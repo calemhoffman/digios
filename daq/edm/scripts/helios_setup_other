@@ -1,25 +1,32 @@
+#!/bin/bash -l
+
 # source specialized parater setups
 #
 
-echo "##### other settings specific to h060_pb208 #####"
-echo "setting ezero params"
+echo "############################################"
+echo "##### Setting other params for iss000  #####"
+echo "############################################"
+
+echo "* setting ezero params *"
 ./edm/scripts/ezero_saved
-echo "done with ezero settings"
+echo "** done with ezero settings **"
 
-echo "setting array params"
+echo "* setting array params"
 ./edm/scripts/array_saved
-echo "done with array settings"
+echo "** done with array settings"
 
-#echo "setting elum params"
-#./edm/scripts/elum_saved
-#echo "done with elum settings"
+echo "* setting elum params"
+./edm/scripts/elum_saved
+echo "** done with elum settings"
 
-echo "setting recoil params"
+echo "* setting recoil params"
 ./edm/scripts/recoil_saved
-echo "done with recoil settings"
+echo "** done with recoil settings"
 
 #echo "setting timing params"
 #./edm/scripts/timing_saved
 #echo "done with timing settings"
 
-echo "#### finished with other settings for h060_pb208 ####"
+echo "###########################################"
+echo "#### finished with settings for iss000 ####"
+echo "###########################################"
