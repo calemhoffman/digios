@@ -1,0 +1,1777 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 766
+y 93
+w 550
+h 550
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 82
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 0
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 180
+y 24
+w 202
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "$(D) VME $(DN) : $(DB)"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 165
+y 98
+w 70
+h 16
+controlPv "VME$(DN):$(DB):code_date_RBV"
+format "hex"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 1
+autoHeight
+nullColor index 14
+fastUpdate
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 77
+y 101
+w 72
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Code Date"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 165
+y 71
+w 70
+h 16
+controlPv "VME$(DN):$(DB):geo_addr_RBV"
+format "hex"
+font "helvetica-bold-r-14.0"
+fgColor index 80
+fgAlarm
+bgColor index 1
+autoHeight
+nullColor index 0
+useHexPrefix
+useAlarmBorder
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 85
+y 74
+w 68
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Geo Bd Id"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 165
+y 122
+w 70
+h 16
+controlPv "VME$(DN):$(DB):reg_code_revision_RBV"
+format "hex"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+fgAlarm
+bgColor index 1
+autoHeight
+nullColor index 14
+useHexPrefix
+useAlarmBorder
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 70
+y 123
+w 80
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Main FW ID"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 165
+y 146
+w 70
+h 16
+controlPv "VME$(DN):$(DB):serial_num_RBV"
+format "hex"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+fgAlarm
+bgColor index 1
+autoHeight
+nullColor index 0
+useHexPrefix
+useAlarmBorder
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 122
+y 148
+w 29
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "S.N."
+}
+autoSize
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 404
+y 73
+w 100
+h 25
+fgColor index 87
+bgColor index 85
+topShadowColor index 85
+botShadowColor index 85
+font "helvetica-medium-r-14.0"
+buttonLabel "Channel PVs"
+numPvs 4
+numDsps 8
+displayFileName {
+  0 "DigParamContrl.edl"
+  1 "DigParamContrl.edl"
+  2 "DigParamContrl.edl"
+  3 "DigParamContrl.edl"
+  4 "DigParamContrl.edl"
+  5 "DigParamContrl.edl"
+  6 "DigParamContrl.edl"
+  7 "DigParamContrl.edl"
+}
+menuLabel {
+  0 "LED Thresh"
+  1 "D2 Window"
+  2 "D Window"
+  3 "K Window"
+  4 "M Window"
+  5 "Raw Delay"
+  6 "Raw Len"
+  7 "K0 Window"
+}
+symbols {
+  0 "P=led_threshold"
+  1 "P=d2_window"
+  2 "P=d_window"
+  3 "P=k_window"
+  4 "P=m_window"
+  5 "P=raw_data_length"
+  6 "P=raw_data_window"
+  7 "P=k0_window"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 287
+y 73
+w 100
+h 25
+fgColor index 87
+bgColor index 85
+topShadowColor index 85
+botShadowColor index 85
+font "helvetica-medium-r-14.0"
+buttonLabel "Channels"
+numPvs 4
+numDsps 10
+displayFileName {
+  0 "dgsChannel.edl"
+  1 "dgsChannel.edl"
+  2 "dgsChannel.edl"
+  3 "dgsChannel.edl"
+  4 "dgsChannel.edl"
+  5 "dgsChannel.edl"
+  6 "dgsChannel.edl"
+  7 "dgsChannel.edl"
+  8 "dgsChannel.edl"
+  9 "dgsChannel.edl"
+}
+menuLabel {
+  0 "Ch 0"
+  1 "Ch 1"
+  2 "Ch 2"
+  3 "Ch 3"
+  4 "Ch 4"
+  5 "Ch 5"
+  6 "Ch 6"
+  7 "Ch 7"
+  8 "Ch 8"
+  9 "Ch 9"
+}
+symbols {
+  0 "CH=0"
+  1 "CH=1"
+  2 "CH=2"
+  3 "CH=3"
+  4 "CH=4"
+  5 "CH=5"
+  6 "CH=6"
+  7 "CH=7"
+  8 "CH=8"
+  9 "CH=9"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 165
+y 171
+w 70
+h 16
+controlPv "VME$(DN):$(DB):user_package_data_RBV"
+format "decimal"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+fgAlarm
+bgColor index 1
+autoHeight
+nullColor index 0
+useHexPrefix
+useAlarmBorder
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 89
+y 171
+w 61
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Board ID"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 410
+y 204
+w 100
+h 45
+controlPv "VME$(DN):$(DB):win_comp_min"
+precision 10
+fgColor index 25
+bgColor index 2
+font "helvetica-medium-r-12.0"
+lineWidth 1
+lineAlarm
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 410
+y 246
+w 100
+h 45
+controlPv "VME$(DN):$(DB):win_comp_max"
+precision 10
+fgColor index 25
+bgColor index 2
+font "helvetica-medium-r-12.0"
+lineWidth 1
+lineAlarm
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 333
+y 218
+w 54
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Min Win."
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 331
+y 260
+w 58
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Max Win."
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 411
+y 327
+w 100
+h 20
+controlPv "VME$(DN):$(DB):live_timestamp_lsb_RBV"
+format "hex"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 16
+bgColor index 10
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 320
+y 331
+w 80
+h 16
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Live TS lsb"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 410
+y 357
+w 100
+h 20
+controlPv "VME$(DN):$(DB):live_timestamp_msb_RBV"
+format "hex"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 16
+bgColor index 10
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 323
+y 356
+w 80
+h 16
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Live TS msb"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 416
+y 411
+w 100
+h 20
+controlPv "VME$(DN):$(DB):reg_master_logic_status_RBV"
+format "hex"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 16
+bgColor index 10
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 308
+y 414
+w 100
+h 16
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "M. Log. Status"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 415
+y 447
+w 100
+h 20
+controlPv "VME$(DN):$(DB):reg_sd_config_RBV"
+format "hex"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 16
+bgColor index 10
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 308
+y 448
+w 100
+h 16
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "SD Config"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 414
+y 482
+w 100
+h 20
+controlPv "VME$(DN):$(DB):reg_vme_gp_ctrl_RBV"
+format "hex"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 16
+bgColor index 10
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 308
+y 484
+w 100
+h 16
+font "helvetica-medium-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "VME gr Ctrl"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 372
+y 302
+w 112
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Time Stamp PVs"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 391
+y 386
+w 65
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Misc PVs"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 247
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "0"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 273
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "1"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 299
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "2"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 325
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "3"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 351
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "4"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 378
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "5"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 247
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count0_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 273
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count1_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 325
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count3_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 378
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count5_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 352
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count4_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 299
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count2_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 404
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count6_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 431
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count7_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 457
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count8_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 62
+y 484
+w 73
+h 21
+controlPv "VME$(DN):$(DB):disc_count9_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 247
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable0"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 44
+y 404
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "6"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 44
+y 430
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "7"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 44
+y 456
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "8"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 44
+y 483
+w 10
+h 20
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "9"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 71
+y 224
+w 48
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Disc Hit"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 143
+y 224
+w 71
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Accept Hits"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 247
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count0_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 273
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count1_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 325
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count3_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 378
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count5_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 352
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count4_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 299
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count2_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 404
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count6_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 431
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count7_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 457
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count8_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 146
+y 484
+w 73
+h 21
+controlPv "VME$(DN):$(DB):ahit_count9_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 273
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable1"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 299
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable2"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 325
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable3"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 352
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable4"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 378
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable5"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 404
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable6"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 431
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable7"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 232
+y 457
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable8"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 233
+y 484
+w 60
+h 21
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):channel_enable9"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 235
+y 206
+w 53
+h 32
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Channel"
+  "Enable"
+}
+autoSize
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 407
+y 108
+w 100
+h 23
+fgColor index 0
+fgAlarm
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 83
+botShadowColor index 83
+controlPv "VME$(DN):$(DB):cfd_mode"
+indicatorPv "VME$(DN):$(DB):cfd_mode_RBV"
+font "helvetica-medium-r-14.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 327
+y 112
+w 68
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "CFD Mode"
+}
+autoSize
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 408
+y 141
+w 100
+h 25
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "DAQB$(CR)_$(BID)_CS_Ena"
+onLabel "Enabled"
+offLabel "Disabled"
+labelType "literal"
+3d
+font "helvetica-bold-r-14.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 340
+y 138
+w 47
+h 32
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Board"
+  "Enable "
+}
+autoSize
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 408
+y 172
+w 100
+h 23
+fgColor index 0
+fgAlarm
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME$(DN):$(DB):trigger_mux_select"
+font "helvetica-medium-r-14.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 328
+y 176
+w 65
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Trig Mode"
+}
+autoSize
+endObjectProperties
+

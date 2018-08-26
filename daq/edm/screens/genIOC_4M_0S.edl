@@ -1,0 +1,160 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 292
+y 280
+w 230
+h 230
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 42
+y 16
+w 141
+h 21
+font "helvetica-bold-r-18.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 6
+useDisplayBg
+value {
+  "$(D) VME $(DN)"
+}
+autoSize
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 34
+y 90
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "VME $(DN) Trace"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "Trace.edl"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 135
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "Event Rates"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "eventRates2.edl"
+}
+menuLabel {
+  0 "Event Rates"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 180
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "Counter Rates"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "CounterRates.edl"
+}
+menuLabel {
+  0 "Counter Rates"
+}
+symbols {
+  0 "BD1=MDIG1,BD2=MDIG2,BD3=MDIG3,BD4=MDIG4"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 45
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "Boards"
+numPvs 4
+numDsps 4
+displayFileName {
+  0 "genBoard.edl"
+  1 "genBoard.edl"
+  2 "genBoard.edl"
+  3 "genBoard.edl"
+}
+menuLabel {
+  0 "Board 1"
+  1 "Board 2"
+  2 "Board 3"
+  3 "Board 4"
+}
+symbols {
+  0 "DB=MDIG1,BID=1"
+  1 "DB=MDIG2,BID=2"
+  2 "DB=MDIG3,BID=3"
+  3 "DB =MDIG4,BID=4"
+}
+endObjectProperties
+

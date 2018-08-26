@@ -1,0 +1,1178 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 959
+y 244
+w 500
+h 400
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 33
+y 15
+w 437
+h 21
+font "helvetica-bold-r-24.0"
+fontAlign "center"
+fgColor index 26
+bgColor index 0
+useDisplayBg
+value {
+  "VME $(DN) Event Rates"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 116
+y 73
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "1"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 209
+y 73
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "2"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 310
+y 73
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "3"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 409
+y 73
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "4"
+}
+autoSize
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 51
+y 104
+w 10
+h 150
+
+beginGroup
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 104
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "0"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 129
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "1"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 156
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "2"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 182
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "3"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 208
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "4"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 233
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "5"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 259
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "6"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 285
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "7"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 313
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "8"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 51
+y 341
+w 10
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "9"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 104
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rated1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 130
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rated2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 182
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rated4"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 233
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rated6"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 208
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rated5"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 156
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rated3"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 259
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratee1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 285
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratee2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 313
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratee3"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 282
+y 341
+w 73
+h 21
+controlPv "Cry$(DN)_DV_RateCC1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 104
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratee4"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 130
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratee5"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 182
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratef1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 233
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratef3"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 208
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratef2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 156
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratee6"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 259
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratef4"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 285
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratef5"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 313
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratef6"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 382
+y 341
+w 73
+h 21
+controlPv "Cry$(DN)_DV_RateCC2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 104
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rateb4"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 130
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rateb5"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 182
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratec1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 233
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratec3"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 208
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratec2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 156
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rateb6"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 259
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratec4"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 285
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratec5"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 313
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratec6"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 182
+y 341
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rates2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 104
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratea1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 130
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratea2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 182
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratea4"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 233
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratea6"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 208
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratea5"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 156
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Ratea3"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 259
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rateb1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 285
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rateb2"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 313
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rateb3"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 82
+y 341
+w 73
+h 21
+controlPv "Cry$(DN)_DV_Rates1"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+

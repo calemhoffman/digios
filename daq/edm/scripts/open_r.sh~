@@ -1,0 +1,6 @@
+#!/bin/bash -l
+export TERM=vt100
+gotoacq
+cd edm/scripts
+xterm -T main ./start_run.sh
+

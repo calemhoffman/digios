@@ -1,0 +1,300 @@
+#####################################################################
+#
+#   THIS IS THE DGS SCRIPT AS SCREWED UP FOR HELIOS
+#
+#####################################################################
+# Let's first setup master trigger module
+# Assume it is in a completely wrong state to start
+
+# Clock Source - initialize to local to insure setup can occur
+echo "setting master to local clock"
+caput VME32:MTRG:ClkSrc local > scr.txt
+# In readiness for later, clear all trigger mask bits to turn off all triggers
+caput VME32:MTRG:MAN/AUX Off >> scr.txt	             #turn off man/aux triggers
+caput VME32:MTRG:SUM_X off >> scr.txt	             #turn off sum X triggers
+caput VME32:MTRG:SUM_Y off >> scr.txt	             #turn off sum Y triggers
+caput VME32:MTRG:SUM_XY off >> scr.txt	             #turn off sum X & sum Y triggers
+caput VME32:MTRG:CPLD off >> scr.txt	             #turn off CPLD triggers
+caput VME32:MTRG:GITMO/LINK_L off >> scr.txt         #turn off  GITMO/LINK L
+caput VME32:MTRG:REMOTE_MSTR/LINK_R off  >> scr.txt  #turn off  MSTR/LINK R
+caput VME32:MTRG:MYRIAD/LINK_U off >> scr.txt        #turn off  MYRIAD/LINK U
+
+caput VME32:MTRG:ENBL_MON7_VETO off >> scr.txt       #turn off MON7 FIFO veto
+caput VME32:MTRG:ENBL_NIM_VETO off >> scr.txt        #turn off NIM veto
+caput VME32:MTRG:ENBL_THROTTLE_VETO off >> scr.txt   #turn off throttle enable
+
+#LRU Control - enable all three links, drive SYNC out all three
+echo "setting master links L,R,U DEN/REN/SYNC"
+caput VME32:MTRG:LRUCtl00 ON >> scr.txt
+caput VME32:MTRG:LRUCtl01 ON >> scr.txt
+caput VME32:MTRG:LRUCtl02 ON >> scr.txt
+caput VME32:MTRG:LRUCtl04 ON >> scr.txt #not using link R
+caput VME32:MTRG:LRUCtl05 ON >> scr.txt 
+caput VME32:MTRG:LRUCtl06 ON >> scr.txt
+caput VME32:MTRG:LRUCtl08 ON >> scr.txt
+caput VME32:MTRG:LRUCtl09 ON >> scr.txt
+caput VME32:MTRG:LRUCtl10 ON >> scr.txt
+
+# Set input link mask register to use links A, B only
+#  That is a HELIOS-specific setting
+#  DSSD has five routers so would set D and E to 0 as well
+
+echo "setting master Input Link Mask"
+caput VME32:MTRG:ILM_A 0 >> scr.txt	#DGS Router 1
+caput VME32:MTRG:ILM_B 0 >> scr.txt	#DGS Router 2
+caput VME32:MTRG:ILM_C 1 >> scr.txt	
+caput VME32:MTRG:ILM_D 1 >> scr.txt	
+caput VME32:MTRG:ILM_E 1 >> scr.txt	
+caput VME32:MTRG:ILM_F 1 >> scr.txt
+caput VME32:MTRG:ILM_G 1 >> scr.txt
+caput VME32:MTRG:ILM_H 1 >> scr.txt
+caput VME32:MTRG:ILM_L 0 >> scr.txt
+caput VME32:MTRG:ILM_R 0 >> scr.txt
+caput VME32:MTRG:ILM_U 0 >> scr.txt
+
+# Turn Transmit power and receive power on in all links even if masked
+# Also insure that Line Loopback and Local Loopback are all OFF
+echo "Turn master Tpwr, Rpwr all on"
+
+for i in A B C L R U; do
+   p=$(printf "VME32:MTRG:TPwr_${i}")
+   caput $p 1 >> scr.txt
+   p=$(printf "VME32:MTRG:RPwr_${i}")
+   caput $p 1 >> scr.txt
+#   p=$(printf "VME32:MTRG:SLoL_${i}")
+#   caput $p 0 >> scr.txt
+#   p=$(printf "VME32:MTRG:SLiL_${i}")
+#   caput $p 0 >> scr.txt
+done
+
+for i in D E F G H; do
+   p=$(printf "VME32:MTRG:TPwr_${i}")
+   caput $p 0 >> scr.txt
+   p=$(printf "VME32:MTRG:RPwr_${i}")
+   caput $p 0 >> scr.txt
+#   p=$(printf "VME32:MTRG:SLoL_${i}")
+#   caput $p 0 >> scr.txt
+#   p=$(printf "VME32:MTRG:SLiL_${i}")
+#   caput $p 0 >> scr.txt
+done
+
+
+# turn on external LVDS Pre-emphasizing drivers
+echo "turn on Master line drivers"
+caput VME32:MTRG:PrE_0 off >> scr.txt
+caput VME32:MTRG:PrE_1 off >> scr.txt
+caput VME32:MTRG:PrE_2 off >> scr.txt
+caput VME32:MTRG:PrE_0 on >> scr.txt
+caput VME32:MTRG:PrE_1 on >> scr.txt
+caput VME32:MTRG:PrE_2 on >> scr.txt
+caput VME32:MTRG:PEABCD some >> scr.txt
+caput VME32:MTRG:PEEFG some >> scr.txt
+caput VME32:MTRG:PEHLRU some >> scr.txt
+
+# Insure DC Balance controls are all bypassed
+# Was necessary for GRETINA, firmware for DSSD does not need these
+#echo "ensure DC bypass controls of Master all on"
+#caput VME32:MTRG:MC2_0 1 >> scr.txt
+#caput VME32:MTRG:MC2_1 1 >> scr.txt
+#caput VME32:MTRG:MC2_2 1 >> scr.txt
+#caput VME32:MTRG:MC2_3 1 >> scr.txt
+#caput VME32:MTRG:MC2_4 1 >> scr.txt
+#caput VME32:MTRG:MC2_5 1 >> scr.txt
+#caput VME32:MTRG:MC2_6 1 >> scr.txt
+#caput VME32:MTRG:MC2_7 1 >> scr.txt
+
+
+### at this point Master is driving SYNC patterns to all Routers
+### and is waiting for Routers to send signals back.
+##
+##	Having driven sync for a bit, now take SYNC off of L,R,U
+## so that we're driving the standard data pattern.
+caput VME32:MTRG:LRUCtl02 OFF >> scr.txt
+caput VME32:MTRG:LRUCtl06 OFF >> scr.txt
+caput VME32:MTRG:LRUCtl10 OFF >> scr.txt
+
+############ Now set up Routers ##########################
+#caput VME32:MTRG:ClkSrc link > scr.txt
+## Set up Router 1
+echo "setting up Router #1 to receive clock from Master"
+# Insure Router is running from the local clock
+caput VME32:RTR1:ClkSrc local >> scr.txt
+#caput VME32:RTR1:reg_MISC_CLK_CTL 135 >> scr.txt
+
+
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR1:LRUCtl00 ON >> scr.txt
+caput VME32:RTR1:LRUCtl01 ON >> scr.txt
+caput VME32:RTR1:LRUCtl02 ON >> scr.txt
+
+echo "setting RTR1 Input Link Mask"
+for i in A B C D E F G H; do
+   p=$(printf "VME32:RTR1:ILM_${i}")
+   caput $p 0 >> scr.txt
+done
+
+# Turn on transmit and receive power to all links in Router
+echo "turning on TPWR/RPWR in Router 1"
+
+for i in A B C D E F G H L R U; do
+   p=$(printf "VME32:RTR1:TPwr_${i}")
+   caput $p 1 >> scr.txt
+   p=$(printf "VME32:RTR1:RPwr_${i}")
+   caput $p 1 >> scr.txt
+#   p=$(printf "VME32:RTR1:SLoL_${i}")
+#   caput $p 0 >> scr.txt
+#   p=$(printf "VME32:RTR1:SLiL_${i}")
+#   caput $p 0 >> scr.txt
+done
+
+
+## turn on LVDS drivers in Router
+caput VME32:RTR1:PrE_0 off  >> scr.txt
+caput VME32:RTR1:PrE_1 off  >> scr.txt
+caput VME32:RTR1:PrE_2 off  >> scr.txt
+caput VME32:RTR1:PrE_0 on   >> scr.txt
+caput VME32:RTR1:PrE_1 on   >> scr.txt
+caput VME32:RTR1:PrE_2 on   >> scr.txt
+caput VME32:RTR1:PEABCD some >> scr.txt
+caput VME32:RTR1:PEEFG some  >> scr.txt
+caput VME32:RTR1:PEHLRU some >> scr.txt
+
+## Router #1 now sending SYNC back to Master; repeat for Router #2
+
+######################################################################
+echo "setting up Router #2 to receive clock from Master"
+######################################################################
+# Insure Router is running from the local clock
+#caput VME32:RTR2:reg_MISC_CLK_CTL 135 >> scr.txt
+caput VME32:RTR2:ClkSrc local >> scr.txt
+
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR2:LRUCtl00 ON >> scr.txt
+caput VME32:RTR2:LRUCtl01 ON >> scr.txt
+caput VME32:RTR2:LRUCtl02 ON >> scr.txt
+
+echo "setting RTR2 Input Link Mask"
+for i in A B C D E F G H; do
+   p=$(printf "VME32:RTR2:ILM_${i}")
+   caput $p 0 >> scr.txt
+done
+
+# Turn on transmit and receive power to all links in Router
+echo "turning on TPWR/RPWR in Router 2"
+
+for i in A B C D E F G H L U R; do	# Router 2 link B is disconnected edit: 20121210
+   p=$(printf "VME32:RTR2:TPwr_${i}")
+   caput $p 1 >> scr.txt
+   p=$(printf "VME32:RTR2:RPwr_${i}")
+   caput $p 1 >> scr.txt
+#   p=$(printf "VME32:RTR2:SLoL_${i}")
+#   caput $p 0 >> scr.txt
+#   p=$(printf "VME32:RTR2:SLiL_${i}")
+#   caput $p 0 >> scr.txt
+done
+
+## turn on LVDS drivers in Router
+caput VME32:RTR2:PrE_0 off  >> scr.txt
+caput VME32:RTR2:PrE_1 off  >> scr.txt
+caput VME32:RTR2:PrE_2 off  >> scr.txt
+caput VME32:RTR2:PrE_0 on   >> scr.txt
+caput VME32:RTR2:PrE_1 on   >> scr.txt
+caput VME32:RTR2:PrE_2 on   >> scr.txt
+caput VME32:RTR2:PEABCD some >> scr.txt
+caput VME32:RTR2:PEEFG some  >> scr.txt
+caput VME32:RTR2:PEHLRU some >> scr.txt
+
+## Go back to setting up the Master to allow the init state machine
+## to go to lock. Previously was done before router's were set up
+## but router's need to be sending sync and powered up before we do this
+## edit 20121210
+
+# reset link init state machine in Master
+echo "reset link-init state machine of MAster"
+caput VME32:MTRG:RESET_LINK_INIT 1 >> scr.txt
+# remove reset to link init state machine in Master
+caput VME32:MTRG:RESET_LINK_INIT 0 >> scr.txt
+
+
+## At this point all Routers are sending Sync to Master.
+## Master State machine should be in "WAIT ACK" state
+## Test by reading Misc Stat register of Master; bits
+## 
+##  Until if syntax is remembered, blast along as if everything is
+## fine.
+echo "Acknowledging Master link-init"
+echo "should be a test here"
+# Turn Link Init Ack of Master on and then off again
+caput VME32:MTRG:LOCK_ACK 1 >> scr.txt
+caput VME32:MTRG:LOCK_ACK 0 >> scr.txt
+
+# Set Master to be sending real, not init data, with Imperative
+# Sync on
+echo "setting Master to send non-init sequence with ImpSync on"
+#caput VME32:MTRG:MC_5 0 >> scr.txt   #insure debug mode off ???????
+caput VME32:MTRG:IMP_SYNC 1  >> scr.txt  #insure Imp Sync is ON
+#caput VME32:MTRG:MC_7 0 >> scr.txt   #insure Init Mode off  ???????
+
+# Master should now be sending normal transmission pattern to
+# all Routers with Imperative sync bit set.  Go back to Routers
+# and switch each to link clock .
+echo "setting all Routers to link-source clock"
+caput VME32:RTR1:ClkSrc link >> scr.txt
+caput VME32:RTR2:ClkSrc link >> scr.txt
+
+# these PV's did not get inlcuded. Must set manually to 0x8087
+#caput VME32:RTR1:reg_MISC_CLK_CTL 32903 >> scr.txt
+#caput VME32:RTR2:reg_MISC_CLK_CTL 32903 >> scr.txt
+
+
+# Set each Router to Stringent Lock mode.  A test should be
+# added in here to look for counts in Counter F.
+#
+echo "setting all Routers to Stringent Lock mode"
+caput VME32:RTR1:LINK_L_STRINGENT 1 >> scr.txt
+caput VME32:RTR2:LINK_L_STRINGENT 1 >> scr.txt
+
+
+#Master at this point may have lock error due to clock switch.
+# do a retry and ack again to be sure.
+# retry link init state machine in Master
+echo "retry link-init state machine of MAster"
+caput VME32:MTRG:LOCK_RETRY 1 >> scr.txt
+# remove retry to link init state machine in Master
+caput VME32:MTRG:LOCK_RETRY 0 >> scr.txt
+# then hit and release ack, too
+caput VME32:MTRG:LOCK_ACK 1 >> scr.txt
+caput VME32:MTRG:LOCK_ACK 0 >> scr.txt
+
+# release Imperative Sync of Master
+echo "releasing Imp Sync of Master"
+caput VME32:MTRG:IMP_SYNC 0 >> scr.txt
+
+## To off Sync on routers - this was the bug which left acq hanging
+caput VME32:RTR1:LRUCtl02 OFF > null
+caput VME32:RTR2:LRUCtl02 OFF > null
+
+
+#NOW let us lock the individual routers
+
+echo "locking routers with digitizers"
+$EDMSCRIPTS/diglink_r1 1
+sleep 2
+$EDMSCRIPTS/diglink_r1 2
+sleep 2
+#$EDMSCRIPTS/diglink_r1 3
+#sleep 2
+
+# If the DGS master is using a MyRIAD, or if the DGS master is listening to triggers
+# from the DFMA master, the clock domain crossing FIFOs of the DGS master should be reset
+# to ensure minimum delay.
+#
+# this is done by writing to the PULSED_CTL2 register.
+# Remember, pulsed control registers automatically reset themselves IN THE REGISTER to zero,
+# so you should manually toggle here to make sure EPICS doesn't get silly.
+#
+caput VME32:MTRG:LINK_RU_DCBAL_RESET 1
+caput VME32:MTRG:LINK_RU_DCBAL_RESET 0
+
+
+echo "Finished!"

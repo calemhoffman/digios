@@ -1,0 +1,35 @@
+#!/bin/bash -l
+#Saving Trigger Type
+caput VME04:MDIG4:trigger_mux_select IntAcptAll
+#Saving Individual Timing Params
+caput VME04:MDIG4:led_threshold0 60
+caput VME04:MDIG4:led_threshold1 60
+caput VME04:MDIG4:led_threshold2 60
+caput VME04:MDIG4:led_threshold3 60
+caput VME04:MDIG4:led_threshold4 60
+caput VME04:MDIG4:led_threshold5 60
+caput VME04:MDIG4:led_threshold6 60
+caput VME04:MDIG4:led_threshold7 60
+caput VME04:MDIG4:led_threshold8 60
+caput VME04:MDIG4:led_threshold9 60
+caput VME04:MDIG4:raw_data_window0 2.32
+caput VME04:MDIG4:raw_data_window1 2.32
+caput VME04:MDIG4:raw_data_window2 2.32
+caput VME04:MDIG4:raw_data_window3 2.32
+caput VME04:MDIG4:raw_data_window4 2.32
+caput VME04:MDIG4:raw_data_window5 2.32
+caput VME04:MDIG4:raw_data_window6 2.32
+caput VME04:MDIG4:raw_data_window7 2.32
+caput VME04:MDIG4:raw_data_window8 2.32
+caput VME04:MDIG4:raw_data_window9 2.32
+caput VME04:MDIG4:channel_enable0 Reset
+caput VME04:MDIG4:channel_enable1 Reset
+caput VME04:MDIG4:channel_enable2 Reset
+caput VME04:MDIG4:channel_enable3 Reset
+caput VME04:MDIG4:channel_enable4 Reset
+caput VME04:MDIG4:channel_enable5 Run
+caput VME04:MDIG4:channel_enable6 Reset
+caput VME04:MDIG4:channel_enable7 Run
+caput VME04:MDIG4:channel_enable8 Run
+caput VME04:MDIG4:channel_enable9 Run
+#Save Finished 04/12/2017-18:10

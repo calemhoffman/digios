@@ -1,0 +1,131 @@
+#!/bin/bash -l
+
+# A script to allow the $EDM windows to start terminal windows for 
+# softioc, ioc and hopefully receivers.
+#
+# Each element in the system runs in an xterm that is running on the local 
+# machine where the script is first invoked.
+#
+# Because the xterms all are running locally it is easy to locate and kill 
+# them.  Because things are started remotely by calling the same script the
+# code is localized to a single file
+#
+
+gretTop=/global/devel/gretTop/9-22
+gretTop5=/global/devel5/gretTop/9-22
+baseLib=/global/devel/base/base-3.14.12.1/lib/linux-x86
+
+runSoftIOC() {
+   cd $gretTop/gretClust/iocBoot/iocGretClustGT
+   pwd
+   export LD_LIBRARY_PATH=$baseLib
+   var=$(ps aux | grep st.cmd | grep gret)
+   var2=${var: -14}
+   if [[ $var2 = "Clust ./st.cmd" ]] 
+   then echo "SoftIOC already running"; exit
+   fi    
+   echo "Spawning SoftIOC"
+   xterm -T SoftIOC -sb -sl 1000 -e "./st.cmd" &
+}
+
+trigConsole() {
+   export TERM=vt100
+   echo " terminal trig" 
+   xterm -T TrigCPU -sb -sl 1000 -e "telnet" "ts" "2016" &
+}
+
+ioc1Console() {
+   export TERM=vt100
+   echo " terminal 1" 
+   xterm -T VME1 -sb -sl 1000 -e "telnet" "ts" "2001" &
+}
+
+ioc2Console() {
+   export TERM=vt100
+   echo " terminal 2" 
+   xterm -T VME2 -sb -sl 1000 -e "telnet" "ts" "2002" &
+}
+
+ioc3Console() {
+   export TERM=vt100
+   echo " terminal 3" 
+   xterm -T VME3 -sb -sl 1000 -e "telnet" "ts" "2003" &
+}
+
+ioc4Console() {
+   export TERM=vt100
+   echo " terminal 6" 
+   xterm -T VME4 -sb -sl 1000 -e "telnet" "ts" "2004" &
+}
+
+ioc5Console() {
+   export TERM=vt100
+   echo " terminal 5" 
+   xterm -T VME5 -sb -sl 1000 -e "telnet" "ts" "2005" &
+}
+
+ioc6Console() {
+   export TERM=vt100
+   echo " terminal 6" 
+   xterm -T VME6 -sb -sl 1000 -e "telnet" "ts" "2006" &
+}
+
+ioc7Console() {
+   export TERM=vt100
+   echo " terminal 7"  
+   xterm -T VME7 -sb -sl 1000 -e "telnet" "ts" "2007" &
+}
+
+ioc8Console() {
+   export TERM=vt100
+   echo " terminal 8" 
+   xterm -T VME8 -sb -sl 1000 -e "telnet" "ts" "2008" &
+}
+
+ioc9Console() {
+   export TERM=vt100
+   echo " terminal 9" 
+   xterm -T VME9 -sb -sl 1000 -e "telnet" "ts" "2009" &
+}
+
+ioc10Console() {
+   export TERM=vt100
+   echo " terminal 10" 
+   xterm -T VME10 -sb -sl 1000 -e "telnet" "ts" "2010" &
+}
+
+ioc11Console() {
+   export TERM=vt100
+   echo " terminal 11" 
+   xterm -T VME11 -sb -sl 1000 -e "telnet" "ts" "2011" &
+}
+
+#
+# Inline portion begins here
+#
+# This part of the script runs the commands that will appear in the xterm 
+# windows, whether run remotely or locally.  This is the only case
+# in which the script is invoked with a parameter. The parameter is the same
+# number that was entered in the menu by the operator in the interactive copy. 
+#
+if [ $# -eq 1 ]
+then
+    cmd=$1
+    case $cmd in
+       1)	runSoftIOC ;;
+       2)	trigConsole ;;
+       3)	ioc1Console ;;
+       4)       ioc2Console ;;
+       5)       ioc3Console ;;
+       6)       ioc4Console ;;
+       7)       ioc5Console ;;
+       8)       ioc6Console ;;
+       9)       ioc7Console ;;
+      10)       ioc8Console ;;
+      11)       ioc9Console ;;
+      12)       ioc10Console ;;
+      13)       ioc11Console ;;
+    esac
+    exit
+fi
+

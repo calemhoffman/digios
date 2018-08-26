@@ -1,0 +1,901 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 2436
+y 236
+w 1400
+h 800
+font "helvetica-bold-r-10.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-bold-r-10.0"
+fgColor index 14
+bgColor index 82
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+# Geometry
+x 54
+y 81
+w 550
+h 325
+# Appearance
+xLabel "Time [h:m:s]"
+yLabel "pps"
+fgColor index 0
+bgColor index 0
+gridColor index 14
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 3600
+# X axis properties
+showXAxis
+xAxisStyle "time"
+xAxisSrc "AutoScale"
+xMin 0
+xMax 600
+xAxisTimeFormat "dateTime"
+# Y axis properties
+showYAxis
+yAxisSrc "AutoScale"
+yMax 1
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 2
+yPv {
+  0 "VME32:MTRG:RAW_TRIG_RATE_COUNTER_2_RBV"
+  1 "VME32:MTRG:RAW_TRIG_RATE_COUNTER_3_RBV"
+}
+lineThickness {
+  0 2
+  1 2
+}
+opMode {
+  0 "plot"
+  1 "plot"
+}
+ySigned {
+  0 1
+  1 1
+}
+plotColor {
+  0 index 80
+  1 index 78
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 490
+y 18
+w 350
+h 20
+font "helvetica-bold-r-24.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "HELIOS Monitor: $(TITLE)"
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+# Geometry
+x 53
+y 430
+w 550
+h 325
+# Appearance
+xLabel "Time [h:m:s]"
+yLabel "pps"
+fgColor index 0
+bgColor index 0
+gridColor index 14
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 3600
+# X axis properties
+showXAxis
+xAxisStyle "time"
+xAxisSrc "AutoScale"
+xMin 0
+xMax 500
+xAxisTimeFormat "dateTime"
+# Y axis properties
+showYAxis
+yAxisSrc "AutoScale"
+yMax 1
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 8
+yPv {
+  0 "VME01:MDIG3:disc_count0_RBV"
+  1 "VME01:MDIG3:disc_count1_RBV"
+  2 "VME01:MDIG3:disc_count2_RBV"
+  3 "VME01:MDIG3:disc_count3_RBV"
+  4 "VME01:MDIG3:disc_count4_RBV"
+  5 "VME01:MDIG3:disc_count5_RBV"
+  6 "VME01:MDIG3:disc_count6_RBV"
+  7 "VME01:MDIG3:disc_count7_RBV"
+}
+lineThickness {
+  0 2
+  1 2
+  2 2
+  3 2
+  4 2
+  5 2
+  6 2
+  7 2
+}
+lineStyle {
+  4 "dash"
+  5 "dash"
+  6 "dash"
+  7 "dash"
+}
+opMode {
+  0 "plot"
+  1 "plot"
+  2 "plot"
+  3 "plot"
+  4 "plot"
+  5 "plot"
+  6 "plot"
+  7 "plot"
+}
+ySigned {
+  0 1
+  1 1
+  2 1
+  3 1
+  4 1
+  5 1
+  6 1
+  7 1
+}
+plotColor {
+  0 index 87
+  1 index 81
+  2 index 83
+  3 index 82
+  4 index 79
+  5 index 80
+  6 index 85
+  7 index 86
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 55
+y 53
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 80
+bgColor index 0
+value {
+  "Array OR Trig Rate"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 610
+y 439
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 87
+bgColor index 0
+value {
+  "ch 0"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 610
+y 476
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 81
+bgColor index 0
+value {
+  "ch 1"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 610
+y 513
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 83
+bgColor index 0
+value {
+  "ch 2"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 610
+y 550
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 82
+bgColor index 0
+value {
+  "ch 3"
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+# Geometry
+x 710
+y 433
+w 550
+h 325
+# Appearance
+xLabel "Time [h:m:s]"
+yLabel "pps"
+fgColor index 0
+bgColor index 0
+gridColor index 14
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 3600
+# X axis properties
+showXAxis
+xAxisStyle "time"
+xAxisSrc "AutoScale"
+xMin 0
+xMax 600
+xAxisTimeFormat "dateTime"
+# Y axis properties
+showYAxis
+yAxisSrc "AutoScale"
+yMax 1
+# Y2 axis properties
+showY2Axis
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 19
+yPv {
+  0 "VME32:MTRG:TIMESTAMP_B_RBV"
+  1 "VME32:RTR1:TimestampB_RBV"
+  2 "VME32:RTR1:TimestampB_RBV"
+  3 "VME01:MDIG1:CV_LiveTS"
+  4 "VME01:MDIG1:CV_LiveTS"
+  5 "VME01:MDIG1:CV_LiveTS"
+  6 "VME01:MDIG1:CV_LiveTS"
+  7 "VME02:MDIG1:CV_LiveTS"
+  8 "VME02:MDIG2:CV_LiveTS"
+  9 "VME02:MDIG3:CV_LiveTS"
+  10 "VME02:MDIG4:CV_LiveTS"
+  11 "VME03:MDIG1:CV_LiveTS"
+  12 "VME03:MDIG2:CV_LiveTS"
+  13 "VME03:MDIG3:CV_LiveTS"
+  14 "VME03:MDIG4:CV_LiveTS"
+  15 "VME04:MDIG1:CV_LiveTS"
+  16 "VME04:MDIG2:CV_LiveTS"
+  17 "VME04:MDIG3:CV_LiveTS"
+  18 "VME04:MDIG4:CV_LiveTS"
+}
+lineThickness {
+  0 3
+  1 3
+  2 3
+  3 2
+  4 2
+  5 2
+  6 2
+  7 2
+  8 2
+  9 2
+  10 2
+  11 2
+  12 2
+  13 2
+  14 2
+  15 2
+  16 2
+  17 2
+  18 2
+}
+opMode {
+  0 "plot"
+  1 "plot"
+  2 "plot"
+  3 "plot"
+  4 "plot"
+  5 "plot"
+  6 "plot"
+  7 "plot"
+  8 "plot"
+  9 "plot"
+  10 "plot"
+  11 "plot"
+  12 "plot"
+  13 "plot"
+  14 "plot"
+  15 "plot"
+  16 "plot"
+  17 "plot"
+  18 "plot"
+}
+useY2Axis {
+  3 1
+  4 1
+  5 1
+  6 1
+  7 1
+  8 1
+  9 1
+  10 1
+  11 1
+  12 1
+  13 1
+  14 1
+  15 1
+  16 1
+  17 1
+  18 1
+}
+xSigned {
+  0 60882608
+  1 168741896
+  2 60882608
+  3 1
+  4 1
+  5 1
+  6 1
+  7 1
+  8 1
+  9 1
+  10 1
+  11 1
+  12 1
+  13 1
+  14 1
+  15 1
+  16 1
+  17 1
+  18 1
+}
+ySigned {
+  0 60882608
+  1 168718880
+  2 60882608
+  3 1
+  4 1
+  5 1
+  6 1
+  7 1
+  8 1
+  9 1
+  10 1
+  11 1
+  12 1
+  13 1
+  14 1
+  15 1
+  16 1
+  17 1
+  18 1
+}
+plotColor {
+  0 index 83
+  1 index 79
+  2 index 80
+  3 index 83
+  4 index 79
+  5 index 80
+  6 index 85
+  7 index 83
+  8 index 79
+  9 index 80
+  10 index 85
+  11 index 83
+  12 index 79
+  13 index 80
+  14 index 85
+  15 index 83
+  16 index 79
+  17 index 80
+  18 index 85
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 676
+y 99
+w 163
+h 258
+
+beginGroup
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 676
+y 332
+w 40
+h 25
+controlPv "DAQC1_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 682
+y 99
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Available Buffers"
+}
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 799
+y 126
+w 40
+h 200
+indicatorColor index 79
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC4_CV_BuffersAvail"
+label "IOC 4"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 758
+y 126
+w 40
+h 200
+indicatorColor index 79
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC3_CV_BuffersAvail"
+label "IOC 3"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 717
+y 126
+w 40
+h 200
+indicatorColor index 79
+indicatorAlarm
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC2_CV_BuffersAvail"
+label "IOC 2"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 676
+y 126
+w 40
+h 200
+indicatorColor index 79
+indicatorAlarm
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC1_CV_BuffersAvail"
+label "IOC 1"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 717
+y 332
+w 40
+h 25
+controlPv "DAQC2_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 758
+y 332
+w 40
+h 25
+controlPv "DAQC3_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 799
+y 332
+w 40
+h 25
+controlPv "DAQC4_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Shell Command)
+object shellCmdClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 876
+y 88
+w 178
+h 53
+fgColor index 0
+bgColor index 80
+topShadowColor index 80
+botShadowColor index 80
+font "helvetica-bold-r-18.0"
+buttonLabel "Buffer Monitor On"
+numCmds 1
+commandLabel {
+  0 "Turn On"
+}
+command {
+  0 "$EDMSCRIPTS/bufs.sh 1"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 711
+y 407
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 80
+bgColor index 0
+value {
+  "Timestamps"
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 1277
+y 22
+w 100
+h 54
+
+beginGroup
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 1277
+y 46
+w 100
+h 30
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 78
+topShadowColor index 82
+botShadowColor index 14
+controlPv "Online_CS_StartStop"
+onLabel "ACQ On"
+offLabel "ACQ Off"
+labelType "literal"
+font "helvetica-bold-r-14.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 1277
+y 22
+w 100
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "ACQ On/Off"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Shell Command)
+object shellCmdClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 1055
+y 88
+w 178
+h 53
+fgColor index 0
+bgColor index 80
+topShadowColor index 80
+botShadowColor index 80
+font "helvetica-bold-r-18.0"
+buttonLabel "Buffer Monitor Off"
+numCmds 1
+commandLabel {
+  0 "Turn Off"
+}
+command {
+  0 "killall bufs.sh"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 611
+y 706
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 86
+bgColor index 0
+value {
+  "ch 7"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 611
+y 669
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 85
+bgColor index 0
+value {
+  "ch 6"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 611
+y 632
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 80
+bgColor index 0
+value {
+  "ch 5"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 611
+y 595
+w 50
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 79
+bgColor index 0
+value {
+  "ch 4"
+}
+endObjectProperties
+

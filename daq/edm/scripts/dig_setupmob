@@ -1,0 +1,79 @@
+
+# Setup all digitizer delay windows M, K, D, D2
+# also setup raw data length, data window, peak sensitivity
+#  LEd threshold, channel enable, discriminator mode
+# trigger mode, edge select, pileup mode, extension mode,
+# extension enable, trigger configuration and time windows
+
+echo "Mass setting of Digitizers to default operational values"
+
+caput GLBL:DIG:win_comp_min -1000
+caput GLBL:DIG:win_comp_max 0
+
+caput GLBL:DIG:led_threshold 50
+caput GLBL:DIG:raw_data_length 1.0
+caput GLBL:DIG:raw_data_window 0.32
+caput GLBL:DIG:d_window 0.20
+caput GLBL:DIG:k_window 0.80
+caput GLBL:DIG:m_window 3.5
+caput GLBL:DIG:d2_window 0.20
+
+caput GLBL:DIG:peak_sensitivity 3
+
+
+caput GLBL:DIG:channel_enable 1
+
+caput GLBL:DIG:pileup_mode 1
+caput GLBL:DIG:trigger_polarity 1
+caput GLBL:DIG:dropped_event_count_mode 0
+caput GLBL:DIG:event_count_mode 0
+caput GLBL:DIG:ahit_count_mode 0
+caput GLBL:DIG:disc_count_mode 0
+caput GLBL:DIG:event_extention_mode 0
+caput GLBL:DIG:pileup_extention_mode 0
+caput GLBL:DIG:counter_reset 0
+
+caput GLBL:DIG:trigger_mux_select 0
+
+#need to really put .4 for 400 ns? need to fix equation...
+caput GLBL:DIG:disc_width 1.9
+
+
+# clear FIFOs to insure no old events
+caput GLBL:DIG:master_fifo_reset 1 > null
+caput GLBL:DIG:master_fifo_reset 0 > null
+
+## BUG BUG BUG ##
+# PV that set the load delays bit does not seem to work.
+echo "loading buffer delays"
+
+caput GLBL:DIG:load_delays 0
+sleep 0.1
+caput GLBL:DIG:load_delays 1
+sleep 0.1
+caput GLBL:DIG:load_delays 0
+
+echo "***********SCRIPT COMPLETE************"
+
+caput GLBL:DIG:counter_mode 1
+
+caput GLBL:DIG:master_counter_reset 0
+
+caput GLBL:DIG:master_fifo_reset 1
+
+caput GLBL:DIG:master_fifo_reset 0
+
+caput GLBL:DAQ:DAQTimeDelayA 0.001
+caput GLBL:DAQ:DAQTimeDelayB 0.01
+caput GLBL:DAQ:BuildSendDelay 0.0
+
+## Worked with John to set parameters for data taking, i.e.
+## Digitizer using internal clk and having no trigger module.
+## These numbers correspond to 0xE0051, 0x180, and 0x1 in hex
+## For readback on VME01:MDIG1:reg_master_logic_status I see 81
+caput VME01:MDIG1:reg_master_logic_status 917584
+caput VME01:MDIG1:reg_sd_config  384
+caput VME01:MDIG1:reg_vme_gp_ctrl 1
+
+caput GLBL:DIG:led_threshold 2
+
