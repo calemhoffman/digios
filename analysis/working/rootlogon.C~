@@ -1,0 +1,10 @@
+{
+  gStyle->SetOptStat("im");
+  
+  gROOT->LoadMacro("process_run_local.C");
+  
+  //TFile f("gen.root");
+  //TTree *t = gen_tree;
+  //t->Process("/Users/heliosdigios/experiments/h057_he6/code/Monitors.C++");
+  
+}

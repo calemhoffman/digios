@@ -34,7 +34,7 @@ vector<int> countFromCut;
 TGraph ** graphRateCut; //!
 TMultiGraph * rateGraph; //!
 
-
+TH2F* hADC;
 TH2F* hxfxn[24];
 TH2F* heVx[24]; 
 TH2F* hecalVxcal[24];
@@ -51,29 +51,6 @@ TH1F* h0ettact;
 TH1F* h0de;
 TH1F* h0e;
 TH1F* h0tac;
-
-//INFL001
-TH2F *hExAt;
-TH2F *hExDeE,*hAtDeE;
-TH2F *hExDeT,*hAtDeT;
-TH2F *hExET, *hAtET;
-TH2F *hAtEtotT;
-
-//applied cut
-TH2F *hExDeEg,*hAtDeEg;
-TH2F *hExDeTg,*hAtDeTg;
-TH2F *hExETg, *hAtETg;
-TH2F *hAtEtotTg;
-
-//calibrated, no cut
-TH2F *hExDeEc,*hAtDeEc;
-TH2F *hExDeTc;
-TH2F *hExETc;
-
-//calibrated, and cut!!
-TH2F *hExDeEgc,*hAtDeEgc;
-TH2F *hExDeTgc;
-TH2F *hExETgc;
 
 //time in sec
 Float_t timeZero=0;
@@ -163,36 +140,6 @@ void Monitors::Begin(TTree *tree)
   }
 
   //EZERO
-  //INFL001
-  hExAt = new TH2F("hExAt","Raw RF (0), Exit (1,2) and ATSCAT (3,4,5) Data; Detector ; Energy [ch]",2000,-8000,8000,6,0,6);//Raw Data
-  hExDeE = new TH2F("hExDeE","Exit DE-E; E [ch]; DE [ch]",2000,0,8000,2000,0,2000);//EXIT
-  hExDeT = new TH2F("hExDeT","Exit DE-RF; RF [ch]; DE [ch]",500,2000,3500,2000,0,2000);//
-  hExET = new TH2F("hExET","Exit E-RF; RF [ch]; E [ch]",500,2000,3500,2000,0,8000);//
-  hAtDeE = new TH2F("hAtDeE","ATSCAT DE-E; E [ch]; DE [ch]",1000,0,12000,1000,0,12000);//ATSCAT
-  hAtDeT = new TH2F("hAtDeT","ATSCAT DE-RF; RF [ch]; DE [ch]",1000,2000,3500,1000,0,12000);//
-  hAtET = new TH2F("hAtET","ATSCAT E-RF; RF [ch]; E [ch]",500,2000,3500,500,0,8000);//
-  hAtEtotT = new TH2F("hAtEtotT","ATSCAT ETOT-RF; RF [ch]; ETOT [ch]",500,2000,3500,1000,0,12000);//
-
-  //gated
-  hExDeEg = new TH2F("hExDeEg","Exit DE-E (cut); E [ch]; DE [ch]",500,0,8000,500,0,8000);//EXIT
-  hExDeTg = new TH2F("hExDeTg","Exit DE-RF (cut); RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
-  hExETg = new TH2F("hExETg","Exit E-RF (cut); RF [ch]; E [ch]",500,2000,3500,500,0,8000);//
-  hAtDeEg = new TH2F("hAtDeEg","ATSCAT DE-E (cut); E [ch]; DE [ch]",500,0,8000,500,0,8000);//ATSCAT
-  hAtDeTg = new TH2F("hAtDeTg","ATSCAT DE-RF (cut); RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
-  hAtETg = new TH2F("hAtETg","ATSCAT E-RF (cut); RF [ch]; E [ch]",500,2000,3500,500,0,8000);//
-  hAtEtotTg = new TH2F("hAtEtotTg","ATSCAT ETOT-RF (cut); RF [ch]; ETOT [ch]",500,2000,3500,500,0,8000);//
-
-  //calibrated
-  hExDeEc = new TH2F("hExDeEc","Exit DE-E (cal); E [MeV]; DE [MeV]",2000,0,200,2000,0,80);//EXIT
-  hExDeTc = new TH2F("hExDeTc","Exit DE-RF (cal); TAC [ns]; DE [MeV]",4000,0,1000,2000,0,80);//EXIT
-  hExETc = new TH2F("hExETc","Exit E-RF (cal); TAC [ns]; E [MeV]",150,80,200,1000,0,200);//EXIT
-  hAtDeEc = new TH2F("hAtDeEc","ATSCAT DE-E (cal); E [MeV]; DE [MeV]",500,0,200,500,0,200);//ATSCAT
-  //calibrated & cut
-  hExDeEgc = new TH2F("hExDeEgc","Exit DE-E (cal & cut); E [MeV]; DE [MeV]",2000,0,200,2000,0,80);//EXIT
-  hExDeTgc = new TH2F("hExDeTgc","Exit DE-RF (cal & cut); TAC [ns]; DE [MeV]",4000,100,180,2000,0,80);//EXIT
-  hExETgc = new TH2F("hExETgc","Exit E-RF (cal & cut); TAC [ns]; E [MeV]",150,80,200,1000,0,200);//EXIT
-  hAtDeEgc = new TH2F("hAtDeEgc","ATSCAT DE-E (cal & cut); E [MeV]; DE [MeV]",500,0,200,500,0,200);//ATSCAT
-
   he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
   he0det = new TH2F("he0det","EZERO DE-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
   he0et = new TH2F("he0et","EZERO E-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
@@ -320,113 +267,23 @@ Bool_t Monitors::Process(Long64_t entry)
 	if(rdt[j]-elum_t[i]>-10&&rdt[j]-elum[i]<10)htacE->Fill(0.5+j);
       }
     }
-
-    //EZERO
-    hExAt->Fill(tac[0],0);
-    for (Int_t i=0;i<5;i++) hExAt->Fill(ezero[i],i+1);
-    
-    hExDeE->Fill(TMath::Abs(ezero[1]),TMath::Abs(ezero[0]));
-    hExDeT->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[0]));
-    hExET->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[1]));
-    hAtDeE->Fill(TMath::Abs(ezero[3]),TMath::Abs(ezero[2]));
-    hAtDeT->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[2]));
-    hAtET->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[3]));
-    hAtEtotT->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[4]));
-
-    //calibrated
-    Float_t temp[5]={0,0,0,0,0};
-    for (Int_t i=0;i<5;i++) temp[i] = (Float_t)(TMath::Abs(ezero[i]))*ezero_cal[i][0]+ezero_cal[i][1];
-    Float_t tempT = (2119.1 - TMath::Abs(tac[0]))*tac_slope+tac_offset+82.5;
-
-    hExDeEc->Fill(temp[1],temp[0]);
-    hExDeTc->Fill(tempT,temp[0]);
-    hExETc->Fill(tempT,temp[1]);
-    hAtDeEc->Fill(temp[3],temp[2]);
-    
-	if( isCutFileOpen){
-		for( int i = 0 ; i < numCut; i++ ){
-			cutG = (TCutG *)cutList->At(i) ;
-			if( cutG->IsInside(temp[1], temp[0]) || cutG->IsInside(TMath::Abs(ezero[3]),TMath::Abs(ezero[2]) ) ) { //CRH
-				countFromCut[i] += 1;
-				//printf("count %d : %d \n", i, countFromCut[i]);
-				hExDeEgc->Fill(temp[1],temp[0]);
-				hExDeTgc->Fill(tempT,temp[0]);
-				hExETgc->Fill(tempT,temp[1]);
-				hAtDeEgc->Fill(temp[3],temp[2]);
  
-				hExDeEg->Fill(TMath::Abs(ezero[1]),TMath::Abs(ezero[0]));
-				hExDeTg->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[0]));
-				hExETg->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[1]));
-				hAtDeEg->Fill(TMath::Abs(ezero[3]),TMath::Abs(ezero[2]));
-				hAtDeTg->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[2]));
-				hAtETg->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[3]));
-				hAtEtotTg->Fill(TMath::Abs(tac[0]),TMath::Abs(ezero[4]));
-			}
-		}
-	}
-	
-	//Time
-	if (TMath::Abs(ezero[0])>50 ){//CRH
-	  timeCurrent = (Float_t) ezero_t[0]/1e8;
-	} else if (TMath::Abs(ezero[2])>50 ){//CRH
-	  timeCurrent = (Float_t) ezero_t[2]/1e8;
-	}
-	//initial timeZero and timeRef
-	if (timeZero==0) {
-	  timeZero = timeCurrent;
-	  timeRef  = timeCurrent;
-	}
-	
-	timeCurrent = timeCurrent - timeZero;
-	Float_t timeDelta = timeCurrent - timeRef;
-	
-	if (ProcessedEntries>1 && ProcessedEntries%1000==0) {      
-	  printf("Total Run Time: %10.1f sec, dT : %5.3f sec, Total Evt Rate: %10.0f pps \n",
-		 timeCurrent, timeDelta,
-		 ProcessedEntries/timeCurrent);
-	  
-	  if( timeCurrent > 0 ){
-	    graphRate->SetPoint(n-1, timeCurrent, ProcessedEntries/timeDelta);
-	    
-	    if( isCutFileOpen){
-	      for( int i = 0 ; i < numCut; i++ ){
-		printf("cut%d : %5d, %6.3f pps \n", i+1, countFromCut[i], countFromCut[i]/timeDelta);			 
-		graphRateCut[i]->SetPoint(n-1, timeCurrent, countFromCut[i]/timeDelta);
-		
-		countFromCut[i] = 0; // reset count for semi-Instantaneous beam rate;
-		timeRef = timeCurrent;
-	      }
-	    }
-	    
-	    cCanvas->cd(1);
-	    rateGraph->Draw("AP");
-	    rateGraph->GetXaxis()->SetRangeUser(0, timeCurrent);
-	    gPad->Modified(); cCanvas->Modified(); cCanvas->Update();
-	    
-	    n++;
-	  }
-	  
-	}
-	
-	
-	if (ProcessedEntries>1 && ProcessedEntries%5000==0) {
-	  cCanvas->cd(2); gPad->cd(1); hAtDeE->Draw("colz");
-	  cCanvas->cd(3); gPad->cd(1); hExDeEc->Draw("colz");//CRH
-	  
-	  if( isCutFileOpen){
-	    for( int i = 0 ; i < numCut; i++ ){
-	      cCanvas->cd(2); gPad->cd(1);	 cutList->At(i) ->Draw("same");
-	      cCanvas->cd(3); gPad->cd(1);	 cutList->At(i) ->Draw("same");
-	    }
-	  }
-	  
-	  cCanvas->cd(2); gPad->cd(2); hAtDeT->Draw("colz");
-	  cCanvas->cd(3); gPad->cd(2); hExDeTgc->Draw("colz");//CRH
-	  gPad->Modified(); cCanvas->Modified(); cCanvas->Update();
-	  gSystem->ProcessEvents();
-	}
-	
+    //EZERO
     
+    /* 
+       if( isCutFileOpen){
+       for( int i = 0 ; i < numCut; i++ ){
+       cutG = (TCutG *)cutList->At(i) ;
+       if( cutG->IsInside(temp[1], temp[0]) || cutG->IsInside(TMath::Abs(ezero[3]),TMath::Abs(ezero[2]) ) ) { //CRH
+       countFromCut[i] += 1;
+       //printf("count %d : %d \n", i, countFromCut[i]);
+       hExDeEgc->Fill(temp[1],temp[0]);
+       }
+       }
+       }
+       
+    */
+   
     he0dee->Fill(ezero[1],ezero[0]);
     he0det->Fill(TMath::Abs(tac[0]),ezero[0]);
     he0et->Fill(TMath::Abs(tac[0]),ezero[1]);
@@ -483,13 +340,10 @@ void Monitors::SlaveTerminate()
 
 void Monitors::Terminate()
 {
-  cCanvas->cd(1);
-  if( isCutFileOpen) {
-	for (int i = 0 ; i < numCut ; i++){
-		graphRateCut[i]->Fit("pol0");
-	}
-  }
  
+  cCanvas->cd(1);
+  hxfxn[0]->Draw();
+  cCanvas->Update();
 
   if (ProcessedEntries>=NUMSORT)
     printf("Sorted only %llu\n",NUMSORT);

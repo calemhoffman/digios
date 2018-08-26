@@ -1,8 +1,11 @@
 #!/bin/bash -l
 export TERM=vt100
-cd /media/DIGIOSDATA2/data/h060_pb208
-xterm -T savedata -geometry 130x35+500+20 stop_run.sh
-echo "sleep for 1"
-sleep 1
-echo "Terminal is Free to Use"
+explocation=/home/helios/experiments/iss000/daq
+datalocation=/media/DIGIOSDATA3/data/iss000
+
+cd ${datalocation}
+xterm -T stopdata -fa "Monospace" -fs 12 -bg rgb:cd/20/2c -fg white -geometry 130x35+500+20 -e "${explocation}/edm/scripts/stop_run.sh"
+echo Pause for a few seconds after stopped run.
+sleep 2
+echo Terminal is now Free For Use
 exit
