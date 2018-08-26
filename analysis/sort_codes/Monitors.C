@@ -106,6 +106,9 @@ void Monitors::Begin(TTree *tree)
     heVx[i] = new TH2F(Form("heVx%d",i),
 		       Form("Raw PSD E vs. X (ch=%d);X (channel);E (channel)",i),
 		       500,-0.1,1.1,500,0,4000);
+    hecalVxcal[i] = new TH2F(Form("hecalVxcal%d",i),
+			      Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
+		       500,-0.25,5.25,500,0,20);
   }//array loop
   hecalVz = new TH2F("hecalVz","E vs. Z;Z (cm);E (MeV)",450,60,105,500,0,30);
   hecalVzR = new TH2F("hecalVzR","E vs. Z gated;Z (cm);E (MeV)",450,60,105,500,0,30);
@@ -251,6 +254,7 @@ Bool_t Monitors::Process(Long64_t entry)
       hxfxn[i]->Fill(xf[i],xn[i]);
       if (x[i]>-1.1&&x[i]<1.1&&e[i]>100&&(xn[i]>0||xf[i]>0)) {
 	heVx[i]->Fill(x[i],e[i]);
+	hecalVxcal[i]->Fill(xcal[i]*5.0,ecal[i]);
 	hecalVz->Fill(z[i],ecal[i]);
       }
 
@@ -340,15 +344,33 @@ void Monitors::SlaveTerminate()
 
 void Monitors::Terminate()
 {
- 
-  cCanvas->cd(1);
-  hxfxn[0]->Draw();
-  cCanvas->Update();
 
-  if (ProcessedEntries>=NUMSORT)
+ TCanvas *cxfxn = new TCanvas("cxfxn","XFXN",1200,800);
+  cxfxn->Clear(); cxfxn->Divide(6,4);
+  TCanvas *ceVx = new TCanvas("ceVx","EVX",1200,800);
+  ceVx->Clear(); ceVx->Divide(6,4);
+  TCanvas *cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",1200,800);
+  cecalVxcal->Clear(); cecalVxcal->Divide(6,4);
+  
+  for (Int_t i=0;i<24;i++) {
+    cxfxn->cd(i+1); hxfxn[i]->Draw("col");
+    ceVx->cd(i+1); heVx[i]->Draw("col");
+    //    cecalVxcal->cd(i+1); hecalVxcal[i]->Draw("col");
+  }
+  /*
+  TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
+  cecalVz->Clear();hecalVz->Draw("col");
+
+  TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
+  crdt->Clear();crdt->Divide(2,2);
+  for (Int_t i=0;i<4;i++) {
+    crdt->cd(i+1); hrdt[i]->Draw("col");
+  }
+  */
+ if (ProcessedEntries>=NUMSORT)
     printf("Sorted only %llu\n",NUMSORT);
   // printf("Total time for sort: %3.1f\n",StpWatch.RealTime());
   //printf("Which is a rate of: %3.1f k/s\n",(Float_t)ProcessedEntries/StpWatch.RealTime()/1000.);
-
+ 
   StpWatch.Start(kFALSE);
 }
