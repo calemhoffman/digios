@@ -1,0 +1,231 @@
+#!/bin/bash -l
+
+# Setup all digitizer delay windows M, K, D, D2
+# also setup raw data length, data window, peak sensitivity
+#  LEd threshold, channel enable, discriminator mode
+# trigger mode, edge select, pileup mode, extension mode,
+# extension enable, trigger configuration and time windows
+
+cd /global/devel/systems/edm/scripts
+
+echo "Mass setting of Digitizers to default operational values"
+#/global/devel/systems/edm/scripts/set_dig_all baseline_delay 260   # do this before setting d,k,m,d2
+
+caput GLBL:DIG:baseline_start 1000
+/global/devel/systems/edm/scripts/set_bgos baseline_start 8192     # this is really 0 volts
+
+caput GLBL:DIG:baseline_delay 260
+caput GLBL:DIG:win_comp_min -10
+caput GLBL:DIG:win_comp_max -3
+caput GLBL:DIG:disc_width 15
+
+caput GLBL:DIG:led_threshold 50
+caput GLBL:DIG:raw_data_length 1.0
+caput GLBL:DIG:raw_data_window 0.32
+caput GLBL:DIG:d_window 0.20
+caput GLBL:DIG:k_window 0.80
+caput GLBL:DIG:d2_window 0.20
+#caput GLBL:DIG:d_window 0.60
+#caput GLBL:DIG:k_window 0.20
+#caput GLBL:DIG:d2_window 0.30
+caput GLBL:DIG:m_window 3.5
+caput GLBL:DIG:CFD_fraction 30
+
+caput GLBL:DIG:peak_sensitivity 3
+
+caput GLBL:DIG:channel_enable 1
+
+caput GLBL:DIG:pileup_mode 0
+caput GLBL:DIG:trigger_polarity 1
+caput GLBL:DIG:dropped_event_count_mode 0
+caput GLBL:DIG:event_count_mode 0
+caput GLBL:DIG:ahit_count_mode 0
+caput GLBL:DIG:disc_count_mode 0
+caput GLBL:DIG:event_extention_mode 0
+caput GLBL:DIG:pileup_extention_mode 0
+caput GLBL:DIG:counter_reset 0
+
+caput DigFIFOSpeed Fast
+
+echo "global settings to all digitizers done"
+
+echo "done setting individual channels of digitizers"
+
+echo "setting digitizer mode to TTCS everywhere"
+
+caput GLBL:DIG:trigger_mux_select 2
+
+#need to really put .4 for 400 ns? need to fix equation...
+#caput GLBL:DIG:disc_width 1.9
+
+
+# clear FIFOs to insure no old events
+caput GLBL:DIG:master_fifo_reset 1 > null
+caput GLBL:DIG:master_fifo_reset 0 > null
+
+## BUG BUG BUG ##
+# PV that set the load delays bit does not seem to work.
+echo "loading buffer delays"
+
+caput GLBL:DIG:load_delays 0
+sleep 0.1
+caput GLBL:DIG:load_delays 1
+sleep 0.1
+caput GLBL:DIG:load_delays 0
+
+
+##################################################################
+#   With system linked up, now set DGS-specific X-plane and Y-plane
+#   mapping register values
+##################################################################
+echo "loading X-plane and Y-plane maps -- sets bgo as X-plane and ge as Y-Plane"
+##In all Routers, load the X-plane with 0x1F (31) and the Y-plane with 0x3E0 (992)
+for a in 1 2 3
+do # fill X-plane of routers with all 31
+  for b in 1_ 2_ 3_ 4_ 5_ 6_ 7_ 8_
+  do
+    caput VME32:RTR"$a":reg_X_PLANE_MAP_"$b" 31 
+    caput VME32:RTR"$a":reg_Y_PLANE_MAP_"$b" 992 
+  done
+done
+################# using the registers ###################################
+#for i in 1 2 3; do
+   # fill X-plane of routers with all 31
+#   for ((regadd=2136; regadd<2165; regadd += 4)) do
+#       caput VME32:DBG:dbg_card_number ${i} > null
+#       caput VME32:DBG:dbg_address ${regadd} > null
+#       caput VME32:DBG:dbg_value 31 > null
+#       caput VME32:DBG:dbg_write_addr 1 > null
+#   done
+   # fill Y-plane of routers with all 992
+#   for ((regadd=2168; regadd<2197; regadd += 4)) do
+#       caput VME32:DBG:dbg_card_number ${i} > null
+#       caput VME32:DBG:dbg_address ${regadd} > null
+#       caput VME32:DBG:dbg_value 992 > null
+#       caput VME32:DBG:dbg_write_addr 1 > null
+#   done
+#done
+################# using the registers ###################################
+echo "setting up Master Trigger to trigger from sum of X plane"
+
+#as we are missing a pv for y threshold, we write to addr 0x8cc in slot 0,
+# this is the master trigger. Set slot, address, value, then do the write
+# 8cc is 2252, 
+caput VME32:DBG:dbg_card_number 0 > null
+# write the y threshold
+caput VME32:DBG:dbg_address 2252 > null
+caput VME32:DBG:dbg_value 0 > null
+caput VME32:DBG:dbg_write_addr 1 > null
+
+#now write x thr. in addr 8c8, or 2248 > null
+caput VME32:DBG:dbg_address 2248 > null
+caput VME32:DBG:dbg_value 0 > null
+caput VME32:DBG:dbg_write_addr 1 > null
+
+
+caput Trig0_CS_TM_0 on > null	   #turn on Auxiliar /Manual triggers only
+caput Trig0_CS_TM_1 off > null	   #turn on Auxiliary/Manual triggers only
+caput Trig0_CS_TM_2 off > null	   #turn on Auxiliary/Manual triggers only
+caput Trig0_CS_TM_3 off > null	   #turn on Auxiliary/Manual triggers only
+
+caput Trig0_CS_TM_13 on > null	   #Enable NIM input for Auxiliary Triggers
+caput Trig0_CS_TM_14 off > null	   #Disable NIM input for Trigger VETO
+caput Trig0_CS_TM_15 off > null	   #Disable processing of throttle requests
+
+
+# after digitizers completely set up, remove SYNC on link L of Routers
+## Set link L of Router to drive SYNC back to Master
+caput Trig1_CS_LRUCtl02 OFF > null
+caput Trig2_CS_LRUCtl02 OFF > null
+caput Trig3_CS_LRUCtl02 OFF > null
+
+echo "***********SCRIPT COMPLETE************"
+
+caput GLBL:DIG:counter_mode 1
+caput GLBL:DIG:master_counter_enable 1
+caput GLBL:DIG:master_counter_reset 0
+
+caput GLBL:DIG:master_logic_enable 0
+caput GLBL:DIG:master_fifo_reset 1
+
+caput GLBL:DIG:master_fifo_reset 0
+
+caput GLBL:DAQ:DAQTimeDelayA 0.001
+caput GLBL:DAQ:DAQTimeDelayB 0.01
+caput GLBL:DAQ:BuildSendDelay 0.0
+
+# Disable standard detectors 1,2,3,4,5,6,10,53,58 
+
+#caput VME01:DIG1:channel_enable0 Reset
+caput VME01:DIG1:channel_enable1 Reset
+caput VME01:DIG1:channel_enable2 Reset
+caput VME01:DIG1:channel_enable4 Reset
+#caput VME01:DIG1:channel_enable5 Reset
+caput VME01:DIG1:channel_enable6 Reset
+caput VME01:DIG1:channel_enable7 Reset
+caput VME01:DIG1:channel_enable9 Reset
+caput VME03:DIG3:channel_enable3 Reset
+caput VME03:DIG3:channel_enable8 Reset
+caput VME06:DIG3:channel_enable0 Reset
+caput VME06:DIG3:channel_enable1 Reset
+caput VME06:DIG3:channel_enable2 Reset
+caput VME06:DIG3:channel_enable5 Reset
+caput VME06:DIG3:channel_enable6 Reset
+caput VME06:DIG3:channel_enable7 Reset
+caput VME09:DIG1:channel_enable1 Reset
+caput VME09:DIG1:channel_enable6 Reset
+
+# Disable current missing 8
+caput VME01:DIG1:channel_enable3 Reset
+caput VME01:DIG1:channel_enable8 Reset
+# Disable current missing 14
+caput VME01:DIG3:channel_enable1 Reset
+caput VME01:DIG3:channel_enable6 Reset
+# Disable current missing 78
+caput VME04:DIG3:channel_enable3 Reset
+caput VME04:DIG3:channel_enable8 Reset
+# Disable current missing 82
+caput VME05:DIG1:channel_enable0 Reset
+caput VME05:DIG1:channel_enable5 Reset
+# Disable current missing 9
+caput VME06:DIG3:channel_enable4 Reset
+caput VME06:DIG3:channel_enable9 Reset
+# Disable current missing 51
+caput VME09:DIG1:channel_enable0 Reset
+caput VME09:DIG1:channel_enable5 Reset
+
+# disable slave digitizers
+VME="1 2 3 4 5 6 7 8 9 10 11"
+for a in $VME
+do
+  caput DAQB"$a"_2_CS_Ena Disable
+  caput DAQB"$a"_4_CS_Ena Disable
+done
+
+# set GS68 Ge threshold to 120
+caput VME04:DIG1:led_threshold8 120
+
+# To get good suppression, need to set bgo threshold to around 23.
+/global/devel/systems/edm/scripts/set_bgos led_threshold 23
+# Not sure this is necessary but make sure BGO pileup mode is in accept
+/global/devel/systems/edm/scripts/set_bgos pileup_mode Accept
+# for safety lets set discrimantor bits for all Ge detectors
+caput GLBL:DIG:disc_width 15
+/global/devel/systems/edm/scripts/set_ge disc_width 15 > null
+
+# set Ge 68 to a high threshold
+
+#caput Chico::UDP_RcvrIPAddr 192.168.203.122
+#caput Chico::UDP_RcvrIPPort 1101
+#caput Chico::TCPIP_RcvrIPAddr 192.168.203.122
+#caput Chico::TCPIP_RcvrIPPort 20000
+
+caput Trig0_CS_XTHRESH 255
+caput Trig0_CS_YTHRESH 0
+caput Trig0_CS_TM_2 on
+
+set_preamp_reset2 > null # enable preamp reset on Ge channels
+
+echo "dig_dgssetup script is finished!!!!!!"
+
+

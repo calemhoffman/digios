@@ -1,0 +1,15 @@
+
+ROOTINC = $(shell root-config --cflags)
+ROOTLIB = $(shell root-config --new --libs)
+ 
+CCFLAG   = -I. -I$(ROOTSYS)/include -L$(ROOTSYS)/lib -DMAC=1
+CC       = /usr/bin/g++ $(CCENV)
+cc       = /usr/bin/gcc $(CCENV)
+
+TRAILOR  = -lm
+SOCKET = 
+NSL = -lnsl
+
+
+
+# yum -y install cernlib-devel

@@ -1,0 +1,10 @@
+#Start a human-readable list of PV's to add to wiki
+#Replace $$ with numbers
+
+Rates:
+Disc. Hits - VME$$:MDIG$$:disc_count$$_RBV
+Acc. Hits  - VME$$:MDIG$$:ahit_count$$_RBV
+Acc. Evts  - VME$$:MDIG$$:accepted_event_count$$_RBV
+Drop. Evts - VME$$:MDIG$$:dropped_event_count$$_RBV
+
+Live TS    - VME$$:MDIG$$:CV_LiveTS

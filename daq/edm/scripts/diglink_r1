@@ -1,0 +1,102 @@
+#!/bin/bash -l
+
+############################################################################
+#
+# routers at this point should all be locked to the Master
+# May now proceed to lock all the digitzers to the Routers
+#
+############################################################################
+
+if [ ! $1 ]
+then 	# -n tests to see if the argument is non empty
+	echo 'Must specify which router (1, 2 or 3)'
+    exit 1
+fi
+
+if [ "$1" -lt 1 ] || [ "$1" -gt 3 ]
+then
+    echo "Router $1 does not exist: Valid Routers are 1, 2 or 3."
+    exit 1
+fi
+
+
+## Set all input link mask registers, transmit enable and
+## receive enable of Routers to enablethem to talk to digitizers
+
+echo "Re-locking router $1"
+
+###################################################
+# 
+# Setup SERDES links of all the digitizers
+#
+###################################################
+
+
+echo "setting all digitizer SERDES controls"
+
+# set clk_select to SERDES clock
+caput GLBL:DIG:clk_select 0 > saves/router.txt
+# turn off master logic enable
+caput GLBL:DIG:master_logic_enable 0 > saves/router.txt
+# sd_rx_pwr and sd_tx_pwer are POWER DOWN controls, as that's the way the 
+# DS92LV18 SERDES chip works (low = powerdown).
+caput GLBL:DIG:sd_rx_pwr 0 > saves/router.txt
+caput GLBL:DIG:sd_tx_pwr 0 > saves/router.txt
+# loopback enables should be off, or 0, disabling loopback
+caput GLBL:DIG:sd_line_loopback_en 0 > saves/router.txt
+caput GLBL:DIG:sd_local_loopback_en 0 > saves/router.txt
+# turn sync ON to send a pattern back t > saves/router.txto the Router that it can lock onto
+caput GLBL:DIG:sd_sync 1 > saves/router.txt
+ 
+ # Assert and release link init machine reset in all Routers
+echo "release link-init state machine of Router $1 "
+caput VME32:RTR"$1":RESET_LINK_INIT 1 > saves/router.txt
+caput VME32:RTR"$1":RESET_LINK_INIT 0 > saves/router.txt
+
+#Router at this point may have lock error due to clock switch.
+# do a retry and ack again to be sure.
+# retry link init state machine in Master
+echo "retry link-init state machine of Router $1"
+caput VME32:RTR"$1":LOCK_RETRY 1 > saves/router.txt
+# remove retry to link init state machine in Master
+caput VME32:RTR"$1":LOCK_RETRY 0 > saves/router.txt
+# then hit and release ack, too
+caput VME32:RTR"$1":LOCK_ACK 1 > saves/router.txt
+caput VME32:RTR"$1":LOCK_ACK 0 > saves/router.txt
+
+## Router is now sending 'real' data to digitizers since ACK was hit
+
+echo "Enabling master state machine of all digitizers"
+echo "setting all digitizers to SERDES clock source"
+
+# Enable master state machines of all digitizers (do not set master logic enable bit though)
+# Setup all digitizer clock source to SERDES
+
+caput GLBL:DIG:sd_sm_stringent_lock 1 > saves/router.txt
+caput GLBL:DIG:sd_sm_lost_lock_flag 1 > saves/router.txt
+caput GLBL:DIG:sd_sm_lost_lock_flag 0 > saves/router.txt
+caput GLBL:DIG:sd_sync 0 > saves/router.txt
+
+# Finally, whack the imperative Sync once more to lock up the
+# timestamps throughout
+#echo "final Imperative Sync to lock timestamps"
+#caput Trig0_CS_MC_6 1 > saves/router.txt
+#caput Trig0_CS_MC_6 0 > saves/router.txt
+
+### as PV not there, use the 'back door' option to reset all the counters in the Routers
+#we write to PULSED_CTL1_REG addr 0x8E0 (decimal 2272), bit 14 (value of 16384) ,
+
+#for ((i=1;i<4;i++))
+#do
+#    caput VME32:DBG:dbg_card_number ${i} > saves/router.txt
+#    caput VME32:DBG:dbg_address 2272 > saves/router.txt
+#    caput VME32:DBG:dbg_value 16384 > saves/router.txt
+#    caput VME32:DBG:dbg_write_addr 1 > saves/router.txt
+#done
+
+
+echo "SERDES linkup of Router $1 Complete"
+
+
+
+################## end of SERDES linkup procedure ##############

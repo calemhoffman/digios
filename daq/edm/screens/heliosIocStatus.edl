@@ -1,0 +1,908 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1038
+y 370
+w 700
+h 275
+font "courier-medium-r-10.0"
+ctlFont "courier-medium-r-10.0"
+btnFont "courier-medium-r-10.0"
+fgColor index 14
+bgColor index 55
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 59
+y 16
+w 100
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "TCP/IP Rate"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 3
+y 45
+w 60
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "VME1"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 3
+y 85
+w 60
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "VME2"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 3
+y 125
+w 60
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "VME3"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 3
+y 165
+w 60
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "VME4"
+}
+endObjectProperties
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 70
+y 38
+w 80
+h 25
+controlPv "DAQC1_CV_SendRate"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 70
+y 78
+w 80
+h 25
+controlPv "DAQC2_CV_SendRate"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 70
+y 118
+w 80
+h 25
+controlPv "DAQC3_CV_SendRate"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 70
+y 158
+w 80
+h 25
+controlPv "DAQC4_CV_SendRate"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 260
+y 16
+w 80
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Send Buffs"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 262
+y 37
+w 80
+h 25
+controlPv "DAQC1_CV_NumSendBuffers"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 262
+y 77
+w 80
+h 25
+controlPv "DAQC2_CV_NumSendBuffers"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 262
+y 117
+w 80
+h 25
+controlPv "DAQC3_CV_NumSendBuffers"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 262
+y 157
+w 80
+h 25
+controlPv "DAQC4_CV_NumSendBuffers"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 354
+y 17
+w 100
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 14
+bgAlarm
+useDisplayBg
+value {
+  "Send to:"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 354
+y 39
+w 120
+h 25
+controlPv "OnMon1_CS_RcvrIP"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+limitsFromDb
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 354
+y 79
+w 120
+h 25
+controlPv "OnMon2_CS_RcvrIP"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+limitsFromDb
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 354
+y 119
+w 120
+h 25
+controlPv "OnMon3_CS_RcvrIP"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+limitsFromDb
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 354
+y 159
+w 120
+h 25
+controlPv "OnMon4_CS_RcvrIP"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+limitsFromDb
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 567
+y 39
+w 80
+h 25
+controlPv "OnMon1_CV_Count"
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 567
+y 79
+w 80
+h 25
+controlPv "OnMon2_CV_Count"
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 567
+y 118
+w 80
+h 25
+controlPv "OnMon3_CV_Count"
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 567
+y 158
+w 80
+h 25
+controlPv "OnMon4_CV_Count"
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 474
+y 17
+w 90
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 14
+bgAlarm
+useDisplayBg
+value {
+  "% to Send"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 488
+y 39
+w 60
+h 25
+controlPv "OnMon1_CS_PercentToSend"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+precision 3
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 488
+y 79
+w 60
+h 25
+controlPv "OnMon2_CS_PercentToSend"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+precision 3
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 488
+y 119
+w 60
+h 25
+controlPv "OnMon3_CS_PercentToSend"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+precision 3
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 488
+y 159
+w 60
+h 25
+controlPv "OnMon4_CS_PercentToSend"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+precision 3
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 564
+y 16
+w 90
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "UDP Packets"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 164
+y 16
+w 80
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Buffs Avail"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 166
+y 37
+w 80
+h 25
+controlPv "DAQC1_CV_BuffersAvail"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 166
+y 77
+w 80
+h 25
+controlPv "DAQC2_CV_BuffersAvail"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 166
+y 117
+w 80
+h 25
+controlPv "DAQC3_CV_BuffersAvail"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 166
+y 157
+w 80
+h 25
+controlPv "DAQC4_CV_BuffersAvail"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 5
+y 245
+w 60
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "right"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "VME32"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 264
+y 237
+w 80
+h 25
+controlPv "DAQC32_CV_NumSendBuffers"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 569
+y 237
+w 80
+h 25
+controlPv "OnMon32_CV_Count"
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 490
+y 239
+w 60
+h 25
+controlPv "OnMon32_CS_PercentToSend"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+precision 3
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 356
+y 239
+w 120
+h 25
+controlPv "OnMon32_CS_RcvrIP"
+font "helvetica-bold-r-14.0"
+fgColor index 14
+bgColor index 2
+editable
+motifWidget
+limitsFromDb
+nullColor index 3
+smartRefresh
+useHexPrefix
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 168
+y 237
+w 80
+h 25
+controlPv "DAQC32_CV_BuffersAvail"
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 1
+bgColor index 11
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties

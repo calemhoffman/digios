@@ -1,0 +1,175 @@
+#!/bin/bash -l
+
+# Setup all digitizer delay windows M, K, D, D2
+# also setup raw data length, data window, peak sensitivity
+#  LEd threshold, channel enable, discriminator mode
+# trigger mode, edge select, pileup mode, extension mode,
+# extension enable, trigger configuration and time windows
+
+#cd /global/devel/systems/helios/edm/scripts
+echo "####################################################"
+echo "# iss001 helios_setup_digitizer                    #"
+echo "# Setting digitizer values - defaults & triggering #"
+echo "####################################################"
+
+caput Online_CS_StartStop Stop
+caput Online_CS_SaveData No Save
+caput DAQG_CS_BuildEnable Copy
+caput GLBL:DIG:counter_mode 0
+caput GLBL:DIG:baseline_start 8192 # this is really 0 volts
+caput GLBL:DIG:d_window 0.2
+caput GLBL:DIG:k_window 0.8
+caput GLBL:DIG:m_window 1.0
+caput GLBL:DIG:k0_window 0.0
+caput GLBL:DIG:d3_window 0.2
+caput GLBL:DIG:d2_window 0.2
+caput GLBL:DIG:led_threshold 400
+caput GLBL:DIG:CFD_fraction 30
+caput GLBL:DIG:raw_data_length 0.5 #really raw delay??
+caput GLBL:DIG:raw_data_window 2.32 #really data/trace length?
+caput GLBL:DIG:trigger_polarity Both
+caput GLBL:DIG:pileup_mode Accept
+caput GLBL:DIG:trigger_mux_select ExtTTCL #IntAcptAll 
+caput GLBL:DIG:channel_enable Run
+caput GLBL:DIG:win_comp_min -10
+caput GLBL:DIG:win_comp_max  0
+caput GLBL:DIG:peak_sensitivity 3
+caput GLBL:DIG:cfd_mode LED_Mode
+caput GLBL:DIG:preamp_reset_delay 0
+caput GLBL:DIG:preamp_reset_delay_en Disabled
+caput GLBL:DIG:delay 26
+caput GLBL:DIG:baseline_start 8192
+caput GLBL:DIG:tracking_speed 3
+caput GLBL:DIG:holdoff_time 140
+caput DigFIFOSpeed Fast
+caput GLBL:DIG:veto_enable Disabled
+
+caput GLBL:DIG:disc_width 15
+
+caput GLBL:DIG:dropped_event_count_mode 0
+caput GLBL:DIG:event_count_mode 0
+caput GLBL:DIG:ahit_count_mode 0
+caput GLBL:DIG:disc_count_mode 0
+caput GLBL:DIG:event_extention_mode 0
+caput GLBL:DIG:pileup_extention_mode 0
+caput GLBL:DIG:counter_reset 0
+
+echo "global settings to all digitizers done"
+
+echo "done setting individual channels of digitizers"
+
+# clear FIFOs to insure no old events
+caput GLBL:DIG:master_fifo_reset 1 > null
+caput GLBL:DIG:master_fifo_reset 0 > null
+
+## BUG BUG BUG ##
+# PV that set the load delays bit does not seem to work.
+echo "loading buffer delays"
+
+caput GLBL:DIG:load_delays 0
+sleep 0.1
+caput GLBL:DIG:load_delays 1
+sleep 0.1
+caput GLBL:DIG:load_delays 0
+
+##################################################################
+# Globals finished now individual boards / channels
+#
+###################################################################
+echo "Setting deactivated boards / channels"
+caput DAQB1_1_CS_Ena Disable
+caput DAQB2_4_CS_Ena Disable
+caput DAQB3_4_CS_Ena Disable
+caput DAQB4_4_CS_Ena Disable
+#caput VME01:MDIG1:channel_enable1 Reset
+echo "Setting internal trigger boards / channels"
+#caput VME01:MDIG1:trigger_mux_select IntAcptAll #Array RF
+echo "Setting individual threshold"
+echo "Setting other various individual parameters"
+
+##################################################################
+#   With system linked up, HELIOS ISS000  X-plane and Y-plane
+#   mapping register values
+#  
+#   array RTR1 E-H, RTR2 A-H Energy X-plane
+#   elum RTR1 B-C ?? Y-plane
+#   Recoil RTR1 D ?? not in trigger
+##################################################################
+echo "Misc X-plane"
+caput VME32:RTR1:reg_X_PLANE_MAP_A 0 
+caput VME32:RTR1:reg_X_PLANE_MAP_B 0
+caput VME32:RTR1:reg_X_PLANE_MAP_C 0
+caput VME32:RTR1:reg_X_PLANE_MAP_D 0
+
+echo "Setting X-plane - Si Array Energies Only"
+caput VME32:RTR1:reg_X_PLANE_MAP_E 252
+caput VME32:RTR1:reg_X_PLANE_MAP_F 0
+caput VME32:RTR1:reg_X_PLANE_MAP_G 63
+caput VME32:RTR1:reg_X_PLANE_MAP_H 0
+
+caput VME32:RTR2:reg_X_PLANE_MAP_A 0
+caput VME32:RTR2:reg_X_PLANE_MAP_B 15
+caput VME32:RTR2:reg_X_PLANE_MAP_C 192
+caput VME32:RTR2:reg_X_PLANE_MAP_D 0
+
+caput VME32:RTR2:reg_X_PLANE_MAP_E 3
+caput VME32:RTR2:reg_X_PLANE_MAP_F 240
+caput VME32:RTR2:reg_X_PLANE_MAP_G 0
+caput VME32:RTR2:reg_X_PLANE_MAP_H 0
+
+echo "Setting Y-plane - elum"
+caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_B 255
+caput VME32:RTR1:reg_Y_PLANE_MAP_C 255
+caput VME32:RTR1:reg_Y_PLANE_MAP_D 0
+
+caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_F 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_G 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_H 0
+
+caput VME32:RTR2:reg_Y_PLANE_MAP_A 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_B 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_C 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_D 0
+
+caput VME32:RTR2:reg_Y_PLANE_MAP_E 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_F 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_G 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_H 0
+
+echo "End of Trigger Mapping ###"
+
+caput GLBL:DIG:counter_mode 1
+######### NOT FOUND CRH 2.15 ##########
+#caput GLBL:DIG:master_counter_enable 1
+caput GLBL:DIG:master_counter_reset 0
+
+caput GLBL:DIG:master_logic_enable 0
+caput GLBL:DIG:master_fifo_reset 1
+
+caput GLBL:DIG:master_fifo_reset 0
+
+caput GLBL:DAQ:DAQTimeDelayA 0.001
+caput GLBL:DAQ:DAQTimeDelayB 0.01
+caput GLBL:DAQ:BuildSendDelay 0.0
+
+caput VME32:MTRG:XTHRESH 0
+caput VME32:MTRG:YTHRESH 0
+caput VME32:MTRG:SUM_X on
+caput VME32:MTRG:SUM_Y on
+caput VME32:MTRG:SUM_XY off
+
+caput VME32:RTR1:ENBL_DISCBIT_DELAY Off
+caput VME32:RTR2:ENBL_DISCBIT_DELAY Off
+
+caput GLBL:DIG:counter_mode 0
+
+# after digitizers completely set up, remove SYNC on link L of Routers
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR1:LRUCtl02 OFF > null
+caput VME32:RTR2:LRUCtl02 OFF > null
+
+echo "#########################################"
+echo "Finished - helios_setup_digitizer iss000"
+echo "#########################################"

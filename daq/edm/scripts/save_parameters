@@ -1,0 +1,209 @@
+#!/bin/bash -l
+
+
+#cd /global/devel/systems/edm
+#\mv Global.save1 Global.save2
+#\mv Global.save Global.save1
+#rm Global.save
+
+sfile=$1
+
+echo $sfile
+
+echo '#!/bin/bash -l' > $sfile
+chmod +x $sfile
+
+# First write values of user_package_data to file
+
+# First save globals with CryG prefix
+
+echo "Saving Globals"
+
+GLBL="GLBL:DIG:d_window GLBL:DIG:k_window GLBL:DIG:m_window GLBL:DIG:k0_window GLBL:DIG:d3_window GLBL:DIG:led_threshold GLBL:DIG:CFD_fraction GLBL:DIG:raw_data_length GLBL:DIG:raw_data_window GLBL:DIG:trigger_polarity GLBL:DIG:pileup_mode GLBL:DIG:trigger_mux_select GLBL:DIG:channel_enable GLBL:DIG:win_comp_min GLBL:DIG:win_comp_max GLBL:DIG:peak_sensitivity GLBL:DIG:cfd_mode GLBL:DIG:preamp_reset_delay GLBL:DIG:preamp_reset_delay_en GLBL:DIG:delay GLBL:DIG:baseline_start GLBL:DIG:tracking_speed GLBL:DIG:holdoff_time DigFIFOSpeed GLBL:DIG:veto_enable"
+
+echo "#Saving Globals #1" >> $sfile
+caget $GLBL | awk '{print "caput " $1 " " $2}' >> $sfile
+
+# This is for DAQB PV's which enable and disable entire digitizer - remnent of Carlware
+# added 1/4/16 - mpc
+
+VME="1 2 3 4"
+DIG="1 2 3 4"
+
+for a in $VME
+do
+  for b in $DIG
+  do
+    pv=DAQB"$a"_"$b"_CS_Ena
+    chpv=$(caget "$pv" | awk '{print $2}')
+    #echo 'caput' $pv $chpv
+    echo 'caput' $pv $chpv >> $sfile
+  done
+done
+
+# Now get PV's for Ge/BGO digitizers
+
+
+echo "Saving Non-Globals"
+echo "#Saving Non-Globals" >> $sfile
+
+VME="01 02 03 04"
+DIG="1 2 3 4"
+CH="0 1 2 3 4 5 6 7 8 9"
+
+# Now check individual 
+
+#PVD="trigger_mux_select  win_comp_min win_comp_max peak_sensitivity cfd_mode"
+PVD="trigger_mux_select peak_sensitivity cfd_mode veto_enable"
+for a in $VME
+do
+  for c in $PVD
+  do
+  glpv=$(caget GLBL:DIG:"$c" | awk '{print $2}') 
+    for b in $DIG   
+    do
+      # master digitizer
+      pv=VME"$a":MDIG"$b":"$c"
+      chpv=$(caget "$pv"_RBV | awk '{print $2}')
+      if [[ $glpv != $chpv ]] 
+      then 
+        #echo 'caput' $pv $chpv
+        echo 'caput' $pv $chpv >> $sfile
+      fi
+      # slave digitizer
+      pv=VME"$a":MDIG"$b":"$c"
+      chpv=$(caget "$pv"_RBV | awk '{print $2}')
+      if [[ $glpv != $chpv ]] 
+      then 
+        #echo 'caput' $pv $chpv
+        echo 'caput' $pv $chpv >> $sfile
+      fi
+    done
+  done
+done
+
+# for moment not saving CFD_fraction due to some difference between this value and that of the Global
+PVS="d_window k_window m_window d3_window led_threshold raw_data_length raw_data_window trigger_polarity pileup_mode channel_enable preamp_reset_delay preamp_reset_delay_en"
+
+# Now check indvidual channels. Check RBV vs Global. If differet save as write variable. 
+
+for a in $VME
+do
+  for b in $DIG
+  do
+    for c in $PVS
+    do
+      glpv=$(caget GLBL:DIG:"$c" | awk '{print $2}') 
+      # master digitizer
+      for d in $CH
+      do 
+        pv=VME"$a":MDIG"$b":"$c""$d"
+        chpv=$(caget "$pv"_RBV | awk '{print $2}')
+        if [[ $glpv != $chpv ]] 
+        then 
+          # echo 'caput' $pv $chpv
+          echo 'caput' $pv $chpv >> $sfile
+        fi
+      done
+      # slave digitizer
+      for d in $CH
+      do 
+        pv=VME"$a":MDIG"$b":"$c""$d"
+        chpv=$(caget "$pv"_RBV | awk '{print $2}')
+        if [[ $glpv != $chpv ]] 
+        then 
+          # echo 'caput' $pv $chpv
+          echo 'caput' $pv $chpv >> $sfile
+        fi
+      done
+    done
+  done
+done
+
+# Now lets save come master stuff
+echo "Saving MTRG stuff"
+echo "#Saving MTRG stuff" >> $sfile
+
+VME="32"
+PVM="MAN/AUX SUM_X SUM_Y SUM_XY GITMO/LINK_L REMOTE_MSTR/LINK_R MYRIAD/LINK_U ENBL_MON7_VETO ENBL_THROTTLE_VETO ENBL_NIM_VETO XTHRESH YTHRESH reg_GITMO_TRIG_DELAY REMOTE_TRIG_DELAY_REG RT_TS_MODE REMOTE_TRIGGER_TS_OFFSET REMOTE_TRIG_DIG_OFFSET REM_TRIG_OVERLAP RT_EN_COINC1 RT_EN_COINC2 RT_EN_COINC3 RT_EN_COINC4 RT_EN_COINC5 RT_EN_COINC6 RT_EN_COINC7 EN_NIM_AUX EN_TRIG_RAM_AUX TRIG_A_PRESCALE_ENBL TRIG_A_PRESCALE_FACTOR TRIG_B_PRESCALE_ENBL TRIG_B_PRESCALE_FACTOR TRIG_C_PRESCALE_ENBL TRIG_C_PRESCALE_FACTOR TRIG_D_PRESCALE_ENBL TRIG_D_PRESCALE_FACTOR TRIG_E_PRESCALE_ENBL TRIG_E_PRESCALE_FACTOR TRIG_F_PRESCALE_ENBL TRIG_F_PRESCALE_FACTOR TRIG_G_PRESCALE_ENBL TRIG_G_PRESCALE_FACTOR TRIG_H_PRESCALE_ENBL TRIG_H_PRESCALE_FACTOR MYR_TRIGGER_TYPE_SELECT MYRIAD_TRIG_DLY MYR_TS_MODE MYRIAD_OVERLAP_CONTROL MYR_EN_COINC1 MYR_EN_COINC2 MYR_EN_COINC3 MYR_EN_COINC4 MYR_EN_COINC5 MYR_EN_COINC6 MYR_EN_COINC7 NIMSrc1 NIMSrc2"
+
+for a in $VME
+do
+  for c in $PVM
+  do
+    pv=VME"$a":MTRG:"$c"
+    chpv=$(caget "$pv"_RBV | awk '{print $2}')
+    echo 'caput' $pv $chpv >> $sfile
+  done
+done
+
+# make loop for propagation frames
+PVF="1 3 4 5 6 7"
+LINK="LINK_L LINK_R LINK_U"
+for a in $LINK
+do
+  for b in $PVF
+  do
+    pv=VME32:MTRG:"$a"_PROPAGATE_F"$b"
+    chpv=$(caget "$pv"_RBV | awk '{print $2}')
+    echo 'caput' $pv $chpv >> $sfile
+  done
+done 
+
+# make loop for RAM Registers
+
+ram="SWEEP VETO TRIG"
+reg1="A B C D E F G H I J K L M N O P"
+reg2="A B C D"
+
+for c in $ram
+do 
+  for a in $reg1
+  do
+    for b in $reg2
+    do 
+      pv=VME32:MTRG:reg_"$c"_RAM_"$a""$b"
+      val=$(caget "$pv"_RBV  | awk '{print $2}')
+      caput $pv $val >> $sfile
+    done 
+  done
+done
+
+# Now let us save some router stuff
+echo "Saving Router stuff"
+echo "#Saving Router stuff" >> $sfile
+
+VME="32"
+RTR="1 2"
+PVR="X_SELECT Y_SELECT ASSERTION_DELAY OVERLAP_DELAY ENBL_DISCBIT_DELAY NIMSrc1 NIMSrc2 ENABLE_VETO "
+for a in $VME
+do
+  for b in $RTR
+  do
+    for c in $PVR
+    do
+      pv=VME"$a":RTR"$b":"$c"
+      chpv=$(caget "$pv"_RBV | awk '{print $2}')
+      echo 'caput' $pv $chpv >> $sfile
+    done
+  done
+done
+
+# Now save the X and Y register maps
+for a in 1
+do 
+  for b in A B C D E F G H
+  do
+    pv=VME32:RTR"$a":reg_X_PLANE_MAP_"$b" 
+    chpv=$(caget "$pv"_RBV | awk '{print $2}')
+    echo 'caput' $pv $chpv >> $sfile
+    pv=VME32:RTR"$a":reg_Y_PLANE_MAP_"$b" 
+    chpv=$(caget "$pv"_RBV | awk '{print $2}')
+    echo 'caput' $pv $chpv >> $sfile
+  done
+done
+
+date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> $sfile
+echo "All Done"
+exit
+

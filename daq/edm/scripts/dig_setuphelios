@@ -1,0 +1,124 @@
+#!/bin/bash -l
+
+# Setup all digitizer delay windows M, K, D, D2
+# also setup raw data length, data window, peak sensitivity
+#  LEd threshold, channel enable, discriminator mode
+# trigger mode, edge select, pileup mode, extension mode,
+# extension enable, trigger configuration and time windows
+
+cd /global/devel/systems/helios/edm/scripts
+
+echo "Mass setting of Digitizers to default operational values"
+
+caput GLBL:DIG:counter_mode 0
+caput GLBL:DIG:baseline_start 8192 # this is really 0 volts
+caput GLBL:DIG:d_window 0.2
+caput GLBL:DIG:k_window 0.8
+caput GLBL:DIG:m_window 1.0
+caput GLBL:DIG:k0_window 0.0
+caput GLBL:DIG:d3_window 0.2
+caput GLBL:DIG:d2_window 0.2
+caput GLBL:DIG:led_threshold 400
+caput GLBL:DIG:CFD_fraction 30
+caput GLBL:DIG:raw_data_length 0.5 #really raw delay??
+caput GLBL:DIG:raw_data_window 2.32 #really data/trace length?
+caput GLBL:DIG:trigger_polarity Both
+caput GLBL:DIG:pileup_mode Accept
+caput GLBL:DIG:trigger_mux_select IntAcptAll
+caput GLBL:DIG:channel_enable Run
+caput GLBL:DIG:win_comp_min -10
+caput GLBL:DIG:win_comp_max  0
+caput GLBL:DIG:peak_sensitivity 3
+caput GLBL:DIG:cfd_mode LED_Mode
+caput GLBL:DIG:preamp_reset_delay 0
+caput GLBL:DIG:preamp_reset_delay_en Disabled
+caput GLBL:DIG:delay 26
+caput GLBL:DIG:baseline_start 8192
+caput GLBL:DIG:tracking_speed 3
+caput GLBL:DIG:holdoff_time 140
+caput DigFIFOSpeed Fast
+caput GLBL:DIG:veto_enable Disabled
+
+caput GLBL:DIG:disc_width 15
+
+caput GLBL:DIG:dropped_event_count_mode 0
+caput GLBL:DIG:event_count_mode 0
+caput GLBL:DIG:ahit_count_mode 0
+caput GLBL:DIG:disc_count_mode 0
+caput GLBL:DIG:event_extention_mode 0
+caput GLBL:DIG:pileup_extention_mode 0
+caput GLBL:DIG:counter_reset 0
+
+echo "global settings to all digitizers done"
+
+echo "done setting individual channels of digitizers"
+
+# clear FIFOs to insure no old events
+caput GLBL:DIG:master_fifo_reset 1 > null
+caput GLBL:DIG:master_fifo_reset 0 > null
+
+## BUG BUG BUG ##
+# PV that set the load delays bit does not seem to work.
+echo "loading buffer delays"
+
+caput GLBL:DIG:load_delays 0
+sleep 0.1
+caput GLBL:DIG:load_delays 1
+sleep 0.1
+caput GLBL:DIG:load_delays 0
+
+
+##################################################################
+#   With system linked up, now set DGS-specific X-plane and Y-plane
+#   mapping register values
+##################################################################
+echo "loading X-plane and Y-plane maps -- sets bgo as X-plane and ge as Y-Plane"
+##In all Routers, load the X-plane with 0x1F (31) and the Y-plane with 0x3E0 (992)
+for a in 1 2 
+do # fill X-plane of routers with all 31
+  for b in A B C D E F G H
+  do
+    caput VME32:RTR"$a":reg_X_PLANE_MAP_"$b" 31
+    caput VME32:RTR"$a":reg_Y_PLANE_MAP_"$b" 0
+  done
+done
+
+# after digitizers completely set up, remove SYNC on link L of Routers
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR1:LRUCtl02 OFF > null
+caput VME32:RTR2:LRUCtl02 OFF > null
+#caput VME32:RTR3:LRUCtl02 OFF > null
+
+echo "***********SCRIPT COMPLETE************"
+
+caput GLBL:DIG:counter_mode 1
+caput GLBL:DIG:master_counter_enable 1
+caput GLBL:DIG:master_counter_reset 0
+
+caput GLBL:DIG:master_logic_enable 0
+caput GLBL:DIG:master_fifo_reset 1
+
+caput GLBL:DIG:master_fifo_reset 0
+
+caput GLBL:DAQ:DAQTimeDelayA 0.001
+caput GLBL:DAQ:DAQTimeDelayB 0.01
+caput GLBL:DAQ:BuildSendDelay 0.0
+
+# set Ge 68 to a high threshold
+
+caput VME32:MTRG:XTHRESH 255
+caput VME32:MTRG:YTHRESH 0
+caput VME32:MTRG:SUM_Y on
+
+caput VME32:RTR1:ENBL_DISCBIT_DELAY On
+caput VME32:RTR2:ENBL_DISCBIT_DELAY On
+#caput VME32:RTR3:ENBL_DISCBIT_DELAY On
+
+caput GLBL:DIG:counter_mode 0
+
+#set_preamp_reset2 > null # enable preamp reset on Ge channels
+
+#current_status_DGS.save
+
+echo "dig_setuphelios script is finished!!!!!!"
+

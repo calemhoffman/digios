@@ -1,0 +1,15 @@
+
+ROOTINC = $(shell root-config --cflags)
+ROOTLIB = $(shell root-config --libs)
+ 
+CCFLAG   = -I. $(ROOTINC) $(ROOTLIB) -DMAC=1 -Wno-unused-command-line-argument
+CC       = /usr/bin/g++ $(CCENV) -D_FILE_OFFSET_BITS=64
+cc       = /usr/bin/gcc $(CCENV) -D_FILE_OFFSET_BITS=64
+
+TRAILOR  = -lm
+SOCKET = 
+NSL = -lnsl
+
+
+
+# yum -y install cernlib-devel

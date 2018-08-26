@@ -1,0 +1,872 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 36
+y 71
+w 700
+h 600
+font "helvetica-bold-r-10.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-bold-r-10.0"
+fgColor index 14
+bgColor index 82
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 111
+y 12
+w 350
+h 20
+font "helvetica-bold-r-24.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "HELIOS Throttle"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 55
+y 53
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 87
+bgColor index 0
+value {
+  "Throttle On/Off"
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 35
+y 244
+w 163
+h 258
+
+beginGroup
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 35
+y 477
+w 40
+h 25
+controlPv "DAQC1_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 41
+y 244
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Available Buffers"
+}
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 158
+y 271
+w 40
+h 200
+indicatorColor index 79
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC4_CV_BuffersAvail"
+label "IOC 4"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 117
+y 271
+w 40
+h 200
+indicatorColor index 79
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC3_CV_BuffersAvail"
+label "IOC 3"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 76
+y 271
+w 40
+h 200
+indicatorColor index 79
+indicatorAlarm
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC2_CV_BuffersAvail"
+label "IOC 2"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 35
+y 271
+w 40
+h 200
+indicatorColor index 79
+indicatorAlarm
+fgColor index 82
+bgColor index 0
+indicatorPv "DAQC1_CV_BuffersAvail"
+label "IOC 1"
+origin "0"
+font "helvetica-bold-r-12.0"
+labelTicks "50"
+majorTicks "1"
+minorTicks "0"
+min "0"
+max "400"
+scaleFormat "FFloat"
+orientation "vertical"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 76
+y 477
+w 40
+h 25
+controlPv "DAQC2_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 117
+y 477
+w 40
+h 25
+controlPv "DAQC3_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 158
+y 477
+w 40
+h 25
+controlPv "DAQC4_CV_BuffersAvail"
+fgColor index 79
+fgAlarm
+bgColor index 82
+fill
+font "helvetica-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 26
+y 120
+w 100
+h 54
+
+beginGroup
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 26
+y 144
+w 100
+h 30
+fgColor index 14
+onColor index 79
+offColor index 80
+inconsistentColor index 78
+topShadowColor index 82
+botShadowColor index 14
+controlPv "Online_CS_StartStop"
+onLabel "ACQ On"
+offLabel "ACQ Off"
+labelType "literal"
+font "helvetica-bold-r-14.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 26
+y 120
+w 100
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "ACQ On/Off"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 217
+y 53
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 80
+bgColor index 0
+value {
+  "Router 1"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 325
+y 127
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 78
+bgColor index 0
+value {
+  "Throttle On/Off"
+}
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 230
+y 157
+w 167
+h 31
+fgColor index 14
+onColor index 0
+offColor index 0
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:RTR1:FORCE_THRTL_ON"
+3d
+font "helvetica-bold-r-10.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 231
+y 218
+w 167
+h 31
+fgColor index 14
+onColor index 0
+offColor index 0
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:RTR2:FORCE_THRTL_ON"
+3d
+font "helvetica-bold-r-10.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 405
+y 157
+w 167
+h 31
+fgColor index 14
+onColor index 0
+offColor index 0
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:RTR1:FORCE_THRTL_OFF"
+3d
+font "helvetica-bold-r-10.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 407
+y 218
+w 167
+h 31
+fgColor index 14
+onColor index 0
+offColor index 0
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:RTR2:FORCE_THRTL_OFF"
+3d
+font "helvetica-bold-r-10.0"
+objType "controls"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 253
+y 302
+w 141
+h 42
+controlPv "VME32:RTR1:reg_THROTTLE_STATUS_RBV"
+fgColor index 14
+fgAlarm
+bgColor index 0
+fill
+font "helvetica-bold-r-10.0"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 253
+y 362
+w 141
+h 42
+controlPv "VME32:RTR2:reg_THROTTLE_STATUS_RBV"
+fgColor index 14
+fgAlarm
+bgColor index 0
+fill
+font "helvetica-bold-r-10.0"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 269
+y 487
+w 70
+h 35
+controlPv "VME32:RTR1:THROTTLE_FILTER_TIME"
+displayMode "decimal"
+fgColor index 25
+bgColor index 2
+fill
+font "helvetica-medium-r-12.0"
+lineWidth 1
+lineAlarm
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 300
+y 447
+w 110
+h 32
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Min. recognized"
+  "throttle request"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 455
+y 446
+w 147
+h 32
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Min. Width of throttle"
+  "to master trig"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 470
+y 490
+w 70
+h 35
+controlPv "VME32:RTR1:THROTTLE_WIDTH"
+displayMode "decimal"
+fgColor index 25
+bgColor index 2
+fill
+font "helvetica-medium-r-12.0"
+lineWidth 1
+lineAlarm
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 546
+y 499
+w 39
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "*20ns"
+}
+autoSize
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 348
+y 495
+w 87
+h 22
+fgColor index 25
+bgColor index 3
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:RTR1:THROTTLE_TIME_RANGE"
+font "helvetica-medium-r-18.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 450
+y 292
+w 108
+h 21
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Veto Selects"
+}
+autoSize
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 579
+y 348
+w 23
+h 22
+fgColor index 25
+onColor index 35
+offColor index 3
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:MTRG:ENBL_NIM_VETO"
+labelType "literal"
+3d
+font "helvetica-medium-r-18.0"
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 439
+y 377
+w 130
+h 14
+controlPv "VME32:MTRG:ENBL_THROTTLE_VETO.DESC"
+format "string"
+font "helvetica-medium-r-12.0"
+fontAlign "right"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+autoHeight
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 579
+y 318
+w 23
+h 22
+fgColor index 25
+onColor index 35
+offColor index 3
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:MTRG:ENBL_MON7_VETO"
+labelType "literal"
+3d
+font "helvetica-medium-r-18.0"
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 438
+y 325
+w 130
+h 14
+controlPv "VME32:MTRG:ENBL_MON7_VETO.DESC"
+format "string"
+font "helvetica-medium-r-12.0"
+fontAlign "right"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+autoHeight
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 579
+y 373
+w 23
+h 22
+fgColor index 25
+onColor index 35
+offColor index 3
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:MTRG:ENBL_THROTTLE_VETO"
+labelType "literal"
+3d
+font "helvetica-medium-r-18.0"
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 439
+y 352
+w 130
+h 14
+controlPv "VME32:MTRG:ENBL_NIM_VETO.DESC"
+format "string"
+font "helvetica-medium-r-12.0"
+fontAlign "right"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+autoHeight
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 545
+y 560
+w 39
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "*20ns"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 469
+y 551
+w 70
+h 35
+controlPv "VME32:RTR2:THROTTLE_WIDTH"
+displayMode "decimal"
+fgColor index 25
+bgColor index 2
+fill
+font "helvetica-medium-r-12.0"
+lineWidth 1
+lineAlarm
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 347
+y 556
+w 87
+h 22
+fgColor index 25
+bgColor index 3
+inconsistentColor index 14
+topShadowColor index 0
+botShadowColor index 14
+controlPv "VME32:RTR2:THROTTLE_TIME_RANGE"
+font "helvetica-medium-r-18.0"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 268
+y 548
+w 70
+h 35
+controlPv "VME32:RTR2:THROTTLE_FILTER_TIME"
+displayMode "decimal"
+fgColor index 25
+bgColor index 2
+fill
+font "helvetica-medium-r-12.0"
+lineWidth 1
+lineAlarm
+endObjectProperties
+

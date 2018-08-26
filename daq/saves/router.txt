@@ -1,0 +1,2 @@
+Old : GLBL:DIG:sd_sync               Sync 
+New : GLBL:DIG:sd_sync               Normal 

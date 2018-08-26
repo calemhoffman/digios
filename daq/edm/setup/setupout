@@ -1,0 +1,9 @@
+*
+* Your LD_LIBRARY_PATH must be set and contain
+* the path to your EPICS base's
+* lib/HOST_ARCH resp. lib/EPICS_HOST_ARCH directory
+* so that we can use the CA, Com, ... libraries!
+* It might also need to include the Motif libraries.
+*
+Setting up EDM base directory: /global/devel/extensions/dgs1/src/edm
+

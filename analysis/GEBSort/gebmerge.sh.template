@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] 
+  then
+   echo "Specify only the run number to sort"
+  exit 1
+fi
+
+RUN=$1
+
+dir=/home/choffman/Research/rcnp/e436
+
+echo "GEBMerge started at `date`"
+ 
+$dir/GEBSort_working/GEBMerge $dir/working/GEBMerge.chat  $dir/caldata/Merged/GEBMerged_run$RUN.gtd `ls $dir/caldata/run_$RUN.gtd*` > $dir/caldata/Merged/GEBMerge_run$RUN.log
+ 
+echo "GEBMerge DONE at `date`"

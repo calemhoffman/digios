@@ -1,0 +1,185 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 2188
+y 206
+w 1400
+h 800
+font "helvetica-bold-r-10.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-bold-r-10.0"
+fgColor index 14
+bgColor index 82
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 490
+y 18
+w 300
+h 20
+font "helvetica-bold-r-24.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "HELIOS Monitor: $(TITLE)"
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+# Geometry
+x 256
+y 143
+w 971
+h 554
+# Appearance
+xLabel "Time [h:m:s]"
+yLabel "pps"
+fgColor index 0
+bgColor index 0
+gridColor index 14
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 3600
+# X axis properties
+showXAxis
+xAxisStyle "time"
+xAxisSrc "AutoScale"
+xMin 0
+xMax 600
+xAxisTimeFormat "dateTime"
+# Y axis properties
+showYAxis
+yAxisSrc "AutoScale"
+yMax 500
+# Y2 axis properties
+showY2Axis
+y2AxisSrc "AutoScale"
+y2Min 1
+y2Max 2500
+y2ShowLabelGrid
+# Trace Properties
+numTraces 8
+yPv {
+  0 "DAQC1_CV_BuffersAvail"
+  1 "DAQC1_CV_SendRate"
+  2 "DAQC2_CV_BuffersAvail"
+  3 "DAQC2_CV_SendRate"
+  4 "DAQC3_CV_BuffersAvail"
+  5 "DAQC3_CV_SendRate"
+  6 "DAQC4_CV_BuffersAvail"
+  7 "DAQC4_CV_SendRate"
+}
+plotStyle {
+  1 "point"
+  3 "point"
+  5 "point"
+  7 "point"
+}
+lineThickness {
+  0 4
+  1 2
+  2 4
+  3 2
+  4 4
+  5 2
+  6 4
+  7 2
+}
+plotSymbolType {
+  1 "circle"
+  3 "circle"
+  5 "circle"
+  7 "circle"
+}
+opMode {
+  0 "plot"
+  1 "plot"
+}
+useY2Axis {
+  1 1
+  3 1
+  5 1
+  7 1
+}
+ySigned {
+  0 1
+  1 1
+  2 1
+  3 1
+  4 1
+  5 1
+  6 1
+  7 1
+}
+plotColor {
+  0 index 79
+  1 index 84
+  2 index 83
+  3 index 82
+  4 index 80
+  5 index 85
+  6 index 86
+  7 index 78
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 309
+y 48
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 80
+bgColor index 0
+value {
+  "Array OR Trig Rate"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 462
+y 48
+w 150
+h 20
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 78
+bgColor index 0
+value {
+  "ELUM Trig Rate"
+}
+endObjectProperties
+

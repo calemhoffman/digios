@@ -1,0 +1,242 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 754
+y 616
+w 250
+h 400
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 30
+y 19
+w 174
+h 21
+font "helvetica-bold-r-18.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 6
+useDisplayBg
+value {
+  "CARIBU VME $(DN)"
+}
+autoSize
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 60
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "VME $(DN) Boards"
+numPvs 4
+numDsps 4
+displayFileName {
+  0 "gretBoard.edl"
+  1 "gretBoard.edl"
+  2 "gretBoard.edl"
+  3 "gretBoard.edl"
+}
+menuLabel {
+  0 "Board $(DB1)"
+  1 "Board $(DB2)"
+  2 "Board $(DB3)"
+  3 "Board $(DB4)"
+}
+symbols {
+  0 "DB=$(DB1),SN1=a1,SN2=a2,SN3=a3,SN4=a4,SN5=a5,SN6=a6,SN7=b1,SN8=b2,SN9=b3,SN10=s1"
+  1 "DB=$(DB2),SN1=b4,SN2=b5,SN3=b6,SN4=c1,SN5=c2,SN6=c3,SN7=c4,SN8=c5,SN9=c6,SN10=s2"
+  2 "DB=$(DB3),SN1=d1,SN2=d2,SN3=d3,SN4=d4,SN5=d5,SN6=d6,SN7=e1,SN8=e2,SN9=e3,SN10=CC1"
+  3 "DB=$(DB4),SN1=e4,SN2=e5,SN3=e6,SN4=f1,SN5=f2,SN6=f3,SN7=f4,SN8=f5,SN9=f6,SN10=CC2"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 113
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "Board $(DB1) Segs"
+numPvs 4
+numDsps 10
+displayFileName {
+  0 "DGSchannel.edl"
+  1 "DGSchannel.edl"
+  2 "DGSchannel.edl"
+  3 "DGSchannel.edl"
+  4 "DGSchannel.edl"
+  5 "DGSchannel.edl"
+  6 "DGSchannel.edl"
+  7 "DGSchannel.edl"
+  8 "DGSchannel.edl"
+  9 "DGSchannel.edl"
+}
+menuLabel {
+  0 "Channel 0"
+  1 "Channel 1"
+  2 "Channel 2"
+  3 "Channel 3"
+  4 "Channel 4"
+  5 "Channel 5"
+  6 "Channel 6"
+  7 "Channel 7"
+  8 "Channel 8"
+  9 "Channel 9"
+}
+symbols {
+  0 "SN=a1"
+  1 "SN=a2"
+  2 "SN=a3"
+  3 "SN=a4"
+  4 "SN=a5"
+  5 "SN=a6"
+  6 "SN=b1"
+  7 "SN=b2"
+  8 "SN=b3"
+  9 "SN=s1"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 224
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "VME $(DN) IOC"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "IOC_Status.edl"
+}
+menuLabel {
+  0 "vxStats"
+}
+symbols {
+  0 "P=iocVME$(DN)"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 168
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "VME $(DN) Trace"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "Trace.edl"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 280
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "Sender $(DN)"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "gretSender.edl"
+}
+symbols {
+  0 "S=$(DN)"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 35
+y 335
+w 158
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-medium-r-18.0"
+buttonLabel "Event Rates"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "eventRates.edl"
+}
+menuLabel {
+  0 "Event Rates"
+}
+endObjectProperties
+

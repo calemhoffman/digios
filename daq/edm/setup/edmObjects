@@ -1,0 +1,34 @@
+33
+activeLineClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Lines
+activeRectangleClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Rectangle
+activeCircleClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Circle
+activeArcClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Arc
+activeXTextClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Static Text
+activeXRegTextClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Text w. Reg. Exp.
+activePipClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Graphics Embedded Window
+activeMeterClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors Meter
+activeBarClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors Bar
+activeMessageBoxClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors Message Box
+xyGraphClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors X-Y Graph
+activeXTextDspClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Text Control
+activeXTextDspClass:noedit /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors Text Monitor
+activeSliderClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Slider
+activeMotifSliderClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Motif Slider
+activeButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Button
+activeMenuButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Menu Button
+activeRadioButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Radio Box
+activeMessageButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Message Button
+activeUpdownButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Up/Down Button
+activeRampButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Ramp Button
+activeExitButtonClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Exit Button
+menuMuxClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Menu Mux
+relatedDisplayClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Related Display
+shellCmdClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Controls Shell Command
+pvInspectorClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors PV Inspector
+activeTableClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors Table
+activeCoefTableClass /global/devel/extensions/dgs1/src/edm/baselib/O.linux-x86/libEdmBase.so Monitors Coef Table
+activeChoiceButtonClass /global/devel/extensions/dgs1/src/edm/choiceButton/O.linux-x86/lib7e1b4e6f-239d-4650-95e6-a040d41ba633.so Controls Choice Button
+TextupdateClass /global/devel/extensions/dgs1/src/edm/pvFactory/O.linux-x86/libPV.so Monitors Text Update
+RegTextupdateClass /global/devel/extensions/dgs1/src/edm/pvFactory/O.linux-x86/libPV.so Monitors Reg Text Update
+TextentryClass /global/devel/extensions/dgs1/src/edm/pvFactory/O.linux-x86/libPV.so Controls Text Entry
+ByteClass /global/devel/extensions/dgs1/src/edm/pvFactory/O.linux-x86/libPV.so Monitors Byte

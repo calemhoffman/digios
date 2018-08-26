@@ -1,0 +1,305 @@
+#####################################################################
+#
+#   TRIGGER SETUP FOR ISS000
+#
+#####################################################################
+# Let's first setup master trigger module
+# Assume it is in a completely wrong state to start
+
+# Clock Source - initialize to local to insure setup can occur
+echo "setting master to local clock"
+caput VME32:MTRG:ClkSrc local > trigger
+# In readiness for later, clear all trigger mask bits to turn off all triggers
+caput VME32:MTRG:MAN/AUX Off >> saves/trigger.txt	             #turn off man/aux triggers
+caput VME32:MTRG:SUM_X off >> saves/trigger.txt	             #turn off sum X triggers
+caput VME32:MTRG:SUM_Y off >> saves/trigger.txt	             #turn off sum Y triggers
+caput VME32:MTRG:SUM_XY off >> saves/trigger.txt	             #turn off sum X & sum Y triggers
+caput VME32:MTRG:CPLD off >> saves/trigger.txt	             #turn off CPLD triggers
+caput VME32:MTRG:GITMO/LINK_L off >> saves/trigger.txt         #turn off  GITMO/LINK L
+caput VME32:MTRG:REMOTE_MSTR/LINK_R off  >> saves/trigger.txt  #turn off  MSTR/LINK R
+caput VME32:MTRG:MYRIAD/LINK_U off >> saves/trigger.txt        #turn off  MYRIAD/LINK U
+
+caput VME32:MTRG:ENBL_MON7_VETO off >> saves/trigger.txt       #turn off MON7 FIFO veto
+caput VME32:MTRG:ENBL_NIM_VETO off >> saves/trigger.txt        #turn off NIM veto
+caput VME32:MTRG:ENBL_THROTTLE_VETO off >> saves/trigger.txt   #turn off throttle enable
+
+#LRU Control - enable all three links, drive SYNC out all three
+echo "setting master links L,R,U DEN/REN/SYNC"
+caput VME32:MTRG:LRUCtl00 ON >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl01 ON >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl02 ON >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl04 ON >> saves/trigger.txt #not using link R
+caput VME32:MTRG:LRUCtl05 ON >> saves/trigger.txt 
+caput VME32:MTRG:LRUCtl06 ON >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl08 ON >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl09 ON >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl10 ON >> saves/trigger.txt
+
+# Set input link mask register to use links A, B only
+#  That is a HELIOS-specific setting
+#  DSSD has five routers so would set D and E to 0 as well
+
+echo "setting master Input Link Mask"
+caput VME32:MTRG:ILM_A 0 >> saves/trigger.txt	#DGS Router 1
+caput VME32:MTRG:ILM_B 0 >> saves/trigger.txt	#DGS Router 2
+caput VME32:MTRG:ILM_C 1 >> saves/trigger.txt	
+caput VME32:MTRG:ILM_D 1 >> saves/trigger.txt	
+caput VME32:MTRG:ILM_E 1 >> saves/trigger.txt	
+caput VME32:MTRG:ILM_F 1 >> saves/trigger.txt
+caput VME32:MTRG:ILM_G 1 >> saves/trigger.txt
+caput VME32:MTRG:ILM_H 1 >> saves/trigger.txt
+caput VME32:MTRG:ILM_L 0 >> saves/trigger.txt
+caput VME32:MTRG:ILM_R 0 >> saves/trigger.txt
+caput VME32:MTRG:ILM_U 0 >> saves/trigger.txt
+
+# Turn Transmit power and receive power on in all links even if masked
+# Also insure that Line Loopback and Local Loopback are all OFF
+echo "Turn master Tpwr, Rpwr all on"
+
+for i in A B C L R U; do
+   p=$(printf "VME32:MTRG:TPwr_${i}")
+   caput $p 1 >> saves/trigger.txt
+   p=$(printf "VME32:MTRG:RPwr_${i}")
+   caput $p 1 >> saves/trigger.txt
+#   p=$(printf "VME32:MTRG:SLoL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+#   p=$(printf "VME32:MTRG:SLiL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+done
+
+for i in D E F G H; do
+   p=$(printf "VME32:MTRG:TPwr_${i}")
+   caput $p 0 >> saves/trigger.txt
+   p=$(printf "VME32:MTRG:RPwr_${i}")
+   caput $p 0 >> saves/trigger.txt
+#   p=$(printf "VME32:MTRG:SLoL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+#   p=$(printf "VME32:MTRG:SLiL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+done
+
+
+# turn on external LVDS Pre-emphasizing drivers
+echo "turn on Master line drivers"
+caput VME32:MTRG:PrE_0 off >> saves/trigger.txt
+caput VME32:MTRG:PrE_1 off >> saves/trigger.txt
+caput VME32:MTRG:PrE_2 off >> saves/trigger.txt
+caput VME32:MTRG:PrE_0 on >> saves/trigger.txt
+caput VME32:MTRG:PrE_1 on >> saves/trigger.txt
+caput VME32:MTRG:PrE_2 on >> saves/trigger.txt
+caput VME32:MTRG:PEABCD some >> saves/trigger.txt
+caput VME32:MTRG:PEEFG some >> saves/trigger.txt
+caput VME32:MTRG:PEHLRU some >> saves/trigger.txt
+
+# Insure DC Balance controls are all bypassed
+# Was necessary for GRETINA, firmware for DSSD does not need these
+#echo "ensure DC bypass controls of Master all on"
+#caput VME32:MTRG:MC2_0 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_1 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_2 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_3 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_4 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_5 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_6 1 >> saves/trigger.txt
+#caput VME32:MTRG:MC2_7 1 >> saves/trigger.txt
+
+
+### at this point Master is driving SYNC patterns to all Routers
+### and is waiting for Routers to send signals back.
+##
+##	Having driven sync for a bit, now take SYNC off of L,R,U
+## so that we're driving the standard data pattern.
+caput VME32:MTRG:LRUCtl02 OFF >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl06 OFF >> saves/trigger.txt
+caput VME32:MTRG:LRUCtl10 OFF >> saves/trigger.txt
+
+############ Now set up Routers ##########################
+#caput VME32:MTRG:ClkSrc link > trigger
+## Set up Router 1
+echo "setting up Router #1 to receive clock from Master"
+# Insure Router is running from the local clock
+caput VME32:RTR1:ClkSrc local >> saves/trigger.txt
+#caput VME32:RTR1:reg_MISC_CLK_CTL 135 >> saves/trigger.txt
+
+
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR1:LRUCtl00 ON >> saves/trigger.txt
+caput VME32:RTR1:LRUCtl01 ON >> saves/trigger.txt
+caput VME32:RTR1:LRUCtl02 ON >> saves/trigger.txt
+
+echo "setting RTR1 Input Link Mask"
+for i in A B C D E F G H; do
+   p=$(printf "VME32:RTR1:ILM_${i}")
+   caput $p 0 >> saves/trigger.txt
+done
+
+# Turn on transmit and receive power to all links in Router
+echo "turning on TPWR/RPWR in Router 1"
+
+for i in A B C D E F G H L R U; do
+   p=$(printf "VME32:RTR1:TPwr_${i}")
+   caput $p 1 >> saves/trigger.txt
+   p=$(printf "VME32:RTR1:RPwr_${i}")
+   caput $p 1 >> saves/trigger.txt
+#   p=$(printf "VME32:RTR1:SLoL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+#   p=$(printf "VME32:RTR1:SLiL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+done
+
+
+## turn on LVDS drivers in Router
+caput VME32:RTR1:PrE_0 off  >> saves/trigger.txt
+caput VME32:RTR1:PrE_1 off  >> saves/trigger.txt
+caput VME32:RTR1:PrE_2 off  >> saves/trigger.txt
+caput VME32:RTR1:PrE_0 on   >> saves/trigger.txt
+caput VME32:RTR1:PrE_1 on   >> saves/trigger.txt
+caput VME32:RTR1:PrE_2 on   >> saves/trigger.txt
+caput VME32:RTR1:PEABCD some >> saves/trigger.txt
+caput VME32:RTR1:PEEFG some  >> saves/trigger.txt
+caput VME32:RTR1:PEHLRU some >> saves/trigger.txt
+
+## Router #1 now sending SYNC back to Master; repeat for Router #2
+
+######################################################################
+echo "setting up Router #2 to receive clock from Master"
+######################################################################
+# Insure Router is running from the local clock
+#caput VME32:RTR2:reg_MISC_CLK_CTL 135 >> saves/trigger.txt
+caput VME32:RTR2:ClkSrc local >> saves/trigger.txt
+
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR2:LRUCtl00 ON >> saves/trigger.txt
+caput VME32:RTR2:LRUCtl01 ON >> saves/trigger.txt
+caput VME32:RTR2:LRUCtl02 ON >> saves/trigger.txt
+
+echo "setting RTR2 Input Link Mask"
+for i in A B C D E F G H; do
+   p=$(printf "VME32:RTR2:ILM_${i}")
+   caput $p 0 >> saves/trigger.txt
+done
+
+# Turn on transmit and receive power to all links in Router
+echo "turning on TPWR/RPWR in Router 2"
+
+for i in A B C D E F G H L U R; do	# Router 2 link B is disconnected edit: 20121210
+   p=$(printf "VME32:RTR2:TPwr_${i}")
+   caput $p 1 >> saves/trigger.txt
+   p=$(printf "VME32:RTR2:RPwr_${i}")
+   caput $p 1 >> saves/trigger.txt
+#   p=$(printf "VME32:RTR2:SLoL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+#   p=$(printf "VME32:RTR2:SLiL_${i}")
+#   caput $p 0 >> saves/trigger.txt
+done
+
+## turn on LVDS drivers in Router
+caput VME32:RTR2:PrE_0 off  >> saves/trigger.txt
+caput VME32:RTR2:PrE_1 off  >> saves/trigger.txt
+caput VME32:RTR2:PrE_2 off  >> saves/trigger.txt
+caput VME32:RTR2:PrE_0 on   >> saves/trigger.txt
+caput VME32:RTR2:PrE_1 on   >> saves/trigger.txt
+caput VME32:RTR2:PrE_2 on   >> saves/trigger.txt
+caput VME32:RTR2:PEABCD some >> saves/trigger.txt
+caput VME32:RTR2:PEEFG some  >> saves/trigger.txt
+caput VME32:RTR2:PEHLRU some >> saves/trigger.txt
+
+## Go back to setting up the Master to allow the init state machine
+## to go to lock. Previously was done before router's were set up
+## but router's need to be sending sync and powered up before we do this
+## edit 20121210
+
+# reset link init state machine in Master
+echo "reset link-init state machine of MAster"
+caput VME32:MTRG:RESET_LINK_INIT 1 >> saves/trigger.txt
+# remove reset to link init state machine in Master
+caput VME32:MTRG:RESET_LINK_INIT 0 >> saves/trigger.txt
+
+
+## At this point all Routers are sending Sync to Master.
+## Master State machine should be in "WAIT ACK" state
+## Test by reading Misc Stat register of Master; bits
+## 
+##  Until if syntax is remembered, blast along as if everything is
+## fine.
+echo "Acknowledging Master link-init"
+echo "should be a test here"
+# Turn Link Init Ack of Master on and then off again
+caput VME32:MTRG:LOCK_ACK 1 >> saves/trigger.txt
+caput VME32:MTRG:LOCK_ACK 0 >> saves/trigger.txt
+
+# Set Master to be sending real, not init data, with Imperative
+# Sync on
+echo "setting Master to send non-init sequence with ImpSync on"
+#caput VME32:MTRG:MC_5 0 >> saves/trigger.txt   #insure debug mode off ???????
+caput VME32:MTRG:IMP_SYNC 1  >> saves/trigger.txt  #insure Imp Sync is ON
+#caput VME32:MTRG:MC_7 0 >> saves/trigger.txt   #insure Init Mode off  ???????
+
+# Master should now be sending normal transmission pattern to
+# all Routers with Imperative sync bit set.  Go back to Routers
+# and switch each to link clock .
+echo "setting all Routers to link-source clock"
+caput VME32:RTR1:ClkSrc link >> saves/trigger.txt
+caput VME32:RTR2:ClkSrc link >> saves/trigger.txt
+
+# these PV's did not get inlcuded. Must set manually to 0x8087
+#caput VME32:RTR1:reg_MISC_CLK_CTL 32903 >> saves/trigger.txt
+#caput VME32:RTR2:reg_MISC_CLK_CTL 32903 >> saves/trigger.txt
+
+
+# Set each Router to Stringent Lock mode.  A test should be
+# added in here to look for counts in Counter F.
+#
+#echo "setting all Routers to Stringent Lock mode"
+#caput VME32:RTR1:LINK_L_STRINGENT 1 >> saves/trigger.txt
+#caput VME32:RTR2:LINK_L_STRINGENT 1 >> saves/trigger.txt
+##### Cannot find LINK_L_STRINGET ?? CRH 2.15 ####
+
+#Master at this point may have lock error due to clock switch.
+# do a retry and ack again to be sure.
+# retry link init state machine in Master
+echo "retry link-init state machine of MAster"
+caput VME32:MTRG:LOCK_RETRY 1 >> saves/trigger.txt
+# remove retry to link init state machine in Master
+caput VME32:MTRG:LOCK_RETRY 0 >> saves/trigger.txt
+# then hit and release ack, too
+caput VME32:MTRG:LOCK_ACK 1 >> saves/trigger.txt
+caput VME32:MTRG:LOCK_ACK 0 >> saves/trigger.txt
+
+# release Imperative Sync of Master
+echo "releasing Imp Sync of Master"
+caput VME32:MTRG:IMP_SYNC 0 >> saves/trigger.txt
+
+## To off Sync on routers - this was the bug which left acq hanging
+caput VME32:RTR1:LRUCtl02 OFF > trigger
+caput VME32:RTR2:LRUCtl02 OFF > trigger
+
+
+#NOW let us lock the individual routers
+
+echo "locking routers with digitizers"
+$EDMSCRIPTS/diglink_r1 1
+sleep 2
+$EDMSCRIPTS/diglink_r1 2
+sleep 2
+
+#Set the outputs of the master trigger for AnyTrig
+caput VME32:MTRG:NIMSrc1 AnyTrig >> saves/trigger.txt
+caput VME32:MTRG:NIMSrc2 AnyTrig >> saves/trigger.txt
+
+#Set the outputs of the rtrs to AnyTrig
+caput VME32:RTR1:NIMSrc1 AnyTrig >> saves/trigger.txt
+caput VME32:RTR1:NIMSrc2 AnyTrig >> saves/trigger.txt
+caput VME32:RTR2:NIMSrc1 AnyTrig >> saves/trigger.txt
+caput VME32:RTR2:NIMSrc2 AnyTrig >> saves/trigger.txt
+
+#Reset the L LOCK ERROR
+caput VME32:RTR1:SM_LOST_LOCK_RESET On
+caput VME32:RTR2:SM_LOST_LOCK_RESET On
+sleep 2
+caput VME32:RTR1:SM_LOST_LOCK_RESET Off
+caput VME32:RTR2:SM_LOST_LOCK_RESET Off
+
+echo "#######################################"
+echo "Finished - helios_setup_trigger iss000"
+echo "#######################################"

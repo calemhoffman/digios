@@ -1,0 +1,73 @@
+#!/bin/bash -l
+
+# Setup all digitizer delay windows M, K, D, D2
+# also setup raw data length, data window, peak sensitivity
+#  LEd threshold, channel enable, discriminator mode
+# trigger mode, edge select, pileup mode, extension mode,
+# extension enable, trigger configuration and time windows
+
+cd /global/devel/systems/helios/edm/scripts
+
+echo "###### Setting of Digitizer Triggers ######"
+
+##################################################################
+#   With system linked up, now set DGS-specific X-plane and Y-plane
+#   mapping register values
+##################################################################
+echo "###### Loading X-plane and Y-plane maps ######"
+##Load the X-plane with 0x1F (31) - ch 0 - 4, E's for Router 1,2 A,C,E,G
+##Load the Y-plane with 0x3E0 (992) - ch 0 - 9, XF & XN's, Router 1,2 B,D,F,H
+for a in 1 2 
+do # fill selected X-plane of routers with all 31 (ch 0 - 4)
+  for b in A C E G
+  do
+    caput VME32:RTR"$a":reg_X_PLANE_MAP_"$b" 31
+#    caput VME32:RTR"$a":reg_Y_PLANE_MAP_"$b" 992
+  done
+done
+ 
+ # fill Y-plane of routers with all (64 bit) 
+#bin:1111111111, hex:3FF dec:1023 (ch 0 - 9)
+for a in 1 2
+do
+  for b in B D F H
+  do
+#    caput VME32:RTR"$a":reg_X_PLANE_MAP_"$b" 31
+    caput VME32:RTR"$a":reg_Y_PLANE_MAP_"$b" 1023
+  done
+done
+
+# after digitizers completely set up, remove SYNC on link L of Routers
+## Set link L of Router to drive SYNC back to Master
+caput VME32:RTR1:LRUCtl02 OFF > null
+caput VME32:RTR2:LRUCtl02 OFF > null
+#caput VME32:RTR3:LRUCtl02 OFF > null
+
+caput GLBL:DIG:counter_mode 1
+caput GLBL:DIG:master_counter_enable 1
+caput GLBL:DIG:master_counter_reset 0
+
+caput GLBL:DIG:master_logic_enable 0
+caput GLBL:DIG:master_fifo_reset 1
+
+caput GLBL:DIG:master_fifo_reset 0
+
+caput GLBL:DAQ:DAQTimeDelayA 0.001
+caput GLBL:DAQ:DAQTimeDelayB 0.01
+caput GLBL:DAQ:BuildSendDelay 0.0
+
+caput VME32:MTRG:XTHRESH 0
+caput VME32:MTRG:YTHRESH 0
+caput VME32:MTRG:SUM_X on
+caput VME32:MTRG:SUM_Y on
+
+caput VME32:RTR1:ENBL_DISCBIT_DELAY On
+caput VME32:RTR2:ENBL_DISCBIT_DELAY On
+#caput VME32:RTR3:ENBL_DISCBIT_DELAY On
+
+caput GLBL:DIG:counter_mode 0
+
+caput GLBL:DIG:trigger_mux_select 2 #ExtTTCL
+
+echo "###### END OF dig_trigtest ######"
+

@@ -1,0 +1,17 @@
+ 
+#ROOTINC = -pthread -m64 -I/opt/root/include
+ROOTINC = $(shell root-config --cflags)
+ROOTLIB = $(shell root-config --libs)
+
+CCFLAG   = -I. $(ROOTINC) $(ROOTLIB)
+ccFLAG	 = -I. $(ROOTINC) $(ROOTLIB)
+CC       = g++ -DLINUX $(CCENV) -D_FILE_OFFSET_BITS=64 -DMAC=0
+cc       = gcc -DLINUX $(CCENV) -D_FILE_OFFSET_BITS=64 -DMAC=0
+
+
+TRAILOR  = -lm
+FF       = f77 -m32 -fbounds-check
+
+SOCKET = 
+NSL = -lnsl
+
