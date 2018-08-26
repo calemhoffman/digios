@@ -1,7 +1,7 @@
 {
   gStyle->SetOptStat("im");
   
-  //  gROOT->LoadMacro("process_run_local.C");
+  gROOT->LoadMacro("process_run_local.C");
   
   //TFile f("gen.root");
   //TTree *t = gen_tree;

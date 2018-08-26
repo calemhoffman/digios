@@ -1,15 +1,15 @@
 #!/bin/bash -l
-location=iss
+location=/home/helios/experiments/iss000/daq
 runEdm() {
   export EDMOBJECTS=/global/devel/extensions/dgs1/src/edm/setup
   export EDMHELPFILES=/global/devel/extensions/dgs1/src/edm/helpFiles
   export EDMBASE=/global/devel/extensions/dgs1/src/edm
   export EDM=/global/devel/extensions/dgs1/src/edm/edmMain/O.linux-x86/edm
   export EDMPVOBJECTS=/global/devel/extensions/dgs1/src/edm/setup
-  export EDMFILES=/home/helios/daq/${location}/edm/setup
-  export EDMDATAFILES=$EDMDATAFILES:/home/helios/daq/${location}/edm/screens
+  export EDMFILES=${location}/edm/setup
+  export EDMDATAFILES=$EDMDATAFILES:${location}/edm/screens
   export EDMDATAFILES=$EDMDATAFILES:/global/devel/systems/edm/screens
-  export EDMSCRIPTS=/home/helios/daq/${location}/edm/scripts
+  export EDMSCRIPTS=${location}/edm/scripts
   $EDM -x HELIOSMain.edl &
   echo "Edits are possible in this mode."
 }
