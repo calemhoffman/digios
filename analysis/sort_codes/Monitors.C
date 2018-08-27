@@ -34,7 +34,6 @@ vector<int> countFromCut;
 TGraph ** graphRateCut; //!
 TMultiGraph * rateGraph; //!
 
-TH2F* hADC;
 TH2F* hxfxn[24];
 TH2F* heVx[24]; 
 TH2F* hecalVxcal[24];
@@ -67,7 +66,7 @@ Float_t x[24],z[24];
 Float_t xcal[24],ecal[24],xfcal[24],xncal[24],ecrr[24],ezero[10];
 Int_t tacA[24];
 Float_t z_array_pos[6] = {35.868,29.987,24.111,18.248,12.412,6.676};//in cm
-Float_t z_off=60.0;//to the physical end of array from the target (-20 to si start)
+Float_t z_off=15.64;//to the physical end of array from the target (-20 to si start)
 Float_t xcoef[24] = {0.977877, 0.988848, 0.977536, 0.940756, 1.07479, 0.948377,
 		     0.938322, 0.987471, 0.98292, 0.991469, 0.996435, 0.0,
 		     1.04777, 1.01165, 0.969064, 1.01138, 0.944809, 1.05395,
@@ -85,10 +84,6 @@ Float_t bcoef[24] = {0.453923445, 0.417753264, 0.501465942, 0.538881671, 0.44969
 		     0.369876234, 0.470022039, 0.533858228, 0.589323149, 0.387687336, 0.52972093,
 		     0.494175262, 0.41855132, 0.473385494, 0.584180512, 0.49499818, 0.584009314};
 
-Float_t ezero_cal[5][2]={{0.0367,4.6086},{0.0367,4.6086},{0.01,0},{0.01,0},{0.01,0}};
-Float_t tac_slope=0.07048;//ns/ch
-Float_t tac_offset=100.0;//122.0;
-
 Float_t tempTime=-1000;
 Long64_t tempTimeLong=10001;
 
@@ -98,7 +93,7 @@ void Monitors::Begin(TTree *tree)
   NumEntries = tree->GetEntries();
 
   //Generate all of the histograms needed for drawing later on
-
+  
   for (Int_t i=0;i<24;i++) {//array loop
     hxfxn[i] = new TH2F(Form("hxfxn%d",i),
 			Form("Raw PSD XF vs. XN (ch=%d);XF (channel);XN (channel)",i),
@@ -107,11 +102,11 @@ void Monitors::Begin(TTree *tree)
 		       Form("Raw PSD E vs. X (ch=%d);X (channel);E (channel)",i),
 		       500,-0.1,1.1,500,0,4000);
     hecalVxcal[i] = new TH2F(Form("hecalVxcal%d",i),
-			      Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
-		       500,-0.25,5.25,500,0,20);
+			     Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
+			     500,-0.25,5.25,500,0,20);
   }//array loop
-  hecalVz = new TH2F("hecalVz","E vs. Z;Z (cm);E (MeV)",450,60,105,500,0,30);
-  hecalVzR = new TH2F("hecalVzR","E vs. Z gated;Z (cm);E (MeV)",450,60,105,500,0,30);
+  hecalVz = new TH2F("hecalVz","E vs. Z;Z (cm);E (MeV)",350,-70,0,500,0,15);
+  hecalVzR = new TH2F("hecalVzR","E vs. Z gated;Z (cm);E (MeV)",350,-70,0,500,0,15);
 
 
   //Recoils
@@ -155,7 +150,7 @@ void Monitors::Begin(TTree *tree)
 
   rateGraph = new TMultiGraph();
   graphRate = new TGraph();
-  graphRate->SetTitle("Total Rate [pps]");
+  graphRate->SetTitle("Raw Total Rate");
   graphRate->SetMarkerColor(4);
   graphRate->SetMarkerStyle(20);
   graphRate->SetMarkerSize(1);
@@ -191,8 +186,8 @@ void Monitors::Begin(TTree *tree)
 
 
   cCanvas  = new TCanvas("cCanvas","Running Plots",1250,1000);
-  cCanvas->Divide(1,3);cCanvas->cd(2);gPad->Divide(2,1);
-  cCanvas->cd(3);gPad->Divide(2,1);
+  //cCanvas->Divide(1,3);cCanvas->cd(2);gPad->Divide(2,1);
+  //cCanvas->cd(3);gPad->Divide(2,1);
   cCanvas->Modified(); cCanvas->Update();
   StpWatch.Start();
 }
@@ -238,16 +233,15 @@ Bool_t Monitors::Process(Long64_t entry)
       ecrr[i] = e[i]*kcoef[i]+bcoef[i];
 
       if (xf[i]>0 || xn[i]>0) {
-	x[i] = 00.5*((xf[i]-xn[i]) / (xf[i]+xn[i]))+0.5;//for downstream?
-	//x[i] = 0.5*((xf[i]-xn[i]) / (xf[i]+xn[i]))+0.5;
+	x[i] = 0.5*((xf[i]-xn[i]) / (xf[i]+xn[i]))+0.5;
 
 	if (xfcal[i]>xncal[i]) {
 	  xcal[i] = xfcal[i]/ecal[i];
 	} else if (xncal[i]>=xfcal[i]) {
 	  xcal[i] = 1.0 - xncal[i]/ecal[i];
 	}
-	z[i] = 5.0*(xcal[i]-0.5) + z_off + z_array_pos[i%6];//for downstream?
-	//z[i] = 5.0*(xcal[i]-0.5) - z_off - z_array_pos[i%6];
+	//	z[i] = 5.0*(xcal[i]-0.5) + z_off + z_array_pos[i%6];//for downstream?
+	z[i] = 5.0*(xcal[i]-0.5) - z_off - z_array_pos[i%6];
       }
 
       //Array fill next
@@ -345,7 +339,8 @@ void Monitors::SlaveTerminate()
 void Monitors::Terminate()
 {
 
- TCanvas *cxfxn = new TCanvas("cxfxn","XFXN",1200,800);
+  
+  TCanvas *cxfxn = new TCanvas("cxfxn","XFXN",1200,800);
   cxfxn->Clear(); cxfxn->Divide(6,4);
   TCanvas *ceVx = new TCanvas("ceVx","EVX",1200,800);
   ceVx->Clear(); ceVx->Divide(6,4);
@@ -355,8 +350,11 @@ void Monitors::Terminate()
   for (Int_t i=0;i<24;i++) {
     cxfxn->cd(i+1); hxfxn[i]->Draw("col");
     ceVx->cd(i+1); heVx[i]->Draw("col");
-    //    cecalVxcal->cd(i+1); hecalVxcal[i]->Draw("col");
+    cecalVxcal->cd(i+1); hecalVxcal[i]->Draw("col");
   }
+
+  cCanvas->cd(); hecalVz->Draw("col");
+  cCanvas->Update();
   /*
   TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
   cecalVz->Clear();hecalVz->Draw("col");
