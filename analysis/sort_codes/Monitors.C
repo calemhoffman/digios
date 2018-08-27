@@ -247,8 +247,8 @@ Bool_t Monitors::Process(Long64_t entry)
       hxfxn[i]->Fill(xf[i],xn[i]);
       if (x[i]>-1.1&&x[i]<1.1&&e[i]>100&&(xn[i]>0||xf[i]>0)) {
 	heVx[i]->Fill(x[i],e[i]);
-	hecalVxcal[i]->Fill(xcal[i]*5.0,ecal[i]);
-	hecalVz->Fill(z[i],ecal[i]);
+	hecalVxcal[i]->Fill(xcal[i]*5.0,ecrr[i]);
+	hecalVz->Fill(z[i],ecrr[i]);
       }
 
     }//array loop
@@ -352,6 +352,12 @@ void Monitors::Terminate()
     cecalVxcal->cd(i+1); hecalVxcal[i]->Draw("col");
   }
 
+  TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
+  crdt->Clear();crdt->Divide(2,2);
+  for (Int_t i=0;i<4;i++) {
+    crdt->cd(i+1); hrdt[i]->Draw("col");
+  }
+  
   cCanvas->cd(); hecalVz->Draw("col");
   cCanvas->Update();
   /*
