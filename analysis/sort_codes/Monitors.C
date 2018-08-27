@@ -56,7 +56,7 @@ Float_t timeCurrent=0;
 Float_t timeRef=0;
 
 TH1F* htacE;
-//TH1F* hex;
+TH1F* hexC;
 TH1F* hexR;
 TH1I* htacArray[24];
 TH1F* htac[4];//0 array-rdt, 1 elum-rdt
@@ -129,8 +129,8 @@ void Monitors::Begin(TTree *tree)
 
   htacE = new TH1F("htacE","Elum-RDT TAC; DT [clock ticks]; Counts",4,0,4);
 
-  // hex = new TH1F("hex","excitation spectrum",200,-2,10);
-  hexR = new TH1F("hexR","excitation spectrum with Recoil",500,-2,10);
+  hexC = new TH1F("hexC","excitation spectrum",500,-5,10);
+  hexR = new TH1F("hexR","excitation spectrum with Recoil",500,-5,10);
 
   for (Int_t i=0;i<24;i++) {
     htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
@@ -294,6 +294,8 @@ Bool_t Monitors::Process(Long64_t entry)
     //TACs
     for (Int_t i=0;i<4;i++){
       for(Int_t j=0;j<6;j++){
+	//ungated excitation energy
+	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
 	if(i==0&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[0]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
