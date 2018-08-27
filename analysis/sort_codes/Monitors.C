@@ -185,10 +185,10 @@ void Monitors::Begin(TTree *tree)
   printf("======== number of cuts found : %d \n", numCut);
 
 
-  cCanvas  = new TCanvas("cCanvas","Running Plots",1250,1000);
+  //cCanvas  = new TCanvas("cCanvas","Running Plots",1250,1000);
   //cCanvas->Divide(1,3);cCanvas->cd(2);gPad->Divide(2,1);
   //cCanvas->cd(3);gPad->Divide(2,1);
-  cCanvas->Modified(); cCanvas->Update();
+  //cCanvas->Modified(); cCanvas->Update();
   StpWatch.Start();
 }
 
@@ -265,23 +265,8 @@ Bool_t Monitors::Process(Long64_t entry)
 	if(rdt[j]-elum_t[i]>-10&&rdt[j]-elum[i]<10)htacE->Fill(0.5+j);
       }
     }
- 
+
     //EZERO
-    
-    /* 
-       if( isCutFileOpen){
-       for( int i = 0 ; i < numCut; i++ ){
-       cutG = (TCutG *)cutList->At(i) ;
-       if( cutG->IsInside(temp[1], temp[0]) || cutG->IsInside(TMath::Abs(ezero[3]),TMath::Abs(ezero[2]) ) ) { //CRH
-       countFromCut[i] += 1;
-       //printf("count %d : %d \n", i, countFromCut[i]);
-       hExDeEgc->Fill(temp[1],temp[0]);
-       }
-       }
-       }
-       
-    */
-   
     he0dee->Fill(ezero[1],ezero[0]);
     he0det->Fill(TMath::Abs(tac[0]),ezero[0]);
     he0et->Fill(TMath::Abs(tac[0]),ezero[1]);
@@ -296,7 +281,16 @@ Bool_t Monitors::Process(Long64_t entry)
     for (Int_t i=0;i<4;i++){
       for(Int_t j=0;j<6;j++){
 	//ungated excitation energy
-	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	//hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	//CUTS
+	if( isCutFileOpen){
+	  for( int k = 0 ; k < numCut; k++ ){
+	    cutG = (TCutG *)cutList->At(k) ;
+	    if( cutG->IsInside(rdt[k], rdt[k+1]) ) { //CRH
+	      hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	    }
+	  }
+	}
 	if(i==0&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[0]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
@@ -328,7 +322,8 @@ Bool_t Monitors::Process(Long64_t entry)
       }
     }
 
-   
+  
+        
   }
    return kTRUE;
 }
@@ -359,10 +354,26 @@ void Monitors::Terminate()
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
     crdt->cd(i+1); hrdt[i]->Draw("col");
+    cutG = (TCutG *)cutList->At(i);
+    cutG->Draw("same");
   }
-  
-  cCanvas->cd(); hecalVz->Draw("col");
-  cCanvas->Update();
+
+  cCanvas  = new TCanvas("cCanvas","Plots",1250,1000);
+  //cCanvas->Divide(1,3);cCanvas->cd(2);gPad->Divide(2,1);
+  //cCanvas->cd(3);gPad->Divide(2,1);
+  cCanvas->Modified(); cCanvas->Update();
+  cCanvas->cd(); cCanvas->Divide(1,2);
+  cCanvas->cd(1); gPad->Divide(4,1);
+  for (Int_t i=0;i<4;i++) {
+    cCanvas->cd(1);gPad->cd(i+1); hrdt[i]->Draw("col");
+    cutG = (TCutG *)cutList->At(i);
+    cutG->Draw("same");
+  }
+  cCanvas->cd(2); gPad->Divide(2,1);
+  cCanvas->cd(2);gPad->cd(1); hecalVz->Draw("colz");
+  cCanvas->cd(2);gPad->cd(2); hexC->Draw();
+  cCanvas->cd();
+
   /*
   TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
   cecalVz->Clear();hecalVz->Draw("col");
