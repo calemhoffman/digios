@@ -25,8 +25,8 @@ chunksiz 2000000000
 #    +--- big size makes program slow;
 #         but it may be necessary sometimes
 
-bigbufsize 450
-wosize     100
+bigbufsize 45000
+wosize     50
 #  |
 #  +--- in percent of bigbufsize
 #       written out per buffer
