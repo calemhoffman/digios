@@ -17,17 +17,20 @@ ATTEMPTS=0
 
 while [ "${ATTEMPTS}" -lt "10000" ];
 do
-    
-    rsync -rtuh --delete --progress rsync://helios@192.168.1.2:12000/digiosdata /Users/heliosdigios/experiments/infl001_19O/data/.
+
+    #rsync -rtuh --delete --progress rsync://helios@anldaqrouter:12000/digiosdata /Users/calemhoffman/Research/isolde/data/.
+   # 
     #not needed when sync daemon running
     #/Users/heliosdigios/Applications/get_digios_data.sh $RUN $WHERE
-    /Users/heliosdigios/experiments/infl001_19O/working/gebmerge.sh $RUN
-    /Users/heliosdigios/experiments/infl001_19O/working/gebsortmerged.sh $RUN
+    rsync -rtuh --delete --progress helios@anldaqrouter:/media/DIGIOSDATA3/data/iss000/* /Users/calemhoffman/Research/isolde/data/*
+    /Users/calemhoffman/Research/isolde/iss_git/analysis/working/gebmerge.sh $RUN
+    /Users/calemhoffman/Research/isolde/iss_git/analysis/working/gebsortmerged.sh $RUN
     
-    echo Just created root file run${RUN}.root in ../root_data/
+    echo Just created root file run${RUN}.root in /Users/calemhoffman/Research/isolde/root_data/
+    ls -ltrh /Users/calemhoffman/Research/isolde/root_data
     
     root -q -b "process_run.C(${RUN},0)"
-    cp gen.root ../root_data/gen_run${RUN}.root
+    cp gen.root /Users/calemhoffman/Research/isolde/root_data/gen_run${RUN}.root
     echo copied gen.root to gen_run${RUN}.root
     
     echo ----Done with Processing Run Number ${RUN}----

@@ -9,7 +9,7 @@ fi
 RUN=$1
 
 exp=iss000
-dir=/Users/heliosdigios/experiments/iss000
+dir=/Users/heliosdigios/experiments/iss000/analysis
 
 echo "RUN $RUN: GEBMerge started at `date`"
  
