@@ -11,8 +11,8 @@ echo "########## Saving ELUM Params ##########"
 echo "########## Saving Individual Params ##########"
 echo "#Saving Individual Params" >> $sfile
 
-VME="03"
-DIG="1 2 3 4"
+VME="01"
+DIG="2"
 CH="0 1 2 3 4 5 6 7"
 
 PVS="led_threshold raw_data_window channel_enable"
@@ -34,6 +34,8 @@ do
 done
 
 date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> $sfile
+rm -rf edm/scripts/elum_saved
+ln -s ../../$sfile edm/scripts/elum_saved
 echo "########## Done Saving ELUM Params ###########"
 exit
 
