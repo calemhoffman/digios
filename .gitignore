@@ -5,4 +5,5 @@ analysis/GEBSort/GEBSort_nogeb
 *.o
 *.root
 */*/*.o
+*/*/*.root
 *~
