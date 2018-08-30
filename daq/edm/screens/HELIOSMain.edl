@@ -3,7 +3,7 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 78
+x 70
 y 51
 w 1340
 h 800
@@ -52,7 +52,7 @@ fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "HELIOS Main: INFL001 19O"
+  "ISS COMMANDER"
 }
 endObjectProperties
 
