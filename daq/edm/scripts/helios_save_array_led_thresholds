@@ -11,8 +11,8 @@ echo "########## Saving Global Threshold ##########"
 
 GLBL="GLBL:DIG:led_threshold"
 
-echo "#Saving Global Threshold" >> $sfile
-caget $GLBL | awk '{print "caput " $1 " " $2}' >> $sfile
+#echo "#Saving Global Threshold" >> $sfile
+#caget $GLBL | awk '{print "caput " $1 " " $2}' >> $sfile
 
 echo "########## Saving Individual Thresholds ##########"
 echo "#Saving Individual Thresholds" >> $sfile
