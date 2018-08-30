@@ -20,9 +20,9 @@ Int_t CrapPrint=0;
 //With new mapping...1.15..starts with 1010 now...
 //elum, 200's, timing 400's, zero degrees 300's
 Int_t idDetMap[160] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,//
+		       201,202,203,204,205,206,207,208,-1,-1,//elum
+		       105,101,106,102,103,107,104,108,-1,-1,//recoils
 		       -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,//
-		       -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,//
-		       101,102,103,104,105,106,107,108,-1,-1,//
 		       1,0,5,4,3,2,1,0,-1,-1,/*1*/
 		       3,2,1,0,5,4,3,2,-1,-1,/*2*/
 		       11,10,9,8,7,6,5,4,-1,-1,/*3*/
@@ -235,19 +235,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
 
       //ELUM
       /************************************************************************/
-      if ((id[i]>=1090 && id[i]<1130)&&(idDet>=200&&idDet<=240)) {
-	Int_t elumTemp = idDet - 200;
-
-	if (elumTemp<16) {
-	  psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])
-				-(float)(pre_rise_energy[i]))/M;
-	} else {
-	  psd.ELUM[elumTemp] = ((float)(pre_rise_energy[i])
-				-(float)(post_rise_energy[i]))/M;
-	}
+      if ((id[i]>=1000 && id[i]<1130)&&(idDet>200&&idDet<=240)) {
+	Int_t elumTemp = idDet - 201;
+	psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])
+			      -(float)(pre_rise_energy[i]))/M;
+	
 	psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
       }//end ELUM
-
+      
       //EZERO
       /************************************************************************/
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
