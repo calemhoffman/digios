@@ -8,12 +8,14 @@ elif [ $# -eq 1 ]
 then
     RUN=$1
     WHERE=3
-    expDir=/home/helios/experiments/iss000/analysis
+    
 else
     RUN=$1
     WHERE=$2
 fi
 
+
+expDir=/home/helios/experiments/iss000/analysis
 ATTEMPTS=0
 
 while [ "${ATTEMPTS}" -lt "10000" ];
