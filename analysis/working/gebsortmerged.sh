@@ -12,8 +12,8 @@ dir=/Users/heliosdigios/experiments
 
 #cd $dir/GEBSort_working
 GEBDIR=$dir/iss000/analysis/GEBSort
-MERGDIR=$dir/merged_data
-ROOTDIR=$dir/root_data
+MERGDIR=$dir/iss000/merged_data
+ROOTDIR=$dir/iss000/root_data
 CHATDIR=$dir/iss000/analysis/working
 
 echo "GEBSort started sorting run $RUN at `date`"

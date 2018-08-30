@@ -9,10 +9,10 @@ fi
 RUN=$1
 
 exp=iss000
-dir=/Users/heliosdigios/experiments/iss000/analysis
+dir=/Users/heliosdigios/experiments/iss000
 
 echo "RUN $RUN: GEBMerge started at `date`"
  
-$dir/GEBSort/GEBMerge $dir/working/GEBMerge.chat  $dir/merged_data/GEBMerged_run$RUN.gtd `ls $dir/data/${exp}_run_$RUN.gtd*`
+$dir/analysis/GEBSort/GEBMerge $dir/analysis/working/GEBMerge.chat  $dir/merged_data/GEBMerged_run$RUN.gtd `ls $dir/data/${exp}_run_$RUN.gtd*`
  
 echo "RUN $RUN: GEBMerge DONE at `date`"
