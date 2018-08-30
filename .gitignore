@@ -7,3 +7,5 @@ analysis/GEBSort/GEBSort_nogeb
 */*/*.o
 */*/*.root
 *~
+*/data
+*/root_data
