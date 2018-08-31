@@ -349,17 +349,22 @@ void Monitors::Terminate()
     cecalVxcal->cd(i+1); hecalVxcal[i]->Draw("col");
   }
 
+  TCanvas *celum = new TCanvas("celum","ELUM",1000,1000);
+  celum->Clear(); celum->Divide(2,2);
+  helum[0]->Draw("colz");
+
   TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
     crdt->cd(i+1); hrdt[i]->Draw("col");
-    cutG = (TCutG *)cutList->At(i);
-    cutG->Draw("same");
+    //   cutG = (TCutG *)cutList->At(i);
+    //   cutG->Draw("same");
   }
 
+
+  /* 
+  //when recoils are available...
   cCanvas  = new TCanvas("cCanvas","Plots",1250,1000);
-  //cCanvas->Divide(1,3);cCanvas->cd(2);gPad->Divide(2,1);
-  //cCanvas->cd(3);gPad->Divide(2,1);
   cCanvas->Modified(); cCanvas->Update();
   cCanvas->cd(); cCanvas->Divide(1,2);
   cCanvas->cd(1); gPad->Divide(4,1);
@@ -373,7 +378,7 @@ void Monitors::Terminate()
   cCanvas->cd(2);gPad->cd(2); hexC->Draw();
   cCanvas->cd();
 
-  /*
+ 
   TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
   cecalVz->Clear();hecalVz->Draw("col");
 

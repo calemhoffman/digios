@@ -7,9 +7,9 @@ echo "############################################"
 echo "##### Setting other params for iss000  #####"
 echo "############################################"
 
-echo "* setting ezero params *"
-./edm/scripts/ezero_saved
-echo "** done with ezero settings **"
+#echo "* setting ezero params *"
+#./edm/scripts/ezero_saved
+#echo "** done with ezero settings **"
 
 echo "* setting array params"
 ./edm/scripts/array_saved

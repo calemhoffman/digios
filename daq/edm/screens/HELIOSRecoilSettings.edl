@@ -3,10 +3,10 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 200
-y 427
-w 1350
-h 700
+x 88
+y 171
+w 900
+h 400
 font "helvetica-medium-r-10.0"
 ctlFont "helvetica-medium-r-10.0"
 btnFont "helvetica-medium-r-10.0"
@@ -28,8 +28,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 484
-y 31
+x 250
+y 52
 w 400
 h 21
 font "helvetica-bold-r-24.0"
@@ -38,7 +38,7 @@ fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "HELIOS Recoils"
+  "ISS Recoils"
 }
 endObjectProperties
 
@@ -444,7 +444,7 @@ major 4
 minor 0
 release 0
 x 108
-y 532
+y 298
 w 700
 h 20
 
@@ -457,7 +457,7 @@ major 4
 minor 0
 release 0
 x 748
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -482,7 +482,7 @@ major 4
 minor 0
 release 0
 x 674
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -507,7 +507,7 @@ major 4
 minor 0
 release 0
 x 598
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -532,7 +532,7 @@ major 4
 minor 0
 release 0
 x 522
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -557,7 +557,7 @@ major 4
 minor 0
 release 0
 x 412
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -582,7 +582,7 @@ major 4
 minor 0
 release 0
 x 262
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -607,7 +607,7 @@ major 4
 minor 0
 release 0
 x 186
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -632,7 +632,7 @@ major 4
 minor 1
 release 0
 x 108
-y 535
+y 301
 w 47
 h 16
 font "helvetica-bold-r-14.0"
@@ -652,7 +652,7 @@ major 4
 minor 0
 release 0
 x 338
-y 532
+y 298
 w 60
 h 20
 fgColor index 14
@@ -1605,242 +1605,14 @@ command {
 }
 endObjectProperties
 
-# (Static Text)
-object activeXTextClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 897
-y 111
-w 400
-h 21
-font "helvetica-bold-r-18.0"
-fontAlign "center"
-fgColor index 0
-bgColor index 0
-useDisplayBg
-value {
-  "rates [pps]"
-}
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 1204
-y 138
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count3_RBV"
-label "DE 3"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 1099
-y 138
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count2_RBV"
-label "DE 2"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 995
-y 138
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count1_RBV"
-label "DE 1"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 891
-y 138
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count0_RBV"
-label "DE 0"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 1204
-y 342
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count7_RBV"
-label "E 3"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 1099
-y 342
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count6_RBV"
-label "E 2"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 995
-y 342
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count5_RBV"
-label "E 1"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
-# (Bar)
-object activeBarClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 891
-y 342
-w 100
-h 200
-indicatorColor index 78
-fgColor index 0
-bgColor index 82
-indicatorPv "VME01:MDIG3:disc_count4_RBV"
-label "E 0"
-showScale
-origin "0"
-font "helvetica-bold-r-12.0"
-labelTicks "5"
-majorTicks "1"
-min "0"
-max "15000"
-scaleFormat "FFloat"
-orientation "vertical"
-endObjectProperties
-
 # (Menu Button)
 object activeMenuButtonClass
 beginObjectProperties
 major 4
 minor 0
 release 0
-x 1087
-y 49
+x 601
+y 57
 w 100
 h 23
 fgColor index 0
@@ -1859,16 +1631,16 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 983
-y 42
-w 65
-h 16
-font "helvetica-medium-r-14.0"
-fgColor index 14
+x 583
+y 30
+w 138
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Trig Mode"
+  "Triggering Mode"
 }
 autoSize
 endObjectProperties
