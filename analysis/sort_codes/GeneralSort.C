@@ -22,7 +22,7 @@ Int_t CrapPrint=0;
 Int_t idDetMap[160] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,//
 		       201,202,203,204,205,206,207,208,-1,-1,//elum
 		       105,101,106,102,103,107,104,108,-1,-1,//recoils
-		       -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,//
+		       300,301,-1,-1,-1,-1,-1,-1,-1,-1,//
 		       1,0,5,4,3,2,1,0,-1,-1,/*1*/
 		       3,2,1,0,5,4,3,2,-1,-1,/*2*/
 		       11,10,9,8,7,6,5,4,-1,-1,/*3*/
@@ -146,8 +146,8 @@ Bool_t GeneralSort::Process(Long64_t entry)
     //Zero struct
     for (Int_t i=0;i<100;i++) {//num dets
       psd.Energy[i]=TMath::QuietNaN();
-      psd.XF[i]=TMath::QuietNaN();
-      psd.XN[i]=TMath::QuietNaN();
+      psd.XF[i]=0;
+      psd.XN[i]=0;
       psd.Ring[i]=TMath::QuietNaN();
       psd.RDT[i]=TMath::QuietNaN();
       psd.TAC[i]=TMath::QuietNaN();
