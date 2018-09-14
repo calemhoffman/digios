@@ -233,16 +233,17 @@ Bool_t Monitors::Process(Long64_t entry)
 
       if (xf[i]>0 || xn[i]>0) {
 	x[i] = 0.5*((xf[i]-xn[i]) / (xf[i]+xn[i]))+0.5;
-
-	if (xfcal[i]>xncal[i]) {
-	  xcal[i] = xfcal[i]/ecal[i];
-	} else if (xncal[i]>=xfcal[i]) {
-	  xcal[i] = 1.0 - xncal[i]/ecal[i];
-	}
-	//	z[i] = 5.0*(xcal[i]-0.5) + z_off + z_array_pos[i%6];//for downstream?
-	z[i] = 5.0*(xcal[i]-0.5) - z_off - z_array_pos[i%6];
       }
-
+      
+      if (xfcal[i]>0.5*ecal[i]) {
+	xcal[i] = xfcal[i]/ecal[i];
+      } else if (xncal[i]>=0.5*ecal[i]) {
+	xcal[i] = 1.0 - xncal[i]/ecal[i];
+      }
+      
+      //	z[i] = 5.0*(xcal[i]-0.5) + z_off + z_array_pos[i%6];//for downstream?
+      z[i] = 5.0*(xcal[i]-0.5) - z_off - z_array_pos[i%6];
+      
       //Array fill next
       hxfxn[i]->Fill(xf[i],xn[i]);
       if (x[i]>-1.1&&x[i]<1.1&&e[i]>100&&(xn[i]>0||xf[i]>0)) {
@@ -250,9 +251,9 @@ Bool_t Monitors::Process(Long64_t entry)
 	hecalVxcal[i]->Fill(xcal[i]*5.0,ecrr[i]);
 	hecalVz->Fill(z[i],ecrr[i]);
       }
-
+      
     }//array loop
-
+    
     /* RECOILS */
     for (Int_t i=0;i<4;i++) hrdt[i]->Fill(rdt[i+4],rdt[i]);
 
