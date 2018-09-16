@@ -281,89 +281,54 @@ Bool_t Monitors::Process(Long64_t entry)
     for (Int_t i=0;i<4;i++){
       for(Int_t j=0;j<6;j++){
 	//ungated excitation energy
-	//hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
 	//CUTS
 	if( isCutFileOpen){
 	  for( int k = 0 ; k < numCut; k++ ){
 	    cutG = (TCutG *)cutList->At(k) ;
 	    if( cutG->IsInside(rdt[k], rdt[k+1]) ) { //CRH
-	      hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	      hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	      hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
 	    }
 	  }
 	}
 	if(i==0&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[0]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[0]>5000){hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
-	    hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[0]>500){
 	    htac[0]->Fill(j+0.5);}
 	}
-	  if(i==1&&e[i*6+j]>100){
-	    	  tacA[i*6+j]= (int)(rdt_t[3]-e_t[i*6+j]);
+	if(i==1&&e[i*6+j]>100){
+	  tacA[i*6+j]= (int)(rdt_t[3]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[3]>5300){hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
-	    hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[3]>500){
 	    htac[3]->Fill(j+0.5);}
-	  }
-	  if(i==2&&e[i*6+j]>100){
-	    	  tacA[i*6+j]= (int)(rdt_t[2]-e_t[i*6+j]);
+	}
+	if(i==2&&e[i*6+j]>100){
+	  tacA[i*6+j]= (int)(rdt_t[2]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[2]>5000){hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
-	    hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
-	  htac[2]->Fill(j+0.5);}
-	  }
-	  if(i==3&&e[i*6+j]>100){
-	    	  tacA[i*6+j]= (int)(rdt_t[1]-e_t[i*6+j]);
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[2]>500){
+	    htac[2]->Fill(j+0.5);}
+	}
+	if(i==3&&e[i*6+j]>100){
+	  tacA[i*6+j]= (int)(rdt_t[1]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[1]>5300){hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
-	    hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[1]>500){
 	    htac[1]->Fill(j+0.5);}
-	  }
+	}
       }
     }
-
-  
-        
   }
-   return kTRUE;
+  return kTRUE;
 }
 
 void Monitors::SlaveTerminate()
 {
-
+  
 }
 
 void Monitors::Terminate()
 {
-
-  
-  TCanvas *cxfxn = new TCanvas("cxfxn","XFXN",1200,800);
-  cxfxn->Clear(); cxfxn->Divide(6,4);
-  TCanvas *ceVx = new TCanvas("ceVx","EVX",1200,800);
-  ceVx->Clear(); ceVx->Divide(6,4);
-  TCanvas *cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",1200,800);
-  cecalVxcal->Clear(); cecalVxcal->Divide(6,4);
-  
-  for (Int_t i=0;i<24;i++) {
-    cxfxn->cd(i+1); hxfxn[i]->Draw("col");
-    ceVx->cd(i+1); heVx[i]->Draw("col");
-    cecalVxcal->cd(i+1); hecalVxcal[i]->Draw("col");
-  }
-
-  TCanvas *celum = new TCanvas("celum","ELUM",1000,1000);
-  celum->Clear(); celum->Divide(2,2);
-  helum[0]->Draw("colz");
-
-  TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
-  crdt->Clear();crdt->Divide(2,2);
-  for (Int_t i=0;i<4;i++) {
-    crdt->cd(i+1); hrdt[i]->Draw("col");
-    //   cutG = (TCutG *)cutList->At(i);
-    //   cutG->Draw("same");
-  }
-
-
-  /* 
   //when recoils are available...
   cCanvas  = new TCanvas("cCanvas","Plots",1250,1000);
   cCanvas->Modified(); cCanvas->Update();
@@ -376,23 +341,12 @@ void Monitors::Terminate()
   }
   cCanvas->cd(2); gPad->Divide(2,1);
   cCanvas->cd(2);gPad->cd(1); hecalVz->Draw("colz");
-  cCanvas->cd(2);gPad->cd(2); hexC->Draw();
+  cCanvas->cd(2);gPad->cd(2); hecalVzR->Draw("colz");//hexC->Draw();
   cCanvas->cd();
-
- 
-  TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
-  cecalVz->Clear();hecalVz->Draw("col");
-
-  TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
-  crdt->Clear();crdt->Divide(2,2);
-  for (Int_t i=0;i<4;i++) {
-    crdt->cd(i+1); hrdt[i]->Draw("col");
-  }
-  */
- if (ProcessedEntries>=NUMSORT)
+  
+  if (ProcessedEntries>=NUMSORT)
     printf("Sorted only %llu\n",NUMSORT);
   // printf("Total time for sort: %3.1f\n",StpWatch.RealTime());
   //printf("Which is a rate of: %3.1f k/s\n",(Float_t)ProcessedEntries/StpWatch.RealTime()/1000.);
- 
   StpWatch.Start(kFALSE);
 }
