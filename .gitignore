@@ -9,3 +9,15 @@ analysis/GEBSort/GEBSort_nogeb
 *~
 */data
 */root_data
+*.d
+*.pcm
+*.so
+*~
+*/*.d
+*/*.pcm
+*/*.so
+*/*~
+*/*/*.d
+*/*/*.pcm
+*/*/*.so
+*/*/*~

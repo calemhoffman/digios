@@ -336,8 +336,10 @@ void Monitors::Terminate()
   cCanvas->cd(1); gPad->Divide(4,1);
   for (Int_t i=0;i<4;i++) {
     cCanvas->cd(1);gPad->cd(i+1); hrdt[i]->Draw("col");
-    cutG = (TCutG *)cutList->At(i);
-    cutG->Draw("same");
+    if( isCutFileOpen ) {
+      cutG = (TCutG *)cutList->At(i);
+      cutG->Draw("same");
+    }
   }
   cCanvas->cd(2); gPad->Divide(2,1);
   cCanvas->cd(2);gPad->cd(1); hecalVz->Draw("colz");
