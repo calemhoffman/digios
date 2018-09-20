@@ -61,3 +61,12 @@ void excite(void) {
   cex->cd(1); hexC->Draw("");
   cex->cd(2); hexR->Draw("");
 }
+void tac(void) {
+  TCanvas *ctac = new TCanvas("ctac","ARRAY-RDT",1000,650);
+  ctac->Clear();ctac->SetGrid(0);ctac->Divide(6,4);
+  for (Int_t i=0;i<24;i++) {
+    ctac->cd(i+1); htacArray[i]->Draw("");
+    //   cutG = (TCutG *)cutList->At(i);
+    //   cutG->Draw("same");
+  }
+}

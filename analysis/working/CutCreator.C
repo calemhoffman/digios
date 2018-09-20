@@ -13,13 +13,9 @@ void CutCreator(){
 	printf("2 = E vs. Z cut \n");
 	printf("============== Choice? : ");
 	*/
-	int option = 1; // assume exit dE - E
 	//scanf("%d", &option);
 	
 	TString varX, varY, tag;
-	switch(option){
-	case 1 : varX = "TMath::Abs(rdt[4])"; varY = "TMath::Abs(rdt[0])"; tag = "1"; break;
-	}
 		
 	gStyle->SetOptStat(00000);
 	
@@ -29,9 +25,9 @@ void CutCreator(){
 	TString expression[10];
 
 	for (Int_t i=0;i<4;i++) {
-	  varX.Form("TMath::Abs(rdt[%d])",i+4); varY.Form("TMath::Abs(rdt[%d])",i);
+	  varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i);
 	  
-	  expression[i].Form("%s:%s>>h(4192, 0, 8192, 4192, 0, 8192)", 
+	  expression[i].Form("%s:%s>>h(2096, 0, 8192, 2096, 0, 8192)", 
 			     varY.Data(),
 			     varX.Data());
 	}
@@ -47,7 +43,7 @@ void CutCreator(){
 	do{
 	  printf("======== make a graphic cut on the plot (double click on plot to stop) : " );
 
-	  gen_tree->Draw(expression[count-1], "", "colz", 100000);
+	  gen_tree->Draw(expression[count-1], "", "col");
 	  cCutCreator->Modified(); cCutCreator->Update();
 	  
 	  gPad->WaitPrimitive();

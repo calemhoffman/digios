@@ -38,7 +38,8 @@ TH2F* heVx[24];
 TH2F* hecalVxcal[24];
 TH2F* hecalVz;
 TH2F* hecalVzR;
-TH2F* hrdt[4]; 
+TH2F* hrdt[4];
+TH2F* hrdtg[4];
 TH2F* helum[2];
 TH2F* he0dee;//ezero
 TH2F* he0det;
@@ -112,7 +113,10 @@ void Monitors::Begin(TTree *tree)
   for (Int_t i=0;i<4;i++) {
     hrdt[i] = new TH2F(Form("hrdt%d",i),
 		       Form("Raw Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
-		       500,0,8000,500,0,8000);
+		       1000,0,10000,1000,0,4000);
+    hrdtg[i] = new TH2F(Form("hrdtg%d",i),
+			Form("Gated Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
+			1000,0,10000,1000,0,4000);
   }
 
   //ELUM
@@ -129,8 +133,8 @@ void Monitors::Begin(TTree *tree)
 
   htacE = new TH1F("htacE","Elum-RDT TAC; DT [clock ticks]; Counts",4,0,4);
 
-  hexC = new TH1F("hexC","excitation spectrum",500,-5,10);
-  hexR = new TH1F("hexR","excitation spectrum with Recoil",500,-5,10);
+  hexC = new TH1F("hexC","excitation spectrum",1500,-5,10);
+  hexR = new TH1F("hexR","excitation spectrum with Recoil",1500,-5,10);
 
   for (Int_t i=0;i<24;i++) {
     htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
@@ -250,12 +254,13 @@ Bool_t Monitors::Process(Long64_t entry)
 	heVx[i]->Fill(x[i],e[i]);
 	hecalVxcal[i]->Fill(xcal[i]*5.0,ecrr[i]);
 	hecalVz->Fill(z[i],ecrr[i]);
+	for (Int_t ii=0;ii<4;ii++) hrdtg[ii]->Fill(rdt[ii+4],rdt[ii]);
       }
       
     }//array loop
     
     /* RECOILS */
-    for (Int_t i=0;i<4;i++) hrdt[i]->Fill(rdt[i+4],rdt[i]);
+    for (Int_t ii=0;ii<4;ii++) hrdt[ii]->Fill(rdt[ii+4],rdt[ii]);
 
     /* ELUM */
     for (Int_t i=0;i<16;i++) {
@@ -281,41 +286,57 @@ Bool_t Monitors::Process(Long64_t entry)
     for (Int_t i=0;i<4;i++){
       for(Int_t j=0;j<6;j++){
 	//ungated excitation energy
-	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
+	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.11-2.45);
 	//CUTS
 	if( isCutFileOpen){
 	  for( int k = 0 ; k < numCut; k++ ){
 	    cutG = (TCutG *)cutList->At(k) ;
-	    if( cutG->IsInside(rdt[k], rdt[k+1]) ) { //CRH
-	      hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.1068-0.3137);
-	      hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
+	    if( cutG->IsInside(rdt[k+4], rdt[k]) ) { //CRH
+	      for (Int_t kk=0;kk<4;kk++) { /****/
+		tacA[i*6+j]= (int)(rdt_t[kk]-e_t[i*6+j]); /****/
+		if(tacA[i*6+j]>-10&&tacA[i*6+j]<10) {
+		  hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.11-2.45);
+		  hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
+		} /***/
+	      } /***/
 	    }
 	  }
 	}
-	if(i==0&&e[i*6+j]>100){
+	if(e[i*6+j]>100){
+	  for (Int_t k=0;k<4;k++) {
+	    tacA[i*6+j]= (int)(rdt_t[k]-e_t[i*6+j]);
+	    htacArray[i*6+j]->Fill(tacA[i*6+j]);
+	    if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[k]>50){
+	      htac[k]->Fill(j+0.5);
+	    }
+	  }
+	}
+	/*
+	if(i==1&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[0]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[0]>500){
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[0]>50){
 	    htac[0]->Fill(j+0.5);}
 	}
-	if(i==1&&e[i*6+j]>100){
+	if(i==2&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[3]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[3]>500){
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[3]>50){
 	    htac[3]->Fill(j+0.5);}
 	}
-	if(i==2&&e[i*6+j]>100){
+	if(i==3&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[2]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[2]>500){
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[2]>50){
 	    htac[2]->Fill(j+0.5);}
 	}
-	if(i==3&&e[i*6+j]>100){
+	if(i==0&&e[i*6+j]>100){
 	  tacA[i*6+j]= (int)(rdt_t[1]-e_t[i*6+j]);
 	  htacArray[i*6+j]->Fill(tacA[i*6+j]);
-	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[1]>500){
+	  if(tacA[i*6+j]>-5&&tacA[i*6+j]<5&&rdt[1]>50){
 	    htac[1]->Fill(j+0.5);}
 	}
+	*/
       }
     }
   }
@@ -335,7 +356,7 @@ void Monitors::Terminate()
   cCanvas->cd(); cCanvas->Divide(1,2);
   cCanvas->cd(1); gPad->Divide(4,1);
   for (Int_t i=0;i<4;i++) {
-    cCanvas->cd(1);gPad->cd(i+1); hrdt[i]->Draw("col");
+    cCanvas->cd(1);gPad->cd(i+1); hrdtg[i]->Draw("");
     if( isCutFileOpen ) {
       cutG = (TCutG *)cutList->At(i);
       cutG->Draw("same");
