@@ -25,8 +25,8 @@ caput GLBL:DIG:d3_window 0.2
 caput GLBL:DIG:d2_window 0.2
 caput GLBL:DIG:led_threshold 400
 caput GLBL:DIG:CFD_fraction 30
-caput GLBL:DIG:raw_data_length 0.5 #really raw delay??
-caput GLBL:DIG:raw_data_window 2.32 #really data/trace length?
+caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
+caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
 caput GLBL:DIG:trigger_polarity Both
 caput GLBL:DIG:pileup_mode Accept
 caput GLBL:DIG:trigger_mux_select ExtTTCL #IntAcptAll 
@@ -77,13 +77,37 @@ caput GLBL:DIG:load_delays 0
 #
 ###################################################################
 echo "Setting deactivated boards / channels"
-caput DAQB1_1_CS_Ena Disable
 caput DAQB2_4_CS_Ena Disable
 caput DAQB3_4_CS_Ena Disable
 caput DAQB4_4_CS_Ena Disable
-#caput VME01:MDIG1:channel_enable1 Reset
+caput VME01:MDIG1:channel_enable1 Reset
+caput VME01:MDIG1:channel_enable2 Reset
+caput VME01:MDIG1:channel_enable3 Reset
+caput VME01:MDIG1:channel_enable4 Reset
+caput VME01:MDIG1:channel_enable5 Reset
+caput VME01:MDIG1:channel_enable6 Reset
+caput VME01:MDIG1:channel_enable7 Reset
+caput VME01:MDIG1:channel_enable8 Reset
+caput VME01:MDIG1:channel_enable9 Reset
+caput VME01:MDIG2:channel_enable0 Reset
+caput VME01:MDIG2:channel_enable1 Reset
+caput VME01:MDIG2:channel_enable2 Reset
+caput VME01:MDIG2:channel_enable3 Reset
+caput VME01:MDIG2:channel_enable8 Reset
+caput VME01:MDIG2:channel_enable9 Reset
+caput VME01:MDIG3:channel_enable8 Reset
+caput VME01:MDIG3:channel_enable9 Reset
+caput VME01:MDIG4:channel_enable2 Reset
+caput VME01:MDIG4:channel_enable3 Reset
+caput VME01:MDIG4:channel_enable4 Reset
+caput VME01:MDIG4:channel_enable5 Reset
+caput VME01:MDIG4:channel_enable6 Reset
+caput VME01:MDIG4:channel_enable7 Reset
+caput VME01:MDIG4:channel_enable8 Reset
+caput VME01:MDIG4:channel_enable9 Reset
 echo "Setting internal trigger boards / channels"
-#caput VME01:MDIG1:trigger_mux_select IntAcptAll #Array RF
+caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
+caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
 echo "Setting individual threshold"
 echo "Setting other various individual parameters"
 
@@ -120,7 +144,7 @@ caput VME32:RTR2:reg_X_PLANE_MAP_H 0
 echo "Setting Y-plane - elum"
 caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_B 255
-caput VME32:RTR1:reg_Y_PLANE_MAP_C 255
+caput VME32:RTR1:reg_Y_PLANE_MAP_C 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_D 0
 
 caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
