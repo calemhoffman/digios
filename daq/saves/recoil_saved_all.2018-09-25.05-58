@@ -1,0 +1,27 @@
+#!/bin/bash -l
+#Saving Individual Recoil Params
+caput VME01:MDIG3:led_threshold0 180
+caput VME01:MDIG3:led_threshold1 180
+caput VME01:MDIG3:led_threshold2 180
+caput VME01:MDIG3:led_threshold3 180
+caput VME01:MDIG3:led_threshold4 180
+caput VME01:MDIG3:led_threshold5 180
+caput VME01:MDIG3:led_threshold6 180
+caput VME01:MDIG3:led_threshold7 180
+caput VME01:MDIG3:raw_data_window0 4.32
+caput VME01:MDIG3:raw_data_window1 4.32
+caput VME01:MDIG3:raw_data_window2 4.32
+caput VME01:MDIG3:raw_data_window3 4.32
+caput VME01:MDIG3:raw_data_window4 4.32
+caput VME01:MDIG3:raw_data_window5 4.32
+caput VME01:MDIG3:raw_data_window6 4.32
+caput VME01:MDIG3:raw_data_window7 4.32
+caput VME01:MDIG3:channel_enable0 Run
+caput VME01:MDIG3:channel_enable1 Run
+caput VME01:MDIG3:channel_enable2 Run
+caput VME01:MDIG3:channel_enable3 Run
+caput VME01:MDIG3:channel_enable4 Run
+caput VME01:MDIG3:channel_enable5 Run
+caput VME01:MDIG3:channel_enable6 Run
+caput VME01:MDIG3:channel_enable7 Run
+#Save Finished 09/25/2018-5:58
