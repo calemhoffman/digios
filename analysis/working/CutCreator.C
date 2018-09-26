@@ -13,7 +13,7 @@ void CutCreator(){
 	printf("================ Graphic Cut Creator for RDT ============== \n");
    
    TChain * chain = new TChain("gen_tree");
-   chain->Add("../../../root_data/gen_run48.root");
+   chain->Add("../../root_data/gen_run60.root");
    //chain->Add("data/gen_run49.root");
    //chain->Add("data/gen_run50.root");
    

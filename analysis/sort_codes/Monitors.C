@@ -66,7 +66,7 @@ Float_t x[24],z[24];
 Float_t xcal[24],ecal[24],xfcal[24],xncal[24],ecrr[24],ezero[10];
 Int_t tacA[24];
 Float_t z_array_pos[6] = {35.868,29.987,24.111,18.248,12.412,6.676};//in cm
-Float_t z_off=9.64;//to the physical end of array from the target (-20 to si start)
+Float_t z_off=15.64;//to the physical end of array from the target (-20 to si start)
 Float_t xnCorr[24] = {0.907342,0.907342,0.976727,0.914866,1.021736,
 		      0.887032,0.923250,0.953968,1.020180,0.918340,
 		      0.983084,0.983084,0.997550,0.985319,0.959048,
@@ -312,7 +312,7 @@ Bool_t Monitors::Process(Long64_t entry)
     for (Int_t i=0;i<4;i++){
       for(Int_t j=0;j<6;j++){
 	//ungated excitation energy
-	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.11-2.45);
+	hexC->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.11-3.5);
 	//CUTS
 	if( isCutFileOpen){
 	  for( int k = 0 ; k < numCut; k++ ){
@@ -321,7 +321,7 @@ Bool_t Monitors::Process(Long64_t entry)
 	      for (Int_t kk=0;kk<4;kk++) { /****/
 		tacA[i*6+j]= (int)(rdt_t[kk]-e_t[i*6+j]); /****/
 		if(tacA[i*6+j]>-10&&tacA[i*6+j]<10) {
-		  hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.11-2.45);
+		  hexR->Fill((z[i*6+j]*0.14028+13.638-ecrr[i*6+j])*1.11-3.5);
 		  hecalVzR->Fill(z[i*6+j],ecrr[i*6+j]);
 		} /***/
 	      } /***/
