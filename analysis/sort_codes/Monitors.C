@@ -382,7 +382,7 @@ void Monitors::Terminate()
   cCanvas->cd(); cCanvas->Divide(1,2);
   cCanvas->cd(1); gPad->Divide(4,1);
   for (Int_t i=0;i<4;i++) {
-    cCanvas->cd(1);gPad->cd(i+1); hrdtg[i]->Draw("");
+    cCanvas->cd(1);gPad->cd(i+1); hrdtg[i]->Draw("box colz");
     if( isCutFileOpen ) {
       cutG = (TCutG *)cutList->At(i);
       cutG->Draw("same");
@@ -390,7 +390,7 @@ void Monitors::Terminate()
   }
   cCanvas->cd(2); gPad->Divide(2,1);
   cCanvas->cd(2);gPad->cd(1); hecalVz->Draw("colz");
-  cCanvas->cd(2);gPad->cd(2); hecalVzR->Draw("colz");//hexC->Draw();
+  cCanvas->cd(2);gPad->cd(2); hecalVzR->Draw("colz box");//hexC->Draw();
   cCanvas->cd();
   
   if (ProcessedEntries>=NUMSORT)

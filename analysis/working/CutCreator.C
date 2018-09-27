@@ -47,7 +47,7 @@ void CutCreator(){
             varX.Data());
 
 
-      chain->Draw(expression[i], "", "col");
+      chain->Draw(expression[i], "", "box");
       cCutCreator->Modified(); cCutCreator->Update();
 
       gPad->WaitPrimitive();
@@ -59,7 +59,7 @@ void CutCreator(){
       cut->SetVarX(varX.Data());
       cut->SetVarY(varY.Data());
       cut->SetTitle(tag);
-      cut->SetLineColor(i);
+      cut->SetLineColor(i+1);
       cutList->Add(cut);
 
       printf(" cut-%d \n", i);
