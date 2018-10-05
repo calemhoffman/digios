@@ -17,16 +17,16 @@ then
 	for a in 1 2 3 4
 	do
 	    chpv=$(caget DAQC"$a"_CV_BuffersAvail | awk '{print $2}')
-	    if [ "${chpv}" -lt "300" ]
+	    if [ "${chpv}" -lt "350" ]
 	    then
-		echo Buffers Low Stopping Run
+		echo ----- Buffers Low Stopping Run -----
 		caput Online_CS_StartStop Stop
 	    #else
 		#echo OK $a
 	    fi
 	done
 	ATTEMPTS=$(expr ${ATTEMPTS} + 1)
-	sleep 5
+	sleep 3
 	
     done
 fi
