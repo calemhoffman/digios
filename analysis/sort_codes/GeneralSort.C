@@ -66,6 +66,7 @@ TCanvas *cc0;
 
 //PSD struct
 typedef struct {
+  Int_t runID;
   Float_t Energy[100];
   Float_t XF[100];
   Float_t XN[100];
@@ -89,17 +90,30 @@ typedef struct {
 
 PSD psd; 
 
+TString saveFileName = "gen.root";
+
+int runIDPresent = 0;
+TString fileNum = "";
+
 void GeneralSort::Begin(TTree * tree)
 {
    
   TString option = GetOption();
   NumEntries = tree->GetEntries();
+  
+  //saveFileName = tree->GetDirectory()->GetName();
+  //int findslat = saveFileName.Last('/');
+  //saveFileName.Remove(0, findslat+1);
+  //saveFileName = "gen_" + saveFileName;
 
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
-  oFile = new TFile("gen.root","RECREATE");
+  oFile = new TFile(saveFileName,"RECREATE");
 
   gen_tree = new TTree("gen_tree","PSD Tree");
+
+  gen_tree->Branch("runID", &psd.runID,"runID/I");
+
   gen_tree->Branch("e",psd.Energy,"Energy[100]/F");
   gen_tree->Branch("e_t",psd.EnergyTimestamp,"EnergyTimestamp[100]/l");
   
@@ -133,6 +147,23 @@ void GeneralSort::SlaveBegin(TTree * /*tree*/)
 
 Bool_t GeneralSort::Process(Long64_t entry)
 { 
+  if( entry == 0 ) {
+      fileNum = fChain->GetDirectory()->GetName();
+      
+      printf("----------------------- openning  %s \n", fileNum.Data());
+      
+      int findslat = fileNum.Last('/');
+      fileNum.Remove(0, findslat+1);
+      int found = fileNum.First(".");
+      fileNum.Remove(found);
+      //the fileNum should be something like "xxx_run4563" now
+      while( !fileNum.IsDigit() ){
+         fileNum.Remove(0,1);
+      }
+      runIDPresent = fileNum.Atoi();
+   } 
+   psd.runID = runIDPresent; 
+  
   ProcessedEntries++;
   if (ProcessedEntries<NUMSORT) {
     hEvents->Fill(ProcessedEntries);
@@ -146,8 +177,8 @@ Bool_t GeneralSort::Process(Long64_t entry)
     //Zero struct
     for (Int_t i=0;i<100;i++) {//num dets
       psd.Energy[i]=TMath::QuietNaN();
-      psd.XF[i]=0;
-      psd.XN[i]=0;
+      psd.XF[i]=TMath::QuietNaN();
+      psd.XN[i]=TMath::QuietNaN();
       psd.Ring[i]=TMath::QuietNaN();
       psd.RDT[i]=TMath::QuietNaN();
       psd.TAC[i]=TMath::QuietNaN();

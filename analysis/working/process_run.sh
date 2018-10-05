@@ -6,6 +6,7 @@ then
 fi
 
 RUN=$1
+
 #ATTEMPTS=0
 
 #while [ "${ATTEMPTS}" -lt "10000" ];
@@ -26,9 +27,10 @@ ls -ltrh /Users/heliosdigios/experiments/iss000/root_data
 
 root -q -b "process_run.C(${RUN},0)"
 cp gen.root /Users/heliosdigios/experiments/iss000/root_data/gen_run${RUN}.root
-echo copied gen.root to gen_run${RUN}.root
+echo copied gen.root to root_data/gen_run${RUN}.root
 
 echo ----Done with Processing Run Number ${RUN}----
+
 #    echo "process event attempt number = ${ATTEMPTS}"
 
 #    ATTEMPTS=$(expr ${ATTEMPTS} + 1)
