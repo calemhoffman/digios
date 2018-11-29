@@ -1,0 +1,16 @@
+2.85    //magnetic_field
+925.0   //bore_mm
+11.5    //distance_from_axis
+9.0     //width_of_detector
+300     //recoil_position_+_for_downstream
+100      //radius_of_recoil_detector
+50.5    //length_of_detector
+43.5    //support_length
+600     //first_position_of_6th_det_-_for_upstream
+4       //number_of_detector_as_same_position
+0.00    //1st_detector_near_position
+58.6    //2nd_det
+117.9 
+176.8
+235.8
+294.8   //6th_det

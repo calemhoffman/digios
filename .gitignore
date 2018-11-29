@@ -21,5 +21,7 @@ analysis/GEBSort/GEBSort_nogeb
 */*/*.pcm
 */*/*.so
 */*/*~
+.DS_Store
 
 analysis/ryanAnaCodes
+analysis/Simulation/reaction.dat
