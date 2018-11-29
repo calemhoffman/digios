@@ -10,6 +10,7 @@
 #include <TString.h>
 #include <TSystem.h>
 #include <TObjArray.h>
+#include <fstream>
 
 #define NUMPRINT 20 //>0
 ULong64_t NumEntries = 0;
@@ -32,14 +33,17 @@ vector<int> countFromCut;
 TGraph ** graphRateCut; //!
 TMultiGraph * rateGraph; //!
 
-TH1F* he[24];
-TH2F* hxfxn[24];
-TH2F* hxfxne[24];
-TH2F* heVx[24];
-TH1F* heC[24];
-TH2F* hxfxnC[24]; 
-TH2F* hxfxneC[24];
-TH2F* hecalVxcal[24];
+const int numDet = 24;
+
+TH1F* hStat[numDet];
+TH1F* he[numDet];
+TH2F* hxfxn[numDet];
+TH2F* hxfxne[numDet];
+TH2F* heVx[numDet];
+TH1F* heC[numDet];
+TH2F* hxfxnC[numDet]; 
+TH2F* hxfxneC[numDet];
+TH2F* hecalVxcal[numDet];
 TH2F* hecalVz;
 TH2F* hecalVzRow[4];
 TH2F* hecalVzR;
@@ -64,101 +68,25 @@ Float_t timeRef=0;
 TH1F* htacE;
 TH1F* hexC;
 TH1F* hexR;
-TH1I* htacArray[24];
+TH1I* htacArray[numDet];
 TH1F* htac[4];//0 array-rdt, 1 elum-rdt
 
-Float_t x[24],z[24];
-Float_t xcal[24],ecal[24],xfcal[24],xncal[24],ecrr[24],ezero[10];
-Int_t tacA[24];
+Float_t x[numDet],z[numDet];
+Float_t xcal[numDet],ecal[numDet],xfcal[numDet],xncal[numDet],ecrr[numDet],ezero[10];
+Int_t tacA[numDet];
+
 Float_t z_array_pos[6] = {35.868,29.987,24.111,18.248,12.412,6.676};//in cm
 Float_t z_off=6.5;//to the physical end of array from the target (-20 to si start)
-Float_t xnCorr[24] = { 
- 0.927777,
- 0.997416,
- 0.983927,
- 0.921836,
- 1.031119,
- 0.932300,
- 0.924544,
- 0.964924,
- 1.031305,
- 0.948247,
- 0.993230,
- 0.993230,
- 0.982570,
- 0.996820,
- 1.025245,
- 0.968476,
- 1.032115,
- 0.916941,
- 0.968057,
- 0.934456,
- 0.903874,
- 0.969678,
- 1.029105,
- 1.088023};
-Float_t xfxneCorr[24][2] = {
-{21.734893,   0.903570},
-{16.983617,   0.926099},
-{11.953286,   1.037609},
-{11.118699,   1.068145},
-{12.792129,   0.886603},
-{10.134575,   0.959260},
-{ 6.012734,   1.014910},
-{ 5.246817,   0.965618},
-{ 4.760088,   0.982979},
-{ 5.140974,   0.975379},
-{ 3.307871,   0.910984},
-{ 0.000000,   1.000000},
-{ 6.678441,   0.787783},
-{11.383868,   0.917190},
-{11.139707,   0.927444},
-{10.806677,   0.981076},
-{ 9.559186,   0.983702},
-{ 8.281657,   0.977478},
-{ 8.727315,   0.898558},
-{ 6.783902,   0.981707},
-{15.131056,   1.042929},
-{14.245593,   0.893980},
-{16.216401,   1.102147},
-{ 2.493960,   0.884956}};
 
-Float_t eCorr[24][2] = {
-{256.060637,	-0.003816},
-{253.083810,	-0.015280},
-{278.735623,	 0.021721},
-{267.979831,	-0.008818},
-{250.108256,	-0.001003},
-{247.134021,	 0.013641},
-{262.017938,	-0.006414},
-{253.083810,	 0.010404},
-{262.017938,	-0.006414},
-{256.060637,	-0.003816},
-{239.341772,	-0.009266},
-{ 1.000000,	 0.000000   },
-{213.689980,	-0.026390},
-{250.108256,	-0.001003},
-{244.161153,	 0.002046},
-{253.083810,	 0.010404},
-{263.857355,	 0.017556},
-{259.038694,	 0.032498},
-{252.842600,  -0.036309},
-{254.005728,  -0.141253},
-{265.202952,  -0.048925},
-{255.575575,   0.092847},
-{289.613274,  -0.078108},
-{242.487892,   0.047080}};
-   
-Float_t exCorr[6] = { 938.272,  // mass of proton
-	                   1,        // charge of proton
-	                   27954.0982, // cm frame total energy
-	                   26996.5929, // mass of recoil
-	                   0.132178, // beta to CM frame
-	                   2.5}; // Bfield [T]
+Float_t xnCorr[numDet];
+Float_t xfxneCorr[numDet][2];
+Float_t eCorr[numDet][2];
+
 double a = 11.5 ; // perpendicular distance of detector to axis [mm]
+double Bfield = 2.5 ; // in T
 double Ex, thetaCM;
-
-double alpha, Et, beta, gamm, G, massB, mass; //variables for Ex calculation
+double q, alpha, Et, beta, gamm, G, massB, mass; //variables for Ex calculation
+bool isReaction;
       
 
 Float_t tempTime=-1000;
@@ -171,7 +99,12 @@ void Monitors::Begin(TTree *tree)
 
    //Generate all of the histograms needed for drawing later on
   
-   for (Int_t i=0;i<24;i++) {//array loop
+   for (Int_t i=0;i<numDet;i++) {//array loop
+      
+      hStat[i] = new TH1F(Form("hStat%d", i),
+                          Form("Hit Statistics (ch=%d)", i),
+                          5, 1, 6); // 0 = no hit, 1 = e, 2 = xf, 3 = xn, 4 = xf + xn, 5 = xf +xn + e
+      
       he[i] = new TH1F(Form("he%d", i), 
                        Form("Raw e (ch=%d); e (channel); count", i),
                        500, -500, 3500);
@@ -240,7 +173,7 @@ void Monitors::Begin(TTree *tree)
    hexC = new TH1F("hexC","excitation spectrum",500,-5,10);
    hexR = new TH1F("hexR","excitation spectrum with Recoil",500,-5,10);
 
-   for (Int_t i=0;i<24;i++) {
+   for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
    }
 
@@ -292,15 +225,119 @@ void Monitors::Begin(TTree *tree)
       }
    }
   
-   alpha = 299.792458 * exCorr[5] * exCorr[1] / TMath::TwoPi() / 1000; //MeV/mm
-   beta = exCorr[4];
-   gamm = 1./TMath::Sqrt(1-beta*beta);
-   G = alpha * gamm * beta * a;
-   massB = exCorr[3];
-   mass = exCorr[0];
-   Et = exCorr[2];
-  
-   printf("======== number of cuts found : %d \n", numCut);
+   //printf("======== number of cuts found : %d \n", numCut);
+   
+   //===================================================== loading parameter
+   //========================================= xf = xn correction
+   printf("----- loading xf-xn correction.");
+   ifstream file;
+   file.open("correction_xf_xn.dat");
+   if( file.is_open() ){
+      double a;
+      int i = 0;
+      while( file >> a ){
+         if( i >= numDet) break;
+         xnCorr[i] = a;
+         i = i + 1;
+      }
+      
+      printf("... done.\n");
+   }else{
+      printf("... fail.\n");
+      
+      for(int i = 0; i < numDet; i++){
+         xnCorr[i] = 1;
+      }
+   }
+   file.close();
+   
+   //========================================= e = xf + xn correction
+   
+   printf("----- loading xf/xn-e correction.");
+   file.open("correction_xfxn_e.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= numDet) break;
+         xfxneCorr[i][0] = a;
+         xfxneCorr[i][1] = b;
+         i = i + 1;
+      }
+      printf("... done.\n");
+   }else{
+      printf("... fail.\n");
+      for(int i = 0; i < numDet; i++){
+         xfxneCorr[i][0] = 0;
+         xfxneCorr[i][1] = 1;
+      }
+   }
+   file.close();
+
+   //========================================= e correction
+   
+   printf("----- loading e correction.");
+   file.open("correction_e.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= numDet) break;
+         eCorr[i][0] = a;  // 1/a1
+         eCorr[i][1] = b;  //  a0 , e' = e * a1 + a0
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
+         i = i + 1;
+      }
+      printf("... done.\n");
+      
+   }else{
+      printf("... fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         eCorr[i][0] = 1.;
+         eCorr[i][1] = 0.;
+      }
+   }
+   file.close();
+   
+   //========================================= reaction parameters
+   printf("----- loading reaction parameter.");
+   file.open("reaction.dat");
+   isReaction = false;
+   if( file.is_open() ){
+      string x;
+      int i = 0;
+      while( file >> x ){
+         if( x.substr(0,2) == "//" )  continue;
+         if( i == 0 ) mass = atof(x.c_str());
+         if( i == 1 ) q    = atof(x.c_str());
+         if( i == 2 ) beta = atof(x.c_str()); 
+         if( i == 3 ) Et   = atof(x.c_str()); 
+         if( i == 4 ) massB = atof(x.c_str()); 
+         i = i + 1;
+      }
+      printf("... done.\n");
+
+      isReaction = true;
+      alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
+      gamm = 1./TMath::Sqrt(1-beta*beta);
+      G = alpha * gamm * beta * a ;
+      printf("============\n");
+      printf("mass-b  : %f MeV/c2 \n", mass);
+      printf("charge-b: %f \n", q);
+      printf("E-total : %f MeV \n", Et);
+      printf("mass-B  : %f MeV/c2 \n", massB);      
+      printf("beta    : %f \n", beta);
+      printf("B-field : %f T \n", Bfield);
+      printf("alpha   : %f MeV/mm \n", alpha);
+      printf("a       : %f mm \n", a);
+      printf("G       : %f MeV \n", G);
+      printf("============\n");
+
+   }else{
+      printf("... fail.\n");
+      isReaction = false;
+   }
+   file.close();
 
    StpWatch.Start();
 }
@@ -339,12 +376,19 @@ Bool_t Monitors::Process(Long64_t entry)
 
     //Do calculations and fill histograms
     //Array calcs first
-    for (Int_t i = 0; i < 24; i++) {
+    for (Int_t i = 0; i < numDet; i++) {
       
       //fill raw data
       he[i]->Fill(e[i]);
       hxfxn[i]->Fill(xf[i],xn[i]);
       hxfxne[i]->Fill(xf[i]+xn[i], e[i]);
+      
+      if( !TMath::IsNaN(e[i])  && !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(5);
+      if( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(4);
+      if( !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(3);
+      if( !TMath::IsNaN(xf[i]) ) hStat[i]->Fill(2);
+      if( !TMath::IsNaN(e[i])  ) hStat[i]->Fill(1);
+      if( TMath::IsNaN(e[i])  && TMath::IsNaN(xf[i]) && TMath::IsNaN(xn[i]) ) hStat[i]->Fill(0);
       
       //Calibrations go here
       xfcal[i] = xf[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
@@ -419,50 +463,57 @@ Bool_t Monitors::Process(Long64_t entry)
     for(Int_t i = 0; i < 4 ; i++){
       for(Int_t j = 0; j < 6; j++){
         
-        int detID = i*6+j;
-        //======== Ex calculation by Ryan 
-        double y = ecrr[detID] + mass; // to give the KE + mass of proton;
-        double Z = alpha * gamm * beta * z[detID] * 10.;
-        double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
-	           
-        if( TMath::Abs(Z) < H ) {            
-          //using Newton's method to solve 0 ==  H * sin(phi) - G * tan(phi) - Z = f(phi) 
-          double tolerrence = 0.001;
-          double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
-          double nPhi = 0; // new phi
+         int detID = i*6+j;
+        
+         if( isReaction ){
+            //======== Ex calculation by Ryan 
+            double y = ecrr[detID] + mass; // to give the KE + mass of proton;
+            double Z = alpha * gamm * beta * z[detID] * 10.;
+            double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
+                 
+            if( TMath::Abs(Z) < H ) {            
+               //using Newton's method to solve 0 ==  H * sin(phi) - G * tan(phi) - Z = f(phi) 
+               double tolerrence = 0.001;
+               double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
+               double nPhi = 0; // new phi
 
-          int iter = 0;
-          do{
-            phi = nPhi;
-            nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));               
-            iter ++;
-            if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
-          }while( TMath::Abs(phi - nPhi ) > tolerrence);
-          phi = nPhi;
+               int iter = 0;
+               do{
+                  phi = nPhi;
+                  nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));               
+                  iter ++;
+                  if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
+               }while( TMath::Abs(phi - nPhi ) > tolerrence);
+               phi = nPhi;
 
-          // check f'(phi) > 0
-          double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
-          if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
-            double K = H * TMath::Sin(phi);
-            double x = TMath::ACos( mass / ( y * gamm - K));
-            double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
-            double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
-            Ex = EB - massB;
-	
-            double hahaha1 = gamm* TMath::Sqrt(mass * mass + momt * momt) - y;
-            double hahaha2 = gamm* beta * momt;
-            thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
-		 
-          }else{
+               // check f'(phi) > 0
+               double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
+               if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
+                  double K = H * TMath::Sin(phi);
+                  double x = TMath::ACos( mass / ( y * gamm - K));
+                  double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
+                  double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
+                  Ex = EB - massB;
+         
+                  double hahaha1 = gamm* TMath::Sqrt(mass * mass + momt * momt) - y;
+                  double hahaha2 = gamm* beta * momt;
+                  thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
+             
+               }else{
+                  Ex = TMath::QuietNaN();
+                  thetaCM = TMath::QuietNaN();
+               }	
+            }else{
+               Ex = TMath::QuietNaN();
+               thetaCM = TMath::QuietNaN();
+            }
+         }else{
             Ex = TMath::QuietNaN();
             thetaCM = TMath::QuietNaN();
-          }	
-        }else{
-          Ex = TMath::QuietNaN();
-          thetaCM = TMath::QuietNaN();
-        }
+         }
         //ungated excitation energy
         hexC->Fill(Ex);
+        
         //CUTS
         if( isCutFileOpen){
           for( int k = 0 ; k < numCut; k++ ){
@@ -524,7 +575,7 @@ void Monitors::Terminate()
    */
    StpWatch.Start(kFALSE);
    
-   gROOT->ProcessLine(".L ~/experiments/iss000/analysis/ryanAnaCodes/AutoCali/Utils.C");
+   gROOT->ProcessLine(".L /Users/heliosdigios/experiments/iss631/ryanAnaCodes/AutoCali/Utils.C");
    printf("=============== loaded Utils.C\n");
    gROOT->ProcessLine("listDraws()");
 }

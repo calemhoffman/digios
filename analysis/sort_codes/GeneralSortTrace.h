@@ -5,8 +5,8 @@
 // found on file: run5113.root
 //////////////////////////////////////////////////////////
 
-#ifndef inflightSort_h
-#define inflightSort_h
+#ifndef GeneralSortTrace_h
+#define GeneralSortTrace_h
 
 #include <TROOT.h>
 #include <TCanvas.h>
@@ -23,7 +23,7 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class inflightSort : public TSelector {
+class GeneralSortTrace : public TSelector {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
@@ -66,6 +66,7 @@ public :
    UShort_t        base_sample[200];   //[NumHits]
    Int_t           baseline[200];   //[NumHits]
    UShort_t        trace_length[200];   //[NumHits]
+   Short_t         trace[200][1024];   //[NumHits]
 
    // List of branches
    TBranch        *b_RunNum;
@@ -106,9 +107,10 @@ public :
    TBranch        *b_base_sample;   //!
    TBranch        *b_baseline;   //!
    TBranch        *b_trace_length;   //!
+   TBranch        *b_trace;   //!
 
-   inflightSort(TTree * /*tree*/ =0) : fChain(0) { }
-   virtual ~inflightSort() { }
+   GeneralSortTrace(TTree * /*tree*/ =0) : fChain(0) { }
+   virtual ~GeneralSortTrace() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -123,13 +125,13 @@ public :
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-   ClassDef(inflightSort,0);
+   ClassDef(GeneralSortTrace,0);
 };
 
 #endif
 
-#ifdef inflightSort_cxx
-void inflightSort::Init(TTree *tree)
+#ifdef GeneralSortTrace_cxx
+void GeneralSortTrace::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -182,9 +184,10 @@ void inflightSort::Init(TTree *tree)
    fChain->SetBranchAddress("base_sample", base_sample, &b_base_sample);
    fChain->SetBranchAddress("baseline", baseline, &b_baseline);
    fChain->SetBranchAddress("trace_length", trace_length, &b_trace_length);
+   fChain->SetBranchAddress("trace", trace, &b_trace);
 }
 
-Bool_t inflightSort::Notify()
+Bool_t GeneralSortTrace::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -195,4 +198,4 @@ Bool_t inflightSort::Notify()
    return kTRUE;
 }
 
-#endif // #ifdef inflightSort_cxx
+#endif // #ifdef GeneralSortTrace_cxx

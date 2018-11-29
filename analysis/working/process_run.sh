@@ -1,40 +1,81 @@
 #!/bin/sh
 
-if [ $# -eq 0 ]
-then
-    read -p 'Please enter the run number you would like to process: ' RUN
-fi
+if [ $# -eq 0 ] ; then
+   echo "$./process_run_simple.sh #RUNNUM "
+   echo "$./process_run_simple.sh #RUNNUM #Option_for_single_run"
+  exit 1
+fi;
+
+exp=iss631
+dir=/Users/heliosdigios/experiments/${exp}
+
+#remote data path
+dataloc=/media/DIGIOSDATA3/data/${exp}
+daqDir=/home/helios/experiments/iss631
+
+#===== directory and chat files
+GEBDIR=$dir/GEBSort
+MERGDIR=$dir/merged_data
+ROOTDIR=$dir/root_data
+DATADIR=$dir/data
+MERGECHAT=$dir/working/GEBMerge.chat
+SORTCHAT=$dir/working/GEBSort.chat
+
 
 RUN=$1
 
-#ATTEMPTS=0
+echo "============================================="
+echo "============ RUN $RUN ======================="
+echo "============================================="
 
-#while [ "${ATTEMPTS}" -lt "10000" ];
-#do
+if [ $# -eq 2 ] ; then
+  echo "=================== single run ."
+fi
 
-#rsync -rtuh --delete --progress rsync://helios@anldaqrouter:12000/digiosdata /Users/calemhoffman/Research/isolde/data/.
-# 
-#not needed when sync daemon running
-#/Users/heliosdigios/Applications/get_digios_data.sh $RUN $WHERE
-#rsync -rtuavh --delete --progress helios@anldaqrouter:/media/DIGIOSDATA3/data/iss000/*run_${RUN}* /Users/heliosdigios/experiments/iss000/data/*
+echo "RUN $RUN: Get the raw data `date`"
 
-/Users/heliosdigios/Applications/get_digios_data.sh $RUN 3
-/Users/heliosdigios/experiments/iss000/analysis/working/gebmerge.sh $RUN
-/Users/heliosdigios/experiments/iss000/analysis/working/gebsortmerged.sh $RUN
+rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
+rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${dir}/working/.
+echo "============================================="
+cat ${dir}/working/RunTimeStamp.txt
+echo "============================================="
 
-echo Just created root file run${RUN}.root in /Users/heliosdigios/experiments/iss000/root_data/
-ls -ltrh /Users/heliosdigios/experiments/iss000/root_data
+du -hsc $DATADIR/${exp}_run_$RUN*
 
-root -q -b "process_run.C(${RUN},0)"
-cp gen.root /Users/heliosdigios/experiments/iss000/root_data/gen_run${RUN}.root
-echo copied gen.root to root_data/gen_run${RUN}.root
+if [ ! -f $DATADIR/${exp}_run_$RUN.gtd03_000_0110 ]; then
+    echo "============================================"
+    echo "====  RAW Files of RUN-${RUN} not found! "
+    echo "============================================"
+    exit 
+fi;
 
-echo ----Done with Processing Run Number ${RUN}----
+echo "RUN $RUN: GEBMerge started at `date`"
+$GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${exp}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
+echo "RUN $RUN: GEBMerge DONE at `date`"
 
-#    echo "process event attempt number = ${ATTEMPTS}"
+echo "GEBSort started sorting run $RUN at `date`"
+$GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT 
+echo "GEBSort DONE at `date`"
 
-#    ATTEMPTS=$(expr ${ATTEMPTS} + 1)
-#    sleep 5
-    
-#done
+echo "saved root file -->  "  $ROOTDIR/run$RUN.root 
 
+echo "============================================="
+echo "============================================="
+
+if [ "${RUN:0:1}" == "0" ] ; then
+      runID=${RUN:1:2}
+else
+      runID=$( printf '%d' $RUN )
+fi;
+
+root -q -b "process_run.C($runID,0)"
+
+root -l ../sort_codes/runsCheck.C
+
+if [ $# -eq 1 ] ; then
+  root -l Chain.C
+else
+  root -l "Chain.C($runID)"
+fi;
+  
+exit 1
