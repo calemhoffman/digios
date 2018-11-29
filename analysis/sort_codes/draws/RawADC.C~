@@ -1,7 +1,0 @@
-{
-  TH2F * hADC = new TH2F("hADC","Raw ADC Data; Energy (channels); ID number",
-			 8192,0,16384,200,1000,1200);
-  
-  tree->Draw("id:TMath::Abs(post_rise_energy-pre_rise_energy)>>hADC","","colz");
-
-}

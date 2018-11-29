@@ -1,26 +1,13 @@
 data/
-merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 *.o
 *.root
-*/*/*.o
-*/*/*.root
 *~
 */data
-*/root_data
 *.d
 *.pcm
 *.so
-*~
-*/*.d
-*/*.pcm
-*/*.so
-*/*~
-*/*/*.d
-*/*/*.pcm
-*/*/*.so
-*/*/*~
 .DS_Store
 
 analysis/Simulation/reaction.dat
