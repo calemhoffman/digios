@@ -10,12 +10,11 @@
  *  email: goluckyryan@gmail.com
  * ********************************************************************/
 
-
 #include "TFile.h"
 #include "TTree.h"
 #include "TObjArray.h"
 #include "TGraph.h"
-#include "HELIOS_LIB.h"
+#include "../analysis/Simulation/HELIOS_LIB.h"
 
 void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReactionConfig.txt",  string detGeoFileName = "detectorGeo.txt"){
    
@@ -178,7 +177,5 @@ void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReac
       printf(" det-%d:  %6.2f - %6.2f |  %6.2f, %6.2f\n", i,tMin,  tMax, tMean, tHalf);
    }
    printf("================================================= \n");
-   
-   gROOT->ProcessLine(".q");
 
 }

@@ -1,0 +1,13 @@
+//-------for_more_detail_setting_open_transfer.C
+206      //beam_A
+80       //beam_Z
+2        //target_A
+1        //target_Z
+1        //recoil_light_A
+1        //recoil-light_Z
+7.390    //beam-energy
+1000000  //number_of_Event_being_generated
+false    //isDacay
+false    //isReDo
+-1.700    //x_offset_of_Beam_mm
+1.200    //y_offset_of_Beam_mm

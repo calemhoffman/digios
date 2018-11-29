@@ -23,5 +23,9 @@ analysis/GEBSort/GEBSort_nogeb
 */*/*~
 .DS_Store
 
-analysis/ryanAnaCodes
 analysis/Simulation/reaction.dat
+Cleopatra/Cleopatra
+Cleopatra/ExtractXSec
+Cleopatra/FindThetaCM
+Cleopatra/InFileCreator
+Cleopatra/PlotTGraphTObjArray
