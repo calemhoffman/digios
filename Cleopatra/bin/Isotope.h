@@ -20,7 +20,7 @@
 #include <stdlib.h>  //atoi
 using namespace std;
 
-string dataPath="mass16.txt";
+string dataPath="../bin/mass16.txt";
 
 
 // about the mass**.txt

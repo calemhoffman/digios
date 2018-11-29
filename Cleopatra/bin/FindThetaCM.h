@@ -14,7 +14,7 @@
 #include "TTree.h"
 #include "TObjArray.h"
 #include "TGraph.h"
-#include "../analysis/Simulation/HELIOS_LIB.h"
+#include "HELIOS_LIB.h"
 
 void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReactionConfig.txt",  string detGeoFileName = "detectorGeo.txt"){
    

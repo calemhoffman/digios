@@ -14,5 +14,5 @@ ExtractXSec: ExtractXSec.C ExtractXSec.h
 PlotTGraphTObjArray: PlotTGraphTObjArray.C PlotTGraphTObjArray.h
 	$(CC) PlotTGraphTObjArray.C -o PlotTGraphTObjArray `root-config --cflags --glibs`
 
-FindThetaCM: FindThetaCM.C FindThetaCM.h ../analysis/Simulation/HELIOS_LIB.h Isotope.h constant.h
+FindThetaCM: FindThetaCM.C FindThetaCM.h ../../analysis/Simulation/HELIOS_LIB.h Isotope.h constant.h
 	$(CC) FindThetaCM.C -o FindThetaCM `root-config --cflags --glibs`
