@@ -1,6 +1,10 @@
+//=========== load AutoFit.C
+gROOT->ProcessLine(".L ../sort_codes/AutoFit.C");
+
 void listDraws(void) {
   printf("----------------- List of Plots -------------------\n");
   printf("---------------------------------------------------\n");
+  printf("  HitStat() - Hit statistics for all 24 detectors\n");
   printf("     eRaw() - Raw E for all 24 detectors\n");
   printf("     xfxn() - Raw XF vs. XN for all 24 detectors\n");
   printf("    xfxne() - Raw E vs. XF+XN for all 24 detectors\n");
@@ -19,7 +23,20 @@ void listDraws(void) {
   printf("   ecalVz() - Energy vs. Z\n");
   printf("ecalVzRow() - Energy vs. Z for each row\n");
   printf("   excite() - Excitation Energy\n");
-  printf("fitExcite() - Auto-Fit the Excitation Energy\n");  
+  printf("---------------------------------------------------\n");
+  printf(" ShowFitMethod() - Show various fittign methods \n");
+}
+
+void HitStat(void) {
+  TCanvas *cStat = new TCanvas("cStat","Hit Statistics",1200,800);
+  cStat->Clear();cStat->Divide(6,4);
+  gStyle->SetOptStat("neiou");
+  for (Int_t i=0; i<24; i++) {
+    cStat->cd(i+1); 
+    cStat->cd(i+1)->SetGrid();
+    cStat->cd(i+1)->SetLogy();
+    hStat[i]->Draw("");
+  }
 }
 
 void eRaw(void) {
@@ -197,92 +214,4 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
       result += norm * TMath::Gaus(x[0],mean,sigma, 1);
    }
    return result;
-}
-
-void fitExcite(){
-  TCanvas *cFitExcite = new TCanvas("cFitExcite","Fitting on Ex", 800, 100, 800,800);
-  cFitExcite->Divide(1,2);
-  
-  gStyle->SetOptStat("neiou");
-  cFitExcite->cd(1);
-  hexR->Draw();
-  
-  TH1F * specS = (TH1F*) hexR->Clone();
-  double xMin = hexR->GetXaxis()->GetXmin();
-  double xMax = hexR->GetXaxis()->GetXmax();
-  int xBin = hexR->GetXaxis()->GetNbins();
-  
-  TString titleH;
-  titleH.Form("fitted spectrum; Ex [MeV]; Count / %4.0f keV", (xMax-xMin)*1000./xBin );
-  specS->SetTitle(titleH);   
-  specS->SetName("specS");
-  //specS->GetXaxis()->SetTitleSize(0.06);
-  //specS->GetYaxis()->SetTitleSize(0.06);
-  //specS->GetXaxis()->SetTitleOffset(0.7);
-  //specS->GetYaxis()->SetTitleOffset(0.6);
-  
-  //=================== find peak and fit
-  printf("============= estimate background and find peak\n");
-  TSpectrum * peak = new TSpectrum(50);
-  nPeaks = peak->Search(hexR, 1, "", 0.1); 
-  TH1 * h1 = peak->Background(hexR,10);
-  h1->Draw("same");
-
-  gStyle->SetOptStat(0);
-  gStyle->SetOptFit(0);
-  cFitExcite->cd(2)->SetGrid();
-  cFitExcite->cd(2);
-
-  specS->Add(h1, -1.);
-  specS->Sumw2();
-  specS->Draw();
-
-  //========== Fitting 
-  printf("============= Fit.....");
-  printf(" found %d peaks \n", nPeaks);
-
-  double * xpos = peak->GetPositionX();
-  double * ypos = peak->GetPositionY();
-
-  int * inX = new int[nPeaks];
-  TMath::Sort(nPeaks, xpos, inX, 0 );
-  vector<double> energy, height;
-  for( int j = 0; j < nPeaks; j++){
-    energy.push_back(xpos[inX[j]]);
-    height.push_back(ypos[inX[j]]);
-  }
-
-  const int  n = 3 * nPeaks;
-  double * para = new double[n]; 
-  for(int i = 0; i < nPeaks ; i++){
-    para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
-    para[3*i+1] = energy[i];
-    para[3*i+2] = 0.08;
-  }
-
-  TF1 * fit = new TF1("fit", fpeaks, xMin, xMax, 3* nPeaks );
-  fit->SetLineWidth(1);
-  fit->SetLineColor(2);
-  fit->SetNpx(1000);
-  fit->SetParameters(para);
-  specS->Fit("fit", "q");
-
-  printf("============= display\n");   
-  const Double_t* paraE = fit->GetParErrors();
-  const Double_t* paraA = fit->GetParameters();
-
-  double bw = specS->GetBinWidth(1);
-
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
-  for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
-    printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
-            i, 
-            paraA[3*i] / bw,   paraE[3*i] /bw, 
-            paraA[3*i+1], paraE[3*i+1],
-            paraA[3*i+2], paraE[3*i+2]);
-  }
-  cFitExcite->Update();
 }
