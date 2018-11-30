@@ -161,6 +161,11 @@ To run a simualtion
 =================================================
 
 Once the Calibration are done. It is better to generate a new root file.
+Remeber to edit 
+
+    dataList.txt
+    
+Then run
 
     >root AutoCalibrationTrace.C+
     

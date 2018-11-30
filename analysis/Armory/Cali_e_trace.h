@@ -166,6 +166,7 @@ public :
    double firstPos;
    double xnCorr[24]; // xn correction for xn = xf
    double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
+   double xCorr[24]; // correction of x, scale to (-1,1)
    
    double eCorr[24][2]; // e-correction
    double rdtCorr[8]; //rdt-correction
@@ -472,6 +473,31 @@ void Cali_e_trace::Init(TTree *tree)
       //return;
    }
    file.close();
+   
+   
+   //========================================= e correction
+   
+   printf("----- loading x correction.");
+   file.open("correction_scaleX.dat");
+   if( file.is_open() ){
+      double a;
+      int i = 0;
+      while( file >> a){
+         if( i >= numDet) break;
+         xCorr[i] = a;  
+         i = i + 1;
+      }
+      printf("... done.\n");
+      
+   }else{
+      printf("... fail.\n");
+      for( int i = 0; i < 24 ; i++){
+         xCorr[i] = 1.;
+      }
+      //return;
+   }
+   file.close();
+   
    
    //========================================= rdt correction
    

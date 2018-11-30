@@ -15,9 +15,12 @@
 #include "../Simulation/transfer.C"
 #include "../Armory/Cali_littleTree_trace.h"
 #include "../Armory/Check_e_x.C"
-#include "../Armory/Cali_compareF.C"
+#include "../Armory/Cali_e_single.C"
 #include "../Armory/Cali_xf_xn.C"
 #include "../Armory/Cali_xf_xn_to_e.C"
+#include "../Armory/Cali_scale_x.C"
+#include "../Armory/Cali_compareF.C"
+#include "../Armory/Cali_e_trace.h"
 #include "../Armory/Cali_e_trace.h"
 #include "../Armory/GetCoinTimeCorrectionCutG.C"
 
@@ -29,18 +32,22 @@
 void AutoCalibrationTrace(double eThreshold = 300){
    
    int option;
+   printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
    printf("      Please Edit dataList.txt  \n");
    //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
    printf(" ================================================== \n");
-   printf(" 0 = alpha source calibration for xf - xn.\n");
+   printf(" 0 = alpha source calibration for e and xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
    printf(" 2 = Generate smaller root file with e, x, z, detID, coinTimeUC (aware of Gate)\n");
    printf(" 3 = coinTimeUC calibration. (MANUAL) \n");
    printf(" --------- transfer.root required below  ----------\n");
    printf(" 4 = e calibration by compare with simulation.   \n");
    printf(" 5 = Generate new root with calibrated data. \n");
+   printf(" --------- other programs  ------------------------ \n");
+   printf(" 6 = e calibration for single detector (alpha)\n");
+   printf(" 7 = x - scaling to full (-1,1) (alpha)\n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
    int temp = scanf("%d", &option);
@@ -78,23 +85,28 @@ void AutoCalibrationTrace(double eThreshold = 300){
    //chain->GetListOfFiles()->Print();
    
 /**///=========================================== Calibration
-   if( option > 5 || option < 0 ) {
+   if( option > 7 || option < 0 ) {
      printf("--- bye!----\n");
      gROOT->ProcessLine(".q");
      return;
    }
-   if( option == 0 ) {
+   
+   if( option == 0 || option == 6 || option == 7 ){
       printf(" ============================= alpha source files :  \n");
       chainAlpha->GetListOfFiles()->Print();
       printf(" ================================================== \n");
+   }else{
+      printf(" ================ files :  \n");
+      chain->GetListOfFiles()->Print();
+      printf(" ================================================== \n");
+   }    
+   
+   if( option == 0 ) {
       Cali_xf_xn(chainAlpha);
       return ;
    }
    
       
-   printf(" ================ files :  \n");
-   chain->GetListOfFiles()->Print();
-   printf(" ================================================== \n");
 
    
    if( option == 1 ) Cali_xf_xn_to_e(chain);
@@ -151,7 +163,20 @@ void AutoCalibrationTrace(double eThreshold = 300){
    if( option == 5 ) {
       chain->Process("../Armory/Cali_e_trace.C+");
       gROOT->ProcessLine(".q");
+      return;
    }
    
+   if( option == 6 ) {
+      int det = -1; 
+      printf(" Choose detID (-1 to exit): ");
+      temp = scanf("%d", &det);
+      Cali_e_single(chainAlpha, det);
+      //gROOT->ProcessLine(".q");
+   }
+   
+   if( option == 7 ) {
+      Cali_scale_x(chainAlpha);
+      //gROOT->ProcessLine(".q");
+   }
 }
 

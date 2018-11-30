@@ -24,6 +24,7 @@ void Cali_e_trace::SlaveBegin(TTree * /*tree*/)
    TString option = GetOption();
 }
 
+/*
 double xCorr[24] = {
    1.011, //  0
    0.981, //  1
@@ -50,6 +51,7 @@ double xCorr[24] = {
    0.981, // 22
    1.023, // 23
 };
+*/ 
 
 Bool_t Cali_e_trace::Process(Long64_t entry)
 {

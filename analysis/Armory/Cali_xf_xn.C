@@ -2,6 +2,7 @@
 #include <TTree.h>
 #include <TCanvas.h>
 #include <TROOT.h>
+#include <TSystem.h>
 #include <TStyle.h>
 #include <TProfile.h>
 #include <TH2F.h>
@@ -28,23 +29,27 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int numDet = 24;
+   const int rowDet = 4;
+   const int colDet = 6;
+   
+   const int numDet = rowDet * colDet;
    
 /**///========================================================  load tree
 
    printf("============================================================= \n");
    printf("====================== Cali_xf_xn.C ========================= \n");
    printf("============================================================= \n");
-   printf("============ calibration for PSD detectors using alpha souce. \n");
+   printf("==   calibration for PSD detectors using alpha souce. \n");
+   printf("------------------------------------------------------------- \n");
    printf("1, calibration energy using charateristic energy of alpha souce. \n");
    printf("2, calibration xf-xn with energy-gate. \n");
-   printf("------------------------------------------------- \n");
+   printf("------------------------------------------------------------- \n");
    printf("=========== Total #Entry: %10lld \n", tree->GetEntries());
    
 /**///======================================================== Browser or Canvas
 
    //TBrowser B ;   
-   Int_t Div[2] = {6,4};  //x,y
+   Int_t Div[2] = {colDet,rowDet};  //x,y
    Int_t size[2] = {230,230}; //x,y
    TCanvas * cAlpha = new TCanvas("cAlpha", "cAlpha", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    cAlpha->Divide(Div[0],Div[1]);
