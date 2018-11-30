@@ -7,6 +7,7 @@
 //+root_data/gen_run01[4-9].root
 //+root_data/gen_run02[0-1].root
 //--------- 206Hg
+//+../root_data/gen_run025.root
 +../root_data/gen_run02[5-9].root
 +../root_data/gen_run03[0-9].root
 +../root_data/gen_run041.root

@@ -2,6 +2,7 @@
 #include <TTree.h>
 #include <TCanvas.h>
 #include <TROOT.h>
+#include <TSystem.h>
 #include <TStyle.h>
 #include <TProfile.h>
 #include <TH2F.h>
@@ -13,16 +14,25 @@
 #include <fstream>
 
 void Cali_xf_xn_to_e(TTree *tree){
+   
+   const int rowDet = 4;
+   const int colDet = 6;
+   
+   const int nDet = rowDet * colDet;
+   
+   
    gStyle->SetOptStat(11111111);
    
-   printf("===== calibration for PSD detectors. \n");
-   printf(" making xf + xn = e \n");
-   printf("------------------------------------------------- \n");
+   printf("============================================================= \n");
+   printf("=====================  Cali_xf_xn_e.C  ====================== \n");
+   printf("============================================================= \n");
+   printf("==== making xf + xn = e \n");
+   printf("------------------------------------------------------------- \n");
    printf("=========== Total #Entry: %10lld \n", tree->GetEntries());
 
 /**///======================================================== Browser or Canvas
 
-   Int_t Div[2] = {6,4};  //x,y
+   Int_t Div[2] = {colDet,rowDet};  //x,y
    Int_t size[2] = {230,230}; //x,y
    TCanvas * cCali_xf_xn_e = new TCanvas("cCali_xf_xn_e", "cCali_xf_xn_e", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    cCali_xf_xn_e->Divide(Div[0],Div[1]);
@@ -41,7 +51,6 @@ void Cali_xf_xn_to_e(TTree *tree){
    if(cCali_xf_xn_e->GetShowToolBar() )cCali_xf_xn_e->ToggleToolBar();
 
 /**///========================================================= load xn correction
-   const int nDet = 24;
    double xnCorr[nDet];
    //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");

@@ -381,7 +381,7 @@ void Analyzer::Terminate()
    TObjArray * gList = (TObjArray *) ft->FindObjectAny("gList");
    
    //=========== load AutoFit.C
-   gROOT->ProcessLine(".L ../sorted_codes/AutoFit.C");
+   gROOT->ProcessLine(".L ../Armory/AutoFit.C");
   
    //=========== Plot
    cAna = new TCanvas("cAna", "Analyzer", 1200, 800);
