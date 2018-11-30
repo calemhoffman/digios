@@ -13,13 +13,13 @@
 #include <fstream>
 #include <TProof.h>
 #include "../Simulation/transfer.C"
-#include "../AutoCali/Cali_littleTree_trace.h"
-#include "../AutoCali/Check_e_x.C"
-#include "../AutoCali/Cali_compareF.C"
-#include "../AutoCali/Cali_xf_xn.C"
-#include "../AutoCali/Cali_xf_xn_to_e.C"
-#include "../AutoCali/Cali_e_trace.h"
-#include "../AutoCali/GetCoinTimeCorrectionCutG.C"
+#include "../Armory/Cali_littleTree_trace.h"
+#include "../Armory/Check_e_x.C"
+#include "../Armory/Cali_compareF.C"
+#include "../Armory/Cali_xf_xn.C"
+#include "../Armory/Cali_xf_xn_to_e.C"
+#include "../Armory/Cali_e_trace.h"
+#include "../Armory/GetCoinTimeCorrectionCutG.C"
 
 //==========================================
 //         This file show the steps for calibration 
@@ -31,14 +31,15 @@ void AutoCalibrationTrace(double eThreshold = 300){
    int option;
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
-   printf(" --------- GeneralSortTrace.C --> sorted.root------  \n");
+   printf("      Please Edit dataList.txt  \n");
+   //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
    printf(" 2 = Generate smaller root file with e, x, z, detID, coinTimeUC (aware of Gate)\n");
    printf(" 3 = coinTimeUC calibration. (MANUAL) \n");
-   printf(" --------- transfer.root require below ------------\n");
-   printf(" 4 = e calibration by compare with simulation.\n");
+   printf(" --------- transfer.root required below  ----------\n");
+   printf(" 4 = e calibration by compare with simulation.   \n");
    printf(" 5 = Generate new root with calibrated data. \n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
@@ -77,10 +78,13 @@ void AutoCalibrationTrace(double eThreshold = 300){
    //chain->GetListOfFiles()->Print();
    
 /**///=========================================== Calibration
-   if( option > 5 || option < 0 ) return;
-   
+   if( option > 5 || option < 0 ) {
+     printf("--- bye!----\n");
+     gROOT->ProcessLine(".q");
+     return;
+   }
    if( option == 0 ) {
-      printf(" ================ alpha source files :  \n");
+      printf(" ============================= alpha source files :  \n");
       chainAlpha->GetListOfFiles()->Print();
       printf(" ================================================== \n");
       Cali_xf_xn(chainAlpha);
@@ -99,7 +103,7 @@ void AutoCalibrationTrace(double eThreshold = 300){
       
    if( option == 2 ) {
       printf("=============== creating smaller tree.\n");
-      chain->Process("../AutoCali/Cali_littleTree_trace.C+");
+      chain->Process("../Armory/Cali_littleTree_trace.C+");
       Check_e_x("temp.root", eThreshold);
    }
    
@@ -135,7 +139,7 @@ void AutoCalibrationTrace(double eThreshold = 300){
          Cali_compareF(caliTree, fs, eCdet, eThreshold);
          
          if( eCdet == -1) {
-            chain->Process("../AutoCali/Cali_e_trace.C+");
+            chain->Process("../Armory/Cali_e_trace.C+");
             gROOT->ProcessLine(".q");
          }
       }else{
@@ -145,7 +149,7 @@ void AutoCalibrationTrace(double eThreshold = 300){
    }
    
    if( option == 5 ) {
-      chain->Process("../AutoCali/Cali_e_trace.C+");
+      chain->Process("../Armory/Cali_e_trace.C+");
       gROOT->ProcessLine(".q");
    }
    
