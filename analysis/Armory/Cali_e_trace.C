@@ -24,7 +24,7 @@ void Cali_e_trace::SlaveBegin(TTree * /*tree*/)
    TString option = GetOption();
 }
 
-/*
+/* 206Hg old cali
 double xCorr[24] = {
    1.011, //  0
    0.981, //  1
