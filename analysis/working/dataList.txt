@@ -1,15 +1,15 @@
 //---data_path
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
--root_data/gen_run067.root
+-../root_data/gen_run067.root
 //+root_data/gen_run067.root
 //--------- 130Xe
 //+root_data/gen_run01[4-9].root
 //+root_data/gen_run02[0-1].root
 //--------- 206Hg
-+root_data/gen_run02[5-9].root
-+root_data/gen_run03[0-9].root
-+root_data/gen_run041.root
-+root_data/gen_run04[3-9].root
-+root_data/gen_run05[0-9].root
-+root_data/gen_run06[0-4].root
++../root_data/gen_run02[5-9].root
++../root_data/gen_run03[0-9].root
++../root_data/gen_run041.root
++../root_data/gen_run04[3-9].root
++../root_data/gen_run05[0-9].root
++../root_data/gen_run06[0-4].root
