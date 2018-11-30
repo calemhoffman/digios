@@ -14,7 +14,7 @@
 #define MAXNUMHITS 20 //Highest multiplicity
 #define M 100 //M value for energy filter from digi setting
 
-#include "GeneralSortMapping.h"
+#include "../working/GeneralSortMapping.h"
 
 TBenchmark gClock;
 Bool_t shown = 0;
