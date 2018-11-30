@@ -76,9 +76,9 @@ root -l ../sort_codes/runsCheck.C
 
 #=========== If option = 1, run all processed runs, else, only process this run
 if [ $# -eq 1 ] ; then
-  root -l Chain.C
+  root -l ChainMonitors.C
 else
-  root -l "Chain.C($runID)"
+  root -l "ChainMonitors.C($runID)"
 fi;
   
 exit 1

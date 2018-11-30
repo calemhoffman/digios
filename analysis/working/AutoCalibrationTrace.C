@@ -49,8 +49,6 @@ void AutoCalibrationTrace(double eThreshold = 300){
    printf(" 6 = e calibration for single detector (alpha)\n");
    printf(" 7 = x - scaling to full (-1,1) (alpha)\n");
    printf(" ================================================== \n");
-   printf(" Choose action : ");
-   int temp = scanf("%d", &option);
    
 //==================================================== data files
    
@@ -60,7 +58,7 @@ void AutoCalibrationTrace(double eThreshold = 300){
    //======== experimental sorted data
    TChain * chain = new TChain("gen_tree");
    
-   string dataList="dataList.txt";
+   string dataList="runsList.txt";
    ifstream file;
    file.open(dataList.c_str());
    if( file.is_open() ){
@@ -77,16 +75,19 @@ void AutoCalibrationTrace(double eThreshold = 300){
          }
       }
       file.close();
+   }else{
+      printf("!!!!! ERRRO!!! Missing runsList.txt\n");
+      gROOT->ProcessLine(".q");
+      return; 
    }
    
-   //printf("====================== alpha data. \n");
-   //chainAlpha->GetListOfFiles()->Print();
-   //printf("====================== data. \n");
-   //chain->GetListOfFiles()->Print();
+   
+   printf(" Choose action : ");
+   int temp = scanf("%d", &option);
    
 /**///=========================================== Calibration
    if( option > 7 || option < 0 ) {
-     printf("--- bye!----\n");
+     printf(" --- bye!----\n");
      gROOT->ProcessLine(".q");
      return;
    }

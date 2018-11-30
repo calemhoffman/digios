@@ -59,6 +59,11 @@ run##.root
    |                               Mapping digitizer to detectors)
    V
 gen_run##.root
+   |
+   | after Calibration for e, xf, xn, etc.. Armory/Cali_e_trace.h
+   V
+A_gen_run##.root (this can be condensation for many runs)
+   
 
 =================================================
 ======== 4) Initialization 
@@ -116,7 +121,7 @@ You can load and "monitor" the gen_run##.root by
 =================================================
 For Calibration, we have to edit 
 
-dataList.txt
+runsList.txt
 
 this txt file will tell which gen_run##.root for Calibration
 
@@ -163,7 +168,7 @@ To run a simualtion
 Once the Calibration are done. It is better to generate a new root file.
 Remeber to edit 
 
-    dataList.txt
+runsList.txt
     
 Then run
 
