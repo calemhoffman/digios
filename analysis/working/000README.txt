@@ -5,16 +5,27 @@
 Throught this read me, I hope I can help you to understand the basic of 
 the analysis.   
                               Nov 29, 2018, Ryan (goluckyryan@gmail.com)
+                              
+                              
+----------- context 
+    1) Pre-request Knowlegde
+    2) The folder (analysis) structure 
+    3) From Raw Data to ROOT file
+    4) Initialization 
+    5) Online analysis
+    6) Calibration & sotre in a new root
+    7) Simulation
+    8) Off-line analysis
 
 =================================================
-========= Pre-requise Knowlegde
+======== 1) Pre-request Knowlegde
 =================================================
 1) little idea of cern ROOT
 2) little bit bash shell script
 3) may be some C++
 
 =================================================
-========= The folder (analysis) structure is like this
+========= 2) The folder (analysis) structure 
 =================================================
 analysis
     |
@@ -34,7 +45,7 @@ analysis
                   setting files are stored.)
 
 =================================================
-======== From Raw Data to ROOT file
+======== 3) From Raw Data to ROOT file
 =================================================
 
 Raw Data
@@ -50,36 +61,39 @@ run##.root
 gen_run##.root
 
 =================================================
-======== Initialization 
+======== 4) Initialization 
 =================================================
 As you can see, there are many files in "working". 
 To start with, you need to check/edit few things
 
-1) process_run.sh   
+1) GeneralSortMapping.h
+        
+        This is the detector Mapping.
+
+2) process_run.sh   
 
         This is the bash script to retrive the raw data from 
         the DAQ computer, run the GEBsort, and produce root files.
         
         You should check the paths are correct
         
-2) detectorGeo.txt
-        
-        This is the settign for the detector.
-        
-3) basicReactionConfig.txt
-        
-        This is for simulation.
-        
-4) excitation_energies.txt
+2) process_run.C   
 
-        This is for simulation as well.
+        This macro is for calling GeneralSort.C
+        
+        You should check the paths are correct
+        
+4) detectorGeo.txt
+        
+        This is the settign for the detector. This file is widely used
+        in Calibration.
         
 5) Chain.C 
 
         This use the TChain class to process multiple gen_run##.root
 
 =================================================
-======== Online analysis
+======== 5) Online analysis
 =================================================
 To be honest, I don't like to separate online and offline analysis,
 in ideal case, the online analysis is not so different then the offline. 
@@ -89,17 +103,16 @@ Anyway~~~~~
 To sort/process/convert raw data to gen_run##.root. 
 Once you set up correctly, you type
 
->./process_run.sh ##
+    >./process_run.sh ##
 
 Then, the gen_run##.root will be appeared in the root_data directory
-
 You can load and "monitor" the gen_run##.root by
 
->root gen_run##.root
-root> gen_tree->Process("Monitor.C++") 
+    >root gen_run##.root
+    root> gen_tree->Process("Monitor.C++") 
 
 =================================================
-======== Calibration & sotre in a new root
+======== 6) Calibration & sotre in a new root
 =================================================
 For Calibration, we have to edit 
 
@@ -109,10 +122,56 @@ this txt file will tell which gen_run##.root for Calibration
 
 then, we can call 
 
->root AutoCalibration.C
+    >root AutoCalibrationTrace.C
 
 =================================================
-======== Simulation
+======== 7) Simulation
 =================================================
-..... to be continue.......
 
+To simulate a transfer reaction, Two input files 
+
+    1) basicReactionConfig.txt
+    2) detectorGeo.txt
+    
+Must be edited to suit the reaction. If no excitation_energy.txt, 
+only ground state will be calculated. 
+
+In the output are 
+
+    1) transfer.root
+          
+       constain a) tree   - constain simulated e, z, thetaCM, Ex
+                b) gList  - TObjArray of TGraph, gList->At(i)
+                                  is the constant thetaCM=ideg lines
+                c) fList  - TObjArray of TGraph, infinite detector e-z lines
+                d) fxList - TObjArray of TGraph, finite detector e-z lines
+                c) txList - TObjArray of TGraph, thetaCM vs z lines
+          
+    2) reaction.dat
+      
+       essential parameter for mapping (e,z) -> (Ex, thetaCM)
+       
+       
+To run a simualtion
+ 
+    >root ../Simulation/transfer.C+
+
+=================================================
+======== 8) Off-line analysis
+=================================================
+
+Once the Calibration are done. It is better to generate a new root file.
+
+    >root AutoCalibrationTrace.C+
+    
+    option 5
+    
+This will generate A_gen_run##.root.
+
+A further gate selection, detail Ex offset, etc... can be done with 
+
+    * Analyzer.h
+
+=================================================
+========   end of README  
+=================================================
