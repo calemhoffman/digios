@@ -10,6 +10,8 @@ analysis/GEBSort/GEBSort_nogeb
 *.so
 .DS_Store
 
+root_data/*.root
+
 analysis/Simulation/reaction.dat
 Cleopatra/Cleopatra
 Cleopatra/ExtractXSec
