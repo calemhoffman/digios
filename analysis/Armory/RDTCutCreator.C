@@ -74,5 +74,6 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
 	cutList->Write("cutList", TObject::kSingleKey);
 	
 	printf("====> saved %d cuts into %s\n", 4, saveFileName.Data());
+   gROOT->ProcessLine(".q");
 	
 }
