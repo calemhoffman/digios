@@ -35,14 +35,14 @@ void AutoCalibrationTrace(){
    printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
-   printf("      Please Edit dataList.txt  \n");
+   printf("      Please Edit runsList.txt  \n");
    //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
    printf(" 2 = Auto-Calibration by Kinematics.\n");
-   printf(" --------- transfer.root required below  ----------\n");
-   printf(" 3 = Generate new root with calibrated data. \n");
+   printf(" --------- transfer.root required -----------------\n");
+   printf(" | 3 = Generate new root with calibrated data.    |\n");
    printf(" --------- other programs  ------------------------ \n");
    printf(" 4 = e calibration for single detector (alpha)\n");
    printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
@@ -60,17 +60,55 @@ void AutoCalibrationTrace(){
    string dataList="runsList.txt";
    ifstream file;
    file.open(dataList.c_str());
+   
+   int nBranchAlpha = 0;
+   int nBranch = 0;
+   
    if( file.is_open() ){
       string line;
       while( file >> line){
          //printf("%s \n", line.c_str());
+         int tempNBranchAlpha = 0;
+         int tempNBranch      = 0;
+         
+         
          if( line.substr(0,2) == "//" ) continue;
          if( line.substr(0,1) == "-" ) {
             chainAlpha->Add(line.substr(1).c_str());
+            
+            //Check size of Branch, if not consistence with the first, return error.
+            int entry = chainAlpha->GetEntries();
+            chainAlpha->GetEntry(entry);
+            if( nBranchAlpha == 0 ) {
+               nBranchAlpha = chainAlpha->GetNbranches(); 
+            }else{
+               tempNBranchAlpha = chainAlpha->GetNbranches();
+               
+               if( tempNBranchAlpha != nBranchAlpha ){
+                  printf(" tree structure inconistant at %s \n", line.substr(1).c_str());
+                  gROOT->ProcessLine(".q");
+                  return;
+               }
+            }
          }
          
          if( line.substr(0,1) == "+" ){
             chain->Add(line.substr(1).c_str());
+            
+            //Check size of Branch, if not consistence with the first, return error.
+            int entry = chain->GetEntries();
+            chain->GetEntry(entry);
+            if( nBranch == 0 ) {
+               nBranch = chain->GetNbranches(); 
+            }else{
+               tempNBranch = chain->GetNbranches();
+               
+               if( tempNBranch != nBranch ){
+                  printf(" tree structure inconistant at %s \n", line.substr(1).c_str());
+                  gROOT->ProcessLine(".q");
+                  return;
+               }
+            }
          }
       }
       file.close();
@@ -109,9 +147,11 @@ void AutoCalibrationTrace(){
       
 
    
-   if( option == 1 ) Cali_xf_xn_to_e(chain);
+   if( option == 1 ) {
+      Cali_xf_xn_to_e(chain);
+      gROOT->ProcessLine(".q");
+   }
    
-   TString rootfileSim="transfer.root";
       
    if( option == 2 ) {
       
@@ -124,14 +164,15 @@ void AutoCalibrationTrace(){
       printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
       printf("=================================================================\n");
       int proceedFlag = 0;
-      printf(" Proceed ? (1 = Yes / 0 = No");
+      printf(" Proceed ? (1 = Yes / 0 = No) ");
       temp = scanf("%d", &proceedFlag);
       
       if( proceedFlag == 0 ) {
          printf(" ------ bye bye !------- \n");
+         gROOT->ProcessLine(".q");
          return;
       }
-      
+      printf("#######################################################\n");
       printf("Step 1) ========= creating smaller tree.\n");
       chain->Process("../Armory/Cali_littleTree_trace.C+");
       double eThreshold = 300;
@@ -140,25 +181,44 @@ void AutoCalibrationTrace(){
       TFile *caliFile = new TFile ("temp.root", "read");
       if( !caliFile->IsOpen() ){
          printf("!!!!!!!!!!! no temp.root, please run step 2.!!!!!!!\n");
+         gROOT->ProcessLine(".q");
          return;
       }
       TTree * caliTree = (TTree*) caliFile->Get("tree");
       
+      printf("#######################################################\n");
       printf("Step 2) =============== creating transfer.C\n");
+
+      int nextFlag = 0; 
+      printf("(1 = Yes / 0 = No ) ? ");
+      temp = scanf("%d", &nextFlag);
+      
+      if( nextFlag == 0 ){
+         printf(" ------ bye bye !------- \n");
+         gROOT->ProcessLine(".q");
+         return;
+      }
       transfer();
       
-      
+      TString rootfileSim="transfer.root";
       TFile *fs = new TFile (rootfileSim, "read"); 
       if(!fs->IsOpen()){
          printf("!!!!! cannot open transfer.root !!!!! \n");
+         gROOT->ProcessLine(".q");
          return;
       }
       
-      
+      printf("#######################################################\n");
       printf("Step 3) =============== Calibrate\n");
       float energyThreshold = 300;
-      printf(" Energy Threshold (default = 300 ch): ");
+      printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
       temp = scanf("%f", &energyThreshold);
+      if( energyThreshold < 0 ) {
+         printf(" ------ bye bye !------- \n");
+         gROOT->ProcessLine(".q");
+         return;
+      }
+      
       int eCdet = -1; 
       printf(" Choose detID (-1 for all & make new root): ");
       temp = scanf("%d", &eCdet);
