@@ -29,7 +29,7 @@
 //         //TODO detect branch te_t and trdt_t exist or not, if exist, calibrate with coinTime
 //==========================================
 
-void AutoCalibrationTrace(double eThreshold = 300){
+void AutoCalibrationTrace(){
    
    int option;
    printf(" ================================================== \n");
@@ -40,14 +40,13 @@ void AutoCalibrationTrace(double eThreshold = 300){
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
-   printf(" 2 = Generate smaller root file with e, x, z, detID, coinTimeUC (aware of Gate)\n");
-   printf(" 3 = coinTimeUC calibration. (MANUAL) \n");
+   printf(" 2 = Auto-Calibration by Kinematics.\n");
    printf(" --------- transfer.root required below  ----------\n");
-   printf(" 4 = e calibration by compare with simulation.   \n");
-   printf(" 5 = Generate new root with calibrated data. \n");
+   printf(" 3 = Generate new root with calibrated data. \n");
    printf(" --------- other programs  ------------------------ \n");
-   printf(" 6 = e calibration for single detector (alpha)\n");
-   printf(" 7 = x - scaling to full (-1,1) (alpha)\n");
+   printf(" 4 = e calibration for single detector (alpha)\n");
+   printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
+   printf(" 6 = coinTimeUC calibration. (MANUAL) \n");
    printf(" ================================================== \n");
    
 //==================================================== data files
@@ -86,7 +85,7 @@ void AutoCalibrationTrace(double eThreshold = 300){
    int temp = scanf("%d", &option);
    
 /**///=========================================== Calibration
-   if( option > 7 || option < 0 ) {
+   if( option > 6 || option < 0 ) {
      printf(" --- bye!----\n");
      gROOT->ProcessLine(".q");
      return;
@@ -115,12 +114,84 @@ void AutoCalibrationTrace(double eThreshold = 300){
    TString rootfileSim="transfer.root";
       
    if( option == 2 ) {
-      printf("=============== creating smaller tree.\n");
+      
+      printf("=============== Auto-Calibration Subrountine ====================\n");
+      printf(" Step 1) Generate smaller root file to speed thing up.           \n");
+      printf("         ** aware of the Gate in Armory/Cali_little_tree_trace.C \n");
+      printf(" Step 2) Generate kinematics line using Simulation/transfer.C    \n");
+      printf("         ** make sure you have correct A) basicReactoinConfig.txt    \n");
+      printf("                                       B) excitation_energies.txt    \n");
+      printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
+      printf("=================================================================\n");
+      int proceedFlag = 0;
+      printf(" Proceed ? (1 = Yes / 0 = No");
+      temp = scanf("%d", &proceedFlag);
+      
+      if( proceedFlag == 0 ) {
+         printf(" ------ bye bye !------- \n");
+         return;
+      }
+      
+      printf("Step 1) ========= creating smaller tree.\n");
       chain->Process("../Armory/Cali_littleTree_trace.C+");
+      double eThreshold = 300;
       Check_e_x("temp.root", eThreshold);
+      
+      TFile *caliFile = new TFile ("temp.root", "read");
+      if( !caliFile->IsOpen() ){
+         printf("!!!!!!!!!!! no temp.root, please run step 2.!!!!!!!\n");
+         return;
+      }
+      TTree * caliTree = (TTree*) caliFile->Get("tree");
+      
+      printf("Step 2) =============== creating transfer.C\n");
+      transfer();
+      
+      
+      TFile *fs = new TFile (rootfileSim, "read"); 
+      if(!fs->IsOpen()){
+         printf("!!!!! cannot open transfer.root !!!!! \n");
+         return;
+      }
+      
+      
+      printf("Step 3) =============== Calibrate\n");
+      float energyThreshold = 300;
+      printf(" Energy Threshold (default = 300 ch): ");
+      temp = scanf("%f", &energyThreshold);
+      int eCdet = -1; 
+      printf(" Choose detID (-1 for all & make new root): ");
+      temp = scanf("%d", &eCdet);
+      Cali_compareF(caliTree, fs, eCdet, energyThreshold);
+      
+      if( eCdet == -1) {
+         chain->Process("../Armory/Cali_e_trace.C+");
+         gROOT->ProcessLine(".q");
+      }
+   
    }
    
    if( option == 3 ) {
+      chain->Process("../Armory/Cali_e_trace.C+");
+      gROOT->ProcessLine(".q");
+      return;
+   }
+
+   
+   if( option == 4 ) {
+      int det = -1; 
+      printf(" Choose detID (-1 to exit): ");
+      temp = scanf("%d", &det);
+      Cali_e_single(chainAlpha, det);
+      //gROOT->ProcessLine(".q");
+   }
+   
+   if( option == 5 ) {
+      Cali_scale_x(chainAlpha);
+      //gROOT->ProcessLine(".q");
+   }
+   
+   if( option == 6 ) {
       int det = -1; 
       printf(" Choose detID (-1 for all): ");
       temp = scanf("%d", &det);
@@ -132,52 +203,6 @@ void AutoCalibrationTrace(double eThreshold = 300){
          }
       }
       gROOT->ProcessLine(".q");
-   }
-   
-   if( option == 4 ) {
-      TFile *caliFile = new TFile ("temp.root", "read");
-      if( !caliFile->IsOpen() ){
-			printf("!!!!!!!!!!! no temp.root, please run step 2.!!!!!!!\n");
-			return;
-		}
-      TTree * caliTree = (TTree*) caliFile->Get("tree");
-      
-      TFile *fs = new TFile (rootfileSim, "read"); 
-      
-      if(fs->IsOpen()){
-         
-         int eCdet = -1; 
-         printf(" Choose detID (-1 for all & make new root): ");
-         temp = scanf("%d", &eCdet);
-         Cali_compareF(caliTree, fs, eCdet, eThreshold);
-         
-         if( eCdet == -1) {
-            chain->Process("../Armory/Cali_e_trace.C+");
-            gROOT->ProcessLine(".q");
-         }
-      }else{
-         printf("!!!!! cannot open transfer.root !!!!! \n");
-         return;
-      }
-   }
-   
-   if( option == 5 ) {
-      chain->Process("../Armory/Cali_e_trace.C+");
-      gROOT->ProcessLine(".q");
-      return;
-   }
-   
-   if( option == 6 ) {
-      int det = -1; 
-      printf(" Choose detID (-1 to exit): ");
-      temp = scanf("%d", &det);
-      Cali_e_single(chainAlpha, det);
-      //gROOT->ProcessLine(".q");
-   }
-   
-   if( option == 7 ) {
-      Cali_scale_x(chainAlpha);
-      //gROOT->ProcessLine(".q");
    }
 }
 

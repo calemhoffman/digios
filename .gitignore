@@ -13,8 +13,8 @@ analysis/GEBSort/GEBSort_nogeb
 root_data/*.root
 
 analysis/Simulation/reaction.dat
-Cleopatra/Cleopatra
-Cleopatra/ExtractXSec
-Cleopatra/FindThetaCM
-Cleopatra/InFileCreator
-Cleopatra/PlotTGraphTObjArray
+Cleopatra
+ExtractXSec
+FindThetaCM
+InFileCreator
+PlotTGraphTObjArray
