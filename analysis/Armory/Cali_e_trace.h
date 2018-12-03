@@ -79,6 +79,7 @@ public :
    TBranch        *b_Trace_RDT_Time;  //!
    TBranch        *b_Trace_RDT_RiseTime;  //!
    
+   bool isRunIDExist;
    bool isEBISExist;
    bool isTACExist;
    bool isELUMExist;
@@ -211,7 +212,6 @@ void Cali_e_trace::Init(TTree *tree)
    //printf("========== number of tree loaded : %d \n", fChain->GetNTree());
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("runID", &runID, &b_runID);
    fChain->SetBranchAddress("e", e, &b_Energy);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
@@ -222,8 +222,18 @@ void Cali_e_trace::Init(TTree *tree)
    //fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
    //fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
    
+   isRunIDExist = false;
+   TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("runID");
+   
+   if( br == NULL ){
+      printf(" ++++++++ no runID.\n");
+   }else{
+      isRunIDExist = true;
+      fChain->SetBranchAddress("runID", &runID, &b_runID);
+   }
+   
    isEBISExist = false;
-   TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("EBIS");
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("EBIS");
    if( br == NULL ){
       printf(" ++++++++ no EBIS data.\n");
    }else{
@@ -295,7 +305,7 @@ void Cali_e_trace::Init(TTree *tree)
    run = 0;
    
    newTree->Branch("eventID",&eventID,"eventID/I"); 
-   newTree->Branch("run",&run,"run/I"); 
+   if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
    
    newTree->Branch("e" ,   eC, "e[24]/F");
    //newTree->Branch("xf",  xfC, "xf[24]/F");

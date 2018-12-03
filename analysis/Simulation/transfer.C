@@ -593,5 +593,5 @@ void transfer(string basicConfig = "basicReactionConfig.txt",
    saveFile->Close();
    
    printf("=============== done. saved as %s. count(hit==1) : %d\n", saveFileName.Data(), count);
-   gROOT->ProcessLine(".q");
+   //gROOT->ProcessLine(".q");
 }
