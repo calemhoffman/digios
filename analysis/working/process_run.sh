@@ -64,7 +64,9 @@ echo "saved root file -->  "  $ROOTDIR/run$RUN.root
 echo "============================================="
 echo "============================================="
 
-#========== convert to normal number, without zero in front
+#========== Process_run.C, GeneralSort
+
+# convert to normal number, without zero in front
 if [ "${RUN:0:1}" == "0" ] ; then
       runID=${RUN:1:2}
 else
