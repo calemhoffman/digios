@@ -1,8 +1,10 @@
-data/
-root_data/*.root
-merged_data/
+data
+root_data
+merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
+
+
 *.o
 *.root
 *~

@@ -1,7 +1,6 @@
 {
-   TString folderPath ="../../root_data/gen_run*.root";
+   TString folderPath ="../root_data/gen_run*.root";
    const char* treeName="gen_tree";
-   
    
    //==============================================
    //TString rootFile;
