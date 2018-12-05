@@ -52,7 +52,32 @@ void AutoCalibrationTrace(){
    printf(" Choose action : ");
    int temp = scanf("%d", &option);
    printf(" -------------------------------------------------- \n");
-   printf(" ..... loading runsList.txt........ \n");
+   
+   
+//====================================================  Transfer calculation
+   if( option == 7 ) {
+      printf("========= Simulation/transfer.C ========= \n");
+      printf("== Please check :\n");
+      printf("        1) detectorGeo.txt\n");
+      printf("        2) basicReactionConfig.txt\n");
+      printf("        3) excitation_energies.txt\n");
+      printf("========================================= \n");
+      int nextFlag = 0; 
+      printf("Prceed (1 = Yes / 0 = No ) ? ");
+      temp = scanf("%d", &nextFlag);
+      
+      if( nextFlag == 0 ){
+         printf(" ------ bye bye !------- \n");
+         gROOT->ProcessLine(".q");
+         return;
+      }
+      transfer();
+      gROOT->ProcessLine(".q");
+   }
+   
+   
+   
+   printf(" ..... loading runsList.txt..");
 //==================================================== data files
    
    //======== alpha data
@@ -78,6 +103,9 @@ void AutoCalibrationTrace(){
          
          if( line.substr(0,2) == "//" ) continue;
          if( line.substr(0,1) == "-" ) {
+           
+            gErrorIgnoreLevel = kBreak ; //ignore no File Error
+           
             chainAlpha->Add(line.substr(1).c_str());
             
             //Check size of Branch, if not consistence with the first, return error.
@@ -97,6 +125,9 @@ void AutoCalibrationTrace(){
          }
          
          if( line.substr(0,1) == "+" ){
+           
+            gErrorIgnoreLevel = kBreak ; //ignore no File Error
+            
             chain->Add(line.substr(1).c_str());
             
             //Check size of Branch, if not consistence with the first, return error.
@@ -116,13 +147,15 @@ void AutoCalibrationTrace(){
          }
       }
       file.close();
+      
+      gErrorIgnoreLevel = kUnset ; //go back to default ignore level
    }else{
       printf("!!!!! ERRRO!!! Missing runsList.txt\n");
       gROOT->ProcessLine(".q");
       return; 
    }
    
-   printf("                              .......... done\n");
+   printf(".......... done\n");
    printf(" -------------------------------------------------- \n");
    
 /**///=========================================== Calibration
@@ -266,26 +299,6 @@ void AutoCalibrationTrace(){
             GetCoinTimeCorrectionCutG("temp.root", iDet);
          }
       }
-      gROOT->ProcessLine(".q");
-   }
-   
-    if( option == 7 ) {
-      printf("========= Simulation/transfer.C ========= \n");
-      printf("== Please check :\n");
-      printf("        1) detectorGeo.txt\n");
-      printf("        2) basicReactionConfig.txt\n");
-      printf("        3) excitation_energies.txt\n");
-      printf("========================================= \n");
-      int nextFlag = 0; 
-      printf("Prceed (1 = Yes / 0 = No ) ? ");
-      temp = scanf("%d", &nextFlag);
-      
-      if( nextFlag == 0 ){
-         printf(" ------ bye bye !------- \n");
-         gROOT->ProcessLine(".q");
-         return;
-      }
-      transfer();
       gROOT->ProcessLine(".q");
    }
 }
