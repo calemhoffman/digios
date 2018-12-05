@@ -74,7 +74,7 @@ else
 fi;
 
 root -q -b "process_run.C($runID,0)"
-root -l ../sort_codes/runsCheck.C
+root -l ../Armory/runsCheck.C
 
 #=========== If option = 1, run all processed runs, else, only process this run
 if [ $# -eq 1 ] ; then
