@@ -64,7 +64,9 @@ echo "saved root file -->  "  $ROOTDIR/run$RUN.root
 echo "============================================="
 echo "============================================="
 
-#========== convert to normal number, without zero in front
+#========== Process_run.C, GeneralSort
+
+# convert to normal number, without zero in front
 if [ "${RUN:0:1}" == "0" ] ; then
       runID=${RUN:1:2}
 else
@@ -72,7 +74,7 @@ else
 fi;
 
 root -q -b "process_run.C($runID,0)"
-root -l ../sort_codes/runsCheck.C
+root -l ../Armory/runsCheck.C
 
 #=========== If option = 1, run all processed runs, else, only process this run
 if [ $# -eq 1 ] ; then
