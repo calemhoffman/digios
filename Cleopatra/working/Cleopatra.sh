@@ -101,12 +101,12 @@ if [ ${RunPtolemy} -eq 1 ] ; then
   echo "================================================================="
   echo "=====   Ptolemy Calcualtion   ==================================="
   echo "================================================================="
-  ../ptolemy <${infile}> ${outfile}
+  ./ptolemy <${infile}> ${outfile}
 fi;
 
 #===== Extracting XSec and save into *txt and *root
 if [ ${IsExtractXSec} -eq 1 ] ; then 
-  ./bin/ExtractXSec ${outfile}
+  ../bin/ExtractXSec ${outfile}
 fi;
 
 if [ ${PlotResult} -eq 1 ] ; then 
@@ -116,7 +116,7 @@ if [ ${PlotResult} -eq 1 ] ; then
   echo "================================================================="
   echo "=====   Plot Result from ${rootfile}"
   echo "================================================================="
-  com='../binPlotTGraphTObjArray.h("'${rootfile}'")'
+  com='../bin/PlotTGraphTObjArray.h("'${rootfile}'")'
   echo ${com}
   root -l ${com}
 fi;
