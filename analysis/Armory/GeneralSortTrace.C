@@ -65,7 +65,7 @@ typedef struct {
    Float_t TAC[24];
    Float_t ELUM[32];
    Float_t EZERO[4];
-
+   
    ULong64_t EnergyTimestamp[24];
    ULong64_t XFTimestamp[24];
    ULong64_t XNTimestamp[24];
