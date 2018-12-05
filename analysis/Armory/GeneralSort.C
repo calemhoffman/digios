@@ -40,6 +40,8 @@ typedef struct {
   Float_t EZERO[10];//0,1 - DE-E exit, 2,3 - DE-E atscat, 4 - ETOT
 // 2,3 - DEX,EX
 
+  ULong64_t EBISTimestamp; 
+  ULong64_t T1Timestamp;   // proton pulse, not before run 33
   ULong64_t EnergyTimestamp[100];
   ULong64_t XFTimestamp[100];
   ULong64_t XNTimestamp[100];
@@ -64,10 +66,10 @@ void GeneralSort::Begin(TTree * tree)
   TString option = GetOption();
   NumEntries = tree->GetEntries();
   
-  //saveFileName = tree->GetDirectory()->GetName();
-  //int findslat = saveFileName.Last('/');
-  //saveFileName.Remove(0, findslat+1);
-  //saveFileName = "gen_" + saveFileName;
+  saveFileName = tree->GetDirectory()->GetName();
+  int findslat = saveFileName.Last('/');
+  saveFileName.Remove(0, findslat+1);
+  saveFileName = "gen_" + saveFileName;
 
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
@@ -79,6 +81,9 @@ void GeneralSort::Begin(TTree * tree)
 
   gen_tree->Branch("e",psd.Energy,"Energy[100]/F");
   gen_tree->Branch("e_t",psd.EnergyTimestamp,"EnergyTimestamp[100]/l");
+  
+  gen_tree->Branch("EBIS",&psd.EBISTimestamp,"EBISTimestamp/l");
+  gen_tree->Branch("T1",&psd.T1Timestamp,"T1Timestamp/l");
   
   gen_tree->Branch("xf",psd.XF,"XF[100]/F");
   gen_tree->Branch("xf_t",psd.XFTimestamp,"XFTimestamp[100]/l");
@@ -136,6 +141,9 @@ Bool_t GeneralSort::Process(Long64_t entry)
       StpWatch.Start(kFALSE);
       Frac+=0.1;
     }
+    
+    psd.EBISTimestamp=TMath::QuietNaN();
+    psd.T1Timestamp=TMath::QuietNaN();
 
     //Zero struct
     for (Int_t i=0;i<100;i++) {//num dets
@@ -182,71 +190,84 @@ Bool_t GeneralSort::Process(Long64_t entry)
       idKind = idKindMap[idTemp];
       
       if ((id[i]>1000&&id[i]<2000)&&(psd8Chan<8)&&(idDet>-1)) { //IF PSD	
-	//Information
-	if (idDet<0 && CrapPrint==0) {printf("ohhhhhhhhhhh craaaaaaap\n"); CrapPrint=1;}
-	if (ProcessedEntries<NUMPRINT)
-	  printf("id %i, idKind %2i, idDet %3i, idConst %i\n",id[i],idKind,idDet,idConst);
-	
-	switch(idKind)
-	  {
-	  case 0: /* Energy signal */
-	    psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-	    psd.EnergyTimestamp[idDet] = event_timestamp[i];
-	    break;
-	  case 1: // XF
-	    psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-	    psd.XFTimestamp[idDet] = event_timestamp[i];
-	    break;
-	  case 2: // XN
-	    psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-	    psd.XNTimestamp[idDet] = event_timestamp[i];
-	    break;
-	  default:
-	    ;
-	    break;// 
-	  }
+        //Information
+        if (idDet<0 && CrapPrint==0) {printf("ohhhhhhhhhhh craaaaaaap\n"); CrapPrint=1;}
+        if (ProcessedEntries<NUMPRINT)
+          printf("id %i, idKind %2i, idDet %3i, idConst %i\n",id[i],idKind,idDet,idConst);
+        
+        switch(idKind)
+          {
+          case 0: /* Energy signal */
+            psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+            psd.EnergyTimestamp[idDet] = event_timestamp[i];
+            break;
+          case 1: // XF
+            psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+            psd.XFTimestamp[idDet] = event_timestamp[i];
+            break;
+          case 2: // XN
+            psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+            psd.XNTimestamp[idDet] = event_timestamp[i];
+            break;
+          default:
+            ;
+            break;// 
+          }
       }
 
       //TAC & RF TIMING
       /***********************************************************************/
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) { //RF TIMING SWITCH
-	if (ProcessedEntries<NUMPRINT)
-	  printf("RF id %i, idDet %i\n",id[i],idDet);
-	
-	Int_t tacTemp = idDet-400;
-	psd.TAC[tacTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-	psd.TACTimestamp[tacTemp] = event_timestamp[i];
+        if (ProcessedEntries<NUMPRINT)
+          printf("RF id %i, idDet %i\n",id[i],idDet);
+        
+        Int_t tacTemp = idDet-400;
+        psd.TAC[tacTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.TACTimestamp[tacTemp] = event_timestamp[i];
       }
        
       //RECOIL
       /************************************************************************/
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
-	Int_t rdtTemp = idDet-101;
-	psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])
-			    -(float)(post_rise_energy[i]))/M;
-	psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
+        Int_t rdtTemp = idDet-101;
+        psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])
+                -(float)(post_rise_energy[i]))/M;
+        psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
 
       //ELUM
       /************************************************************************/
       if ((id[i]>=1000 && id[i]<1130)&&(idDet>200&&idDet<=240)) {
-	Int_t elumTemp = idDet - 201;
-	psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])
-			      -(float)(pre_rise_energy[i]))/M;
-	
-	psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
+        Int_t elumTemp = idDet - 201;
+        psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])
+                  -(float)(pre_rise_energy[i]))/M;
+        
+        psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
       }//end ELUM
       
       //EZERO
       /************************************************************************/
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
-	Int_t ezeroTemp = idDet - 300;
-	if (ezeroTemp<10) {
-	  psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])
-				-(float)(pre_rise_energy[i]))/M;
-	  psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
-	}
+        Int_t ezeroTemp = idDet - 300;
+        if (ezeroTemp<10) {
+          psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])
+              -(float)(pre_rise_energy[i]))/M;
+          psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
+        }
       }//end EZERO
+      
+      //EBIS 
+      /************************************************************************/
+      if (id[i]==1010) {
+        psd.EBISTimestamp = event_timestamp[i];
+      }//end EBIS
+         
+      //T1 proton pulse
+      /************************************************************************/
+      if (id[i]==1013) {
+        psd.T1Timestamp = event_timestamp[i];
+      }//end T1
+      
     } // End NumHits Loop
     
     gen_tree->Fill();

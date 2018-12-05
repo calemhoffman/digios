@@ -12,7 +12,7 @@ AnalysisDir=../../analysis
 
 #remote data path
 dataloc=/media/DIGIOSDATA3/data/${exp}
-daqDir=/home/helios/experiments/iss631
+daqDir=/home/helios/experiments/${exp}
 
 #===== directory and chat files
 GEBDIR=$AnalysisDir/GEBSort
@@ -30,7 +30,7 @@ echo "============ RUN $RUN ======================="
 echo "============================================="
 
 if [ $# -eq 1 ] ; then
-  echo "=================== single run ."
+  echo "=================== single run ============"
 fi
 
 #============ Get the raw data
@@ -43,12 +43,13 @@ echo "============================================="
 
 du -hsc $DATADIR/${exp}_run_$RUN*
 
-if [ ! -f $DATADIR/${exp}_run_$RUN.gtd* ]; then
+count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
+if [$count == 0 ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
     echo "============================================"
     exit 
-fi;
+fi
 
 #=========== Merge and Sort
 echo "RUN $RUN: GEBMerge started at `date`"
