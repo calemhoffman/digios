@@ -33,6 +33,10 @@ analysis
     |
     |-- Armory (where all the experimental-independent code is stored)
     |
+    |-- data  ( where the DAQ raw data stored )
+    |
+    |-- merged_data (where intermediate file during GEBSort)
+    |
     |-- root_data (where all Sorted root files should be stored)
     |
     |-- merged_data (where the intermediate files from 
@@ -71,10 +75,15 @@ A_gen_run##.root (this can be condensation for many runs)
 As you can see, there are many files in "working". 
 To start with, you need to check/edit few things
 
-0) the symbolic link /anlysis/root_data
+0) the symbolic links / folder
 
-        This is where the root file will be stored.
+    /anlysis/data
+    /anlysis/merged_data
+    /anlysis/root_data
 
+        These are data will be stored. 
+        ===== YOU NEED TO CREATE YOURSELF ======
+        
 1) GeneralSortMapping.h
         
         This is the detector Mapping.
