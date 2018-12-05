@@ -1,4 +1,6 @@
 data/
+root_data/*.root
+merged_data/
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 *.o
@@ -9,8 +11,6 @@ analysis/GEBSort/GEBSort_nogeb
 *.pcm
 *.so
 .DS_Store
-
-root_data/*.root
 
 analysis/Simulation/reaction.dat
 Cleopatra
