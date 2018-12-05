@@ -47,8 +47,37 @@ void AutoCalibrationTrace(){
    printf(" 4 = e calibration for single detector (alpha)\n");
    printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
    printf(" 6 = coinTimeUC calibration. (MANUAL) \n");
+   printf(" 7 = run Simulation/transfer.C\n");
    printf(" ================================================== \n");
+   printf(" Choose action : ");
+   int temp = scanf("%d", &option);
+   printf(" -------------------------------------------------- \n");
    
+   
+//====================================================  Transfer calculation
+   if( option == 7 ) {
+      printf("========= Simulation/transfer.C ========= \n");
+      printf("== Please check :\n");
+      printf("        1) detectorGeo.txt\n");
+      printf("        2) basicReactionConfig.txt\n");
+      printf("        3) excitation_energies.txt\n");
+      printf("========================================= \n");
+      int nextFlag = 0; 
+      printf("Prceed (1 = Yes / 0 = No ) ? ");
+      temp = scanf("%d", &nextFlag);
+      
+      if( nextFlag == 0 ){
+         printf(" ------ bye bye !------- \n");
+         gROOT->ProcessLine(".q");
+         return;
+      }
+      transfer();
+      gROOT->ProcessLine(".q");
+   }
+   
+   
+   
+   printf(" ..... loading runsList.txt..");
 //==================================================== data files
    
    //======== alpha data
@@ -74,6 +103,9 @@ void AutoCalibrationTrace(){
          
          if( line.substr(0,2) == "//" ) continue;
          if( line.substr(0,1) == "-" ) {
+           
+            gErrorIgnoreLevel = kBreak ; //ignore no File Error
+           
             chainAlpha->Add(line.substr(1).c_str());
             
             //Check size of Branch, if not consistence with the first, return error.
@@ -93,6 +125,9 @@ void AutoCalibrationTrace(){
          }
          
          if( line.substr(0,1) == "+" ){
+           
+            gErrorIgnoreLevel = kBreak ; //ignore no File Error
+            
             chain->Add(line.substr(1).c_str());
             
             //Check size of Branch, if not consistence with the first, return error.
@@ -112,28 +147,30 @@ void AutoCalibrationTrace(){
          }
       }
       file.close();
+      
+      gErrorIgnoreLevel = kUnset ; //go back to default ignore level
    }else{
       printf("!!!!! ERRRO!!! Missing runsList.txt\n");
       gROOT->ProcessLine(".q");
       return; 
    }
    
-   
-   printf(" Choose action : ");
-   int temp = scanf("%d", &option);
+   printf(".......... done\n");
+   printf(" -------------------------------------------------- \n");
    
 /**///=========================================== Calibration
-   if( option > 6 || option < 0 ) {
+   if( option > 7 || option < 0 ) {
      printf(" --- bye!----\n");
      gROOT->ProcessLine(".q");
      return;
    }
    
-   if( option == 0 || option == 6 || option == 7 ){
+   if( option == 0 || option == 4 || option == 5 ){
       printf(" ============================= alpha source files :  \n");
       chainAlpha->GetListOfFiles()->Print();
       printf(" ================================================== \n");
-   }else{
+   }
+   if( 1 <= option && option <= 3){
       printf(" ================ files :  \n");
       chain->GetListOfFiles()->Print();
       printf(" ================================================== \n");

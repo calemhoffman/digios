@@ -71,6 +71,10 @@ A_gen_run##.root (this can be condensation for many runs)
 As you can see, there are many files in "working". 
 To start with, you need to check/edit few things
 
+0) the symbolic link /anlysis/root_data
+
+        This is where the root file will be stored.
+
 1) GeneralSortMapping.h
         
         This is the detector Mapping.
@@ -109,8 +113,16 @@ To sort/process/convert raw data to gen_run##.root.
 Once you set up correctly, you type
 
     >./process_run.sh ##
+    
+          step 1) get the raw data from DAQ server
+          
+          step 2) merge and sort --> created root_data/run##.root
+          
+          step 3) GeneralSort using process.C --> root_data/gen_run##.root
+          
+          step 4) Monitors.C using ChainMonitors.C
 
-Then, the gen_run##.root will be appeared in the root_data directory
+After step 3), gen_run##.root will be appeared in the root_data directory
 You can load and "monitor" the gen_run##.root by
 
     >root gen_run##.root
@@ -121,7 +133,7 @@ You can load and "monitor" the gen_run##.root by
 =================================================
 For Calibration, we have to edit 
 
-runsList.txt
+     runsList.txt
 
 this txt file will tell which gen_run##.root for Calibration
 
@@ -137,6 +149,7 @@ To simulate a transfer reaction, Two input files
 
     1) basicReactionConfig.txt
     2) detectorGeo.txt
+    3) excitation_energy.txt
     
 Must be edited to suit the reaction. If no excitation_energy.txt, 
 only ground state will be calculated. 
