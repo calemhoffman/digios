@@ -64,37 +64,4 @@ vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.260
 ;
 anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
 ;
-$============================================ Ex=0.000(1g9/2)VA
-reset
-REACTION: 206Hg(p,d)205Hg(9/2+ 0.000) ELAB=  7.390
-PARAMETERSET dpsb r0target 
-$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
-
-PROJECTILE 
-wavefunction av18 
-r0=1 a=0.5 l=0 
-;
-TARGET
-JBIGA=0
-nodes=1 l=4 jp=9/2 $node is n-1 
-r0=1.25 a=.65 
-vso=6 rso0=1.10 aso=.65 
-rc0=1.3 
-;
-INCOMING $Varner et al., (CH89) (1991) 16 < E < 65 | 4 < A < 209 | http://dx.doi.org/10.1016/0370-1573(91)90039-O
-v    =  59.175    r0 =   1.212    a =   0.690
-vi   =   0.412   ri0 =   1.259   ai =   0.690
-vsi  =  10.959  rsi0 =   1.259  asi =   0.690
-vso  =   5.900  rso0 =   1.137  aso =   0.630
-vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.260
-;
-OUTGOING $An and Cai (2006) E < 183 | 12 < A < 238 | http://dx.doi.org/10.1103/PhysRevC.73.054605
-v    =  41.976    r0 =   1.151    a =   0.793
-vi   = 117.889   ri0 =   1.322   ai =   0.265
-vsi  = -46.624  rsi0 =   1.360  asi =   0.897
-vso  =   3.557  rso0 =   0.972  aso =   1.011
-vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
-;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
-;
 end $================================== end of input
