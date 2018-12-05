@@ -2,13 +2,13 @@
 
 if [ $# -eq 0 ] ; then
    echo "$./process_run_simple.sh #RUNNUM "
-   echo "$./process_run_simple.sh #RUNNUM #Option_for_single_run"
-                                          #If option = 1, run all processed runs, else, only process this run
+   echo "$./process_run_simple.sh #RUNNUM #Monitor_Multi_run"
+                                          #If non-empty, run all processed runs, else, only process this run
   exit 1
 fi;
 
 exp=iss631
-AnalysisDir=/Users/ryantang/Desktop/HELIOS_repos/analysis
+AnalysisDir=../../analysis
 
 #remote data path
 dataloc=/media/DIGIOSDATA3/data/${exp}
@@ -29,7 +29,7 @@ echo "============================================="
 echo "============ RUN $RUN ======================="
 echo "============================================="
 
-if [ $# -eq 2 ] ; then
+if [ $# -eq 1 ] ; then
   echo "=================== single run ."
 fi
 
@@ -43,7 +43,7 @@ echo "============================================="
 
 du -hsc $DATADIR/${exp}_run_$RUN*
 
-if [ ! -f $DATADIR/${exp}_run_$RUN.gtd03_000_0110 ]; then
+if [ ! -f $DATADIR/${exp}_run_$RUN.gtd* ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
     echo "============================================"
@@ -77,7 +77,7 @@ root -q -b "process_run.C($runID,0)"
 root -l ../Armory/runsCheck.C
 
 #=========== If option = 1, run all processed runs, else, only process this run
-if [ $# -eq 1 ] ; then
+if [ $# -eq 2 ] ; then
   root -l ChainMonitors.C
 else
   root -l "ChainMonitors.C($runID)"
