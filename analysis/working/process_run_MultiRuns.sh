@@ -1,30 +1,39 @@
 #!/bin/sh
 
 if [ $# -ne 2 ] ; then
-   echo "Usage 1, single run for run#1: "
+   echo "Usage : "
    echo "   $./process_run_MultiRuns.sh #1 #2 "
   exit 1
 fi
 
 exp=iss631
-dir=/Users/heliosdigios/experiments/${exp}
+AnalysisDir=../../analysis
+
 #remote data path
 dataloc=/media/DIGIOSDATA3/data/${exp}
-daqDir=/home/helios/experiments/iss631
+daqDir=/home/helios/experiments/${exp}
 
 #===== directory and chat files
-GEBDIR=$dir/GEBSort
-MERGDIR=$dir/merged_data
-ROOTDIR=$dir/root_data
-DATADIR=$dir/data
-MERGECHAT=$dir/working/GEBMerge.chat
-SORTCHAT=$dir/working/GEBSort.chat
+GEBDIR=$AnalysisDir/GEBSort
+MERGDIR=$AnalysisDir/merged_data
+ROOTDIR=$AnalysisDir/root_data
+DATADIR=$AnalysisDir/data
+MERGECHAT=$AnalysisDir/working/GEBMerge.chat
+SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
-if [ "${${1}:0:1}" == "0" ] ; then
-    RUN1=${${1}:1:2}
+RUN1=$1
+RUN2=$2
+
+if [ "${RUN1:0:1}" == "0" ] ; then
+      RUN1=${RUN1:1:2}
+else
+      RUN1=$( printf '%d' $RUN1 )
 fi;
-if [ "${${2}:0:1}" == "0" ] ; then
-    RUN2=${${2}:1:2}
+
+if [ "${RUN2:0:1}" == "0" ] ; then
+      RUN2=${RUN2:1:2}
+else
+      RUN2=$( printf '%d' $RUN2 )
 fi;
 
 for iRUN in $(seq ${RUN1} ${RUN2})
@@ -38,22 +47,24 @@ do
 
   echo "RUN $RUN: Get the raw data `date`"
 
-
+  #============ Get the raw data
   rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
-  rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${dir}/working/.
+  rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
   echo "============================================"
-  cat ${dir}/working/RunTimeStamp.txt
+  cat ${AnalysisDir}/working/RunTimeStamp.txt
   echo "============================================"
 
   du -hsc $DATADIR/${exp}_run_$RUN*
 
-  if [ ! -f $DATADIR/${exp}_run_$RUN.gtd01_000_0101 ]; then
+  count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
+  if [$count == 0 ]; then
       echo "============================================"
       echo "====  RAW Files of RUN-${RUN} not found! "
       echo "============================================"
       exit 
   fi
 
+  #=========== Merge and Sort
   echo "RUN $RUN: GEBMerge started at `date`"
   $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${exp}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
@@ -67,11 +78,10 @@ do
   echo "============================================="
   echo "============================================="
 
+  #========== Process_run.C, GeneralSort
   if [ "${RUN:0:1}" == "0" ] ; then
-        #echo "octal"
         runID=${RUN:1:2}
   else
-        #echo "decimal"
         runID=$( printf '%d' $RUN )
   fi;
 
@@ -79,6 +89,6 @@ do
 
 done
 
-root -l ../sort_codes/runsCheck.C
+root -l ../Armory/runsCheck.C
   
 exit 1

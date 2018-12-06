@@ -2,17 +2,17 @@
 
 if [ $# -eq 0 ] ; then
    echo "$./process_run_simple.sh #RUNNUM "
-   echo "$./process_run_simple.sh #RUNNUM #Option_for_single_run"
-                                          #If option = 1, run all processed runs, else, only process this run
+   echo "$./process_run_simple.sh #RUNNUM #Monitor_Multi_run"
+                                          #If non-empty, run all processed runs, else, only process this run
   exit 1
 fi;
 
 exp=iss631
-AnalysisDir=/Users/ryantang/Desktop/HELIOS_repos/analysis
+AnalysisDir=../../analysis
 
 #remote data path
 dataloc=/media/DIGIOSDATA3/data/${exp}
-daqDir=/home/helios/experiments/iss631
+daqDir=/home/helios/experiments/${exp}
 
 #===== directory and chat files
 GEBDIR=$AnalysisDir/GEBSort
@@ -29,8 +29,8 @@ echo "============================================="
 echo "============ RUN $RUN ======================="
 echo "============================================="
 
-if [ $# -eq 2 ] ; then
-  echo "=================== single run ."
+if [ $# -eq 1 ] ; then
+  echo "=================== single run ============"
 fi
 
 #============ Get the raw data
@@ -43,12 +43,13 @@ echo "============================================="
 
 du -hsc $DATADIR/${exp}_run_$RUN*
 
-if [ ! -f $DATADIR/${exp}_run_$RUN.gtd03_000_0110 ]; then
+count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
+if [$count == 0 ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
     echo "============================================"
     exit 
-fi;
+fi
 
 #=========== Merge and Sort
 echo "RUN $RUN: GEBMerge started at `date`"
@@ -77,7 +78,7 @@ root -q -b "process_run.C($runID,0)"
 root -l ../Armory/runsCheck.C
 
 #=========== If option = 1, run all processed runs, else, only process this run
-if [ $# -eq 1 ] ; then
+if [ $# -eq 2 ] ; then
   root -l ChainMonitors.C
 else
   root -l "ChainMonitors.C($runID)"
