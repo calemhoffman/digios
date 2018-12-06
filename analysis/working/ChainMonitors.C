@@ -1,4 +1,4 @@
-void Chain(int RUNNUM = -1, int RUNNUM2 = -1) {
+void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
 
   if( RUNNUM == -1){
@@ -37,6 +37,6 @@ void Chain(int RUNNUM = -1, int RUNNUM2 = -1) {
   chain->GetListOfFiles()->Print();
   printf("========================================== Number of Files : %2d\n",chain->GetListOfFiles()->GetEntries());
   
-  chain->Process("../Armory/Monitors.C+");
+  chain->Process("Monitors.C+");
 
 }
