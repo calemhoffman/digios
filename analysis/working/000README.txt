@@ -83,6 +83,8 @@ To start with, you need to check/edit few things
 
         These are data will be stored. 
         ===== YOU NEED TO CREATE YOURSELF ======
+    
+    edit ==== MakeDataLinks.sh ====
         
 1) GeneralSortMapping.h
         

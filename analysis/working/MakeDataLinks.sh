@@ -8,16 +8,25 @@ echo "       1) analysis/data "
 echo "       2) analysis/merged_data "
 echo "       3) analysis/root_data "
 echo "----------------------------------------------- "
-echo " Detecting computer : \c"
 
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+Cyan='\033[0;36m'
+NC='\033[0m'
+
+#================ Find computer
 if [ $HOSTNAME == "phywl162.phy.anl.gov" ]; then
-   echo "  HELIOS iMac "
+   echo " Detecting computer : ${RED}HELIOS iMac${NC}"
    
    branch=$(git symbolic-ref HEAD)
    branch=${branch#refs/heads/}
    
-   echo " Current Git Branch :   $branch "
+   echo " Current Git Branch : ${RED}$branch ${NC}"
    
+   OS="MAC"
    DATAPATH=~/experiment
   
    if [ $branch == "master" ] ; then exp=iss631; fi
@@ -28,10 +37,20 @@ if [ $HOSTNAME == "phywl162.phy.anl.gov" ]; then
    
 fi
 
+if [ $HOSTNAME == "phywl154.phy.anl.gov" ]; then
+  echo " Detecting computer : ${RED}Ryan Mac Air${NC}"
+  
+  branch=$(git symbolic-ref HEAD)
+  branch=${branch#refs/heads/}
+   
+  echo " Current Git Branch : ${RED}$branch${NC}"
+  
+  echo "----- no need to do anything."
+fi
 
-
-
-
-ln -shfv ${DATAPATH}/${exp}/data         ../data
-ln -shfv ${DATAPATH}/${exp}/merged_data  ../merged_data
-ln -shfv ${DATAPATH}/${exp}/root_data    ../root_data
+#================= create links
+if [[ ${OS} == "MAC" ]] ; then
+  ln -shfv ${DATAPATH}/${exp}/data         ../data
+  ln -shfv ${DATAPATH}/${exp}/merged_data  ../merged_data
+  ln -shfv ${DATAPATH}/${exp}/root_data    ../root_data
+fi
