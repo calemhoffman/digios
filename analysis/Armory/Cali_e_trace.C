@@ -9,7 +9,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 
-bool rejZeroHit = true;
+bool rejZeroHit = false;
 
 void Cali_e_trace::Begin(TTree * /*tree*/)
 {
@@ -115,7 +115,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    b_RDTTimestamp->GetEntry(entry,0);
    
    if( isEBISExist ) b_EBISTimestamp->GetEntry(entry,0);
-   if( isELUMExist ) b_ELUM->GetEntry(entry,0);
+   if( isELUMExist ) {
+     b_ELUM->GetEntry(entry,0);
+     b_ELUMTimestamp->GetEntry(entry,0);
+   }
    if( isEZEROExist) b_EZERO->GetEntry(entry,0);
    if( isTACExist ) b_TAC->GetEntry(entry,0);
    
