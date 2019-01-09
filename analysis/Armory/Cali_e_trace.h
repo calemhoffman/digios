@@ -330,7 +330,10 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("arrayRDT", &arrayRDT, "arrayRDT/I");
    
    if( isEBISExist ) newTree->Branch("ebis_t", &EBIS_t, "EBIS_t/l");
-   if( isELUMExist ) newTree->Branch("elum", elum, "elum[32]/F");
+   if( isELUMExist ) {
+     newTree->Branch("elum", elum, "elum[32]/F");
+     newTree->Branch("elum_t", elum_t, "elum_t[32]/l");
+   }
    if( isEZEROExist ) newTree->Branch("ezero", ezero, "ezero[10]/F");
    
    newTree->Branch("coin_t", &coin_t, "coin_t/I");
