@@ -183,10 +183,10 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     
     //write ptolmey infile
     numOfReaction ++ ;
-    fprintf(file_out, "$============================================ Ex=%s(%s)%s\n", Ex.c_str(), orbital.c_str(), potential.c_str());
-    fprintf(file_out, "reset\n");
     
     if( reactionType == "(d,p)" || reactionType == "(p,d)" ){
+      fprintf(file_out, "$============================================ Ex=%s(%s)%s\n", Ex.c_str(), orbital.c_str(), potential.c_str());
+      fprintf(file_out, "reset\n");
       fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
                isoA.c_str(), reactionType.c_str(), isoB.c_str(), jValue.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
       fprintf(file_out, "PARAMETERSET dpsb r0target \n");
@@ -229,16 +229,22 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     }
     
     if( reactionType == "(d,d)" ){
+      fprintf(file_out, "$============================================ ELab=%5.2f(d+%s)%s\n", 
+                                                            totalBeamEnergy, isoA.c_str(), potential.c_str());
+      fprintf(file_out, "reset\n");
       fprintf(file_out, "CHANNEL d + %s\n", isoA.c_str());
     }
     
     if( reactionType == "(p,p)" ){
+      fprintf(file_out, "$============================================ ELab=%5.2f(p+%s)%s\n", 
+                                                            totalBeamEnergy, isoA.c_str(), potential.c_str());
+      fprintf(file_out, "reset\n");
       fprintf(file_out, "CHANNEL p + %s\n", isoA.c_str());
     }
     
     if( reactionType == "(d,d)" || reactionType == "(p,p)" ){
       fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
-
+      fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
       string pot1Name = potential.substr(0,1);
       string pot1Ref = potentialRef(pot1Name);
       fprintf(file_out, "$%s\n", pot1Ref.c_str());

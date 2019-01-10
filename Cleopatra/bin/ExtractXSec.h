@@ -54,6 +54,7 @@ int ExtractXSec (string readFile) {
   bool angleFilled = false;
   int numCal = 0;
   int reactionFlag = 0;
+  bool preFindForElastic = false;
   printf("======================================================\n");
   while(getline(file_in, line)){
     lineNum ++;
@@ -102,6 +103,14 @@ int ExtractXSec (string readFile) {
       continue; // nextline
     }
     
+    //----- pre find for Elastic scattering
+    findStr = "0        OPTICAL MODEL SCATTERING FOR THE INCOMING CHANNEL";
+    pos = line.find(findStr);
+    if( pos != string::npos ) {
+      preFindForElastic = true;
+      continue;
+    }
+
     //----- find angle stetting when not known
     if( angleStep == -1 ){
       
@@ -125,20 +134,13 @@ int ExtractXSec (string readFile) {
       continue; //nextline
     }
     
-    //----- when angle setting is found, check if start extracting Xsec or not 
-    if( angleStep != 1){
-      
-      if( lineNum == 647 ) printf("%s \n", line.c_str());
-      
-      if( reactionFlag == 1 ){
-        findStr = "C.M.    LAB     RUTHERFORD";
-      }else if( reactionFlag == 2 ){
-        findStr = "0  C.M.  REACTION     REACTION   LOW L  HIGH L   % FROM";
-      }else{
-        findStr = "dumpdumpdump";
-      }
-    }else{
-      findStr = "dumpdumpdump";
+    //-----  check if start extracting Xsec or not 
+    findStr = "dumpdumpdump";
+    if( reactionFlag == 1 && preFindForElastic ){
+      findStr = "C.M.    LAB     RUTHERFORD";
+    }
+    if( reactionFlag == 2 ){
+      findStr = "0  C.M.  REACTION     REACTION   LOW L  HIGH L   % FROM";
     }
     pos = line.find(findStr);
     if( pos != string::npos ) {
@@ -166,8 +168,7 @@ int ExtractXSec (string readFile) {
       if( num1 != 0. && num2 != 0. ){
         if( !angleFilled ) angle.push_back(num1);
         dataXsec.push_back(num2);
-      }
-      
+      } 
     }
     
     //------ find total Xsec, if found stop extraction
@@ -190,7 +191,9 @@ int ExtractXSec (string readFile) {
       dataMatrix.push_back(dataXsec);
       
       angleFilled = true;
-      startExtract = false;      
+      startExtract = false; 
+      reactionFlag = 0;
+      preFindForElastic = false;
       continue;
     }
     
