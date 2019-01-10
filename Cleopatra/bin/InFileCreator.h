@@ -79,11 +79,11 @@ int GetLValue(string spdf){
   return -1;
 }
 
-int InFileCreator(string read, string infile, double angMin, double angMax, double angStep) {
+int InFileCreator(string readFile, string infile, double angMin, double angMax, double angStep) {
    
   //================= read infile. extract the reactions, write pptolemy infile for each reaction
   ifstream file_in;
-  file_in.open(read.c_str(), ios::in);
+  file_in.open(readFile.c_str(), ios::in);
 
   if( !file_in ){
     printf(" cannot read file. \n");
@@ -186,45 +186,71 @@ int InFileCreator(string read, string infile, double angMin, double angMax, doub
     fprintf(file_out, "$============================================ Ex=%s(%s)%s\n", Ex.c_str(), orbital.c_str(), potential.c_str());
     fprintf(file_out, "reset\n");
     
-    fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
-             isoA.c_str(), reactionType.c_str(), isoB.c_str(), jValue.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
-    fprintf(file_out, "PARAMETERSET dpsb r0target \n");
-    fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
-    fprintf(file_out, "\n");
-    fprintf(file_out, "PROJECTILE \n");
-    fprintf(file_out, "wavefunction av18 \n");
-    fprintf(file_out, "r0=1 a=0.5 l=0 \n");
-    fprintf(file_out, ";\n");
-    fprintf(file_out, "TARGET\n");
-    fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+    if( reactionType == "(d,p)" || reactionType == "(p,d)" ){
+      fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
+               isoA.c_str(), reactionType.c_str(), isoB.c_str(), jValue.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
+      fprintf(file_out, "PARAMETERSET dpsb r0target \n");
+      fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+      fprintf(file_out, "\n");
+      fprintf(file_out, "PROJECTILE \n");
+      fprintf(file_out, "wavefunction av18 \n");
+      fprintf(file_out, "r0=1 a=0.5 l=0 \n");
+      fprintf(file_out, ";\n");
+      fprintf(file_out, "TARGET\n");
+      fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+      
+      fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
+      fprintf(file_out, "r0=1.25 a=.65 \n");
+      fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
+      fprintf(file_out, "rc0=1.3 \n");
+      fprintf(file_out, ";\n");
+      
+      string pot1Name = potential.substr(0,1);
+      string pot1Ref = potentialRef(pot1Name);
+      fprintf(file_out, "INCOMING $%s\n", pot1Ref.c_str());
+      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy);
+      fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+      fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+      fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+      fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+      fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+      fprintf(file_out, ";\n");
+      
+      string pot2Name = potential.substr(1,1);
+      string pot2Ref = potentialRef(pot2Name);
+      fprintf(file_out, "OUTGOING $%s\n", pot2Ref.c_str());
+      CallPotential(pot2Name, isotopeB.A, isotopeB.Z, totalBeamEnergy + Qvalue - atof(Ex.c_str())); 
+      fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+      fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+      fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+      fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+      fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+      fprintf(file_out, ";\n");
+    }
     
-    fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
-    fprintf(file_out, "r0=1.25 a=.65 \n");
-    fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
-    fprintf(file_out, "rc0=1.3 \n");
-    fprintf(file_out, ";\n");
+    if( reactionType == "(d,d)" ){
+      fprintf(file_out, "CHANNEL d + %s\n", isoA.c_str());
+    }
     
-    string pot1Name = potential.substr(0,1);
-    string pot1Ref = potentialRef(pot1Name);
-    fprintf(file_out, "INCOMING $%s\n", pot1Ref.c_str());
-    CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy);
-    fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
-    fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
-    fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
-    fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
-    fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
-    fprintf(file_out, ";\n");
+    if( reactionType == "(p,p)" ){
+      fprintf(file_out, "CHANNEL p + %s\n", isoA.c_str());
+    }
     
-    string pot2Name = potential.substr(1,1);
-    string pot2Ref = potentialRef(pot2Name);
-    fprintf(file_out, "OUTGOING $%s\n", pot2Ref.c_str());
-    CallPotential(pot2Name, isotopeB.A, isotopeB.Z, totalBeamEnergy + Qvalue - atof(Ex.c_str())); 
-    fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
-    fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
-    fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
-    fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
-    fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
-    fprintf(file_out, ";\n");
+    if( reactionType == "(d,d)" || reactionType == "(p,p)" ){
+      fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
+
+      string pot1Name = potential.substr(0,1);
+      string pot1Ref = potentialRef(pot1Name);
+      fprintf(file_out, "$%s\n", pot1Ref.c_str());
+      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy);
+      fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+      fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+      fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+      fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+      fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+      fprintf(file_out, "ELASTIC SCATTERING\n");
+      fprintf(file_out, ";\n");
+    }
     
     
     fprintf(file_out, "anglemin=%f anglemax=%f anglestep=%f\n", angMin, angMax, angStep);
