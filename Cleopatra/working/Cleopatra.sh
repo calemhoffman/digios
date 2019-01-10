@@ -38,12 +38,13 @@ PlotResult=0
 #============================================ USER don't need to change thing below
 
 if [ $# -eq 0 ] ; then
-  echo "$./Cleopatra in-file X  X  X  X"
+  echo "$./Cleopatra in-file X  X  X  X  angMin angMax angStep"
   echo "                     |  |  |  |"
   echo "                     |  |  |  PlotResult? (1/0)"
   echo "                     |  |  Extract cross-section? (1/0)"
   echo "                     |  Run Ptolemy? (1/0)"
   echo "                     Create infile? (1/0)"
+  echo "default angMin = 0, angMax = 50, angStep = 0.5"
   exit 1
 fi;
 
@@ -69,6 +70,15 @@ if [ $# -eq 5 ]; then
   RunPtolemy=$3
   IsExtractXSec=$4
   PlotResult=$5
+fi;
+if [ $# -eq 8 ]; then
+  CreateInFile=$2
+  RunPtolemy=$3
+  IsExtractXSec=$4
+  PlotResult=$5
+  angMin=$6
+  angMax=$7
+  angStep=$8
 fi;
 
 echo "#################################################################"
@@ -98,7 +108,11 @@ echo "================================================================="
 #fi;
 
 if [ ${CreateInFile} -eq 1 ] ; then 
-  ../bin/InFileCreator ${loadfile} 0.0 50.0 0.5
+  if [ $# -eq 8 ]; then
+    ../bin/InFileCreator ${loadfile} $angMin $angMax $angStep
+  else
+    ../bin/InFileCreator ${loadfile} 0.0 50.0 0.5
+  fi
 fi;
 
 if [ ${RunPtolemy} -eq 1 ] ; then 

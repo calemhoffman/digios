@@ -2,6 +2,7 @@ $============================================ ELab=14.78(d+206Hg)AA
 reset
 CHANNEL d + 206Hg
 ELAB = 14.780000
+JBIGA=0
 $An and Cai (2006) E < 183 | 12 < A < 238 | http://dx.doi.org/10.1103/PhysRevC.73.054605
 v    =  96.891    r0 =   1.151    a =   0.793
 vi   =   2.023   ri0 =   1.322   ai =   0.264
@@ -10,12 +11,13 @@ vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ELASTIC SCATTERING
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
 ;
 $============================================ ELab=14.78(d+206Hg)HH
 reset
 CHANNEL d + 206Hg
 ELAB = 14.780000
+JBIGA=0
 $Han, Shi, Shen (2006) E < 200 | 12 < A < 209 | http://dx.doi.org/10.1103/PhysRevC.74.044615
 v    =  86.357    r0 =   1.174    a =   0.809
 vi   =   3.729   ri0 =   1.563   ai =   0.966
@@ -24,12 +26,13 @@ vso  =   3.703  rso0 =   1.234  aso =   0.813
 vsoi =  -0.206 rsoi0 =   1.234 asoi =   0.813  rc0 =   1.698
 ELASTIC SCATTERING
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
 ;
 $============================================ ELab=14.78(d+206Hg)BB
 reset
 CHANNEL d + 206Hg
 ELAB = 14.780000
+JBIGA=0
 $Bojowald et al.(1988) 50 < E < 80 | 27 < A < 208 | http://dx.doi.org/10.1103/PhysRevC.38.1153
 v    =  97.153    r0 =   1.180    a =   0.843
 vi   =   0.000   ri0 =   1.270   ai =   0.892
@@ -38,12 +41,13 @@ vso  =   6.000  rso0 =   1.004  aso =   1.004
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.300
 ELASTIC SCATTERING
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
 ;
 $============================================ ELab=14.78(d+206Hg)DD
 reset
 CHANNEL d + 206Hg
 ELAB = 14.780000
+JBIGA=0
 $Daehnick, Childs, Vrcelj (1980) 11.8 < E < 80 | 27 < A < 238 (REL) | http://dx.doi.org/10.1103/PhysRevC.21.2253
 v    =  95.737    r0 =   1.170    a =   0.735
 vi   =   0.269   ri0 =   1.338   ai =   0.893
@@ -52,12 +56,13 @@ vso  =   6.727  rso0 =   1.070  aso =   0.660
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.300
 ELASTIC SCATTERING
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
 ;
 $============================================ ELab=14.78(d+206Hg)CC
 reset
 CHANNEL d + 206Hg
 ELAB = 14.780000
+JBIGA=0
 $Daehnick, Childs, Vrcelj (1980) 11.8 < E < 80 | 27 < A < 238 (NON-REL) | http://dx.doi.org/10.1103/PhysRevC.21.2253
 v    =  95.737    r0 =   1.170    a =   0.735
 vi   =   0.269   ri0 =   1.338   ai =   0.893
@@ -66,12 +71,13 @@ vso  =   6.727  rso0 =   1.070  aso =   0.660
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.300
 ELASTIC SCATTERING
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
 ;
 $============================================ ELab=14.78(d+206Hg)LL
 reset
 CHANNEL d + 206Hg
 ELAB = 14.780000
+JBIGA=0
 $Lohr and Haeberli (1974) 9 < E < 13 | 40 < A | http://dx.doi.org/10.1016/0375-9474(74)90627-7
 v    = 120.931    r0 =   1.050    a =   0.860
 vi   =   0.000   ri0 =   0.000   ai =   0.000
@@ -80,6 +86,6 @@ vso  =   7.000  rso0 =   0.750  aso =   0.500
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.300
 ELASTIC SCATTERING
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
 ;
 end $================================== end of input
