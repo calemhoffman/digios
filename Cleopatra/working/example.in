@@ -1,3 +1,17 @@
+$============================================ Ex=0.000(1g9/2)AA
+reset
+CHANNEL d + 206Hg
+ELAB = 14.780000
+$An and Cai (2006) E < 183 | 12 < A < 238 | http://dx.doi.org/10.1103/PhysRevC.73.054605
+v    =  96.891    r0 =   1.151    a =   0.793
+vi   =   2.023   ri0 =   1.322   ai =   0.264
+vsi  =  10.378  rsi0 =   1.360  asi =   0.897
+vso  =   3.557  rso0 =   0.972  aso =   1.011
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
+ELASTIC SCATTERING
+;
+anglemin=0.000000 anglemax=180.000000 anglestep=1.000000
+;
 $============================================ Ex=0.000(1g9/2)AK
 reset
 REACTION: 206Hg(d,p)207Hg(9/2+ 0.000) ELAB= 14.780
@@ -29,7 +43,7 @@ vsi  =  10.371  rsi0 =   1.249  asi =   0.626
 vso  =   5.998  rso0 =   1.076  aso =   0.590
 vsoi =  -0.056 rsoi0 =   1.076 asoi =   0.590  rc0 =   1.220
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=180.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.000(1g9/2)QV
 reset
@@ -62,6 +76,6 @@ vsi  =  10.402  rsi0 =   1.259  asi =   0.690
 vso  =   5.900  rso0 =   1.137  aso =   0.630
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.260
 ;
-anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+anglemin=0.000000 anglemax=180.000000 anglestep=1.000000
 ;
 end $================================== end of input

@@ -24,7 +24,15 @@
 ########################################################################
 
 #for User, please Modify the path for thisroot.h
-source /Applications/root/bin/thisroot.sh
+#should auto-find thisroot.sh
+ROOTSOURCE=/Applications/root/bin/thisroot.sh
+if [ -f $ROOTSOURCE ]; then
+  source $ROOTSOURCE
+else
+  echo "===== Please modifly Cleopatra.sh line 27, variable ROOTSOURCE"
+  exit 1
+fi
+#source /Applications/root/bin/thisroot.sh
 
 #================================ User Defualt Control
 CreateInFile=0   # 0 = false, 1 = true
