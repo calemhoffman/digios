@@ -89,7 +89,7 @@ int ExtractXSec (string readFile) {
     if( pos != string::npos ) {
       reaction.push_back( line.substr(pos + findLen + 1) );
       reactionFlag = 1; // 1 for (d,d) or (p,p)
-      //printf("----------- (d,d), %d\n", reactionFlag);
+      //printf("%d |----------- (d,d), %d\n", lineNum, reactionFlag);
       continue; // nextline
     }
     
@@ -99,15 +99,16 @@ int ExtractXSec (string readFile) {
     if( pos != string::npos ) {
       reaction.push_back( line.substr(pos + findLen + 1) );
       reactionFlag = 2; // 2 for (d,p) or (p,d)
-      //printf("----------- (d,p), %d\n", reactionFlag);
+      //printf("%d |----------- (d,p), %d\n", lineNum, reactionFlag);
       continue; // nextline
     }
     
     //----- pre find for Elastic scattering
-    findStr = "0        OPTICAL MODEL SCATTERING FOR THE INCOMING CHANNEL";
+    findStr = "0        OPTICAL MODEL SCATTERING FOR THE OUTGOING CHANNEL";
     pos = line.find(findStr);
     if( pos != string::npos ) {
       preFindForElastic = true;
+      //printf("%d |----------- pre Elastics Flag : %d\n", lineNum, preFindForElastic);
       continue;
     }
 
@@ -128,7 +129,7 @@ int ExtractXSec (string readFile) {
         
         angleStep = atof( line.substr(pos1 + findLen+1).c_str() );
         
-        //printf("---- angle range found.\n");
+        //printf("%d |---- angle range found.\n", lineNum);
         
       }
       continue; //nextline
@@ -145,6 +146,7 @@ int ExtractXSec (string readFile) {
     pos = line.find(findStr);
     if( pos != string::npos ) {
       startExtract = true;
+      //printf("%d |----- start extraction \n", lineNum);
       continue;
     }
     
@@ -172,12 +174,12 @@ int ExtractXSec (string readFile) {
     }
     
     //------ find total Xsec, if found stop extraction
-    if( reactionFlag == 1){
+    findStr = "dumpdumpdump";
+    if( reactionFlag == 1 && preFindForElastic){
       findStr = "0TOTAL REACTION CROSS SECTION =";
-    }else if( reactionFlag == 2){
+    }
+    if( reactionFlag == 2){
       findStr = "0TOTAL:";
-    }else{
-      findStr = "dumpdumpdump";
     }
     findLen = findStr.length();
     pos = line.find(findStr);
@@ -189,6 +191,8 @@ int ExtractXSec (string readFile) {
       
       //push back dataXsec to dataMatrix
       dataMatrix.push_back(dataXsec);
+      
+      //printf("%d |----- end extraction \n", lineNum);
       
       angleFilled = true;
       startExtract = false; 
@@ -209,6 +213,13 @@ int ExtractXSec (string readFile) {
   
   
   printf("----------------------------- list of Calculation \n");
+  //... find suitable lenght for displaying reaction string
+  int reactionStrLen = 0;
+  for( int i = 0; i < numCal ; i++){
+    int len = reaction[i].length();
+    if( len > reactionStrLen ) reactionStrLen = len;
+  }
+  
   for( int i = 0; i < numCal ; i++){
     
     double partialSumXsec = 0.0;
@@ -221,7 +232,7 @@ int ExtractXSec (string readFile) {
     }
     
     size_t pos = title[i].find(")");
-    printf("%50s| %s | Xsec(%3.0f-%3.0f deg) : %f mb\n", reaction[i].c_str(), title[i].substr(pos+1).c_str(), angleMin, angleMax, partialSumXsec);
+    printf("%*s| %s | Xsec(%3.0f-%3.0f deg) : %f mb\n", reactionStrLen + 3, reaction[i].c_str(), title[i].substr(pos+1).c_str(), angleMin, angleMax, partialSumXsec);
   }
   printf("---------------------------------------------------\n");
   
