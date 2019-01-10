@@ -53,6 +53,7 @@ int ExtractXSec (string readFile) {
   bool startExtract = false;
   bool angleFilled = false;
   int numCal = 0;
+  int reactionFlag = 0;
   printf("======================================================\n");
   while(getline(file_in, line)){
     lineNum ++;
@@ -81,16 +82,29 @@ int ExtractXSec (string readFile) {
     }
     
     //---- find Reaction
+    findStr = "0INPUT... CHANNEL";
+    findLen = findStr.length();
+    pos = line.find(findStr);
+    if( pos != string::npos ) {
+      reaction.push_back( line.substr(pos + findLen + 1) );
+      reactionFlag = 1; // 1 for (d,d) or (p,p)
+      //printf("----------- (d,d), %d\n", reactionFlag);
+      continue; // nextline
+    }
+    
     findStr = "REACTION:";
     findLen = findStr.length();
     pos = line.find(findStr);
     if( pos != string::npos ) {
       reaction.push_back( line.substr(pos + findLen + 1) );
-      continue;
+      reactionFlag = 2; // 2 for (d,p) or (p,d)
+      //printf("----------- (d,p), %d\n", reactionFlag);
+      continue; // nextline
     }
     
     //----- find angle stetting when not known
     if( angleStep == -1 ){
+      
       findStr = "anglemin=";
       findLen = findStr.length();
       pos = line.find(findStr);
@@ -105,13 +119,27 @@ int ExtractXSec (string readFile) {
         
         angleStep = atof( line.substr(pos1 + findLen+1).c_str() );
         
+        //printf("---- angle range found.\n");
+        
       }
-      
-      continue;
+      continue; //nextline
     }
     
-    //----- check if start extracting Xsec or not 
-    findStr = "0  C.M.  REACTION     REACTION   LOW L  HIGH L   % FROM";
+    //----- when angle setting is found, check if start extracting Xsec or not 
+    if( angleStep != 1){
+      
+      if( lineNum == 647 ) printf("%s \n", line.c_str());
+      
+      if( reactionFlag == 1 ){
+        findStr = "C.M.    LAB     RUTHERFORD";
+      }else if( reactionFlag == 2 ){
+        findStr = "0  C.M.  REACTION     REACTION   LOW L  HIGH L   % FROM";
+      }else{
+        findStr = "dumpdumpdump";
+      }
+    }else{
+      findStr = "dumpdumpdump";
+    }
     pos = line.find(findStr);
     if( pos != string::npos ) {
       startExtract = true;
@@ -124,8 +152,16 @@ int ExtractXSec (string readFile) {
       if( line.length() < 20 ) continue;
       
       //printf("   |%s \n", line.c_str());
-      double num1 = atof( line.substr(0, 7).c_str());
-      double num2 = atof( line.substr(7, 19).c_str());
+      double num1, num2;
+      if( reactionFlag == 1 ){
+        num1 = atof( line.substr(0, 7).c_str());
+        num2 = atof( line.substr(28, 14).c_str());
+      }
+      
+      if( reactionFlag == 2 ){
+        num1 = atof( line.substr(0, 7).c_str());
+        num2 = atof( line.substr(7, 19).c_str());
+      }
       
       if( num1 != 0. && num2 != 0. ){
         if( !angleFilled ) angle.push_back(num1);
@@ -135,7 +171,13 @@ int ExtractXSec (string readFile) {
     }
     
     //------ find total Xsec, if found stop extraction
-    findStr = "0TOTAL:";
+    if( reactionFlag == 1){
+      findStr = "0TOTAL REACTION CROSS SECTION =";
+    }else if( reactionFlag == 2){
+      findStr = "0TOTAL:";
+    }else{
+      findStr = "dumpdumpdump";
+    }
     findLen = findStr.length();
     pos = line.find(findStr);
     if( pos != string::npos ) {
