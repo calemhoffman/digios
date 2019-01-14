@@ -20,12 +20,12 @@
 # P = Perey, 1963                    |         E < 20  | 30 < A < 100             | http://dx/doi.org/10.1016/0092-640X(76)90007-3
 #=======================================================================
 #reaction   gs-spin orbital  parity   Ex  ELab      Potentials
-206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   AA
-206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   HH
-206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   BB
-206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   DD
-206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   CC
-206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   LL
+#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   AA
+#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   HH
+#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   BB
+#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   DD
+#06Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   CC
+#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   LL
 
-#206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   AK
-#206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   QV
+206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   AK
+206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   QV
