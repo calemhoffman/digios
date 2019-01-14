@@ -83,6 +83,13 @@ if [ $# -eq 8 ]; then
   angStep=$8
 fi;
 
+ExtractXsecMsg=""
+if [ $IsExtractXSec -eq 1 ]; then
+  ExtractXsecMsg=", for (d,d)(p,p), extract Ratio to Rutherford"
+elif [ $IsExtractXSec -eq 2 ]; then
+  ExtractXsecMsg=", for (d,d)(p,p), extract Total Xsec"
+fi;
+
 echo "#################################################################"
 echo "##   @@@@ @@    @@@@  @@@@  @@@@@  @@@@  @@@@@@ @@@@@   @@@@   ##"
 echo "##  @@    @@    @@   @@  @@ @@ @@ @@  @@   @@   @@ @@  @@  @@  ##"
@@ -96,7 +103,7 @@ echo ""
 echo "USER OPTION:"
 echo " --- Is Create Ptolemy infile ? " ${CreateInFile}
 echo " --- Is Run Ptolemy           ? " ${RunPtolemy}
-echo " --- Is Extract Cross-Section ? " ${IsExtractXSec}
+echo " --- Is Extract Cross-Section ? " ${IsExtractXSec} ${ExtractXsecMsg}
 echo " --- Is Plot Results          ? " ${PlotResult}
 echo "================================================================="
 
@@ -125,10 +132,8 @@ if [ ${RunPtolemy} -eq 1 ] ; then
 fi;
 
 #===== Extracting XSec and save into *txt and *root
-if [ ${IsExtractXSec} -eq 1 ] ; then 
-  ../bin/ExtractXSec ${outfile}
-elif ${IsExtractXSec} -eq 2 ] ; then 
-  ../bin/ExtractXSec ${outfile} 1
+if [ ${IsExtractXSec} -ge 1 ] ; then 
+  ../bin/ExtractXSec ${outfile} ${IsExtractXSec}
 fi;
 
 if [ ${PlotResult} -eq 1 ] ; then 

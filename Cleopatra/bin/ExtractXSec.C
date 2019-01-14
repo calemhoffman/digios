@@ -34,7 +34,7 @@ int main (int argc, char *argv[]) {
   }
 
   string readFile = argv[1];
-  int ElasticFlag = 0;
+  int ElasticFlag = 1;
   if( argc == 3 ){
     ElasticFlag = atoi(argv[2]);
   }
