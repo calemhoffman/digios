@@ -157,9 +157,8 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     int factor = 1;
     if( unit == "MeV/u" && beamParticle == "d") factor = 2;
     double totalBeamEnergy = atof(reactionEnergy.substr(0, pos+1).c_str()) * factor;
+    
     //printf("unit : %s , %f\n", unit.c_str(), totalBeamEnergy);
-    
-    
     //printf("  target nucleus : %s \n", isoA.c_str());
     //printf("        reaction : %s \n", reactionType.c_str());
     //printf("          remain : %s \n", isoB.c_str());
@@ -171,7 +170,9 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     Isotope isotopeA(str1[0]);
     Isotope isotopeB(str2[1]);
     
-    double Qvalue = 1875.6129 + isotopeA.Mass - 938.272 - isotopeB.Mass; //(d,p) reaction
+    double Qvalue = 0 ;
+    if( reactionType == "(d,p)" ) Qvalue = +1875.6129 + isotopeA.Mass - 938.272 - isotopeB.Mass; //(d,p) reaction
+    if( reactionType == "(p,d)" ) Qvalue = -1875.6129 + isotopeA.Mass + 938.272 - isotopeB.Mass; //(p,d) reaction
     //printf("Q-Value = %f MeV\n", Qvalue);
     
     //printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeA.A, isotopeA.Z, isotopeA.Mass);
@@ -219,6 +220,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       string pot2Name = potential.substr(1,1);
       string pot2Ref = potentialRef(pot2Name);
       fprintf(file_out, "OUTGOING $%s\n", pot2Ref.c_str());
+      //printf(" total Beam Energy : %f | Qvalue : %f | Ex : %f | E : %f \n", totalBeamEnergy, Qvalue, atof(Ex.c_str()));
       CallPotential(pot2Name, isotopeB.A, isotopeB.Z, totalBeamEnergy + Qvalue - atof(Ex.c_str())); 
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
