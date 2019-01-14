@@ -41,7 +41,9 @@ if [ $# -eq 0 ] ; then
   echo "$./Cleopatra in-file X  X  X  X  angMin angMax angStep"
   echo "                     |  |  |  |"
   echo "                     |  |  |  PlotResult? (1/0)"
-  echo "                     |  |  Extract cross-section? (1/0)"
+  echo "                     |  |  Extract cross-section? (2/1/0)"
+  echo "                     |  |             if 1 = extract Ratio to Rutherford for (d,d) or (p,p)"
+  echo "                     |  |             if 2 = extract total Xsec for (d,d) or (p,p)"
   echo "                     |  Run Ptolemy? (1/0)"
   echo "                     Create infile? (1/0)"
   echo "default angMin = 0, angMax = 50, angStep = 0.5"
@@ -125,6 +127,8 @@ fi;
 #===== Extracting XSec and save into *txt and *root
 if [ ${IsExtractXSec} -eq 1 ] ; then 
   ../bin/ExtractXSec ${outfile}
+elif ${IsExtractXSec} -eq 2 ] ; then 
+  ../bin/ExtractXSec ${outfile} 1
 fi;
 
 if [ ${PlotResult} -eq 1 ] ; then 
