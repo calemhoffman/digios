@@ -19,18 +19,33 @@
 # G = Becchetti and Greenlees, 1969  |         E < 50  | 40 < A                   | http://dx.doi.org/10.1103/PhysRev.182.1190
 # P = Perey, 1963                    |         E < 20  | 30 < A < 100             | http://dx/doi.org/10.1016/0092-640X(76)90007-3
 #=======================================================================
-#reaction   gs-spin orbital  parity   Ex  ELab      Potentials
-#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   AA
-#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   HH
-#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   BB
-#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   DD
-#06Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   CC
-#206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   LL
+#reaction        gs-spin    orbital  spin-pi(Ex)   Ex   ELab      Potentials
+#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AA
+#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   HH
+#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   BB
+#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   DD
+#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   CC
+#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   LL
 
-#206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   AK
-#206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   QV
+#206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AK
+#206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   QV
 
-20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     KA
-20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     VA
-20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     KQ
-20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     VQ
+20F(p,d)19F   2   0d5/2   1/2+  0.000  10MeV/u     KA
+20F(p,d)19F   2   0d5/2   1/2+  0.000  10MeV/u     VA
+20F(p,d)19F   2   0d5/2   1/2+  0.000  10MeV/u     KQ
+20F(p,d)19F   2   0d5/2   1/2+  0.000  10MeV/u     VQ
+
+20F(p,d)19F   2   0p3/2   1/2-  0.110  10MeV/u     KA
+20F(p,d)19F   2   0p3/2   1/2-  0.110  10MeV/u     VA
+20F(p,d)19F   2   0p3/2   1/2-  0.110  10MeV/u     KQ
+20F(p,d)19F   2   0p3/2   1/2-  0.110  10MeV/u     VQ
+
+20F(p,d)19F   2   1s1/2   5/2+  0.197  10MeV/u     KA
+20F(p,d)19F   2   1s1/2   5/2+  0.197  10MeV/u     VA
+20F(p,d)19F   2   1s1/2   5/2+  0.197  10MeV/u     KQ
+20F(p,d)19F   2   1s1/2   5/2+  0.197  10MeV/u     VQ
+
+20F(p,d)19F   2   0p1/2   5/2-  1.346  10MeV/u     KA
+20F(p,d)19F   2   0p1/2   5/2-  1.346  10MeV/u     VA
+20F(p,d)19F   2   0p1/2   5/2-  1.346  10MeV/u     KQ
+20F(p,d)19F   2   0p1/2   5/2-  1.346  10MeV/u     VQ
