@@ -95,6 +95,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
   file_out = fopen (infile.c_str(), "w+");
 
   printf("Angle setting (%5.2f, %5.2f) deg | Step : %5.2f deg\n", angMin, angMax, angStep);
+  printf("---------------------------\n");
 
   //extract information
   int numOfReaction = 0;
@@ -104,12 +105,13 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
 
     if( tempLine.substr(0, 1) == "#" ) continue;
     if( tempLine.size() < 5 ) continue;
-    
-    printf("  %s\n", tempLine.c_str());
 
     //split line using space
     vector<string> str0 = SplitStr(tempLine, " ");
-    
+    if ( str0.size() == 0 ) continue;
+
+    printf("  %s\n", tempLine.c_str());
+
     vector<string> str1 = SplitStr(str0[0], "(");
     vector<string> str2 = SplitStr(str1[1], ")", 1);
 
@@ -120,7 +122,12 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     
     string gsSpinA = str0[1];
     string orbital = str0[2];
-    string parity = (str0[3] == "+1" ? "+" : "-");
+
+    string spinParity = str0[3];
+    int lenSpinParity = spinParity.length();
+    string spin = spinParity.substr(0, lenSpinParity-1);
+    string parity = spinParity.substr(lenSpinParity-1);
+
     string Ex = str0[4];
     string reactionEnergy = str0[5];
     string potential = str0[6];
@@ -129,7 +136,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     string isoB = str2[1];
     string reactionType = str2[0];
     
-    if( potential.length() != 2 ){
+    if( (reactionType == "(d,p)" || reactionType == "(p,d)") && potential.length() != 2 ){
       printf("  ===> ERROR! Potential input should be 2 charaters! skipped. \n");
       continue;
     }
@@ -189,7 +196,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, "$============================================ Ex=%s(%s)%s\n", Ex.c_str(), orbital.c_str(), potential.c_str());
       fprintf(file_out, "reset\n");
       fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
-               isoA.c_str(), reactionType.c_str(), isoB.c_str(), jValue.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
+               isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
       fprintf(file_out, "PARAMETERSET dpsb r0target \n");
       fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
       fprintf(file_out, "\n");
