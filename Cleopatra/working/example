@@ -27,5 +27,10 @@
 #06Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   CC
 #206Hg(d,d)206Hg   0   1g9/2  +1  0.000  7.39MeV/u   LL
 
-206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   AK
-206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   QV
+#206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   AK
+#206Hg(d,p)207Hg   0   1g9/2  +1  0.000  7.39MeV/u   QV
+
+20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     KA
+20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     VA
+20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     KQ
+20F(p,d)19F   2   0d5/2   +1  0.000  10MeV/u     VQ

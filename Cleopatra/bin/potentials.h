@@ -102,6 +102,8 @@ bool AnCaiPotential(int A, int Z, double E){
 
   rc0 = 1.303;
 
+  //PrintPotential();
+
   return true;
 }
 
@@ -386,6 +388,8 @@ bool KoningPotential(int A, int Z, double E){
 
   rc0 = rc;
 
+  //PrintPotential();
+
   return true;
 }
 
@@ -556,7 +560,7 @@ bool PereyPotential(int A, int Z, double E){
 bool CallPotential(string potName, int A, int Z, double E){
   bool okFlag = false;
   
-  //printf(" Potenital : %s \n", potName.c_str());
+  //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
 
   if( potName == "A") okFlag = AnCaiPotential(A, Z, E);
   if( potName == "H") okFlag = HSSPotential(A, Z, E);
