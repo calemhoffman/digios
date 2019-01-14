@@ -25,7 +25,10 @@
 
 using namespace std;
 
-int ExtractXSec (string readFile) {
+int ExtractXSec (string readFile, int indexForElastic=0) {
+  
+  //indexForElastic = 0 ; for Ratio
+  //indexForElastic = 1 ; for Total
    
   //--- open file.out
   ifstream file_in;
@@ -157,12 +160,16 @@ int ExtractXSec (string readFile) {
       
       //printf("   |%s \n", line.c_str());
       double num1, num2;
-      if( reactionFlag == 1 ){
+      if( reactionFlag == 1 ){ // Elastics (d,d) or (p,p)
         num1 = atof( line.substr(0, 7).c_str());
-        num2 = atof( line.substr(28, 14).c_str());
+        if( indexForElastic == 0 ){
+          num2 = atof( line.substr(15, 10).c_str());
+        }else{
+          num2 = atof( line.substr(28, 14).c_str());
+        }
       }
       
-      if( reactionFlag == 2 ){
+      if( reactionFlag == 2 ){ // InElastics (d,p) or (p,d)
         num1 = atof( line.substr(0, 7).c_str());
         num2 = atof( line.substr(7, 19).c_str());
       }
