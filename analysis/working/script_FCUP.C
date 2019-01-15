@@ -65,7 +65,7 @@ void script_FCUP(int runID = 41){
    //========================== Gate   
    TString gate_D = Form("1000 < elum && elum < 1250 && run==%d ", runID);
    
-   double fScale = 3.28;
+   double fScale = 1.0;
 
    if( runID == 0) {
      gate_D = "1000 < elum && elum < 1250";
@@ -98,7 +98,7 @@ void script_FCUP(int runID = 41){
    printf("run-%d | startTime : %f [day], endTime : %f [day]\n", runID, tRange[0], tRange[1]);
 
    TH1F * h1 = new TH1F("h1", Form("ELUM Deuteron - RUN:%d", runID ), tBin, tRange[0], tRange[1]);
-   TH2F * h2 = new TH2F("h2", "FCUP * 3.28", tBin, tRange[0], tRange[1], 500, 0, 50);
+   TH2F * h2 = new TH2F("h2", "FCUP * 3.28", tBin, tRange[0], tRange[1], 500, 0, 30);
    TProfile * h2_pfx = new TProfile("h2_pfx", "h2_pfx", tBin, tRange[0], tRange[1]);
 
    cScript->cd(1);
@@ -127,16 +127,39 @@ void script_FCUP(int runID = 41){
    h2->SetYTitle("FCUP [pA]");
    h2->SetXTitle("day");
 
-   printf("Duration: %f [min] \n", runTime[runID - 25][0] * 24 * 60 );
-   printf("Total (d,d') count : %f \n", h1->GetEntries()); 
-   printf("Integral FCUP: %f [C]\n", h2->Integral(bin[0], bin[1]));
-
    h2->ProfileX("h2_pfx");
    h2_pfx->SetLineColor(2);
 
+   double duration = runTime[runID - 25][0] * 24 * 60; // min
+   printf("Duration: %f [min] \n",  duration );
+   double ddCount = h1->GetEntries();
+   printf("Total (d,d) count : %f \n", ddCount ); 
+   double fcuppA = h2_pfx->Integral(bin[0], bin[1]) ; // in pico-A
+   printf("Integral FCUP: %f [pC]\n", fcuppA * 60.);
+
+   printf("-------------- Average \n");
    cScript->cd(1);
+   TF1 * fit0 = new TF1("fit0", "pol0", tRange[0], tRange[1]);
+   h1->Fit("fit0", "", "Rq",  tRange[0] + 1.5*tPadding, tRange[1] - 3*tPadding);
+
+   double ddCountA  = fit0->GetParameter(0);
+   double ddCountAE = fit0->GetParError(0);
+
+   cScript->cd(2);
+   TF1 * fit1 = new TF1("fit1", "pol0", tRange[0], tRange[1]);
+   h2_pfx->Fit("fit1", "", "Rq",  tRange[0] + 1.5*tPadding, tRange[1] - 3*tPadding);
+
+   double fCuppAA  = fit1->GetParameter(0);
+   double fCuppAAE = fit1->GetParError(0);
+
+   printf("(d,d) count per min          : %f (%f)\n", ddCountA, ddCountAE );
+   printf("Average Integral FCUP per min: %f (%f)[pA]\n", fCuppAA, fCuppAAE );
+   
+
+   //cScript->cd(1);
    h2_pfx->Draw("same");
 
+   return;
    cScript->cd(2);
    TH1F * h1copy = (TH1F*) h1->Clone("h1copy");
    h1copy->Divide(h2_pfx);
