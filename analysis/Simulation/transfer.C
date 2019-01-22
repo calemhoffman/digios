@@ -554,7 +554,7 @@ void transfer(string basicConfig = "basicReactionConfig.txt",
          z += gRandom->Gaus(0, zSigma);
 
          //ELUM
-         double zElum = 231.5;
+         double zElum = 228.1;
          xHit1 = helios.GetXPos(zElum);
          yHit1 = helios.GetYPos(zElum);
          rhoHit1 = helios.GetR(zElum);
