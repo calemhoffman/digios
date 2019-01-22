@@ -102,7 +102,7 @@ void script_FCUP(int runID = 41){
    TH1F * h1 = new TH1F("h1", Form("ELUM Deuteron - RUN:%d", runID ), tBin, tRange[0], tRange[1]);
    TH2F * h2 = new TH2F("h2", "FCUP", tBin, tRange[0], tRange[1], 500, 0, 30);
    TProfile * h2_pfx = new TProfile("h2_pfx", "h2_pfx", tBin, tRange[0], tRange[1]);
-   TH2F * h3 = new TH2F("h3", "FCUP-ISOLDE", tBin, tRange[0], tRange[1], 500, 0, 30);
+   TH2F * h3 = new TH2F("h3", "FCUP-ISOLDE", tBin, tRange[0], tRange[1], 500, 0, 15);
 
    cScript->cd(1);
    // offset to experiment date time
