@@ -38,7 +38,15 @@
 #206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AK
 #206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   QV
 
-20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ax
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     Ax
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     Al
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     Ap
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     Ac
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     At
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     Ah
+40Ca(d,t)39Ca    2   0d5/2   1/2+  0.000  15MeV/u     Ab
+
+
 #20F(d,3He)19O    2   0d5/2   1/2+  0.000  10MeV/u     Al
 
 #20F(p,d)19F   2   0d5/2   1/2+  0.000  10MeV/u     KA

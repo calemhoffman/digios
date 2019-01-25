@@ -119,6 +119,7 @@ void Isotope::FindMassByName(string name){
     
     if( name == "d" ) name = "2H";
     if( name == "t" ) name = "3H";
+    if( name == "a" ) name = "4He";
     
     string temp = name;
     int lastDigit = 0;

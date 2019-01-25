@@ -244,7 +244,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       string pot1Name = potential.substr(0,1);
       string pot1Ref = potentialRef(pot1Name);
       fprintf(file_out, "INCOMING $%s\n", pot1Ref.c_str());
-      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy);
+      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
       fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
@@ -255,8 +255,9 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       string pot2Name = potential.substr(1,1);
       string pot2Ref = potentialRef(pot2Name);
       fprintf(file_out, "OUTGOING $%s\n", pot2Ref.c_str());
-      printf(" total Beam Energy : %f | Qvalue : %f | Ex : %f \n", totalBeamEnergy, Qvalue, atof(Ex.c_str()));
-      CallPotential(pot2Name, isotopeB.A, isotopeB.Z, totalBeamEnergy + Qvalue - atof(Ex.c_str())); 
+      //printf(" total Beam Energy : %f | Qvalue : %f | Ex : %f \n", totalBeamEnergy, Qvalue, atof(Ex.c_str()));
+      double eBeam = totalBeamEnergy + Qvalue - atof(Ex.c_str());
+      CallPotential(pot2Name, isotopeB.A, isotopeB.Z, eBeam, isotopeb.Z); 
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
       fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
@@ -275,7 +276,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       string pot1Name = potential.substr(0,1);
       string pot1Ref = potentialRef(pot1Name);
       fprintf(file_out, "$%s\n", pot1Ref.c_str());
-      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy);
+      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
       fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
