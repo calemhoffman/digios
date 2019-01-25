@@ -29,7 +29,7 @@ vsi  =  10.658  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.000(0d5/2)VA
 reset
@@ -62,7 +62,7 @@ vsi  =  10.658  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.000(0d5/2)KQ
 reset
@@ -95,7 +95,7 @@ vsi  =  15.750  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.000(0d5/2)VQ
 reset
@@ -128,7 +128,7 @@ vsi  =  15.750  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.110(0p3/2)KA
 reset
@@ -161,7 +161,7 @@ vsi  =  10.661  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.110(0p3/2)VA
 reset
@@ -194,7 +194,7 @@ vsi  =  10.661  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.110(0p3/2)KQ
 reset
@@ -227,7 +227,7 @@ vsi  =  15.723  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.110(0p3/2)VQ
 reset
@@ -260,7 +260,7 @@ vsi  =  15.723  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.197(1s1/2)KA
 reset
@@ -293,7 +293,7 @@ vsi  =  10.664  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.197(1s1/2)VA
 reset
@@ -326,7 +326,7 @@ vsi  =  10.664  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.197(1s1/2)KQ
 reset
@@ -359,7 +359,7 @@ vsi  =  15.702  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=0.197(1s1/2)VQ
 reset
@@ -392,7 +392,7 @@ vsi  =  15.702  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=1.346(0p1/2)KA
 reset
@@ -425,7 +425,7 @@ vsi  =  10.699  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=1.346(0p1/2)VA
 reset
@@ -458,7 +458,7 @@ vsi  =  10.699  rsi0 =   1.391  asi =   0.696
 vso  =   3.557  rso0 =   0.972  aso =   1.011
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.303
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=1.346(0p1/2)KQ
 reset
@@ -491,7 +491,7 @@ vsi  =  15.427  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 $============================================ Ex=1.346(0p1/2)VQ
 reset
@@ -524,6 +524,6 @@ vsi  =  15.427  rsi0 =   1.340  asi =   0.680
 vso  =   0.000  rso0 =   0.000  aso =   0.000
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.150
 ;
-anglemin=0.000000 anglemax=80.000000 anglestep=1.000000
+anglemin=10.000000 anglemax=40.000000 anglestep=1.000000
 ;
 end $================================== end of input
