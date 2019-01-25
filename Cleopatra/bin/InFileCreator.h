@@ -39,8 +39,8 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
   size_t pos;
   do{
-    pos = tempLine.find(splitter, 1); // fine space
-    if( pos == 1 ){ //check if it is space again
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
       tempLine = tempLine.substr(pos+1);
       continue;
     }
@@ -111,11 +111,32 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     if ( str0.size() == 0 ) continue;
 
     printf("  %s\n", tempLine.c_str());
+    
+    //for( int i = 0 ; i < str0.size() ; i++){
+    //  printf(" str0[%d] %s \n", i,  str0[i].c_str());
+    //}
 
-    vector<string> str1 = SplitStr(str0[0], "(");
+    vector<string> str1 = SplitStr(str0[0], "(", 0);
     vector<string> str2 = SplitStr(str1[1], ")", 1);
+    
+    str2[0] = "(" + str2[0];
+    
+    //TODO use mass table for d, p, t, 3He
+    int lenStr20 = str2[0].length();
+    size_t posTemp1 = str2[0].find(",");
+    string ma = str2[0].substr(1, posTemp1-1);
+    size_t posTemp2 = str2[0].find(")");
+    string mb = str2[0].substr(posTemp1+1, posTemp2-posTemp1-1);
+    //printf(" ma : |%s| , mb : |%s| \n", ma.c_str(), mb.c_str());
+    Isotope isotopea(ma);
+    Isotope isotopeb(mb);
+    
+    bool isReactionSupported = false;
+    if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" ){
+      if( mb == "p" || mb == "d" || mb == "t" || mb == "3He") isReactionSupported = true;
+    }
 
-    if( !(str2[0] == "(d,d)" || str2[0] =="(p,p)" || str2[0] == "(p,d)" || str2[0] == "(d,p)") ){
+    if( isReactionSupported == false ){
       printf("  ===> Ignored. Reaction type not supported. \n"); 
       continue;
     }
@@ -136,8 +157,20 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     string isoB = str2[1];
     string reactionType = str2[0];
     
-    if( (reactionType == "(d,p)" || reactionType == "(p,d)") && potential.length() != 2 ){
-      printf("  ===> ERROR! Potential input should be 2 charaters! skipped. \n");
+    Isotope isotopeA(str1[0]);
+    Isotope isotopeB(str2[1]);
+    
+    //check reaction valid by balancing the A and Z number;
+    if( isotopeA.A + isotopea.A != isotopeB.A + isotopeb.A || isotopeA.Z + isotopea.Z != isotopeB.Z + isotopeb.Z ) {
+      printf("    ====> ERROR! A-number or Z-number not balanced. \n");
+      continue;
+    }
+    
+    bool isTransferReaction = true;
+    if( ma == mb ) isTransferReaction = false;
+
+    if( isTransferReaction && potential.length() != 2 ){
+      printf("     ===> ERROR! Potential input should be 2 charaters! skipped. \n");
       continue;
     }
     
@@ -174,12 +207,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     //printf("         orbital : %s \n", orbital.c_str());
     //printf("        Ex [MeV] : %s \n", Ex.c_str());
     
-    Isotope isotopeA(str1[0]);
-    Isotope isotopeB(str2[1]);
-    
-    double Qvalue = 0 ;
-    if( reactionType == "(d,p)" ) Qvalue = +1875.6129 + isotopeA.Mass - 938.272 - isotopeB.Mass; //(d,p) reaction
-    if( reactionType == "(p,d)" ) Qvalue = -1875.6129 + isotopeA.Mass + 938.272 - isotopeB.Mass; //(p,d) reaction
+    double Qvalue = isotopea.Mass + isotopeA.Mass - isotopeb.Mass  - isotopeB.Mass;
     //printf("Q-Value = %f MeV\n", Qvalue);
     
     //printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeA.A, isotopeA.Z, isotopeA.Mass);
@@ -192,7 +220,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     //write ptolmey infile
     numOfReaction ++ ;
     
-    if( reactionType == "(d,p)" || reactionType == "(p,d)" ){
+    if( isTransferReaction ){
       fprintf(file_out, "$============================================ Ex=%s(%s)%s\n", Ex.c_str(), orbital.c_str(), potential.c_str());
       fprintf(file_out, "reset\n");
       fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
@@ -227,7 +255,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       string pot2Name = potential.substr(1,1);
       string pot2Ref = potentialRef(pot2Name);
       fprintf(file_out, "OUTGOING $%s\n", pot2Ref.c_str());
-      //printf(" total Beam Energy : %f | Qvalue : %f | Ex : %f | E : %f \n", totalBeamEnergy, Qvalue, atof(Ex.c_str()));
+      printf(" total Beam Energy : %f | Qvalue : %f | Ex : %f \n", totalBeamEnergy, Qvalue, atof(Ex.c_str()));
       CallPotential(pot2Name, isotopeB.A, isotopeB.Z, totalBeamEnergy + Qvalue - atof(Ex.c_str())); 
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
@@ -237,21 +265,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, ";\n");
     }
     
-    if( reactionType == "(d,d)" ){
-      fprintf(file_out, "$============================================ ELab=%5.2f(d+%s)%s\n", 
-                                                            totalBeamEnergy, isoA.c_str(), potential.c_str());
-      fprintf(file_out, "reset\n");
-      fprintf(file_out, "CHANNEL d + %s\n", isoA.c_str());
-    }
-    
-    if( reactionType == "(p,p)" ){
+    if( isTransferReaction == false ){
       fprintf(file_out, "$============================================ ELab=%5.2f(p+%s)%s\n", 
                                                             totalBeamEnergy, isoA.c_str(), potential.c_str());
       fprintf(file_out, "reset\n");
-      fprintf(file_out, "CHANNEL p + %s\n", isoA.c_str());
-    }
-    
-    if( reactionType == "(d,d)" || reactionType == "(p,p)" ){
+      fprintf(file_out, "CHANNEL %s + %s\n", ma.c_str(), isoA.c_str());
       fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
       fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
       string pot1Name = potential.substr(0,1);

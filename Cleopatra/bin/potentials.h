@@ -109,8 +109,6 @@ bool AnCaiPotential(int A, int Z, double E){
 
   rc0 = 1.303;
 
-  //PrintPotential();
-
   return true;
 }
 
@@ -149,8 +147,6 @@ bool HSSPotential(int A, int Z, double E){
   asoi  = 0.813;
 
   rc0 = 1.698;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -190,8 +186,6 @@ bool BojowaldPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -240,8 +234,6 @@ bool DaehnickPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -279,8 +271,6 @@ bool LohrPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -318,8 +308,6 @@ bool PereyPereyPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.15;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -395,8 +383,6 @@ bool KoningPotential(int A, int Z, double E){
 
   rc0 = rc;
 
-  //PrintPotential();
-
   return true;
 }
 
@@ -437,8 +423,6 @@ bool VarnerPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = Rc/A3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -476,8 +460,6 @@ bool MenetPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.25;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -519,8 +501,6 @@ bool BecchettiPotential(int A, int Z, double E){
 
   rc0 = 1.3;
   
-  //PrintPotential();
-
   return true;
 }
 
@@ -557,8 +537,6 @@ bool PereyPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.25;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -568,43 +546,67 @@ bool XuPotential(int A, int Z, double E){
   int N   = A-Z;
   double A3 = pow(A, 1./3.);
 
-  double vsiTest = 33.26647 - 0.16975 * E - 12 * (N-Z)/A;
+  double vsiTest = 33.26647 - 0.16975 * E - 12.0 * (N-Z)/A;
   double viTest = -2 + 0.10645*E - 0.00016156 * pow(E,2);
   
-  v  = 136.34988 - 0.20315 * E - 0.00030147 * pow(E,2) - 24 * (N-Z) / A + 0.4 * Z / A3;
+  v  = 136.34988 - 0.20315 * E - 0.00030147 * pow(E,2) - 24.0 * (N-Z) / A + 0.4 * Z / A3;
   r0 = 1.14963;
   a  = 0.78836;
 
-  vi  = viTest > 0 ? viTest : 0.0 ;
+  vi = 0.0; if( viTest > 0 ) vi = viTest;
   ri0 = 1.61807;
   ai  = 0.66485;
 
-  vsi  = 13.5;
-  rsi0 =  1.25;
-  asi  = 0.47;
+  vsi = 0.0; if( vsiTest > 0 ) vsi = vsiTest;
+  rsi0 =  1.20655;
+  asi  = 0.73593;
 
-  vso  = 7.5;
-  rso0 = 1.25;
-  aso  = 0.47;
+  vso  = 3.0;
+  rso0 = 1.26864;
+  aso  = 0.89999;
 
   vsoi  = 0;
   rsoi0 = 0;
   asoi  = 0;
 
   rc0 = 1.25;
+  
   return false;
 }
 
 bool LiangPotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  v  = 118.36 - 0.2071 * E + 0.000063961 * pow(E,2) + 26.001 * (N-Z) / A + 0.5668 * Z / A3;
+  r0 = 1.1657 + 0.0401 / A3;
+  a  = 0.6641 + 0.0305 * A3;
 
+  vi  = -6.8871 + 0.3115 * E - 0.00068096 * pow(E,2);
+  ri0 = 1.4022 + 0.0418 / A3;
+  ai  = 0.7732 + 0.0219 * A3;
+
+  vsi  = 20.119 - 0.1626 * E - 5.4067 * (N-Z) / A + 1.2087 * A3;
+  rsi0 = 1.1802 + 0.0587 / A3;
+  asi  = 0.6292 + 0.0657 * A3;
+
+  vso  = 2.0491 + 0.0099804 * A3;
+  rso0 = 0.7211 + 0.0586 / A3;
+  aso  = 0.7643 + 0.0535 * A3;
+
+  vsoi  = -1.1591;
+  rsoi0 = 0.7211 + 0.0586 * A3;
+  asoi  = 0.7643 + 0.0535 * A3;
+
+  rc0 = 1.289;
+  
   return false;
 }
 
 bool CallPotential(string potName, int A, int Z, double E){
   bool okFlag = false;
   
-  //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
-
   if( potName == "A") okFlag = AnCaiPotential(A, Z, E);
   if( potName == "H") okFlag = HSSPotential(A, Z, E);
   if( potName == "B") okFlag = BojowaldPotential(A, Z, E);
@@ -621,6 +623,8 @@ bool CallPotential(string potName, int A, int Z, double E){
   if( potName == "x") okFlag = XuPotential(A, Z, E);
   if( potName == "l") okFlag = LiangPotential(A, Z, E);
   
-
+  //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
+  //PrintPotential();
+  
   return okFlag;
 }
