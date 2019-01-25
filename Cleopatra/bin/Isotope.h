@@ -116,6 +116,10 @@ void Isotope::FindMassByAZ(int A, int Z){
 void Isotope::FindMassByName(string name){
 
     // done seperate the Mass number and the name 
+    
+    if( name == "d" ) name = "2H";
+    if( name == "t" ) name = "3H";
+    
     string temp = name;
     int lastDigit = 0;
 
