@@ -64,6 +64,13 @@ string potentialRef(string name){
   if( name == "P" ){
     return "Perey (1963) E < 20 | 30 < A < 100 | http://dx/doi.org/10.1016/0092-640X(76)90007-3";
   }
+
+  if( name == "x" ){
+    return "XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5";
+  }
+  if( name == "l" ){
+    return "Liang, Li, Cai (2009) E < 270 | All masses | http://dx.doi.org/10.1088/0954-3899/36/8/085104";
+  }
    
   return "";
 }
@@ -556,6 +563,42 @@ bool PereyPotential(int A, int Z, double E){
   return true;
 }
 
+bool XuPotential(int A, int Z, double E){
+
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+
+  double vsiTest = 33.26647 - 0.16975 * E - 12 * (N-Z)/A;
+  double viTest = -2 + 0.10645*E - 0.00016156 * pow(E,2);
+  
+  v  = 136.34988 - 0.20315 * E - 0.00030147 * pow(E,2) - 24 * (N-Z) / A + 0.4 * Z / A3;
+  r0 = 1.14963;
+  a  = 0.78836;
+
+  vi  = viTest > 0 ? viTest : 0.0 ;
+  ri0 = 1.61807;
+  ai  = 0.66485;
+
+  vsi  = 13.5;
+  rsi0 =  1.25;
+  asi  = 0.47;
+
+  vso  = 7.5;
+  rso0 = 1.25;
+  aso  = 0.47;
+
+  vsoi  = 0;
+  rsoi0 = 0;
+  asoi  = 0;
+
+  rc0 = 1.25;
+  return false;
+}
+
+bool LiangPotential(int A, int Z, double E){
+
+  return false;
+}
 
 bool CallPotential(string potName, int A, int Z, double E){
   bool okFlag = false;
@@ -575,5 +618,9 @@ bool CallPotential(string potName, int A, int Z, double E){
   if( potName == "G") okFlag = BecchettiPotential(A, Z, E);
   if( potName == "P") okFlag = PereyPotential(A, Z, E);
   
+  if( potName == "x") okFlag = XuPotential(A, Z, E);
+  if( potName == "l") okFlag = LiangPotential(A, Z, E);
+  
+
   return okFlag;
 }
