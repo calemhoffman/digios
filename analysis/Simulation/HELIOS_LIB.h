@@ -635,11 +635,12 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       double zHit = TMath::QuietNaN();
       bool isHit = false;
       bool isHitFromOutside = false;
-      bool redoFlag = false;
+      bool isReachArrayCoverage = false;
       
       loop = 0;
       int startJ = (int) fmod(TMath::Ceil(mDet*phi/TMath::TwoPi() - 0.5) ,mDet) ;
 
+      // loop until reach the detector position covrage.
       do{
          loop += 1;
          int n = 2*loop -1;
@@ -652,24 +653,27 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          for( int j = startJ ; j < startJ + mDet; j++){
          
             double phiDet = TMath::TwoPi() / mDet * (j); // detector plane angle 
-            redoFlag = false;
+            isReachArrayCoverage = false;
             isHitFromOutside = false;
             
             //========== calculate zHit
             double aEff = a - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
-            
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
             if( firstPos > 0 ){
-               if( zHit < pos[0] )  redoFlag = true;
+               if( zHit < pos[0] )  continue; // goto next loop
                if(zHit > pos[nDet-1] + l) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-               if( pos[nDet-1] < zHit )redoFlag = true;
+               if( pos[nDet-1] < zHit ) continue;
                if( zHit < pos[0] - l) return -4; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
             double dir = TMath::Cos( TMath::Tan(theta) * zHit/ rho + phi - phiDet);
-            if( dir < 0) isHitFromOutside = true;
+            if( dir < 0) {
+              isHitFromOutside = true;
+            }else{
+              return -5; // hit from inside.
+            }
             // when dir == 0, no solution
 
             // calculate the distance from middle of detector
@@ -679,30 +683,33 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          
             //======= check Block
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support && sHit < a/2. ) return -5; // blocked by support
+               if( pos[0] > zHit && zHit > pos[0] - support && sHit < a/2. ) return -6; // blocked by support
             }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < a/2.) return -5;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < a/2.) return -6;
             }
             
             //====== check hit
-            if( !redoFlag && isHitFromOutside && sHit < w/2.){      
+            if( !isReachArrayCoverage && isHitFromOutside && sHit < w/2.){      
                isHit = true;
-               redoFlag = false;
+               isReachArrayCoverage = false;
                detRowID = (j+mDet) % mDet;
                break;     // if isHit, break, don't calculate for the rest of the detector
             }else{
-               redoFlag = true;
+               isReachArrayCoverage = true;
             }
          }      
-      }while(redoFlag); 
+      }while(isReachArrayCoverage); 
       
-      if( !isHit ) return -6; // zHit falls outside the detector, but could be in the gap of detector
+      if( !isHit ) return -7; // zHit falls outside the detector, but could be in the gap of detector
       
       //===== final calculation for light particle
       e = Pb.E() - Pb.M();
       z = zHit;
       t = zHit / vp0;
       dphi = t * vt0 / rho;
+      
+      //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
+      if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
       
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
@@ -722,10 +729,10 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       if( detID >=0  ){
          hit = 1;      
       }else{
-         hit = -7; // particle-b hit the gap
+         hit = -9; // particle-b hit the gap
       }
    }else{
-      hit = -8;
+      hit = -10; // hit helio wall or (detector upstream, particle go downstream, via versa)
    }
 
    return hit;
