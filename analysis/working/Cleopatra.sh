@@ -57,6 +57,7 @@ loadfile=$1
 infile=$1".in"
 outfile=$1".out"
 rootfile=$1".root"
+exFile=$1".Ex.txt"
 
 if [ $# -eq 2 ]; then
   CreateInFile=$2
@@ -160,5 +161,5 @@ if [ ${PlotResult} -eq 1 ] ; then
 fi;
 
 if [ ${SimTransfer} -eq 1 ] ; then 
-  ../Cleopatra/Transfer reactionConfigtxt detectorGeo.txt example.Ex.txt example.root transfer.root reaction.dat
+  ../Cleopatra/Transfer reactionConfigtxt detectorGeo.txt ${exFile} ${rootfile} transfer.root reaction.dat
 fi;
