@@ -20,3 +20,4 @@ analysis/Cleopatra/ExtractXSec
 analysis/Cleopatra/FindThetaCM
 analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray
+analysis/Cleopatra/Transfer
