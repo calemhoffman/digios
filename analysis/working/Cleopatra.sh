@@ -35,10 +35,13 @@ CreateInFile=0   # 0 = false, 1 = true
 RunPtolemy=0
 IsExtractXSec=0
 PlotResult=0
+SimTransfer=0
 #============================================ USER don't need to change thing below
 
 if [ $# -eq 0 ] ; then
-  echo "$./Cleopatra in-file X  X  X  X  angMin angMax angStep"
+  echo "$./Cleopatra in-file X  X  X  X  X angMin angMax angStep"
+  echo "                     |  |  |  |  |"
+  echo "                     |  |  |  |  Simulate Transfer reaction? (1/0)"
   echo "                     |  |  |  |"
   echo "                     |  |  |  PlotResult? (1/0)"
   echo "                     |  |  Extract cross-section? (2/1/0)"
@@ -73,14 +76,22 @@ if [ $# -eq 5 ]; then
   IsExtractXSec=$4
   PlotResult=$5
 fi;
-if [ $# -eq 8 ]; then
+if [ $# -eq 6 ]; then
   CreateInFile=$2
   RunPtolemy=$3
   IsExtractXSec=$4
   PlotResult=$5
-  angMin=$6
-  angMax=$7
-  angStep=$8
+  SimTransfer=$6
+fi;
+if [ $# -eq 9 ]; then
+  CreateInFile=$2
+  RunPtolemy=$3
+  IsExtractXSec=$4
+  PlotResult=$5
+  SimTransfer=$6
+  angMin=$7
+  angMax=$8
+  angStep=$9
 fi;
 
 ExtractXsecMsg=""
@@ -118,9 +129,9 @@ echo "================================================================="
 
 if [ ${CreateInFile} -eq 1 ] ; then 
   if [ $# -eq 8 ]; then
-    ../bin/InFileCreator ${loadfile} $angMin $angMax $angStep
+    ../Cleopatra/InFileCreator ${loadfile} $angMin $angMax $angStep
   else
-    ../bin/InFileCreator ${loadfile} 0.0 50.0 0.5
+    ../Cleopatra/InFileCreator ${loadfile} 0.0 50.0 0.5
   fi
 fi;
 
@@ -133,7 +144,7 @@ fi;
 
 #===== Extracting XSec and save into *txt and *root
 if [ ${IsExtractXSec} -ge 1 ] ; then 
-  ../bin/ExtractXSec ${outfile} ${IsExtractXSec}
+  ../Cleopatra/ExtractXSec ${outfile} ${IsExtractXSec}
 fi;
 
 if [ ${PlotResult} -eq 1 ] ; then 
@@ -143,7 +154,11 @@ if [ ${PlotResult} -eq 1 ] ; then
   echo "================================================================="
   echo "=====   Plot Result from ${rootfile}"
   echo "================================================================="
-  com='../bin/PlotTGraphTObjArray.h("'${rootfile}'")'
+  com='../Cleopatra/PlotTGraphTObjArray.h("'${rootfile}'")'
   echo ${com}
   root -l ${com}
+fi;
+
+if [ ${SimTransfer} -eq 1 ] ; then 
+  ../Cleopatra/Transfer reactionConfigtxt detectorGeo.txt example.Ex.txt example.root transfer.root reaction.dat
 fi;
