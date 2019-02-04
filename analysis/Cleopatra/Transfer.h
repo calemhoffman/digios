@@ -465,7 +465,8 @@ void Transfer(
     if( distSize != ExKnown.size() ) {
       printf(" The number of distribution from Ptolmey Calculation is not equal to number of Ex input \n"); 
       printf("   --> the Ptolmey calculation is probably not matched with Ex input.\n"); 
-      printf(" ....Terminate.  \n"); 
+      printf(" .... not use DWBA input.  \n"); 
+      distFile->Close();
     }
   }else{
     printf("------- no DWBA input. \n");
