@@ -102,6 +102,13 @@ elif [ $IsExtractXSec -eq 2 ]; then
   ExtractXsecMsg=", for (d,d)(p,p), extract Total Xsec"
 fi;
 
+if [ $IsExtractXsec -eq 0 ]; then
+  SumTransfer=0;
+  TransferMsg="Overrided by not ExtractXsec"
+else
+  TransferMsg=""
+fi
+
 echo "#################################################################"
 echo "##   @@@@ @@    @@@@  @@@@  @@@@@  @@@@  @@@@@@ @@@@@   @@@@   ##"
 echo "##  @@    @@    @@   @@  @@ @@ @@ @@  @@   @@   @@ @@  @@  @@  ##"
@@ -117,6 +124,7 @@ echo " --- Is Create Ptolemy infile ? " ${CreateInFile}
 echo " --- Is Run Ptolemy           ? " ${RunPtolemy}
 echo " --- Is Extract Cross-Section ? " ${IsExtractXSec} ${ExtractXsecMsg}
 echo " --- Is Plot Results          ? " ${PlotResult}
+echo " ----Is Simulation Transfer   ? " ${SimTransfer} ${TransferMsg}
 echo "================================================================="
 
 #if [ ${CreateInFile} -eq 1 ] ; then 

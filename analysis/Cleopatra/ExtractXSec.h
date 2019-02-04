@@ -250,7 +250,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   }
   printf("---------------------------------------------------\n");
   
-  //================================== save ExPtolemy.txt
+  //================================== save *.Ex.txt
   string saveExName = readFile;
   int len = saveExName.length();
   saveExName = saveExName.substr(0, len - 4); 
@@ -258,10 +258,6 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   printf("Output : %s \n", saveExName.c_str());
   FILE * file_Ex;
   file_Ex = fopen(saveExName.c_str(), "w+");
-  
-  for( int i = 0; i < numCal ; i++){
-      fprintf(file_Ex, "//%14s\n", reaction[i].c_str());
-  }
   
   fprintf(file_Ex, "recoil\n");
 
