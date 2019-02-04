@@ -15,8 +15,8 @@ analysis/GEBSort/GEBSort_nogeb
 .DS_Store
 
 analysis/Simulation/reaction.dat
-Cleopatra
-ExtractXSec
-FindThetaCM
-InFileCreator
-PlotTGraphTObjArray
+analysis/Cleopatra/Cleopatra
+analysis/Cleopatra/ExtractXSec
+analysis/Cleopatra/FindThetaCM
+analysis/Cleopatra/InFileCreator
+analysis/Cleopatra/PlotTGraphTObjArray
