@@ -13,8 +13,6 @@
 #include <fstream>
 #include <TObjArray.h>
 
-
-
 double exDistFunc(Double_t *x, Double_t * par){
   return par[(int) x[0]];
 }
@@ -41,11 +39,9 @@ void Transfer(
   int numEvent;
 
   //---- HELIOS detector geometry
-  double BField = 2.5; // T
-  double BFieldTheta = 0.; // direction of B-field
+  double BField , BFieldTheta; // Bfield and direction of B-field in T and deg
   bool isCoincidentWithRecoil = false; 
-  double eSigma = 0.040 ; // detector energy sigma MeV
-  double zSigma = 0.010 ; // detector position sigma mm
+  double eSigma, zSigma; // detector energy and position resolution in MeV and mm
 
   //---- excitation of Beam 
   int nExA = 1;
@@ -72,7 +68,7 @@ void Transfer(
     string line;
     int i = 0;
     while( cFile >> line){
-      printf("%d, %s \n", i,  line.c_str());
+      //printf("%d, %s \n", i,  line.c_str());
       if( line.substr(0,2) == "//" ) continue;
       if( i == 0 ) AA = atoi(line.c_str());
       if( i == 1 ) zA = atoi(line.c_str());
@@ -123,9 +119,9 @@ void Transfer(
   reaction.SetIncidentEnergyAngle(KEAmean, 0, 0);
   reaction.CalReactionConstant();
 
-  printf("===================================================\n");
-  printf("=========== %27s ===========\n", reaction.GetReactionName().Data());
-  printf("===================================================\n");
+  printf("***************************************************\n");
+  printf("*        %27s             *\n", reaction.GetReactionName().Data());
+  printf("***************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
   printf("#################################### Beam \n");
   printf("         KE: %7.4f +- %5.4f MeV/u, dp/p = %5.2f %% \n", KEAmean, KEAsigma, KEAsigma/KEAmean * 50.);
@@ -137,26 +133,40 @@ void Transfer(
   //======== Set HELIOS
   printf("#################################### HELIOS configuration\n");   
   HELIOS helios;
-  //TODO add BFieldTheta in detectorGeo.txt
-  helios.OverrideMagneticFieldDirection(BFieldTheta);
   bool sethelios = helios.SetDetectorGeometry(heliosDetGeoFile);
   if( !sethelios){
     helios.OverrideMagneticField(BField);
+    helios.OverrideMagneticFieldDirection(BFieldTheta);
     printf("======== B-field : %5.2f T, Theta : %6.2f deg\n", BField, BFieldTheta);
   }
-  helios.SetCoincidentWithRecoil(isCoincidentWithRecoil);
+  //helios.SetCoincidentWithRecoil(isCoincidentWithRecoil);
   int mDet = helios.GetNumberOfDetectorsInSamePos();
-  printf("========== energy resol.: %f MeV\n", eSigma);
-  printf("=========== pos-Z resol.: %f mm \n", zSigma);
+  
+  eSigma = helios.GetDetEnergyResol();
+  zSigma = helios.GetDetPositionResol();
+  
+  printf("                    energy resol.: %f MeV\n", eSigma);
+  printf("                     pos-Z resol.: %f mm \n", zSigma);
+  
+  double zElum1 = helios.GetElum1Pos();
+  double zElum2 = helios.GetElum2Pos();
+  double zRecoil1 = helios.GetRecoil1Pos();
+  double zRecoil2 = helios.GetRecoil2Pos();
+  
+  if( zElum1 != 0 ) printf("                      Elum 1 pos.: %f mm \n", zElum1);
+  if( zElum2 != 0 ) printf("                      Elum 2 pos.: %f mm \n", zElum2);
+  if( zRecoil1 != 0 ) printf("                    Recoil 1 pos.: %f mm \n", zRecoil1);
+  if( zRecoil2 != 0 ) printf("                    Recoil 2 pos.: %f mm \n", zRecoil2);
+  
   double beta = reaction.GetReactionBeta() ;
   double gamma = reaction.GetReactionGamma();
   double mb = reaction.GetMass_b();
   double pCM = reaction.GetMomentumbCM();
   double q = TMath::Sqrt(mb*mb + pCM*pCM);
   double slope = 299.792458 * zb * helios.GetBField() / TMath::TwoPi() * beta / 1000.; // MeV/mm
-  printf("====================== e-z slope : %f MeV/mm\n", slope);   
+  printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
-  printf("=== e-z intercept (ground state) : %f MeV\n", intercept); 
+  printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
 
   //============ save reaction.dat
   if( filename != "" ) {
@@ -365,39 +375,38 @@ void Transfer(
   
   //in case need ELUM
   double xHit1, yHit1, rhoHit1;
-  tree->Branch("xHit1", &xHit1, "xHit1/D");
-  tree->Branch("yHit1", &yHit1, "yHit1/D");
-  tree->Branch("rhoHit1", &rhoHit1, "rhoHit1/D");
-
+  if( zElum1 != 0 ) {
+    tree->Branch("xHit1", &xHit1, "xHit1/D");
+    tree->Branch("yHit1", &yHit1, "yHit1/D");
+    tree->Branch("rhoHit1", &rhoHit1, "rhoHit1/D");
+  }
+  
   double xHit2, yHit2, rhoHit2;
-  tree->Branch("xHit2", &xHit2, "xHit2/D");
-  tree->Branch("yHit2", &yHit2, "yHit2/D");
-  tree->Branch("rhoHit2", &rhoHit2, "rhoHit2/D");
-
+  if( zElum2 != 0 ) {
+    tree->Branch("xHit2", &xHit2, "xHit2/D");
+    tree->Branch("yHit2", &yHit2, "yHit2/D");
+    tree->Branch("rhoHit2", &rhoHit2, "rhoHit2/D");
+  }
+  
   //in case need other recoil detector. 
   double rxHit1, ryHit1;
-  tree->Branch("rxHit1", &rxHit1, "rxHit1/D");
-  tree->Branch("ryHit1", &ryHit1, "ryHit1/D");
-
+  if( zRecoil1 != 0 ){
+    tree->Branch("rxHit1", &rxHit1, "rxHit1/D");
+    tree->Branch("ryHit1", &ryHit1, "ryHit1/D");
+  }
   double rxHit2, ryHit2;
-  tree->Branch("rxHit2", &rxHit2, "rxHit2/D");
-  tree->Branch("ryHit2", &ryHit2, "ryHit2/D");
-
+  if( zRecoil2 != 0 ){
+    tree->Branch("rxHit2", &rxHit2, "rxHit2/D");
+    tree->Branch("ryHit2", &ryHit2, "ryHit2/D");
+  }
   //======= function for e-z plot for ideal case
   printf("++++ generate functions\n");
   TObjArray * gList = new TObjArray();
-  TF1* g0 = new TF1("g0", "TMath::Sqrt([0] + [1] * x*x) - [2]", -1000, 1000);
-  g0->SetParameter(0, mb*mb);
-  g0->SetParameter(1, TMath::Power(slope/beta,2));
-  g0->SetParameter(2, mb);
-  g0->SetNpx(1000);
-  gList->Add(g0);    
-  printf("/");
-
+  gList->SetName("Constant thetaCM lines");
   const int gxSize = 50;
   TF1 ** gx = new TF1*[gxSize];
   TString name;
-  for( int i = 1; i <= gxSize; i++){
+  for( int i = 0; i < gxSize; i++){
     name.Form("g%d", i);     
     gx[i] = new TF1(name, "([0]*TMath::Sqrt([1]+[2]*x*x)+[5]*x)/([3]) - [4]", -1000, 1000);      
     double thetacm = i * TMath::DegToRad();
@@ -411,7 +420,7 @@ void Transfer(
     gx[i]->SetNpx(1000);
     gList->Add(gx[i]);
     printf("/");
-    if( i % 40 == 0 ) printf("\n");
+    if( i > 1 && i % 40 == 0 ) printf("\n");
   }
   gList->Write("gList", TObject::kSingleKey);
   printf(" %d constant thetaCM functions\n", gxSize);
@@ -610,32 +619,32 @@ void Transfer(
     yHit = helios.GetYPos(z);
     z += gRandom->Gaus(0, zSigma);
 
-    //TODO put this into detectorGeo.txt
     //ELUM
-    double zElum = 231.5;
-    xHit1 = helios.GetXPos(zElum);
-    yHit1 = helios.GetYPos(zElum);
-    rhoHit1 = helios.GetR(zElum);
-
-    double zElum2 = zElum - 10.;
-    xHit2 = helios.GetXPos(zElum2);
-    yHit2 = helios.GetYPos(zElum2);
-    rhoHit2 = helios.GetR(zElum2);
-
+    if( zElum1 != 0 ){
+      xHit1 = helios.GetXPos(zElum1);
+      yHit1 = helios.GetYPos(zElum1);
+      rhoHit1 = helios.GetR(zElum1);
+    }
+    if( zElum2 != 0 ){
+      xHit2 = helios.GetXPos(zElum2);
+      yHit2 = helios.GetYPos(zElum2);
+      rhoHit2 = helios.GetR(zElum2);
+    }
     recoilT = helios.GetRecoilTime();
     rxHit = helios.GetRecoilXHit();
     ryHit = helios.GetRecoilYHit();
 
     //TODO put this into detectorGeo.txt
     //other recoil detectors
-    double recoilZ1 = 231.5;
-    rxHit1 = helios.GetRecoilXPos(recoilZ1);
-    ryHit1 = helios.GetRecoilYPos(recoilZ1);
+    if ( zRecoil1 != 0 ){
+      rxHit1 = helios.GetRecoilXPos(zRecoil1);
+      ryHit1 = helios.GetRecoilYPos(zRecoil1);
+    }
+    if ( zRecoil2 != 0 ){
+      rxHit2 = helios.GetRecoilXPos(zRecoil2);
+      ryHit2 = helios.GetRecoilYPos(zRecoil2);
+    }
     
-    double recoilZ2 = 1463;
-    rxHit2 = helios.GetRecoilXPos(recoilZ2);
-    ryHit2 = helios.GetRecoilYPos(recoilZ2);
-
     reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());
     ExCal = reaction.GetEx();
     thetaCMCal = reaction.GetThetaCM();
