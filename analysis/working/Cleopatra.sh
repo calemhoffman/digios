@@ -130,7 +130,7 @@ echo "================================================================="
 #fi;
 
 if [ ${CreateInFile} -eq 1 ] ; then 
-  if [ $# -eq 8 ]; then
+  if [ $# -eq 9 ]; then
     ../Cleopatra/InFileCreator ${loadfile} $angMin $angMax $angStep
   else
     ../Cleopatra/InFileCreator ${loadfile} 0.0 50.0 0.5

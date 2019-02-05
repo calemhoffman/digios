@@ -29,7 +29,7 @@ void PlotTGraphTObjArray(TString rootFileName){
   
   TFile * file = new TFile(rootFileName, "READ");
   
-  TObjArray * gList = (TObjArray *) file->FindObjectAny("gList");
+  TObjArray * gList = (TObjArray *) file->FindObjectAny("qList");
   
   if( gList == NULL ) {
     printf("No Result was found.\n");
