@@ -7,12 +7,11 @@ Make a new Transfer.C/h for simulation included Ptolmey Xsec distribution.
 Basic Structure:
 1) daq
 2) analysis
-       1) oragnize the files, put all experimentals independent files in Armory.  
-
-       2) added ryan's code for stardard analysis method. 
+2a) oragnize the files, put all experimentals independent files in Armory.  
+2b) added ryan's code for stardard analysis method. 
 
 3) Cleopatra
-       1) This is a user interface for Ptolemy.
+3a) This is a user interface for Ptolemy.
  
 ## Initialization
 All things digital data for HELIOS, ISS, etc. Including both daq and analysis software
