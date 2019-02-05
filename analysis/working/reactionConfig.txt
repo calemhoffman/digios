@@ -6,7 +6,7 @@
 3        //recoil_light_A
 1        //recoil-light_Z
 10.00    //beam-energy
-10000  //number_of_Event_being_generated
+100000  //number_of_Event_being_generated
 false    //isDacay
 false    //isReDo
 0.00    //x_offset_of_Beam_mm

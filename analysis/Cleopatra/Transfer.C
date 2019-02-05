@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
     printf("   [1] reactionConfig.txt (intput) reaction Setting \n");
     printf("   [2] detectorGeo.txt    (intput) detector Setting \n");
     printf("   [3] Ex.txt             (intput) Excitation energies \n");
-    printf("   [4] DWBA.root          (input) thetaCM distribution from DWBA \n");
+    printf("   [4] DWBA.root          (intput) thetaCM distribution from DWBA \n");
     printf("   [5] transfer.root      (output) rootFile name for output \n");
     printf("   [6] reaction.dat       (output) Key reaction parameters \n");
     printf("------------------------------------------------------\n");
@@ -95,13 +95,13 @@ int main (int argc, char *argv[]) {
     filename = argv[6];
   }
   
-  printf(" %s \n", basicConfig.c_str());
-  printf(" %s \n", heliosDetGeoFile.c_str());
-  printf(" %s \n", excitationFile.c_str());
-  printf(" %s \n", saveFileName.Data());
-  printf(" %s \n", ptolemyRoot.Data());
-  printf(" %s \n", filename.Data());
+  //printf(" %s \n", basicConfig.c_str());
+  //printf(" %s \n", heliosDetGeoFile.c_str());
+  //printf(" %s \n", excitationFile.c_str());
+  //printf(" %s \n", saveFileName.Data());
+  //printf(" %s \n", ptolemyRoot.Data());
+  //printf(" %s \n", filename.Data());
   
-  Transfer( basicConfig, heliosDetGeoFile, excitationFile, saveFileName, ptolemyRoot, filename);
+  Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
   
 }

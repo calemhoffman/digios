@@ -25,9 +25,18 @@
 #include <TString.h>
 #include <TMath.h>
 #include <TGraph.h>
+#include <TF1.h>
 #include <TObjArray.h>
 
 using namespace std;
+
+TObjArray * gList = NULL;
+double distfunct(double *x, double *par){
+  
+  TGraph * gTemp = (TGraph *) gList->At(par[0]);
+  
+  return gTemp->Eval(x[0]);
+}
 
 int ExtractXSec (string readFile, int indexForElastic=1) {
   
@@ -304,20 +313,38 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   printf("Output : %s \n", fileName.Data());
   TFile * fileOut = new TFile(fileName, "RECREATE" );
   
-  TObjArray * gList = new TObjArray();
+  gList = new TObjArray();
+  gList->SetName("TGraph of distributions");
+  TObjArray * fList = new TObjArray();
+  gList->SetName("TF1 of distributions");
+  
+  TGraph ** gGraph = new TGraph *[numCal];
+  TF1 ** dist = new TF1*[numCal];
+  
   for( int i = 0; i < numCal ; i++){
-    TGraph * gTemp = new TGraph();
+    gGraph[i] = new TGraph();
     TString name = reaction[i];
     name += "|";
     name += title[i];
-    gTemp->SetName(name);
+    gGraph[i]->SetName(name);
     for( int j = 0; j < angle.size() ; j++){
-        gTemp->SetPoint(j, angle[j], dataMatrix[i][j]);
+        gGraph[i]->SetPoint(j, angle[j], dataMatrix[i][j]);
     }
-    gList->Add(gTemp);
+    gList->Add(gGraph[i]);
+    
+    name.Form("dist%d", i);
+    dist[i] = new TF1(name, distfunct, angleMin, angleMax, 1 );
+    dist[i]->SetParameter(0, i);
+    
+    fList->Add(dist[i]);
+    
+    //delete tempFunc;
+    
   }
+  gList->Write("qList", 1);
+  fList->Write("pList", 1);
   
-  gList->Write("gList", 1);
+  
   fileOut->Write();
   fileOut->Close();
   printf("---------------------------------------------------\n");
