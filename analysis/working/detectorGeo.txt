@@ -1,15 +1,15 @@
-2.85   //Bfield
-925.0  //bore_mm
-11.5   //distance_from_axis
-9.0    //width_of_detector
-300   //recoil_position_+_for_downstream
-52     //radius_of_recoil_detector
-50.5   //length_of_detector
-43.5   //support_length
-590   //first_position_-_for_upstream
+2.85     //Bfield
+925.0    //bore_mm
+11.5     //distance_from_axis_mm
+9.0      //width_of_detector_mm
+300      //recoil_position_+_for_downstream
+52       //radius_of_recoil_detector
+50.5     //length_of_detector
+43.5     //support_length
+590      //first_position_-_for_upstream
 4        //number_of_detector_as_same_position
-0.00 //1st_detector_near_position_in_reference_to_det6
-58.6 //2nd_det
+0.00     //1st_detector_near_position_in_reference_to_det6
+58.6     //2nd_det
 117.9 
 176.8
 235.8
