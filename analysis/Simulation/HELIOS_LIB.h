@@ -398,6 +398,16 @@ public:
    double GetBField() {return Bfield;}
    double GetDetectorA() {return a;}
    
+   double GetDetEnergyResol(){return eSigma;}
+   double GetDetPositionResol(){return zSigma;}
+   
+   double GetRecoil1Pos(){return posRecoil1;}
+   double GetRecoil2Pos(){return posRecoil2;}
+   
+   double GetElum1Pos(){return zElum1;}
+   double GetElum2Pos(){return zElum2;}
+   
+   
 private:
    double theta, phi; // polar angle of particle 
    double e, z, x, rho, dphi, t;
@@ -431,6 +441,14 @@ private:
    bool overrideDetDistance;
    bool overrideFirstPos;
    bool isCoincidentWithRecoil;
+   
+   
+   double eSigma;
+   double zSigma;
+   double posRecoil1;
+   double posRecoil2;
+   double zElum1;
+   double zElum2;
 };
 
 HELIOS::HELIOS(){
@@ -477,7 +495,16 @@ HELIOS::HELIOS(){
    
    overrideDetDistance = false;
    overrideFirstPos = false;
-   isCoincidentWithRecoil = true;
+   isCoincidentWithRecoil = false;
+   
+   eSigma = 0;
+   zSigma = 0;
+   
+   posRecoil1 = 0;
+   posRecoil2 = 0;
+   
+   zElum1 = 0;
+   zElum2 = 0;
 }
 
 HELIOS::~HELIOS(){
@@ -498,17 +525,29 @@ bool HELIOS::SetDetectorGeometry(string filename){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          
-         if( i == 0 )                         Bfield    = atof(x.c_str());
-         if( i == 1 )                         bore      = atof(x.c_str());
-         if( i == 2 && !overrideDetDistance ) a         = atof(x.c_str());
-         if( i == 3 )                         w         = atof(x.c_str());
-         if( i == 4 )                         posRecoil = atof(x.c_str());
-         if( i == 5 )                         rhoRecoil = atof(x.c_str());
-         if( i == 6 )                         l         = atof(x.c_str());
-         if( i == 7 )                         support   = atof(x.c_str());
-         if( i == 8 && !overrideFirstPos )    firstPos  = atof(x.c_str());
-         if( i == 9 )                         mDet      = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 0 )                            Bfield = atof(x.c_str());
+         if( i == 1 )                       BfieldTheta = atof(x.c_str());
+         if( i == 2 )                              bore = atof(x.c_str());
+         if( i == 3 && !overrideDetDistance )         a = atof(x.c_str());
+         if( i == 4 )                                 w = atof(x.c_str());
+         if( i == 5 )                         posRecoil = atof(x.c_str());
+         if( i == 6 )                         rhoRecoil = atof(x.c_str());
+         if( i == 7 ){
+           if( x.compare("false") == 0 ) isCoincidentWithRecoil = false;
+           if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
+         }
+         if( i == 8 )                        posRecoil1 = atof(x.c_str());
+         if( i == 9 )                        posRecoil2 = atof(x.c_str());
+         if( i == 10)                            zElum1 = atof(x.c_str());
+         if( i == 11 )                           zElum2 = atof(x.c_str());
+         if( i == 12 )                                 l = atof(x.c_str());
+         if( i == 13 )                           support = atof(x.c_str());
+         if( i == 14 && !overrideFirstPos )     firstPos = atof(x.c_str());
+         if( i == 15 )                            eSigma = atof(x.c_str());
+         if( i == 16 )                            zSigma = atof(x.c_str());
+         
+         if( i == 17 )                             mDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -522,10 +561,12 @@ bool HELIOS::SetDetectorGeometry(string filename){
          pos[id] = firstPos + pos[id];
       }
       
-      printf("================ B-field: %8.2f T, Theta : %6.2f deg \n", Bfield, BfieldTheta * TMath::RadToDeg());
-      printf("==== Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
-      printf("========= First Position: %8.2f mm \n", firstPos);
-      printf("====== gap of multi-loop: %8.2f mm \n", firstPos > 0 ? firstPos - support : firstPos + support );
+      printf("=====================================================\n");
+      printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta * TMath::RadToDeg());
+      printf("     Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
+      printf("       gap of multi-loop: %8.2f mm \n", firstPos > 0 ? firstPos - support : firstPos + support );
+      printf("          First Position: %8.2f mm \n", firstPos);
+      printf("------------------------------------- Detector Position \n");
       for(int i = 0; i < nDet ; i++){
          if( firstPos > 0 ){
             printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + l);
@@ -533,7 +574,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
             printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - l , pos[i]);
          }
       }
-      printf("=======================\n");
+      printf("=====================================================\n");
 		isDetReady = true;
    
    }else{
