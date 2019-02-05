@@ -23,7 +23,12 @@ TGraph * thetaCMDist = NULL;
 TF1 * dist = NULL;
 
 double disFunc(Double_t *x, Double_t * par){
-  return thetaCMDist->Eval(x[0]);
+  
+  //if( par[0] < x[0] && x[0] < par[1]){
+    return thetaCMDist->Eval(x[0]);
+  //}else{
+  //  return 0;
+  //}
 }
 
 double exDistFunc(Double_t *x, Double_t * par){
@@ -34,8 +39,8 @@ void Transfer(
               string basicConfig = "reactionConfig.txt", 
          string heliosDetGeoFile = "detectorGeo.txt", 
         string    excitationFile = "excitation_energies.txt", //when no file, only ground state
-        TString     saveFileName = "transfer.root",
         TString      ptolemyRoot = "DWBA.root", // when no file, use isotropic distribution of thetaCM
+        TString     saveFileName = "transfer.root",
         TString         filename = "reaction.dat"){ // when no file, no output.
 
   //================================================= User Setting //TODO move to reactionConfig
@@ -260,8 +265,26 @@ void Transfer(
   int exSize = ExKnown.size();
   TF1 * exDist = new TF1("exDist", exDistFunc, 0, exSize, exSize);
   for(int i = 0; i < exSize; i++){
-    printf(" %d | %f \n", i, ExStrength[i]);
+    //printf(" %d | %f \n", i, ExStrength[i]);
     exDist->SetParameter(i, ExStrength[i]);
+  }
+  
+  //======== Load DWBAroot for thetaCM distribution
+  printf("####################### Load DWBA input : %s  \n", ptolemyRoot.Data());
+  
+  TFile * distFile = new TFile(ptolemyRoot);
+  TObjArray * distList = NULL;
+  if( distFile->IsOpen() ) {
+    distList = (TObjArray *) distFile->FindObjectAny("pList"); // the function List
+    int distSize = distList->GetLast() + 1;
+    if( distSize != ExKnown.size() ) {
+      printf(" The number of distribution from Ptolmey Calculation is not equal to number of Ex input \n"); 
+      printf("   --> the Ptolmey calculation is probably not matched with Ex input.\n"); 
+      printf(" .... not use DWBA input.  \n"); 
+      distFile->Close();
+    }
+  }else{
+    printf("------- no DWBA input. \n");
   }
 
   //====================== build tree
@@ -453,25 +476,7 @@ void Transfer(
   }
   txList->Write("txList", TObject::kSingleKey);
   printf("done!\n");
-
-
-  //======== Load DWBAroot for thetaCM distribution
-  TFile * distFile = new TFile(ptolemyRoot);
-  TObjArray * distList = NULL;
-  if( distFile->IsOpen() ) {
-    distList = (TObjArray *) distFile->FindObjectAny("gList");
-    int distSize = distList->GetLast() + 1;
-
-    if( distSize != ExKnown.size() ) {
-      printf(" The number of distribution from Ptolmey Calculation is not equal to number of Ex input \n"); 
-      printf("   --> the Ptolmey calculation is probably not matched with Ex input.\n"); 
-      printf(" .... not use DWBA input.  \n"); 
-      distFile->Close();
-    }
-  }else{
-    printf("------- no DWBA input. \n");
-  }
-
+  
   //========timer
   TBenchmark clock;
   bool shown ;   
@@ -523,19 +528,27 @@ void Transfer(
         reaction.SetIncidentEnergyAngle(KEAnew, theta, phi);
       }
 
-      //==== Calculate reaction
+      //==== Calculate thetaCM
       thetaCM = TMath::ACos(2 * gRandom->Rndm() - 1) ; 
-
       if( distFile->IsOpen()){
-        thetaCMDist = (TGraph *) distList->At(i);
-        dist = new TF1("dist", disFunc, 0, 180, 0);
-        dist->SetNpx(1000);
-        thetaCM = dist->GetRandom();
-        delete dist;
+        dist = (TF1 *) distList->At(ExID);
+        //double xMin, xMax, y;
+        //thetaCMDist->GetPoint(0, xMin, y);
+        //int size = thetaCMDist->GetN();
+        //thetaCMDist->GetPoint(size-1, xMax, y);
+        //
+        //dist = new TF1("dist", disFunc, xMin, xMax, 0);
+        //dist->SetParameter(0, xMin);
+        //dist->SetParameter(1, xMax);
+        
+        thetaCM = dist->GetRandom() / 180. * TMath::Pi();
+        
+        //delete dist;
       }
 
       double phiCM = TMath::TwoPi() * gRandom->Rndm(); 
 
+      //==== Calculate reaction
       TLorentzVector * output = reaction.Event(thetaCM, phiCM);
 
       TLorentzVector Pb = output[2];
@@ -663,6 +676,7 @@ void Transfer(
         shown = 0;
       }
     }
+    
   }
 
   saveFile->Write();
