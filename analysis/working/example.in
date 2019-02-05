@@ -1,6 +1,6 @@
-$============================================ Ex=0.000(0d5/2)Kx
+$============================================ Ex=0.197(0d5/2)Kx
 reset
-REACTION: 20F(d,t)19F(1/2+ 0.000) ELAB= 20.000
+REACTION: 20F(d,t)19F(5/2+ 0.197) ELAB= 20.000
 PARAMETERSET dpsb r0target 
 $lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
 
@@ -23,17 +23,17 @@ vso  =   5.345  rso0 =   0.947  aso =   0.590
 vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
 ;
 OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
-v    = 132.326    r0 =   1.150    a =   0.788
-vi   =   0.030   ri0 =   1.618   ai =   0.665
-vsi  =  29.298  rsi0 =   1.207  asi =   0.736
+v    = 132.369    r0 =   1.150    a =   0.788
+vi   =   0.010   ri0 =   1.618   ai =   0.665
+vsi  =  29.332  rsi0 =   1.207  asi =   0.736
 vso  =   3.000  rso0 =   1.269  aso =   0.900
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
 ;
 anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
 ;
-$============================================ Ex=0.110(0p3/2)Kx
+$============================================ Ex=1.698(0d5/2)Kx
 reset
-REACTION: 20F(d,t)19F(1/2- 0.110) ELAB= 20.000
+REACTION: 20F(d,t)19F(5/2+ 1.698) ELAB= 20.000
 PARAMETERSET dpsb r0target 
 $lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
 
@@ -43,7 +43,7 @@ r0=1 a=0.5 l=0
 ;
 TARGET
 JBIGA=2
-nodes=0 l=1 jp=3/2 $node is n-1 
+nodes=0 l=2 jp=5/2 $node is n-1 
 r0=1.25 a=.65 
 vso=6 rso0=1.10 aso=.65 
 rc0=1.3 
@@ -56,17 +56,83 @@ vso  =   5.345  rso0 =   0.947  aso =   0.590
 vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
 ;
 OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
-v    = 132.350    r0 =   1.150    a =   0.788
-vi   =   0.019   ri0 =   1.618   ai =   0.665
-vsi  =  29.317  rsi0 =   1.207  asi =   0.736
+v    = 132.690    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  29.587  rsi0 =   1.207  asi =   0.736
 vso  =   3.000  rso0 =   1.269  aso =   0.900
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
 ;
 anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
 ;
-$============================================ Ex=0.197(1s1/2)Kx
+$============================================ Ex=2.809(0d5/2)Kx
 reset
-REACTION: 20F(d,t)19F(5/2+ 0.197) ELAB= 20.000
+REACTION: 20F(d,t)19F(5/2+ 2.809) ELAB= 20.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r0=1 a=0.5 l=0 
+;
+TARGET
+JBIGA=2
+nodes=0 l=2 jp=5/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  51.082    r0 =   1.155    a =   0.675
+vi   =   1.827   ri0 =   1.155   ai =   0.675
+vsi  =   8.166  rsi0 =   1.299  asi =   0.529
+vso  =   5.345  rso0 =   0.947  aso =   0.590
+vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 132.928    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  29.775  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+$============================================ Ex=4.873(0d5/2)Kx
+reset
+REACTION: 20F(d,t)19F(5/2+ 4.873) ELAB= 20.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r0=1 a=0.5 l=0 
+;
+TARGET
+JBIGA=2
+nodes=0 l=2 jp=5/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  51.082    r0 =   1.155    a =   0.675
+vi   =   1.827   ri0 =   1.155   ai =   0.675
+vsi  =   8.166  rsi0 =   1.299  asi =   0.529
+vso  =   5.345  rso0 =   0.947  aso =   0.590
+vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 133.367    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  30.125  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+$============================================ Ex=5.155(1s1/2)Kx
+reset
+REACTION: 20F(d,t)19F(3/2+ 5.155) ELAB= 20.000
 PARAMETERSET dpsb r0target 
 $lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
 
@@ -89,17 +155,17 @@ vso  =   5.345  rso0 =   0.947  aso =   0.590
 vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
 ;
 OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
-v    = 132.369    r0 =   1.150    a =   0.788
-vi   =   0.010   ri0 =   1.618   ai =   0.665
-vsi  =  29.332  rsi0 =   1.207  asi =   0.736
+v    = 133.427    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  30.173  rsi0 =   1.207  asi =   0.736
 vso  =   3.000  rso0 =   1.269  aso =   0.900
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
 ;
 anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
 ;
-$============================================ Ex=1.346(0p1/2)Kx
+$============================================ Ex=4.708(0p1/2)Kx
 reset
-REACTION: 20F(d,t)19F(5/2- 1.346) ELAB= 20.000
+REACTION: 20F(d,t)19F(5/2- 4.708) ELAB= 20.000
 PARAMETERSET dpsb r0target 
 $lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
 
@@ -122,9 +188,108 @@ vso  =   5.345  rso0 =   0.947  aso =   0.590
 vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
 ;
 OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
-v    = 132.615    r0 =   1.150    a =   0.788
+v    = 133.332    r0 =   1.150    a =   0.788
 vi   =   0.000   ri0 =   1.618   ai =   0.665
-vsi  =  29.527  rsi0 =   1.207  asi =   0.736
+vsi  =  30.097  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+$============================================ Ex=4.899(0p1/2)Kx
+reset
+REACTION: 20F(d,t)19F(3/2- 4.899) ELAB= 20.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r0=1 a=0.5 l=0 
+;
+TARGET
+JBIGA=2
+nodes=0 l=1 jp=1/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  51.082    r0 =   1.155    a =   0.675
+vi   =   1.827   ri0 =   1.155   ai =   0.675
+vsi  =   8.166  rsi0 =   1.299  asi =   0.529
+vso  =   5.345  rso0 =   0.947  aso =   0.590
+vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 133.372    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  30.130  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+$============================================ Ex=7.447(0p1/2)Kx
+reset
+REACTION: 20F(d,t)19F(5/2- 7.447) ELAB= 20.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r0=1 a=0.5 l=0 
+;
+TARGET
+JBIGA=2
+nodes=0 l=1 jp=1/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  51.082    r0 =   1.155    a =   0.675
+vi   =   1.827   ri0 =   1.155   ai =   0.675
+vsi  =   8.166  rsi0 =   1.299  asi =   0.529
+vso  =   5.345  rso0 =   0.947  aso =   0.590
+vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 133.911    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  30.562  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+$============================================ Ex=7.637(0p3/2)Kx
+reset
+REACTION: 20F(d,t)19F(7/2- 7.637) ELAB= 20.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r0=1 a=0.5 l=0 
+;
+TARGET
+JBIGA=2
+nodes=0 l=1 jp=3/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  51.082    r0 =   1.155    a =   0.675
+vi   =   1.827   ri0 =   1.155   ai =   0.675
+vsi  =   8.166  rsi0 =   1.299  asi =   0.529
+vso  =   5.345  rso0 =   0.947  aso =   0.590
+vsoi =  -0.093 rsoi0 =   0.947 asoi =   0.590  rc0 =   1.381
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 133.951    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  30.595  rsi0 =   1.207  asi =   0.736
 vso  =   3.000  rso0 =   1.269  aso =   0.900
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
 ;
