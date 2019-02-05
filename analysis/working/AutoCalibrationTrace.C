@@ -62,6 +62,7 @@ void AutoCalibrationTrace(){
       printf("        2) basicReactionConfig.txt\n");
       printf("        3) excitation_energies.txt\n");
       printf("========================================= \n");
+      printf(" !!!!!!! WARING: This code is outdated. Please use Cleopatra/Transfer \n");
       int nextFlag = 0; 
       printf("Prceed (1 = Yes / 0 = No ) ? ");
       temp = scanf("%d", &nextFlag);
@@ -74,8 +75,6 @@ void AutoCalibrationTrace(){
       transfer();
       gROOT->ProcessLine(".q");
    }
-   
-   
    
    printf(" ..... loading runsList.txt..");
 //==================================================== data files
@@ -181,14 +180,10 @@ void AutoCalibrationTrace(){
       return ;
    }
    
-      
-
-   
    if( option == 1 ) {
       Cali_xf_xn_to_e(chain);
       gROOT->ProcessLine(".q");
    }
-   
       
    if( option == 2 ) {
       
