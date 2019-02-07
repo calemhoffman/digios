@@ -3,7 +3,7 @@
 80       //beam_Z
 2        //target_A
 1        //target_Z
-2        //recoil_light_A
+1        //recoil_light_A
 1        //recoil-light_Z
 7.390    //beam-energy
 1000000  //number_of_Event_being_generated
