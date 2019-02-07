@@ -100,6 +100,8 @@ void Transfer(
         if( line.compare("false") == 0 ) isReDo = false;
         if( line.compare("true" ) == 0 ) isReDo = true;
       }
+
+      if( i == 21) ExAList[0] = atof(line.c_str());
       
       i = i + 1;
     }
@@ -124,6 +126,7 @@ void Transfer(
   printf("***************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
   printf("#################################### Beam \n");
+  if( ExAList[0] != 0 ) printf("    Beam Ex: %7.4f MeV\n", ExAList[0]);
   printf("         KE: %7.4f +- %5.4f MeV/u, dp/p = %5.2f %% \n", KEAmean, KEAsigma, KEAsigma/KEAmean * 50.);
   printf("      theta: %7.4f +- %5.4f MeV/u \n", thetaMean, thetaSigma);
   printf("offset(x,y): %7.4f, %7.4f mm \n", xBeam, yBeam);
