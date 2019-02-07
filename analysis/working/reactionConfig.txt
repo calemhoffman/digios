@@ -20,3 +20,4 @@ false           //isTargetScattering
 19F_in_CD2.txt  //stopping_power_for_heavy_recoil
 false           //isDacay
 false           //isReDo
+2.000           //excitation_energy_of_A[MeV]
