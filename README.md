@@ -1,7 +1,7 @@
 # digios
 ## Major Update on Feb 05, 2019, Ryan
-Move Cleopatra into analysis.
-Make a new Transfer.C/h for simulation included Ptolmey Xsec distribution.
+- Move Cleopatra into analysis.
+- Make a new Transfer.C/h for simulation included Ptolmey Xsec distribution.
 
 ## Major  update on Nov 29, 2018, Ryan
 Basic Structure:
