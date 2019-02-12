@@ -21,6 +21,7 @@
 #include <TCanvas.h>
 #include <TObjArray.h>
 #include <TGraph.h>
+#include <TF1.h>
 #include <TAxis.h>
 #include <TH1F.h>
 #include <TLegend.h>
