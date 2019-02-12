@@ -38,6 +38,20 @@ double distfunct(double *x, double *par){
   return gTemp->Eval(x[0]);
 }
 
+bool isFloat( string str ) {
+  int length = str.length();
+  for( int i = 0; i < length; i++){
+    string it = str.substr(i,1);
+    if( it == " " || it == "."|| it == "1"|| it == "2"|| 
+         it == "3"|| it == "4"|| it == "5"|| it == "6"|| it == "7"|| it == "8"|| it == "9"|| it == "0"){
+      continue;
+    }else{
+      return false;
+    } 
+  }
+  return true;
+}
+
 int ExtractXSec (string readFile, int indexForElastic=1) {
   
   //indexForElastic = 1 ; for Ratio
@@ -169,9 +183,9 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
     //----- start extracting Xsec
     if( startExtract ){
       
-      if( line.length() < 20 ) continue;
+      if( line.length() <  20 ) continue;
       
-      //printf("   |%s \n", line.c_str());
+      //printf("%d   |%s \n", line.length(), line.c_str());
       double num1, num2;
       if( reactionFlag == 1 ){ // Elastics (d,d) or (p,p)
         num1 = atof( line.substr(0, 7).c_str());
@@ -183,8 +197,13 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
       }
       
       if( reactionFlag == 2 ){ // InElastics (d,p) or (p,d)
-        num1 = atof( line.substr(0, 7).c_str());
-        num2 = atof( line.substr(7, 19).c_str());
+        if( isFloat( line.substr(0, 7) ) ){
+          num1 = atof( line.substr(0, 7).c_str());
+          num2 = atof( line.substr(7, 19).c_str());
+        }else{
+          num1 = 0.0;
+          num2 = 0.0;
+        }
       }
       
       if( num1 != 0. && num2 != 0. ){

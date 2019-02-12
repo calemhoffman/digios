@@ -1,7 +1,7 @@
 /***********************************************************************
  * 
  *  This is InFileCreator, To creator the in-file for Ptolemy
- *          only for (d,p), (d,p), (d,d), or (p,p)
+ *          only for (x,y), x or y = p, d, t, 3He
  * 
  *  It read a simple infile.in from reaction_setting file
  * 
@@ -230,7 +230,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, "\n");
       fprintf(file_out, "PROJECTILE \n");
       fprintf(file_out, "wavefunction av18 \n");
-      fprintf(file_out, "r0=1 a=0.5 l=0 \n");
+      fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
       fprintf(file_out, ";\n");
       fprintf(file_out, "TARGET\n");
       fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
