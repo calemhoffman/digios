@@ -5,6 +5,7 @@ analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 
 
+core.*
 *.o
 *.root
 *~
