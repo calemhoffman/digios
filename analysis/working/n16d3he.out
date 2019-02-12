@@ -1,10 +1,10 @@
                                                  P T O L E M Y
- April 2007 version     Computer: Intel Pentium, Redhat Linux  beboplogin4          12 Feb 19  121812.527
+ April 2007 version     Computer: Intel Pentium, Redhat Linux  beboplogin4          12 Feb 19  124238.279
 
 0INPUT... $============================================ Ex=0.74(0p1/2)Kx
 0INPUT... reset
                                                  P T O L E M Y
- April 2007 version     Computer: Intel Pentium, Redhat Linux  beboplogin4          12 Feb 19  121812.528
+ April 2007 version     Computer: Intel Pentium, Redhat Linux  beboplogin4          12 Feb 19  124238.279
 
 0INPUT... REACTION: 16N(d,3He)15C(5/2+ 0.74) ELAB= 24.000
 0INPUT... PARAMETERSET dpsb r0target
@@ -172,22 +172,22 @@
 016N(d,3He)15C(5/2+ 0.74)                     ELAB =  24.00 MEV                                                                      
 
 0TIME IN A12                        0.000 SEC
- IN PHI & A12 LOOP                  0.063 SEC
- INTERPOLATING H'S                  0.002 SEC
+ IN PHI & A12 LOOP                  0.058 SEC
+ INTERPOLATING H'S                  0.005 SEC
  COMPUTING SCATTERING WAVES         0.001 SEC
  INTERPOLATING SCATTERING WAVES     0.001 SEC
- REST OF RI & RO LOOP               0.005 SEC
- REST OF LO LOOP                    0.000 SEC
+ REST OF RI & RO LOOP               0.008 SEC
+ REST OF LO LOOP                    0.001 SEC
  ALL OTHER TIME                     0.000 SEC
- TOTAL TIME                         0.072 SEC
+ TOTAL TIME                         0.074 SEC
  NUMBER OF CALLS TO second           3284 CALLS
  
-    13408000 PASSES WERE MADE THROUGH THE INNERMOST LOOP;        AVERAGE TERM TIME =    0.005 MICROSECONDS
+    13408000 PASSES WERE MADE THROUGH THE INNERMOST LOOP;        AVERAGE TERM TIME =    0.004 MICROSECONDS
      6720000 ITERATIONS OF COS(ARG-MU*PHI) WERE MADE;          AVERAGE COSINE TIME =    0.009 MICROSECONDS
       640000 PASSES WERE MADE THROUGH THE (M1, M2) LOOP
       640000 PASSES WERE MADE THE PHI LOOP
        62400 H'S WERE COMPUTED OR READ                              AVERAGE H TIME =    0.001 MILLISECONDS
-       62400 H'S WERE FOUND BY INTERPOLATION          AVERAGE H-INTERPOLATION TIME =    0.032 MICROSECONDS
+       62400 H'S WERE FOUND BY INTERPOLATION          AVERAGE H-INTERPOLATION TIME =    0.080 MICROSECONDS
         0.00% OF THE (RI,RO) POINTS WERE SKIPPED DUE TO DWCUTOFF.
 
 
@@ -230,7 +230,7 @@
     2     3/2  1/2  1    1     3    0.220E-02    30      0.12764E-08   0     0.698    16.5        16       -3.142127332.947     0.000
     2     3/2  1/2  2   -1     3    0.255E-02    30      0.10478E-07   0     0.711    16.5        18        0.000 38952.153     0.000
     2     3/2  1/2  2    1     3    0.483E-02    30      0.20893E-08   0     0.699    16.5        16        0.000127317.952     0.000
-0 TIME FOR L-INTERPOLATIONS :   0.001 SECONDS
+0 TIME FOR L-INTERPOLATIONS :   0.000 SECONDS
 
 1                                                        P T O L E M Y
                                       ELASTIC PARTIAL WAVE S-MATRIX ELEMENTS AND UNITARITY
@@ -922,20 +922,20 @@
 0
 0
 0CPU TIMES FOR CROSS SECTIONS (SECONDS):
-0PRINTING PHASE SHIFTS            0.000
+0PRINTING PHASE SHIFTS            0.001
  ELASTIC CROSS SECTIONS           0.001
  BETA'S (SUM ON LI)               0.000
- REACTION CROSS SECTIONS          0.003          (   0.16 MFLOPS = 53.799 MFLOP/SEC )
- REACTION ANALYZING POWERS        0.000
+ REACTION CROSS SECTIONS          0.002          (   0.16 MFLOPS = 80.699 MFLOP/SEC )
+ REACTION ANALYZING POWERS        0.001
  ELASTIC ANALYZING POWERS         0.001
  ALL OTHER TIME                   0.000
- TOTAL TIME                              0.005
+ TOTAL TIME                              0.006
 
 0
 0INPUT... $============================================ Ex=0.00(0p1/2)Kx
 0INPUT... reset
                                                  P T O L E M Y
- April 2007 version     Computer: Intel Pentium, Redhat Linux  beboplogin4          12 Feb 19  121812.657
+ April 2007 version     Computer: Intel Pentium, Redhat Linux  beboplogin4          12 Feb 19  124238.415
 
 
    -------  ALL NUMBERED OBJECTS CLEARED  ------
@@ -1102,14 +1102,14 @@
 016N(d,3He)15C(1/2+ 0.00)                     ELAB =  24.00 MEV                                                                      
 
 0TIME IN A12                        0.000 SEC
- IN PHI & A12 LOOP                  0.052 SEC
- INTERPOLATING H'S                  0.000 SEC
+ IN PHI & A12 LOOP                  0.053 SEC
+ INTERPOLATING H'S                  0.001 SEC
  COMPUTING SCATTERING WAVES         0.000 SEC
- INTERPOLATING SCATTERING WAVES     0.004 SEC
- REST OF RI & RO LOOP               0.003 SEC
+ INTERPOLATING SCATTERING WAVES     0.002 SEC
+ REST OF RI & RO LOOP               0.001 SEC
  REST OF LO LOOP                    0.000 SEC
  ALL OTHER TIME                     0.000 SEC
- TOTAL TIME                         0.059 SEC
+ TOTAL TIME                         0.057 SEC
  NUMBER OF CALLS TO second           3284 CALLS
  
     13408000 PASSES WERE MADE THROUGH THE INNERMOST LOOP;        AVERAGE TERM TIME =    0.004 MICROSECONDS
@@ -1117,7 +1117,7 @@
       640000 PASSES WERE MADE THROUGH THE (M1, M2) LOOP
       640000 PASSES WERE MADE THE PHI LOOP
        62400 H'S WERE COMPUTED OR READ                              AVERAGE H TIME =    0.001 MILLISECONDS
-       62400 H'S WERE FOUND BY INTERPOLATION          AVERAGE H-INTERPOLATION TIME =    0.000 MICROSECONDS
+       62400 H'S WERE FOUND BY INTERPOLATION          AVERAGE H-INTERPOLATION TIME =    0.016 MICROSECONDS
         0.00% OF THE (RI,RO) POINTS WERE SKIPPED DUE TO DWCUTOFF.
 
 
@@ -1160,7 +1160,7 @@
     2     3/2  1/2  1    1     3    0.230E-02    31      0.21889E-08   0     0.719    16.5        16       -3.142108593.026     0.000
     2     3/2  1/2  2   -1     3    0.259E-02    31      0.16408E-07   0     0.730    16.5        18        0.000 31341.178     0.000
     2     3/2  1/2  2    1     3    0.500E-02    31      0.35828E-08   0     0.720    16.5        16        0.000108576.629     0.000
-0 TIME FOR L-INTERPOLATIONS :   0.000 SECONDS
+0 TIME FOR L-INTERPOLATIONS :   0.001 SECONDS
 
 1                                                        P T O L E M Y
                                       ELASTIC PARTIAL WAVE S-MATRIX ELEMENTS AND UNITARITY
@@ -1852,14 +1852,14 @@
 0
 0
 0CPU TIMES FOR CROSS SECTIONS (SECONDS):
-0PRINTING PHASE SHIFTS            0.001
+0PRINTING PHASE SHIFTS            0.000
  ELASTIC CROSS SECTIONS           0.001
  BETA'S (SUM ON LI)               0.000
  REACTION CROSS SECTIONS          0.002          (   0.17 MFLOPS = 83.274 MFLOP/SEC )
  REACTION ANALYZING POWERS        0.001
  ELASTIC ANALYZING POWERS         0.001
  ALL OTHER TIME                   0.000
- TOTAL TIME                              0.006
+ TOTAL TIME                              0.005
 
 0
 0INPUT... end $================================== end of input
