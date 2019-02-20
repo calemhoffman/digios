@@ -59,6 +59,8 @@ void Transfer(
 
   //---- Auxiliary setting
   bool isDecay = false;
+  int decayA = 1;
+  int decayZ = 0;
   bool isReDo = false; // redo calculation until detected. 
 
   //---- if basicConfig.txt exist, overide the reaction   
@@ -96,12 +98,14 @@ void Transfer(
         if( line.compare("false") == 0 ) isDecay = false;
         if( line.compare("true")  == 0 ) isDecay = true;
       }
-      if( i == 20 ) {
+      if( i == 20 ) decayA = atoi(line.c_str());
+      if( i == 21 ) decayZ = atoi(line.c_str());
+      if( i == 22 ) {
         if( line.compare("false") == 0 ) isReDo = false;
         if( line.compare("true" ) == 0 ) isReDo = true;
       }
 
-      if( i == 21) ExAList[0] = atof(line.c_str());
+      if( i == 23) ExAList[0] = atof(line.c_str());
       
       i = i + 1;
     }
@@ -209,7 +213,7 @@ void Transfer(
   Decay decay;
   if(isDecay) {
     printf("#################################### Decay\n");
-    decay.SetMotherDaugther(AB, zB, AB-1,zB); //neutron decay
+    decay.SetMotherDaugther(AB, zB, AB-decayA,zB-decayZ); //decay
   }
   //======= loading excitation energy
   printf("#################################### excitation energies\n");

@@ -960,12 +960,14 @@ public:
       Isotope Mother(AB, zB);
       Isotope Daugther_D(AD, zD);
       Isotope Daugther_d(AB-AD, zB-zD);
-      
-      printf("====== decay mode : %s --> %s + %s \n", Mother.Name.c_str(), Daugther_d.Name.c_str(), Daugther_D.Name.c_str());
 
       mB = Mother.Mass;
       mD = Daugther_D.Mass;
       md = Daugther_d.Mass;
+      
+      double Q = mB - mD - md;
+      
+      printf("====== decay mode : %s --> %s + %s, Q = %.3f MeV \n", Mother.Name.c_str(), Daugther_d.Name.c_str(), Daugther_D.Name.c_str(), Q);
       
       isMotherSet = true;
    }
