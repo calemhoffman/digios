@@ -24,7 +24,7 @@ int main (int argc, char *argv[]) {
   printf("==========     Simulate Transfer reaction in HELIOS    ==========\n");
   printf("=================================================================\n");
   
-  if(argc < 1 || argc > 7) { 
+  if(argc == 2) { 
     printf("Usage: ./Transfer [1] [2] [3] [4] [5] \n");
     printf("       default file name \n");
     printf("   [1] reactionConfig.txt (intput) reaction Setting \n");
