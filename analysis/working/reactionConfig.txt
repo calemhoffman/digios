@@ -1,11 +1,12 @@
+
 //-------for_comment
-238              //beam_A
-92               //beam_Z
-2               //target_A
-1               //target_Z
+2              //beam_A
+1               //beam_Z
+210             //target_A
+84               //target_Z
 1               //recoil_light_A
 1               //recoil-light_Z
-10.00           //beam-energy_in_MeV/u
+8.50           //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
@@ -18,8 +19,8 @@ false           //isTargetScattering
 20F_in_CD2.txt  //stopping_power_for_beam
 3H_in_CD2.txt   //stopping_power_for_light_recoil
 19F_in_CD2.txt  //stopping_power_for_heavy_recoil
-true            //isDacay
-1             //decayNucleus_A
+false            //isDacay
+1              //decayNucleus_A
 0              //decayNucleus_Z
 false           //isReDo
 0.000           //excitation_energy_of_A[MeV]

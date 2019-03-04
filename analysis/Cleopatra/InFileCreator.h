@@ -161,6 +161,9 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     Isotope isotopeB(str2[1]);
     
     //check reaction valid by balancing the A and Z number;
+    //printf("A: %d + %d = %d + %d \n", isotopeA.A, isotopea.A, isotopeB.A, isotopeb.A);
+    //printf("Z: %d + %d = %d + %d \n", isotopeA.Z, isotopea.Z, isotopeB.Z, isotopeb.Z);
+
     if( isotopeA.A + isotopea.A != isotopeB.A + isotopeb.A || isotopeA.Z + isotopea.Z != isotopeB.Z + isotopeb.Z ) {
       printf("    ====> ERROR! A-number or Z-number not balanced. \n");
       continue;

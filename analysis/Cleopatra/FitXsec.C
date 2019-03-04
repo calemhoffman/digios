@@ -15,7 +15,7 @@ Double_t func0(Double_t *x, Double_t *para) {
 }
 
 
-void FitXsec(TString expXsec, int ID, TString ptolemy){
+void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2){
   
   
   printf("========================================================\n");
@@ -39,18 +39,17 @@ void FitXsec(TString expXsec, int ID, TString ptolemy){
   gX->SetMarkerColor(4);
   gX->SetMarkerSize(1.5);
   gX->SetMarkerStyle(4);
-
   
   TCanvas * cFitXsec = new TCanvas ("cFitXsec", "Fit X-sec", 0, 0, 800, 600);
   cFitXsec->SetLogy();
   
-  TLegend * legend = new TLegend( 0.6, 0.2, 0.9, 0.4); 
+  TLegend * legend = new TLegend( 0.2, 0.15, 0.9, 0.25); 
   
   legend->AddEntry(gX, "Exp");
   
   gX->Draw("AP");
   gX->GetYaxis()->SetRangeUser(0.1, 10);
-  gX->GetXaxis()->SetLimits(0, 50);
+  gX->GetXaxis()->SetLimits(0, 150); //TODO auto range
 
   //gX->GetXaxis()->SetTitle("theta_CM [deg]");
   //gX->GetYaxis()->SetTitle("dsigma/dOmega [mb/sr]");
@@ -66,15 +65,21 @@ void FitXsec(TString expXsec, int ID, TString ptolemy){
   //=============== read Therotical Xsec
   TFile * fPtolemy = new TFile(ptolemy);
   
-  TObjArray * gList = (TObjArray*) fPtolemy->FindObjectAny("gList");
+  TObjArray * gList = (TObjArray*) fPtolemy->FindObjectAny("qList"); //TODO change function
   
-  const int n = gList->GetLast() + 1 ; 
-  
+  int n = gList->GetLast() + 1 ; 
+
+  if( ID2 >= 0 &&  0 <= ID2 && ID2 < n ) {
+    n = 1;
+  }else{
+    ID2= 0;
+  }
+
   TGraph * gr[n];
   
-  for ( int i = 0; i < n ; i++){
+  for ( int i = 0 ; i < n ; i++){
     
-    gr[i] = (TGraph *) gList->At(i);
+    gr[i] = (TGraph *) gList->At(i + ID2);
     gr[i]->SetLineColor(i+1);
     
     //legend->AddEntry(gr[i], gr[i]->GetName());
@@ -110,7 +115,9 @@ void FitXsec(TString expXsec, int ID, TString ptolemy){
     
     int ndf = fit->GetNDF();
     double chisquared = fit->GetChisquare();
-    
+
+    printf("chi2 = %f , ndf = %d \n", chisquared, ndf);
+
     chi[i] = chisquared/ndf;
     
     printf(" %s | SF = %5.3f(%5.3f), chi2 = %f \n", gr[i]->GetName(), paraA[0], paraE[0], chisquared/ndf);  
@@ -138,7 +145,8 @@ void FitXsec(TString expXsec, int ID, TString ptolemy){
   
   for( int i = 0 ; i < n; i++){
     TString nlj = gr[i]->GetName();
-    nlj.Remove(0, 9);
+    int length = nlj.Length();
+    nlj.Remove(0, length - 8);
     nlj.Remove(5);
     nlj.Insert(2, "_{");
     nlj.Append("}");
