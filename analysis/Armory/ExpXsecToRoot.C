@@ -9,6 +9,7 @@
 #include <fstream>
 #include <vector>
 
+//TODO CM frame or Lab frame
 void ExpXsecToRoot(TString expXsecFile){
 
   //read data
@@ -90,6 +91,8 @@ void ExpXsecToRoot(TString expXsecFile){
   fout->Close();
   
   printf("==== saved root as : %s \n", saveFileName.Data());
+
+  gROOT->ProcessLine(".q");
   
 }
 
