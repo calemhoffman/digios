@@ -25,7 +25,8 @@ void PrintPotential(){
 }
 
 string potentialRef(string name){
-   
+  
+  //======== Deuteron 
   if( name == "A" ){
     return "An and Cai (2006) E < 183 | 12 < A < 238 | http://dx.doi.org/10.1103/PhysRevC.73.054605";
   }
@@ -48,7 +49,7 @@ string potentialRef(string name){
     return "Perey and Perey (1963) 12 < E < 25  | 40 < A | http://dx.doi.org/10.1016/0370-1573(91)90039-O";
   }
    
-   
+  //======= Proton 
   if( name == "K" ){
     return "Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0";
   }
@@ -63,6 +64,29 @@ string potentialRef(string name){
   }
   if( name == "P" ){
     return "Perey (1963) E < 20 | 30 < A < 100 | http://dx/doi.org/10.1016/0092-640X(76)90007-3";
+  }
+
+  //====== A = 3
+  if( name == "x" ){
+    return "XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5";
+  }
+  if( name == "l" ){
+    return "Liang, Li, Cai (2009) E < 270 | All masses | http://dx.doi.org/10.1088/0954-3899/36/8/085104";
+  }
+  if( name == "p" ){
+    return "Pang et al., (2009) All E | All masses | Isospin dep. | http://dx.doi.org/10.1103/PhysRevC.79.024615";
+  }
+  if( name == "c" ){
+    return "Li, Liang, Cai, (2007) E < 40 | All masses | 48 < A < 232 | Tritons   | http://dx.doi.org/10.1016/j.nuclphysa.2007.03.004";
+  }
+  if( name == "t" ){
+    return "Trost et al., (1987) 10 < E < 220 | 10 < A < 208 | http://dx.doi.org/10.1016/0375-9474(87)90551-3";
+  }
+  if( name == "h" ){
+    return "Hyakutake et al., (1980) 90 < E < 120 | About 58 < A < 92 | http://dx.doi.org/10.1016/0375-9474(80)90013-5";
+  }
+  if( name == "b" ){
+    return "Becchetti and Greenlees, (1971) E < 40 | 40 < A | Iso. Dep.";
   }
    
   return "";
@@ -140,8 +164,6 @@ bool HSSPotential(int A, int Z, double E){
   asoi  = 0.813;
 
   rc0 = 1.698;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -181,8 +203,6 @@ bool BojowaldPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -231,8 +251,6 @@ bool DaehnickPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -270,8 +288,6 @@ bool LohrPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -309,8 +325,6 @@ bool PereyPereyPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.15;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -426,8 +440,6 @@ bool VarnerPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = Rc/A3;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -465,8 +477,6 @@ bool MenetPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.25;
-  
-  //PrintPotential();
 
   return true;
 }
@@ -508,8 +518,6 @@ bool BecchettiPotential(int A, int Z, double E){
 
   rc0 = 1.3;
   
-  //PrintPotential();
-
   return true;
 }
 
@@ -546,18 +554,242 @@ bool PereyPotential(int A, int Z, double E){
   asoi  = 0;
 
   rc0 = 1.25;
-  
-  //PrintPotential();
 
   return true;
 }
 
+bool XuPotential(int A, int Z, double E){
 
-bool CallPotential(string potName, int A, int Z, double E){
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+
+  double vsiTest = 33.26647 - 0.16975 * E - 12.0 * (N-Z)/A;
+  double viTest = -2 + 0.10645*E - 0.00016156 * pow(E,2);
+  
+  v  = 136.34988 - 0.20315 * E - 0.00030147 * pow(E,2) - 24.0 * (N-Z) / A + 0.4 * Z / A3;
+  r0 = 1.14963;
+  a  = 0.78836;
+
+  vi = 0.0; if( viTest > 0 ) vi = viTest;
+  ri0 = 1.61807;
+  ai  = 0.66485;
+
+  vsi = 0.0; if( vsiTest > 0 ) vsi = vsiTest;
+  rsi0 =  1.20655;
+  asi  = 0.73593;
+
+  vso  = 3.0;
+  rso0 = 1.26864;
+  aso  = 0.89999;
+
+  vsoi  = 0;
+  rsoi0 = 0;
+  asoi  = 0;
+
+  rc0 = 1.25;
+  
+  return true;
+}
+
+bool LiangPotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  v  = 118.36 - 0.2071 * E + 0.000063961 * pow(E,2) + 26.001 * (N-Z) / A + 0.5668 * Z / A3;
+  r0 = 1.1657 + 0.0401 / A3;
+  a  = 0.6641 + 0.0305 * A3;
+
+  vi  = -6.8871 + 0.3115 * E - 0.00068096 * pow(E,2);
+  ri0 = 1.4022 + 0.0418 / A3;
+  ai  = 0.7732 + 0.0219 * A3;
+
+  vsi  = 20.119 - 0.1626 * E - 5.4067 * (N-Z) / A + 1.2087 * A3;
+  rsi0 = 1.1802 + 0.0587 / A3;
+  asi  = 0.6292 + 0.0657 * A3;
+
+  vso  = 2.0491 + 0.0099804 * A3;
+  rso0 = 0.7211 + 0.0586 / A3;
+  aso  = 0.7643 + 0.0535 * A3;
+
+  vsoi  = -1.1591;
+  rsoi0 = 0.7211 + 0.0586 * A3;
+  asoi  = 0.7643 + 0.0535 * A3;
+
+  rc0 = 1.289;
+  
+  return true;
+}
+
+bool PangPotential(int A, int Z, double E, int Zproj){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  double rc = 1.24 * A3 + 0.12;
+  double EC = 1.728 * Z * Zproj / rc;
+  double ETA = 1.0 * (N-Z) / A;
+  double vsiAsym = 35.0 - 34.2 * ETA;
+  if( Zproj == 2.0 ) vsiAsym = 35 + 34.2* ETA;
+   
+  v  = 118.3 - 0.13 * (E - EC);
+  r0 = 1.3  - 0.48 / A3;
+  a  = 0.82;
+
+  vi  = 38.5/(1.0 + exp( (156.1 - E + EC)/52.4 ));
+  ri0 = 1.31 - 0.13 / A3;
+  ai  = 0.84;
+
+  vsi  = vsiAsym / ( 1.0 + exp( (E - EC - 30.8) / 106.4 ));
+  rsi0 = 1.31 - 0.13 / A3;
+  asi  = 0.84;
+
+  vso  = 0;
+  if( E < 85 ) vso = 1.7 - 0.02 * E;
+  rso0 = 0.64 + 1.18 / A3;
+  aso  = 0.13;
+
+  vsoi  = 0.;
+  rsoi0 = 0.;
+  asoi  = 0.;
+
+  rc0 = A3 / rc;
+  
+  return true;
+}
+
+bool LiLiangCaiPotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  v  = 137.6 - 0.1456 * E + 0.0436 * pow(E,2) + 4.3751 * (N-Z) / A + 1.0474 * Z / A3;
+  r0 = 1.1201 - 0.1504 / A3;
+  a  = 0.6833 + 0.0191 * A3;
+
+  vi  = 7.383 + 0.5025 * E - 0.0097 * pow(E,2);
+  ri0 = 1.3202 - 0.1776 / A3;
+  ai  = 1.119  + 0.01913 * A3;
+
+  vsi  = 37.06 - 0.6451 * E - 47.19 * (N-Z) / A;
+  rsi0 = 1.251 - 0.4622 / A3;
+  asi  = 0.8114 + 0.01159 * A3;
+
+  vso  = 1.9029;
+  rso0 = 0.46991 + 0.1294 / A3;
+  aso  = 0.3545 - 0.0522 * A3;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.422;
+  
+  return true;
+}
+
+bool TrostPotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  double JR = 272.33 * (1.0 + 0.002029 * A) * ( 1.0 - 0.001453 * E ) * (1.0 + 3.4931 * pow(A3,-2)) * ( 1.0+(-0.825165+exp(0.92059-0.079154*A))*exp(-0.065066*E) );
+  double AP = 3 ;
+
+  r0 = 1.150;
+  double RR = A3 * r0;  
+  a  = 0.64*(1+(0.0004*A))*(1+0.25*(1-exp(-0.2*A))*(1-exp(-0.06*E)));
+  double pi = 3.141592653589793;
+  v  = 3.0/(4 * pi) * JR * AP * A * pow(RR, -3.0) / (1 + pow((pi * a)/RR,2) );
+  
+  vi  = 0.0;
+  ri0 = 0.0;
+  ai  = 0.0;
+
+  vsi  = 24.5*(1+(1-(0.011*A))*(-0.0018)*E)*(1-exp(-(1.0+(0.003*E))*0.1*A))*(1-exp(-0.1*E));
+  rsi0 = 1.26*(1-(0.00055*E))*(1+exp(-0.9163-(0.005*A))*exp(-0.09*E));
+  asi  = 0.8;
+
+  vso  = 0.0;
+  rso0 = 0.0;
+  aso  = 0.0;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.4;
+  
+  return true;
+}
+
+bool HyakutakePotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  v  = 111.4 - 0.173 * E + 14.9 * (N-Z) / A + 1.1 * Z / A3;
+  r0 = 1.21;
+  a  = 0.76;
+
+  vi  = 0.0;
+  ri0 = 0.0;
+  ai  = 0.0;
+
+  vsi  = 24.8 - 0.028 * E;
+  rsi0 = 1.17;
+  asi  = 0.754 + 0.78 * (N-Z) / A;
+
+  vso  = 0.0;
+  rso0 = 0.0;
+  aso  = 0.0;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.300;
+  
+  return true;
+}
+
+bool BecchettiA3Potential(int A, int Z, double E, int Zproj){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  v  = 165 - 0.17 * E - 6.4 * (N-Z) / A;
+  if( Zproj == 2 ) v = 151.9 - 0.17 * E + 50. * (N-Z) / A;
+  
+  r0 = 1.20;
+  a  = 0.72;
+
+  vi  = 46.0 - 0.33 * E - 110. * (N-Z) / A;
+  if( Zproj == 2 ) vi = 41.7 - 0.33 * E + 44.0 * (N-Z) / A;
+  ri0 = 1.4;
+  ai  = 0.84;
+  if( Zproj == 2 ) ai = 0.88;
+
+  vsi  = 0.0;
+  rsi0 = 0.0;
+  asi  = 0.0;
+
+  vso  = 2.5;
+  rso0 = 1.2;
+  aso  = 0.72;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.300;
+  
+  return true;
+}
+
+bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   bool okFlag = false;
   
-  //printf(" Potenital : %s \n", potName.c_str());
-
   if( potName == "A") okFlag = AnCaiPotential(A, Z, E);
   if( potName == "H") okFlag = HSSPotential(A, Z, E);
   if( potName == "B") okFlag = BojowaldPotential(A, Z, E);
@@ -570,6 +802,17 @@ bool CallPotential(string potName, int A, int Z, double E){
   if( potName == "M") okFlag = MenetPotential(A, Z, E);
   if( potName == "G") okFlag = BecchettiPotential(A, Z, E);
   if( potName == "P") okFlag = PereyPotential(A, Z, E);
+  
+  if( potName == "x") okFlag = XuPotential(A, Z, E);
+  if( potName == "l") okFlag = LiangPotential(A, Z, E);
+  if( potName == "p") okFlag = PangPotential(A, Z, E, Zproj);
+  if( potName == "c") okFlag = LiLiangCaiPotential(A, Z, E);
+  if( potName == "t") okFlag = TrostPotential(A, Z, E);
+  if( potName == "h") okFlag = HyakutakePotential(A, Z, E);
+  if( potName == "b") okFlag = BecchettiA3Potential(A, Z, E, Zproj);
+  
+  //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
+  //PrintPotential();
   
   return okFlag;
 }

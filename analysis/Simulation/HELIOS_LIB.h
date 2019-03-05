@@ -398,6 +398,16 @@ public:
    double GetBField() {return Bfield;}
    double GetDetectorA() {return a;}
    
+   double GetDetEnergyResol(){return eSigma;}
+   double GetDetPositionResol(){return zSigma;}
+   
+   double GetRecoil1Pos(){return posRecoil1;}
+   double GetRecoil2Pos(){return posRecoil2;}
+   
+   double GetElum1Pos(){return zElum1;}
+   double GetElum2Pos(){return zElum2;}
+   
+   
 private:
    double theta, phi; // polar angle of particle 
    double e, z, x, rho, dphi, t;
@@ -431,6 +441,14 @@ private:
    bool overrideDetDistance;
    bool overrideFirstPos;
    bool isCoincidentWithRecoil;
+   
+   
+   double eSigma;
+   double zSigma;
+   double posRecoil1;
+   double posRecoil2;
+   double zElum1;
+   double zElum2;
 };
 
 HELIOS::HELIOS(){
@@ -477,7 +495,16 @@ HELIOS::HELIOS(){
    
    overrideDetDistance = false;
    overrideFirstPos = false;
-   isCoincidentWithRecoil = true;
+   isCoincidentWithRecoil = false;
+   
+   eSigma = 0;
+   zSigma = 0;
+   
+   posRecoil1 = 0;
+   posRecoil2 = 0;
+   
+   zElum1 = 0;
+   zElum2 = 0;
 }
 
 HELIOS::~HELIOS(){
@@ -498,17 +525,29 @@ bool HELIOS::SetDetectorGeometry(string filename){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          
-         if( i == 0 )                         Bfield    = atof(x.c_str());
-         if( i == 1 )                         bore      = atof(x.c_str());
-         if( i == 2 && !overrideDetDistance ) a         = atof(x.c_str());
-         if( i == 3 )                         w         = atof(x.c_str());
-         if( i == 4 )                         posRecoil = atof(x.c_str());
-         if( i == 5 )                         rhoRecoil = atof(x.c_str());
-         if( i == 6 )                         l         = atof(x.c_str());
-         if( i == 7 )                         support   = atof(x.c_str());
-         if( i == 8 && !overrideFirstPos )    firstPos  = atof(x.c_str());
-         if( i == 9 )                         mDet      = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 0 )                            Bfield = atof(x.c_str());
+         if( i == 1 )                       BfieldTheta = atof(x.c_str());
+         if( i == 2 )                              bore = atof(x.c_str());
+         if( i == 3 && !overrideDetDistance )         a = atof(x.c_str());
+         if( i == 4 )                                 w = atof(x.c_str());
+         if( i == 5 )                         posRecoil = atof(x.c_str());
+         if( i == 6 )                         rhoRecoil = atof(x.c_str());
+         if( i == 7 ){
+           if( x.compare("false") == 0 ) isCoincidentWithRecoil = false;
+           if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
+         }
+         if( i == 8 )                        posRecoil1 = atof(x.c_str());
+         if( i == 9 )                        posRecoil2 = atof(x.c_str());
+         if( i == 10)                            zElum1 = atof(x.c_str());
+         if( i == 11 )                           zElum2 = atof(x.c_str());
+         if( i == 12 )                                 l = atof(x.c_str());
+         if( i == 13 )                           support = atof(x.c_str());
+         if( i == 14 && !overrideFirstPos )     firstPos = atof(x.c_str());
+         if( i == 15 )                            eSigma = atof(x.c_str());
+         if( i == 16 )                            zSigma = atof(x.c_str());
+         
+         if( i == 17 )                             mDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -522,10 +561,12 @@ bool HELIOS::SetDetectorGeometry(string filename){
          pos[id] = firstPos + pos[id];
       }
       
-      printf("================ B-field: %8.2f T, Theta : %6.2f deg \n", Bfield, BfieldTheta * TMath::RadToDeg());
-      printf("==== Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
-      printf("========= First Position: %8.2f mm \n", firstPos);
-      printf("====== gap of multi-loop: %8.2f mm \n", firstPos > 0 ? firstPos - support : firstPos + support );
+      printf("=====================================================\n");
+      printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta * TMath::RadToDeg());
+      printf("     Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
+      printf("       gap of multi-loop: %8.2f mm \n", firstPos > 0 ? firstPos - support : firstPos + support );
+      printf("          First Position: %8.2f mm \n", firstPos);
+      printf("------------------------------------- Detector Position \n");
       for(int i = 0; i < nDet ; i++){
          if( firstPos > 0 ){
             printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + l);
@@ -533,7 +574,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
             printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - l , pos[i]);
          }
       }
-      printf("=======================\n");
+      printf("=====================================================\n");
 		isDetReady = true;
    
    }else{
@@ -635,11 +676,12 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       double zHit = TMath::QuietNaN();
       bool isHit = false;
       bool isHitFromOutside = false;
-      bool redoFlag = false;
+      bool isReachArrayCoverage = false;
       
       loop = 0;
       int startJ = (int) fmod(TMath::Ceil(mDet*phi/TMath::TwoPi() - 0.5) ,mDet) ;
 
+      // loop until reach the detector position covrage.
       do{
          loop += 1;
          int n = 2*loop -1;
@@ -652,24 +694,27 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          for( int j = startJ ; j < startJ + mDet; j++){
          
             double phiDet = TMath::TwoPi() / mDet * (j); // detector plane angle 
-            redoFlag = false;
+            isReachArrayCoverage = false;
             isHitFromOutside = false;
             
             //========== calculate zHit
             double aEff = a - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
-            
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
             if( firstPos > 0 ){
-               if( zHit < pos[0] )  redoFlag = true;
+               if( zHit < pos[0] )  continue; // goto next loop
                if(zHit > pos[nDet-1] + l) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-               if( pos[nDet-1] < zHit )redoFlag = true;
+               if( pos[nDet-1] < zHit ) continue;
                if( zHit < pos[0] - l) return -4; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
             double dir = TMath::Cos( TMath::Tan(theta) * zHit/ rho + phi - phiDet);
-            if( dir < 0) isHitFromOutside = true;
+            if( dir < 0) {
+              isHitFromOutside = true;
+            }else{
+              return -5; // hit from inside.
+            }
             // when dir == 0, no solution
 
             // calculate the distance from middle of detector
@@ -679,30 +724,33 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          
             //======= check Block
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support && sHit < a/2. ) return -5; // blocked by support
+               if( pos[0] > zHit && zHit > pos[0] - support && sHit < a/2. ) return -6; // blocked by support
             }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < a/2.) return -5;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < a/2.) return -6;
             }
             
             //====== check hit
-            if( !redoFlag && isHitFromOutside && sHit < w/2.){      
+            if( !isReachArrayCoverage && isHitFromOutside && sHit < w/2.){      
                isHit = true;
-               redoFlag = false;
+               isReachArrayCoverage = false;
                detRowID = (j+mDet) % mDet;
                break;     // if isHit, break, don't calculate for the rest of the detector
             }else{
-               redoFlag = true;
+               isReachArrayCoverage = true;
             }
          }      
-      }while(redoFlag); 
+      }while(isReachArrayCoverage); 
       
-      if( !isHit ) return -6; // zHit falls outside the detector, but could be in the gap of detector
+      if( !isHit ) return -7; // zHit falls outside the detector, but could be in the gap of detector
       
       //===== final calculation for light particle
       e = Pb.E() - Pb.M();
       z = zHit;
       t = zHit / vp0;
       dphi = t * vt0 / rho;
+      
+      //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
+      if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
       
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
@@ -722,10 +770,10 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       if( detID >=0  ){
          hit = 1;      
       }else{
-         hit = -7; // particle-b hit the gap
+         hit = -9; // particle-b hit the gap
       }
    }else{
-      hit = -8;
+      hit = -10; // hit helio wall or (detector upstream, particle go downstream, via versa)
    }
 
    return hit;
@@ -912,12 +960,14 @@ public:
       Isotope Mother(AB, zB);
       Isotope Daugther_D(AD, zD);
       Isotope Daugther_d(AB-AD, zB-zD);
-      
-      printf("====== decay mode : %s --> %s + %s \n", Mother.Name.c_str(), Daugther_d.Name.c_str(), Daugther_D.Name.c_str());
 
       mB = Mother.Mass;
       mD = Daugther_D.Mass;
       md = Daugther_d.Mass;
+      
+      double Q = mB - mD - md;
+      
+      printf("====== decay mode : %s --> %s + %s, Q = %.3f MeV \n", Mother.Name.c_str(), Daugther_d.Name.c_str(), Daugther_D.Name.c_str(), Q);
       
       isMotherSet = true;
    }

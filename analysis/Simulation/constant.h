@@ -1,3 +1,13 @@
+/***********************************************************************
+ * 
+ *  This is constant.h, to provide various physical constants.
+ * 
+ *-------------------------------------------------------
+ *  created by Ryan (Tsz Leung) Tang, Nov-18, 2018
+ *  email: goluckyryan@gmail.com
+ * ********************************************************************/
+
+
 #ifndef constant
 #define constant
 #include <cmath>
@@ -17,12 +27,12 @@ const double deg2rad = pi/180 ;
 const double rad2deg = 180/pi ;
 
 
-//cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+//======================================================================
 const double amu  = 931.494; // MeV/c^2
 const double hbarc = 197.272; // MeV fm;
 const double c = 299.792458; // mm/ns; 
 
-//cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+//======================================================================
 double kg2MeV(double m){
     return m*c_SI*c_SI/e/1e6;
 }
@@ -52,11 +62,9 @@ double ev2nm(double eV){
   return hbarc/2/pi/eV;
 }
 
-//cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+//======================================================================
 const double mp = kg2MeV(mp_SI);
 const double mn = kg2MeV(mn_SI);
-
-
 
 
 #endif

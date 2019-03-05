@@ -554,7 +554,11 @@ void transfer(string basicConfig = "basicReactionConfig.txt",
          z += gRandom->Gaus(0, zSigma);
 
          //ELUM
+<<<<<<< HEAD
          double zElum = 228.1;
+=======
+         double zElum = 231.5;
+>>>>>>> master
          xHit1 = helios.GetXPos(zElum);
          yHit1 = helios.GetYPos(zElum);
          rhoHit1 = helios.GetR(zElum);
@@ -574,7 +578,7 @@ void transfer(string basicConfig = "basicReactionConfig.txt",
          //rxHit2 = helios.GetRecoilXPos(1463.7+200);
          //ryHit2 = helios.GetRecoilYPos(1463.7+200);
          
-         reaction.CalExThetaCM(e, z, BField, helios.GetDetectorA());
+         reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());
          ExCal = reaction.GetEx();
          thetaCMCal = reaction.GetThetaCM();
          

@@ -14,24 +14,24 @@
 #include "TTree.h"
 #include "TObjArray.h"
 #include "TGraph.h"
-#include "HELIOS_LIB.h"
+#include "../Simulation/HELIOS_LIB.h"
 
-void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReactionConfig.txt",  string detGeoFileName = "detectorGeo.txt"){
-   
-   //---- reaction
-   int AA = 206, zA = 80;
-   int Aa = 2,  za = 1;
-   int Ab = 1,  zb = 1;
-   
-   //---- beam
-   double KEAmean = 7.0; // MeV/u 
-   double thetaMean = 0.; // mrad 
-   double xBeam = 0; // mm
-   double yBeam = 0; // mm
+void FindThetaCM(double Ex, double XRATION = 0.95, 
+            string basicConfig="reactionConfig.txt",  
+            string detGeoFileName = "detectorGeo.txt"){
+
+  //---- reaction
+  int AA, zA; //beam
+  int Aa, za; //target
+  int Ab, zb; //recoil-1
+
+  //---- beam
+  double KEAmean, KEAsigma; // MeV/u , assume Guassian
+  double thetaMean, thetaSigma; // mrad , assume Guassian due to small angle
+  double xBeam, yBeam; // mm
    
    ifstream cFile;
    cFile.open(basicConfig.c_str());
-   bool isOverided = false;
    if( cFile.is_open() ){
       string line;
       int i = 0;
@@ -50,7 +50,6 @@ void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReac
          i = i + 1;
       }
       cFile.close();
-      isOverided = true;
    }
    
    /**///========================================================= load files
@@ -79,7 +78,7 @@ void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReac
    printf("===================================================\n");
    printf("=========== %27s ===========\n", reaction.GetReactionName().Data());
    printf("===================================================\n");
-   if( isOverided )printf("----- loading reaction from : %s. \n", basicConfig.c_str());
+   printf("----- loading reaction from : %s. \n", basicConfig.c_str());
    printf("         KE: %7.4f \n", KEAmean);
    printf("      theta: %7.4f \n", thetaMean);
    printf("offset(x,y): %7.4f, %7.4f mm \n", xBeam, yBeam);
@@ -97,11 +96,11 @@ void FindThetaCM(double Ex, double XRATION = 0.95, string basicConfig="basicReac
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          if( i == 0 ) BField   = atof(x.c_str());
-         if( i == 2 )  a       = atof(x.c_str());
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) jDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 3 )  a       = atof(x.c_str());
+         if( i == 12 ) length   = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 17 ) jDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;

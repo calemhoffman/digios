@@ -2,10 +2,14 @@
  * 
  *  This is ExtractXSec for *.out for Ptolemy
  * 
+ *  This program will extract cross section distribution from Ptolmey output.
+ *  save as *.Xsec.txt and *.root for distribution
+ * 
+ *  save ExPtolemy.txt for excitation energies and total X-section 
  * -----------------------------------------------------
  *  This program will call the root library and compile in g++
  *  compilation:
- *  g++ InFileCreator.C -o InFileCreator `root-config --cflags --glibs`
+ *  g++ ExtractXSec.C -o ExtractXSec `root-config --cflags --glibs`
  *
  * ------------------------------------------------------
  *  created by Ryan (Tsz Leung) Tang, Nov-18, 2018
@@ -21,11 +25,37 @@
 #include <TString.h>
 #include <TMath.h>
 #include <TGraph.h>
+#include <TF1.h>
 #include <TObjArray.h>
 
 using namespace std;
 
-int ExtractXSec (string readFile) {
+TObjArray * gList = NULL;
+double distfunct(double *x, double *par){
+  
+  TGraph * gTemp = (TGraph *) gList->At(par[0]);
+  
+  return gTemp->Eval(x[0]);
+}
+
+bool isFloat( string str ) {
+  int length = str.length();
+  for( int i = 0; i < length; i++){
+    string it = str.substr(i,1);
+    if( it == " " || it == "."|| it == "1"|| it == "2"|| 
+         it == "3"|| it == "4"|| it == "5"|| it == "6"|| it == "7"|| it == "8"|| it == "9"|| it == "0"){
+      continue;
+    }else{
+      return false;
+    } 
+  }
+  return true;
+}
+
+int ExtractXSec (string readFile, int indexForElastic=1) {
+  
+  //indexForElastic = 1 ; for Ratio
+  //indexForElastic = 2 ; for Total
    
   //--- open file.out
   ifstream file_in;
@@ -46,13 +76,15 @@ int ExtractXSec (string readFile) {
   double angleMax = 0;
   double angleStep = -1;
   
-  //---- read file.out
+  //================================== read file.out
   string line;
   int lineNum = 0;
   vector<double> dataXsec;
   bool startExtract = false;
   bool angleFilled = false;
   int numCal = 0;
+  int reactionFlag = 0;
+  bool preFindForElastic = false;
   printf("======================================================\n");
   while(getline(file_in, line)){
     lineNum ++;
@@ -81,16 +113,38 @@ int ExtractXSec (string readFile) {
     }
     
     //---- find Reaction
+    findStr = "0INPUT... CHANNEL";
+    findLen = findStr.length();
+    pos = line.find(findStr);
+    if( pos != string::npos ) {
+      reaction.push_back( line.substr(pos + findLen + 1) );
+      reactionFlag = 1; // 1 for (d,d) or (p,p)
+      //printf("%d |----------- (d,d), %d\n", lineNum, reactionFlag);
+      continue; // nextline
+    }
+    
     findStr = "REACTION:";
     findLen = findStr.length();
     pos = line.find(findStr);
     if( pos != string::npos ) {
       reaction.push_back( line.substr(pos + findLen + 1) );
-      continue;
+      reactionFlag = 2; // 2 for (d,p) or (p,d)
+      //printf("%d |----------- (d,p), %d\n", lineNum, reactionFlag);
+      continue; // nextline
     }
     
+    //----- pre find for Elastic scattering
+    findStr = "0        OPTICAL MODEL SCATTERING FOR THE OUTGOING CHANNEL";
+    pos = line.find(findStr);
+    if( pos != string::npos ) {
+      preFindForElastic = true;
+      //printf("%d |----------- pre Elastics Flag : %d\n", lineNum, preFindForElastic);
+      continue;
+    }
+
     //----- find angle stetting when not known
     if( angleStep == -1 ){
+      
       findStr = "anglemin=";
       findLen = findStr.length();
       pos = line.find(findStr);
@@ -105,37 +159,67 @@ int ExtractXSec (string readFile) {
         
         angleStep = atof( line.substr(pos1 + findLen+1).c_str() );
         
+        //printf("%d |---- angle range found.\n", lineNum);
+        
       }
-      
-      continue;
+      continue; //nextline
     }
     
-    //----- check if start extracting Xsec or not 
-    findStr = "0  C.M.  REACTION     REACTION   LOW L  HIGH L   % FROM";
+    //-----  check if start extracting Xsec or not 
+    findStr = "dumpdumpdump";
+    if( reactionFlag == 1 && preFindForElastic ){
+      findStr = "C.M.    LAB     RUTHERFORD";
+    }
+    if( reactionFlag == 2 ){
+      findStr = "0  C.M.  REACTION     REACTION   LOW L  HIGH L   % FROM";
+    }
     pos = line.find(findStr);
     if( pos != string::npos ) {
       startExtract = true;
+      //printf("%d |----- start extraction \n", lineNum);
       continue;
     }
     
     //----- start extracting Xsec
     if( startExtract ){
       
-      if( line.length() < 20 ) continue;
+      if( line.length() <  20 ) continue;
       
-      //printf("   |%s \n", line.c_str());
-      double num1 = atof( line.substr(0, 7).c_str());
-      double num2 = atof( line.substr(7, 19).c_str());
+      //printf("%d   |%s \n", line.length(), line.c_str());
+      double num1, num2;
+      if( reactionFlag == 1 ){ // Elastics (d,d) or (p,p)
+        num1 = atof( line.substr(0, 7).c_str());
+        if( indexForElastic == 1 ){
+          num2 = atof( line.substr(15, 10).c_str());
+        }else{
+          num2 = atof( line.substr(28, 14).c_str());
+        }
+      }
+      
+      if( reactionFlag == 2 ){ // InElastics (d,p) or (p,d)
+        if( isFloat( line.substr(0, 7) ) ){
+          num1 = atof( line.substr(0, 7).c_str());
+          num2 = atof( line.substr(7, 19).c_str());
+        }else{
+          num1 = 0.0;
+          num2 = 0.0;
+        }
+      }
       
       if( num1 != 0. && num2 != 0. ){
         if( !angleFilled ) angle.push_back(num1);
         dataXsec.push_back(num2);
-      }
-      
+      } 
     }
     
     //------ find total Xsec, if found stop extraction
-    findStr = "0TOTAL:";
+    findStr = "dumpdumpdump";
+    if( reactionFlag == 1 && preFindForElastic){
+      findStr = "0TOTAL REACTION CROSS SECTION =";
+    }
+    if( reactionFlag == 2){
+      findStr = "0TOTAL:";
+    }
     findLen = findStr.length();
     pos = line.find(findStr);
     if( pos != string::npos ) {
@@ -147,15 +231,19 @@ int ExtractXSec (string readFile) {
       //push back dataXsec to dataMatrix
       dataMatrix.push_back(dataXsec);
       
+      //printf("%d |----- end extraction \n", lineNum);
+      
       angleFilled = true;
-      startExtract = false;      
+      startExtract = false; 
+      reactionFlag = 0;
+      preFindForElastic = false;
       continue;
     }
     
   }
   file_in.close();
   
-  //---- summary
+  //================================== summary
   printf("====================== Total number of line read : %d \n", lineNum);  
   printf("Angle : %5.2f, %5.2f | step : %5.2f \n", angleMin, angleMax, angleStep);
   printf("Number of Angle read : %lu \n", angle.size());
@@ -164,6 +252,15 @@ int ExtractXSec (string readFile) {
   
   
   printf("----------------------------- list of Calculation \n");
+  //... find suitable lenght for displaying reaction string
+  int reactionStrLen = 0;
+  for( int i = 0; i < numCal ; i++){
+    int len = reaction[i].length();
+    if( len > reactionStrLen ) reactionStrLen = len;
+  }
+  
+  vector<double> partialXsec;
+  partialXsec.clear();
   for( int i = 0; i < numCal ; i++){
     
     double partialSumXsec = 0.0;
@@ -174,16 +271,33 @@ int ExtractXSec (string readFile) {
       double phi = TMath::TwoPi();
       partialSumXsec += dataMatrix[i][j] * sin( theta ) * dTheta * phi ;
     }
+    partialXsec.push_back(partialSumXsec);
     
     size_t pos = title[i].find(")");
-    printf("%50s| %s | Xsec(%3.0f-%3.0f deg) : %f mb\n", reaction[i].c_str(), title[i].substr(pos+1).c_str(), angleMin, angleMax, partialSumXsec);
+    printf("%*s| %s | Xsec(%3.0f-%3.0f deg) : %f mb\n", reactionStrLen + 3, reaction[i].c_str(), title[i].substr(pos+1).c_str(), angleMin, angleMax, partialSumXsec);
   }
   printf("---------------------------------------------------\n");
   
+  //================================== save *.Ex.txt
+  string saveExName = readFile;
+  int len = saveExName.length();
+  saveExName = saveExName.substr(0, len - 4); 
+  saveExName += ".Ex.txt";
+  printf("Output : %s \n", saveExName.c_str());
+  FILE * file_Ex;
+  file_Ex = fopen(saveExName.c_str(), "w+");
   
-  //---- open file.Xsec.txt
+  fprintf(file_Ex, "recoil\n");
+
+  for( int i = 0; i < numCal ; i++){
+      fprintf(file_Ex, "%9.5f     %9.5f\n", Ex[i], partialXsec[i]);
+  }
+  
+  fclose(file_Ex);
+  
+  //================================== save file.Xsec.txt
   string saveFileName = readFile;
-  int len = saveFileName.length();
+  len = saveFileName.length();
   saveFileName = saveFileName.substr(0, len - 4); 
   saveFileName += ".Xsec.txt";
   printf("Output : %s \n", saveFileName.c_str());
@@ -210,7 +324,7 @@ int ExtractXSec (string readFile) {
   }
   fclose(file_out);
   
-  //Save in ROOT
+  //================================== Save in ROOT
   len = saveFileName.length();
   saveFileName = saveFileName.substr(0, len - 9);
   TString fileName = saveFileName;
@@ -218,24 +332,42 @@ int ExtractXSec (string readFile) {
   printf("Output : %s \n", fileName.Data());
   TFile * fileOut = new TFile(fileName, "RECREATE" );
   
-  TObjArray * gList = new TObjArray();
+  gList = new TObjArray();
+  gList->SetName("TGraph of distributions");
+  TObjArray * fList = new TObjArray();
+  gList->SetName("TF1 of distributions");
+  
+  TGraph ** gGraph = new TGraph *[numCal];
+  TF1 ** dist = new TF1*[numCal];
+  
   for( int i = 0; i < numCal ; i++){
-    TGraph * gTemp = new TGraph();
+    gGraph[i] = new TGraph();
     TString name = reaction[i];
     name += "|";
     name += title[i];
-    gTemp->SetName(name);
+    gGraph[i]->SetName(name);
     for( int j = 0; j < angle.size() ; j++){
-        gTemp->SetPoint(j, angle[j], dataMatrix[i][j]);
+        gGraph[i]->SetPoint(j, angle[j], dataMatrix[i][j]);
     }
-    gList->Add(gTemp);
+    gList->Add(gGraph[i]);
+    
+    name.Form("dist%d", i);
+    dist[i] = new TF1(name, distfunct, angleMin, angleMax, 1 );
+    dist[i]->SetParameter(0, i);
+    
+    fList->Add(dist[i]);
+    
+    //delete tempFunc;
+    
   }
+  gList->Write("qList", 1);
+  fList->Write("pList", 1);
   
-  gList->Write("gList", 1);
+  
   fileOut->Write();
   fileOut->Close();
   printf("---------------------------------------------------\n");
-
+  
   return 0;
 }
  

@@ -5,7 +5,7 @@
 Throught this read me, I hope I can help you to understand the basic of 
 the analysis.   
                               Nov 29, 2018, Ryan (goluckyryan@gmail.com)
-                              
+                 last update: Feb 05, 2019, Ryan        
                               
 ----------- context 
     1) Pre-request Knowlegde
@@ -15,7 +15,8 @@ the analysis.
     5) Online analysis
     6) Calibration & sotre in a new root
     7) Simulation
-    8) Off-line analysis
+    8) Cleopatra for DWBA calculation using Ptolemy
+    9) Off-line analysis
 
 =================================================
 ======== 1) Pre-request Knowlegde
@@ -41,6 +42,8 @@ analysis
     |
     |-- merged_data (where the intermediate files from 
     |                 raw data to sorted root file are stored )
+    |
+    |-- Cleopatra (where all Ptolemy and new Transfer simulation codes are stored)
     |
     |-- Simulation (where all kinematics simulation codes are stored)
     |
@@ -158,11 +161,11 @@ then, we can call
 
 To simulate a transfer reaction, Two input files 
 
-    1) basicReactionConfig.txt
+    1) reactionConfig.txt
     2) detectorGeo.txt
-    3) excitation_energy.txt
+    3) Ex.txt
     
-Must be edited to suit the reaction. If no excitation_energy.txt, 
+Must be edited to suit the reaction. If no Ex.txt, 
 only ground state will be calculated. 
 
 In the output are 
@@ -183,10 +186,43 @@ In the output are
        
 To run a simualtion
  
-    >root ../Simulation/transfer.C+
+    >../Cleopatra/Transfer
 
 =================================================
-======== 8) Off-line analysis
+======== 8) Cleopatra for DWBA calculation using Ptolemy
+=================================================
+
+The calculation is using Ptolemy. 
+It requires an *.in file for setting of optical potenital.
+
+Cleopatra is a user interface for Ptolemy.
+It do following things:
+
+1) create *in file (InFileCreator)
+2) do Ptolemy calculation
+3) extract cross section distributions from *.out file (ExtractXsec)
+4) plot the distributions (PlotTGraphObjArray)
+5) (optional) simulate transfer reaction.
+
+The input files:
+
+      example : for simple Ptolemy setting, the file name can be changed.
+
+The output files are:
+
+    1) example.in  (in file for Ptolemy)
+    2) example.out (out file for Ptolemy)
+    3) example.Ex.txt (excitation energies with Xsec)
+    4) example.Xsec.txt (Xsec distributions in txt format)
+    5) example.root ( Xsec distributions in TObjArray)
+
+For simulating transfer reaction with thetaCM distribution. 
+need the reactionConfig.txt and detectorGeo.txt. same as part 7).
+But instead of using the Ex.txt, use example.Ex.txt. 
+
+
+=================================================
+======== 9) Off-line analysis
 =================================================
 
 Once the Calibration are done. It is better to generate a new root file.
