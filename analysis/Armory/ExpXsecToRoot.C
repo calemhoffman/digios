@@ -41,7 +41,7 @@ void ExpXsecToRoot(TString expXsecFile){
       }
       
       if( i%4 == 0 ) angle[id].push_back(atof(x.c_str()));
-      //if( i%4 == 1 ) dangle[id].push_back(atof(x.c_str()));
+      //if( i%4 == 1 ) dangle[id].push_back(atof(x.c_str())); //using this, fitting chisquare will be strange. 
       if( i%4 == 1 ) dangle[id].push_back(0);
       if( i%4 == 2 ) xsec[id].push_back(atof(x.c_str()));
       if( i%4 == 3 ) dxsec[id].push_back(atof(x.c_str()));
@@ -77,7 +77,7 @@ void ExpXsecToRoot(TString expXsecFile){
     printf("============= %d/%d, size = %d \n", i, n,  m);
     gx[i] = new TGraphErrors();
     for( int j = 0; j < m; j++){
-      printf("%2d | %f , %f\n", j, angle[i][j], xsec[i][j]);
+      printf("%2d | %f(%f), %f(%f)\n", j, angle[i][j], dangle[i][j], xsec[i][j], dxsec[i][j]);
       gx[i]->SetPoint(j, angle[i][j], xsec[i][j]);
       gx[i]->SetPointError(j, dangle[i][j], dxsec[i][j]);
     }
