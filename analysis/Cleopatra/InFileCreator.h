@@ -73,9 +73,9 @@ int GetLValue(string spdf){
   if( spdf == "d" ) return 2;
   if( spdf == "f" ) return 3;
   if( spdf == "g" ) return 4;
-  if( spdf == "i" ) return 5;
-  if( spdf == "h" ) return 6;
-  
+  if( spdf == "h" ) return 5;
+  if( spdf == "i" ) return 6;
+  if( spdf == "j" ) return 7;  
   return -1;
 }
 

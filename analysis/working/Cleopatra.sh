@@ -141,7 +141,15 @@ if [ ${RunPtolemy} -eq 1 ] ; then
   echo "================================================================="
   echo "=====   Ptolemy Calcualtion   ==================================="
   echo "================================================================="
-  ./ptolemy <${infile}> ${outfile}
+  ptolemyOUTPUT="$(./ptolemy <${infile}> ${outfile})"
+
+  if [ "${ptolemyOUTPUT}" = "" ] ; then
+      echo "Ptolmey finished without problem. "
+  else
+      echo "Ptolemy has error, check ${infile} or ${outfile}"
+      exit 1;
+  fi
+
 fi;
 
 #===== Extracting XSec and save into *txt and *root
