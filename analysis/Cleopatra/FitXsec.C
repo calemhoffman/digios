@@ -37,7 +37,7 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
   gX->SetMarkerColor(4);
   gX->SetMarkerSize(1.5);
   gX->SetMarkerStyle(4);
-  
+
   TCanvas * cFitXsec = new TCanvas ("cFitXsec", "Fit X-sec", 0, 0, 800, 600);
   cFitXsec->SetLogy();
   
@@ -54,8 +54,8 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
 
   //find yRange and xRange;
   double yRange[2], xRange[2];
-  yRange[0] = 0;
-  yRange[1] = 0;
+  yRange[0] = 1000.0;
+  yRange[1] = 0.0001;
   xRange[0] = 0;
   xRange[1] = 0;
   for( int i = 0 ; i < gX->GetN(); i++){
@@ -63,11 +63,18 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
     gX->GetPoint(i, x, y);
     if( x > xRange[1] ) xRange[1] = x;
     if( x < xRange[0] ) xRange[0] = x;
-    if( y > yRange[1] ) yRange[1] = x;
-    if( y < yRange[0] ) yRange[0] = x;
+    if( y > yRange[1] ) yRange[1] = y;
+    if( y < yRange[0] ) yRange[0] = y;
   }
 
-  gX->GetYaxis()->SetRangeUser(0.1, 10);
+  printf("yRange : %f, %f \n", yRange[0], yRange[1]);
+  double yMin, yMax, yMean, dy;
+  yMean = (yRange[1] + yRange[0])/2.;
+  dy = abs(yRange[1] - yRange[0])/2.;
+  yMin = TMath::Power(10, TMath::Floor(TMath::Log10(yRange[0])));
+  yMax = TMath::Power(10, TMath::Ceil(TMath::Log10(yRange[1])));
+
+  gX->GetYaxis()->SetRangeUser(yMin, yMax);
   gX->GetXaxis()->SetLimits(0, xRange[1] * 1.1);
   
   gX->GetXaxis()->SetTitle("#theta_{CM} [deg]");
@@ -120,15 +127,12 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
     dSF[i] = paraE[0];
     
     int ndf = fit->GetNDF();
-    double chisquared = fit->GetChisquare();
-
-    //printf("chi2 = %f , ndf = %d \n", chisquared, ndf);
-
+    double chisquared = fit->GetChisquare(); // checked. the chisquared is calculated correctly
     chi[i] = chisquared/ndf;
-    
     printf(" %s | SF = %5.3f(%5.3f), chi2 = %f \n", gr[i]->GetName(), paraA[0], paraE[0], chisquared/ndf);  
     
   }
+  printf("!!!!! if the uncertainties of Xsec are ZERO. the chisquare should be as small as possible!!!!!\n");
   
   //============= Scale TGraph with SF
   for( int i = 0; i < n; i++){
@@ -156,7 +160,7 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
     nlj.Remove(5);
     nlj.Insert(2, "_{");
     nlj.Append("}");
-    text.DrawLatex(0.15, 0.8 - 0.05 *i ,Form("%s| SF: %5.3f(%3.0f), #chi^{2}: %5.3f", nlj.Data(), SF[i], dSF[i]*1000, chi[i]));
+    text.DrawLatex(0.15, 0.8 - 0.05 *i ,Form("%s| SF: %5.3f(%3.0f), #chi^{2}: %5.3e", nlj.Data(), SF[i], dSF[i]*1000, chi[i]));
   }
   
 }
