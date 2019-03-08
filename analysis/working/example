@@ -52,21 +52,21 @@
 #210Po(d,p)211Po   0    2d3/2     3/2+    2.910   8.5MeV/u     AK
 #210Po(d,p)211Po   0    2d3/2     3/2+    3.252   8.5MeV/u     AK
 
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   AA
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   HH
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   BB
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   DD
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   CC
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   LL
-208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   QQ
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   AA
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   HH
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   BB
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   DD
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   CC
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   LL
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   QQ
 
-#208Pb(d,p)209Pb  0   1g9/2     9/2+  0.000  7.5MeV/u   AK
-#208Pb(d,p)209Pb  0   0i11/2   11/2+  0.000  7.5MeV/u   AK
-#208Pb(d,p)209Pb  0   0j15/2   15/2-  0.000  7.5MeV/u   AK
-#208Pb(d,p)209Pb  0   2d5/2     5/2+  0.000  7.5MeV/u   AK
-#208Pb(d,p)209Pb  0   3s1/2     1/2+  0.000  7.5MeV/u   AK
-#208Pb(d,p)209Pb  0   1g7/2     7/2+  0.000  7.5MeV/u   AK
-#208Pb(d,p)209Pb  0   2d3/2     3/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   1g9/2     9/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   0i11/2   11/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   0j15/2   15/2-  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   2d5/2     5/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   3s1/2     1/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   1g7/2     7/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   2d3/2     3/2+  0.000  7.5MeV/u   AK
 
 
 #20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Kx
