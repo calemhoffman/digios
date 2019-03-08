@@ -58,7 +58,7 @@ void Analyzer::Begin(TTree *tree)
    hMultiHit = new TH1F("hMultiHit", "MultiHit; hit; count / hit ", 10, 0, 10);
    
    //ex spectrum
-   double range[3] = { 30, -0.5, 3.0}; // resol. [keV], low Ex, high Ex
+   double range[3] = { 50, -1, 3.5}; // resol. [keV], low Ex, high Ex
    hEx   = new TH1F("hEx"  ,  Form("Ex; Ex[MeV]; count / %2.0f keV", range[0])          , (range[2]-range[1])/range[0]*1000., range[1], range[2]);
 
    // thetaCM spectrum
@@ -373,7 +373,7 @@ void Analyzer::Terminate()
                100,
                TMath::Floor(time/60.), time - TMath::Floor(time/60.)*60.);
   
-   gStyle->SetOptStat("neiou");
+   gStyle->SetOptStat("");
    
    //=========== load transfer.root
    TFile * ft = new TFile("transfer.root");
@@ -384,15 +384,15 @@ void Analyzer::Terminate()
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");
   
    //=========== Plot
-   cAna = new TCanvas("cAna", "Analyzer", 1200, 800);
-   cAna->Divide(6,4);
+   cAna = new TCanvas("cAna", "Analyzer", 800, 400);
+   cAna->Divide(1,1);
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
    
    //double max = findXMax(hei);
    double max = findXMax(hExi);
    
    //hEx->Draw();
-   
+   /*
    for( int i = 0; i < 24; i++){
      cAna->cd(i+1);
      cAna->cd(i+1)->SetGrid();
@@ -465,5 +465,5 @@ void Analyzer::Terminate()
    //   hExc[i]->Draw();
    //}
    
-   
+   /**/
 }

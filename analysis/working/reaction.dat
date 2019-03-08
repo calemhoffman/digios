@@ -1,6 +1,13 @@
 938.2720         //mass_b
 1                //charge_b
+<<<<<<< HEAD
+0.12403706       //betaCM
+193716.3039      //Etot
+192761.9033      //mass_B
+0.1193           //alpha=slope/beta
+=======
 0.17002436       //betaCM
 1466.9384        //Etot
 -404.0000        //mass_B
 0.1360           //alpha=slope/beta
+>>>>>>> master
