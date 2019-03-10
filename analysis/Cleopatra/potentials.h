@@ -331,7 +331,7 @@ bool PereyPereyPotential(int A, int Z, double E){
 
 
 //======================== proton 
-bool KoningPotential(int A, int Z, double E){
+bool KoningPotential(int A, int Z, double E, double Zproj){
   // p + A(Z)
   // E < 200 or 200 MeV/u
   // 24 < A < 209
@@ -353,19 +353,23 @@ bool KoningPotential(int A, int Z, double E){
   double vn3 = 0.00001994 - 0.00000002 * A;
   
   double vp4 = 7e-9; // = vn4
+  double vn4 = vp4;
   
   double wp1 = 14.667 + 0.009629*A;
   double wn1 = 12.195 + 0.0167*A;
   
   double wp2 = 73.55 + 0.0795*A; // = wn2
+  double wn2 = wp2;
   
   double dp1 = 16 + 16.*(N-Z)/A;
-  double dn2 = 16 - 16.*(N-Z)/A;
+  double dn1 = 16 - 16.*(N-Z)/A;
   
   double dp2 = 0.018 + 0.003802/(1 + exp((A-156.)/8)); // = dn2
+  double dn2 = dp2;
   
   double dp3 = 11.5 ; // = dn3
-  
+  double dn3 = dp3;
+ 
   double vso1 = 5.922 + 0.003 * A;
   double vso2 = 0.004;
   
@@ -379,22 +383,34 @@ bool KoningPotential(int A, int Z, double E){
   double vc = 1.73/rc * Z / A3;
 
   v  = vp1*(1 - vp2*(E-epf) + vp3*pow(E-epf,2) + vp4*pow(E-epf,3)) + vc * vp1 * (vp2 - 2*vp3*(E-epf) + 3*vp4*pow(E-epf,2));
+  //neutron
+  if( Zproj == 0 ) v  = vn1*(1 - vn2*(E-enf) + vn3*pow(E-enf,2) + vn4*pow(E-enf,3)) + vc * vn1 * (vn2 - 2*vn3*(E-enf) + 3*vn4*pow(E-enf,2));
+
+
   r0 = 1.3039 - 0.4054 / A3;
   a  = 0.6778 - 0.000148 * A;
 
   vi  = wp1 * pow(E-epf,2)/(pow(E-epf,2) + pow(wp2,2));
+  if( Zproj == 0 ) vi  = wn1 * pow(E-epf,2)/(pow(E-epf,2) + pow(wn2,2));
+  
   ri0 = 1.3039 - 0.4054 / A3;
   ai  = 0.6778 - 0.000148 * A;
 
   vsi  = dp1 * pow(E-epf,2)/(pow(E-epf,2)+pow(dp3,2)) * exp(-dp2*(E-epf));
+  if( Zproj == 0 )   vsi  = dn1 * pow(E-enf,2)/(pow(E-enf,2)+pow(dn3,2)) * exp(-dn2*(E-enf));
+
   rsi0 = 1.3424 - 0.01585 * A3;
   asi  = 0.5187 + 0.0005205 * A;
 
   vso  = vso1 * exp(-vso2 * (E-epf));
+  if( Zproj == 0 ) vso = vso1 * exp(-vso2 * (E-enf));
+
   rso0 = 1.1854 - 0.647/A3;
   aso  = 0.59;
 
   vsoi  = wso1 * pow(E-epf,2)/(pow(E-epf,2)+pow(wso2,2));
+  if ( Zproj == 0 )   vsoi  = wso1 * pow(E-enf,2)/(pow(E-enf,2)+pow(wso2,2));
+
   rsoi0 = 1.1854 - 0.647/A3;
   asoi  = 0.59;
 
@@ -797,7 +813,7 @@ bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   if( potName == "L") okFlag = LohrPotential(A, Z, E);
   if( potName == "Q") okFlag = PereyPereyPotential(A, Z, E);
   
-  if( potName == "K") okFlag = KoningPotential(A, Z, E);
+  if( potName == "K") okFlag = KoningPotential(A, Z, E, Zproj);
   if( potName == "V") okFlag = VarnerPotential(A, Z, E);
   if( potName == "M") okFlag = MenetPotential(A, Z, E);
   if( potName == "G") okFlag = BecchettiPotential(A, Z, E);

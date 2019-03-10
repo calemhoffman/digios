@@ -133,7 +133,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     
     bool isReactionSupported = false;
     if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" ){
-      if( mb == "p" || mb == "d" || mb == "t" || mb == "3He") isReactionSupported = true;
+      if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
     }
 
     if( isReactionSupported == false ){
@@ -196,9 +196,9 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       }
     }
     string unit = reactionEnergy.substr(pos+1);
-    string beamParticle = reactionType.substr(1,1);
+    //string beamParticle = reactionType.substr(1,1);
     int factor = 1;
-    if( unit == "MeV/u" && beamParticle == "d") factor = 2;
+    if( unit == "MeV/u") factor = isotopea.A;
     double totalBeamEnergy = atof(reactionEnergy.substr(0, pos+1).c_str()) * factor;
     
     //printf("unit : %s , %f\n", unit.c_str(), totalBeamEnergy);
