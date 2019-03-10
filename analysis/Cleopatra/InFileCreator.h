@@ -132,9 +132,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     Isotope isotopeb(mb);
     
     bool isReactionSupported = false;
-    if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" ){
-      if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
-    }
+    if( isotopea.A <= 3 && isotopea.Z <= 2 && isotopeb.A <=3 && isotopeb.Z <=2 ) isReactionSupported = true; 
+
+    //if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" || mb == "n"){
+    //  if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
+    //}
 
     if( isReactionSupported == false ){
       printf("  ===> Ignored. Reaction type not supported. \n"); 
@@ -183,7 +185,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     int spdf = GetLValue(lValue);
     //printf(" j = %s, l = %s = %d, parity = %s \n", jValue.c_str(), lValue.c_str(), spdf, parity.c_str());
     if( spdf == -1 ){
-      printf(" ===> skipped. Not reconginzed L-label. \n");
+      printf(" ===> skipped. Not reconginzed L-label. (user input : %s) \n", lValue.c_str());
       continue;
     }
     
@@ -228,16 +230,25 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, "reset\n");
       fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
                isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
-      fprintf(file_out, "PARAMETERSET dpsb r0target \n");
-      fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
-      fprintf(file_out, "\n");
-      fprintf(file_out, "PROJECTILE \n");
-      fprintf(file_out, "wavefunction av18 \n");
-      fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
+      if( isotopea.A <= 2 && isotopea.Z <= 1){
+        fprintf(file_out, "PARAMETERSET dpsb r0target \n");
+        fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+        fprintf(file_out, "\n");
+        fprintf(file_out, "PROJECTILE \n");
+        fprintf(file_out, "wavefunction av18 \n");
+        fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
+      }
+      if( isotopea.A == 3 ){
+        fprintf(file_out, "PARAMETERSET alpha3 r0target \n");
+        fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+        fprintf(file_out, "\n");
+        fprintf(file_out, "PROJECTILE \n");
+        fprintf(file_out, "wavefunction phiffer \n");
+        fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
+      } 
       fprintf(file_out, ";\n");
       fprintf(file_out, "TARGET\n");
       fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-      
       fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
       fprintf(file_out, "r0=1.25 a=.65 \n");
       fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
