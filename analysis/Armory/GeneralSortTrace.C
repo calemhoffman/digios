@@ -16,8 +16,8 @@
 
 #include "../working/GeneralSortMapping.h"
 
-TBenchmark gClock;
-Bool_t shown = 0;
+//================== TODO to be a setup file
+const int nDet=30; //number of PSD detector
 
 TString saveFileName = "sortedTrace.root"; //TODO add suffix to original file
 TFile *saveFile; //!
@@ -31,11 +31,11 @@ ULong64_t ProcessedEntries = 0;
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 1; //0 = no process, 1, fit, 2, constant fraction 
-int traceLength = 200;
+int traceMethod = 0; //0 = no process, 1, fit, 2, constant fraction 
+int traceLength = 1000;
 
-bool isTACRF = true;
-bool isRecoil = true;
+bool isTACRF = false;
+bool isRecoil = false;
 bool isElum = false;
 bool isEZero = false;
 
@@ -44,9 +44,9 @@ TClonesArray * arr ;//!
 TGraph * gTrace; //!
 TF1 * gFit; //!
 
-float te[24];    // energy from trace
-float te_r[24];  // rising time from frace
-float te_t[24];  // time
+float te[nDet];    // energy from trace
+float te_r[nDet];  // rising time from frace
+float te_t[nDet];  // time
 float ttac[6];
 float ttac_t[6];
 float ttac_r[6];
@@ -54,28 +54,38 @@ float trdt[8];
 float trdt_t[8];
 float trdt_r[8];
 
+//clock
+TBenchmark gClock;
+Bool_t shown = 0;
+
+//runID
+int runIDPresent = 0;
+TString fileNum = "";
+
+
 //PSD struct
 typedef struct {
    Int_t   eventID;
-   Float_t Energy[24];
-   Float_t XF[24];
-   Float_t XN[24];
-   Float_t Ring[24];
-   Float_t RDT[24];
-   Float_t TAC[24];
+   Int_t   runID;
+   Float_t Energy[nDet];
+   Float_t XF[nDet];
+   Float_t XN[nDet];
+   Float_t Ring[nDet];
+   Float_t RDT[nDet];
+   Float_t TAC[nDet];
    Float_t ELUM[32];
    Float_t EZERO[4];
    
-   ULong64_t EnergyTimestamp[24];
-   ULong64_t XFTimestamp[24];
-   ULong64_t XNTimestamp[24];
-   ULong64_t RingTimestamp[24];
-   ULong64_t RDTTimestamp[24];
-   ULong64_t TACTimestamp[24];
+   ULong64_t EnergyTimestamp[nDet];
+   ULong64_t XFTimestamp[nDet];
+   ULong64_t XNTimestamp[nDet];
+   ULong64_t RingTimestamp[nDet];
+   ULong64_t RDTTimestamp[nDet];
+   ULong64_t TACTimestamp[nDet];
    ULong64_t ELUMTimestamp[32];
    ULong64_t EZEROTimestamp[4];
    
-   Float_t x[24];
+   Float_t x[nDet];
    
 } PSD;
 
@@ -87,38 +97,48 @@ void GeneralSortTrace::Begin(TTree * tree)
    TString option = GetOption();
    NumEntries = tree->GetEntries();
    EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
+
    printf( "=====================================================\n");
    printf( "===============  GeneralSortTrace.C ================= \n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
-   printf( "========== Make a new tree with trace, total Entry : %llu, use : %llu [%4.1f%]\n", NumEntries, EffEntries, EffEntries*100./NumEntries);
+   printf( "========== Make a new tree with trace, total Entry : %llu, use : %d [%4.1f%%]\n", NumEntries, EffEntries, EffEntries*100./NumEntries);
    printf( "  TAC/RF : %s \n", isTACRF ?  "On" : "Off");
    printf( "  Recoil : %s \n", isRecoil ? "On" : "Off");
    printf( "  Elum   : %s \n", isElum ?   "On" : "Off");
    printf( "  EZero  : %s \n", isEZero ?  "On" : "Off");
-   printf( "  Trace  : %s , Method: %d, Save: %s \n", isTraceON ?  "On" : "Off", traceMethod, isSaveTrace? "Yes": "No:");
+   printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethod==0 ? "no-Fit" : "Fit" , isSaveTrace? "Yes": "No:");
+
+   //================= save file Name
+   saveFileName = tree->GetDirectory()->GetName();
+   int findslat = saveFileName.Last('/');
+   saveFileName.Remove(0, findslat+1);
+   saveFileName = "../root_data/trace_" + saveFileName;
+   printf("Output Root File : %s \n", saveFileName.Data());
 
    saveFile = new TFile(saveFileName,"RECREATE");
    newTree = new TTree("tree","PSD Tree w/ trace");
 
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
-
-   newTree->Branch("e",    psd.Energy,          "Energy[24]/F");
-   newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[24]/l");
-   newTree->Branch("xf",   psd.XF,              "XF[24]/F");
-   newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[24]/l");
-   newTree->Branch("xn",   psd.XN,              "XN[24]/F");
-   newTree->Branch("xn_t", psd.XNTimestamp,     "XNTimestamp[24]/l");
-   newTree->Branch("x",    psd.x,               "x[24]/F"); 
+   
+   newTree->Branch("runID", &psd.runID,"runID/I");
+   
+   newTree->Branch("e",    psd.Energy,          Form("Energy[%d]/F", nDet));
+   newTree->Branch("e_t",  psd.EnergyTimestamp, Form("EnergyTimestamp[%d]/l", nDet));
+   newTree->Branch("xf",   psd.XF,              Form("XF[%d]/F", nDet));
+   newTree->Branch("xf_t", psd.XFTimestamp,     Form("XFTimestamp[%d]/l", nDet));
+   newTree->Branch("xn",   psd.XN,              Form("XN[%d]/F", nDet));
+   newTree->Branch("xn_t", psd.XNTimestamp,     Form("XNTimestamp[%d]/l", nDet));
+   newTree->Branch("x",    psd.x,               Form("x[%d]/F", nDet)); 
 
    if( isRecoil){
-      newTree->Branch("rdt",   psd.RDT,          "RDT[24]/F");
-      newTree->Branch("rdt_t", psd.RDTTimestamp, "RDTTimestamp[24]/l"); 
+      newTree->Branch("rdt",   psd.RDT,          Form("RDT[%d]/F", nDet));
+      newTree->Branch("rdt_t", psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", nDet)); 
    }
    
    if( isTACRF ){
-      newTree->Branch("tac",   psd.TAC,          "TAC[24]/F");
-      newTree->Branch("tac_t", psd.TACTimestamp, "TACTimestamp[24]/l"); 
+      newTree->Branch("tac",   psd.TAC,          Form("TAC[%d]/F", nDet));
+      newTree->Branch("tac_t", psd.TACTimestamp, Form("TACTimestamp[%d]/l", nDet)); 
    }
    
    if( isElum ) {
@@ -140,22 +160,29 @@ void GeneralSortTrace::Begin(TTree * tree)
       
       if( traceMethod > 0 ){
 	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
-         newTree->Branch("te",             te,  "Trace_Energy[24]/F");
-         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[24]/F");
-         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[24]/F");
+         newTree->Branch("te",             te,  "Trace_Energy[nDet]/F");
+         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[nDet]/F");
+         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[nDet]/F");
          newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
          newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
          newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
       }
    }
 
-  printf("======= IDMAP: \n");
-  for(int i = 0 ; i < 160; i ++){
-    printf("%3d(%2d)\t", idDetMap[i], idKindMap[i]);
-    if( (i+1) % 10 == 0 ) printf("\n");
-  }
+  printf("======= ID-MAP: \n");
+  printf("%10s|", ""); 
+  for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
   printf("\n");
-   
+  for(int i = 0 ; i < 96; i++ ) printf("-");
+  printf("\n");
+  printf("%10s|", "VME1-Dig1"); 
+  for(int i = 0 ; i < 160; i ++){
+    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+    if( (i+1) % 10 == 0 ) {
+       printf("\n");
+       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)); 
+    }
+  }
    gClock.Reset();
    gClock.Start("timer");
    
@@ -172,14 +199,34 @@ void GeneralSortTrace::SlaveBegin(TTree * /*tree*/)
 Bool_t GeneralSortTrace::Process(Long64_t entry)
 { 
    psd.eventID = entry;
+   
    ProcessedEntries++;
    if(ProcessedEntries >= MaxProcessedEntries) return kTRUE;
    
    b_NumHits->GetEntry(entry);
-   if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
+   //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
+   
+/**///======================================== extract runID from fileName
+   if( entry == 0 ) {
+      fileNum = fChain->GetDirectory()->GetName();
+      
+      printf("----------------------- openning  %s \n", fileNum.Data());
+      
+      int findslat = fileNum.Last('/');
+      fileNum.Remove(0, findslat+1);
+      int found = fileNum.First(".");
+      fileNum.Remove(found);
+      //the fileNum should be something like "xxx_run4563" now
+      while( !fileNum.IsDigit() ){
+         fileNum.Remove(0,1);
+      }
+      runIDPresent = fileNum.Atoi();
+   } 
+   psd.runID = runIDPresent; 
+   
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i<24; i++) {//num dets
+   for (Int_t i=0 ; i<nDet; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
@@ -202,7 +249,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
    }
    
    if( isTraceON ){
-      for(int i = 0; i < 24; i++){
+      for(int i = 0; i < nDet; i++){
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
@@ -223,7 +270,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
    b_pre_rise_energy->GetEntry(entry);
    b_post_rise_energy->GetEntry(entry);
    b_event_timestamp->GetEntry(entry);
-   if( isTraceON ) b_trace->GetEntry(entry);
+   if( isTraceON && isTraceDataExist ) b_trace->GetEntry(entry);
 
    //ID PSD Channels
    Int_t idKind  = -1;
@@ -237,7 +284,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
       
       //PSD
       /***********************************************************************/
-      if( (id[i] > 1000 && id[i] < 2000) &&  30> idDet && idDet>-1 ) {
+      if( (id[i] > 1000 && id[i] < 2000) &&  nDet > idDet && idDet>-1 ) {
          
          switch(idKind){
             case 0: /* Energy signal */
@@ -251,6 +298,10 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             case 2: // XN
                psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
                psd.XNTimestamp[idDet] = event_timestamp[i];
+               break;
+            case 3: // Ring
+               psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.RingTimestamp[idDet] = event_timestamp[i];
                break;
          }
       }
@@ -318,13 +369,13 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
       
    }//end of NumHits
    
-   for(int i = 0 ; i < 24; i++){
+   for(int i = 0 ; i < nDet; i++){
       psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
    }
    
    //Trace
    /************************************************************************/
-   if( isTraceON ) {
+   if( isTraceON && isTraceDataExist) {
       int countTrace = 0;
       for(Int_t i = 0; i < NumHits ; i++) {
          Int_t idTemp   = id[i] - idConst;
@@ -342,7 +393,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
          //Set gTrace
          
          if( traceMethod == 0 ){
-            for ( int j = 0 ; j < 300; j++){
+            for ( int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
             continue;
