@@ -6,6 +6,8 @@ set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
 export DIGIOSRUNNUM
 
+echo "RUN-${RUN} start at $(date)" >> ~/experiments/${expname}/RunTimeStamp.txt 
+
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
 caput Online_CS_StartStop Start
