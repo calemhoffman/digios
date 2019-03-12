@@ -23,7 +23,7 @@ TString saveFileName = "sortedTrace.root"; //TODO add suffix to original file
 TFile *saveFile; //!
 TTree *newTree; //!
 
-ULong64_t MaxProcessedEntries=100000000000;
+ULong64_t MaxProcessedEntries=1000000000;
 int EffEntries;
 ULong64_t NumEntries = 0;
 ULong64_t ProcessedEntries = 0;
@@ -91,7 +91,7 @@ void GeneralSortTrace::Begin(TTree * tree)
    printf( "===============  GeneralSortTrace.C ================= \n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
-   printf( "========== Make a new tree with trace, total Entry : %d, use : %d [%4.1f%]\n", NumEntries, EffEntries, EffEntries*100./NumEntries);
+   printf( "========== Make a new tree with trace, total Entry : %llu, use : %llu [%4.1f%]\n", NumEntries, EffEntries, EffEntries*100./NumEntries);
    printf( "  TAC/RF : %s \n", isTACRF ?  "On" : "Off");
    printf( "  Recoil : %s \n", isRecoil ? "On" : "Off");
    printf( "  Elum   : %s \n", isElum ?   "On" : "Off");
@@ -148,6 +148,13 @@ void GeneralSortTrace::Begin(TTree * tree)
          newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
       }
    }
+
+  printf("======= IDMAP: \n");
+  for(int i = 0 ; i < 160; i ++){
+    printf("%3d(%2d)\t", idDetMap[i], idKindMap[i]);
+    if( (i+1) % 10 == 0 ) printf("\n");
+  }
+  printf("\n");
    
    gClock.Reset();
    gClock.Start("timer");

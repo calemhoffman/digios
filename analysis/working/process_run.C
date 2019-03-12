@@ -28,7 +28,7 @@ void process_run(Int_t RUNNUM=5, Int_t SORTNUM=0)
     name.Form("../root_data/gen_run%03d.root", RUNNUM);
     printf("%s \n", name.Data());
     printf("============================================= \n");
-    gROOT->ProcessLine("!q");
+    gROOT->ProcessLine(".q");
     
   }else if (SORTNUM==1) {
     TString name("gen.root");
