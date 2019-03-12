@@ -26,25 +26,32 @@ SORTCHAT=$AnalysisDir/working/GEBSort.chat
 RUN=$1
 
 echo "============================================="
-echo "============ RUN $RUN ======================="
+echo "============ RUN $RUN ========================"
 echo "============================================="
 
 if [ $# -eq 1 ] ; then
   echo "=================== single run ============"
 fi
 
-#============ Get the raw data
-echo "RUN $RUN: Get the raw data `date`"
-rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
-rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
-echo "============================================="
-cat ${AnalysisDir}/working/RunTimeStamp.txt
-echo "============================================="
+PCName="$(hostname)"
+if [ ${PCName} == "digios1" ]; then
+    echo "Already in digios1, no need to get data."
+else
+    #============ Get the raw data
+    echo "RUN $RUN: Get the raw data `date`"
+    rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
+    rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
+    echo "============================================="
+    cat ${AnalysisDir}/working/RunTimeStamp.txt
+    echo "============================================="
+
+fi
 
 du -hsc $DATADIR/${exp}_run_$RUN*
 
 count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
-if [$count == 0 ]; then
+echo "========== Number of Files : ${count}"
+if [ ${count} -eq 0 ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
     echo "============================================"
@@ -56,11 +63,11 @@ echo "RUN $RUN: GEBMerge started at `date`"
 $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${exp}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
 echo "RUN $RUN: GEBMerge DONE at `date`"
 
-echo "GEBSort started sorting run $RUN at `date`"
+echo "========= GEBSort started sorting run $RUN at `date`"
 $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT 
 echo "GEBSort DONE at `date`"
 
-echo "saved root file -->  "  $ROOTDIR/run$RUN.root 
+echo "========= saved root file -->  "  $ROOTDIR/run$RUN.root 
 
 echo "============================================="
 echo "============================================="
@@ -74,14 +81,14 @@ else
       runID=$( printf '%d' $RUN )
 fi;
 
-root -q -b "process_run.C($runID,0)"
-root -l ../Armory/runsCheck.C
+root -q -b "process_run.C(${runID},0)"
+#root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 
 #=========== If option = 1, run all processed runs, else, only process this run
 if [ $# -eq 2 ] ; then
   root -l ChainMonitors.C
 else
-  root -l "ChainMonitors.C($runID)"
+#  root -l "ChainMonitors.C($runID)"
 fi;
   
 exit 1
