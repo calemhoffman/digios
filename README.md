@@ -1,4 +1,10 @@
 # digios
+
+## Major Branches
+- master : should be the latest branch with latest code
+- 4SideArray : the branch for the 4-side array, the main diff is the daq
+- ISS631 : the analysis code on 2018-Oct.
+
 ## Major Update on Feb 05, 2019, Ryan
 - Move Cleopatra into analysis.
 - Make a new Transfer.C/h for simulation included Ptolmey Xsec distribution.
