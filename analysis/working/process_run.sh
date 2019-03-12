@@ -38,9 +38,10 @@ if [ ${PCName} == "digios1" ]; then
     echo "Already in digios1, no need to get data."
 else
     #============ Get the raw data
+    IP=192.168.1.2
     echo "RUN $RUN: Get the raw data `date`"
-    rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
-    rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
+    rsync -avuht --progress "helios@${IP}:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
+    rsync -avuht --progress "helios@${IP}:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
     echo "============================================="
     cat ${AnalysisDir}/working/RunTimeStamp.txt
     echo "============================================="

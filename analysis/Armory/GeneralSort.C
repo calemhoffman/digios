@@ -105,12 +105,20 @@ void GeneralSort::Begin(TTree * tree)
  
   StpWatch.Start();
 
-  printf("======= IDMAP: \n");
-  for(int i = 0 ; i < 160; i ++){
-    printf("%3d(%2d)\t", idDetMap[i], idKindMap[i]);
-    if( (i+1) % 10 == 0 ) printf("\n");
-  }
+  printf("======= ID-MAP: \n");
+  printf("%10s|", ""); 
+  for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
   printf("\n");
+  for(int i = 0 ; i < 96; i++ ) printf("-");
+  printf("\n");
+  printf("%10s|", "VME1-Dig1"); 
+  for(int i = 0 ; i < 160; i ++){
+    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+    if( (i+1) % 10 == 0 ) {
+       printf("\n");
+       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)); 
+    }
+  }
 
 }
 
