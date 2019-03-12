@@ -104,6 +104,14 @@ void GeneralSort::Begin(TTree * tree)
   gen_tree->Branch("ezero_t",psd.EZEROTimestamp,"EZEROTimestamp[10]/l"); 
  
   StpWatch.Start();
+
+  printf("======= IDMAP: \n");
+  for(int i = 0 ; i < 160; i ++){
+    printf("%3d(%2d)\t", idDetMap[i], idKindMap[i]);
+    if( (i+1) % 10 == 0 ) printf("\n");
+  }
+  printf("\n");
+
 }
 
 void GeneralSort::SlaveBegin(TTree * /*tree*/)
