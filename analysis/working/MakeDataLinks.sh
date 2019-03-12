@@ -65,6 +65,12 @@ if [ ${PCNAME:0:5} == "bebop" ]; then
 
 fi
 
+if [ ${PCNAME} == "digios1" ] ; then
+
+    
+
+fi
+
 #================= create links
 echo "--------- remove exist links"
 rm -f ../data

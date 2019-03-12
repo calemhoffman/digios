@@ -6,7 +6,7 @@ if [ $# -ne 2 ] ; then
   exit 1
 fi
 
-exp=iss631
+exp=ARR01
 AnalysisDir=../../analysis
 
 #remote data path

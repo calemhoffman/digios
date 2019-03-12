@@ -8,11 +8,11 @@ read -p 'Enter the new experiment name: ' expName
 
 echo "----------- new experiment name : ${expName}"
 
-EXPPATH=/home/helios/experiments
+EXPPATH=/home/helios/digios
 DATAPATH=/media/DIGIOSDATA3
-OLDexpName=iss631
+OLDexpName=ARR01
 
-expDIR=${EXPPATH}/${expName}
+expDIR=${EXPPATH}
 
 #===== make new folders
 #echo "====== Creaing ${expDIR} in ${EXPPATH}"
@@ -34,30 +34,22 @@ mkdir -vp ${rootData}
 #===== replace string
 echo "======= replacing string"
 sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run_local.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run_simple.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/gebmerge_local.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/gebsortmerged.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/gebmerge.sh
 sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run.C
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run_local.C
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/gebsortmerged_local.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/start_run.sh
+sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/process_run_MultiRuns.C
+sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/analysis/working/Rsync_data_from_DAQ.sh
 sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/helios_setup_digitizer
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/open_r.sh
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/close_r.sh
 sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/helios_setup_trigger
 sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/helios_setup_other
-sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/heliosCommander
+sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/open_r.sh
+sed -i "s/${OLDexpName}/${expName}/g" ${expDIR}/daq/edm/scripts/close_r.sh
 
 #===== check replace string
 echo "========= check the replace"
 grep -rnw ${expDIR} -e "${expName}"
 
 #===== replace .bashrc
-echo "======== replace .bashrc"
-sed -i "s/${OLDexpName}/${expName}/g" ~/.bashrc
+#echo "======== replace .bashrc"
+#sed -i "s/${OLDexpName}/${expName}/g" ~/.bashrc
 
 #===== create symbolic links
 echo "======== creating symbolic links"

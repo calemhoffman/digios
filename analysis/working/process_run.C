@@ -1,4 +1,4 @@
-TString expName ="iss631";
+TString expName ="ARR01";
 
 void process_run(Int_t RUNNUM=5, Int_t SORTNUM=0)
 {

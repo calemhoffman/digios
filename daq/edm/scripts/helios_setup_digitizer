@@ -8,7 +8,7 @@
 
 #cd /global/devel/systems/helios/edm/scripts
 echo "####################################################"
-echo "# iss001 helios_setup_digitizer                    #"
+echo "# ARR01 helios_setup_digitizer                    #"
 echo "# Setting digitizer values - defaults & triggering #"
 echo "####################################################"
 
@@ -112,7 +112,7 @@ echo "Setting individual threshold"
 echo "Setting other various individual parameters"
 
 ##################################################################
-#   With system linked up, HELIOS ISS000  X-plane and Y-plane
+#   With system linked up, HELIOS ARR01  X-plane and Y-plane
 #   mapping register values
 #  
 #   array RTR1 E-H, RTR2 A-H Energy X-plane
@@ -195,5 +195,5 @@ caput VME32:RTR1:LRUCtl02 OFF > null
 caput VME32:RTR2:LRUCtl02 OFF > null
 
 echo "#########################################"
-echo "Finished - helios_setup_digitizer iss000"
+echo "Finished - helios_setup_digitizer ARR01"
 echo "#########################################"
