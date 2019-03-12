@@ -66,9 +66,15 @@ if [ ${PCNAME:0:5} == "bebop" ]; then
 fi
 
 if [ ${PCNAME} == "digios1" ] ; then
+   echo " Detecting computer : DAQ"
+   
+   branch=$(git symbolic-ref HEAD)
+   branch=${branch#refs/heads/}
+   
+   echo " Current Git Branch : $branch"
 
-    
-
+   echo " not set yet, please edit bash script."
+   exit
 fi
 
 #================= create links
