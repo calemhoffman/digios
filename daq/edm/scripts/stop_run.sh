@@ -2,8 +2,7 @@
 
 echo ------------ Stopping the current run ------------------
 
-expname=iss000
-echo "         stop at $(date)" >> ~/experiments/${expname}/RunTimeStamp.txt
+echo "         stop at $(date)" >> ~/digios/RunTimeStamp.txt
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"

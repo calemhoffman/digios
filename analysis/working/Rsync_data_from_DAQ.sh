@@ -1,7 +1,7 @@
 #!/bin/sh
 
-exp=iss631
-dir=/Users/heliosdigios/experiments/${exp}
+exp=ARR01
+dir=/Users/heliosdigios/digios
 #remote data path
 dataloc=/media/DIGIOSDATA3/data/${exp}
 
