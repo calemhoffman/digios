@@ -29,8 +29,8 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int rowDet = 4;
-   const int colDet = 6;
+   const int rowDet = 6;
+   const int colDet = 5;
    
    const int numDet = rowDet * colDet;
    
@@ -76,12 +76,13 @@ void Cali_xf_xn(TTree * tree){
    for( int i = 0; i < numDet; i ++){
       TString name;
       name.Form("q%d", i);
-      q[i] = new TH1F(name, name, 200, 500, 1800);
+      q[i] = new TH1F(name, name, 200, -5000, -500);
       q[i]->SetXTitle(name);
       
       TString expression;
       expression.Form("e[%d] >> q%d" ,i, i);
-      gate[i].Form("e[%d] > 0", i);
+      gate[i].Form("");
+      //gate[i].Form("e[%d] > 0", i);
       
       cAlpha->cd(i+1);
       tree->Draw(expression, gate[i] , "");

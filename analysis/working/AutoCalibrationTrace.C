@@ -165,14 +165,14 @@ void AutoCalibrationTrace(){
    }
    
    if( option == 0 || option == 4 || option == 5 ){
-      printf(" ============================= alpha source files :  \n");
+      printf(" ============================= alpha source files :  \033[0;31m\n");
       chainAlpha->GetListOfFiles()->Print();
-      printf(" ================================================== \n");
+      printf("\033[0m\n");
    }
    if( 1 <= option && option <= 3){
-      printf(" ================ files :  \n");
+      printf(" ================ files :  \033[0;31m\n");
       chain->GetListOfFiles()->Print();
-      printf(" ================================================== \n");
+      printf("\033[0m\n");
    }    
    
    if( option == 0 ) {
