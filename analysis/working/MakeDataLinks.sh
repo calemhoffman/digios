@@ -20,7 +20,7 @@ NC='\033[0m'
 PCNAME=${HOSTNAME}
 
 #================ Find computer
-if [ $PCNAME == "phywl162.phy.anl.gov" ]; then
+if [ $PCNAME == "phywl183.phy.anl.gov" ]; then
    echo " Detecting computer : ${RED}HELIOS iMac${NC}"
    
    branch=$(git symbolic-ref HEAD)
@@ -30,7 +30,7 @@ if [ $PCNAME == "phywl162.phy.anl.gov" ]; then
    
    DATAPATH=~/experiment
   
-   if [ $branch == "master" ] ; then exp=iss631; fi
+   if [ $branch == "master" ] ; then exp=ARR01; fi
    if [ $branch == "ISS631" ] ; then exp=iss631; fi
    if [ $branch == "ISS000" ] ; then exp=iss000; fi
    
@@ -73,8 +73,7 @@ if [ ${PCNAME} == "digios1" ] ; then
    
    echo " Current Git Branch : $branch"
 
-   echo " not set yet, please edit bash script."
-   exit
+   if [ $branch == "master" ] ; then exp=ARR01; fi
 fi
 
 #================= create links

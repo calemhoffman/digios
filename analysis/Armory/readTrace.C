@@ -10,6 +10,8 @@
 #include <TF1.h>
 #include <TLine.h>
 
+const int nDet = 30;
+
 void readTrace(TString fileName){
    
 /**///==============================================================   
@@ -33,8 +35,8 @@ void readTrace(TString fileName){
    tree->SetBranchAddress("trace", &arr);
    
    int eventID;
-   float e[24], xf[24], xn[24];
-   float te[24];
+   float e[nDet], xf[nDet], xn[nDet];
+   float te[nDet];
    float rdt[8];
    
    tree->SetBranchAddress("eventID",   &eventID);
@@ -57,29 +59,34 @@ void readTrace(TString fileName){
       
       bool nextFlag = true;
       
-      for( int i = 0; i < 24; i++){
+      for( int i = 0; i < nDet; i++){
          if( TMath::IsNaN(e[i]) ) continue;    
-         if( e[i] > 0 ){
-            nextFlag = false;
-         }
+         //if( e[i] > 0 ) nextFlag = false;
+         
          printf("========= ev: %d, #trace: %d | %d, (e, xf, xn , te[i]) = (%7.2f, %7.2f, %7.2f, %7.2f)\n", 
                     eventID, arr->GetEntriesFast(), i, e[i], xf[i], xn[i], te[i]);
-        
+         
+         //f( e[i] < -500 ) nextFlag = false;
+         nextFlag = false;
       }
-      for( int i = 0; i < 8; i++){
-         if( TMath::IsNaN(rdt[i]) ) continue;    
-         if( rdt[i] > 0 ){
-            nextFlag = false;
-         }
-         printf("      rdt: %d , %7.2f\n", i, rdt[i]);
-        
-      }
+      //for( int i = 0; i < 8; i++){
+      //   if( TMath::IsNaN(rdt[i]) ) continue;    
+      //   if( rdt[i] > 0 ){
+      //      nextFlag = false;
+      //   }
+      //   printf("      rdt: %d , %7.2f\n", i, rdt[i]);
+      //  
+      //}
       
       if( nextFlag ) continue;
       
       for( int j = 0; j < arr->GetEntriesFast() ; j++){
 
          TGraph * g  = (TGraph*) arr->At(j);
+         
+         TString gTitle;
+         gTitle = g->GetName();
+         g->SetTitle(gTitle);
          
          TF1 * gFit = (TF1 *) g->FindObject("gFit");
          if( gFit != NULL ){ 
@@ -93,9 +100,9 @@ void readTrace(TString fileName){
             int det  = gFit->GetLineStyle();
             
             //if( det < 100 ) continue;
-            if( det != 18 && det != 19 && det !=12 ) continue;
+            //if( det != 18 && det != 19 && det !=12 ) continue;
             
-            TString gTitle;
+            
             gTitle.Form("(%d,%d), base: %5.1f, rise: %5.3f, time: %5.2f, energy: %6.1f | chi2: %6.2f, %6.2f |(1 for break)",
                      det, kind, base, riseTime, time, energy, chiSq, TMath::Sqrt(chiSq)/energy);
             
@@ -135,7 +142,7 @@ void readTrace(TString fileName){
    TH2F * hEE = new TH2F("hEE", "jj; e(trace); e(digit)", 500, 0, 8000, 500, 0, 8000);
    for( int ev = 0; ev < totnumEntry; ev++){
       tree->GetEntry(ev);
-      for( int i = 0; i < 24; i++){
+      for( int i = 0; i < nDet; i++){
          if( TMath::IsNaN(te[i]) || TMath::IsNaN(e[i]) ) continue;  
          hEE->Fill(te[i] , e[i]);
       }

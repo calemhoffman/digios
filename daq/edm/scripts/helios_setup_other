@@ -4,7 +4,7 @@
 #
 
 echo "############################################"
-echo "##### Setting other params for ARR01  #####"
+echo "##### Setting other params for         #####"
 echo "############################################"
 
 #echo "* setting ezero params *"
@@ -28,5 +28,5 @@ echo "** done with recoil settings"
 #echo "done with timing settings"
 
 echo "###########################################"
-echo "#### finished with settings for ARR01 ####"
+echo "#### finished with settings for        ####"
 echo "###########################################"
