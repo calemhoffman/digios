@@ -1,10 +1,10 @@
 #!/bin/bash -l
-source ~/digios/expName.sh #load expName
-
 read -p 'Enter the Run Number: ' RUN
 set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
 export DIGIOSRUNNUM
+
+source ~/digios/expName.sh #load expName
 
 echo "RUN-${RUN} start at $(date)" >> ~/digios/RunTimeStamp.txt 
 
