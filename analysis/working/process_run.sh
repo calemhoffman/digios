@@ -11,7 +11,7 @@ if [ $# -eq 0 ] ; then
 fi;
 
 source ../../expName.sh #load expName
-AnalysisDir=../analysis
+AnalysisDir=../../analysis
 
 #remote data path
 dataloc=/media/DIGIOSDATA3/${expName}/data
@@ -24,7 +24,6 @@ ROOTDIR=$AnalysisDir/root_data
 DATADIR=$AnalysisDir/data
 MERGECHAT=$AnalysisDir/working/GEBMerge.chat
 SORTCHAT=$AnalysisDir/working/GEBSort.chat
-
 
 RUN=$1
 isDownload=1
@@ -49,7 +48,7 @@ if [ $# -ge 5 ]; then
  OverRideMonitor=""
 fi
 
-if [ isGeneralSort -eq 2 ]; then
+if [ ${isGeneralSort} -eq 2 ]; then
   isMonitor=0;
   OverRideMonitor="overrided by GeneralSortTrace."
 fi
@@ -73,7 +72,7 @@ if [ ${isDownload} -eq 1 ]; then
       #============ Get the raw data
       IP=192.168.1.2
       echo "RUN $RUN: Get the raw data `date`"
-      rsync -avuht --progress "helios@${IP}:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
+      rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
       rsync -avuht --progress "helios@${IP}:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
       echo "============================================="
       cat ${AnalysisDir}/working/RunTimeStamp.txt
@@ -82,9 +81,9 @@ if [ ${isDownload} -eq 1 ]; then
   fi
 fi
 
-du -hsc $DATADIR/${exp}_run_$RUN*
+du -hsc $DATADIR/${expName}_run_$RUN*
 
-count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
+count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
 echo "========== Number of Files : ${count}"
 if [ ${count} -eq 0 ]; then
     echo "============================================"
@@ -97,14 +96,14 @@ fi
 if [ $isMergeSort -eq 1 ]; then
   echo "######################### Merge and Sort raw data"
   echo "RUN $RUN: GEBMerge started at `date`"
-  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${exp}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
+  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 
   echo "========= GEBSort started sorting run $RUN at `date`"
-  $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT 
+  ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
   echo "GEBSort DONE at `date`"
 
-  echo "========= saved root file -->  "  $ROOTDIR/run$RUN.root 
+  echo "========= saved root file -->  "  ${ROOTDIR}/run${RUN}.root 
 
   echo "============================================="
   echo "============================================="

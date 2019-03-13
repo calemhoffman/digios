@@ -10,11 +10,7 @@ fi
 
 PCName="$(hostname)"
 
-if [ ${PCName} == "phywl183.phy.anl.gov" ]; then 
-   echo "----------- new experiment name : ${expName}" #for MAC
-else
-   echo -e "----------- new experiment name : \033[0;31${expName}\033[0m"
-fi
+echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
 
 #------ Set up data folder, check disk space
 echo "=================== Checking disk space."
