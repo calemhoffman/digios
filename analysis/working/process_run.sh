@@ -63,8 +63,16 @@ echo "GeneralSort : ${isGeneralSort}"
 echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
 echo "============================================="
 
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+Cyan='\033[0;36m'
+NC='\033[0m'
+
 if [ ${isDownload} -eq 1 ]; then
-  echo "######################### Download raw data"
+  ech -e "${RED}######################### Download raw data${NC}"
   PCName="$(hostname)"
   if [ ${PCName} == "digios1" ]; then
       echo "Already in digios1, no need to get data."
@@ -94,7 +102,7 @@ fi
 
 #=========== Merge and Sort
 if [ $isMergeSort -eq 1 ]; then
-  echo "######################### Merge and Sort raw data"
+  echo "${RED}######################### Merge and Sort raw data${NC}"
   echo "RUN $RUN: GEBMerge started at `date`"
   ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
@@ -120,12 +128,12 @@ fi;
 
 
 if [ $isGeneralSort -eq 1 ]; then
-  echo "######################### GeneralSort.C"
+  echo "${RED}######################### GeneralSort.C${NC}"
   root -q -b "process_run.C(${runID})"
 fi
 
 if [ $isGeneralSort -eq 2 ]; then
-  echo "######################### GeneralSortTrace.C"
+  echo "${RED}######################### GeneralSortTrace.C${NC}"
   root -q -b "process_run.C(${runID}, 1)"
 fi
 root -l ../Armory/runsCheck.C  #check the run Entries, and duration
