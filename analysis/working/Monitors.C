@@ -6,6 +6,7 @@
 #include <TStyle.h>
 #include <TCutG.h>
 #include <TGraph.h>
+#include <TMath.h>
 #include <TMultiGraph.h>
 #include <TString.h>
 #include <TSystem.h>
