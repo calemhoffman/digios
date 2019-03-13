@@ -6,12 +6,12 @@ if [ $# -ne 2 ] ; then
   exit 1
 fi
 
-exp=ARR01
-AnalysisDir=../../analysis
+source ../../expName.sh #load expName
+AnalysisDir=../analysis
 
 #remote data path
-dataloc=/media/DIGIOSDATA3/data/${exp}
-daqDir=/home/helios/experiments/${exp}
+dataloc=/media/DIGIOSDATA3/${exp}/data
+daqDir=/home/helios/digios
 
 #===== directory and chat files
 GEBDIR=$AnalysisDir/GEBSort
@@ -45,18 +45,26 @@ do
   echo "============ RUN $RUN ======================="
   echo "============================================="
 
-  echo "RUN $RUN: Get the raw data `date`"
+  echo "######################### Download raw data"
+  PCName="$(hostname)"
+  if [ ${PCName} == "digios1" ]; then
+      echo "Already in digios1, no need to get data."
+  else
+    echo "RUN $RUN: Get the raw data `date`"
 
-  #============ Get the raw data
-  rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
-  rsync -avuht --progress "helios@anldaqrouter:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
-  echo "============================================"
-  cat ${AnalysisDir}/working/RunTimeStamp.txt
-  echo "============================================"
-
+    #============ Get the raw data
+    IP=192.168.1.2
+    rsync -avuht --progress "helios@${IP}:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
+    rsync -avuht --progress "helios@${IP}:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
+    echo "============================================"
+    cat ${AnalysisDir}/working/RunTimeStamp.txt
+    echo "============================================"
+  fi
+  
   du -hsc $DATADIR/${exp}_run_$RUN*
 
   count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
+  echo "========== Number of Files : ${count}"
   if [$count == 0 ]; then
       echo "============================================"
       echo "====  RAW Files of RUN-${RUN} not found! "
@@ -85,7 +93,7 @@ do
         runID=$( printf '%d' $RUN )
   fi;
 
-  root -q -b "process_run.C($runID,0)"
+  root -q -b "process_run.C($runID)"
 
 done
 

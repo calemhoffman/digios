@@ -69,7 +69,7 @@ void GeneralSort::Begin(TTree * tree)
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
   saveFileName.Remove(0, findslat+1);
-  saveFileName = "gen_" + saveFileName;
+  saveFileName = "../root_data/gen_" + saveFileName;
 
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
@@ -208,8 +208,8 @@ Bool_t GeneralSort::Process(Long64_t entry)
       if ((id[i]>1000&&id[i]<2000)&&(psd8Chan<8)&&(idDet>-1)) { //IF PSD	
         //Information
         if (idDet<0 && CrapPrint==0) {printf("ohhhhhhhhhhh craaaaaaap\n"); CrapPrint=1;}
-        if (ProcessedEntries<NUMPRINT)
-          printf("id %i, idKind %2i, idDet %3i, idConst %i\n",id[i],idKind,idDet,idConst);
+        //if (ProcessedEntries<NUMPRINT)
+        //  printf("id %i, idKind %2i, idDet %3i, idConst %i\n",id[i],idKind,idDet,idConst);
         
         switch(idKind)
           {

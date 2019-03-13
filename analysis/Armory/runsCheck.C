@@ -44,7 +44,7 @@
    int numFile = rootFileName.size();
    for( int i = 0; i < numFile ; i++){
       
-      printf("%s \n", rootFileName[i].Data());
+      //printf("%s \n", rootFileName[i].Data());
       
       f = new TFile (rootFileName[i], "read");
       

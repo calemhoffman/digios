@@ -1,7 +1,8 @@
 !/bin/bash -l
+source ~/digios/expName.sh #load expName
 export TERM=vt100
 explocation=/home/digios/daq
-datalocation=/media/DIGIOSDATA3/data/ARR01
+datalocation=/media/DIGIOSDATA3/${expName}/data
 
 cd ${datalocation}
 caput Online_CS_SaveData No Save

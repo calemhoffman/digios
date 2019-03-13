@@ -32,7 +32,7 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 0; //0 = no process, 1, fit, 2, constant fraction 
-int traceLength = 1000;
+int traceLength = 600;
 
 bool isTACRF = false;
 bool isRecoil = false;
@@ -396,6 +396,8 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             for ( int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
+            
+            gTrace->SetName(Form("det:%d,kind:%d", idDet, idKind));
             continue;
          }
          
@@ -412,7 +414,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             
             //Set gFit
             gFit->SetLineStyle(idDet);
-            gFit->SetLineColor(idKind == 0 ? 3 : idKind);
+            gFit->SetLineColor(idKind == 0 ? 4 : idKind);
             gFit->SetRange(0, traceLength);
 
             base = gTrace->Eval(1);

@@ -190,10 +190,11 @@ void GeneralSortTrace::Init(TTree *tree)
    
    TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("trace");
    if( br == NULL ) {
-      printf("+++++++ no trace data.\n");
+      printf("++++++++++++++++++++++++++++++ no trace data.\n");
       isTraceDataExist = false;
    }else{
       isTraceDataExist = true;
+      printf("++++++++++++++++++++++++++++++ trace data exist.\n");
       fChain->SetBranchAddress("trace", trace, &b_trace);
    }
 }
