@@ -1,10 +1,11 @@
 #!/bin/sh
 
 if [ $# -eq 0 ] ; then
-  echo "$./process_run_simple.sh #RunNum #download #MergeSort #GeneralSort #Monitor"
+  echo "$./process_run_simple.sh #RunNum #download #Merge #EventBld #GeneralSort #Monitor"
   echo "              RunNum = a 3 digit run number, e.g. 001"
   echo "            download = 1/0, is download from DAQ?"
-  echo "           MergeSort = 1/0, is Merge and Sort the raw data?"
+  echo "               Merge = 1/0, is Merge the raw data?"  
+  echo "            EventBld = 1/0, is building event from the meged data?"  
   echo "          GenralSort = 2/1/0, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C"
   echo "             Monitor = 2/1/0, run ChainMonitor.C?  1 = single run, 2 = all runs"
   exit 1
@@ -27,7 +28,8 @@ SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
 RUN=$1
 isDownload=1
-isMergeSort=1
+isMerge=1
+isSort=1
 isGeneralSort=1
 isMonitor=1
 
@@ -36,15 +38,19 @@ if [ $# -ge 2 ]; then
 fi
 
 if [ $# -ge 3 ]; then
- isMergeSort=$3
+ isMerge=$3
 fi
 
 if [ $# -ge 4 ]; then
- isGeneralSort=$4
+ isSort=$4
 fi
 
 if [ $# -ge 5 ]; then
- isMonitor=$5
+ isGeneralSort=$5
+fi
+
+if [ $# -ge 6 ]; then
+ isMonitor=$6
  OverRideMonitor=""
 fi
 
@@ -58,7 +64,8 @@ echo "============ RUN $RUN ========================"
 echo "============================================="
 
 echo "Download    : ${isDownload}"
-echo "MergeSort   : ${isMergeSort}"
+echo "Merge       : ${isMerge}"
+echo "Sort        : ${isSort}"
 echo "GeneralSort : ${isGeneralSort}"
 echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
 echo "============================================="
@@ -72,7 +79,7 @@ Cyan='\033[0;36m'
 NC='\033[0m'
 
 if [ ${isDownload} -eq 1 ]; then
-  ech -e "${RED}######################### Download raw data${NC}"
+  echo -e "${RED}######################### Download raw data${NC}"
   PCName="$(hostname)"
   if [ ${PCName} == "digios1" ]; then
       echo "Already in digios1, no need to get data."
@@ -101,12 +108,14 @@ if [ ${count} -eq 0 ]; then
 fi
 
 #=========== Merge and Sort
-if [ $isMergeSort -eq 1 ]; then
+if [ $isMerge -eq 1 ]; then
   echo "${RED}######################### Merge and Sort raw data${NC}"
   echo "RUN $RUN: GEBMerge started at `date`"
   ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
+fi
 
+if [ $isSort -eq 1 ]; then
   echo "========= GEBSort started sorting run $RUN at `date`"
   ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
   echo "GEBSort DONE at `date`"
@@ -128,12 +137,12 @@ fi;
 
 
 if [ $isGeneralSort -eq 1 ]; then
-  echo "${RED}######################### GeneralSort.C${NC}"
+  echo -e "${RED}######################### GeneralSort.C${NC}"
   root -q -b "process_run.C(${runID})"
 fi
 
 if [ $isGeneralSort -eq 2 ]; then
-  echo "${RED}######################### GeneralSortTrace.C${NC}"
+  echo -e "${RED}######################### GeneralSortTrace.C${NC}"
   root -q -b "process_run.C(${runID}, 1)"
 fi
 root -l ../Armory/runsCheck.C  #check the run Entries, and duration
