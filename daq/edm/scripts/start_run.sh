@@ -6,7 +6,7 @@ export DIGIOSRUNNUM
 
 source ~/digios/expName.sh #load expName
 
-echo "RUN-${RUN} start at $(date)" >> ~/digios/RunTimeStamp.txt 
+echo "RUN-${RUN} start at $(date)" >> ~/digios/analysis/working/RunTimeStamp.txt 
 
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
