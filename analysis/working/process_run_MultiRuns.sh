@@ -10,7 +10,7 @@ source ../../expName.sh #load expName
 AnalysisDir=../analysis
 
 #remote data path
-dataloc=/media/DIGIOSDATA3/${exp}/data
+dataloc=/media/DIGIOSDATA3/${expName}/data
 daqDir=/home/helios/digios
 
 #===== directory and chat files
@@ -54,14 +54,14 @@ do
 
     #============ Get the raw data
     IP=192.168.1.2
-    rsync -avuht --progress "helios@${IP}:${dataloc}/${exp}_run_$RUN.gtd*" ${DATADIR}/.
+    rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
     rsync -avuht --progress "helios@${IP}:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
     echo "============================================"
     cat ${AnalysisDir}/working/RunTimeStamp.txt
     echo "============================================"
   fi
   
-  du -hsc $DATADIR/${exp}_run_$RUN*
+  du -hsc $DATADIR/${expName}_run_$RUN*
 
   count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
   echo "========== Number of Files : ${count}"
@@ -74,7 +74,7 @@ do
 
   #=========== Merge and Sort
   echo "RUN $RUN: GEBMerge started at `date`"
-  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${exp}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
+  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${expName}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 
   echo "GEBSort started sorting run $RUN at `date`"
