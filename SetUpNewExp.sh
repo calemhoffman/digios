@@ -9,12 +9,11 @@ if [ $# -eq 0 ]; then
 fi
 
 PCName="$(hostname)"
-
 echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
 
 #------ Set up data folder, check disk space
 echo "=================== Checking disk space."
-
+echo "PC name : ${PCName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
    DATAPATH=/media/DIGIOSDATA3
@@ -23,15 +22,29 @@ if [ ${PCName} == "digios1" ]; then  #DAQ
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
-fi
 
-if [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
+else if [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
    DATAPATH=~/experiments
-   
+
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
+else if [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
+   DATAPATH=/lcrc/project/HELIOS/
+   space=100000000
+else
+   read "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
+   echo "DATAPATH for    raw data : ${DATAPATH}/data"
+   echo "DATAPATH for merged_data : ${DATAPATH}/merged_data"
+   echo "DATAPATH for   root_data : ${DATAPATH}/root_data"   
+
+   space=`df -ml | tail -1 | awk '{print $4}'` #in mb
+   spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
+   spacePrecent="${spacePrecent:0:2}"
+   echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
 fi
 
 if [ "${space}" -le 512000 ]; then
@@ -40,25 +53,33 @@ if [ "${space}" -le 512000 ]; then
    
    if [ ${OKFlag} == "N" ]; then
       echo "xxxxxxxxxxxxxx Abort SetUpNewExp.sh."
-      exit 0;
+      exit
+   fi
+fi
+
+
+#------ check is there any GIt branch in repository, 
+#       if not create Git Branch, if yes, checkout
+echo "=================== Checking/Create Git Branch"
+if [ ${expName} == "ARR01" ]; then
+   echo "this is master experiment name. no branch create."
+else
+   isBranchExist=`git ls-remote --heads https://github.com/calemhoffman/digios.git ${expName} | wc -l`
+   if [ $isBranchExist -eq 0 ]; then
+       git checkout -b ${expName}
+   else
+       echo "Experimental Name (${expName}) already in use."
+       echo "Please take another name or git pull ${expName}"
+       exit
    fi
 fi
 
 #------ set up expName.sh, so that all experimental Name is refered to this name
-echo "=================== Setting up ~/digios/expName.sh"
-touch ~/digios/expName.sh
+DigiosDir="$(pwd)"
+echo "=================== Setting up ${DigiosDir}/expName.sh"
+touch ${DigiosDir}/expName.sh
 echo "#!/bin/bash -l" > expName.sh
 echo "expName=${expName}" >> expName.sh
-
-#------ check is there any GIt branch in repository, 
-#       if not create Git Branch, if yes, checkout
-#echo "=================== Checking/Create Git Branch"
-#if [ ${expName} == "ARR01" ]; then
-#   echo "this is master experiment name. no branch create."
-#else
-#   git checkout -b ${expName}
-#fi
-
 
 echo "=================== making new folders in ${DATAPATH}/${expName}"
 Data=${DATAPATH}/${expName}/data
