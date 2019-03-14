@@ -2,7 +2,7 @@
 
 echo ------------ Stopping the current run ------------------
 
-echo "         stop at $(date)" >> ~/digios/RunTimeStamp.txt
+echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.txt
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"

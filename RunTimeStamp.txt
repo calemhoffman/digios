@@ -1,2 +1,0 @@
-RUN-002 start at Wed Mar 13 21:34:34 CET 2019
-         stop at Wed Mar 13 21:35:08 CET 2019
