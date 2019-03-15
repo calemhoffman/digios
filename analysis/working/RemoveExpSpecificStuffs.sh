@@ -8,6 +8,7 @@ echo "   correction_*.dat  "
 echo "   reaction.dat  "
 echo "   run_Summary.dat"
 echo "   example.*"
+echo "   RunTimeStamp.dat"
 echo "   *.root  "
 echo "   *.d  "
 echo "   *.so  "
@@ -21,6 +22,7 @@ if [ ${conti} == "Yes" ] ; then
   rm -fv reaction.dat
   rm -fv run_Summary.dat
   rm -fv example.*
+  rm -fv RunTimeStamp.dat
   rm -fv *.root
   rm -fv *.d
   rm -fv *.so

@@ -31,7 +31,7 @@ ULong64_t ProcessedEntries = 0;
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 0; //0 = no process, 1, fit, 2, constant fraction 
+int traceMethod = 0; //0 = no process, 1, fit, 2, Trapezoid (not implement yet
 int traceLength = 600;
 
 bool isTACRF = false;
@@ -99,7 +99,7 @@ void GeneralSortTrace::Begin(TTree * tree)
    EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
 
    printf( "=====================================================\n");
-   printf( "===============  GeneralSortTrace.C ================= \n");
+   printf( "===============  GeneralSortTrace.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
    printf( "========== Make a new tree with trace, total Entry : %llu, use : %d [%4.1f%%]\n", NumEntries, EffEntries, EffEntries*100./NumEntries);
@@ -120,16 +120,17 @@ void GeneralSortTrace::Begin(TTree * tree)
    newTree = new TTree("tree","PSD Tree w/ trace");
 
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
-   
    newTree->Branch("runID", &psd.runID,"runID/I");
    
-   newTree->Branch("e",    psd.Energy,          Form("Energy[%d]/F", nDet));
-   newTree->Branch("e_t",  psd.EnergyTimestamp, Form("EnergyTimestamp[%d]/l", nDet));
-   newTree->Branch("xf",   psd.XF,              Form("XF[%d]/F", nDet));
-   newTree->Branch("xf_t", psd.XFTimestamp,     Form("XFTimestamp[%d]/l", nDet));
-   newTree->Branch("xn",   psd.XN,              Form("XN[%d]/F", nDet));
-   newTree->Branch("xn_t", psd.XNTimestamp,     Form("XNTimestamp[%d]/l", nDet));
-   newTree->Branch("x",    psd.x,               Form("x[%d]/F", nDet)); 
+   newTree->Branch("e",      psd.Energy,          Form("Energy[%d]/F", nDet));
+   newTree->Branch("e_t",    psd.EnergyTimestamp, Form("EnergyTimestamp[%d]/l", nDet));
+   newTree->Branch("xf",     psd.XF,              Form("XF[%d]/F", nDet));
+   newTree->Branch("xf_t",   psd.XFTimestamp,     Form("XFTimestamp[%d]/l", nDet));
+   newTree->Branch("xn",     psd.XN,              Form("XN[%d]/F", nDet));
+   newTree->Branch("xn_t",   psd.XNTimestamp,     Form("XNTimestamp[%d]/l", nDet));
+   newTree->Branch("ring",   psd.Ring,            Form("Ring[%d]/F", nDet));
+   newTree->Branch("ring_t", psd.RingTimestamp,   Form("RingTimestamp[%d]/l", nDet));
+   newTree->Branch("x",      psd.x,               Form("x[%d]/F", nDet)); 
 
    if( isRecoil){
       newTree->Branch("rdt",   psd.RDT,          Form("RDT[%d]/F", nDet));
@@ -489,16 +490,16 @@ void GeneralSortTrace::SlaveTerminate()
 void GeneralSortTrace::Terminate()
 {
    newTree->Write();
-   int validCount = newTree->GetEntries();
+   int savedEntries = newTree->GetEntries();
    saveFile->Close();
 
    printf("=======================================================\n");
-   printf("----- Total processed entries : %3.1f k\n",EffEntries/1000.0);
+   printf("----- Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
    gClock.Stop("timer");
    Double_t time = gClock.GetRealTime("timer");
    printf("----- Total run time : %6.0f sec \n", time);
-   printf("----- Rate for sort: %6.3f k/sec\n",EffEntries/time/1000.0);
-   printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
+   printf("----- Sorting Rate   : %6.3f k/sec\n",EffEntries/time/1000.0);
+   printf("----- saved as \e[31m %s \e[m. events saved: %d\n", saveFileName.Data() , savedEntries); 
    
    gROOT->ProcessLine(".q");
 }
