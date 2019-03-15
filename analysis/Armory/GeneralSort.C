@@ -4,27 +4,27 @@
 #include <TH2.h>
 #include <TMath.h>
 #include <TStyle.h>
+#include <TBenchmark.h>
 
 #define NUMPRINT 20 //>0
-ULong64_t NUMSORT=100000000;
-
 #define MAXNUMHITS 200 //Highest multiplicity
 #define M 100 //M value for energy filter from digi setting
 
+ULong64_t MaxProcessedEntries=100000000;
 ULong64_t NumEntries = 0;
+int EffEntries;
 ULong64_t ProcessedEntries = 0;
-Float_t Frac = 0.1; //Progress bar
-Int_t CrapPrint=0;
 
 #include "../working/GeneralSortMapping.h"
 
-TStopwatch StpWatch;
+//clock
+TBenchmark gClock;
+Bool_t shown = 0;
 
 TFile *oFile;
 TTree *gen_tree;
 
 TH1F *hEvents;
-
 TCanvas *cc0;
 
 //PSD struct
@@ -50,6 +50,8 @@ typedef struct {
   ULong64_t TACTimestamp[100];
   ULong64_t ELUMTimestamp[32];
   ULong64_t EZEROTimestamp[10];
+  
+  Float_t x[100];
 
 } PSD;
 
@@ -65,6 +67,7 @@ void GeneralSort::Begin(TTree * tree)
    
   TString option = GetOption();
   NumEntries = tree->GetEntries();
+  EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
   
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
@@ -85,11 +88,16 @@ void GeneralSort::Begin(TTree * tree)
   gen_tree->Branch("EBIS",&psd.EBISTimestamp,"EBISTimestamp/l");
   gen_tree->Branch("T1",&psd.T1Timestamp,"T1Timestamp/l");
   
+  gen_tree->Branch("ring",psd.Ring,"Ring[100]/F");
+  gen_tree->Branch("ring_t",psd.RingTimestamp,"RingTimestamp[100]/l");
+
   gen_tree->Branch("xf",psd.XF,"XF[100]/F");
   gen_tree->Branch("xf_t",psd.XFTimestamp,"XFTimestamp[100]/l");
  
   gen_tree->Branch("xn",psd.XN,"XN[100]/F");
   gen_tree->Branch("xn_t",psd.XNTimestamp,"XNTimestamp[100]/l"); 
+  
+  gen_tree->Branch("x",psd.x,"x[100]/F");
 
   gen_tree->Branch("rdt",psd.RDT,"RDT[100]/F");
   gen_tree->Branch("rdt_t",psd.RDTTimestamp,"RDTTimestamp[100]/l"); 
@@ -102,8 +110,6 @@ void GeneralSort::Begin(TTree * tree)
 
   gen_tree->Branch("ezero",psd.EZERO,"EZERO[10]/F");
   gen_tree->Branch("ezero_t",psd.EZEROTimestamp,"EZEROTimestamp[10]/l"); 
- 
-  StpWatch.Start();
 
   printf("======= ID-MAP: \n");
   printf("%10s|", ""); 
@@ -120,6 +126,11 @@ void GeneralSort::Begin(TTree * tree)
     }
   }
 
+  gClock.Reset();
+  gClock.Start("timer");
+
+  printf("====================== started \n");
+
 }
 
 void GeneralSort::SlaveBegin(TTree * /*tree*/)
@@ -131,6 +142,7 @@ void GeneralSort::SlaveBegin(TTree * /*tree*/)
 
 Bool_t GeneralSort::Process(Long64_t entry)
 { 
+  //=============================== Get Run Number
   if( entry == 0 ) {
       fileNum = fChain->GetDirectory()->GetName();
       
@@ -148,24 +160,21 @@ Bool_t GeneralSort::Process(Long64_t entry)
    } 
    psd.runID = runIDPresent; 
   
+  
+  
   ProcessedEntries++;
-  if (ProcessedEntries<NUMSORT) {
+  if (ProcessedEntries<MaxProcessedEntries) {
     hEvents->Fill(ProcessedEntries);
-
-    if (ProcessedEntries>NumEntries*Frac-1) {
-      printf(" %3.0f%% (%llu/%llu Mil) processed in %6.1f seconds\n",Frac*100,ProcessedEntries/1000000,NumEntries/1000000,StpWatch.RealTime());
-      StpWatch.Start(kFALSE);
-      Frac+=0.1;
-    }
     
     psd.EBISTimestamp=TMath::QuietNaN();
     psd.T1Timestamp=TMath::QuietNaN();
 
-    //Zero struct
+    //=============================== Zero struct
     for (Int_t i=0;i<100;i++) {//num dets
       psd.Energy[i]=TMath::QuietNaN();
       psd.XF[i]=TMath::QuietNaN();
       psd.XN[i]=TMath::QuietNaN();
+      psd.x[i]=TMath::QuietNaN();
       psd.Ring[i]=TMath::QuietNaN();
       psd.RDT[i]=TMath::QuietNaN();
       psd.TAC[i]=TMath::QuietNaN();
@@ -183,7 +192,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
     }
 
     
-    //Pull needed entries
+    //=============================== Pull needed entries
     b_NumHits->GetEntry(entry);
     b_id->GetEntry(entry);
     b_pre_rise_energy->GetEntry(entry);
@@ -193,24 +202,22 @@ Bool_t GeneralSort::Process(Long64_t entry)
     b_event_timestamp->GetEntry(entry);
 
     //ID PSD Channels
- 
     Int_t idKind = -1;
     Int_t idDet=-1; // Detector number
     Int_t idConst=1010; //Temp value to get idDet
     
-    /* -- Loop over NumHits -- */
+    //==============================================================
+    /* --------------------- Loop over NumHits ------------------ */
+    //==============================================================
     for (Int_t i=0;i<NumHits;i++) {
       Int_t psd8Chan = id[i]%10;     
       Int_t idTemp = id[i] - idConst;
       idDet = idDetMap[idTemp];
       idKind = idKindMap[idTemp];
       
-      if ((id[i]>1000&&id[i]<2000)&&(psd8Chan<8)&&(idDet>-1)) { //IF PSD	
-        //Information
-        if (idDet<0 && CrapPrint==0) {printf("ohhhhhhhhhhh craaaaaaap\n"); CrapPrint=1;}
-        //if (ProcessedEntries<NUMPRINT)
-        //  printf("id %i, idKind %2i, idDet %3i, idConst %i\n",id[i],idKind,idDet,idConst);
-        
+      
+      //=============================== PSD
+      if ((id[i]>1000&&id[i]<2000)&&(psd8Chan<8)&&(idDet>-1)) {         
         switch(idKind)
           {
           case 0: /* Energy signal */
@@ -225,14 +232,17 @@ Bool_t GeneralSort::Process(Long64_t entry)
             psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
             psd.XNTimestamp[idDet] = event_timestamp[i];
             break;
+          case 3: // Ring
+            psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+            psd.RingTimestamp[idDet] = event_timestamp[i];
+            break;
           default:
             ;
             break;// 
           }
       }
 
-      //TAC & RF TIMING
-      /***********************************************************************/
+      //=============================== TAC & RF TIMING
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) { //RF TIMING SWITCH
         if (ProcessedEntries<NUMPRINT)
           printf("RF id %i, idDet %i\n",id[i],idDet);
@@ -242,8 +252,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
         psd.TACTimestamp[tacTemp] = event_timestamp[i];
       }
        
-      //RECOIL
-      /************************************************************************/
+      //=============================== RECOIL
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
         Int_t rdtTemp = idDet-101;
         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])
@@ -251,18 +260,16 @@ Bool_t GeneralSort::Process(Long64_t entry)
         psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
 
-      //ELUM
-      /************************************************************************/
+      //=============================== ELUM
       if ((id[i]>=1000 && id[i]<1130)&&(idDet>200&&idDet<=240)) {
         Int_t elumTemp = idDet - 201;
         psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])
                   -(float)(pre_rise_energy[i]))/M;
         
         psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
-      }//end ELUM
+      }
       
-      //EZERO
-      /************************************************************************/
+      //=============================== EZERO
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
         Int_t ezeroTemp = idDet - 300;
         if (ezeroTemp<10) {
@@ -270,23 +277,51 @@ Bool_t GeneralSort::Process(Long64_t entry)
               -(float)(pre_rise_energy[i]))/M;
           psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
         }
-      }//end EZERO
+      }
       
-      //EBIS 
-      /************************************************************************/
+      //=============================== EBIS 
       if (id[i]==1010) {
         psd.EBISTimestamp = event_timestamp[i];
-      }//end EBIS
+      }
          
-      //T1 proton pulse
-      /************************************************************************/
+      //=============================== T1 proton pulse
       if (id[i]==1013) {
         psd.T1Timestamp = event_timestamp[i];
-      }//end T1
+      }
       
     } // End NumHits Loop
     
-    gen_tree->Fill();
+    //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  CalculateX
+    for(int i = 0 ; i < 30; i++){
+      psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
+    }
+
+    //Clock
+    /************************************************************************/
+    oFile->cd(); //set focus on this file
+    gen_tree->Fill();  
+
+    gClock.Stop("timer");
+    Double_t time = gClock.GetRealTime("timer");
+    gClock.Start("timer");
+
+    if ( !shown ) {
+      if (fmod(time, 10) < 1 ){
+         printf( "%10lld[%2d%%]|%3.0f min %5.2f sec | expect:%5.2f min\n", 
+               entry, 
+               TMath::Nint((entry+1)*100./EffEntries),
+               TMath::Floor(time/60.), 
+               time - TMath::Floor(time/60.)*60.,
+               EffEntries*time/(entry+1.)/60.);
+         shown = 1;
+         gen_tree->Write();
+      }
+    }else{
+      if (fmod(time, 10) > 9 ){
+         shown = 0;
+      }
+    }
+
   }  
   return kTRUE;
 }
@@ -298,16 +333,20 @@ void GeneralSort::SlaveTerminate()
 
 void GeneralSort::Terminate()
 {
-  if (ProcessedEntries>=NUMSORT)
-    printf("Sorted only %llu\n",NUMSORT);
   gen_tree->Write();
+  int savedEntries = gen_tree->GetEntries();
   oFile->Close();
   
   //  cc0 = new TCanvas("cc0","cc0",800,600);
   // cc0->Clear(); hEvents->Draw();  
   
-  printf("Total processed entries : %3.1f k\n",ProcessedEntries/1000.0);
-  printf("Total time for sort: %3.1f\n",StpWatch.RealTime());
-  printf("Rate for sort: %3.1f k/s\n",(Float_t)ProcessedEntries/StpWatch.RealTime()/1000.0);
-  StpWatch.Start(kFALSE);
+  printf("=======================================================\n");
+  printf("----- Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
+  gClock.Stop("timer");
+  Double_t time = gClock.GetRealTime("timer");
+  printf("----- Total run time : %6.0f sec \n", time);
+  printf("----- Sorting rate   : %6.3f k/sec\n",EffEntries/time/1000.0);
+  printf("----- saved as \e[31m %s \e[m. events saved: %d\n", saveFileName.Data() , savedEntries); 
+
+  gROOT->ProcessLine(".q");
 }

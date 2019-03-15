@@ -1,5 +1,14 @@
 #!/bin/bash -l
-read -p 'Enter the Run Number: ' RUN
+read -p 'Enter the Run Number (e.g. 001): ' RUN
+
+#check RUN is 3 digit
+runLen=${#RUN}
+if [ ${runLen} -eq 1 ]; then
+   RUN="00"${RUN}
+elif [ ${runLen} -eq 2 ]; then
+   RUN="0"${RUN}
+fi;
+
 set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
 export DIGIOSRUNNUM
