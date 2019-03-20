@@ -7,14 +7,19 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h> //for atoi, atof
-#include <math.h> //exp
+#include <cmath> //exp
 #include <vector> 
-#include <fstream> 
+#include <fstream>
+
+#include <TROOT.h> 
+#include <TFile.h>
+#include <TTree.h>
+#include <TMath.h>
+
 #include "RK4.h"
 #include "WS.h"
 
 using namespace std;
-
 
 vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
@@ -43,7 +48,7 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
     output.push_back(secStr);
     //printf(" |%s---\n", secStr.c_str());
-    
+
   }while(pos != string::npos );
 
   return output;
@@ -52,7 +57,7 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
 int main(int argc, char *argv[]){
 
-  if(argc < 5 || argc > 11) { 
+  if(argc < 5 || argc > 11) {
     printf("Usage: ./WSFit expFile A V0 VSO <dV0 dVSO r0 a0 rso, aso>\n");
     printf("       expFile = experimental energies\n");
     printf("             A = mass number\n");
@@ -65,39 +70,38 @@ int main(int argc, char *argv[]){
     printf("            a0 = reduced radius for central potential, default 0.65 fm\n");
     printf("           rso = reduced radius for Spin-Orbital potential, default 1.0 fm\n");
     printf("           aso = reduced radius for Spin-Orbital potential, default 0.65 fm\n");
-    exit(0); 
-  }
-  
+    exit(0);   }
+
   string readFile = argv[1];
   int A=atoi(argv[2]);
   double V0ini = atof(argv[3]);
   double VSOini = atof(argv[4]);
-  
+
   double dV0 = 0.5;   if( argc >= 6 )  dV0 = atof(argv[5]);
   double dVSO = 3.0;  if( argc >= 7 ) dVSO = atof(argv[6]);
   double r0 = 1.25;   if( argc >= 8 )   r0 = atof(argv[7]);
   double A0 = 0.65;   if( argc >= 9 )   A0 = atof(argv[8]);
   double rso = 1.0;   if( argc >= 10 ) rso = atof(argv[9]);
   double aso = 0.65;  if( argc >= 11 ) aso = atof(argv[10]);
-  
+
   ifstream file_in;
   file_in.open(readFile.c_str(), ios::in);
 
   if( !file_in ){
     printf(" cannot read file: %s. \n", readFile.c_str());
-    return 0 ; 
+    return 0 ;
   }
-  
+
   vector<string> NLJ; //orbital label
   vector<double> BE;  //binding enegry of orbital
-  
+
   NLJ.clear();
   BE.clear();
-  
+
   while( file_in.good() ) {
     string tempLine;
     getline(file_in, tempLine );
-    
+
     if( tempLine.substr(0, 1) == "#" ) continue;
     if( tempLine.size() < 1 ) continue;
     
@@ -116,23 +120,26 @@ int main(int argc, char *argv[]){
     
   }
   printf("==============================\n");
-  
-  //Find centroid or s-state, then fit 
-  vector<double> centroidBE;
-  vector<string> centroidNLJ; 
-  
-  centroidBE.clear();
-  centroidNLJ.clear();
-  
-    
-  V0 = 0.0;R0 = r0 * pow(A, 1./3.); a0 = A0;
-  VSO = 0.0; RSO = rso * pow(A, 1./3.); aSO = aso;
-  
-  printf("================ Woods-Saxon parameters \n");
-  printf(" A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3fm \n", A, 0.1, 200, 20.); // default
-  printf("  R0: %8.4f fm,  a0: %8.4f fm \n", R0, a0);
-  printf(" RS0: %8.4f fm, aS0: %8.4f fm \n", RSO, aSO);
-  printf("=======================\n");
+
+  TFile * fileOut = new TFile("wsFit.root", "recreate");
+  TTree * tree = new TTree("tree", "tree");
+
+  double rms = TMath::QuietNaN();
+  tree->Branch("V0", &V0, "V0/D");
+  tree->Branch("R0", &R0, "R0/D");
+  tree->Branch("r0", &r0, "r0/D");
+  tree->Branch("a0", &a0, "a0/D");
+  tree->Branch("VSO", &VSO, "VSO/D");
+  tree->Branch("RSO", &RSO, "RSO/D");
+  tree->Branch("rso", &rso, "rso/D");
+  tree->Branch("aSO", &aSO, "aSO/D");
+  tree->Branch("rms", &rms, "rms/D");
+
+  //printf("================ Woods-Saxon parameters \n");
+  //printf(" A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3fm \n", A, 0.1, 200, 20.); // default
+  //printf("  R0: %8.4f fm,  a0: %8.4f fm \n", R0, a0);
+  //printf(" RS0: %8.4f fm, aS0: %8.4f fm \n", RSO, aSO);
+  //printf("=======================\n");
   
   
   printf("############################## Fit V0 and Vso\n");
@@ -140,35 +147,65 @@ int main(int argc, char *argv[]){
   double rmsMin = 1000;
   double V0best = V0ini;
   double Vsobest = VSOini;
-  for( double v0 = -dV0; v0 <= dV0; v0 = v0 + 0.2   ){
-    V0 = V0ini + v0;
-    printf("---------------------\n");
-    for( double vso = -dVSO; vso <= dVSO; vso = vso + 0.5 ){
-      VSO = VSOini + vso;
-      WS();
-      //printf("    Experiment  |  Woods-Saxon   |\n");
-      double rms = 0;
-      for( int i = 0; i < NLJ.size(); i++){
-        for( int j = 0; j < orbString.size(); j++){
-          if( NLJ[i] == orbString[j] ){
-            double diff = BE[i] -  energy[j];
-            rms += pow(diff,2);
-            //printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, orbString[j].c_str(), energy[j], diff);
-            continue;
-          }
-        }
-      }
-      rms = sqrt(rms);
-      if( rms < rmsMin ) {
-        rmsMin = rms;
-        V0best = V0;
-        Vsobest = VSO;
-      }
-      printf("V0 : %f, VSO : %f,  rms : %f \n", V0,  VSO, rms);
-    }
-  }
+
+  for( double r0v = -0.1 ; r0v <= 0.1; r0v = r0v + 0.02){
+    R0 = (r0 + r0v) * pow(A, 1./3.); 
+    printf("---------------------R0  : %f fm\n", R0);
+    for( double a0v = -0.1; a0v <=0.1; a0v = a0v + 0.02){
+      a0 = A0 + a0v;
+      printf("---------------------a0  : %f fm\n", a0);
+      for( double rsov = -0.1 ; rsov <= 0.1; rsov = rsov + 0.02){
+        RSO = (rso + rsov) * pow(A, 1./3.); 
+        printf("---------------------RSO : %f fm\n", RSO);        
+        for( double asov = - 0.1; asov <=0.1; asov = asov + 0.02){
+          aSO = aso + asov;
+          printf("---------------------aSO : %f fm\n", aSO);
+          for( double v0 = -dV0; v0 <= dV0; v0 = v0 + 0.2   ){
+            V0 = V0ini + v0;
+            printf("--------------------- r0 : %f, rso : %f\n", r0 + r0v, rso + rsov);
+            printf("%7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "V0", "R0", "a0", "VSO", "RSO", "aSO", "rms");
+            for( double vso = -dVSO; vso <= dVSO; vso = vso + 0.5 ){
+              string flag = "";
+              VSO = VSOini + vso;
+              WS();
+              //printf("    Experiment  |  Woods-Saxon   |\n");
+              rms = 0;
+              for( int i = 0; i < NLJ.size(); i++){
+                for( int j = 0; j < orbString.size(); j++){
+                  if( NLJ[i] == orbString[j] ){
+                    double diff = BE[i] -  energy[j];
+                    rms += pow(diff,2);
+                    //printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, orbString[j].c_str(), energy[j], diff);
+                    continue;
+                  }
+                }
+              }
+              if( rms == 0 ){
+                rms = 10000;
+              }else{
+                rms = sqrt(rms);
+              }
+              if( rms < rmsMin ) {
+                rmsMin = rms;
+                V0best = V0;
+                Vsobest = VSO;
+                flag = "<-----";
+              }
+              printf("%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f %s\n", V0, R0, a0, VSO, RSO, aSO, rms, flag.c_str());
+              tree->Fill();
+              
+
+            }// end of VSO loop
+          }// end of V0 loop
+        }// end of aso loop
+      }// end of Rso loop
+    }// end of a0 loop
+  }// end of R0 loop
   printf("======= The best fit V0 : %f, VSO : %f , rms : %f \n", V0best, Vsobest, rmsMin);
-  
+
+  fileOut->Write();
+  fileOut->Close();
+
   V0 = V0best;
   VSO = Vsobest;
   WS();
