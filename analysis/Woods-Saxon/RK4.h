@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h> //for atoi, atof
-#include <math.h> //exp
+#include <cmath> //exp
 #include <vector> 
 
 using namespace std;
@@ -35,6 +35,14 @@ double VSO;
 double RSO;
 double aSO;
 double LS;
+
+void PrintWSParas(int A, double dr, int step){
+  printf("================ Woods-Saxon parameters \n");
+  printf("   A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3fm \n", A, dr, step, dr * step);
+  printf("  R0: %8.4f fm,  a0: %8.4f fm \n", R0, a0);
+  printf(" RS0: %8.4f fm, aS0: %8.4f fm \n", RSO, aSO);
+  printf("=======================\n");
+}
 
 double Pot(double r){
 	// Wood-Saxon
