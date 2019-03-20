@@ -8,7 +8,7 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 200 //Highest multiplicity
-#define M 100 //M value for energy filter from digi setting
+#define M -100 //M value for energy filter from digi setting, number of channel
 
 ULong64_t MaxProcessedEntries=100000000;
 ULong64_t NumEntries = 0;
@@ -112,20 +112,18 @@ void GeneralSort::Begin(TTree * tree)
   gen_tree->Branch("ezero_t",psd.EZEROTimestamp,"EZEROTimestamp[10]/l"); 
 
   printf("======= ID-MAP: \n");
-  printf("%10s|", ""); 
+  printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
   printf("\n");
   for(int i = 0 ; i < 96; i++ ) printf("-");
-  printf("\n");
-  printf("%10s|", "VME1-Dig1"); 
   for(int i = 0 ; i < 160; i ++){
-    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
-    if( (i+1) % 10 == 0 ) {
+    if( (i) % 10 == 0 ) {
        printf("\n");
-       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)); 
+       if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
+    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
   }
-
+  printf("\n");
   gClock.Reset();
   gClock.Start("timer");
 
@@ -210,14 +208,13 @@ Bool_t GeneralSort::Process(Long64_t entry)
     /* --------------------- Loop over NumHits ------------------ */
     //==============================================================
     for (Int_t i=0;i<NumHits;i++) {
-      Int_t psd8Chan = id[i]%10;     
       Int_t idTemp = id[i] - idConst;
       idDet = idDetMap[idTemp];
       idKind = idKindMap[idTemp];
       
       
       //=============================== PSD
-      if ((id[i]>1000&&id[i]<2000)&&(psd8Chan<8)&&(idDet>-1)) {         
+      if ( 0 <= idDet && idDet < 100 && 0 <= idKind && idKind <= 3 ) {         
         switch(idKind)
           {
           case 0: /* Energy signal */
@@ -244,8 +241,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
 
       //=============================== TAC & RF TIMING
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) { //RF TIMING SWITCH
-        if (ProcessedEntries<NUMPRINT)
-          printf("RF id %i, idDet %i\n",id[i],idDet);
+        if (ProcessedEntries<NUMPRINT) printf("RF id %i, idDet %i\n",id[i],idDet);
         
         Int_t tacTemp = idDet-400;
         psd.TAC[tacTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;

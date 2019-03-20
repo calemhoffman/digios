@@ -12,7 +12,7 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 20 //Highest multiplicity
-#define M 100 //M value for energy filter from digi setting
+#define M -100 //M value for energy filter from digi setting, number of channel
 
 #include "../working/GeneralSortMapping.h"
 
@@ -181,7 +181,7 @@ void GeneralSortTrace::Begin(TTree * tree)
     printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
     if( (i+1) % 10 == 0 ) {
        printf("\n");
-       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)); 
+       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)+1); 
     }
   }
    gClock.Reset();
