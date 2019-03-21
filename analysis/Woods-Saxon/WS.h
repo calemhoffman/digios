@@ -28,6 +28,13 @@ vector<double> errorU;
 vector<double> errorE; 
 vector<double> errorUratio; 
 
+void PrintEnergyLevels(){
+  printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orb", "energy", "errorU", "errorE", "errorUratio");  
+  for( int i = 0; i < energy.size() ; i++){
+    printf("%2d| %8s,  %12.6f | %12.5f | %12.4E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
+  }
+}
+
 // the potential parameters are global values
 int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double eTorr = 0.001, int maxLoop = 300, double dKE = 0.2){
   
