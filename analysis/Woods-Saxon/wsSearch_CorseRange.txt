@@ -1,5 +1,4 @@
 #=======search_setting_for_Woods_Saxon
-209  //mass_A
 -47  //min_V0
 -44  //max_V0
 0.2    //step_V0

@@ -39,9 +39,10 @@ double LS;
 void PrintWSParas(int A, double dr, int step){
   printf("================ Woods-Saxon parameters \n");
   printf("   A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3fm \n", A, dr, step, dr * step);
-  printf("  R0: %8.4f fm,  a0: %8.4f fm \n", R0, a0);
-  printf(" RS0: %8.4f fm, aS0: %8.4f fm \n", RSO, aSO);
-  printf("=======================\n");
+  double fact = pow(A, 1./3);
+  printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n",V0,  R0, R0/fact, a0);
+  printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n",VSO,  RSO, RSO/fact, aSO);
+  printf("================================\n");
 }
 
 double Pot(double r){

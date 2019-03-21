@@ -58,14 +58,19 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
 int main(int argc, char *argv[]){
 
-  if(argc != 3 ) {
-    printf("Usage: ./WSFit expFile paraFile\n");
+  if(argc != 5 ) {
+    //TODO put the mass number out of paraFile
+    printf("Usage: ./WSSearch expFile A paraFile outRoot\n");
     printf("       expFile = experimental energies\n");
+    printf("             A = mass number\n");
     printf("      paraFile = search setting\n");
+    printf("       outRoot = output Root File name\n");
     exit(0);   }
 
   string readFile = argv[1];
-  string paraFile=argv[2];
+  int A  = atoi(argv[2]);
+  string paraFile = argv[3];
+  string rootFile = argv[4];
 
   //========= reading expFile
   ifstream file_in;
@@ -114,7 +119,6 @@ int main(int argc, char *argv[]){
     return 0 ;
   }
 
-  int A;
   double v0step, v0min, v0max;
   double r0step, r0min, r0max;
   double a0step, a0min, a0max;
@@ -133,26 +137,26 @@ int main(int argc, char *argv[]){
     vector<string> str0 = SplitStr(tempLine, " ");
     if( str0.size() == 0 ) continue;
 
-    if( i == 0 ) A = atoi(str0[0].c_str());
-    if( i == 1  ) v0min  = atof(str0[0].c_str());
-    if( i == 2  ) v0max  = atof(str0[0].c_str());
-    if( i == 3  ) v0step = atof(str0[0].c_str());
-    if( i == 4  ) r0min  = atof(str0[0].c_str());
-    if( i == 5  ) r0max  = atof(str0[0].c_str());
-    if( i == 6  ) r0step = atof(str0[0].c_str());
-    if( i == 7  ) a0min  = atof(str0[0].c_str());
-    if( i == 8  ) a0max  = atof(str0[0].c_str());
-    if( i == 9  ) a0step = atof(str0[0].c_str());
+    //if( i == 0 ) A = atoi(str0[0].c_str());
+    if( i == 0  ) v0min  = atof(str0[0].c_str());
+    if( i == 1  ) v0max  = atof(str0[0].c_str());
+    if( i == 2  ) v0step = atof(str0[0].c_str());
+    if( i == 3  ) r0min  = atof(str0[0].c_str());
+    if( i == 4  ) r0max  = atof(str0[0].c_str());
+    if( i == 5  ) r0step = atof(str0[0].c_str());
+    if( i == 6  ) a0min  = atof(str0[0].c_str());
+    if( i == 7  ) a0max  = atof(str0[0].c_str());
+    if( i == 8  ) a0step = atof(str0[0].c_str());
 
-    if( i == 10  ) vsomin  = atof(str0[0].c_str());
-    if( i == 11  ) vsomax  = atof(str0[0].c_str());
-    if( i == 12  ) vsostep = atof(str0[0].c_str());
-    if( i == 13  ) rsomin  = atof(str0[0].c_str());
-    if( i == 14  ) rsomax  = atof(str0[0].c_str());
-    if( i == 15  ) rsostep = atof(str0[0].c_str());
-    if( i == 16  ) asomin  = atof(str0[0].c_str());
-    if( i == 17  ) asomax  = atof(str0[0].c_str());
-    if( i == 18  ) asostep = atof(str0[0].c_str());
+    if( i == 9  ) vsomin  = atof(str0[0].c_str());
+    if( i == 10  ) vsomax  = atof(str0[0].c_str());
+    if( i == 11  ) vsostep = atof(str0[0].c_str());
+    if( i == 12  ) rsomin  = atof(str0[0].c_str());
+    if( i == 13  ) rsomax  = atof(str0[0].c_str());
+    if( i == 14  ) rsostep = atof(str0[0].c_str());
+    if( i == 15  ) asomin  = atof(str0[0].c_str());
+    if( i == 16  ) asomax  = atof(str0[0].c_str());
+    if( i == 17  ) asostep = atof(str0[0].c_str());
     
     i++;
   }
@@ -170,7 +174,7 @@ int main(int argc, char *argv[]){
   printf("==============================\n");
 
 
-  TFile * fileOut = new TFile("wsFit.root", "recreate");
+  TFile * fileOut = new TFile(rootFile.c_str(), "recreate");
   TTree * tree = new TTree("tree", "tree");
 
   double r0, rso;
