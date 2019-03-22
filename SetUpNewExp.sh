@@ -69,7 +69,7 @@ else
        git checkout -b ${expName}
    else
        echo "Experimental Name (${expName}) already in use."
-       echo "Please take another name or git pull ${expName}"
+       echo "Please take another name or git pull origin ${expName}"
        exit
    fi
 fi

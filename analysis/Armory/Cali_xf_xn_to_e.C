@@ -15,11 +15,13 @@
 
 void Cali_xf_xn_to_e(TTree *tree){
    
-   const int rowDet = 4;
-   const int colDet = 6;
+/**///======================================================== initial input
+   const int rowDet = 6;
+   const int colDet = 5;
    
    const int nDet = rowDet * colDet;
    
+   int energyRange[2] = {500, 5000};
    
    gStyle->SetOptStat(11111111);
    
