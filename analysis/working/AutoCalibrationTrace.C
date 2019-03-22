@@ -35,7 +35,7 @@ void AutoCalibrationTrace(){
    printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
-   printf("      Please Edit runsList.txt  \n");
+   printf(" \e[31m     Please Edit runsList.txt  \e[0m\n");
    //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
