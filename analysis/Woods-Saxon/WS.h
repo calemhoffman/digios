@@ -1,3 +1,4 @@
+
 /****************************************************************
   Eigen-energies for Wood-Saxon potential with Spin-Orbital.
   Using Rungu-Kuttan-4 method to solve the wavefunction numerically
@@ -13,7 +14,8 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h> //for atoi, atof
-#include <math.h> //exp
+//#include <math.h> //exp
+#include <cmath>
 #include <vector> 
 #include "RK4.h"
 
@@ -25,6 +27,13 @@ vector<string> orbString;
 vector<double> errorU; 
 vector<double> errorE; 
 vector<double> errorUratio; 
+
+void PrintEnergyLevels(){
+  printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orb", "energy", "errorU", "errorE", "errorUratio");  
+  for( int i = 0; i < energy.size() ; i++){
+    printf("%2d| %8s,  %12.6f | %12.5f | %12.4E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
+  }
+}
 
 // the potential parameters are global values
 int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double eTorr = 0.001, int maxLoop = 300, double dKE = 0.2){
@@ -111,15 +120,18 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
             }
           }while( abs(w) > torr || de > eTorr );
 
-          string temp = to_string(nValue) + orbital;
-          if( VSO != 0.0 ){
-            if( J > L ) {
-              temp = temp + to_string(2*L+1) + "/2";
-            }else{
-              temp = temp + to_string(2*L-1) + "/2";
-            }
-          }
+          char buffer[100];
+          int nn = sprintf(buffer, "%d%s%d/2", nValue, orbital.c_str(), J > L ? 2*L+1 : 2*L-1);
+          //string temp = to_string(nValue) + orbital;
+          //if( VSO != 0.0 ){
+          //  if( J > L ) {
+          //    temp = temp + to_string(2*L+1) + "/2";
+          //  }else{
+          //    temp = temp + to_string(2*L-1) + "/2";
+          //  }
+          //}
 
+          string temp = buffer;
           orbString.push_back(temp);
           energy.push_back(e);
           errorU.push_back(w);
@@ -177,7 +189,11 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
   
   //Erase incorrect energy
   for( int i = energy.size() - 1 ; i >=0  ; i--){
+    //printf("%s, energy: %f, errorU : |%f|,  torr :  %f \n", orbString[i].c_str(), energy[i],  errorU[i], torr); 
+      
+    //if( errorU[i] > torr || errorU[i] < -torr || errorE[i] > eTorr){
     if( abs(errorU[i]) > torr || errorE[i] > eTorr){
+       
       orbString.erase(orbString.begin() + i);
       energy.erase(energy.begin() + i);
       errorU.erase(errorU.begin() + i);
