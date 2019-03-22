@@ -16,6 +16,7 @@
 #include <TTree.h>
 #include <TMath.h>
 #include <TStopwatch.h>
+#include <TMacro.h>
 
 #include "RK4.h"
 #include "WS.h"
@@ -176,6 +177,9 @@ int main(int argc, char *argv[]){
 
   TFile * fileOut = new TFile(rootFile.c_str(), "recreate");
   TTree * tree = new TTree("tree", "tree");
+
+  TMacro searchFile(argv[3]);
+  searchFile.Write("searchPara");
 
   double r0, rso;
   double rms = TMath::QuietNaN();
