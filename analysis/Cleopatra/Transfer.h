@@ -8,6 +8,7 @@
 #include "TTree.h"
 #include "TRandom.h"
 #include "TGraph.h"
+#include "TMacro.h"
 #include <stdlib.h>
 #include <vector>
 #include <fstream>
@@ -305,6 +306,11 @@ void Transfer(
   printf("#################################### building Tree in %s\n", saveFileName.Data());
   TFile * saveFile = new TFile(saveFileName, "recreate");
   TTree * tree = new TTree("tree", "tree");
+
+  TMacro config(basicConfig.c_str());
+  TMacro detGeo(heliosDetGeoFile.c_str());
+  config.Write(basicConfig.c_str());
+  detGeo.Write(heliosDetGeoFile.c_str());
 
   int hit; // the output of Helios.CalHit
   tree->Branch("hit", &hit, "hit/I");

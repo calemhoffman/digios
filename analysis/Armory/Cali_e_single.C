@@ -22,6 +22,9 @@ void Cali_e_single(TTree * tree, int detID){
   
 /**///======================================================== initial input
    
+   int energyRange[2] = {500, 5000};
+   
+   
 /**///========================================================  load tree
 
    printf("============================================================= \n");
@@ -56,7 +59,7 @@ void Cali_e_single(TTree * tree, int detID){
    printf("############## e correction \n");
    TString name;
    name.Form("q%d", detID);
-   TH1F * q = new TH1F(name, name, 300, 500, 1800);
+   TH1F * q = new TH1F(name, name, 300, energyRange[0], energyRange[1]);
    q->SetXTitle(name);
    
    TString expression, gate;
@@ -116,28 +119,36 @@ void Cali_e_single(TTree * tree, int detID){
       
       //------------ 3, correction      
       //======== fill reference energy
+      vector<double> tempEnergy;
       int n = 0;
       float eng = -1;
       printf("=================== input reference energy\n");
       do{
-         printf("%2d-th peak energy (< 0 to stop):", n);
+         printf("What should be the %2d-th peak energy [MeV] ? (< 0 to skip):", n  );
          temp = scanf("%f", &eng);
-         printf("             input: %f \n", eng);
-         if( eng >= 0 ) refEnergy.push_back(eng);
-         n ++;
-      }while(eng >= 0);
+         if( eng >= 0 ) {
+            printf("       %f ch --> %f MeV\n", energy[n],  eng);
+            refEnergy.push_back(eng);
+            tempEnergy.push_back(energy[n]);
+         }else{
+            printf("       %f ch --> skipped \n", energy[n]);
+         }
+         n++;
+      }while( n < nPeaks);
       
       if( refEnergy.size() == 0 ) return;
-   
+      
+      energy.clear();
       
       printf("----- adjusting the energy .....\n");
       n = refEnergy.size();
       for( int k = 0; k < n; k++){
-         printf("%2d-th peak : %f \n", k,  refEnergy[k]);
+         energy.push_back(tempEnergy[k]);
+         printf("%2d-th peak : %f MeV | %f ch \n", k,  refEnergy[k], energy[k]);
       }
       printf("----------------------------------\n");
       
-      TGraph * graph = new TGraph(nPeaks, &energy[0], &refEnergy[0] );
+      TGraph * graph = new TGraph(n, &energy[0], &refEnergy[0] );
          
       TF1 * fit = new TF1("fit", "pol1" );
       graph->Fit("fit", "q");
@@ -145,9 +156,9 @@ void Cali_e_single(TTree * tree, int detID){
       a0 = fit->GetParameter(0);
       a1 = fit->GetParameter(1);
          
-      printf("a0: %9.6f, a1: %9.6f \n", a0, a1);
+      //printf("a0: %9.6f, a1: %9.6f \n", a0, a1);
       
-      printf(" save to file as : %9.6f\t%9.6f\n", 1./a1, a0);
+      printf("Please manually save to file as : %9.6f\t%9.6f\n", 1./a1, a0);
          
       TString name;
       name.Form("p%d", detID);

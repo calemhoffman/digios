@@ -1,3 +1,4 @@
+
 data
 root_data
 merged_data
@@ -23,4 +24,5 @@ analysis/Cleopatra/PlotTGraphTObjArray
 analysis/Cleopatra/Transfer
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
-analysis/Woods-Saxon/WSFit2
+analysis/Woods-Saxon/WSSearch
+slurm-*.out
