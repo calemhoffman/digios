@@ -34,24 +34,24 @@ int main(int argc, char *argv[]){
     exit(0);
   }
 
-  V0 = atof(argv[1]);
-  R0 = atof(argv[2]);
-  a0 = atof(argv[3]);
+  wsp.V0 = atof(argv[1]);
+  wsp.R0 = atof(argv[2]);
+  wsp.a0 = atof(argv[3]);
   
-  VSO = 0.;
-  RSO = 1.;
-  aSO = 1.;
+  wsp.VSO = 0.;
+  wsp.RSO = 1.;
+  wsp.aSO = 1.;
   
   if( argc == 5 ){
-    VSO = atof(argv[4]);
-    RSO = R0;
-    aSO = a0;
+    wsp.VSO = atof(argv[4]);
+    wsp.RSO = wsp.R0;
+    wsp.aSO = wsp.a0;
   }
   
   if( argc >= 7 ){
-    VSO = atof(argv[4]);
-    RSO = atof(argv[5]);
-    aSO = atof(argv[6]);
+    wsp.VSO = atof(argv[4]);
+    wsp.RSO = atof(argv[5]);
+    wsp.aSO = atof(argv[6]);
   }
   
   int nStep = 200; 

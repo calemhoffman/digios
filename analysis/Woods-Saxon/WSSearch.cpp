@@ -183,14 +183,14 @@ int main(int argc, char *argv[]){
 
   double r0, rso;
   double rms = TMath::QuietNaN();
-  tree->Branch("V0", &V0, "V0/D");
-  tree->Branch("R0", &R0, "R0/D");
+  tree->Branch("V0", &wsp.V0, "V0/D");
+  tree->Branch("R0", &wsp.R0, "R0/D");
   tree->Branch("r0", &r0, "r0/D");
-  tree->Branch("a0", &a0, "a0/D");
-  tree->Branch("VSO", &VSO, "VSO/D");
-  tree->Branch("RSO", &RSO, "RSO/D");
+  tree->Branch("a0", &wsp.a0, "a0/D");
+  tree->Branch("VSO", &wsp.VSO, "VSO/D");
+  tree->Branch("RSO", &wsp.RSO, "RSO/D");
   tree->Branch("rso", &rso, "rso/D");
-  tree->Branch("aSO", &aSO, "aSO/D");
+  tree->Branch("aSO", &wsp.aSO, "aSO/D");
   tree->Branch("rms", &rms, "rms/D");
 
   //PrintWSPara(A, 0.1, 200);
@@ -224,21 +224,21 @@ int main(int argc, char *argv[]){
   stpWatch.Start();
   int count = 0;
   for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
-    R0 = r0v * pow(A, 1./3.); 
+    wsp.R0 = r0v * pow(A, 1./3.); 
     r0 = r0v;
     //printf("---------------------R0  : %f fm (%f fm)\n", R0, r0);
     for( double a0v = a0min; a0v <= a0max; a0v = a0v + a0step){
-      a0 = a0v;
+      wsp.a0 = a0v;
       //printf("---------------------a0  : %f fm\n", a0);
       for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
-        RSO = rsov * pow(A, 1./3.); 
+        wsp.RSO = rsov * pow(A, 1./3.); 
         rso = rsov;
         //printf("---------------------RSO : %f fm (%f fm)\n", RSO, rso);        
         for( double asov = asomin; asov <= asomax; asov = asov + asostep){
-          aSO = asov;
+          wsp.aSO = asov;
           //printf("---------------------aSO : %f fm\n", aSO);
           for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
-            V0 = v0;
+            wsp.V0 = v0;
             double expTime = stpWatch.RealTime()* numCal/count / 60.;
             system("clear");
             printf("============ Input from %s.\n", readFile.c_str());
@@ -262,7 +262,7 @@ int main(int argc, char *argv[]){
             printf("r0 : %f fm, rso : %f fm\n", r0, rso);
             printf("======= Current calculation \n");
             printf("%7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "V0", "R0", "a0", "VSO", "RSO", "aSO", "rms");
-            printf("%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f\e[0m\n", V0, R0, a0, VSO, RSO, aSO, rms);
+            printf("%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f\e[0m\n", wsp.V0, wsp.R0, wsp.a0, wsp.VSO, wsp.RSO, wsp.aSO, rms);
             
             printf("======= Best parameters \n");
             printf("\e[31m%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f\e[0m\n", 
@@ -279,7 +279,7 @@ int main(int argc, char *argv[]){
             }
             for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
               string flag = "";
-              VSO = vso;
+              wsp.VSO = vso;
               WS();
               count++;
               rms = 0;
@@ -301,12 +301,12 @@ int main(int argc, char *argv[]){
               }
               if( rms < rmsMin ) {
                 rmsMin = rms;
-                V0best = V0;
-                R0best = R0;
-                a0best = a0;
-                Vsobest = VSO;
-                Rsobest = RSO;
-                asobest = aSO;
+                V0best = wsp.V0;
+                R0best = wsp.R0;
+                a0best = wsp.a0;
+                Vsobest = wsp.VSO;
+                Rsobest = wsp.RSO;
+                asobest = wsp.aSO;
                 energyBest = energy;
                 orbStringBest = orbString;
                 flag = "<-----";
@@ -325,17 +325,15 @@ int main(int argc, char *argv[]){
   fileOut->Write();
   fileOut->Close();
 
-  V0 = V0best;
-  R0 = R0best;
-  a0 = a0best;
-  VSO = Vsobest;
-  RSO = Rsobest;
-  aSO = asobest;
-  WS();
+  wsp.V0 = V0best;
+  wsp.R0 = R0best;
+  wsp.a0 = a0best;
+  wsp.VSO = Vsobest;
+  wsp.RSO = Rsobest;
+  wsp.aSO = asobest;
+  WS(200, 0.1);
   printf("================ Best Fit Woods-Saxon parameters \n");
-  printf(" A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3fm \n", A, 0.1, 200, 20.); // default
-  printf("  V0: %8.4f MeV,  R0: %8.4f fm,  a0: %8.4f fm \n", V0, R0, a0);
-  printf(" VSO: %8.4f MeV, RS0: %8.4f fm, aS0: %8.4f fm \n", VSO, RSO, aSO);
+  PrintWSParas(A, 0.1, 200, wsp);
     
   printf("    Experiment  |  Woods-Saxon   |\n");
   for( int i = 0; i < NLJ.size(); i++){
@@ -348,11 +346,7 @@ int main(int argc, char *argv[]){
     }
   }
   
-  
-  printf("=======================\n");
-  for( int i = 0; i < energy.size() ; i++){
-    printf("%2d| %8s,  %12.6f | %12.5f | %12.7E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
-  }
+  PrintEnergyLevels();
   
   
   return 0;

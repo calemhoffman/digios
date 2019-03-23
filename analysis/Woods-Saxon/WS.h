@@ -30,7 +30,7 @@ vector<double> errorUratio;
 
 void PrintEnergyLevels(){
   printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orb", "energy", "errorU", "errorE", "errorUratio");  
-  for( int i = 0; i < energy.size() ; i++){
+  for( int i = 0; i < (int) energy.size() ; i++){
     printf("%2d| %8s,  %12.6f | %12.5f | %12.4E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
   }
 }
@@ -44,12 +44,6 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
   errorE.clear();
   errorUratio.clear();
   
-  //printf("================ inputs\n");
-  //printf("  V0: %8.4f MeV,  R0: %8.4f fm,  a0: %8.4f fm \n", V0, R0, a0);
-  //printf(" VS0: %8.4f MeV, RS0: %8.4f fm, aS0: %8.4f fm \n", VSO, RSO, aSO);
-  //printf(" dr:%5.3f fm, nStep: %3d, range: %5.3fm \n",  dr, nStep, dr * nStep);
-  
-  //printf("================ Start finding eigen Energies \n");
   double u = 0;
   double uOld = 0;
   
@@ -70,21 +64,21 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
 
     for( float J = L + 0.5 ;  J >= abs(L - 0.5) ; J = J - 1. ){
 
-      if( VSO == 0. &&  J < L + 0.5 ) continue;
+      if( wsp.VSO == 0. &&  J < L + 0.5 ) continue;
 
-      LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
+      wsp.LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
       //printf(" ----------------  L, J = %d, %3.1f | LS : %f \n", L, J, LS); 
       int nValue = 0;
 
-      for( float KE = V0 ; KE < 0 ; KE = KE + dKE ){
+      for( float KE = wsp.V0 ; KE < 0 ; KE = KE + dKE ){
         
-        vector<double> outputRK = RKfouth(KE, L, nStep, dr); // RKfouth will output the wavefunction at the furtherst distant.
+        vector<double> outputRK = RKfouth(KE, L, nStep, dr, wsp); // RKfouth will output the wavefunction at the furtherst distant.
         
         u = outputRK[0];
 
         //printf(" ====  KE , uOdl,  u : %f , %f,  %f \n", KE, uOld,  u);
 
-        if( KE == V0 ) {
+        if( KE == wsp.V0 ) {
           uOld = u;
           continue;
         }
@@ -102,7 +96,7 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
             loop ++;
             e = (e1 + e2)/2.;
             de = abs( e-e1);
-            vector<double> out = RKfouth(e, L, nStep, dr);
+            vector<double> out = RKfouth(e, L, nStep, dr, wsp);
             w = out[0];
             wr = out[0]/out[1];
             if( loop > maxLoop ) break;
@@ -122,14 +116,6 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
 
           char buffer[100];
           int nn = sprintf(buffer, "%d%s%d/2", nValue, orbital.c_str(), J > L ? 2*L+1 : 2*L-1);
-          //string temp = to_string(nValue) + orbital;
-          //if( VSO != 0.0 ){
-          //  if( J > L ) {
-          //    temp = temp + to_string(2*L+1) + "/2";
-          //  }else{
-          //    temp = temp + to_string(2*L-1) + "/2";
-          //  }
-          //}
 
           string temp = buffer;
           orbString.push_back(temp);
