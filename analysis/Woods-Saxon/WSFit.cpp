@@ -113,10 +113,10 @@ int main(int argc, char *argv[]){
   //}
   //printf("==============================\n");
     
-  V0 = V0ini ;R0 = r0 * pow(A, 1./3.); a0 = A0;
-  VSO = VSOini ; RSO = rso * pow(A, 1./3.); aSO = aso;
+  wsp.V0 = V0ini ;wsp.R0 = r0 * pow(A, 1./3.); wsp.a0 = A0;
+  wsp.VSO = VSOini ; wsp.RSO = rso * pow(A, 1./3.); wsp.aSO = aso;
   
-  PrintWSParas(A, dr , nStep);
+  PrintWSParas(A, dr , nStep, wsp);
   
   printf("############################## Calculate WS levels and compare\n");
   WS(nStep, dr);
