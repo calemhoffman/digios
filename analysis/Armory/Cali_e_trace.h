@@ -162,7 +162,7 @@ public :
    int jDet; // number of detector at same position
    vector<double> pos;
    double Bfield;
-   double a;
+   double perpDist;
    double length;
    double firstPos;
    double xnCorr[24]; // xn correction for xn = xf
@@ -370,12 +370,12 @@ void Cali_e_trace::Init(TTree *tree)
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 0 ) Bfield   = atof(x.c_str());
-         if( i == 2 ) a        = atof(x.c_str());         
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) jDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 0  )          Bfield = atof(x.c_str());
+         if( i == 3  )        perpDist = atof(x.c_str());
+         if( i == 12 )          length = atof(x.c_str());
+         if( i == 14 )        firstPos = atof(x.c_str());
+         if( i == 17 )            jDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -389,6 +389,12 @@ void Cali_e_trace::Init(TTree *tree)
          pos[id] = firstPos + pos[id];
       }
       
+      printf(" Bfield       : %6.2f T\n", Bfield);
+      printf(" PSD prepDist : %6.3f mm\n", perpDist);
+      printf(" PSD length   : %6.3f mm\n", length);
+      printf(" # row Det    : %6d \n", jDet);
+      printf(" # col Det    : %6d \n", iDet);
+      printf("----------- list of detector position\n");
       for(int i = 0; i < iDet ; i++){
          if( firstPos > 0 ){
             printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
@@ -402,7 +408,7 @@ void Cali_e_trace::Init(TTree *tree)
        printf("... fail\n");
        Bfield = 2.5;
        firstPos =  0;
-       a = 9;
+       perpDist = 9;
        length = 50.5;
        jDet = 4;
        iDet = 6;
@@ -611,17 +617,17 @@ void Cali_e_trace::Init(TTree *tree)
       isReaction = true;
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.;
       gamma = 1./TMath::Sqrt(1-beta*beta);
-      G = alpha * gamma * beta * a ;
+      G = alpha * gamma * beta * perpDist ;
       printf("============\n");
-      printf("mass-b  : %f MeV/c2 \n", mass);
-      printf("charge-b: %f \n", q);
-      printf("E-total : %f MeV \n", Et);
-      printf("mass-B  : %f MeV/c2 \n", massB);      
-      printf("beta    : %f \n", beta);
-      printf("B-field : %f T \n", Bfield);
-      printf("alpha   : %f MeV/mm \n", alpha);
-      printf("a       : %f mm \n", a);
-      printf("G       : %f MeV \n", G);
+      printf("mass-b   : %f MeV/c2 \n", mass);
+      printf("charge-b : %f \n", q);
+      printf("E-total  : %f MeV \n", Et);
+      printf("mass-B   : %f MeV/c2 \n", massB);      
+      printf("beta     : %f \n", beta);
+      printf("B-field  : %f T \n", Bfield);
+      printf("alpha    : %f MeV/mm \n", alpha);
+      printf("perpDist : %f mm \n", perpDist);
+      printf("G        : %f MeV \n", G);
 
 
    }else{

@@ -339,10 +339,10 @@ public:
       printf("------ Overriding FirstPosition to : %8.2f mm \n", firstPos);
       this->firstPos = firstPos;
    }
-   void OverrideDetectorDistance(double a){
+   void OverrideDetectorDistance(double perpDist){
       overrideDetDistance = true;
-      printf("------ Overriding Detector Distance to : %8.2f mm \n", a);
-      this->a = a;
+      printf("------ Overriding Detector Distance to : %8.2f mm \n", perpDist);
+      this->perpDist = perpDist;
    }
    
    int CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double xOff = 0, double yOff = 0 ); // return 0 for no hit, 1 for hit
@@ -396,7 +396,7 @@ public:
    double GetZ0(){return z0;}  // infinite detector
    double GetTime0(){return t0;}
    double GetBField() {return Bfield;}
-   double GetDetectorA() {return a;}
+   double GetDetectorA() {return perpDist;}
    
    double GetDetEnergyResol(){return eSigma;}
    double GetDetPositionResol(){return zSigma;}
@@ -428,11 +428,11 @@ private:
    double Bfield; // T
    double BfieldTheta; // rad, 0 = z-axis, pi/2 = y axis, pi = -z axis
    double bore; // bore , mm
-   double a; // distance from axis
-   double w; // width   
+   double perpDist; // distance from axis
+   double width; // width   
    double posRecoil; // recoil, downstream
    double rhoRecoil; // radius recoil
-   double l; // length
+   double length; // length
    double support;
    double firstPos; // m 
    vector<double> pos; // near position in m
@@ -482,11 +482,11 @@ HELIOS::HELIOS(){
    Bfield = 0;
    BfieldTheta = 0;
    bore = 1000;
-   a = 10;
-   w = 10;
+   perpDist = 10;
+   width = 10;
    posRecoil = 0;
    rhoRecoil = 0;
-   l = 0;
+   length = 0;
    support = 0;
    firstPos = 0;
    pos.clear();
@@ -528,8 +528,8 @@ bool HELIOS::SetDetectorGeometry(string filename){
          if( i == 0 )                            Bfield = atof(x.c_str());
          if( i == 1 )                       BfieldTheta = atof(x.c_str());
          if( i == 2 )                              bore = atof(x.c_str());
-         if( i == 3 && !overrideDetDistance )         a = atof(x.c_str());
-         if( i == 4 )                                 w = atof(x.c_str());
+         if( i == 3 && !overrideDetDistance )  perpDist = atof(x.c_str());
+         if( i == 4 )                             width = atof(x.c_str());
          if( i == 5 )                         posRecoil = atof(x.c_str());
          if( i == 6 )                         rhoRecoil = atof(x.c_str());
          if( i == 7 ){
@@ -540,7 +540,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
          if( i == 9 )                        posRecoil2 = atof(x.c_str());
          if( i == 10)                            zElum1 = atof(x.c_str());
          if( i == 11 )                           zElum2 = atof(x.c_str());
-         if( i == 12 )                                 l = atof(x.c_str());
+         if( i == 12 )                                 length = atof(x.c_str());
          if( i == 13 )                           support = atof(x.c_str());
          if( i == 14 && !overrideFirstPos )     firstPos = atof(x.c_str());
          if( i == 15 )                            eSigma = atof(x.c_str());
@@ -569,9 +569,9 @@ bool HELIOS::SetDetectorGeometry(string filename){
       printf("------------------------------------- Detector Position \n");
       for(int i = 0; i < nDet ; i++){
          if( firstPos > 0 ){
-            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + l);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
          }else{
-            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - l , pos[i]);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
          }
       }
       printf("=====================================================\n");
@@ -698,14 +698,14 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             isHitFromOutside = false;
             
             //========== calculate zHit
-            double aEff = a - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
+            double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
             if( firstPos > 0 ){
                if( zHit < pos[0] )  continue; // goto next loop
-               if(zHit > pos[nDet-1] + l) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
+               if(zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
                if( pos[nDet-1] < zHit ) continue;
-               if( zHit < pos[0] - l) return -4; 
+               if( zHit < pos[0] - length) return -4; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
@@ -720,17 +720,17 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             // calculate the distance from middle of detector
             double xHit = GetXPos(zHit) + xOff;
             double yHit = GetYPos(zHit) + yOff;
-            double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - a*a);
+            double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
          
             //======= check Block
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support && sHit < a/2. ) return -6; // blocked by support
+               if( pos[0] > zHit && zHit > pos[0] - support && sHit < perpDist/2. ) return -6; // blocked by support
             }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < a/2.) return -6;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < perpDist/2.) return -6;
             }
             
             //====== check hit
-            if( !isReachArrayCoverage && isHitFromOutside && sHit < w/2.){      
+            if( !isReachArrayCoverage && isHitFromOutside && sHit < width/2.){      
                isHit = true;
                isReachArrayCoverage = false;
                detRowID = (j+mDet) % mDet;
@@ -755,14 +755,14 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
          if( firstPos > 0 ){
-            if( pos[i] < z  && z < pos[i] + l ){
+            if( pos[i] < z  && z < pos[i] + length ){
                detID = i;
-               x = ( z - (pos[i] + l/2 ))/ l*2 ;// range from -1 , 1 
+               x = ( z - (pos[i] + length/2 ))/ length*2 ;// range from -1 , 1 
             }
          }else{
-            if( pos[i] - l < z  && z < pos[i] ){
+            if( pos[i] - length < z  && z < pos[i] ){
                detID = i;
-               x = ( z - (pos[i] - l/2 ))/ l*2 ;// range from -1 , 1 
+               x = ( z - (pos[i] - length/2 ))/ length*2 ;// range from -1 , 1 
             }
          }
       }
