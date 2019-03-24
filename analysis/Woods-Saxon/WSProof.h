@@ -49,6 +49,7 @@ public :
    TBranch        *b_aSO;   //!
    
    TString energyFile; 
+   bool isFileLoaded;
    TMacro expEnergy;
    vector<string> NLJ;
 	vector<double> BE;  //binding enegry of orbital
@@ -61,7 +62,7 @@ public :
    TTree * newTree; //!
    
    double rms, lesq; // rms, least-sq
-   WSPara wsp;
+   WoodsSaxon ws;
    
    WSProof(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~WSProof() { }
