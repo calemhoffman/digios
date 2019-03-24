@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h> //for atoi, atof
-#include <math.h> //exp
+#include <cmath> //exp
 #include <vector> 
 #include <fstream> 
+
+#include "TMath.h"
 #include "RK4.h"
 #include "WS.h"
 
@@ -112,6 +114,8 @@ int main(int argc, char *argv[]){
   //printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);  
   //}
   //printf("==============================\n");
+  
+  WSPara wsp;
     
   wsp.V0 = V0ini ;wsp.R0 = r0 * pow(A, 1./3.); wsp.a0 = A0;
   wsp.VSO = VSOini ; wsp.RSO = rso * pow(A, 1./3.); wsp.aSO = aso;
@@ -119,7 +123,7 @@ int main(int argc, char *argv[]){
   PrintWSParas(A, dr , nStep, wsp);
   
   printf("############################## Calculate WS levels and compare\n");
-  WS(nStep, dr);
+  WS(wsp, nStep, dr);
   printf("      Experiment      |      Woods-Saxon      |     diff\n");
   double rms = 0;
   int numMatch = 0;
@@ -136,10 +140,10 @@ int main(int argc, char *argv[]){
   }
   
   if( numMatch != NLJ.size() ){
-    rms = -404;
+    rms = TMath::QuietNaN();
     printf("========================================= RMS = \e[31mfail\e[0m keV \n");
   }else{
-    rms = sqrt(rms);
+    rms = sqrt(rms/NLJ.size());
     printf("========================================= RMS = \e[31m%8.2f\e[0m keV \n", rms*1000.);
   }
 

@@ -36,7 +36,7 @@ void PrintEnergyLevels(){
 }
 
 // the potential parameters are global values
-int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double eTorr = 0.001, int maxLoop = 300, double dKE = 0.2){
+int WS(WSPara wsp, int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double eTorr = 0.001, int maxLoop = 300, double dKE = 0.2){
   
   energy.clear();
   orbString.clear();
@@ -67,12 +67,11 @@ int WS(int nStep = 200, double dr = 0.1, int maxL = 7, double torr = 500, double
       if( wsp.VSO == 0. &&  J < L + 0.5 ) continue;
 
       wsp.LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
-      //printf(" ----------------  L, J = %d, %3.1f | LS : %f \n", L, J, LS); 
+      //printf(" ----------------  L, J = %d, %3.1f | LS : %f \n", L, J, wsp.LS); 
       int nValue = 0;
-
-      for( float KE = wsp.V0 ; KE < 0 ; KE = KE + dKE ){
-        
-        vector<double> outputRK = RKfouth(KE, L, nStep, dr, wsp); // RKfouth will output the wavefunction at the furtherst distant.
+		for( float KE = wsp.V0 ; KE < 0 ; KE = KE + dKE ){
+			
+	     vector<double> outputRK = RKfouth(KE, L, nStep, dr, wsp); // RKfouth will output the wavefunction at the furtherst distant.
         
         u = outputRK[0];
 

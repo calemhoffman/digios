@@ -33,6 +33,8 @@ int main(int argc, char *argv[]){
     printf("        dr : stepSize [fm] (0.1)\n");
     exit(0);
   }
+  
+  WSPara wsp;
 
   wsp.V0 = atof(argv[1]);
   wsp.R0 = atof(argv[2]);
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]){
   double dKE = 0.2;
   
   //calculate WS eigen energy
-  WS(nStep, dr, 7, torr, eTorr, maxLoop, dKE);
+  WS(wsp, nStep, dr, 7, torr, eTorr, maxLoop, dKE);
   
   //print all energy
   printf("================ result\n");
