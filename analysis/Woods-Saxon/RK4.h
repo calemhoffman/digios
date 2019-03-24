@@ -39,7 +39,7 @@ typedef struct {
  double LS;
 }WSPara;
 
-WSPara wsp;
+//WSPara wsp;
 
 void PrintWSParas(int A, double dr, int step, WSPara wsp){
   printf("================ Woods-Saxon parameters \n");

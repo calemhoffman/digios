@@ -180,6 +180,8 @@ int main(int argc, char *argv[]){
 
   TMacro searchFile(argv[3]);
   searchFile.Write("searchPara");
+  
+  WSPara wsp;
 
   double r0, rso;
   double rms = TMath::QuietNaN();
@@ -280,7 +282,7 @@ int main(int argc, char *argv[]){
             for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
               string flag = "";
               wsp.VSO = vso;
-              WS();
+              WS(wsp, 200, 0.1);
               count++;
               rms = 0;
               int nDiff = 0;
@@ -331,7 +333,7 @@ int main(int argc, char *argv[]){
   wsp.VSO = Vsobest;
   wsp.RSO = Rsobest;
   wsp.aSO = asobest;
-  WS(200, 0.1);
+  WS(wsp, 200, 0.1);
   printf("================ Best Fit Woods-Saxon parameters \n");
   PrintWSParas(A, 0.1, 200, wsp);
     
