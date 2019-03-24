@@ -26,8 +26,9 @@
 #include "WSProof.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <TMath.h>
 
-vector<string> WSProof::SplitStr(string tempLine, string splitter, int shift = 0){
+vector<string> WSProof::SplitStr(string tempLine, string splitter, int shift){
 
   vector<string> output;
 
@@ -67,8 +68,11 @@ void WSProof::ReadEnergyFile(TString expFile){
   file_in.open(expFile.Data(), ios::in);
   if( !file_in ){
     printf(" cannot read file: %s. \n", expFile.Data());
-    return 0 ;
+    isFileLoaded = false;
+    return;
   }
+  
+  isFileLoaded = true;
   
   expEnergy.ReadFile(expFile.Data());
   
@@ -92,7 +96,7 @@ void WSProof::ReadEnergyFile(TString expFile){
 
   file_in.close();
   printf("============ Input from %s.\n", expFile.Data());
-  for( int i = 0; i < NLJ.size() ; i++){
+  for( int i = 0; i < (int) NLJ.size() ; i++){
     printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);    
   }
   printf("==============================\n");
@@ -170,6 +174,7 @@ Bool_t WSProof::Process(Long64_t entry)
    //
    // The return value is currently not used.
    
+   if( isFileLoaded == false ) return kFALSE;
    
 	b_V0->GetEntry(entry);
 	b_R0->GetEntry(entry);
@@ -181,23 +186,24 @@ Bool_t WSProof::Process(Long64_t entry)
 	b_rSO->GetEntry(entry);
 	b_aSO->GetEntry(entry);
 	
-	wsp.V0 = V0;
-	wsp.R0 = R0;
-	wsp.a0 = a0;
-	wsp.VSO = VSO;
-	wsp.RSO = RSO;
-	wsp.aSO = aSO;
+	ws.V0 = V0;
+	ws.R0 = R0;
+	ws.a0 = a0;
+	ws.VSO = VSO;
+	ws.RSO = RSO;
+	ws.aSO = aSO;
+	ws.SetWSRadius(209, r0, rSO);
+	ws.dr = 0.1, ws.nStep = 200;
 	//PrintWSParas(209, 0.1, 200, wsp);
-	
-	//WS(wsp, 200, 0.1);
+	ws.CalWSEnergies();
 	//PrintEnergyLevels();
 	rms = 0;
 	lesq = 0;
 	int nDiff = 0;
-	for( int i = 0; i < NLJ.size(); i++){
-	 for( int j = 0; j < orbString.size(); j++){
-		if( NLJ[i] == orbString[j] ){
-		  double diff = BE[i] -  energy[j];
+	for( int i = 0; i < (int) NLJ.size(); i++){
+	 for( int j = 0; j < (int) ws.orbString.size(); j++){
+		if( NLJ[i] == ws.orbString[j] ){
+		  double diff = BE[i] -  ws.energy[j];
 		  rms += pow(diff,2);
 		  nDiff ++;
 		  continue;
@@ -205,7 +211,7 @@ Bool_t WSProof::Process(Long64_t entry)
 	 }
 	}
 	
-	if( rms == 0 || nDiff != NLJ.size() ){
+	if( rms == 0 || nDiff != (int) NLJ.size() ){
 	 rms = TMath::QuietNaN();
 	 lesq = TMath::QuietNaN();
 	}else{
