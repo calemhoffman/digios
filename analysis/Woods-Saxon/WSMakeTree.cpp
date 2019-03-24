@@ -179,15 +179,17 @@ int main(int argc, char *argv[]){
   
   searchRangeMsg.Print();
   searchRangeMsg.Write("searchRange");
+  
+  WSPara wsp;
 
-  double r0, rso;
+  double r0, rSO;
   tree->Branch("V0", &wsp.V0, "V0/D");
   tree->Branch("R0", &wsp.R0, "R0/D");
   tree->Branch("r0", &r0, "r0/D");
   tree->Branch("a0", &wsp.a0, "a0/D");
   tree->Branch("VSO", &wsp.VSO, "VSO/D");
   tree->Branch("RSO", &wsp.RSO, "RSO/D");
-  tree->Branch("rso", &rso, "rso/D");
+  tree->Branch("rSO", &rSO, "rSO/D");
   tree->Branch("aSO", &wsp.aSO, "aSO/D");
   
   // count number of Calculation
@@ -223,7 +225,7 @@ int main(int argc, char *argv[]){
       //printf("---------------------a0  : %f fm\n", a0);
       for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
         wsp.RSO = rsov * pow(A, 1./3.); 
-        rso = rsov;
+        rSO = rsov;
         //printf("---------------------RSO : %f fm (%f fm)\n", RSO, rso);        
         for( double asov = asomin; asov <= asomax; asov = asov + asostep){
           wsp.aSO = asov;
