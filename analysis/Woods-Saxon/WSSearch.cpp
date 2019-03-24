@@ -299,7 +299,7 @@ int main(int argc, char *argv[]){
               if( rms == 0 || nDiff != NLJ.size() ){
                 rms = TMath::QuietNaN();
               }else{
-                rms = sqrt(rms);
+                rms = sqrt(rms/NLJ.size());
               }
               if( rms < rmsMin ) {
                 rmsMin = rms;
