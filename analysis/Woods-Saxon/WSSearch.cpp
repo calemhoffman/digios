@@ -181,18 +181,17 @@ int main(int argc, char *argv[]){
   TMacro searchFile(argv[3]);
   searchFile.Write("searchPara");
   
-  WSPara wsp;
+  WoodsSaxon ws;
 
-  double r0, rso;
   double rms = TMath::QuietNaN();
-  tree->Branch("V0", &wsp.V0, "V0/D");
-  tree->Branch("R0", &wsp.R0, "R0/D");
-  tree->Branch("r0", &r0, "r0/D");
-  tree->Branch("a0", &wsp.a0, "a0/D");
-  tree->Branch("VSO", &wsp.VSO, "VSO/D");
-  tree->Branch("RSO", &wsp.RSO, "RSO/D");
-  tree->Branch("rso", &rso, "rso/D");
-  tree->Branch("aSO", &wsp.aSO, "aSO/D");
+  tree->Branch("V0", &ws.V0, "V0/D");
+  tree->Branch("R0", &ws.R0, "R0/D");
+  tree->Branch("r0", &ws.r0, "r0/D");
+  tree->Branch("a0", &ws.a0, "a0/D");
+  tree->Branch("VSO", &ws.VSO, "VSO/D");
+  tree->Branch("RSO", &ws.RSO, "RSO/D");
+  tree->Branch("rSO", &ws.rSO, "rSO/D");
+  tree->Branch("aSO", &ws.aSO, "aSO/D");
   tree->Branch("rms", &rms, "rms/D");
 
   //PrintWSPara(A, 0.1, 200);
@@ -226,21 +225,21 @@ int main(int argc, char *argv[]){
   stpWatch.Start();
   int count = 0;
   for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
-    wsp.R0 = r0v * pow(A, 1./3.); 
-    r0 = r0v;
+    ws.R0 = r0v * pow(A, 1./3.); 
+    ws.r0 = r0v;
     //printf("---------------------R0  : %f fm (%f fm)\n", R0, r0);
     for( double a0v = a0min; a0v <= a0max; a0v = a0v + a0step){
-      wsp.a0 = a0v;
+      ws.a0 = a0v;
       //printf("---------------------a0  : %f fm\n", a0);
       for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
-        wsp.RSO = rsov * pow(A, 1./3.); 
-        rso = rsov;
-        //printf("---------------------RSO : %f fm (%f fm)\n", RSO, rso);        
+        ws.RSO = rsov * pow(A, 1./3.); 
+        ws.rSO = rsov;
+        //printf("---------------------RSO : %f fm (%f fm)\n", RSO, rSO);        
         for( double asov = asomin; asov <= asomax; asov = asov + asostep){
-          wsp.aSO = asov;
+          ws.aSO = asov;
           //printf("---------------------aSO : %f fm\n", aSO);
           for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
-            wsp.V0 = v0;
+            ws.V0 = v0;
             double expTime = stpWatch.RealTime()* numCal/count / 60.;
             system("clear");
             printf("============ Input from %s.\n", readFile.c_str());
@@ -261,10 +260,10 @@ int main(int argc, char *argv[]){
                    count, numCal, count*100./numCal, stpWatch.RealTime()/60., expTime, rmsMin);
             printf("==============================\n");
             stpWatch.Start(kFALSE);            
-            printf("r0 : %f fm, rso : %f fm\n", r0, rso);
+            printf("r0 : %f fm, rSO : %f fm\n", ws.r0, ws.rSO);
             printf("======= Current calculation \n");
             printf("%7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "V0", "R0", "a0", "VSO", "RSO", "aSO", "rms");
-            printf("%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f\e[0m\n", wsp.V0, wsp.R0, wsp.a0, wsp.VSO, wsp.RSO, wsp.aSO, rms);
+            printf("%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f\e[0m\n", ws.V0, ws.R0, ws.a0, ws.VSO, ws.RSO, ws.aSO, rms);
             
             printf("======= Best parameters \n");
             printf("\e[31m%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f\e[0m\n", 
@@ -280,16 +279,15 @@ int main(int argc, char *argv[]){
               }
             }
             for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
-              string flag = "";
-              wsp.VSO = vso;
-              WS(wsp, 200, 0.1);
+              ws.VSO = vso;
+              ws.CalWSEnergies();
               count++;
               rms = 0;
               int nDiff = 0;
               for( int i = 0; i < NLJ.size(); i++){
-                for( int j = 0; j < orbString.size(); j++){
-                  if( NLJ[i] == orbString[j] ){
-                    double diff = BE[i] -  energy[j];
+                for( int j = 0; j < ws.orbString.size(); j++){
+                  if( NLJ[i] == ws.orbString[j] ){
+                    double diff = BE[i] -  ws.energy[j];
                     rms += pow(diff,2);
                     nDiff ++;
                     continue;
@@ -303,19 +301,15 @@ int main(int argc, char *argv[]){
               }
               if( rms < rmsMin ) {
                 rmsMin = rms;
-                V0best = wsp.V0;
-                R0best = wsp.R0;
-                a0best = wsp.a0;
-                Vsobest = wsp.VSO;
-                Rsobest = wsp.RSO;
-                asobest = wsp.aSO;
-                energyBest = energy;
-                orbStringBest = orbString;
-                flag = "<-----";
-                //printf("%7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "V0", "R0", "a0", "VSO", "RSO", "aSO", "rms");
-                //printf("\e[31m%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f / %f\e[0m\n", V0, R0, a0, VSO, RSO, aSO, rms, rmsMin);
+                V0best = ws.V0;
+                R0best = ws.R0;
+                a0best = ws.a0;
+                Vsobest = ws.VSO;
+                Rsobest = ws.RSO;
+                asobest = ws.aSO;
+                energyBest = ws.energy;
+                orbStringBest = ws.orbString;
               }
-              //printf("%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f| %f / %f %s\n", V0, R0, a0, VSO, RSO, aSO, rms, rmsMin,  flag.c_str());
               tree->Fill();
               tree->Write("tree", TObject::kOverwrite);
             }// end of VSO loop
@@ -327,28 +321,28 @@ int main(int argc, char *argv[]){
   fileOut->Write();
   fileOut->Close();
 
-  wsp.V0 = V0best;
-  wsp.R0 = R0best;
-  wsp.a0 = a0best;
-  wsp.VSO = Vsobest;
-  wsp.RSO = Rsobest;
-  wsp.aSO = asobest;
-  WS(wsp, 200, 0.1);
+  ws.V0 = V0best;
+  ws.R0 = R0best;
+  ws.a0 = a0best;
+  ws.VSO = Vsobest;
+  ws.RSO = Rsobest;
+  ws.aSO = asobest;
+  ws.CalWSEnergies();
   printf("================ Best Fit Woods-Saxon parameters \n");
-  PrintWSParas(A, 0.1, 200, wsp);
+  ws.PrintWSParas();
     
   printf("    Experiment  |  Woods-Saxon   |\n");
   for( int i = 0; i < NLJ.size(); i++){
-    for( int j = 0; j < orbString.size(); j++){
-      if( NLJ[i] == orbString[j] ){
-        double diff = BE[i] -  energy[j];
-        printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, orbString[j].c_str(), energy[j], diff);
+    for( int j = 0; j < ws.orbString.size(); j++){
+      if( NLJ[i] == ws.orbString[j] ){
+        double diff = BE[i] -  ws.energy[j];
+        printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff);
         continue;
       }
     }
   }
   
-  PrintEnergyLevels();
+  ws.PrintEnergyLevels();
   
   
   return 0;

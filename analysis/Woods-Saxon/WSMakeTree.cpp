@@ -25,6 +25,7 @@ TBenchmark gClock;
 Bool_t shown = 0;
 
 #include "RK4.h"
+#include "WS.h"
 
 using namespace std;
 
@@ -180,17 +181,17 @@ int main(int argc, char *argv[]){
   searchRangeMsg.Print();
   searchRangeMsg.Write("searchRange");
   
-  WSPara wsp;
+  WoodsSaxon ws;
 
   double r0, rSO;
-  tree->Branch("V0", &wsp.V0, "V0/D");
-  tree->Branch("R0", &wsp.R0, "R0/D");
-  tree->Branch("r0", &r0, "r0/D");
-  tree->Branch("a0", &wsp.a0, "a0/D");
-  tree->Branch("VSO", &wsp.VSO, "VSO/D");
-  tree->Branch("RSO", &wsp.RSO, "RSO/D");
-  tree->Branch("rSO", &rSO, "rSO/D");
-  tree->Branch("aSO", &wsp.aSO, "aSO/D");
+  tree->Branch("V0", &ws.V0, "V0/D");
+  tree->Branch("R0", &ws.R0, "R0/D");
+  tree->Branch("r0", &ws.r0, "r0/D");
+  tree->Branch("a0", &ws.a0, "a0/D");
+  tree->Branch("VSO", &ws.VSO, "VSO/D");
+  tree->Branch("RSO", &ws.RSO, "RSO/D");
+  tree->Branch("rSO", &ws.rSO, "rSO/D");
+  tree->Branch("aSO", &ws.aSO, "aSO/D");
   
   // count number of Calculation
   int numCal = 0;
@@ -217,23 +218,23 @@ int main(int argc, char *argv[]){
   
   int count = 0;
   for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
-    wsp.R0 = r0v * pow(A, 1./3.); 
-    r0 = r0v;
+    ws.R0 = r0v * pow(A, 1./3.); 
+    ws.r0 = r0v;
     //printf("---------------------R0  : %f fm (%f fm)\n", R0, r0);
     for( double a0v = a0min; a0v <= a0max; a0v = a0v + a0step){
-      wsp.a0 = a0v;
+      ws.a0 = a0v;
       //printf("---------------------a0  : %f fm\n", a0);
       for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
-        wsp.RSO = rsov * pow(A, 1./3.); 
-        rSO = rsov;
+        ws.RSO = rsov * pow(A, 1./3.); 
+        ws.rSO = rsov;
         //printf("---------------------RSO : %f fm (%f fm)\n", RSO, rso);        
         for( double asov = asomin; asov <= asomax; asov = asov + asostep){
-          wsp.aSO = asov;
+          ws.aSO = asov;
           //printf("---------------------aSO : %f fm\n", aSO);
           for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
-            wsp.V0 = v0;
+            ws.V0 = v0;
             for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
-              wsp.VSO = vso;
+              ws.VSO = vso;
               count++;
               
               

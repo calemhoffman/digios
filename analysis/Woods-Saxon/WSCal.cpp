@@ -33,27 +33,26 @@ int main(int argc, char *argv[]){
     printf("        dr : stepSize [fm] (0.1)\n");
     exit(0);
   }
-  
-  WSPara wsp;
+  WoodsSaxon ws;
 
-  wsp.V0 = atof(argv[1]);
-  wsp.R0 = atof(argv[2]);
-  wsp.a0 = atof(argv[3]);
+  ws.V0 = atof(argv[1]);
+  ws.R0 = atof(argv[2]);
+  ws.a0 = atof(argv[3]);
   
-  wsp.VSO = 0.;
-  wsp.RSO = 1.;
-  wsp.aSO = 1.;
+  ws.VSO = 0.;
+  ws.RSO = 1.;
+  ws.aSO = 1.;
   
   if( argc == 5 ){
-    wsp.VSO = atof(argv[4]);
-    wsp.RSO = wsp.R0;
-    wsp.aSO = wsp.a0;
+    ws.VSO = atof(argv[4]);
+    ws.RSO = ws.R0;
+    ws.aSO = ws.a0;
   }
   
   if( argc >= 7 ){
-    wsp.VSO = atof(argv[4]);
-    wsp.RSO = atof(argv[5]);
-    wsp.aSO = atof(argv[6]);
+    ws.VSO = atof(argv[4]);
+    ws.RSO = atof(argv[5]);
+    ws.aSO = atof(argv[6]);
   }
   
   int nStep = 200; 
@@ -69,14 +68,17 @@ int main(int argc, char *argv[]){
   double dKE = 0.2;
   
   //calculate WS eigen energy
-  WS(wsp, nStep, dr, 7, torr, eTorr, maxLoop, dKE);
+  ws.dr = 0.1; ws.nStep = 200;
+  
+  ws.PrintWSParas();
+  ws.CalWSEnergies();
   
   //print all energy
   printf("================ result\n");
   printf(" %8s,  %12s |      u(%4.1f) | %12s |%12s \n", "Orbital", "Energy [MeV]", dr*nStep, "de", "u-Ratio"); 
-  for( int i = 0; i < energy.size() ; i++){
-    if( abs(errorU[i]) > torr || errorE[i] > eTorr) continue;
-    printf("%2d| %8s,  %12.6f | %12.5f | %12.7E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
+  for( int i = 0; i < ws.energy.size() ; i++){
+    if( abs(ws.errorU[i]) > torr || ws.errorE[i] > eTorr) continue;
+    printf("%2d| %8s,  %12.6f | %12.5f | %12.7E | %12f\n",i, ws.orbString[i].c_str(), ws.energy[i], ws.errorU[i], ws.errorE[i], ws.errorUratio[i]);  
   }
   printf("========== end of program ======= \n");
   
