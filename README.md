@@ -5,6 +5,9 @@
 - 4SideArray : the branch for the 4-side array, the main diff is the daq
 - ISS631 : the analysis code on 2018-Oct.
 
+# Minor Change on March 25, 2019, Ryan
+- Simluation becomes obsolete
+
 ## Major Update on March 13, 2019, Ryan (tag = v1.5)
 - reorginize of the strcuture of directory
 - made the daq for new 6-side array
