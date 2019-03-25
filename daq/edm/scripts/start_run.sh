@@ -1,5 +1,6 @@
 #!/bin/bash -l
 read -p 'Enter the Run Number (e.g. 001): ' RUN
+read -p 'Singleline comment for this run: ' COMMENT
 
 #check RUN is 3 digit
 runLen=${#RUN}
@@ -15,7 +16,8 @@ export DIGIOSRUNNUM
 
 source ~/digios/expName.sh #load expName
 
-echo "RUN-${RUN} start at $(date)" >> ~/digios/analysis/working/RunTimeStamp.txt 
+#echo "RUN-${RUN} start at $(date), $COMMENT"
+echo "RUN-${RUN} start at $(date), $COMMENT" >> ~/digios/analysis/working/RunTimeStamp.txt 
 
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
