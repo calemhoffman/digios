@@ -18,6 +18,8 @@ void ProofWSSearch(){
 
    int numWorker = 36;
 
+   bool isProgressGUI = false;
+
    //==================== End of User input
 
 	//WSMakeTree
@@ -31,6 +33,7 @@ void ProofWSSearch(){
 	
 	//PRoof-lite section
 	TProof * p = TProof::Open("", Form("workers=%d", numWorker));
+   p->SetProgressDialog(isProgressGUI);
 	chain->SetProof();
   
    //Read searchRange
