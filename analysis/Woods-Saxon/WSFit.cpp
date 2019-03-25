@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h> //for atoi, atof
-#include <math.h> //exp
+#include <cmath> //exp
 #include <vector> 
 #include <fstream> 
+
+#include "TMath.h"
 #include "RK4.h"
 #include "WS.h"
 
@@ -48,7 +50,6 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
   return output;
 }
-
 
 int main(int argc, char *argv[]){
 
@@ -112,38 +113,43 @@ int main(int argc, char *argv[]){
   //printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);  
   //}
   //printf("==============================\n");
-    
-  V0 = V0ini ;R0 = r0 * pow(A, 1./3.); a0 = A0;
-  VSO = VSOini ; RSO = rso * pow(A, 1./3.); aSO = aso;
   
-  PrintWSParas(A, dr , nStep);
+  WoodsSaxon ws;
+  
+  ws.V0 = V0ini ;    ws.a0  = A0;
+  ws.VSO = VSOini ;  ws.aSO = aso;
+  ws.SetWSRadius(A, r0, rso);
+  
+  ws.dr = dr; ws.nStep = nStep;
+  
+  ws.PrintWSParas();
   
   printf("############################## Calculate WS levels and compare\n");
-  WS(nStep, dr);
+  ws.CalWSEnergies();
   printf("      Experiment      |      Woods-Saxon      |     diff\n");
   double rms = 0;
   int numMatch = 0;
   for( int i = 0; i < NLJ.size(); i++){
-    for( int j = 0; j < orbString.size(); j++){
-      if( NLJ[i] == orbString[j] ){
-        double diff = BE[i] -  energy[j];
+    for( int j = 0; j < ws.orbString.size(); j++){
+      if( NLJ[i] == ws.orbString[j] ){
+        double diff = BE[i] -  ws.energy[j];
         rms += pow(diff,2);
         numMatch ++;
-        printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | %8.2f keV \n",i,  NLJ[i].c_str(), BE[i], j, orbString[j].c_str(), energy[j], diff * 1000.);
+        printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | %8.2f keV \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff * 1000.);
         continue;
       }
     }
   }
   
   if( numMatch != NLJ.size() ){
-    rms = -404;
+    rms = TMath::QuietNaN();
     printf("========================================= RMS = \e[31mfail\e[0m keV \n");
   }else{
-    rms = sqrt(rms);
+    rms = sqrt(rms/NLJ.size());
     printf("========================================= RMS = \e[31m%8.2f\e[0m keV \n", rms*1000.);
   }
 
-  PrintEnergyLevels();
+  ws.PrintEnergyLevels();
   
   
   return 0;
