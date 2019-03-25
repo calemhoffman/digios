@@ -25,4 +25,5 @@ analysis/Cleopatra/Transfer
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
 analysis/Woods-Saxon/WSSearch
+analysis/Woods-Saxon/WSMakeTree
 slurm-*.out

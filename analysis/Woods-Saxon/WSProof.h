@@ -17,8 +17,12 @@
 #include <vector>
 #include <fstream>
 
-#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/RK4.h"
-#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/WS.h"
+//#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/RK4.h"
+//#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/WS.h"
+
+#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/RK4.h"
+#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/WS.h"
+
 
 // Header file for the classes stored in the TTree if any.
 
@@ -61,8 +65,11 @@ public :
    TProofOutputFile * proofFile ; //!
    TTree * newTree; //!
    
+   int wsA; // mass number
+
    double rms, lesq; // rms, least-sq
    WoodsSaxon ws;
+
    
    WSProof(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~WSProof() { }

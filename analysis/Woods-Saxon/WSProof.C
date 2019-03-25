@@ -74,7 +74,7 @@ void WSProof::ReadEnergyFile(TString expFile){
   
   isFileLoaded = true;
   
-  expEnergy.ReadFile(expFile.Data());
+  //expEnergy.ReadFile(expFile.Data());
   
   NLJ.clear();
   BE.clear();
@@ -108,13 +108,21 @@ void WSProof::Begin(TTree * /*tree*/)
    // When running with PROOF Begin() is only called on the client.
    // The tree argument is deprecated (on PROOF 0 is passed).
 
-   TString option = GetOption(); //TODO use this as a portal for setting
+   TString option = GetOption(); 
    
-   saveFileName = "haha.root";
+   //option = Form("%d,%s,%s",A, energyFile.Data(),outRootFile.Data());
    
-   ReadEnergyFile(option);
-   
-   Info("begin", "========================== Begin");
+   vector<string> optionList = SplitStr(option.Data(), ",");
+   for(int i = 0; i < (int) optionList.size(); i++){
+     Info("Begin", "%s", optionList[i].c_str());
+   }
+
+
+   wsA = atoi(optionList[0].c_str());
+   ReadEnergyFile(optionList[1]);
+   saveFileName = optionList[2];
+
+   printf("========================== Begin\n");
 
 }
 
@@ -175,7 +183,9 @@ Bool_t WSProof::Process(Long64_t entry)
    // The return value is currently not used.
    
    if( isFileLoaded == false ) return kFALSE;
-   
+
+   //Printf("================== entry %llu \n", entry);
+
 	b_V0->GetEntry(entry);
 	b_R0->GetEntry(entry);
 	b_r0->GetEntry(entry);
@@ -185,32 +195,48 @@ Bool_t WSProof::Process(Long64_t entry)
 	b_RSO->GetEntry(entry);
 	b_rSO->GetEntry(entry);
 	b_aSO->GetEntry(entry);
-	
+   
 	ws.V0 = V0;
 	ws.R0 = R0;
 	ws.a0 = a0;
 	ws.VSO = VSO;
 	ws.RSO = RSO;
 	ws.aSO = aSO;
-	ws.SetWSRadius(209, r0, rSO);
-	ws.dr = 0.1, ws.nStep = 200;
-	//PrintWSParas(209, 0.1, 200, wsp);
+   ws.r0 = r0;
+   ws.rSO = rSO;
+   ws.A = wsA;
+   ws.dr = 0.1;
+   ws.nStep = 300;
+
+	ws.PrintWSParas();
 	ws.CalWSEnergies();
-	//PrintEnergyLevels();
+   bool showStat = false;
+   if( entry % 500 == 0 ) showStat = true;
+	//ws.PrintEnergyLevels();
 	rms = 0;
 	lesq = 0;
 	int nDiff = 0;
-	for( int i = 0; i < (int) NLJ.size(); i++){
-	 for( int j = 0; j < (int) ws.orbString.size(); j++){
+
+   if( showStat) {
+     printf("========================================\n");
+     printf("    Experiment  |  Woods-Saxon   |\n");
+   }
+   for( int i = 0; i < (int) NLJ.size(); i++){
+     if(showStat) printf(" %d %6s (%9.6f) | \n",i,  NLJ[i].c_str(), BE[i] );	  
+     for( int j = 0; j < (int) ws.orbString.size(); j++){
 		if( NLJ[i] == ws.orbString[j] ){
 		  double diff = BE[i] -  ws.energy[j];
 		  rms += pow(diff,2);
 		  nDiff ++;
+        if(showStat) printf("%d %6s (%9.6f) | diff : %f \n", j, ws.orbString[j].c_str(), ws.energy[j], diff);
 		  continue;
-		}
+		}else{
+        if(showStat) printf("---- \n");
+      }
 	 }
 	}
-	
+	if( showStat) printf("========================================\n");
+   
 	if( rms == 0 || nDiff != (int) NLJ.size() ){
 	 rms = TMath::QuietNaN();
 	 lesq = TMath::QuietNaN();
