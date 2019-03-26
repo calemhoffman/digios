@@ -18,7 +18,7 @@ using namespace std;
 const int numDet = 30;
 const int numRow = 6;  
 
-ULong64_t maxNumberEvent = 1000000;
+ULong64_t maxNumberEvent = 100000000;
 
 //---histogram seeting
 int rawEnergyRange[2] = {-500, 5000}; // share with e, ring, xf, xn
@@ -464,6 +464,9 @@ void Monitors::Begin(TTree *tree)
    }
    file.close();
    printf("======================================\n");
+   
+   
+   printf("------------ %d \n", A);
 
    StpWatch.Start();
 }

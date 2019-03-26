@@ -31,7 +31,7 @@ ULong64_t ProcessedEntries = 0;
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 0; //0 = no process, 1, fit, 2, Trapezoid (not implement yet
+int traceMethod = 0; //0 = no process, 1, fit, 2, Trapezoid (not implement yet) //TODO
 int traceLength = 600;
 
 bool isTACRF = false;

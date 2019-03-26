@@ -64,6 +64,9 @@ public :
    TBranch        *b_ELUMTimestamp;   //!
    TBranch        *b_EZERO;   //!
    TBranch        *b_EZEROTimestamp;   //!
+   
+   int A;
+   void testingInput(int n){this->A = n;}
 
    Monitors(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Monitors() { }
