@@ -127,7 +127,7 @@ void Transfer(
   reaction.CalReactionConstant();
 
   printf("***************************************************\n");
-  printf("*        %27s             *\n", reaction.GetReactionName().Data());
+  printf("*\e[31m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
   printf("***************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
   printf("#################################### Beam \n");
@@ -255,12 +255,12 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, %4.2f | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, %4.2f | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, %4.2f | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], y0[i]);
       }
     }
   }else{
@@ -309,8 +309,8 @@ void Transfer(
 
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
-  config.Write(basicConfig.c_str());
-  detGeo.Write(heliosDetGeoFile.c_str());
+  config.Write("reactionConfig");
+  detGeo.Write("detGeo");
 
   int hit; // the output of Helios.CalHit
   tree->Branch("hit", &hit, "hit/I");
