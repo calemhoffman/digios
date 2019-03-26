@@ -16,9 +16,13 @@ void ProofWSSearch(){
    TString templateRoot = "template.root";
    TString outRootFile = "haha.root";
 
-   int numWorker = 36;
+   int numWorker = 4;
+   int maxEvent = 1000;
+   
+   int nStep = 200;
+   double dr = 0.1; // fm
 
-   bool isProgressGUI = false;
+   bool isProgressGUI = true;
 
    //==================== End of User input
 
@@ -54,8 +58,8 @@ void ProofWSSearch(){
    //chain->Process(selector, "", 1000);
 
    //Simplist way to do
-   TString option = Form("%d,%s,%s",A, energyFile.Data(),outRootFile.Data());
-   chain->Process("WSProof.C+", option);
+   TString option = Form("%d,%s,%s,%d,%f",A, energyFile.Data(),outRootFile.Data(), nStep, dr);
+   chain->Process("WSProof.C+", option, maxEvent);
 
    //add back the searchRange into the root
    TFile * file = new TFile("haha.root", "UPDATE");
