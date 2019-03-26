@@ -530,17 +530,17 @@ bool HELIOS::SetDetectorGeometry(string filename){
          if( i == 2 )                              bore = atof(x.c_str());
          if( i == 3 && !overrideDetDistance )  perpDist = atof(x.c_str());
          if( i == 4 )                             width = atof(x.c_str());
-         if( i == 5 )                         posRecoil = atof(x.c_str());
-         if( i == 6 )                         rhoRecoil = atof(x.c_str());
-         if( i == 7 ){
+         if( i == 5 )                            length = atof(x.c_str());
+         if( i == 6 )                         posRecoil = atof(x.c_str());
+         if( i == 7 )                         rhoRecoil = atof(x.c_str());
+         if( i == 8 ){
            if( x.compare("false") == 0 ) isCoincidentWithRecoil = false;
            if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
          }
-         if( i == 8 )                        posRecoil1 = atof(x.c_str());
-         if( i == 9 )                        posRecoil2 = atof(x.c_str());
-         if( i == 10)                            zElum1 = atof(x.c_str());
-         if( i == 11 )                           zElum2 = atof(x.c_str());
-         if( i == 12 )                                 length = atof(x.c_str());
+         if( i == 9 )                        posRecoil1 = atof(x.c_str());
+         if( i == 10 )                        posRecoil2 = atof(x.c_str());
+         if( i == 11)                            zElum1 = atof(x.c_str());
+         if( i == 12 )                           zElum2 = atof(x.c_str());
          if( i == 13 )                           support = atof(x.c_str());
          if( i == 14 && !overrideFirstPos )     firstPos = atof(x.c_str());
          if( i == 15 )                            eSigma = atof(x.c_str());
@@ -798,6 +798,7 @@ public:
    double GetDepth() {return depth;}
    double GetPathLength() {return length;}
    
+   vector<string> SplitStr(string tempLine, string splitter, int shift = 0);
    void LoadStoppingPower(string file);
    
    void SetTarget(double density, double depth){
@@ -824,6 +825,9 @@ public:
          //assume the particle will not be stopped
          //printf(" x: %f, KE:  %f, S: %f \n", x, KE, gA->Eval(KE));
          KE = KE - densityUse * gA->Eval(KE) * 10. * dx ; // factor 10, convert MeV/mm -> MeV/cm
+         
+         //TODO add angular Straggling
+         
          x = x + dx;
       }while(x < length);
       
@@ -850,6 +854,9 @@ private:
    double KE0, KE;
    
    TGraph * gA; // stopping power of A, b, B, in unit of MeV/(mg/cm2)
+   TGraph * gB; // projection range [nm]
+   TGraph * gC; // parallel Straggling [nm]
+   TGraph * gD; // perpendicular Straggling [nm]
       
 };
 
@@ -862,10 +869,46 @@ TargetScattering::TargetScattering(){
    depth = 0;
    length = 0;
    gA = NULL;
+   gB = NULL;
+   gC = NULL;
+   gD = NULL;
 }
 
 TargetScattering::~TargetScattering(){
    delete gA;
+}
+
+vector<string> TargetScattering::SplitStr(string tempLine, string splitter, int shift){
+
+  vector<string> output;
+
+  size_t pos;
+  do{
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
+      tempLine = tempLine.substr(pos+1);
+      continue;
+    }
+
+    string secStr;
+    if( pos == string::npos ){
+      secStr = tempLine;
+    }else{
+      secStr = tempLine.substr(0, pos+shift);
+      tempLine = tempLine.substr(pos+shift);
+    }
+
+    //check if secStr is begin with space
+    while( secStr.substr(0, 1) == " "){
+      secStr = secStr.substr(1);
+    }
+    
+    if( !secStr.empty() ) output.push_back(secStr);
+    //printf(" |%s---\n", secStr.c_str());
+    
+  }while(pos != string::npos );
+
+  return output;
 }
 
 void TargetScattering::LoadStoppingPower(string filename){
@@ -877,6 +920,9 @@ void TargetScattering::LoadStoppingPower(string filename){
    
    vector<double> energy;
    vector<double> stopping;
+   vector<double> projRange;
+   vector<double> paraStraggling;
+   vector<double> prepStraggling;
    
    if( file.is_open() ){
       printf("... OK\n");
@@ -905,21 +951,40 @@ void TargetScattering::LoadStoppingPower(string filename){
             }
          }
          
-         found = line.find("keV   ");
-         if ( found != string::npos){
-            energy.push_back( atof(line.substr(0,7).c_str()) * 0.001);
-            double a = atof(line.substr(14,10).c_str());
-            double b = atof(line.substr(25,10).c_str());
+         size_t foundkeV = line.find("keV   ");
+         size_t foundMeV = line.find("MeV   ");
+         size_t foundGeV = line.find("GeV   ");
+         if ( foundkeV != string::npos || foundMeV != string::npos || foundGeV != string::npos ){
+            vector<string> haha = SplitStr(line, "  ");
+            //for( int i = 0 ; i < (int) haha.size()-1; i++){
+            //   printf("%d,%s|", i, haha[i].c_str());
+            //}
+            //printf("\n");
+         
+            found = haha[0].find("keV"); if( found != string::npos ) energy.push_back(atof(haha[0].substr(0, found).c_str()) * 0.001);
+            found = haha[0].find("MeV"); if( found != string::npos ) energy.push_back(atof(haha[0].substr(0, found).c_str()) * 1.);
+            found = haha[0].find("GeV"); if( found != string::npos ) energy.push_back(atof(haha[0].substr(0, found).c_str()) * 1000.);
+            
+            double a = atof(haha[1].c_str());
+            double b = atof(haha[2].c_str());
             stopping.push_back(a+b);
+            
+            found = haha[3].find("A") ; if( found != string::npos ) projRange.push_back(atof(haha[3].substr(0, found).c_str()) * 0.1);
+            found = haha[3].find("um"); if( found != string::npos ) projRange.push_back(atof(haha[3].substr(0, found).c_str()) * 1000.);
+            found = haha[3].find("mm"); if( found != string::npos ) projRange.push_back(atof(haha[3].substr(0, found).c_str()) * 1e6);
+            
+            found = haha[4].find("A") ; if( found != string::npos ) paraStraggling.push_back(atof(haha[4].substr(0, found).c_str()) * 0.1);
+            found = haha[4].find("um"); if( found != string::npos ) paraStraggling.push_back(atof(haha[4].substr(0, found).c_str()) * 1e3);
+            found = haha[4].find("mm"); if( found != string::npos ) paraStraggling.push_back(atof(haha[4].substr(0, found).c_str()) * 1e6);
+            
+            found = haha[5].find("A") ; if( found != string::npos ) prepStraggling.push_back(atof(haha[5].substr(0, found).c_str()) * 0.1);
+            found = haha[5].find("um"); if( found != string::npos ) prepStraggling.push_back(atof(haha[5].substr(0, found).c_str()) * 1e3);
+            found = haha[5].find("mm"); if( found != string::npos ) prepStraggling.push_back(atof(haha[5].substr(0, found).c_str()) * 1e6);
+            
+            //printf(" %f, %f, %f, %f, %f \n", energy.back(), stopping.back(), projRange.back(), paraStraggling.back(), prepStraggling.back());
          }
          
-         found = line.find("MeV   ");
-         if ( found != string::npos){
-            energy.push_back( atof(line.substr(0,7).c_str()));
-            double a = atof(line.substr(14,10).c_str());
-            double b = atof(line.substr(25,10).c_str());
-            stopping.push_back(a+b);
-         }
+         
       }
       
    }else{
@@ -927,6 +992,10 @@ void TargetScattering::LoadStoppingPower(string filename){
    }
    
    gA = new TGraph(energy.size(), &energy[0], &stopping[0]);
+   
+   gB = new TGraph(energy.size(), &energy[0], &projRange[0]);
+   gC = new TGraph(energy.size(), &energy[0], &paraStraggling[0]);
+   gD = new TGraph(energy.size(), &energy[0], &prepStraggling[0]);
    
 }
 //=======================================================

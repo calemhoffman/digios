@@ -28,7 +28,7 @@
 #include <stdlib.h>     /* atof */
 #include <cmath>
 #include <vector>
-#include "Isotope.h" // for geting Z
+#include "../Cleopatra/Isotope.h" // for geting Z
 #include "potentials.h"
 
 using namespace std;
