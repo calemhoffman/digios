@@ -17,11 +17,11 @@
 #include <vector>
 #include <fstream>
 
-//#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/RK4.h"
-//#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/WS.h"
+#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/RK4.h"
+#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/WS.h"
 
-#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/RK4.h"
-#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/WS.h"
+//#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/RK4.h"
+//#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/WS.h"
 
 
 // Header file for the classes stored in the TTree if any.
@@ -54,7 +54,7 @@ public :
    
    TString energyFile; 
    bool isFileLoaded;
-   TMacro expEnergy;
+   TMacro * expEnergy; 
    vector<string> NLJ;
 	vector<double> BE;  //binding enegry of orbital
    void ReadEnergyFile(TString expFile);
@@ -66,6 +66,8 @@ public :
    TTree * newTree; //!
    
    int wsA; // mass number
+   int wsNStep; // number of step in solving radial Schrodinger equation
+   double wsdr; // step size
 
    double rms, lesq; // rms, least-sq
    WoodsSaxon ws;
@@ -104,6 +106,9 @@ void WSProof::Init(TTree *tree)
    // (once per file to be processed).
 
    // Set branch addresses and branch pointers
+   
+   printf("==================== Init\n");
+   
    if (!tree) return;
    fChain = tree;
    fChain->SetMakeClass(1);
@@ -117,6 +122,21 @@ void WSProof::Init(TTree *tree)
    fChain->SetBranchAddress("rSO", &rSO, &b_rSO);
    fChain->SetBranchAddress("aSO", &aSO, &b_aSO);
    
+   
+	printf("============== # fInput %d \n", fInput->GetSize());
+   if( fInput->GetSize() > 0 ) {
+		//for(int i = 0 ; i < fInput->GetSize() ; i++){
+		//	printf("--------- %d \n", i);
+		//	fInput->At(i)->Print();
+		//}
+		
+		printf("========================= TMacro for energy\n");
+		expEnergy = (TMacro *) fInput->At(1);
+		expEnergy->Print();
+		expEnergy->SaveSource("temp.txt");
+		
+		ReadEnergyFile("temp.txt");
+	}
    
 }
 

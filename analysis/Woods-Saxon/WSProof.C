@@ -110,17 +110,17 @@ void WSProof::Begin(TTree * /*tree*/)
 
    TString option = GetOption(); 
    
-   //option = Form("%d,%s,%s",A, energyFile.Data(),outRootFile.Data());
-   
    vector<string> optionList = SplitStr(option.Data(), ",");
-   for(int i = 0; i < (int) optionList.size(); i++){
-     Info("Begin", "%s", optionList[i].c_str());
-   }
-
-
-   wsA = atoi(optionList[0].c_str());
-   ReadEnergyFile(optionList[1]);
-   saveFileName = optionList[2];
+   //for(int i = 0; i < (int) optionList.size(); i++){
+   //  Info("Begin", "%s", optionList[i].c_str());
+   //}
+   
+   saveFileName = optionList[2]; // this will be use at terminate
+   
+   //use this macro to pass the expEnergy to Slave via fInput
+   expEnergy = new TMacro();
+   expEnergy->ReadFile(optionList[1].c_str());
+   fInput->Add(expEnergy);
 
    printf("========================== Begin\n");
 
@@ -135,11 +135,16 @@ void WSProof::SlaveBegin(TTree * /*tree*/)
    Info("begin", "========================== Slave Begin");
 
    TString option = GetOption();
+	vector<string> optionList = SplitStr(option.Data(), ",");
    
-   saveFileName = "haha.root";
+	wsA = atoi(optionList[0].c_str());
+   saveFileName = optionList[2];
+	wsNStep = atoi(optionList[3].c_str());
+	wsdr = atof(optionList[4].c_str());
+	printf(" ----- save File Name  : %s \n", saveFileName.Data());
    
    proofFile = new TProofOutputFile(saveFileName, "M"); // M for merge
-   proofFile->SetOutputFileName(saveFileName);
+   proofFile->SetOutputFileName(saveFileName);  
    
    saveFile = proofFile->OpenFile("RECREATE");
    
@@ -205,12 +210,12 @@ Bool_t WSProof::Process(Long64_t entry)
    ws.r0 = r0;
    ws.rSO = rSO;
    ws.A = wsA;
-   ws.dr = 0.1;
-   ws.nStep = 300;
+   ws.dr = wsdr;
+   ws.nStep = wsNStep;
 
 	ws.PrintWSParas();
 	ws.CalWSEnergies();
-   bool showStat = false;
+   bool showStat = true;
    if( entry % 500 == 0 ) showStat = true;
 	//ws.PrintEnergyLevels();
 	rms = 0;
@@ -223,17 +228,18 @@ Bool_t WSProof::Process(Long64_t entry)
    }
    for( int i = 0; i < (int) NLJ.size(); i++){
      if(showStat) printf(" %d %6s (%9.6f) | \n",i,  NLJ[i].c_str(), BE[i] );	  
+     bool isMatched = false; 
      for( int j = 0; j < (int) ws.orbString.size(); j++){
 		if( NLJ[i] == ws.orbString[j] ){
 		  double diff = BE[i] -  ws.energy[j];
 		  rms += pow(diff,2);
 		  nDiff ++;
+		  isMatched = true;
         if(showStat) printf("%d %6s (%9.6f) | diff : %f \n", j, ws.orbString[j].c_str(), ws.energy[j], diff);
 		  continue;
-		}else{
-        if(showStat) printf("---- \n");
-      }
+		}
 	 }
+	 if(showStat && !isMatched) printf(" ------ \n");
 	}
 	if( showStat) printf("========================================\n");
    
@@ -275,7 +281,7 @@ void WSProof::Terminate()
    //
    saveFile = TFile::Open(saveFileName, "UPDATE");
    
-   expEnergy.Write("expEnergy");
+   expEnergy->Write("expEnergy");
    
    //get entries
    TTree * tree = (TTree*) saveFile->FindObjectAny("tree");
