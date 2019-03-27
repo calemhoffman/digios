@@ -58,7 +58,7 @@ caput GLBL:DIG:counter_reset 0
 
 echo "global settings to all digitizers done"
 
-echo "done setting individual channels of digitizers"
+#echo "done setting individual channels of digitizers"
 
 # clear FIFOs to insure no old events
 caput GLBL:DIG:master_fifo_reset 1 > null
@@ -78,40 +78,40 @@ caput GLBL:DIG:load_delays 0
 # Globals finished now individual boards / channels
 #
 ###################################################################
-echo "Setting deactivated boards / channels"
-caput DAQB2_4_CS_Ena Disable
-caput DAQB3_4_CS_Ena Disable
-caput DAQB4_4_CS_Ena Disable
-caput VME01:MDIG1:channel_enable1 Reset
-caput VME01:MDIG1:channel_enable2 Reset
-caput VME01:MDIG1:channel_enable3 Reset
-caput VME01:MDIG1:channel_enable4 Reset
-caput VME01:MDIG1:channel_enable5 Reset
-caput VME01:MDIG1:channel_enable6 Reset
-caput VME01:MDIG1:channel_enable7 Reset
-caput VME01:MDIG1:channel_enable8 Reset
-caput VME01:MDIG1:channel_enable9 Reset
-caput VME01:MDIG2:channel_enable0 Reset
-caput VME01:MDIG2:channel_enable1 Reset
-caput VME01:MDIG2:channel_enable2 Reset
-caput VME01:MDIG2:channel_enable3 Reset
-caput VME01:MDIG2:channel_enable8 Reset
-caput VME01:MDIG2:channel_enable9 Reset
-caput VME01:MDIG3:channel_enable8 Reset
-caput VME01:MDIG3:channel_enable9 Reset
-caput VME01:MDIG4:channel_enable2 Reset
-caput VME01:MDIG4:channel_enable3 Reset
-caput VME01:MDIG4:channel_enable4 Reset
-caput VME01:MDIG4:channel_enable5 Reset
-caput VME01:MDIG4:channel_enable6 Reset
-caput VME01:MDIG4:channel_enable7 Reset
-caput VME01:MDIG4:channel_enable8 Reset
-caput VME01:MDIG4:channel_enable9 Reset
-echo "Setting internal trigger boards / channels"
-caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
-caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
-echo "Setting individual threshold"
-echo "Setting other various individual parameters"
+#echo "Setting deactivated boards / channels"
+#caput DAQB2_4_CS_Ena Disable
+#caput DAQB3_4_CS_Ena Disable
+#caput DAQB4_4_CS_Ena Disable
+#caput VME01:MDIG1:channel_enable1 Reset
+#caput VME01:MDIG1:channel_enable2 Reset
+#caput VME01:MDIG1:channel_enable3 Reset
+#caput VME01:MDIG1:channel_enable4 Reset
+#caput VME01:MDIG1:channel_enable5 Reset
+#aput VME01:MDIG1:channel_enable6 Reset
+#caput VME01:MDIG1:channel_enable7 Reset
+#caput VME01:MDIG1:channel_enable8 Reset
+#caput VME01:MDIG1:channel_enable9 Reset
+#caput VME01:MDIG2:channel_enable0 Reset
+#caput VME01:MDIG2:channel_enable1 Reset
+#caput VME01:MDIG2:channel_enable2 Reset
+#caput VME01:MDIG2:channel_enable3 Reset
+#caput VME01:MDIG2:channel_enable8 Reset
+#caput VME01:MDIG2:channel_enable9 Reset
+#caput VME01:MDIG3:channel_enable8 Reset
+#caput VME01:MDIG3:channel_enable9 Reset
+#caput VME01:MDIG4:channel_enable2 Reset
+#caput VME01:MDIG4:channel_enable3 Reset
+#caput VME01:MDIG4:channel_enable4 Reset
+#caput VME01:MDIG4:channel_enable5 Reset
+#caput VME01:MDIG4:channel_enable6 Reset
+#caput VME01:MDIG4:channel_enable7 Reset
+#caput VME01:MDIG4:channel_enable8 Reset
+#caput VME01:MDIG4:channel_enable9 Reset
+#echo "Setting internal trigger boards / channels"
+#caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
+#caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
+#echo "Setting individual threshold"
+#echo "Setting other various individual parameters"
 
 ##################################################################
 #   With system linked up, HELIOS  X-plane and Y-plane

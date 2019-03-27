@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 106
-y 121
+x 91
+y 175
 w 1800
 h 1100
 font "helvetica-bold-r-10.0"
@@ -1868,7 +1868,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable5"
+controlPv "VME02:MDIG2:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -1893,7 +1893,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable6"
+controlPv "VME02:MDIG2:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -1918,7 +1918,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable7"
+controlPv "VME02:MDIG2:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -1943,7 +1943,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable0"
+controlPv "VME02:MDIG2:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -1968,7 +1968,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable1"
+controlPv "VME02:MDIG2:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2343,7 +2343,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable7"
+controlPv "VME02:MDIG3:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2368,7 +2368,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable0"
+controlPv "VME02:MDIG3:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2393,7 +2393,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable1"
+controlPv "VME02:MDIG3:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2418,7 +2418,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable2"
+controlPv "VME02:MDIG3:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2443,7 +2443,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG2:channel_enable3"
+controlPv "VME02:MDIG3:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2818,7 +2818,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable1"
+controlPv "VME02:MDIG3:channel_enable9"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2843,7 +2843,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable2"
+controlPv "VME02:MDIG3:channel_enable8"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2868,7 +2868,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable3"
+controlPv "VME02:MDIG3:channel_enable7"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2893,7 +2893,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable4"
+controlPv "VME02:MDIG3:channel_enable6"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -2918,7 +2918,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable5"
+controlPv "VME02:MDIG3:channel_enable5"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -3320,7 +3320,7 @@ x 1675
 y 635
 w 60
 h 18
-controlPv "VME03:MDIG1:$(PVNAME)3"
+controlPv "VME03:MDIG1:$(PVNAME)4"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -3348,7 +3348,7 @@ x 1675
 y 612
 w 60
 h 14
-controlPv "VME03:MDIG1:disc_count3_RBV"
+controlPv "VME03:MDIG1:disc_count4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -3494,6 +3494,7 @@ autoHeight
 nullColor index 0
 newPos
 objType "monitors"
+id "4"
 noExecuteClipMask
 endObjectProperties
 
@@ -3810,7 +3811,7 @@ x 1675
 y 659
 w 60
 h 14
-controlPv "VME03:MDIG1:$(PVNAME)3_RBV"
+controlPv "VME03:MDIG1:$(PVNAME)4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -3837,7 +3838,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG3:channel_enable1"
+controlPv "VME03:MDIG1:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -3862,7 +3863,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG3:channel_enable2"
+controlPv "VME03:MDIG1:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -3887,7 +3888,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG3:channel_enable3"
+controlPv "VME03:MDIG1:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -3912,7 +3913,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG3:channel_enable4"
+controlPv "VME03:MDIG1:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -3937,7 +3938,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG3:channel_enable5"
+controlPv "VME03:MDIG1:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4392,7 +4393,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable3"
+controlPv "VME03:MDIG2:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4417,7 +4418,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable4"
+controlPv "VME03:MDIG2:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4442,7 +4443,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable5"
+controlPv "VME03:MDIG2:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4467,7 +4468,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable6"
+controlPv "VME03:MDIG2:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4492,7 +4493,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable7"
+controlPv "VME03:MDIG2:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4947,7 +4948,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG2:channel_enable5"
+controlPv "VME03:MDIG2:channel_enable9"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -4972,7 +4973,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG2:channel_enable6"
+controlPv "VME03:MDIG2:channel_enable8"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5022,7 +5023,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable0"
+controlPv "VME03:MDIG2:channel_enable6"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5047,7 +5048,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG1:channel_enable1"
+controlPv "VME03:MDIG2:channel_enable5"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13189,7 +13190,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable3"
+controlPv "VME02:MDIG1:channel_enable9"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13214,7 +13215,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable4"
+controlPv "VME02:MDIG1:channel_enable8"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13379,7 +13380,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable5"
+controlPv "VME02:MDIG1:channel_enable7"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13404,7 +13405,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable6"
+controlPv "VME02:MDIG1:channel_enable6"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13569,7 +13570,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG1:channel_enable7"
+controlPv "VME02:MDIG1:channel_enable5"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13798,7 +13799,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG3:channel_enable5"
+controlPv "VME02:MDIG1:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13963,7 +13964,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG3:channel_enable4"
+controlPv "VME02:MDIG1:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13988,7 +13989,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG3:channel_enable3"
+controlPv "VME02:MDIG1:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14153,7 +14154,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG3:channel_enable2"
+controlPv "VME02:MDIG1:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14178,7 +14179,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG3:channel_enable1"
+controlPv "VME02:MDIG1:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14724,7 +14725,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG3:channel_enable7"
+controlPv "VME01:MDIG3:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14749,7 +14750,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG2:channel_enable0"
+controlPv "VME01:MDIG3:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14774,7 +14775,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG2:channel_enable1"
+controlPv "VME01:MDIG3:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14799,7 +14800,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG2:channel_enable2"
+controlPv "VME01:MDIG3:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14824,7 +14825,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME03:MDIG2:channel_enable3"
+controlPv "VME01:MDIG3:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
