@@ -30,7 +30,8 @@ caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
 caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
 caput GLBL:DIG:trigger_polarity Both
 caput GLBL:DIG:pileup_mode Accept
-caput GLBL:DIG:trigger_mux_select ExtTTCL #IntAcptAll 
+#caput GLBL:DIG:trigger_mux_select ExtTTCL
+caput GLBL:DIG:trigger_mux_select IntAcptAll 
 caput GLBL:DIG:channel_enable Run
 caput GLBL:DIG:win_comp_min -10
 caput GLBL:DIG:win_comp_max  0
