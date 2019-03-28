@@ -1,6 +1,18 @@
 #!/bin/bash -l
 
-echo ------------ Stopping the current run ------------------
+source ~/digios/expName.sh
+
+RUN=${LastRunNum}
+
+#check RUN is 3 digit
+runLen=${#RUN}
+if [ ${runLen} -eq 1 ]; then
+   RUN="00"${RUN}
+elif [ ${runLen} -eq 2 ]; then
+   RUN="0"${RUN}
+fi;
+
+echo ------------ Stopping the current Run${RUN} ------------------
 
 echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.dat
 
@@ -24,4 +36,4 @@ do
    done <temp
 done        
 rm -rf temp
-echo ------------ The run has now been STOPPED  ----------------
+echo ------------ The Run${RUN} has now been STOPPED  ----------------

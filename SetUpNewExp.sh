@@ -78,8 +78,9 @@ fi
 DigiosDir="$(pwd)"
 echo "=================== Setting up ${DigiosDir}/expName.sh"
 touch ${DigiosDir}/expName.sh
-echo "#!/bin/bash -l" > expName.sh
-echo "expName=${expName}" >> expName.sh
+echo "#!/bin/bash -l" > ${DigiosDir}/expName.sh
+echo "expName=${expName}" >> ${DigiosDir}/expName.sh
+echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
 
 echo "=================== making new folders in ${DATAPATH}/${expName}"
 Data=${DATAPATH}/${expName}/data

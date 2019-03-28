@@ -1,4 +1,4 @@
-!/bin/bash -l
+#!/bin/bash -l
 export TERM=vt100
 explocation=~/digios/daq
 source ~/digios/expName.sh #load expName
