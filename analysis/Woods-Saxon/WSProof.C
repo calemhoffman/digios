@@ -114,7 +114,8 @@ void WSProof::Begin(TTree * /*tree*/)
    //for(int i = 0; i < (int) optionList.size(); i++){
    //  Info("Begin", "%s", optionList[i].c_str());
    //}
-   
+
+   ReadEnergyFile(optionList[1]); // just diaplay, not feed to Slave
    saveFileName = optionList[2]; // this will be use at terminate
    
    //use this macro to pass the expEnergy to Slave via fInput
@@ -213,9 +214,9 @@ Bool_t WSProof::Process(Long64_t entry)
    ws.dr = wsdr;
    ws.nStep = wsNStep;
 
-	ws.PrintWSParas();
+	//ws.PrintWSParas();
 	ws.CalWSEnergies();
-   bool showStat = true;
+   bool showStat = false;
    if( entry % 500 == 0 ) showStat = true;
 	//ws.PrintEnergyLevels();
 	rms = 0;
@@ -227,7 +228,7 @@ Bool_t WSProof::Process(Long64_t entry)
      printf("    Experiment  |  Woods-Saxon   |\n");
    }
    for( int i = 0; i < (int) NLJ.size(); i++){
-     if(showStat) printf(" %d %6s (%9.6f) | \n",i,  NLJ[i].c_str(), BE[i] );	  
+     if(showStat) printf(" %d %6s (%9.6f) | ",i,  NLJ[i].c_str(), BE[i] );	  
      bool isMatched = false; 
      for( int j = 0; j < (int) ws.orbString.size(); j++){
 		if( NLJ[i] == ws.orbString[j] ){

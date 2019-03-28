@@ -10,14 +10,15 @@
 
 void ProofWSSearch(){
    //=============== User input
-   int A = 209;
-   TString energyFile = "energy209Pb.dat";
+   int A = 17;
+   string sym = "O";
+   TString energyFile = "energy17O.dat";
    TString searchRange = "wsSearch_Range.txt";
    TString templateRoot = "template.root";
-   TString outRootFile = "haha.root";
+   TString outRootFile = Form("ws_%d%s.root", A, sym.c_str());
 
-   int numWorker = 4;
-   int maxEvent = 1000;
+   int numWorker = 36;
+   int maxEvent = 0; // if zero = All event
    
    int nStep = 200;
    double dr = 0.1; // fm
@@ -46,6 +47,13 @@ void ProofWSSearch(){
    tMacro->Print();
    infile->Close();
 
+   int numEntries = chain->GetEntries();
+   float workerPower = 2.5; // event / sec / worker
+   double estTime = numEntries / workerPower / numWorker; // in sec
+   printf(" Estimated Time (%4.1f events/ sec / worker): %6.0f sec = %5.0f min = %4.1f hour\n",
+          workerPower, estTime, estTime/60., estTime/60./60.);
+   printf(" Results save to : %s \n", outRootFile.Data());
+
    //TSelector, not working
    //p->Load("WSProof.C+");
    //WSProof * selector = new WSProof();
@@ -59,8 +67,11 @@ void ProofWSSearch(){
 
    //Simplist way to do
    TString option = Form("%d,%s,%s,%d,%f",A, energyFile.Data(),outRootFile.Data(), nStep, dr);
-   chain->Process("WSProof.C+", option, maxEvent);
-
+   if( maxEvent > 0 ) {
+     chain->Process("WSProof.C+", option, maxEvent);
+   }else{
+     chain->Process("WSProof.C+", option);
+   }
    //add back the searchRange into the root
    TFile * file = new TFile("haha.root", "UPDATE");
    tMacro->Write("searchRange");
