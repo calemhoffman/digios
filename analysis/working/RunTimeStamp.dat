@@ -9,3 +9,19 @@ RUN-005 start at Tue Mar 26 19:34:32 CDT 2019, 2-alpha sources
          stop at Tue Mar 26 23:43:08 CDT 2019
 RUN-006 start at Wed Mar 27 00:15:15 CDT 2019, 2-alpha run
          stop at Wed Mar 27 14:25:09 CDT 2019
+RUN-007 start at Wed Mar 27 15:07:56 CDT 2019, alpha run, reconnect cables
+         stop at Wed Mar 27 15:13:27 CDT 2019
+RUN-008 start at Wed Mar 27 15:22:24 CDT 2019, again, last run is too small?
+         stop at Wed Mar 27 15:52:34 CDT 2019
+RUN-009 start at Wed Mar 27 16:41:19 CDT 2019, again
+         stop at Wed Mar 27 17:06:40 CDT 2019
+RUN-010 start at Wed Mar 27 17:07:35 CDT 2019, again, longer trace 8 us
+         stop at Wed Mar 27 17:15:05 CDT 2019
+RUN-011 start at Wed Mar 27 17:26:14 CDT 2019, increase voltage to 100
+         stop at Wed Mar 27 17:51:57 CDT 2019
+RUN-011 start at Wed Mar 27 18:41:54 CDT 2019, reconnect cable, HV 100V
+         stop at Wed Mar 27 18:42:28 CDT 2019
+RUN-012 start at Wed Mar 27 18:44:32 CDT 2019, again
+         stop at Wed Mar 27 18:49:27 CDT 2019
+RUN-013 start at Wed Mar 27 19:29:52 CDT 2019, testing
+         stop at Wed Mar 27 19:30:28 CDT 2019

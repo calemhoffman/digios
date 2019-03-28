@@ -12,7 +12,7 @@ elif [ ${runLen} -eq 2 ]; then
    RUN="0"${RUN}
 fi;
 
-echo ------------ Stopping the current Run${RUN} ------------------
+echo -e "------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
 echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.dat
 
@@ -36,4 +36,4 @@ do
    done <temp
 done        
 rm -rf temp
-echo ------------ The Run${RUN} has now been STOPPED  ----------------
+echo -e "------------ The Run\033[0;3m${RUN}\033[0m has now been STOPPED  ----------------"
