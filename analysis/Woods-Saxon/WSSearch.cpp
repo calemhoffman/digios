@@ -138,7 +138,6 @@ int main(int argc, char *argv[]){
     vector<string> str0 = SplitStr(tempLine, " ");
     if( str0.size() == 0 ) continue;
 
-    //if( i == 0 ) A = atoi(str0[0].c_str());
     if( i == 0  ) v0min  = atof(str0[0].c_str());
     if( i == 1  ) v0max  = atof(str0[0].c_str());
     if( i == 2  ) v0step = atof(str0[0].c_str());
@@ -311,9 +310,10 @@ int main(int argc, char *argv[]){
                 orbStringBest = ws.orbString;
               }
               tree->Fill();
-              tree->Write("tree", TObject::kOverwrite);
+              
             }// end of VSO loop
           }// end of V0 loop
+          tree->Write("tree", TObject::kOverwrite);
         }// end of aso loop
       }// end of Rso loop
     }// end of a0 loop
