@@ -17,9 +17,9 @@ GLBL="GLBL:DIG:led_threshold"
 echo "########## Saving Individual Thresholds ##########"
 echo "#Saving Individual Thresholds" >> $sfile
 
-VME="02 03 04"
+VME="01 02 03 04"
 DIG="1 2 3"
-CH="0 1 2 3 4 5 6 7"
+CH="0 1 2 3 4 5 6 7 8 9"
 
 PVS="led_threshold channel_enable"
 
