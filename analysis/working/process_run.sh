@@ -1,17 +1,6 @@
 #!/bin/sh
 
-if [ $# -eq 0 ] ; then
-  echo "$./process_run_simple.sh #RunNum #download #Merge #EventBld #GeneralSort #Monitor"
-  echo "              RunNum = a 3 digit run number, e.g. 001"
-  echo "            download = 1/0, is download from DAQ?"
-  echo "               Merge = 1/0/-1, is Merge the raw data? -1 is force merge"  
-  echo "            EventBld = 1/0/-1, is building event from the meged data? -1 is force build"  
-  echo "          GenralSort = 2/1/0/-1, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C"
-  echo "             Monitor = 2/1/0, run ChainMonitor.C?  1 = single run, 2 = all runs"
-  exit 1
-fi;
-
-if [ $1 == "-help" ]; then
+if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "$./process_run_simple.sh #RunNum #download #Merge #EventBld #GeneralSort #Monitor"
   echo "              RunNum = a 3 digit run number, e.g. 001"
   echo "            download = 1/0, is download from DAQ?"
@@ -98,9 +87,12 @@ BLUE='\033[0;34m'
 Cyan='\033[0;36m'
 NC='\033[0m'
 
+#=========== Check host name
+PCName=$(hostname)
+
+#=========== Download raw
 if [ ${isDownload} -eq 1 ]; then
   echo -e "${RED}######################### Download raw data${NC}"
-  PCName="$(hostname)"
   if [ ${PCName} == "digios1" ]; then
       echo "Already in digios1, no need to get data."
   else
@@ -109,12 +101,12 @@ if [ ${isDownload} -eq 1 ]; then
       echo "RUN $RUN: Get the raw data `date`"
       rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
       rsync -avuht --progress "helios@${IP}:${daqDir}/analysis/working/RunTimeStamp.dat" ${AnalysisDir}/working/.
-      echo "============================================="
-      cat ${AnalysisDir}/working/RunTimeStamp.dat
-      echo "============================================="
-
   fi
 fi
+
+echo "============================================="
+cat ${AnalysisDir}/working/RunTimeStamp.dat
+echo "============================================="
 
 du -hsc $DATADIR/${expName}_run_$RUN*
 
@@ -127,6 +119,7 @@ if [ ${count} -eq 0 ]; then
     exit 
 fi
 
+
 #=========== Merge
 if [ $isMerge -eq 1 ]; then
   echo -e "${RED}######################### Merge raw data${NC}"
@@ -136,9 +129,9 @@ if [ $isMerge -eq 1 ]; then
   #==== check if merged data exist
   isMergedDataExist=`ls -1 ${MERGDIR}/GEBMerged_run${RUN}* 2>/dev/null | wc -l`
   if [ ${isMergedDataExist} -gt 0 ]; then
-    mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
   else
-    mergedDataTime=0
+      mergedDataTime=0
   fi
   
   if [ ${rawDataTime} -ge ${mergedDataTime} ]; then
@@ -189,7 +182,7 @@ if [ $isSort -eq -1 ]; then # force Sort
   echo -e "${RED}========= GEBSort started sorting run $RUN at `date` (force)${NC}"
   ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
   echo "GEBSort DONE at `date`"
-  echo -e "========= saved root file --> {$RED} ${ROOTDIR}/run${RUN}.root ${NC} "
+  echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "
   echo "============================================="
   echo "============================================="
 fi
