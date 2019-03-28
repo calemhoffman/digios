@@ -1,9 +1,8 @@
 #!/bin/sh
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run_simple.sh #RunNum #download #Merge #EventBld #GeneralSort #Monitor"
+  echo "$./process_run_simple.sh #RunNum #Merge #EventBld #GeneralSort #Monitor"
   echo "              RunNum = a 3 digit run number, e.g. 001"
-  echo "            download = 1/0, is download from DAQ?"
   echo "               Merge = 1/0/-1, is Merge the raw data? -1 is force merge"  
   echo "            EventBld = 1/0/-1, is building event from the meged data? -1 is force build"  
   echo "          GenralSort = 2/1/0/-1, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C"
@@ -28,6 +27,11 @@ SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
 RUN=$1
 
+if [ ${RUN} -gt ${LastRunNum} ]; then
+    echo "========== LastRunNum: ${LastRunNum}."
+    exit 1
+fi
+
 #make RUN to be 3 digit
 runLen=${#RUN}
 if [ ${runLen} -eq 1 ]; then
@@ -36,30 +40,25 @@ elif [ ${runLen} -eq 2 ]; then
    RUN="0"${RUN}
 fi;
 
-isDownload=1
 isMerge=1
 isSort=1
 isGeneralSort=1
 isMonitor=1
 
 if [ $# -ge 2 ]; then
- isDownload=$2
+ isMerge=$2
 fi
 
 if [ $# -ge 3 ]; then
- isMerge=$3
+ isSort=$3
 fi
 
 if [ $# -ge 4 ]; then
- isSort=$4
+ isGeneralSort=$4
 fi
 
 if [ $# -ge 5 ]; then
- isGeneralSort=$5
-fi
-
-if [ $# -ge 6 ]; then
- isMonitor=$6
+ isMonitor=$5
  OverRideMonitor=""
 fi
 
@@ -72,7 +71,6 @@ echo "============================================="
 echo "============ RUN $RUN ========================"
 echo "============================================="
 
-echo "Download    : ${isDownload}"
 echo "Merge       : ${isMerge}"
 echo "Sort        : ${isSort}"
 echo "GeneralSort : ${isGeneralSort}"
@@ -90,18 +88,17 @@ NC='\033[0m'
 #=========== Check host name
 PCName=$(hostname)
 
-#=========== Download raw
-if [ ${isDownload} -eq 1 ]; then
-  echo -e "${RED}######################### Download raw data${NC}"
-  if [ ${PCName} == "digios1" ]; then
-      echo "Already in digios1, no need to get data."
-  else
-      #============ Get the raw data
-      IP=192.168.1.2
-      echo "RUN $RUN: Get the raw data `date`"
-      rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
-      rsync -avuht --progress "helios@${IP}:${daqDir}/analysis/working/RunTimeStamp.dat" ${AnalysisDir}/working/.
-  fi
+#######################################
+####################  Download raw data
+echo -e "${RED}######################### Download raw data${NC}"
+if [ ${PCName} == "digios1" ]; then
+    echo "Already in digios1, no need to get data."
+else
+    #============ Get the raw data
+    IP=192.168.1.2
+    echo "RUN $RUN: Get the raw data `date`"
+    rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
+    rsync -avuht --progress "helios@${IP}:${daqDir}/analysis/working/RunTimeStamp.dat" ${AnalysisDir}/working/.
 fi
 
 echo "============================================="
@@ -120,14 +117,23 @@ if [ ${count} -eq 0 ]; then
 fi
 
 
-#=========== Merge
+#######################################
+#################### Merge
 if [ $isMerge -eq 1 ]; then
   echo -e "${RED}######################### Merge raw data${NC}"
-  
+
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
-  rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`
+  if [ ${PCName} == "digios1" ]; then
+      echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
+      rawDataTime=`stat -c "%Z"  ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
+  else
+      rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
+  fi
+
   #==== check if merged data exist
   isMergedDataExist=`ls -1 ${MERGDIR}/GEBMerged_run${RUN}* 2>/dev/null | wc -l`
+
+  #==== if merged data exist, check timeStamp
   if [ ${isMergedDataExist} -gt 0 ]; then
       mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
   else
@@ -151,12 +157,17 @@ if [ $isMerge -eq -1 ]; then # force merge
   echo "RUN $RUN: GEBMerge DONE at `date`"
 fi
 
-#=========== Sort
+#######################################
+#################### Sort
 if [ $isSort -eq 1 ]; then
   echo -e "${RED}========= GEBSort started sorting run $RUN at `date`${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
-  mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+  if [ ${PCName} == "digios1" ]; then
+      mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+  else
+      mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+  fi
   #==== check if root data exist
   isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
   
@@ -187,7 +198,8 @@ if [ $isSort -eq -1 ]; then # force Sort
   echo "============================================="
 fi
 
-#========== Process_run.C, GeneralSort
+########################################
+#################### Process_run.C, GeneralSort
 
 # convert to normal number, without zero in front
 if [ "${RUN:0:1}" == "0" ] ; then
@@ -208,7 +220,8 @@ if [ $isGeneralSort -eq 2 ]; then
 fi
 root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 
-#=========== Monitor
+########################################
+#################### Monitor
 if [ $isMonitor -eq 1 ] ; then
   root -l "ChainMonitors.C(${runID})"
 fi
