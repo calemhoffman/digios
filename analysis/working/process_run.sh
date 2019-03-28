@@ -89,11 +89,6 @@ NC='\033[0m'
 
 #=========== Check host name
 PCName=$(hostname)
-if [ ${PCName} == "digios1" ]; then
-    #=== force merge and sort dor digios1, becasue the checking data time is not working
-    isMerge=-1
-    isSort=-1
-fi
 
 #=========== Download raw
 if [ ${isDownload} -eq 1 ]; then
@@ -187,7 +182,7 @@ if [ $isSort -eq -1 ]; then # force Sort
   echo -e "${RED}========= GEBSort started sorting run $RUN at `date` (force)${NC}"
   ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
   echo "GEBSort DONE at `date`"
-  echo -e "========= saved root file --> {$RED} ${ROOTDIR}/run${RUN}.root ${NC} "
+  echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "
   echo "============================================="
   echo "============================================="
 fi
