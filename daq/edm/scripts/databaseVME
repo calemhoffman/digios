@@ -1,0 +1,29 @@
+#!/bin/bash
+
+VME=$1
+DIG=$2
+
+echo "------ Database for VME0${VME}:DIG${DIG} ----"
+
+CH="0 1 2 3 4 5 6 7 8 9"
+
+loopflag=1
+
+while [ ${loopflag} -eq 1 ]; do
+
+    for c in $CH ; do
+
+   hitRate=$(caget VME0${VME}:MDIG${DIG}:disc_count${c}_RBV | awk '{print $2}')
+
+   dataStr="INSERT hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
+   
+   #echo ${dataStr}
+   
+   influx -execute "${dataStr}" -database="testing"
+
+   #sleep 0.5
+
+    done
+
+
+done

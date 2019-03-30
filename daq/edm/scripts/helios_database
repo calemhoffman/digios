@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "#################################"
+echo "##    database for Grafana     ##"
+echo "#################################"
+
+#==== energy
+xterm -geometry 50x4+0+0   -e "./databaseVME 1 1" & # top left, e-r
+xterm -geometry 50x4+0+100  -e "./databaseVME 4 2" &  # top top, e-r
+xterm -geometry 50x4+0+200 -e "./databaseVME 3 3" &  # top right, e-r
+xterm -geometry 50x4+0+300 -e "./databaseVME 3 1" &  # bottm  right, e-r
+xterm -geometry 50x4+0+400 -e "./databaseVME 2 2" &  # bottom bottom, e-r
+xterm -geometry 50x4+0+500 -e "./databaseVME 1 3" &  # bottom  left, e-r
+
+#==== xf, xn
+xterm -geometry 50x4+0+600  -e "./databaseVME 1 2" & # top left, 
+xterm -geometry 50x4+0+700  -e "./databaseVME 4 3" &  # top top, e-r
+xterm -geometry 50x4+0+800  -e "./databaseVME 4 1" &  # top right, e-r
+xterm -geometry 50x4+0+900  -e "./databaseVME 3 2" &  # bottm  right, e-r
+xterm -geometry 50x4+0+1000 -e "./databaseVME 2 3" &  # bottom bottom, e-r
+xterm -geometry 50x4+0+1100 -e "./databaseVME 2 1" &  # bottom  left, e-r
+

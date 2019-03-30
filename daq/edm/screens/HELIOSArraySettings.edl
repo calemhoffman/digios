@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 195
-y 200
+x 436
+y 213
 w 1800
 h 1100
 font "helvetica-bold-r-10.0"
@@ -14008,7 +14008,7 @@ x 347
 y 785
 w 60
 h 14
-controlPv "VME03:MDIG3:$(PVNAME)3_RBV"
+controlPv "VME02:MDIG1:$(PVNAME)2_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -14198,7 +14198,7 @@ x 498
 y 785
 w 60
 h 14
-controlPv "VME02:MDIG2:$(PVNAME)4_RBV"
+controlPv "VME02:MDIG1:$(PVNAME)4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
