@@ -1,0 +1,10 @@
+                                              file,     #event, size[MB], duration[s],       [min],      [hour]
+                      ../root_data/gen_run001.root,    3320417,   161.33,   72412.382,    1206.873,      20.115
+                      ../root_data/gen_run002.root,       2756,     0.23,      33.064,       0.551,       0.009
+                      ../root_data/gen_run003.root,    1987790,    98.54,    2604.171,      43.403,       0.723
+                      ../root_data/gen_run004.root,    1970178,   100.09,    3148.962,      52.483,       0.875
+                      ../root_data/gen_run006.root,      60231,     5.30,     177.959,       2.966,       0.049
+                      ../root_data/gen_run010.root,      71380,     6.68,     446.589,       7.443,       0.124
+                      ../root_data/gen_run012.root,     232780,    20.89,     294.919,       4.915,       0.082
+                      ../root_data/gen_run014.root,     544894,    44.17,    1588.252,      26.471,       0.441
+                      ../root_data/gen_run999.root,    3847879,   185.19,   17902.058,     298.368,       4.973
