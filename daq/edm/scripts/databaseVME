@@ -11,19 +11,18 @@ loopflag=1
 
 while [ ${loopflag} -eq 1 ]; do
 
-    for c in $CH ; do
+   for c in $CH ; do
 
-   hitRate=$(caget VME0${VME}:MDIG${DIG}:disc_count${c}_RBV | awk '{print $2}')
+	hitRate=$(caget VME0${VME}:MDIG${DIG}:disc_count${c}_RBV | awk '{print $2}')
 
-   dataStr="INSERT hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
-   
-   #echo ${dataStr}
-   
-   influx -execute "${dataStr}" -database="testing"
-
-   #sleep 0.5
-
-    done
+	clear
+	echo "Database for VME0${VME}:DIG${DIG} ---- HitRate:${hitRate}"
+	
+	dataStr="INSERT hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
+        #echo ${dataStr}   
+	influx -execute "${dataStr}" -database="testing"
+	
+   done
 
 
 done
