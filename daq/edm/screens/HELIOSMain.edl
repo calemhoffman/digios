@@ -4,7 +4,7 @@ major 4
 minor 0
 release 1
 x 106
-y 39
+y 61
 w 1400
 h 816
 font "helvetica-bold-r-10.0"
@@ -7542,5 +7542,28 @@ endObjectProperties
 
 endGroup
 
+endObjectProperties
+
+# (Shell Command)
+object shellCmdClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 1146
+y 291
+w 102
+h 28
+fgColor index 14
+bgColor index 40
+topShadowColor index 40
+botShadowColor index 40
+font "helvetica-bold-r-14.0"
+buttonLabel "Database"
+oneShot
+numCmds 1
+command {
+  0 "$EDMSCRIPTS/helios_database"
+}
 endObjectProperties
 
