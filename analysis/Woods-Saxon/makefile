@@ -16,3 +16,4 @@ WSMakeTree: WSMakeTree.cpp RK4.h
 	
 clean: 
 	rm -fv WSFit WSCal WSSearch WSMakeTree
+	rm -fv *.pcm *.d *.so
