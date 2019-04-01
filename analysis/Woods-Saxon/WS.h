@@ -55,7 +55,7 @@ public:
 
 	void PrintWSParas(){
 	  printf("================ Woods-Saxon parameters \n");
-	  printf("   A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3fm \n", A, dr, nStep, dr * nStep);
+	  printf("   A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, dr, nStep, dr * nStep);
 	  printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
 	  printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n", VSO,  RSO, rSO, aSO);
 	  printf("================================\n");
