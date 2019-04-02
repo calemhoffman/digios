@@ -10,12 +10,12 @@
 
 void ProofWSSearch(){
    //=============== User input
-   int A = 17;
-   string sym = "O";
-   TString energyFile = "energy17O.dat";
+   int A = 209;
+   string sym = "Pb";
+   TString energyFile = "energy209Pb.dat";
    TString searchRange = "wsSearch_Range.txt";
    TString templateRoot = "template.root";
-   TString outRootFile = Form("ws_%d%s.root", A, sym.c_str());
+   TString outRootFile = Form("ws_%d%s_all.root", A, sym.c_str());
 
    int numWorker = 36;
    int maxEvent = 0; // if zero = All event
@@ -73,7 +73,7 @@ void ProofWSSearch(){
      chain->Process("WSProof.C+", option);
    }
    //add back the searchRange into the root
-   TFile * file = new TFile("haha.root", "UPDATE");
+   TFile * file = new TFile(outRootFile, "UPDATE");
    tMacro->Write("searchRange");
    file->Close();
 
