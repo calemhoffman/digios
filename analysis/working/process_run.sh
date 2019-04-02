@@ -225,6 +225,7 @@ root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 if [ $isMonitor -eq 1 ] ; then
   root -l "ChainMonitors.C(${runID})"
 fi
+
 if [ $isMonitor -eq 2 ] ; then
   root -l ChainMonitors.C
 fi;  

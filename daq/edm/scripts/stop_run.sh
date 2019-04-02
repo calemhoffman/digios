@@ -36,4 +36,4 @@ do
    done <temp
 done        
 rm -rf temp
-echo -e "------------ The Run\033[0;3m${RUN}\033[0m has now been STOPPED  ----------------"
+echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
