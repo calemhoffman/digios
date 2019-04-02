@@ -10,8 +10,8 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ../../expName.sh #load expName
-AnalysisDir=../../analysis
+source ~/digios/expName.sh #load expName
+AnalysisDir=~/digios/analysis
 
 #remote data path
 dataloc=/media/DIGIOSDATA3/${expName}/data
@@ -27,10 +27,10 @@ SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
 RUN=$1
 
-if [ ${RUN} -gt ${LastRunNum} ]; then
-    echo "========== LastRunNum: ${LastRunNum}."
-    exit 1
-fi
+#if [ ${RUN} -gt $((LastRunNum + 1)) ]; then
+#    echo "========== LastRunNum: ${LastRunNum}."
+#    exit 1
+#fi
 
 #make RUN to be 3 digit
 runLen=${#RUN}
