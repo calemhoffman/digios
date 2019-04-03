@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 436
-y 213
+x -147
+y 84
 w 1800
 h 1100
 font "helvetica-bold-r-10.0"
@@ -9753,7 +9753,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG2:channel_enable0"
+controlPv "VME03:MDIG3:channel_enable8"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -9778,7 +9778,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG2:channel_enable1"
+controlPv "VME03:MDIG3:channel_enable7"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -9943,7 +9943,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG2:channel_enable2"
+controlPv "VME03:MDIG3:channel_enable6"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -10140,7 +10140,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME02:MDIG2:channel_enable3"
+controlPv "VME03:MDIG3:channel_enable5"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
