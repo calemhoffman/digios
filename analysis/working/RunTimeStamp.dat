@@ -33,3 +33,5 @@ RUN-016 start at Fri Mar 29 15:54:03 CDT 2019, alpha on top, HV=60V
          stop at Fri Mar 29 17:58:41 CDT 2019
 RUN-017 start at Fri Mar 29 19:05:13 CDT 2019, disrupted last time, again
          stop at Sat Mar 30 14:48:57 CDT 2019
+RUN-018 start at Tue Apr  2 17:17:55 CDT 2019, relocate pre-amp, alpha top
+         stop at Wed Apr  3 11:26:01 CDT 2019
