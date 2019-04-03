@@ -1,0 +1,243 @@
+#!/bin/bash -l
+#Saving Individual Thresholds
+caput VME01:MDIG1:led_threshold0 700
+caput VME01:MDIG1:led_threshold1 570
+caput VME01:MDIG1:led_threshold2 600
+caput VME01:MDIG1:led_threshold3 550
+caput VME01:MDIG1:led_threshold4 550
+caput VME01:MDIG1:led_threshold5 500
+caput VME01:MDIG1:led_threshold6 400
+caput VME01:MDIG1:led_threshold7 400
+caput VME01:MDIG1:led_threshold8 350
+caput VME01:MDIG1:led_threshold9 400
+caput VME01:MDIG1:channel_enable0 Run
+caput VME01:MDIG1:channel_enable1 Run
+caput VME01:MDIG1:channel_enable2 Run
+caput VME01:MDIG1:channel_enable3 Run
+caput VME01:MDIG1:channel_enable4 Run
+caput VME01:MDIG1:channel_enable5 Run
+caput VME01:MDIG1:channel_enable6 Run
+caput VME01:MDIG1:channel_enable7 Run
+caput VME01:MDIG1:channel_enable8 Run
+caput VME01:MDIG1:channel_enable9 Run
+caput VME01:MDIG2:led_threshold0 400
+caput VME01:MDIG2:led_threshold1 350
+caput VME01:MDIG2:led_threshold2 350
+caput VME01:MDIG2:led_threshold3 350
+caput VME01:MDIG2:led_threshold4 280
+caput VME01:MDIG2:led_threshold5 480
+caput VME01:MDIG2:led_threshold6 350
+caput VME01:MDIG2:led_threshold7 400
+caput VME01:MDIG2:led_threshold8 350
+caput VME01:MDIG2:led_threshold9 350
+caput VME01:MDIG2:channel_enable0 Run
+caput VME01:MDIG2:channel_enable1 Run
+caput VME01:MDIG2:channel_enable2 Run
+caput VME01:MDIG2:channel_enable3 Run
+caput VME01:MDIG2:channel_enable4 Run
+caput VME01:MDIG2:channel_enable5 Run
+caput VME01:MDIG2:channel_enable6 Run
+caput VME01:MDIG2:channel_enable7 Run
+caput VME01:MDIG2:channel_enable8 Run
+caput VME01:MDIG2:channel_enable9 Run
+caput VME01:MDIG3:led_threshold0 500
+caput VME01:MDIG3:led_threshold1 450
+caput VME01:MDIG3:led_threshold2 450
+caput VME01:MDIG3:led_threshold3 400
+caput VME01:MDIG3:led_threshold4 500
+caput VME01:MDIG3:led_threshold5 350
+caput VME01:MDIG3:led_threshold6 250
+caput VME01:MDIG3:led_threshold7 250
+caput VME01:MDIG3:led_threshold8 250
+caput VME01:MDIG3:led_threshold9 250
+caput VME01:MDIG3:channel_enable0 Run
+caput VME01:MDIG3:channel_enable1 Run
+caput VME01:MDIG3:channel_enable2 Run
+caput VME01:MDIG3:channel_enable3 Run
+caput VME01:MDIG3:channel_enable4 Run
+caput VME01:MDIG3:channel_enable5 Run
+caput VME01:MDIG3:channel_enable6 Run
+caput VME01:MDIG3:channel_enable7 Run
+caput VME01:MDIG3:channel_enable8 Run
+caput VME01:MDIG3:channel_enable9 Run
+caput VME02:MDIG1:led_threshold0
+caput VME02:MDIG1:led_threshold1
+caput VME02:MDIG1:led_threshold2
+caput VME02:MDIG1:led_threshold3
+caput VME02:MDIG1:led_threshold4
+caput VME02:MDIG1:led_threshold5
+caput VME02:MDIG1:led_threshold6
+caput VME02:MDIG1:led_threshold7
+caput VME02:MDIG1:led_threshold8
+caput VME02:MDIG1:led_threshold9
+caput VME02:MDIG1:channel_enable0
+caput VME02:MDIG1:channel_enable1
+caput VME02:MDIG1:channel_enable2
+caput VME02:MDIG1:channel_enable3
+caput VME02:MDIG1:channel_enable4
+caput VME02:MDIG1:channel_enable5
+caput VME02:MDIG1:channel_enable6
+caput VME02:MDIG1:channel_enable7
+caput VME02:MDIG1:channel_enable8
+caput VME02:MDIG1:channel_enable9
+caput VME02:MDIG2:led_threshold0
+caput VME02:MDIG2:led_threshold1
+caput VME02:MDIG2:led_threshold2
+caput VME02:MDIG2:led_threshold3
+caput VME02:MDIG2:led_threshold4
+caput VME02:MDIG2:led_threshold5
+caput VME02:MDIG2:led_threshold6
+caput VME02:MDIG2:led_threshold7
+caput VME02:MDIG2:led_threshold8
+caput VME02:MDIG2:led_threshold9
+caput VME02:MDIG2:channel_enable0
+caput VME02:MDIG2:channel_enable1
+caput VME02:MDIG2:channel_enable2
+caput VME02:MDIG2:channel_enable3
+caput VME02:MDIG2:channel_enable4
+caput VME02:MDIG2:channel_enable5
+caput VME02:MDIG2:channel_enable6
+caput VME02:MDIG2:channel_enable7
+caput VME02:MDIG2:channel_enable8
+caput VME02:MDIG2:channel_enable9
+caput VME02:MDIG3:led_threshold0
+caput VME02:MDIG3:led_threshold1
+caput VME02:MDIG3:led_threshold2
+caput VME02:MDIG3:led_threshold3
+caput VME02:MDIG3:led_threshold4
+caput VME02:MDIG3:led_threshold5
+caput VME02:MDIG3:led_threshold6
+caput VME02:MDIG3:led_threshold7
+caput VME02:MDIG3:led_threshold8
+caput VME02:MDIG3:led_threshold9
+caput VME02:MDIG3:channel_enable0
+caput VME02:MDIG3:channel_enable1
+caput VME02:MDIG3:channel_enable2
+caput VME02:MDIG3:channel_enable3
+caput VME02:MDIG3:channel_enable4
+caput VME02:MDIG3:channel_enable5
+caput VME02:MDIG3:channel_enable6
+caput VME02:MDIG3:channel_enable7
+caput VME02:MDIG3:channel_enable8
+caput VME02:MDIG3:channel_enable9
+caput VME03:MDIG1:led_threshold0
+caput VME03:MDIG1:led_threshold1
+caput VME03:MDIG1:led_threshold2
+caput VME03:MDIG1:led_threshold3
+caput VME03:MDIG1:led_threshold4
+caput VME03:MDIG1:led_threshold5
+caput VME03:MDIG1:led_threshold6
+caput VME03:MDIG1:led_threshold7
+caput VME03:MDIG1:led_threshold8
+caput VME03:MDIG1:led_threshold9
+caput VME03:MDIG1:channel_enable0
+caput VME03:MDIG1:channel_enable1
+caput VME03:MDIG1:channel_enable2
+caput VME03:MDIG1:channel_enable3
+caput VME03:MDIG1:channel_enable4
+caput VME03:MDIG1:channel_enable5
+caput VME03:MDIG1:channel_enable6
+caput VME03:MDIG1:channel_enable7
+caput VME03:MDIG1:channel_enable8
+caput VME03:MDIG1:channel_enable9
+caput VME03:MDIG2:led_threshold0
+caput VME03:MDIG2:led_threshold1
+caput VME03:MDIG2:led_threshold2
+caput VME03:MDIG2:led_threshold3
+caput VME03:MDIG2:led_threshold4
+caput VME03:MDIG2:led_threshold5
+caput VME03:MDIG2:led_threshold6
+caput VME03:MDIG2:led_threshold7
+caput VME03:MDIG2:led_threshold8
+caput VME03:MDIG2:led_threshold9
+caput VME03:MDIG2:channel_enable0
+caput VME03:MDIG2:channel_enable1
+caput VME03:MDIG2:channel_enable2
+caput VME03:MDIG2:channel_enable3
+caput VME03:MDIG2:channel_enable4
+caput VME03:MDIG2:channel_enable5
+caput VME03:MDIG2:channel_enable6
+caput VME03:MDIG2:channel_enable7
+caput VME03:MDIG2:channel_enable8
+caput VME03:MDIG2:channel_enable9
+caput VME03:MDIG3:led_threshold0
+caput VME03:MDIG3:led_threshold1
+caput VME03:MDIG3:led_threshold2
+caput VME03:MDIG3:led_threshold3
+caput VME03:MDIG3:led_threshold4
+caput VME03:MDIG3:led_threshold5
+caput VME03:MDIG3:led_threshold6
+caput VME03:MDIG3:led_threshold7
+caput VME03:MDIG3:led_threshold8
+caput VME03:MDIG3:led_threshold9
+caput VME03:MDIG3:channel_enable0
+caput VME03:MDIG3:channel_enable1
+caput VME03:MDIG3:channel_enable2
+caput VME03:MDIG3:channel_enable3
+caput VME03:MDIG3:channel_enable4
+caput VME03:MDIG3:channel_enable5
+caput VME03:MDIG3:channel_enable6
+caput VME03:MDIG3:channel_enable7
+caput VME03:MDIG3:channel_enable8
+caput VME03:MDIG3:channel_enable9
+caput VME04:MDIG1:led_threshold0
+caput VME04:MDIG1:led_threshold1
+caput VME04:MDIG1:led_threshold2
+caput VME04:MDIG1:led_threshold3
+caput VME04:MDIG1:led_threshold4
+caput VME04:MDIG1:led_threshold5
+caput VME04:MDIG1:led_threshold6
+caput VME04:MDIG1:led_threshold7
+caput VME04:MDIG1:led_threshold8
+caput VME04:MDIG1:led_threshold9
+caput VME04:MDIG1:channel_enable0
+caput VME04:MDIG1:channel_enable1
+caput VME04:MDIG1:channel_enable2
+caput VME04:MDIG1:channel_enable3
+caput VME04:MDIG1:channel_enable4
+caput VME04:MDIG1:channel_enable5
+caput VME04:MDIG1:channel_enable6
+caput VME04:MDIG1:channel_enable7
+caput VME04:MDIG1:channel_enable8
+caput VME04:MDIG1:channel_enable9
+caput VME04:MDIG2:led_threshold0
+caput VME04:MDIG2:led_threshold1
+caput VME04:MDIG2:led_threshold2
+caput VME04:MDIG2:led_threshold3
+caput VME04:MDIG2:led_threshold4
+caput VME04:MDIG2:led_threshold5
+caput VME04:MDIG2:led_threshold6
+caput VME04:MDIG2:led_threshold7
+caput VME04:MDIG2:led_threshold8
+caput VME04:MDIG2:led_threshold9
+caput VME04:MDIG2:channel_enable0
+caput VME04:MDIG2:channel_enable1
+caput VME04:MDIG2:channel_enable2
+caput VME04:MDIG2:channel_enable3
+caput VME04:MDIG2:channel_enable4
+caput VME04:MDIG2:channel_enable5
+caput VME04:MDIG2:channel_enable6
+caput VME04:MDIG2:channel_enable7
+caput VME04:MDIG2:channel_enable8
+caput VME04:MDIG2:channel_enable9
+caput VME04:MDIG3:led_threshold0
+caput VME04:MDIG3:led_threshold1
+caput VME04:MDIG3:led_threshold2
+caput VME04:MDIG3:led_threshold3
+caput VME04:MDIG3:led_threshold4
+caput VME04:MDIG3:led_threshold5
+caput VME04:MDIG3:led_threshold6
+caput VME04:MDIG3:led_threshold7
+caput VME04:MDIG3:led_threshold8
+caput VME04:MDIG3:led_threshold9
+caput VME04:MDIG3:channel_enable0
+caput VME04:MDIG3:channel_enable1
+caput VME04:MDIG3:channel_enable2
+caput VME04:MDIG3:channel_enable3
+caput VME04:MDIG3:channel_enable4
+caput VME04:MDIG3:channel_enable5
+caput VME04:MDIG3:channel_enable6
+caput VME04:MDIG3:channel_enable7
+caput VME04:MDIG3:channel_enable8
+caput VME04:MDIG3:channel_enable9
+#Save Finished 04/03/2019-13:39
