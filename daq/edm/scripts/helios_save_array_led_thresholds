@@ -33,6 +33,7 @@ do
       do 
         pv=VME"$a":MDIG"$b":"$c""$d"
         chpv=$(caget "$pv"_RBV | awk '{print $2}')
+	echo $pv $chpv
         echo 'caput' $pv $chpv >> $sfile
       done
     done
