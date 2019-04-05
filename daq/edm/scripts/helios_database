@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "#################################"
-echo "##    database for Grafana     ##"
-echo "#################################"
-
-if [ $# -eq 1 ] && [ $1 != "start" ] && [ $1 != "stop" ]; then
+if [ $# -eq 0 ] || ([ $1 != "start" ] && [ $1 != "stop" ]); then
     echo "Usage: ./helios_database start/stop"
     exit 1
 fi
+
+echo "#################################"
+echo "##    database for Grafana     ##"
+echo "#################################"
 
 option=$1
 
@@ -29,11 +29,14 @@ xterm -T database10  -geometry 80x4+0+900  -e "./databaseVME 3 2" &  # bottm  ri
 xterm -T database11  -geometry 80x4+0+1000 -e "./databaseVME 2 3" &  # bottom bottom, e-r
 xterm -T database12  -geometry 80x4+0+1100 -e "./databaseVME 2 1" &  # bottom  left, e-r
 
+#===== threshold for every 15 min = 900 sec
+xterm -T database13  -geometry 80x4+0+1200 -e "./databaseVME_Threshold.sh 900" & 
+
 fi
 
 
 if [ ${option} == "stop" ]; then
-    for a in {1..12} ; do 
+    for a in {1..13} ; do 
 	processID=$(ps aux | grep database$a | grep 'xterm' | awk '{print $2}')
 	kill -2 ${processID}
     done        
