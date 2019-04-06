@@ -30,7 +30,7 @@ xterm -T database11  -geometry 80x4+0+1000 -e "./databaseVME 2 3" &  # bottom bo
 xterm -T database12  -geometry 80x4+0+1100 -e "./databaseVME 2 1" &  # bottom  left, e-r
 
 #===== threshold for every 15 min = 900 sec
-xterm -T database13  -geometry 80x4+0+1200 -e "./databaseVME_Threshold.sh 900" & 
+#xterm -T database13  -geometry 80x4+0+1200 -e "./databaseVME_Threshold.sh 900" & 
 
 fi
 
