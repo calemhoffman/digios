@@ -91,7 +91,7 @@ TGraph *graphRate;// = new TGraph(n,x,y);
  
 ***************************************************/
 //======== raw data
-TH1F* hStat[numDet];
+//TH1F* hStat[numDet];
 TH1F* he[numDet];
 TH1F* hring[numDet];
 TH1F* hxf[numDet];
@@ -109,6 +109,7 @@ TH2F* hxfVID;
 TH2F* hxnVID;
 
 TH2F* heVx[numDet]; // e vs (xf-xn)/e
+TH2F* hringVx[numDet]; // ring vs (xf-xn)/e
 
 //====== cal data
 TH2F* heVxsCal[numDet]; // raw e vs xf
@@ -197,9 +198,9 @@ void Monitors::Begin(TTree *tree)
   
    for (Int_t i=0;i<numDet;i++) {//array loop
       
-      hStat[i] = new TH1F(Form("hStat%d", i),
-                          Form("Hit Statistics (ch=%d)", i),
-                          7, 1, 8); // 0 = no hit, 1 = e, 2 = ring, 3 = xf, 4 = xn, 5 = xf + xn, 6 = xf +xn + e, 7 = xf + xn + e + ring
+      //hStat[i] = new TH1F(Form("hStat%d", i),
+      //                    Form("Hit Statistics (ch=%d)", i),
+      //                    7, 1, 8); // 0 = no hit, 1 = e, 2 = ring, 3 = xf, 4 = xn, 5 = xf + xn, 6 = xf +xn + e, 7 = xf + xn + e + ring
       
       he[i] = new TH1F(Form("he%d", i), 
                        Form("Raw e (ch=%d); e (channel); count", i),
@@ -243,7 +244,11 @@ void Monitors::Begin(TTree *tree)
       
       heVx[i] = new TH2F(Form("heVx%d",i),
                            Form("Raw PSD E vs. X (ch=%d);X (channel);E (channel)",i),
-                           100,-0.1,1.1,100,rawEnergyRange[0], rawEnergyRange[1]);
+                           500,-0.1,1.1,500,rawEnergyRange[0], rawEnergyRange[1]);
+                           
+      hringVx[i] = new TH2F(Form("hringVx%d",i),
+                           Form("Ring vs, X (ch=%d);X (channel);Ring (channel)",i),
+                           500,-0.1,1.1,500,rawEnergyRange[0], rawEnergyRange[1]);
                            
       heCalVxCal[i] = new TH2F(Form("heCalVxCal%d",i),
                            Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
@@ -556,14 +561,14 @@ Bool_t Monitors::Process(Long64_t entry)
       hxfVID->Fill(i, xf[i]);
       hxnVID->Fill(i, xn[i]);
       
-      if( !TMath::IsNaN(e[i])  && !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) && !TMath::IsNaN(ring[i]) ) hStat[i]->Fill(7);
-      if( !TMath::IsNaN(e[i])  && !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(6);
-      if( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(5);
-      if( !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(4);
-      if( !TMath::IsNaN(xf[i]) ) hStat[i]->Fill(3);
-      if( !TMath::IsNaN(ring[i]) ) hStat[i]->Fill(2);
-      if( !TMath::IsNaN(e[i])  ) hStat[i]->Fill(1);
-      if( TMath::IsNaN(e[i]) && TMath::IsNaN(ring[i]) && TMath::IsNaN(xf[i]) && TMath::IsNaN(xn[i]) ) hStat[i]->Fill(0);
+      //if( !TMath::IsNaN(e[i])  && !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) && !TMath::IsNaN(ring[i]) ) hStat[i]->Fill(7);
+      //if( !TMath::IsNaN(e[i])  && !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(6);
+      //if( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(5);
+      //if( !TMath::IsNaN(xn[i]) ) hStat[i]->Fill(4);
+      //if( !TMath::IsNaN(xf[i]) ) hStat[i]->Fill(3);
+      //if( !TMath::IsNaN(ring[i]) ) hStat[i]->Fill(2);
+      //if( !TMath::IsNaN(e[i])  ) hStat[i]->Fill(1);
+      //if( TMath::IsNaN(e[i]) && TMath::IsNaN(ring[i]) && TMath::IsNaN(xf[i]) && TMath::IsNaN(xn[i]) ) hStat[i]->Fill(0);
       
       //==================== Calibrations go here
       xfcal[i] = xf[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
@@ -599,6 +604,7 @@ Bool_t Monitors::Process(Long64_t entry)
       //=================== Array fill next
       if( -1.1 < x[i] && x[i] < 1.1 && e[i]>100 && (xn[i]>0||xf[i]>0)) {
         heVx[i]->Fill(x[i],e[i]);
+        hringVx[i]->Fill(x[i],ring[i]);
         heCalVxCal[i]->Fill(xcal[i]*5.0,eCal[i]);
         heCalVz->Fill(z[i]*10.,eCal[i]);
 
