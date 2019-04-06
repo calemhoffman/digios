@@ -38,6 +38,6 @@ fi
 if [ ${option} == "stop" ]; then
     for a in {1..13} ; do 
 	processID=$(ps aux | grep database$a | grep 'xterm' | awk '{print $2}')
-	kill -2 ${processID}
+	kill -9 ${processID}
     done        
 fi

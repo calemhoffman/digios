@@ -207,17 +207,17 @@ else
       runID=$( printf '%d' $RUN )
 fi;
 
-
 if [ $isGeneralSort -eq 1 ]; then
   echo -e "${RED}######################### GeneralSort.C${NC}"
   root -q -b "process_run.C(${runID})"
+  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 if [ $isGeneralSort -eq 2 ]; then
   echo -e "${RED}######################### GeneralSortTrace.C${NC}"
   root -q -b "process_run.C(${runID}, 1)"
+  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
-root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 
 ########################################
 #################### Monitor
