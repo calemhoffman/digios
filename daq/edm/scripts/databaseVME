@@ -3,6 +3,9 @@
 VME=$1
 DIG=$2
 
+IP="diag2.onenet"
+database="testDB"
+
 echo "------ Database for VME0${VME}:DIG${DIG} ----"
 
 CH="0 1 2 3 4 5 6 7 8 9"
@@ -16,13 +19,19 @@ while [ ${loopflag} -eq 1 ]; do
 	hitRate=$(caget VME0${VME}:MDIG${DIG}:disc_count${c}_RBV | awk '{print $2}')
 
 	clear
-	echo "Database for VME0${VME}:DIG${DIG} ---- HitRate:${hitRate}"
+	#echo "==========================="
+	echo "Database for VME0${VME}:DIG${DIG}:CH${c} ---- HitRate:${hitRate}"
 	
-	dataStr="INSERT hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
+	#dataStr="INSERT hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
         #echo ${dataStr}   
-	influx -execute "${dataStr}" -database="testing"
+	#influx -execute "${dataStr}" -database="testing"
+
+	dataStr="hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
+	#echo "------"$dataStr
+	curl -sS -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}"
 	
    done
 
+   sleep 3
 
 done
