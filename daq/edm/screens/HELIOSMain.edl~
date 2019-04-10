@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 106
-y 61
+x 589
+y 58
 w 1400
 h 816
 font "helvetica-bold-r-10.0"
@@ -7555,15 +7555,20 @@ y 291
 w 102
 h 28
 fgColor index 14
-bgColor index 40
-topShadowColor index 40
-botShadowColor index 40
+bgColor index 86
+topShadowColor index 86
+botShadowColor index 86
 font "helvetica-bold-r-14.0"
 buttonLabel "Database"
 oneShot
-numCmds 1
+numCmds 2
+commandLabel {
+  0 "Start"
+  1 "Stop"
+}
 command {
-  0 "$EDMSCRIPTS/helios_database"
+  0 "$EDMSCRIPTS/helios_database start &"
+  1 "$EDMSCRIPTS/helios_database stop"
 }
 endObjectProperties
 

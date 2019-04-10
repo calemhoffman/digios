@@ -5,9 +5,9 @@ if [ $# -eq 0 ] || ([ $1 != "start" ] && [ $1 != "stop" ]); then
     exit 1
 fi
 
-echo "#################################"
-echo "##    database for Grafana     ##"
-echo "#################################"
+echo "###################################"
+echo "    $1  database for Grafana     "
+echo "###################################"
 
 option=$1
 
@@ -29,8 +29,8 @@ xterm -T database10  -geometry 80x4+0+900  -e "./databaseVME 3 2" &  # bottm  ri
 xterm -T database11  -geometry 80x4+0+1000 -e "./databaseVME 2 3" &  # bottom bottom, e-r
 xterm -T database12  -geometry 80x4+0+1100 -e "./databaseVME 2 1" &  # bottom  left, e-r
 
-#===== threshold for every 15 min = 900 sec
-xterm -T database13  -geometry 80x4+0+1200 -e "./databaseVME_Threshold 900" & 
+#===== threshold for every 4 min = 240 sec
+xterm -T database13  -geometry 80x4+0+1200 -e "./databaseVME_Threshold 300" & 
 
 fi
 
