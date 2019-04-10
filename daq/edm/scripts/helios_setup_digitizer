@@ -79,9 +79,9 @@ caput GLBL:DIG:load_delays 0
 #
 ###################################################################
 #echo "Setting deactivated boards / channels"
-caput DAQB2_4_CS_Ena Disable
-caput DAQB3_4_CS_Ena Disable
-caput DAQB4_4_CS_Ena Disable
+#caput DAQB2_4_CS_Ena Disable
+#caput DAQB3_4_CS_Ena Disable
+#caput DAQB4_4_CS_Ena Disable
 #caput VME01:MDIG1:channel_enable1 Reset
 #caput VME01:MDIG1:channel_enable2 Reset
 #caput VME01:MDIG1:channel_enable3 Reset
@@ -108,8 +108,8 @@ caput DAQB4_4_CS_Ena Disable
 #caput VME01:MDIG4:channel_enable8 Reset
 #caput VME01:MDIG4:channel_enable9 Reset
 #echo "Setting internal trigger boards / channels"
-caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
-caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
+#caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
+#caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
 #echo "Setting individual threshold"
 #echo "Setting other various individual parameters"
 

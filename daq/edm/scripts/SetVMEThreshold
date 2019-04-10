@@ -5,8 +5,8 @@ if [ $# -eq 0 ] || [ $# -ne 3  ]; then
     exit 1
 fi
 
-IP="diag2.onenet"
-database="testDB"
+IP="heliosDB.onenet"
+database="testing"
 
 VME=$1
 DIG=$2
@@ -30,7 +30,7 @@ caput VME0${VME}:MDIG${DIG}:led_threshold${CH} ${newThreshold}
 #dataStr="INSERT threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${newThreshold}"
 #influx -execute "${dataStr}" -database="testing"
 
-dataStr="threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${newthreshold}"
+dataStr="threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${newThreshold}"
 curl -sS -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}"
 
 echo "========= done."
