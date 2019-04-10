@@ -67,6 +67,8 @@ public :
    Int_t           baseline[200];   //[NumHits]
    UShort_t        trace_length[200];   //[NumHits]
    Short_t         trace[200][1024];   //[NumHits]
+   
+   bool isTraceDataExist;
 
    // List of branches
    TBranch        *b_RunNum;
@@ -184,7 +186,17 @@ void GeneralSortTrace::Init(TTree *tree)
    fChain->SetBranchAddress("base_sample", base_sample, &b_base_sample);
    fChain->SetBranchAddress("baseline", baseline, &b_baseline);
    fChain->SetBranchAddress("trace_length", trace_length, &b_trace_length);
-   fChain->SetBranchAddress("trace", trace, &b_trace);
+   
+   
+   TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("trace");
+   if( br == NULL ) {
+      printf("++++++++++++++++++++++++++++++ no trace data.\n");
+      isTraceDataExist = false;
+   }else{
+      isTraceDataExist = true;
+      printf("++++++++++++++++++++++++++++++ trace data exist.\n");
+      fChain->SetBranchAddress("trace", trace, &b_trace);
+   }
 }
 
 Bool_t GeneralSortTrace::Notify()

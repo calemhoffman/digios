@@ -2,7 +2,7 @@
 
 #####################################################################
 #
-#   TRIGGER SETUP FOR ISS000
+#   TRIGGER SETUP
 #
 #####################################################################
 # Let's first setup master trigger module
@@ -303,5 +303,5 @@ caput VME32:RTR1:SM_LOST_LOCK_RESET Off
 caput VME32:RTR2:SM_LOST_LOCK_RESET Off
 
 echo "#######################################"
-echo "Finished - helios_setup_trigger iss000"
+echo "Finished - helios_setup_trigger "
 echo "#######################################"
