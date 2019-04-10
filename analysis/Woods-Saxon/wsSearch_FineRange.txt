@@ -1,0 +1,19 @@
+#=======search_setting_for_Woods_Saxon
+-44.6    //min_V0
+-44.6  //max_V0
+0.1    //step_V0
+1.27 //min_r0
+1.27 //max_r0
+0.01 //step_r0
+0.77 //min_a0
+0.77 //max_a0
+0.01 //step_a0
+26.5   //min_VSO
+26.5   //max_VSO
+0.1    //step_VSO
+1.25 //min_rSO
+1.25 //max_rSO
+0.01 //step_rSO
+0.51 //min_aSO
+1.00 //max_aSO
+0.02 //step_aSO

@@ -20,29 +20,29 @@ NC='\033[0m'
 PCNAME=${HOSTNAME}
 
 #================ Find computer
-if [ $PCNAME == "phywl162.phy.anl.gov" ]; then
-   echo " Detecting computer : ${RED}HELIOS iMac${NC}"
+if [ $PCNAME == "phywl183.phy.anl.gov" ]; then
+   echo -e " Detecting computer : ${RED}HELIOS iMac${NC}"
    
    branch=$(git symbolic-ref HEAD)
    branch=${branch#refs/heads/}
    
-   echo " Current Git Branch : ${RED}$branch ${NC}"
+   echo -e " Current Git Branch : ${RED}$branch ${NC}"
    
    DATAPATH=~/experiment
   
-   if [ $branch == "master" ] ; then exp=iss631; fi
+   if [ $branch == "master" ] ; then exp=ARR01; fi
    if [ $branch == "ISS631" ] ; then exp=iss631; fi
    if [ $branch == "ISS000" ] ; then exp=iss000; fi
    
 fi
 
 if [ $PCNAME == "phywl154.phy.anl.gov" ]; then
-  echo " Detecting computer : ${RED}Ryan Mac Air${NC}"
+  echo -e " Detecting computer : ${RED}Ryan Mac Air${NC}"
   
   branch=$(git symbolic-ref HEAD)
   branch=${branch#refs/heads/}
    
-  echo " Current Git Branch : ${RED}$branch${NC}"
+  echo -e " Current Git Branch : ${RED}$branch${NC}"
   echo "----- no need to do anything."
   
   exit
@@ -50,12 +50,12 @@ if [ $PCNAME == "phywl154.phy.anl.gov" ]; then
 fi
 
 if [ ${PCNAME:0:5} == "bebop" ]; then
-   echo " Detecting computer : BEBOP"
+   echo -e " Detecting computer : ${RED}BEBOP${NC}"
    
    branch=$(git symbolic-ref HEAD)
    branch=${branch#refs/heads/}
    
-   echo " Current Git Branch : $branch"
+   echo -e " Current Git Branch : ${RED}$branchP${NC}"
    
    DATAPATH=/lcrc/project/HELIOS
   
@@ -63,6 +63,17 @@ if [ ${PCNAME:0:5} == "bebop" ]; then
    if [ $branch == "ISS631" ] ; then exp=iss631; fi
    if [ $branch == "ISS000" ] ; then exp=iss000; fi
 
+fi
+
+if [ ${PCNAME} == "digios1" ] ; then
+   echo " Detecting computer : ${RED}DAQ${NC}"
+   
+   branch=$(git symbolic-ref HEAD)
+   branch=${branch#refs/heads/}
+   
+   echo " Current Git Branch : ${RED}$branch${NC}"
+
+   if [ $branch == "master" ] ; then exp=ARR01; fi
 fi
 
 #================= create links

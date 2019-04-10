@@ -190,7 +190,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
       if( reactionFlag == 1 ){ // Elastics (d,d) or (p,p)
         num1 = atof( line.substr(0, 7).c_str());
         if( indexForElastic == 1 ){
-          num2 = atof( line.substr(15, 10).c_str());
+          num2 = atof( line.substr(15, 15).c_str());
         }else{
           num2 = atof( line.substr(28, 14).c_str());
         }

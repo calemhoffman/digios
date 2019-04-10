@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
   
   double Ex = 0;
   double xRatio = 0.95;
-  string reactionTxt = "basicReactionConfig.txt";
+  string reactionTxt = "reactionConfig.txt";
   string detGeoTxt = "detectorGeo.txt";
   
   if ( argc == 2 ){
