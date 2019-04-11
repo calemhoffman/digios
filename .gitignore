@@ -1,10 +1,11 @@
+
 data
 root_data
 merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 
-
+core.*
 *.o
 *.root
 *~
@@ -21,3 +22,8 @@ analysis/Cleopatra/FindThetaCM
 analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray
 analysis/Cleopatra/Transfer
+analysis/Woods-Saxon/WSCal
+analysis/Woods-Saxon/WSFit
+analysis/Woods-Saxon/WSSearch
+analysis/Woods-Saxon/WSMakeTree
+slurm-*.out

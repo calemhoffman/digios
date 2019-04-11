@@ -7,8 +7,9 @@
 # extension enable, trigger configuration and time windows
 
 #cd /global/devel/systems/helios/edm/scripts
+
 echo "####################################################"
-echo "# iss001 helios_setup_digitizer                    #"
+echo "# helios_setup_digitizer                           #"
 echo "# Setting digitizer values - defaults & triggering #"
 echo "####################################################"
 
@@ -29,7 +30,8 @@ caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
 caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
 caput GLBL:DIG:trigger_polarity Both
 caput GLBL:DIG:pileup_mode Accept
-caput GLBL:DIG:trigger_mux_select ExtTTCL #IntAcptAll 
+#caput GLBL:DIG:trigger_mux_select ExtTTCL
+caput GLBL:DIG:trigger_mux_select IntAcptAll 
 caput GLBL:DIG:channel_enable Run
 caput GLBL:DIG:win_comp_min -10
 caput GLBL:DIG:win_comp_max  0
@@ -56,7 +58,7 @@ caput GLBL:DIG:counter_reset 0
 
 echo "global settings to all digitizers done"
 
-echo "done setting individual channels of digitizers"
+#echo "done setting individual channels of digitizers"
 
 # clear FIFOs to insure no old events
 caput GLBL:DIG:master_fifo_reset 1 > null
@@ -76,43 +78,43 @@ caput GLBL:DIG:load_delays 0
 # Globals finished now individual boards / channels
 #
 ###################################################################
-echo "Setting deactivated boards / channels"
-caput DAQB2_4_CS_Ena Disable
-caput DAQB3_4_CS_Ena Disable
-caput DAQB4_4_CS_Ena Disable
-caput VME01:MDIG1:channel_enable1 Reset
-caput VME01:MDIG1:channel_enable2 Reset
-caput VME01:MDIG1:channel_enable3 Reset
-caput VME01:MDIG1:channel_enable4 Reset
-caput VME01:MDIG1:channel_enable5 Reset
-caput VME01:MDIG1:channel_enable6 Reset
-caput VME01:MDIG1:channel_enable7 Reset
-caput VME01:MDIG1:channel_enable8 Reset
-caput VME01:MDIG1:channel_enable9 Reset
-caput VME01:MDIG2:channel_enable0 Reset
-caput VME01:MDIG2:channel_enable1 Reset
-caput VME01:MDIG2:channel_enable2 Reset
-caput VME01:MDIG2:channel_enable3 Reset
-caput VME01:MDIG2:channel_enable8 Reset
-caput VME01:MDIG2:channel_enable9 Reset
-caput VME01:MDIG3:channel_enable8 Reset
-caput VME01:MDIG3:channel_enable9 Reset
-caput VME01:MDIG4:channel_enable2 Reset
-caput VME01:MDIG4:channel_enable3 Reset
-caput VME01:MDIG4:channel_enable4 Reset
-caput VME01:MDIG4:channel_enable5 Reset
-caput VME01:MDIG4:channel_enable6 Reset
-caput VME01:MDIG4:channel_enable7 Reset
-caput VME01:MDIG4:channel_enable8 Reset
-caput VME01:MDIG4:channel_enable9 Reset
-echo "Setting internal trigger boards / channels"
-caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
-caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
-echo "Setting individual threshold"
-echo "Setting other various individual parameters"
+#echo "Setting deactivated boards / channels"
+#caput DAQB2_4_CS_Ena Disable
+#caput DAQB3_4_CS_Ena Disable
+#caput DAQB4_4_CS_Ena Disable
+#caput VME01:MDIG1:channel_enable1 Reset
+#caput VME01:MDIG1:channel_enable2 Reset
+#caput VME01:MDIG1:channel_enable3 Reset
+#caput VME01:MDIG1:channel_enable4 Reset
+#caput VME01:MDIG1:channel_enable5 Reset
+#caput VME01:MDIG1:channel_enable6 Reset
+#caput VME01:MDIG1:channel_enable7 Reset
+#caput VME01:MDIG1:channel_enable8 Reset
+#caput VME01:MDIG1:channel_enable9 Reset
+#caput VME01:MDIG2:channel_enable0 Reset
+#caput VME01:MDIG2:channel_enable1 Reset
+#caput VME01:MDIG2:channel_enable2 Reset
+#caput VME01:MDIG2:channel_enable3 Reset
+#caput VME01:MDIG2:channel_enable8 Reset
+#caput VME01:MDIG2:channel_enable9 Reset
+#caput VME01:MDIG3:channel_enable8 Reset
+#caput VME01:MDIG3:channel_enable9 Reset
+#caput VME01:MDIG4:channel_enable2 Reset
+#caput VME01:MDIG4:channel_enable3 Reset
+#caput VME01:MDIG4:channel_enable4 Reset
+#caput VME01:MDIG4:channel_enable5 Reset
+#caput VME01:MDIG4:channel_enable6 Reset
+#caput VME01:MDIG4:channel_enable7 Reset
+#caput VME01:MDIG4:channel_enable8 Reset
+#caput VME01:MDIG4:channel_enable9 Reset
+#echo "Setting internal trigger boards / channels"
+#caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
+#caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
+#echo "Setting individual threshold"
+#echo "Setting other various individual parameters"
 
 ##################################################################
-#   With system linked up, HELIOS ISS000  X-plane and Y-plane
+#   With system linked up, HELIOS  X-plane and Y-plane
 #   mapping register values
 #  
 #   array RTR1 E-H, RTR2 A-H Energy X-plane
@@ -195,5 +197,5 @@ caput VME32:RTR1:LRUCtl02 OFF > null
 caput VME32:RTR2:LRUCtl02 OFF > null
 
 echo "#########################################"
-echo "Finished - helios_setup_digitizer iss000"
+echo "Finished - helios_setup_digitizer        "
 echo "#########################################"
