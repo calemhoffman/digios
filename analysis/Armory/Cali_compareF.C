@@ -26,8 +26,10 @@
 void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400){
 /**///======================================================== User Input
 
-   double a1Range[2] = {200, 450};
+   double a1Range[2] = {500, 800};
    double a0Range[2] = {-0.7, 4.0};
+   
+   double minTotalMinDist = 150.;
 
    double distThreshold   = 0.01;
    bool isXFXN = false; // only use event for both XF and XN valid
@@ -93,8 +95,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    int numDet;
-   int rDet = 6; // number of detector at different position, row-Det
-   int cDet = 4; // number of detector at same position, column-Det
+   int rDet = 5; // number of detector at different position, row-Det
+   int cDet = 6; // number of detector at same position, column-Det
    vector<double> pos;
    double length = 50.5;
    double firstPos = -110;
@@ -303,12 +305,13 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       }
       /**///======================================================== Calculate minDist
 
+      //int numEntries = exPlot[idet]->GetEntries();
+      //if( numEntries < 100 ) continue;
+
       clock.Reset(); clock.Start("timer");
       
       double A0 = 0.;
-      double A1 = 260.;
-      
-      double minTotalMinDist = 99.;
+      double A1 = (a1Range[1] - a1Range[0])/2.;
       
       TString gDistName; 
       gDistName.Form("gDist%d", idet);
