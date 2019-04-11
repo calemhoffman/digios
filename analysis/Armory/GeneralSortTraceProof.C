@@ -69,7 +69,7 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    proofFile = new TProofOutputFile(saveFileName, "M");
    saveFile = proofFile->OpenFile("RECREATE");
    
-   newTree = new TTree("tree","PSD Tree w/ trace");
+   newTree = new TTree("gen_tree","PSD Tree w/ trace");
    newTree->SetDirectory(saveFile);
    newTree->AutoSave();
 
