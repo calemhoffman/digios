@@ -19,7 +19,7 @@
 //================== TODO to be a setup file
 const int nDet=30; //number of PSD detector
 
-TString saveFileName = "sortedTrace.root"; //TODO add suffix to original file
+TString saveFileName;
 TFile *saveFile; //!
 TTree *newTree; //!
 
@@ -117,7 +117,7 @@ void GeneralSortTrace::Begin(TTree * tree)
    printf("Output Root File : %s \n", saveFileName.Data());
 
    saveFile = new TFile(saveFileName,"RECREATE");
-   newTree = new TTree("tree","PSD Tree w/ trace");
+   newTree = new TTree("gen_tree","PSD Tree w/ trace");
 
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
    newTree->Branch("runID", &psd.runID,"runID/I");
