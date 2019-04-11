@@ -3,7 +3,7 @@
 #include <TTree.h>
 #include <TProof.h>
 
-void Proof_onGeneralSortTrace(){
+void Proof_onGeneralSortTrace(TString file){
    
    //+++++++++++++++++++++++++++++
    //    for some unknown reason, have to copy it and run in local folder. 
@@ -14,18 +14,18 @@ void Proof_onGeneralSortTrace(){
    TChain * chain = new TChain("tree");
    //filename should be in the format "*runXXXX.root", otherwise, the runID will be incorrect
    //chain->Add("/lcrc/project/HELIOS/h057_he6/root_data/run200.root"); 
-   chain->Add("data/trace_run70.root"); 
+   chain->Add(file); 
    
-   TProof * p = TProof::Open("", "workers=3");
+   TProof * p = TProof::Open("", "workers=4");
    
    chain->SetProof();
-   chain->Process("GeneralSortTraceProof.C+");
+   chain->Process("~/digios/analysis/Armory/GeneralSortTraceProof.C+", file);
    
    delete chain;
    delete p;
    
    
-   /**///=============== process for calibaration and coinTime
+   //=============== process for calibaration and coinTime
    /* something wrong.
    TChain * chain2 = new TChain("tree");
    chain2->Add("sortedTrace107.root");
@@ -37,5 +37,5 @@ void Proof_onGeneralSortTrace(){
    
    delete chain2;
    delete p2;
-   /**/
+   */
 }

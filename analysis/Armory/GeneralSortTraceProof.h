@@ -106,6 +106,7 @@ public :
    TBranch        *b_trace;   //!
    
    //======================= new tree, new file
+   TString saveFileName;
    TFile *saveFile; //!
    TProofOutputFile * proofFile; //!
    TTree *newTree; //!

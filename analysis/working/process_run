@@ -5,7 +5,7 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "              RunNum = a 3 digit run number, e.g. 001"
   echo "               Merge = 1/0/-1, is Merge the raw data? -1 is force merge"  
   echo "            EventBld = 1/0/-1, is building event from the meged data? -1 is force build"  
-  echo "          GenralSort = 2/1/0/-1, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C"
+  echo "          GenralSort = 3/2/1/0/-1, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C, 3 = GeneralSortTraceProof.C"
   echo "             Monitor = 2/1/0, run ChainMonitor.C?  1 = single run, 2 = all runs"
   exit 1
 fi;
@@ -65,6 +65,7 @@ if [ ${isGeneralSort} -eq 2 ]; then
   isMonitor=0;
   OverRideMonitor="overrided by GeneralSortTrace."
 fi
+
 
 echo "============================================="
 echo "============ RUN $RUN ========================"
@@ -209,14 +210,23 @@ fi;
 
 if [ $isGeneralSort -eq 1 ]; then
   echo -e "${RED}######################### GeneralSort.C${NC}"
-  root -q -b "process_run.C(${runID})"
+  root -l -q -b "process_run.C(${runID})"
   root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 if [ $isGeneralSort -eq 2 ]; then
   echo -e "${RED}######################### GeneralSortTrace.C${NC}"
-  root -q -b "process_run.C(${runID}, 1)"
+  root -l -q -b "process_run.C(${runID}, 1)"
   root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+fi
+
+if [ $isGeneralSort -eq 3 ]; then
+  echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
+  root -l -q "process_run.C(${runID}, 2)"
+
+  #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
+
+  #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 ########################################

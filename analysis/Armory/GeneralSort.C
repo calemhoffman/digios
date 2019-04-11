@@ -173,7 +173,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       psd.XF[i]=TMath::QuietNaN();
       psd.XN[i]=TMath::QuietNaN();
       psd.x[i]=TMath::QuietNaN();
-      psd.Ring[i]=TMath::QuietNaN();
+      psd.Ring[i]=0.;
       psd.RDT[i]=TMath::QuietNaN();
       psd.TAC[i]=TMath::QuietNaN();
       if (i<32) psd.ELUM[i]=TMath::QuietNaN();
