@@ -22,7 +22,7 @@ ULong64_t maxNumberEvent = 100000000;
 
 //---histogram seeting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {500, 8000};
+int energyRange[2]= {50, 8000};
 
 //TODO switch for histogram
 
@@ -258,7 +258,7 @@ void Monitors::Begin(TTree *tree)
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", 24, 0, 24, 500, 2, 7);
    
    //E-Z plot
-   heCalVz = new TH2F("heCalVz","E vs. Z;Z (mm);E (MeV)",400,-500, 0,400,0,10);
+   heCalVz = new TH2F("heCalVz","E vs. Z;Z (mm);E (MeV)",400,-1000, 1000,400,energyRange[0], energyRange[1]);
    heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (cm);E (MeV)",700,-55,0,750,0,3000);
    
    for( int i = 0; i < numRow; i++){
@@ -549,7 +549,7 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //======================= fill raw data
       
-      //if( ring[i] !=0 ) return kTRUE;
+      if( ring[i] >50 ) return kTRUE;
       
       he[i]->Fill(e[i]);
       hring[i]->Fill(ring[i]);
