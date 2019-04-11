@@ -29,10 +29,12 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int rowDet = 4;
-   const int colDet = 6;
+   const int rowDet = 6;
+   const int colDet = 5;
    
    const int numDet = rowDet * colDet;
+   
+   int energyRange[2] = {500, 5000};
    
 /**///========================================================  load tree
 
@@ -76,12 +78,13 @@ void Cali_xf_xn(TTree * tree){
    for( int i = 0; i < numDet; i ++){
       TString name;
       name.Form("q%d", i);
-      q[i] = new TH1F(name, name, 200, 500, 1800);
+      q[i] = new TH1F(name, name, 200, energyRange[0], energyRange[1]);
       q[i]->SetXTitle(name);
       
       TString expression;
       expression.Form("e[%d] >> q%d" ,i, i);
-      gate[i].Form("e[%d] > 0", i);
+      gate[i].Form("");
+      //gate[i].Form("e[%d] > 0", i);
       
       cAlpha->cd(i+1);
       tree->Draw(expression, gate[i] , "");
@@ -129,14 +132,15 @@ void Cali_xf_xn(TTree * tree){
       for( int i = 0; i < numDet; i ++){
          TString name;
          name.Form("p%d", i);
-         p[i] = new TH1F(name, name, 300, 100, 1800);
+         p[i] = new TH1F(name, name, 300, energyRange[0], energyRange[1]);
          p[i]->SetXTitle(name);
          
          TString expression;
          expression.Form("e[%d]  * %f >> p%d", i,  xHalf[refID]/xHalf[i], i);
-         gate[i].Form("e[%d] > 0", i);
+         //gate[i].Form("e[%d] > 0", i);
          cAlpha->cd(i+1);
          tree->Draw(expression, gate[i] , "");
+         gSystem->ProcessEvents();
       }
       
    }
@@ -345,7 +349,7 @@ void Cali_xf_xn(TTree * tree){
    for( int i = 0; i < numDet; i ++){
       TString name;
       name.Form("h%d", i);
-      h[i] = new TH2F(name, name, 100, -100, 1800, 100, -100, 1800);
+      h[i] = new TH2F(name, name, 100, energyRange[0], energyRange[1], 100,energyRange[0], energyRange[1]);
       name.Form("xf[%d]", i); h[i]->SetYTitle(name);
       name.Form("xn[%d]", i); h[i]->SetXTitle(name);
       
@@ -357,8 +361,8 @@ void Cali_xf_xn(TTree * tree){
       cAlpha->cd(i+1);
       tree->Draw(expression, gate[i] , "");
       
-      line.SetX2(1600);
-      line.SetY1(1600);
+      line.SetX2(xHalf[i]-100);
+      line.SetY1(xHalf[i]-100);
       line.Draw("same");
       
       cAlpha->Update();
@@ -395,7 +399,7 @@ void Cali_xf_xn(TTree * tree){
    for( int i = 0; i < numDet; i ++){
       TString name;
       name.Form("k%d", i);
-      k[i] = new TH2F(name, name, 100, -100, 1800, 100, -100, 1800);
+      k[i] = new TH2F(name, name, 100,energyRange[0], energyRange[1], 100,energyRange[0], energyRange[1]);
       name.Form("xf[%d]", i); k[i]->SetYTitle(name);
       name.Form("xn[%d]", i); k[i]->SetXTitle(name);
       
