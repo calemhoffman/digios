@@ -4,22 +4,20 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 20 //Highest multiplicity
-#define M 100 //M value for energy filter from digi setting
+#define M -100 //M value for energy filter from digi setting
 
-#include "GeneralSortMapping.h"
+#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
 
 //===================== setting
-TString saveFileName = "sortedTrace.root"; //TODO add suffix to original file
-
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 200;
+int traceLength = 300;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = false;
-bool isRecoil = true;
+bool isRecoil = false;
 bool isElum = false;
 bool isEZero = false;
 
@@ -38,10 +36,20 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    printf( "  EZero  : %s \n", isEZero ?  "On" : "Off");
    TString traceMethodName;
    switch(traceMethod){
-   case 0: traceMethodName = "simply copy"; break;
+   case 0: traceMethodName = "copy"; break;
    case 1: traceMethodName = "fit"; break;
    }
    printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
+   
+   
+   saveFileName = option;
+   int findslat = saveFileName.Last('/');
+   saveFileName.Remove(0, findslat+1);
+   saveFileName = "../root_data/trace_" + saveFileName;
+   
+   printf("Save file Name : %s \n", saveFileName.Data());
+   
+   SetOption(saveFileName.Data());
    
    printf("====================== Begin. \n");
 }
@@ -52,10 +60,16 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    TString option = GetOption();
 
    //create tree in slave
-   proofFile = new TProofOutputFile(saveFileName);
+   
+   saveFileName = option;
+   int findslat = saveFileName.Last('/');
+   saveFileName.Remove(0, findslat+1);
+   saveFileName = "../root_data/trace_" + saveFileName;
+   
+   proofFile = new TProofOutputFile(saveFileName, "M");
    saveFile = proofFile->OpenFile("RECREATE");
    
-   newTree = new TTree("tree","PSD Tree w/ trace");
+   newTree = new TTree("gen_tree","PSD Tree w/ trace");
    newTree->SetDirectory(saveFile);
    newTree->AutoSave();
 
@@ -330,7 +344,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             if( 30 > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = gFit->GetParameter(0);
+               te[idDet]   = gFit->GetParameter(0) * (-1);
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
             }

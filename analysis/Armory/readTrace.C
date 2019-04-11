@@ -102,7 +102,6 @@ void readTrace(TString fileName){
             //if( det < 100 ) continue;
             //if( det != 18 && det != 19 && det !=12 ) continue;
             
-            
             gTitle.Form("(%d,%d), base: %5.1f, rise: %5.3f, time: %5.2f, energy: %6.1f | chi2: %6.2f, %6.2f |(1 for break)",
                      det, kind, base, riseTime, time, energy, chiSq, TMath::Sqrt(chiSq)/energy);
             
