@@ -21,8 +21,8 @@ const int numRow = 6;
 ULong64_t maxNumberEvent = 100000000;
 
 //---histogram seeting
-int rawEnergyRange[2] = {-500, 5000}; // share with e, ring, xf, xn
-int energyRange[2]= {500, 5000};
+int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
+int energyRange[2]= {500, 8000};
 
 //TODO switch for histogram
 
@@ -548,6 +548,9 @@ Bool_t Monitors::Process(Long64_t entry)
     for (Int_t i = 0; i < numDet; i++) {
 
       //======================= fill raw data
+      
+      //if( ring[i] !=0 ) return kTRUE;
+      
       he[i]->Fill(e[i]);
       hring[i]->Fill(ring[i]);
       hxf[i]->Fill(xf[i]);
@@ -602,14 +605,16 @@ Bool_t Monitors::Process(Long64_t entry)
       //if( !TMath::IsNaN(z[i]) ) multiHit ++;
       
       //=================== Array fill next
-      if( -1.1 < x[i] && x[i] < 1.1 && e[i]>100 && (xn[i]>0||xf[i]>0)) {
-        heVx[i]->Fill(x[i],e[i]);
-        hringVx[i]->Fill(x[i],ring[i]);
+
+      heVx[i]->Fill(x[i],e[i]);
+      hringVx[i]->Fill(x[i],ring[i]);
+     
+      //if( -1.1 < xcal[i] && xcal[i] < 1.1 && eCal[i]>100 && (xn[i]>0||xf[i]>0)) {
         heCalVxCal[i]->Fill(xcal[i]*5.0,eCal[i]);
         heCalVz->Fill(z[i]*10.,eCal[i]);
 
-        for (Int_t ii=0;ii<4;ii++) hrdtg[ii]->Fill(rdt[ii+4],rdt[ii]);
-      }
+        //for (Int_t ii=0;ii<4;ii++) hrdtg[ii]->Fill(rdt[ii+4],rdt[ii]);
+      //}
       
     }//end of array loop
     
