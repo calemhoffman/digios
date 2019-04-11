@@ -28,8 +28,7 @@ while [ ${loopflag} -eq 1 ]; do
 
 	dataStr="hitRate,VME=${VME},DIG=${DIG},CH=${c} value=${hitRate}"
 	#echo "------"$dataStr
-	curl -sS -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
-	echo "Although operation time-out, the data is OK."
+	curl -v -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
 	#sleep 0.5
 	
    done
