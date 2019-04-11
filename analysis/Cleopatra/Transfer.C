@@ -24,8 +24,8 @@ int main (int argc, char *argv[]) {
   printf("==========     Simulate Transfer reaction in HELIOS    ==========\n");
   printf("=================================================================\n");
   
-  if(argc < 1 || argc > 7) { 
-    printf("Usage: ./Transfer [1] [2] [3] [4] [5] \n");
+  if(argc == 2 || argc > 7) { 
+    printf("Usage: ./Transfer [1] [2] [3] [4] [5] [6]\n");
     printf("       default file name \n");
     printf("   [1] reactionConfig.txt (intput) reaction Setting \n");
     printf("   [2] detectorGeo.txt    (intput) detector Setting \n");
@@ -95,13 +95,22 @@ int main (int argc, char *argv[]) {
     filename = argv[6];
   }
   
-  //printf(" %s \n", basicConfig.c_str());
-  //printf(" %s \n", heliosDetGeoFile.c_str());
-  //printf(" %s \n", excitationFile.c_str());
-  //printf(" %s \n", saveFileName.Data());
-  //printf(" %s \n", ptolemyRoot.Data());
-  //printf(" %s \n", filename.Data());
-  
+  //printf("    reaction setting : %s \n", basicConfig.c_str());
+  //printf("      helios setting : %s \n", heliosDetGeoFile.c_str());
+  //if( excitationFile == "" ){
+  //  printf(" excitation energies : %s \n", excitationFile.c_str());
+  //}
+  //printf("     Ouput root file : %s \n", saveFileName.Data());
+  //if( ptolemyRoot != "" ) {
+  //  printf("  Ptolmey Xsec dist. : %s \n", ptolemyRoot.Data());
+  //}else{
+  //  printf(" No Ptolmey Xsec dist. \n");
+  //}
+  //if( filename != "") {
+  //  printf("save reaction const. : %s \n", filename.Data());
+  //}else{
+  //  printf(" Not save reaction const. \n");
+  //}
   Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
   
 }

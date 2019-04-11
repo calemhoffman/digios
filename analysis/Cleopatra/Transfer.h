@@ -1,4 +1,4 @@
-#include "../Simulation/HELIOS_LIB.h"
+#include "HELIOS_LIB.h"
 #include "TROOT.h"
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
@@ -8,6 +8,7 @@
 #include "TTree.h"
 #include "TRandom.h"
 #include "TGraph.h"
+#include "TMacro.h"
 #include <stdlib.h>
 #include <vector>
 #include <fstream>
@@ -59,6 +60,8 @@ void Transfer(
 
   //---- Auxiliary setting
   bool isDecay = false;
+  int decayA = 1;
+  int decayZ = 0;
   bool isReDo = false; // redo calculation until detected. 
 
   //---- if basicConfig.txt exist, overide the reaction   
@@ -96,12 +99,14 @@ void Transfer(
         if( line.compare("false") == 0 ) isDecay = false;
         if( line.compare("true")  == 0 ) isDecay = true;
       }
-      if( i == 20 ) {
+      if( i == 20 ) decayA = atoi(line.c_str());
+      if( i == 21 ) decayZ = atoi(line.c_str());
+      if( i == 22 ) {
         if( line.compare("false") == 0 ) isReDo = false;
         if( line.compare("true" ) == 0 ) isReDo = true;
       }
 
-      if( i == 21) ExAList[0] = atof(line.c_str());
+      if( i == 23) ExAList[0] = atof(line.c_str());
       
       i = i + 1;
     }
@@ -122,7 +127,7 @@ void Transfer(
   reaction.CalReactionConstant();
 
   printf("***************************************************\n");
-  printf("*        %27s             *\n", reaction.GetReactionName().Data());
+  printf("*\e[31m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
   printf("***************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
   printf("#################################### Beam \n");
@@ -209,7 +214,7 @@ void Transfer(
   Decay decay;
   if(isDecay) {
     printf("#################################### Decay\n");
-    decay.SetMotherDaugther(AB, zB, AB-1,zB); //neutron decay
+    decay.SetMotherDaugther(AB, zB, AB-decayA,zB-decayZ); //decay
   }
   //======= loading excitation energy
   printf("#################################### excitation energies\n");
@@ -250,12 +255,12 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, %4.2f | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, %4.2f | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, %4.2f | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], y0[i]);
       }
     }
   }else{
@@ -301,6 +306,11 @@ void Transfer(
   printf("#################################### building Tree in %s\n", saveFileName.Data());
   TFile * saveFile = new TFile(saveFileName, "recreate");
   TTree * tree = new TTree("tree", "tree");
+
+  TMacro config(basicConfig.c_str());
+  TMacro detGeo(heliosDetGeoFile.c_str());
+  config.Write("reactionConfig");
+  detGeo.Write("detGeo");
 
   int hit; // the output of Helios.CalHit
   tree->Branch("hit", &hit, "hit/I");

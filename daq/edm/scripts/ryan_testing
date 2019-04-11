@@ -1,0 +1,105 @@
+#!/bin/bash
+
+echo "#################################"
+echo "##    Ryan testing script      ##"
+echo "#################################"
+
+VMEID=$1
+DIGID=$2
+ch=$3
+
+if [ $# -eq 0 ] ; then
+    read -p "VME ID (single digit) ? : " VMEID
+    read -p "DIG ID  (single digit) ? : " DIGID
+    read -p "Channle (single digit) ? : " ch
+fi
+
+VMEID="0${VMEID}"
+
+
+RED="\033[0;31m"
+NC="\033[0;m"
+
+echo -e "==== Auto set Threshold on VME${RED}${VMEID}${NC}:MDIG${RED}${DIGID}${NC}:CH-${RED}${ch}${NC} === "
+
+Address="VME${VMEID}:MDIG${DIGID}"
+
+thresholdStr="${Address}:led_threshold${ch}"
+hitStr="${Address}:disc_count${ch}_RBV"
+
+countGoodTime=0;
+loopFlag=1
+skipFlag=0
+
+while [ ${loopFlag} -eq 1 ]; do
+
+echo "==========================="
+
+#--- getting threshold
+threshold=$(caget ${thresholdStr} | awk '{print $2}')
+echo -e "Threshold : ${RED}${threshold}${NC}"
+    
+#--- getting hit rate for 10 times
+echo "Collecting 10 tiggers....."
+avgHitRate=0
+for iii in {1..10}; do
+hitRate=$(caget ${hitStr} | awk '{print $2}')
+echo -n "${hitRate}  "
+#--- if instant HitRate > 500 
+if [ ${hitRate} -gt 500 ]; then
+newThreshold=$(python -c "print ${threshold}*2")
+caput ${thresholdStr} ${newThreshold}
+skipFlag=1
+break
+fi
+avgHitRate=$((avgHitRate + hitRate)) # only work for integer
+sleep 1.5 #wait for 1.0 sec
+done
+
+if [ ${skipFlag} -eq 1 ]; then 
+continue 
+fi
+
+avgHitRate=$(python -c "print ${avgHitRate}/10")
+
+echo "| avgHitRate : ${avgHitRate}"
+
+#--- if the hitRate == 0, decrease threshold by 10
+if [ ${avgHitRate} -eq 0 ]; then
+threshold=$((threshold - 10))
+caput ${thresholdStr} ${threshold}
+fi
+
+
+#--- check if the hitRate less than 10
+if [ ${avgHitRate} -le 10 ]  && [ ${avgHitRate} -ne 0 ]; then
+countGoodTime=$((countGoodTime + 1));
+echo " Good for once ${countGoodTime}"
+if [ ${countGoodTime} -ge 2 ]; then
+loopFlag=0
+fi
+fi
+
+#--- if the hitRate > 10 , increase threshold by 10
+if [ ${avgHitRate} -lt 200 ]  &&  [ ${avgHitRate} -gt 10  ]; then
+threshold=$((threshold + 10))
+caput ${thresholdStr} ${threshold}
+fi
+
+#--- if the hitRate > 100, increase threshold by 50
+if [ ${avgHitRate} -lt 200 ] && [ ${avgHitRate} -gt 100 ]; then
+threshold=$((threshold + 50))
+caput ${thresholdStr} ${threshold}
+fi
+
+#--- if the hitRate > 200, increase threshold by 100
+if [ ${avgHitRate} -gt 200 ]; then
+threshold=$((threshold + 100))
+caput ${thresholdStr} ${threshold}
+fi
+
+sleep 1.5
+
+done
+
+echo "====== Auto Threshold finished."

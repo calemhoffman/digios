@@ -1,6 +1,20 @@
 #!/bin/bash -l
 
-echo ------------ Stopping the current run ------------------
+source ~/digios/expName.sh
+
+RUN=${LastRunNum}
+
+#check RUN is 3 digit
+runLen=${#RUN}
+if [ ${runLen} -eq 1 ]; then
+   RUN="00"${RUN}
+elif [ ${runLen} -eq 2 ]; then
+   RUN="0"${RUN}
+fi;
+
+echo -e "------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
+
+echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.dat
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
@@ -22,4 +36,4 @@ do
    done <temp
 done        
 rm -rf temp
-echo ------------ The run has now been STOPPED  ----------------
+echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"

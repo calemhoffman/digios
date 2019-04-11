@@ -1,13 +1,29 @@
 #!/bin/sh
 
-exp=iss631
-dir=/Users/heliosdigios/experiments/${exp}
-#remote data path
-dataloc=/media/DIGIOSDATA3/data/${exp}
+PCName="$(hostname)"
 
-#===== directory
-DATADIR=$dir/data
+if [ ${PCName:0:5} == "bebop" ]; then
+    source /lcrc/project/HELIOS/digios/expName.sh
+    dir=/lcrc/project/${expName}/data
+    mkdir -v ${dir}
+    echo " need to do ssh via sonata "
+    exit
+fi 
 
-rsync -avuht --progress "helios@anldaqrouter:${dataloc}/${exp}_run_*" ${DATADIR}/.
+if [ ${PCName} = "phywl183.phy.anl.gov" ]; then
+    source ~/digios/expName.sh
+    dir=~/experiments/${expName}/data
+    mkdir -v ${dir}
 
-exit 1
+    #remote data path
+    dataloc=/media/DIGIOSDATA3/${expName}/data
+    #===== directory
+    IP=192.168.1.2
+    rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_*" ${dir}/.    
+fi
+
+if [ $PCName = "digios1" ] ; then
+    echo "already in digios1."
+fi
+
+exit
