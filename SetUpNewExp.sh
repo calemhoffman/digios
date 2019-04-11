@@ -4,6 +4,14 @@ echo "#     Set-up for new Experiment"
 echo "#############################################"
 
 expName=$1
+
+read -p "========== Have you git the present experiment (Y/N)?" isGit
+
+if [ ${isGit} == "N" ]; then
+    echo "Please git it."
+    exit 1
+fi
+
 if [ $# -eq 0 ]; then
    read -p 'Enter the new experiment name: ' expName
 fi
@@ -64,7 +72,7 @@ if [ ${expName} == "ARR01" ]; then
    echo "this is master experiment name. no branch create."
    git checkout master
 else
-   isBranchExist=`git branch -a | grep ${expName}`
+   isBranchExist=`git branch -a | grep ${expName} | wc -l`
    if [ ${isBranchExist} -eq 0 ]; then
        git checkout -b ${expName}
    else
@@ -111,3 +119,17 @@ ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
 ln -sfv ${rootData} ${expDIR}/analysis/root_data
 
 echo "=================== done."
+
+#===== clean up working if it is new
+if [ ${branchExist} -eq 0 ]; then
+    echo "======== Clean up working directory "
+    rm -fv correction_*.dat
+    rm -fv reaction.dat
+    rm -fv run_Summary.dat
+    rm -fv example.*
+    rm -fv RunTimeStamp.dat
+    rm -fv *.root
+    rm -fv *.d
+    rm -fv *.so
+    rm -fv *.pcm
+fi 
