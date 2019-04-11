@@ -1,0 +1,69 @@
+$============================================ Ex=0.74(0p1/2)Kx
+reset
+REACTION: 16N(d,3He)15C(5/2+ 0.74) ELAB= 24.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r=1 a=0.5 l=0
+R0=1.2 rc0=1.2 
+;
+TARGET
+JBIGA=2
+nodes=0 l=1 jp=1/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  49.779    r0 =   1.143    a =   0.675
+vi   =   2.314   ri0 =   1.143   ai =   0.675
+vsi  =   7.913  rsi0 =   1.302  asi =   0.527
+vso  =   5.249  rso0 =   0.929  aso =   0.590
+vsoi =  -0.121 rsoi0 =   0.929 asoi =   0.590  rc0 =   1.436
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 128.924    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  27.934  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+$============================================ Ex=0.00(0p1/2)Kx
+reset
+REACTION: 16N(d,3He)15C(1/2+ 0.00) ELAB= 24.000
+PARAMETERSET dpsb r0target 
+$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 
+
+PROJECTILE 
+wavefunction av18 
+r=1 a=0.5 l=0
+R0=1.2 rc0=1.2 
+;
+TARGET
+JBIGA=0
+nodes=0 l=1 jp=1/2 $node is n-1 
+r0=1.25 a=.65 
+vso=6 rso0=1.10 aso=.65 
+rc0=1.3 
+;
+INCOMING $Koning and Delaroche (2009) 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+v    =  49.779    r0 =   1.143    a =   0.675
+vi   =   2.314   ri0 =   1.143   ai =   0.675
+vsi  =   7.913  rsi0 =   1.302  asi =   0.527
+vso  =   5.249  rso0 =   0.929  aso =   0.590
+vsoi =  -0.121 rsoi0 =   0.929 asoi =   0.590  rc0 =   1.436
+;
+OUTGOING $XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5
+v    = 128.924    r0 =   1.150    a =   0.788
+vi   =   0.000   ri0 =   1.618   ai =   0.665
+vsi  =  27.934  rsi0 =   1.207  asi =   0.736
+vso  =   3.000  rso0 =   1.269  aso =   0.900
+vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
+;
+anglemin=0.000000 anglemax=50.000000 anglestep=0.500000
+;
+end $================================== end of input
