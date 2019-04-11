@@ -61,7 +61,7 @@ if [ $# -ge 5 ]; then
  OverRideMonitor=""
 fi
 
-if [ ${isGeneralSort} -eq 2 ]; then
+if [ ${isGeneralSort} -ge 2 ]; then
   isMonitor=0;
   OverRideMonitor="overrided by GeneralSortTrace."
 fi
@@ -210,7 +210,7 @@ fi;
 
 if [ $isGeneralSort -eq 1 ]; then
   echo -e "${RED}######################### GeneralSort.C${NC}"
-  root -l -q -b "process_run.C(${runID})"
+  root -l -q -b "process_run.C(${runID}, 0)"
   root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 

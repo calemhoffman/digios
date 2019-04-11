@@ -4,6 +4,14 @@ echo "#     Set-up for new Experiment"
 echo "#############################################"
 
 expName=$1
+
+read -p "========== Have you git the present experiment (Y/N)?" isGit
+
+if [ ${isGit} == "N" ]; then
+    echo "Please git it."
+    exit 1
+fi
+
 if [ $# -eq 0 ]; then
    read -p 'Enter the new experiment name: ' expName
 fi
@@ -22,20 +30,18 @@ if [ ${PCName} == "digios1" ]; then  #DAQ
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
-
-else if [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
+elif [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
    DATAPATH=~/experiments
 
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
-
-else if [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
+elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
    DATAPATH=/lcrc/project/HELIOS/
    space=100000000
 else
-   read "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
+   read -p "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
    echo "DATAPATH for    raw data : ${DATAPATH}/data"
    echo "DATAPATH for merged_data : ${DATAPATH}/merged_data"
    echo "DATAPATH for   root_data : ${DATAPATH}/root_data"   
@@ -61,11 +67,13 @@ fi
 #------ check is there any GIt branch in repository, 
 #       if not create Git Branch, if yes, checkout
 echo "=================== Checking/Create Git Branch"
+pullFlag="K"
 if [ ${expName} == "ARR01" ]; then
    echo "this is master experiment name. no branch create."
+   git checkout master
 else
-   isBranchExist=`git ls-remote --heads https://github.com/calemhoffman/digios.git ${expName} | wc -l`
-   if [ $isBranchExist -eq 0 ]; then
+   isBranchExist=`git branch -a | grep ${expName} | wc -l`
+   if [ ${isBranchExist} -eq 0 ]; then
        git checkout -b ${expName}
    else
        echo "Experimental Name (${expName}) already in use."
@@ -74,18 +82,20 @@ else
        if [ ${pullFlag} == "N" ]; then
 	   exit
        else
-	   git pull origin ${expName}
+	   git checkout ${expName}
        fi
    fi
 fi
 
 #------ set up expName.sh, so that all experimental Name is refered to this name
-DigiosDir="$(pwd)"
-echo "=================== Setting up ${DigiosDir}/expName.sh"
-touch ${DigiosDir}/expName.sh
-echo "#!/bin/bash -l" > ${DigiosDir}/expName.sh
-echo "expName=${expName}" >> ${DigiosDir}/expName.sh
-echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
+if [ ${isBranchExist} -eq 0 ]; then
+    DigiosDir="$(pwd)"
+    echo "=================== Setting up ${DigiosDir}/expName.sh"
+    touch ${DigiosDir}/expName.sh
+    echo "#!/bin/bash -l" > ${DigiosDir}/expName.sh
+    echo "expName=${expName}" >> ${DigiosDir}/expName.sh
+    echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
+fi
 
 echo "=================== making new folders in ${DATAPATH}/${expName}"
 Data=${DATAPATH}/${expName}/data
@@ -109,3 +119,17 @@ ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
 ln -sfv ${rootData} ${expDIR}/analysis/root_data
 
 echo "=================== done."
+
+#===== clean up working if it is new
+if [ ${branchExist} -eq 0 ]; then
+    echo "======== Clean up working directory "
+    rm -fv correction_*.dat
+    rm -fv reaction.dat
+    rm -fv run_Summary.dat
+    rm -fv example.*
+    rm -fv RunTimeStamp.dat
+    rm -fv *.root
+    rm -fv *.d
+    rm -fv *.so
+    rm -fv *.pcm
+fi 

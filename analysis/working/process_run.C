@@ -18,11 +18,11 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
     
     TString processCmd;
     if( isTrace == 0 ) {
-        processCmd.Form("../Armory/GeneralSortTrace.C+");
+        processCmd.Form("../Armory/GeneralSort.C+");
         t1->Process(processCmd);
         f.Close();
     }else if(isTrace == 1){
-        processCmd.Form("../Armory/GeneralSort.C+");
+        processCmd.Form("../Armory/GeneralSortTrace.C+");
         t1->Process(processCmd);
         f.Close();
     }else if(isTrace == 2){
@@ -48,7 +48,7 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
     if( isTrace < 2 ){
         name.Form("../root_data/gen_run%03d.root", RUNNUM);
     }else if ( isTrace == 2 ) {
-        name.Form("sortedTrace.root"); //TODO rename
+        name.Form("../root_data/trace_run%03d.root", RUNNUM);
     }
     printf("%s \n", name.Data());
     printf("============================================= \n");
