@@ -70,7 +70,12 @@ else
    else
        echo "Experimental Name (${expName}) already in use."
        echo "Please take another name or git pull origin ${expName}"
-       exit
+       read -p "Do you want to pull origin ${expName} (Y/N):"  pullFlag
+       if [ ${pullFlag} == "N" ]; then
+	   exit
+       else
+	   git pull origin ${expName}
+       fi
    fi
 fi
 
