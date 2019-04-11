@@ -1,7 +1,10 @@
-!/bin/bash -l
+#!/bin/bash -l
 export TERM=vt100
-explocation=/home/helios/experiments/iss000/daq
-datalocation=/media/DIGIOSDATA3/data/iss000
+explocation=~/digios/daq
+source ~/digios/expName.sh #load expName
+datalocation=/media/DIGIOSDATA3/${expName}/data
+
+echo $datalocation
 
 cd ${datalocation}
 caput Online_CS_SaveData No Save

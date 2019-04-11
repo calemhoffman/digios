@@ -28,12 +28,15 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
+   Int_t           runID;
    Float_t         e[100];
    ULong64_t       e_t[100];
    Float_t         xf[100];
    ULong64_t       xf_t[100];
    Float_t         xn[100];
    ULong64_t       xn_t[100];
+   Float_t         ring[100];
+   ULong64_t       ring_t[100];
    Float_t         rdt[100];
    ULong64_t       rdt_t[100];
    Float_t         tac[100];
@@ -44,12 +47,15 @@ public :
    ULong64_t       ezero_t[10];
 
    // List of branches
+   TBranch        *b_runID;   //!
    TBranch        *b_Energy;   //!
    TBranch        *b_EnergyTimestamp;   //!
    TBranch        *b_XF;   //!
    TBranch        *b_XFTimestamp;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_XNTimestamp;   //!
+   TBranch        *b_Ring;   //!
+   TBranch        *b_RingTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
    TBranch        *b_TAC;   //!
@@ -58,6 +64,9 @@ public :
    TBranch        *b_ELUMTimestamp;   //!
    TBranch        *b_EZERO;   //!
    TBranch        *b_EZEROTimestamp;   //!
+   
+   int A;
+   void testingInput(int n){this->A = n;}
 
    Monitors(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Monitors() { }
@@ -96,12 +105,15 @@ void Monitors::Init(TTree *tree)
    fChain = tree;
    fChain->SetMakeClass(1);
 
+   fChain->SetBranchAddress("runID", &runID, &b_runID);
    fChain->SetBranchAddress("e", e, &b_Energy);
    fChain->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
    fChain->SetBranchAddress("xn", xn, &b_XN);
    fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
+   fChain->SetBranchAddress("ring", ring, &b_Ring);
+   fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
    fChain->SetBranchAddress("rdt", rdt, &b_RDT);
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);
    fChain->SetBranchAddress("tac", tac, &b_TAC);

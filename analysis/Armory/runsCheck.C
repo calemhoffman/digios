@@ -1,5 +1,5 @@
 {
-   TString folderPath ="../root_data/gen_run*.root";
+   TString folderPath ="../root_data/*_run*.root";
    const char* treeName="gen_tree";
    
    //==============================================
@@ -14,12 +14,13 @@
    double time1, time2, dTime;
    ULong64_t firstTime, lastTime;
    
+   printf("building fileList\n");
    TString cmd;
-   cmd.Form(".!ls -1 %s | sort > runList.txt", folderPath.Data());
+   cmd.Form(".!ls -1 %s | sort > foundRunList.txt", folderPath.Data());
    gROOT->ProcessLine(cmd);
    
    ifstream file;
-   file.open("runList.txt");
+   file.open("foundRunList.txt");
    vector<TString> rootFileName;
    if( file.is_open() ){
       string x;
@@ -28,17 +29,17 @@
       }
    }else{
        printf("... fail\n");
-       gROOT->ProcessLine(".!rm -f runList.txt");
+       gROOT->ProcessLine(".!rm -f foundRunList.txt");
        return;
    }
    
-   gROOT->ProcessLine(".!rm -f runList.txt"); 
+   gROOT->ProcessLine(".!rm -f foundRunList.txt"); 
    
    
    FILE * paraOut;
    TString filename;
    filename.Form("run_Summary.dat");
-   paraOut = fopen (filename, "w+");
+   paraOut = fopen(filename.Data(), "w+");
    
    int numFile = rootFileName.size();
    for( int i = 0; i < numFile ; i++){
@@ -49,6 +50,13 @@
       
       if( !f->IsOpen()) continue; 
       printf("%15s is loaded.", rootFileName[i].Data());
+      
+      TString prefix; //==== working on
+      int findlast = rootFileName[i].Last('_');
+      prefix = rootFileName[i].Remove(findLast);
+      
+      if( prefix == "gen" ) treeName = "gen_tree";
+      if( prefix == "trace" ) treeName = "tree";
       
       tree = (TTree*)f->Get(treeName);
 

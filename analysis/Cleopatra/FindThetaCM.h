@@ -14,7 +14,7 @@
 #include "TTree.h"
 #include "TObjArray.h"
 #include "TGraph.h"
-#include "../Simulation/HELIOS_LIB.h"
+#include "../Cleopatra/HELIOS_LIB.h"
 
 void FindThetaCM(double Ex, double XRATION = 0.95, 
             string basicConfig="reactionConfig.txt",  
@@ -97,7 +97,7 @@ void FindThetaCM(double Ex, double XRATION = 0.95,
          if( x.substr(0,2) == "//" )  continue;
          if( i == 0 ) BField   = atof(x.c_str());
          if( i == 3 )  a       = atof(x.c_str());
-         if( i == 12 ) length   = atof(x.c_str());
+         if( i == 5 ) length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
          if( i == 17 ) jDet = atoi(x.c_str());
          if( i >= 18 ) {

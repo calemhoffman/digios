@@ -112,13 +112,13 @@ bool loadFitParameters(TString fitParaFile){
 //########################################
 //########################################
 //########################################
-void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax){
+void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
   
   
   if( gROOT->FindObjectAny("cFitGauss") == NULL ){
     TCanvas * cFitGauss = new TCanvas("cFitGauss", "fit Gauss", 800, 400);
   }
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   
   hist->Draw();
   
@@ -154,13 +154,13 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax){
 //########################################
 //########################################
 //########################################
-void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax){
+void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
   
   
   if( gROOT->FindObjectAny("cFitGaussP1") == NULL ){
     TCanvas * cFitGaussP1 = new TCanvas("cFitGaussP1", "fit Gauss & P1", 800, 400);
   }
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   
   hist->Draw();
   
@@ -215,7 +215,9 @@ void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax)
 //########################################
 //########################################
 //########################################
-vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1, double mean2, double sigma2, double xMin, double xMax, bool newCanvas){
+vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1, 
+                                       double mean2, double sigma2, 
+                           double xMin, double xMax, TString optStat = "", bool newCanvas = false){
   
   vector<double> output;
   output.clear();
@@ -223,7 +225,7 @@ vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1, double mean2
   if( newCanvas &&  gROOT->FindObjectAny("cFit2GaussP1") == NULL ){
     TCanvas * cFit2GaussP1 = new TCanvas("cFit2GaussP1", "fit Gauss & P1", 800, 400);
   }
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   
   hist->Draw();
   
@@ -305,12 +307,12 @@ vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1, double mean2
 //########################################
 //########################################
 //########################################
-void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1){
+void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString optStat = ""){
 
   TCanvas *cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 800, 100, 800,800);
   cFitAuto->Divide(1,2);
   
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   cFitAuto->cd(1);
   hist->Draw();
   
@@ -439,7 +441,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1){
 //########################################
 //########################################
 //########################################
-void fitNGauss(TH1 * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"){
+void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile = "AutoFit_para.txt"){
    
   //============ 131Xe
   //energy.push_back(-2.8);  height.push_back(100); lowE.push_back(-3.0); highE.push_back(-2.4);
@@ -457,7 +459,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt")
   cFitNGauss->Divide(1,2);
   if(! cFitNGauss->GetShowEventStatus() ) cFitNGauss->ToggleEventStatus();
   
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   cFitNGauss->cd(1);
   hist->Draw();
   
@@ -587,7 +589,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt")
 //########################################
 //########################################
 //########################################
-void fitNGauss2(TH1 * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"){
+void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile = "AutoFit_para.txt"){
    
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -602,7 +604,7 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"
   
   if(! cFitNGauss2->GetShowEventStatus() ) cFitNGauss2->ToggleEventStatus();
   
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   cFitNGauss2->cd(1);
   hist->Draw();
   
@@ -744,7 +746,7 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"
 //########################################
 //########################################
 //########################################
-void fitNGaussP1(TH1 * hist, TString fitFile = "AutoFit_para.txt", double xMin = 0, double xMax = 0){
+void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_para.txt", double xMin = 0, double xMax = 0){
    
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -758,7 +760,7 @@ void fitNGaussP1(TH1 * hist, TString fitFile = "AutoFit_para.txt", double xMin =
   cFitNGaussP1->Divide(1,2);  
   if(! cFitNGaussP1->GetShowEventStatus() ) cFitNGaussP1->ToggleEventStatus();
   
-  gStyle->SetOptStat("neiou");
+  gStyle->SetOptStat(optStat);
   cFitNGaussP1->cd(1);
   int maxBin = hist->GetMaximumBin();
   double ymax = hist->GetBinContent(maxBin);

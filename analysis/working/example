@@ -38,20 +38,51 @@
 #206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AK
 #206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   QV
 
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ax
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Al
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ap
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ac
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     At
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ah
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ab
+#210Po(d,p)211Po   0    1g9/2     9/2+    0.000   8.5MeV/u     AK
+#210Po(d,p)211Po   0    0i11/2   11/2+    0.685   8.5MeV/u     AK
+#210Po(d,p)211Po   0    2d5/2     5/2+    1.049   8.5MeV/u     AK
+#210Po(d,p)211Po   0    2d5/2     5/2+    1.378   8.5MeV/u     AK
+#210Po(d,p)211Po   0    2d5/2     5/2+    1.799   8.5MeV/u     AK
+#210Po(d,p)211Po   0    3s1/2     1/2+    2.084   8.5MeV/u     AK
+#210Po(d,p)211Po   0    3s1/2     1/2+    2.161   8.5MeV/u     AK
+#210Po(d,p)211Po   0    1g7/2     7/2+    2.606   8.5MeV/u     AK
+#210Po(d,p)211Po   0    1g7/2     7/2+    2.639   8.5MeV/u     AK
+#210Po(d,p)211Po   0    2d3/2     3/2+    2.661   8.5MeV/u     AK
+#210Po(d,p)211Po   0    1g7/2     7/2+    2.862   8.5MeV/u     AK
+#210Po(d,p)211Po   0    2d3/2     3/2+    2.910   8.5MeV/u     AK
+#210Po(d,p)211Po   0    2d3/2     3/2+    3.252   8.5MeV/u     AK
 
-20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Kx
-20F(d,t)19F   2   0d5/2   5/2+  1.698  10MeV/u     Kx
-20F(d,t)19F   2   0d5/2   5/2+  2.809  10MeV/u     Kx
-20F(d,t)19F   2   0d5/2   5/2+  4.873  10MeV/u     Kx
-20F(d,t)19F   2   1s1/2   3/2+  5.155  10MeV/u     Kx
-20F(d,t)19F   2   0p1/2   5/2-  4.708  10MeV/u     Kx
-20F(d,t)19F   2   0p1/2   3/2-  4.899  10MeV/u     Kx
-20F(d,t)19F   2   0p1/2   5/2-  7.447  10MeV/u     Kx
-20F(d,t)19F   2   0p3/2   7/2-  7.637  10MeV/u     Kx
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   AA
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   HH
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   BB
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   DD
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   CC
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   LL
+#208Pb(d,d)208Pb   0    1g9/2   9/2+   0.000  12.5MeV/u   QQ
+
+208Pb(d,p)209Pb  0   1g9/2     9/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   0i11/2   11/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   0j15/2   15/2-  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   2d5/2     5/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   3s1/2     1/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   1g7/2     7/2+  0.000  7.5MeV/u   AK
+208Pb(d,p)209Pb  0   2d3/2     3/2+  0.000  7.5MeV/u   AK
+
+
+#20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Kx
+#20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Vx
+#20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Kl
+#20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Vl
+
+#20F(d,t)19F   2   1s1/2   3/2+  5.155  10MeV/u     Kx
+#20F(d,t)19F   2   1s1/2   3/2+  5.155  10MeV/u     Vx
+#20F(d,t)19F   2   1s1/2   3/2+  5.155  10MeV/u     Kl
+#20F(d,t)19F   2   1s1/2   3/2+  5.155  10MeV/u     Vl
+
+#20F(d,t)19F   2   0p1/2   3/2-  4.899  10MeV/u     Kx
+#20F(d,t)19F   2   0p1/2   3/2-  4.899  10MeV/u     Vx
+#20F(d,t)19F   2   0p1/2   3/2-  4.899  10MeV/u     Kl
+#20F(d,t)19F   2   0p1/2   3/2-  4.899  10MeV/u     Vl
+
+#16N(d,3He)15C  2   0p1/2   5/2+  0.740  10MeV/u     Kx
+#16N(d,3He)15C  2   0p3/2   5/2+  0.740  10MeV/u     Kl

@@ -73,6 +73,7 @@ if [ ${expName} == "ARR01" ]; then
    echo "this is master experiment name. no branch create."
    git checkout master
 else
+
    if [ ${isBranchExist} -eq 0 ]; then
        git checkout -b ${expName}
    else
@@ -122,6 +123,7 @@ echo "=================== done."
 
 #===== clean up working if it is new
 if [ ${isBranchExist} -eq 0 ]; then
+
     echo "======== Clean up working directory "
     rm -fv correction_*.dat
     rm -fv reaction.dat
@@ -132,4 +134,5 @@ if [ ${isBranchExist} -eq 0 ]; then
     rm -fv *.d
     rm -fv *.so
     rm -fv *.pcm
+
 fi 

@@ -182,11 +182,11 @@ void Cali_littleTree_trace::Init(TTree *tree)
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          if( i == 0 ) Bfield   = atof(x.c_str());
-         if( i == 2 ) a        = atof(x.c_str());         
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) jDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 3 ) a        = atof(x.c_str());         
+         if( i == 5 ) length   = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 17 ) jDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;

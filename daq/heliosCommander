@@ -1,5 +1,6 @@
 #!/bin/bash -l
-location=/home/helios/experiments/iss000/daq
+#location=/home/helios/experiments/array/daq
+location="$(pwd)"
 runEdm() {
   export EDMOBJECTS=/global/devel/extensions/dgs1/src/edm/setup
   export EDMHELPFILES=/global/devel/extensions/dgs1/src/edm/helpFiles

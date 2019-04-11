@@ -1,7 +1,10 @@
-TString expName ="iss631";
+#include <TROOT.h>
+#include <TChain.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <TProof.h>
 
-void process_run(Int_t RUNNUM=5, Int_t SORTNUM=0)
-{
+void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
   
   if (SORTNUM==0) {
     TString name;
@@ -14,17 +17,42 @@ void process_run(Int_t RUNNUM=5, Int_t SORTNUM=0)
 
     
     TString processCmd;
-    processCmd.Form("../Armory/GeneralSort.C+");
-    t1->Process(processCmd);
-    f.Close();
-    
-    processCmd.Form(".!mv -v gen_run%03d.root ../root_data/gen_run%03d.root", RUNNUM, RUNNUM);
-    gROOT->ProcessLine(processCmd);
+    if( isTrace == 0 ) {
+        processCmd.Form("../Armory/GeneralSort.C+");
+        t1->Process(processCmd);
+        f.Close();
+    }else if(isTrace == 1){
+        processCmd.Form("../Armory/GeneralSortTrace.C+");
+        t1->Process(processCmd);
+        f.Close();
+    }else if(isTrace == 2){
+        TChain * chain = new TChain("tree");
+        chain->Add(name); 
+   
+        TProof * p = TProof::Open("", "workers=4");
+   
+        chain->SetProof();
+
+        chain->Process("../Armory/GeneralSortTraceProof.C+", name);
+        
+        
+        delete chain;
+        delete p;
+        
+    }else{
+        return;
+    }
     
     printf("======================================done RUN-%03d \n", RUNNUM);
-    name.Form("../root_data/gen_run%03d.root", RUNNUM);
+
+    if( isTrace < 2 ){
+        name.Form("../root_data/gen_run%03d.root", RUNNUM);
+    }else if ( isTrace == 2 ) {
+        name.Form("../root_data/trace_run%03d.root", RUNNUM);
+    }
     printf("%s \n", name.Data());
     printf("============================================= \n");
+    gROOT->ProcessLine(".q");
     
   }else if (SORTNUM==1) {
     TString name("gen.root");

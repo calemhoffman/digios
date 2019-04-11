@@ -12,7 +12,6 @@
 #include <TGraph.h>
 #include <fstream>
 #include <TProof.h>
-#include "../Simulation/transfer.C"
 #include "../Armory/Cali_littleTree_trace.h"
 #include "../Armory/Check_e_x.C"
 #include "../Armory/Cali_e_single.C"
@@ -29,13 +28,15 @@
 //         //TODO detect branch te_t and trdt_t exist or not, if exist, calibrate with coinTime
 //==========================================
 
-void AutoCalibrationTrace(){
+int temp ;   
+int option;
+
+void PrintManual(){
    
-   int option;
    printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
-   printf("      Please Edit runsList.txt  \n");
+   printf(" \e[31m     Please Edit runsList.txt  \e[0m\n");
    //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
@@ -47,33 +48,45 @@ void AutoCalibrationTrace(){
    printf(" 4 = e calibration for single detector (alpha)\n");
    printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
    printf(" 6 = coinTimeUC calibration. (MANUAL) \n");
-   printf(" 7 = run Simulation/transfer.C\n");
+   printf(" 7 = run Cleopatra/transfer.C\n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
-   int temp = scanf("%d", &option);
+   temp = scanf("%d", &option);
    printf(" -------------------------------------------------- \n");
    
+}
+
+void toTransferReaction(){
+   
+   printf("========= Cleopatra/Transfer.C ========= \n");
+   printf("== Please check :\n");
+   printf("        1) detectorGeo.txt\n");
+   printf("        2) reactionConfig.txt\n");
+   printf("        3) Ex.txt\n");
+   printf("========================================= \n");
+   int nextFlag = 0; 
+   printf("Prceed (1 = Yes / 0 = No ) ? ");
+   temp = scanf("%d", &nextFlag);
+
+   if( nextFlag == 0 ){
+      printf(" ------ bye bye !------- \n");
+      gROOT->ProcessLine(".q");
+      return;
+   }
+   system("../Cleopatra/Transfer");
+   gROOT->ProcessLine(".q");
+
+}
+
+
+//TODO in a while-loop that don't need to run the macro again
+void AutoCalibrationTrace(){
+
+   PrintManual();
    
 //====================================================  Transfer calculation
    if( option == 7 ) {
-      printf("========= Simulation/transfer.C ========= \n");
-      printf("== Please check :\n");
-      printf("        1) detectorGeo.txt\n");
-      printf("        2) basicReactionConfig.txt\n");
-      printf("        3) excitation_energies.txt\n");
-      printf("========================================= \n");
-      printf(" !!!!!!! WARING: This code is outdated. Please use Cleopatra/Transfer \n");
-      int nextFlag = 0; 
-      printf("Prceed (1 = Yes / 0 = No ) ? ");
-      temp = scanf("%d", &nextFlag);
-      
-      if( nextFlag == 0 ){
-         printf(" ------ bye bye !------- \n");
-         gROOT->ProcessLine(".q");
-         return;
-      }
-      transfer();
-      gROOT->ProcessLine(".q");
+      toTransferReaction();
    }
    
    printf(" ..... loading runsList.txt..");
@@ -165,14 +178,14 @@ void AutoCalibrationTrace(){
    }
    
    if( option == 0 || option == 4 || option == 5 ){
-      printf(" ============================= alpha source files :  \n");
+      printf(" ============================= alpha source files :  \033[0;31m\n");
       chainAlpha->GetListOfFiles()->Print();
-      printf(" ================================================== \n");
+      printf("\033[0m\n");
    }
    if( 1 <= option && option <= 3){
-      printf(" ================ files :  \n");
+      printf(" ================ files :  \033[0;31m\n");
       chain->GetListOfFiles()->Print();
-      printf(" ================================================== \n");
+      printf("\033[0m\n");
    }    
    
    if( option == 0 ) {
@@ -230,7 +243,8 @@ void AutoCalibrationTrace(){
          gROOT->ProcessLine(".q");
          return;
       }
-      transfer();
+      
+      toTransferReaction();
       
       TString rootfileSim="transfer.root";
       TFile *fs = new TFile (rootfileSim, "read"); 
