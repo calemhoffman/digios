@@ -70,7 +70,9 @@ void Cali_xf_xn_to_e(TTree *tree){
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      return;
+      for( int i = 0 ; i < nDet ; i++){
+         xnCorr[i] = 1;
+      }
    }
    file.close();
    
@@ -83,14 +85,14 @@ void Cali_xf_xn_to_e(TTree *tree){
    for( int i = 0; i < nDet; i ++){
       TString name;
       name.Form("d%d", i);
-      d[i] = new TH2F(name, name , 200, 0 , 2000 , 200, 0 , 2000);
+      d[i] = new TH2F(name, name , 200, 0 , 5000 , 200, 0 , 5000);
       d[i]->SetXTitle("xf+xn");
       d[i]->SetYTitle("e");
       
       TString expression;
       expression.Form("e[%d]:(xf[%d]+xn[%d] * %f)>> d%d" , i,i,i, xnCorr[i],i);
       TString gate;
-      gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0 ",i, i, i);
+      gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0 && ring[%d] < 50",i, i, i, i);
       //gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0 && TMath::Abs(xf[%d] - xn[%d]*%f)< 100",i, i, i, i, i, xnCorr[i]);
       
       cCali_xf_xn_e->cd(i+1);
