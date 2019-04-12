@@ -1,2 +1,12 @@
 RUN-001 start at Thu Apr 11 13:51:24 CDT 2019, 11B 95MeV, 500ug CD2, dz ???? B = 2.5 T, 5x10^6 pps
          stop at Thu Apr 11 14:12:19 CDT 2019
+RUN-002 start at Thu Apr 11 14:26:12 CDT 2019, dz close by ~15 cm, other same
+         stop at Thu Apr 11 14:59:40 CDT 2019
+RUN-003 start at Thu Apr 11 15:08:42 CDT 2019, same as before execpt cross slits pulled way out
+         stop at Thu Apr 11 15:38:01 CDT 2019
+RUN-004 start at Thu Apr 11 15:43:18 CDT 2019, 100 ug Target, same z
+         stop at Thu Apr 11 16:16:36 CDT 2019
+RUN-005 start at Thu Apr 11 16:17:44 CDT 2019, new run on the same target
+         stop at Thu Apr 11 16:53:58 CDT 2019
+RUN-006 start at Thu Apr 11 16:54:17 CDT 2019, same
+         stop at Thu Apr 11 17:10:07 CDT 2019
