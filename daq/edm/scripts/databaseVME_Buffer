@@ -1,0 +1,31 @@
+#!/bin/bash
+
+IP="heliosDB.onenet"
+database="testing"
+
+echo "------ Database for VME0${VME}:DIG${DIG} ----"
+
+VME="1 2 3 4"
+
+loopflag=1
+
+while [ ${loopflag} -eq 1 ]; do
+
+   for c in $VME ; do
+
+	buffer=$(caget DAQC${c}_CV_BuffersAvail | awk '{print $2}')
+
+	clear
+	#echo "==========================="
+	echo "Database for VME${c} ---- Buffer:${buffer}"
+
+	dataStr="buffer,VME=${c} value=${buffer}"
+	#echo "------"$dataStr
+	curl -v -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
+	#sleep 0.5
+	
+   done
+
+   sleep 3
+
+done
