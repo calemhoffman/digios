@@ -57,6 +57,8 @@ void newCanvas(int sizeX = 800, int sizeY = 600, int posX = 0, int posY = 0){
 
 
 //TODO set histogram y-axis all the same heigh
+
+
 //void HitStat(void) {
 //  TCanvas *cStat = (TCanvas *) gROOT->FindObjectAny("cStat");
 //  if( cStat == NULL ) {

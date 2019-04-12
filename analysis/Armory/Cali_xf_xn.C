@@ -83,7 +83,7 @@ void Cali_xf_xn(TTree * tree){
       
       TString expression;
       expression.Form("e[%d] >> q%d" ,i, i);
-      gate[i].Form("");
+      gate[i].Form("ring[%d]==0", i);
       //gate[i].Form("e[%d] > 0", i);
       
       cAlpha->cd(i+1);

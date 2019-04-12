@@ -1,8 +1,8 @@
 //---data_path
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
--../root_data/gen_run004.root
-+../root_data/gen_run004.root
+-../root_data/gen_run036.root
++../root_data/gen_run036.root
 //--------- 130Xe
 //+root_data/gen_run01[4-9].root
 //+root_data/gen_run02[0-1].root
