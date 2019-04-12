@@ -68,11 +68,11 @@ fi
 #       if not create Git Branch, if yes, checkout
 echo "=================== Checking/Create Git Branch"
 pullFlag="K"
+isBranchExist=`git branch -a | grep ${expName} | wc -l`
 if [ ${expName} == "ARR01" ]; then
    echo "this is master experiment name. no branch create."
    git checkout master
 else
-   isBranchExist=`git branch -a | grep ${expName} | wc -l`
    if [ ${isBranchExist} -eq 0 ]; then
        git checkout -b ${expName}
    else
@@ -121,7 +121,7 @@ ln -sfv ${rootData} ${expDIR}/analysis/root_data
 echo "=================== done."
 
 #===== clean up working if it is new
-if [ ${branchExist} -eq 0 ]; then
+if [ ${isBranchExist} -eq 0 ]; then
     echo "======== Clean up working directory "
     rm -fv correction_*.dat
     rm -fv reaction.dat
