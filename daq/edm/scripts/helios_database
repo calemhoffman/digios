@@ -27,10 +27,11 @@ xterm -T database8   -geometry 80x4+0+700  -e "~/digios/daq/edm/scripts/database
 xterm -T database9   -geometry 80x4+0+800  -e "~/digios/daq/edm/scripts/databaseVME 4 1" &  # top right, e-r
 xterm -T database10  -geometry 80x4+0+900  -e "~/digios/daq/edm/scripts/databaseVME 3 2" &  # bottm  right, e-r
 xterm -T database11  -geometry 80x4+0+1000 -e "~/digios/daq/edm/scripts/databaseVME 2 3" &  # bottom bottom, e-r
-xterm -T database12  -geometry 80x4+0+1100 -e "~/digios/daq/edm/scripts/databaseVME 2 1" &  # bottom  left, e-r
+xterm -T database12  -geometry 80x4+100+0 -e "~/digios/daq/edm/scripts/databaseVME 2 1" &  # bottom  left, e-r
 
 #===== threshold for every 4 min = 240 sec
-xterm -T database13  -geometry 80x4+0+1200 -e "~/digios/daq/edm/scripts/databaseVME_Threshold 300" & 
+xterm -T database13  -geometry 80x4+100+100 -e "~/digios/daq/edm/scripts/databaseVME_Threshold 300" & 
+xterm -T database14  -geometry 80x4+100+200 -e "~/digios/daq/edm/scripts/databaseVME_Buffer" &
 
 fi
 
