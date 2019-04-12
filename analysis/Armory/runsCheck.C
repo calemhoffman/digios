@@ -1,5 +1,5 @@
 {
-   TString folderPath ="../root_data/gen_run*.root";
+   TString folderPath ="../root_data/*_run*.root";
    const char* treeName="gen_tree";
    
    //==============================================
@@ -50,6 +50,13 @@
       
       if( !f->IsOpen()) continue; 
       printf("%15s is loaded.", rootFileName[i].Data());
+      
+      //TString prefix; //==== working on
+      //int findlast = rootFileName[i].Last('_');
+      //prefix = rootFileName[i].Remove(findLast);
+      
+      //if( prefix == "gen" ) treeName = "gen_tree";
+      //if( prefix == "trace" ) treeName = "tree";
       
       tree = (TTree*)f->Get(treeName);
 

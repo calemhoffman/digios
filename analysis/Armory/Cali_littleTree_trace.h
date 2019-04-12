@@ -233,13 +233,13 @@ void Cali_littleTree_trace::Init(TTree *tree)
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      Terminate();
-      return;
+      for( int i = 0 ; i < numDet; i++){
+         xnCorr[i] = 1;
+      }
    }
    file.close();
    
    //========================================= e = xf + xn correction
-   
    printf("----- loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
    if( file.is_open() ){
