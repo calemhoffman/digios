@@ -124,25 +124,41 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
       //========= calculate x
-      if(xf[idet] > 0  && xn[idet] > 0 ) {
-         xTemp = (xfC-xnC)/(xfC+xnC);
+      //if(xf[idet] > 0  && xn[idet] > 0 ) {
+      //   xTemp = (xfC-xnC)/(xfC+xnC);
+      //   multiHit++;
+      //   hitID = 0;
+      //}else if(xf[idet] == 0 && xn[idet] > 0 ){
+      //   xTemp = (1-2*xnC/e[idet]);
+      //   multiHit++;
+      //   hitID = 1;
+      //}else if(xf[idet] > 0 && xn[idet] == 0 ){
+      //   xTemp = (2*xfC/e[idet]-1);
+      //   multiHit++;
+      //   hitID = 2;
+      //}else{
+      //   xTemp = TMath::QuietNaN();
+      //}
+      
+      if( xf[idet] > 0 && xn[idet] > 0 ){
+         xTemp = (xfC-xnC)/eTemp;
          multiHit++;
          hitID = 0;
-      }else if(xf[idet] == 0 && xn[idet] > 0 ){
-         xTemp = (1-2*xnC/e[idet]);
+      }else if(xfC > eTemp/2.){
+         xTemp = 2*xfC/eTemp - 1. ;
          multiHit++;
          hitID = 1;
-      }else if(xf[idet] > 0 && xn[idet] == 0 ){
-         xTemp = (2*xfC/e[idet]-1);
+      }else if(xnC > eTemp/2.){
+         xTemp = 1. - 2* xnC/eTemp;
          multiHit++;
          hitID = 2;
       }else{
          xTemp = TMath::QuietNaN();
       }
-      
+         
+         
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
-      //printf("%d, %d , %f \n", eventID, idet, e[idet]);
-      
+      //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
       
       //========= calculate z
       
