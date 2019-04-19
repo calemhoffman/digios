@@ -9,12 +9,17 @@ VME="1 2 3 4"
 
 loopflag=1
 
+lastBuff=400
+
 while [ ${loopflag} -eq 1 ]; do
 
    for c in $VME ; do
 
 	buffer=$(caget DAQC${c}_CV_BuffersAvail | awk '{print $2}')
-
+        #if [ ${c} -eq 1 ]; then
+	#    x=$RANDOM
+	#    buffer=$(python -c "print (int)($x/32767.*500)")
+	#fi
 	clear
 	#echo "==========================="
 	echo "Database for VME${c} ---- Buffer:${buffer}"
@@ -23,7 +28,7 @@ while [ ${loopflag} -eq 1 ]; do
 	#echo "------"$dataStr
 	curl -v -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
 	
-	sleep 1
+	sleep 0.5
 	
    done
 
