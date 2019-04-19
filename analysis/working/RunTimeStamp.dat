@@ -77,3 +77,19 @@ RUN-037 start at Mon Apr  8 21:52:27 CDT 2019, HV=200, disable TT-4 TR-4 BL-4
 RUN-038 start at Thu Apr 11 11:08:37 CDT 2019, 
          stop at Thu Apr 11 11:26:06 CDT 2019
 RUN-039 start at Thu Apr 11 11:32:25 CDT 2019, Th source off center new thresholds
+RUN-040 start at Mon Apr 15 11:45:40 CDT 2019, alpha-th run
+         stop at Mon Apr 15 11:48:45 CDT 2019
+RUN-041 start at Mon Apr 15 11:49:21 CDT 2019, reduced trace length
+         stop at Mon Apr 15 12:18:55 CDT 2019
+RUN-042 start at Mon Apr 15 12:39:08 CDT 2019, checking trig settings
+         stop at Mon Apr 15 12:39:24 CDT 2019
+RUN-043 start at Mon Apr 15 12:40:39 CDT 2019, checking trig settings
+         stop at Mon Apr 15 13:14:48 CDT 2019
+RUN-044 start at Mon Apr 15 13:29:39 CDT 2019, adjusted thresholds, lowered trace lenght for non-energies
+         stop at Mon Apr 15 15:04:36 CDT 2019
+RUN-045 start at Mon Apr 15 15:12:27 CDT 2019, possible problem with daq, run 44 unsortable?
+         stop at Mon Apr 15 15:43:08 CDT 2019
+RUN-046 start at Mon Apr 15 15:56:42 CDT 2019, last two runs corrupted somehow. test run now
+         stop at Mon Apr 15 15:58:49 CDT 2019
+RUN-047 start at Mon Apr 15 16:02:03 CDT 2019, run 46 sorted ok, try a longer run
+         stop at Mon Apr 15 16:59:01 CDT 2019
