@@ -46,9 +46,9 @@ public :
    ULong64_t       ezero_t[10];
    
    //Trace
-   Float_t         te[24];
-   Float_t         te_r[24];
-   Float_t         te_t[24];
+   Float_t         te[30];
+   Float_t         te_r[30];
+   Float_t         te_t[30];
    Float_t         trdt[8];
    Float_t         trdt_t[8];
    Float_t         trdt_r[8];
@@ -113,14 +113,14 @@ public :
    //tree  
    Int_t eventID;
    Int_t run;
-   Float_t eC[24];
-   Float_t xfC[24];
-   Float_t xnC[24];
-   ULong64_t eC_t[24];
-   Float_t x[24]; // unadjusted position, range (-1,1)
-   Float_t z[24]; 
+   Float_t eC[30];
+   Float_t xfC[30];
+   Float_t xnC[30];
+   ULong64_t eC_t[30];
+   Float_t x[30]; // unadjusted position, range (-1,1)
+   Float_t z[30]; 
    int det;    //TODO, when multiHit, which is detID?
-   int hitID[24]; // is e, xf, xn are all fired.
+   int hitID[30]; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
    
    Float_t thetaCM;
@@ -165,14 +165,14 @@ public :
    double perpDist;
    double length;
    double firstPos;
-   double xnCorr[24]; // xn correction for xn = xf
-   double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
-   double xCorr[24]; // correction of x, scale to (-1,1)
+   double xnCorr[30]; // xn correction for xn = xf
+   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   double xCorr[30]; // correction of x, scale to (-1,1)
    
-   double eCorr[24][2]; // e-correction
+   double eCorr[30][2]; // e-correction
    double rdtCorr[8]; //rdt-correction
    
-   double cTCorr[24][9]; // coinTime correction
+   double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
    
    bool isReaction;
@@ -307,20 +307,20 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("eventID",&eventID,"eventID/I"); 
    if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
    
-   newTree->Branch("e" ,   eC, "e[24]/F");
-   //newTree->Branch("xf",  xfC, "xf[24]/F");
-   //newTree->Branch("xn",  xnC, "xn[24]/F");
-   newTree->Branch("x" ,    x, "x[24]/F");
-   newTree->Branch("z" ,    z, "z[24]/F");
+   newTree->Branch("e" ,   eC, "e[30]/F");
+   //newTree->Branch("xf",  xfC, "xf[30]/F");
+   //newTree->Branch("xn",  xnC, "xn[30]/F");
+   newTree->Branch("x" ,    x, "x[30]/F");
+   newTree->Branch("z" ,    z, "z[30]/F");
    newTree->Branch("detID", &det, "det/I");
-   newTree->Branch("hitID", hitID, "hitID[24]/I");
+   newTree->Branch("hitID", hitID, "hitID[30]/I");
    newTree->Branch("multiHit", &multiHit, "multiHit/I");
    
    newTree->Branch("Ex", &Ex, "Ex/F");
    newTree->Branch("thetaCM", &thetaCM, "thetaCM/F");
    newTree->Branch("thetaLab", &thetaLab, "thetaLab/F");
    
-   newTree->Branch("e_t", eC_t, "e_t[24]/l");
+   newTree->Branch("e_t", eC_t, "e_t[30]/l");
    
    newTree->Branch("rdt", rdtC, "rdtC[8]/F");
    newTree->Branch("rdt_t", rdtC_t, "rdtC_t[8]/l");
@@ -485,7 +485,7 @@ void Cali_e_trace::Init(TTree *tree)
       
    }else{
       printf("... fail.\n");
-      for( int i = 0; i < 24 ; i++){
+      for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
       }
@@ -510,7 +510,7 @@ void Cali_e_trace::Init(TTree *tree)
       
    }else{
       printf("... fail.\n");
-      for( int i = 0; i < 24 ; i++){
+      for( int i = 0; i < numDet ; i++){
          xCorr[i] = 1.;
       }
       //return;
@@ -534,7 +534,7 @@ void Cali_e_trace::Init(TTree *tree)
       
    }else{
       printf("... fail.\n");
-      for( int i = 0; i < 24 ; i++){
+      for( int i = 0; i < numDet ; i++){
          rdtCorr[i] = 1.;
       }
    }

@@ -24,16 +24,16 @@ public :
    // Declaration of leaf types
    Int_t           eventID;
    Int_t           run;
-   Float_t         e[24];
-   Float_t         x[24];
-   Float_t         z[24];
+   Float_t         e[30];
+   Float_t         x[30];
+   Float_t         z[30];
    Int_t           detID;
-   Int_t           hitID[24];
+   Int_t           hitID[30];
    Int_t           multiHit;
    Float_t         Ex;
    Float_t         thetaCM;
    Float_t         thetaLab;
-   ULong64_t       e_t[24];
+   ULong64_t       e_t[30];
    Float_t         rdt[8];
    ULong64_t       rdt_t[8];
    Int_t           rdtID[8];

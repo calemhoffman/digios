@@ -37,6 +37,7 @@ public :
    // Declaration of leaf types
    Float_t         e[100];
    ULong64_t       e_t[100];
+   Float_t         ring[100];
    Float_t         xf[100];
    Float_t         xn[100];
    Float_t         rdt[100];
@@ -49,6 +50,7 @@ public :
    // List of branches
    TBranch        *b_Energy;   //!
    TBranch        *b_EnergyTimestamp;   //!
+   TBranch        *b_Ring;   //!
    TBranch        *b_XF;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_RDT;   //!
@@ -141,6 +143,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("e", e, &b_Energy);
+   fChain->SetBranchAddress("ring", ring, &b_Ring);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
    

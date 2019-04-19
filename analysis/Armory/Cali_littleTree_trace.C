@@ -73,6 +73,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    eventID += 1;
    
    b_Energy->GetEntry(entry,0);
+   b_Ring->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
@@ -111,6 +112,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    for(int idet = 0 ; idet < numDet; idet++){
       
+      if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
       if( TMath::IsNaN(xf[idet]) && TMath::IsNaN(xn[idet])  ) continue;
       
