@@ -5,12 +5,20 @@ echo "#############################################"
 
 expName=$1
 
-read -p "========== Have you git the present experiment (Y/N)?" isGit
-
-if [ ${isGit} == "N" ]; then
-    echo "Please git it."
-    exit 1
+echo -e "--- Checking git repository is clean or not...."
+gitCheck=$(git status --porcelain --untraced-files=no | wc -1)
+if [ ${gitCheck} -eq 0 ]; then
+    echo "---- clean."
+else
+    git status
+    echo "=============== Please fix the git status"
+    exit 1;
 fi
+#read -p "========== Have you git the present experiment (Y/N)?" isGit
+#if [ ${isGit} == "N" ]; then
+#    echo "Please git it."
+#    exit 1
+#fi
 
 if [ $# -eq 0 ]; then
    read -p 'Enter the new experiment name: ' expName
