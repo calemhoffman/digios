@@ -21,6 +21,7 @@ fi
 #fi
 
 if [ $# -eq 0 ]; then
+   git branch -a
    read -p 'Enter the new experiment name: ' expName
 fi
 
