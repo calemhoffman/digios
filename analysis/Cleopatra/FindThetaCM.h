@@ -168,7 +168,9 @@ void FindThetaCM(double Ex, double XRATION = 0.95,
    printf("-------------------------------------------------\n");
    for( int i = 0; i < iDet; i++){
       double tMin = tx->Eval(midPos[i]-length*XRATION/2.);
+      if( tMin < 0 ) tMin = 0;
       double tMax = tx->Eval(midPos[i]+length*XRATION/2.);
+      if( tMax < 0 ) tMax = 0;
       
       double tMean = (tMax + tMin)/2.;
       double tHalf = (tMax - tMin)/2.;
