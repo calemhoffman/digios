@@ -5,14 +5,23 @@ echo "#############################################"
 
 expName=$1
 
-read -p "========== Have you git the present experiment (Y/N)?" isGit
-
-if [ ${isGit} == "N" ]; then
-    echo "Please git it."
-    exit 1
+echo -e "--- Checking git repository is clean or not...."
+gitCheck=`git status --porcelain --untracked-files=no | wc -l`
+if [ ${gitCheck} -eq 0 ]; then
+    echo "---- clean."
+else
+    git status
+    echo "=============== Please fix the git status"
+    exit 1;
 fi
+#read -p "========== Have you git the present experiment (Y/N)?" isGit
+#if [ ${isGit} == "N" ]; then
+#    echo "Please git it."
+#    exit 1
+#fi
 
 if [ $# -eq 0 ]; then
+   git branch -a
    read -p 'Enter the new experiment name: ' expName
 fi
 
@@ -25,21 +34,27 @@ echo "PC name : ${PCName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
    DATAPATH=/media/DIGIOSDATA3
+   expDIR=~/digios
    
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
 elif [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
    DATAPATH=~/experiments
+   expDIR=~/digios
 
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
 elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
    DATAPATH=/lcrc/project/HELIOS/
    space=100000000
+   expDIR=/lcrc/project/HELIOS/digios
+
 else
    read -p "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
    echo "DATAPATH for    raw data : ${DATAPATH}/data"
@@ -80,7 +95,7 @@ else
    else
        echo "Experimental Name (${expName}) already in use."
        echo "Please take another name or git pull origin ${expName}"
-       read -p "Do you want to pull origin ${expName} (Y/N):"  pullFlag
+       read -p "Do you want to checkout origin/${expName} (Y/N):"  pullFlag
        if [ ${pullFlag} == "N" ]; then
 	   exit
        else
@@ -111,7 +126,6 @@ mkdir -vp ${rootData}
 
 #===== create symbolic links
 echo "=================== creating symbolic links"
-expDIR=~/digios
 rm -f ${expDIR}/analysis/data
 rm -f ${expDIR}/analysis/merged_data
 rm -f ${expDIR}/analysis/root_data
