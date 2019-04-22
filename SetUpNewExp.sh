@@ -33,21 +33,27 @@ echo "PC name : ${PCName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
    DATAPATH=/media/DIGIOSDATA3
+   expDIR=~/digios
    
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
 elif [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
    DATAPATH=~/experiments
+   expDIR=~/digios
 
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
 elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
    DATAPATH=/lcrc/project/HELIOS/
    space=100000000
+   expDIR=/lcrc/project/HELIOS/digios
+
 else
    read -p "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
    echo "DATAPATH for    raw data : ${DATAPATH}/data"
@@ -119,7 +125,6 @@ mkdir -vp ${rootData}
 
 #===== create symbolic links
 echo "=================== creating symbolic links"
-expDIR=~/digios
 rm -f ${expDIR}/analysis/data
 rm -f ${expDIR}/analysis/merged_data
 rm -f ${expDIR}/analysis/root_data
