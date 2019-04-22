@@ -30,5 +30,5 @@
 #reaction        gs-spin    orbital  spin-pi(Ex)   Ex   ELab      Potentials
 11B(d,p)12B        3/2      0p3/2     1+         0.000  8.667MeV/u     AK
 11B(d,p)12B        3/2      0p3/2     2+         0.953  8.667MeV/u     AK
-11B(d,p)12B        3/2      0d5/2     2-         1.674  8.667MeV/u     AK
-11B(d,p)12B        3/2      0d5/2     1-         2.620  8.667MeV/u     AK
+11B(d,p)12B        3/2      0s1/2     2-         1.674  8.667MeV/u     AK
+11B(d,p)12B        3/2      0s1/2     1-         2.620  8.667MeV/u     AK
