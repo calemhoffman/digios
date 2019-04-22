@@ -6,7 +6,7 @@ echo "#############################################"
 expName=$1
 
 echo -e "--- Checking git repository is clean or not...."
-gitCheck=`git status --porcelain --untraced-files=no | wc -l`
+gitCheck=`git status --porcelain --untracked-files=no | wc -l`
 if [ ${gitCheck} -eq 0 ]; then
     echo "---- clean."
 else
