@@ -309,7 +309,7 @@ vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1,
 //########################################
 void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString optStat = ""){
 
-  TCanvas *cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 800, 100, 800,800);
+  TCanvas *cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
   cFitAuto->Divide(1,2);
   
   gStyle->SetOptStat(optStat);
@@ -322,7 +322,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   int xBin = hist->GetXaxis()->GetNbins();
   
   TString titleH;
-  titleH.Form("fitted spectrum; Ex [MeV]; Count / %4.0f keV", (xMax-xMin)*1000./xBin );
+  titleH.Form("fitted spectrum (BG=%d); Ex [MeV]; Count / %4.0f keV", bgEst, (xMax-xMin)*1000./xBin );
   specS->SetTitle(titleH);   
   specS->SetName("specS");
   //specS->GetXaxis()->SetTitleSize(0.06);

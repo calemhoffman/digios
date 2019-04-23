@@ -16,7 +16,7 @@
 #include "TGraph.h"
 #include "../Cleopatra/HELIOS_LIB.h"
 
-void FindThetaCM(double Ex, double XRATION = 0.95, 
+void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95, 
             string basicConfig="reactionConfig.txt",  
             string detGeoFileName = "detectorGeo.txt"){
 
@@ -167,13 +167,23 @@ void FindThetaCM(double Ex, double XRATION = 0.95,
    printf("         %6s - %6s |  %6s, %6s\n", "Min",  "Max", "Mean", "Half");
    printf("-------------------------------------------------\n");
    for( int i = 0; i < iDet; i++){
-      double tMin = tx->Eval(midPos[i]-length*XRATION/2.);
-      double tMax = tx->Eval(midPos[i]+length*XRATION/2.);
+     double zMin = midPos[i]-length*XRATION/2.;
+     double zMax = midPos[i]+length*XRATION/2.;
+     double zLength = zMax - zMin; 
+     double zStep = zLength/(nDivision+1);
+     for( int j = 0 ; j < nDivision+1 ; j++){
+       
+       double tMin = tx->Eval(zMin + j*zStep);
+       if( tMin < 0 ) tMin = 5;
+       double tMax = tx->Eval(zMin + (j+1)*zStep);
+       if( tMax < 0 ) tMax = 5;
+       
+       double tMean = (tMax + tMin)/2.;
+       double tHalf = (tMax - tMin)/2.;
       
-      double tMean = (tMax + tMin)/2.;
-      double tHalf = (tMax - tMin)/2.;
-      
-      printf(" det-%d:  %6.2f - %6.2f |  %6.2f, %6.2f\n", i,tMin,  tMax, tMean, tHalf);
+       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f\n", i, j, tMin,  tMax, tMean, tHalf);
+     }
+     if( nDivision > 0 ) printf("--------------\n");
    }
    printf("================================================= \n");
 
