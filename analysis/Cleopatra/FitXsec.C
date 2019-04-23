@@ -72,8 +72,8 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
   double yMin, yMax, yMean, dy;
   yMean = (yRange[1] + yRange[0])/2.;
   dy = abs(yRange[1] - yRange[0])/2.;
-  yMin = TMath::Power(10, TMath::Floor(TMath::Log10(yRange[0])));
-  yMax = TMath::Power(10, TMath::Ceil(TMath::Log10(yRange[1])));
+  yMin = TMath::Power(10, TMath::Floor(TMath::Log10(yRange[0])))*0.5;
+  yMax = TMath::Power(10, TMath::Ceil(TMath::Log10(yRange[1])))*1.5;
 
   gX->GetYaxis()->SetRangeUser(yMin, yMax);
   gX->GetXaxis()->SetLimits(0, xRange[1] * 1.1);
