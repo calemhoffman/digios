@@ -14,7 +14,7 @@ echo "   *.d  "
 echo "   *.so  "
 echo "   *.pcm  "
 echo "==================================================="
-echo " Remove above files? (Yes/No)\c"
+echo " Remove above files? (Yes/No)"
 read conti
 
 if [ ${conti} == "Yes" ] ; then
