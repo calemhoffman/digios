@@ -140,14 +140,18 @@ echo "=================== done."
 if [ ${isBranchExist} -eq 0 ]; then
 
     echo "======== Clean up working directory "
-    rm -fv correction_*.dat
-    rm -fv reaction.dat
-    rm -fv run_Summary.dat
-    rm -fv example.*
-    rm -fv RunTimeStamp.dat
-    rm -fv *.root
-    rm -fv *.d
-    rm -fv *.so
-    rm -fv *.pcm
+    rm -fv ${expDIR}/analysis/working/correction_*.dat
+    rm -fv ${expDIR}/analysis/working/reaction.dat
+    rm -fv ${expDIR}/analysis/working/run_Summary.dat
+    rm -fv ${expDIR}/analysis/working/example.*
+    rm -fv ${expDIR}/analysis/working/RunTimeStamp.dat
+    rm -fv ${expDIR}/analysis/working/*.root
+    rm -fv ${expDIR}/analysis/working/*.d
+    rm -fv ${expDIR}/analysis/working/*.so
+    rm -fv ${expDIR}/analysis/working/*.pcm
+
+    echo "======== git commit "
+    git add -A
+    git commit -m "new experiment ${expName}"
 
 fi 
