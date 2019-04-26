@@ -610,6 +610,10 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    ryHit = TMath::QuietNaN();
    phiB = TMath::QuietNaN();
    
+   //range of detector azimuth angle, for beam at center
+   double azimu = TMath::Pi()/ mDet; 
+   double azimuDet = TMath::ATan2(width/2., perpDist);
+   
    //rotate Pb and PB to B-Field 
    Pb.RotateX(BfieldTheta);
    PB.RotateX(BfieldTheta);
@@ -686,9 +690,9 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          loop += 1;
          int n = 2*loop -1;
          
-         if( loop > 50 ) {
-            return -3;  // when loop > 50
-            break; // maximum 50 loops
+         if( loop > 10 ) {
+            return -3;  // when loop > 10
+            break; // maximum 10 loops
          }
          
          for( int j = startJ ; j < startJ + mDet; j++){
@@ -718,15 +722,20 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             // when dir == 0, no solution
 
             // calculate the distance from middle of detector
-            double xHit = GetXPos(zHit) + xOff;
+            double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
+            
+            //======= Check inside the detector
+            double eta = TMath::Abs(TMath::ATan2(yHit,xHit));
+            double etaMod = TMath::Abs(fmod(eta + azimu,  2* azimu) - azimu);
+            if ( etaMod > azimuDet ) return hit = -8;
          
             //======= check Block
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support && sHit < perpDist/2. ) return -6; // blocked by support
+               if( pos[0] > zHit && zHit > pos[0] - support /*&& sHit < perpDist/2.*/ ) return -6; // blocked by support
             }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < perpDist/2.) return -6;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support /*&& sHit < perpDist/2.*/) return -6;
             }
             
             //====== check hit
@@ -750,7 +759,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       dphi = t * vt0 / rho;
       
       //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
-      if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
+      //if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
       
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
