@@ -6,14 +6,7 @@ source ${constFile} #load expName
 #==== next experiment number
 LastRunNum=$((LastRunNum + 1))
 
-echo "#!/bin/bash -l" > ${constFile}
-echo "expName=${expName}" >> ${constFile}
-echo "LastRunNum=${LastRunNum}" >> ${constFile}
-
-#read -p 'Enter the Run Number (e.g. 001): ' RUN
-
 RUN=${LastRunNum}
-
 #check RUN is 3 digit
 runLen=${#RUN}
 if [ ${runLen} -eq 1 ]; then
@@ -29,6 +22,9 @@ echo "=========================================="
 #==== read comment
 read -p 'Singleline comment for this run: ' COMMENT
 
+echo "#!/bin/bash -l" > ${constFile}
+echo "expName=${expName}" >> ${constFile}
+echo "LastRunNum=${LastRunNum}" >> ${constFile}
 
 set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
