@@ -660,6 +660,14 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       eB   = PB.E() - PB.M();
       zB   = vp0 * tB;
       
+      //========== calculate particle-B hit radius on recoil dectector
+      vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
+      vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
+      rhoBHit = GetRecoilR(posRecoil);
+      rxHit = GetRecoilXPos(posRecoil);
+      ryHit = GetRecoilYPos(posRecoil);
+      if(isCoincidentWithRecoil && rhoBHit > rhoRecoil ) return -2; // when particle-B miss the recoil detector
+
       //========= check is particle-b was blocked by recoil detector
       rhoHit = GetR(posRecoil) ;// radius of light particle b at recoil detector
       if( z0 > 0 && posRecoil > 0 && z0 > posRecoil && rhoHit < rhoRecoil) {
@@ -668,13 +676,6 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       if( z0 < 0 && posRecoil < 0 && z0 < posRecoil && rhoHit < rhoRecoil) {
           return -1 ;
       }
-      //========== calculate particle-B hit radius on recoil dectector
-      vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
-      vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-      rhoBHit = GetRecoilR(posRecoil);
-      rxHit = GetRecoilXPos(posRecoil);
-      ryHit = GetRecoilYPos(posRecoil);
-      if(isCoincidentWithRecoil && rhoBHit > rhoRecoil ) return -2; // when particle-B miss the recoil detector
 
       //================ Calulate z hit
       double zHit = TMath::QuietNaN();
@@ -754,7 +755,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       dphi = t * vt0 / rho;
       
       //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
-      //if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
+      if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
       double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
       double yHit = GetYPos(zHit) + yOff;
       //======= Check inside the detector
