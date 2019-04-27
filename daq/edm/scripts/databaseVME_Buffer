@@ -29,7 +29,12 @@ while [ ${loopflag} -eq 1 ]; do
 	curl -v -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
 	
 	sleep 0.5
-	
+
+	if [ ${buffer} -lt 200 ]; then
+	    caput Online_CS_StartStop Stop
+	    sleep 10
+	    caput Online_CS_StartStop Start
+	fi
    done
 
 done
