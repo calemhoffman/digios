@@ -725,12 +725,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
-            
-            //======= Check inside the detector
-            double eta = TMath::Abs(TMath::ATan2(yHit,xHit));
-            double etaMod = TMath::Abs(fmod(eta + azimu,  2* azimu) - azimu);
-            if ( etaMod > azimuDet ) return hit = -8;
-         
+               
             //======= check Block
             if( firstPos > 0 ){
                if( pos[0] > zHit && zHit > pos[0] - support /*&& sHit < perpDist/2.*/ ) return -6; // blocked by support
@@ -760,7 +755,13 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       
       //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
       //if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
-      
+      double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
+      double yHit = GetYPos(zHit) + yOff;
+      //======= Check inside the detector
+      double eta = TMath::Abs(TMath::ATan2(yHit,xHit));
+      double etaMod = TMath::Abs(fmod(eta + azimu,  2* azimu) - azimu);
+      if ( etaMod > azimuDet ) return hit = -8;
+    
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
          if( firstPos > 0 ){
