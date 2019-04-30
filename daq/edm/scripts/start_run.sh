@@ -20,6 +20,7 @@ echo "Starting run : ${RUN}"
 echo "=========================================="
 
 #==== read comment
+echo 'Ctrl+C to cancel with no harm.'
 read -p 'Singleline comment for this run: ' COMMENT
 
 echo "#!/bin/bash -l" > ${constFile}

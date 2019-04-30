@@ -19,7 +19,7 @@ threshold=$(caget VME0${VME}:MDIG${DIG}:led_threshold${CH} | awk '{print $2}')
 #influx -execute "${dataStr}" -database="testing"
 
 dataStr="threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${threshold}"
-curl -sS -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
 
 echo " === current threshold is ${threshold}"
 
@@ -31,6 +31,6 @@ caput VME0${VME}:MDIG${DIG}:led_threshold${CH} ${newThreshold}
 #influx -execute "${dataStr}" -database="testing"
 
 dataStr="threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${newThreshold}"
-curl -sS -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
 
 echo "========= done."
