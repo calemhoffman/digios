@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x -147
-y 84
+x 22
+y 110
 w 1800
 h 1100
 font "helvetica-bold-r-10.0"
@@ -11853,7 +11853,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME01:MDIG1:channel_enable7"
+controlPv "VME04:MDIG1:channel_enable7"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
