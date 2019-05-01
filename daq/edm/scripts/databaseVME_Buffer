@@ -51,7 +51,7 @@ while [ ${loopflag} -eq 1 ]; do
 
 	sleep 0.5
 
-	if [ ${buffer} -lt 200 ]; then
+	if [ ${buffer} -lt 300 ]; then
 	    caput Online_CS_StartStop Stop
 	    echo " stop ACQ at $(date), wait for 10 sec" >> ~/helioBuffer.log
 	    sleep 10

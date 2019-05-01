@@ -30,8 +30,8 @@ caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
 caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
 caput GLBL:DIG:trigger_polarity Both
 caput GLBL:DIG:pileup_mode Accept
-#caput GLBL:DIG:trigger_mux_select ExtTTCL
-caput GLBL:DIG:trigger_mux_select IntAcptAll 
+caput GLBL:DIG:trigger_mux_select ExtTTCL
+#caput GLBL:DIG:trigger_mux_select IntAcptAll 
 caput GLBL:DIG:channel_enable Run
 caput GLBL:DIG:win_comp_min -10
 caput GLBL:DIG:win_comp_max  0
@@ -101,6 +101,7 @@ caput GLBL:DIG:load_delays 0
 #caput VME01:MDIG3:channel_enable9 Reset
 #caput VME01:MDIG4:channel_enable2 Reset
 #caput VME01:MDIG4:channel_enable3 Reset
+caput VME01:MDIG4:trigger_mux_select IntAcptAll 
 #caput VME01:MDIG4:channel_enable4 Reset
 #caput VME01:MDIG4:channel_enable5 Reset
 #caput VME01:MDIG4:channel_enable6 Reset
@@ -122,45 +123,45 @@ caput GLBL:DIG:load_delays 0
 #   Recoil RTR1 D ?? not in trigger
 ##################################################################
 echo "Misc X-plane"
-caput VME32:RTR1:reg_X_PLANE_MAP_A 0 
+caput VME32:RTR1:reg_X_PLANE_MAP_A 31 
 caput VME32:RTR1:reg_X_PLANE_MAP_B 0
-caput VME32:RTR1:reg_X_PLANE_MAP_C 0
+caput VME32:RTR1:reg_X_PLANE_MAP_C 31
 caput VME32:RTR1:reg_X_PLANE_MAP_D 0
 
 echo "Setting X-plane - Si Array Energies Only"
-caput VME32:RTR1:reg_X_PLANE_MAP_E 252
-caput VME32:RTR1:reg_X_PLANE_MAP_F 0
-caput VME32:RTR1:reg_X_PLANE_MAP_G 63
+caput VME32:RTR1:reg_X_PLANE_MAP_E 528
+caput VME32:RTR1:reg_X_PLANE_MAP_F 31
+caput VME32:RTR1:reg_X_PLANE_MAP_G 0
 caput VME32:RTR1:reg_X_PLANE_MAP_H 0
 
-caput VME32:RTR2:reg_X_PLANE_MAP_A 0
-caput VME32:RTR2:reg_X_PLANE_MAP_B 15
-caput VME32:RTR2:reg_X_PLANE_MAP_C 192
+caput VME32:RTR2:reg_X_PLANE_MAP_A 31
+caput VME32:RTR2:reg_X_PLANE_MAP_B 0
+caput VME32:RTR2:reg_X_PLANE_MAP_C 31
 caput VME32:RTR2:reg_X_PLANE_MAP_D 0
 
-caput VME32:RTR2:reg_X_PLANE_MAP_E 3
-caput VME32:RTR2:reg_X_PLANE_MAP_F 240
+caput VME32:RTR2:reg_X_PLANE_MAP_E 0
+caput VME32:RTR2:reg_X_PLANE_MAP_F 31
 caput VME32:RTR2:reg_X_PLANE_MAP_G 0
 caput VME32:RTR2:reg_X_PLANE_MAP_H 0
 
 echo "Setting Y-plane - elum"
-caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_B 255
-caput VME32:RTR1:reg_Y_PLANE_MAP_C 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_A 992
+caput VME32:RTR1:reg_Y_PLANE_MAP_B 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_C 992
 caput VME32:RTR1:reg_Y_PLANE_MAP_D 0
 
 caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_F 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_F 992
 caput VME32:RTR1:reg_Y_PLANE_MAP_G 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_H 0
 
-caput VME32:RTR2:reg_Y_PLANE_MAP_A 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_A 992
 caput VME32:RTR2:reg_Y_PLANE_MAP_B 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_C 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_C 992
 caput VME32:RTR2:reg_Y_PLANE_MAP_D 0
 
 caput VME32:RTR2:reg_Y_PLANE_MAP_E 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_F 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_F 992
 caput VME32:RTR2:reg_Y_PLANE_MAP_G 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_H 0
 
