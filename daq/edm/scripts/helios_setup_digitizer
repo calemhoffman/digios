@@ -28,7 +28,7 @@ caput GLBL:DIG:led_threshold 400
 caput GLBL:DIG:CFD_fraction 30
 caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
 caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
-caput GLBL:DIG:trigger_polarity Both
+caput GLBL:DIG:trigger_polarity FallEdge
 caput GLBL:DIG:pileup_mode Accept
 caput GLBL:DIG:trigger_mux_select ExtTTCL
 #caput GLBL:DIG:trigger_mux_select IntAcptAll 
@@ -101,7 +101,7 @@ caput GLBL:DIG:load_delays 0
 #caput VME01:MDIG3:channel_enable9 Reset
 #caput VME01:MDIG4:channel_enable2 Reset
 #caput VME01:MDIG4:channel_enable3 Reset
-caput VME01:MDIG4:trigger_mux_select IntAcptAll 
+caput VME03:MDIG4:trigger_mux_select IntAcptAll 
 #caput VME01:MDIG4:channel_enable4 Reset
 #caput VME01:MDIG4:channel_enable5 Reset
 #caput VME01:MDIG4:channel_enable6 Reset
@@ -126,10 +126,11 @@ echo "Misc X-plane"
 caput VME32:RTR1:reg_X_PLANE_MAP_A 31 
 caput VME32:RTR1:reg_X_PLANE_MAP_B 0
 caput VME32:RTR1:reg_X_PLANE_MAP_C 31
-caput VME32:RTR1:reg_X_PLANE_MAP_D 0
+caput VME32:RTR1:reg_X_PLANE_MAP_D 170
 
 echo "Setting X-plane - Si Array Energies Only"
-caput VME32:RTR1:reg_X_PLANE_MAP_E 528
+#caput VME32:RTR1:reg_X_PLANE_MAP_E 528
+caput VME32:RTR1:reg_X_PLANE_MAP_E 0
 caput VME32:RTR1:reg_X_PLANE_MAP_F 31
 caput VME32:RTR1:reg_X_PLANE_MAP_G 0
 caput VME32:RTR1:reg_X_PLANE_MAP_H 0

@@ -29,6 +29,9 @@ xterm -T database10  -geometry 80x4+0+900  -e "~/digios/daq/edm/scripts/database
 xterm -T database11  -geometry 80x4+0+1000 -e "~/digios/daq/edm/scripts/databaseVME 2 3" &  # bottom bottom, e-r
 xterm -T database12  -geometry 80x4+100+0 -e "~/digios/daq/edm/scripts/databaseVME 2 1" &  # bottom  left, e-r
 
+#==== recoil
+xterm -T database15   -geometry 80x4+100+600  -e "~/digios/daq/edm/scripts/databaseVME 1 4" & # recoil 
+
 #===== threshold for every 4 min = 240 sec
 xterm -T database13  -geometry 80x4+100+100 -e "~/digios/daq/edm/scripts/databaseVME_Threshold 300" & 
 xterm -T database14  -geometry 80x4+100+200 -e "~/digios/daq/edm/scripts/databaseVME_Buffer" &
@@ -37,7 +40,7 @@ fi
 
 
 if [ ${option} == "stop" ]; then
-    for a in {1..13} ; do 
+    for a in {1..15} ; do 
 	processID=$(ps aux | grep database$a | grep 'xterm' | awk '{print $2}')
 	kill -9 ${processID}
     done        
