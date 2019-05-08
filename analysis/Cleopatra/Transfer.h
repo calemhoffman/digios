@@ -311,6 +311,19 @@ void Transfer(
   TMacro detGeo(heliosDetGeoFile.c_str());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
+  
+  TMacro hitMeaning;
+  TString str;
+  str = "hit == 1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
+  str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -3 ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
+  str = "hit == -4 ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -5 ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -6 ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
+  str = "hit == -7 ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
+  str = "hit == -8 ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
+  hitMeaning.Write("hitMeaning");
 
   int hit; // the output of Helios.CalHit
   tree->Branch("hit", &hit, "hit/I");
@@ -402,15 +415,17 @@ void Transfer(
   }
   
   //in case need other recoil detector. 
-  double rxHit1, ryHit1;
+  double rxHit1, ryHit1, rhoBHit1;
   if( zRecoil1 != 0 ){
     tree->Branch("rxHit1", &rxHit1, "rxHit1/D");
     tree->Branch("ryHit1", &ryHit1, "ryHit1/D");
+    tree->Branch("rhoBHit1", &rhoBHit1, "rhoBHit1/D");
   }
-  double rxHit2, ryHit2;
+  double rxHit2, ryHit2, rhoBHit2;
   if( zRecoil2 != 0 ){
     tree->Branch("rxHit2", &rxHit2, "rxHit2/D");
     tree->Branch("ryHit2", &ryHit2, "ryHit2/D");
+    tree->Branch("rhoBHit2", &rhoBHit2, "rhoBHit2/D");
   }
   //======= function for e-z plot for ideal case
   printf("++++ generate functions\n");
@@ -652,10 +667,12 @@ void Transfer(
     if ( zRecoil1 != 0 ){
       rxHit1 = helios.GetRecoilXPos(zRecoil1);
       ryHit1 = helios.GetRecoilYPos(zRecoil1);
+      rhoBHit1 = helios.GetRecoilR(zRecoil1);
     }
     if ( zRecoil2 != 0 ){
       rxHit2 = helios.GetRecoilXPos(zRecoil2);
       ryHit2 = helios.GetRecoilYPos(zRecoil2);
+      rhoBHit2 = helios.GetRecoilR(zRecoil2);
     }
     
     reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());
