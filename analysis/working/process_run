@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run_simple.sh #RunNum #Merge #EventBld #GeneralSort #Monitor"
+  echo "$./process_run #RunNum #Merge #EventBld #GeneralSort #Monitor"
   echo "              RunNum = a 3 digit run number, e.g. 001"
   echo "               Merge = 1/0/-1, is Merge the raw data? -1 is force merge"  
   echo "            EventBld = 1/0/-1, is building event from the meged data? -1 is force build"  
@@ -203,7 +203,10 @@ fi
 
 # convert to normal number, without zero in front
 if [ "${RUN:0:1}" == "0" ] ; then
-      runID=${RUN:1:2}
+    runID=${RUN:1:2}
+    if [ "${runID:0:1}" == "0" ]; then
+	runID=${runID:1:1}
+    fi
 else
       runID=$( printf '%d' $RUN )
 fi;
