@@ -38,9 +38,10 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
-      varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i);
+      //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
+      varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
 
-      expression[i].Form("%s:%s>>h(500, 0, 8000, 500, 0, 5000)", 
+      expression[i].Form("%s:%s>>h(500, 0, 5000, 500, 0, 2000)", 
             varY.Data(),
             varX.Data());
 
