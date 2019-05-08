@@ -5,6 +5,10 @@ echo "#############################################"
 
 expName=$1
 
+if [ ${expName} == "master" ] || [ ${expName} == "Master" ]; then
+   expName="ARR01"
+fi
+
 echo -e "--- Checking git repository is clean or not...."
 gitCheck=`git status --porcelain --untracked-files=no | wc -l`
 if [ ${gitCheck} -eq 0 ]; then
