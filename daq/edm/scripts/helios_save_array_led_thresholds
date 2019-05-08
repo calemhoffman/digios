@@ -43,6 +43,7 @@ done
 date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> $sfile
 rm -rf edm/scripts/array_saved
 ln -s ../../$sfile edm/scripts/array_saved
+echo "saved in : ${sfile}"
 echo "########## Done Saving Thresholds ###########"
 exit
 
