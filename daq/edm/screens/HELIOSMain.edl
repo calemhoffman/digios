@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 46
-y 90
+x 880
+y 57
 w 1400
 h 816
 font "helvetica-bold-r-10.0"
@@ -5271,7 +5271,7 @@ x 771
 y 677
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count1_RBV"
+controlPv "VME01:MDIG4:ahit_count1_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5292,7 +5292,7 @@ x 771
 y 721
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count7_RBV"
+controlPv "VME01:MDIG4:ahit_count7_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5313,7 +5313,7 @@ x 771
 y 692
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count3_RBV"
+controlPv "VME01:MDIG4:ahit_count3_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5334,7 +5334,7 @@ x 771
 y 707
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count5_RBV"
+controlPv "VME01:MDIG4:ahit_count5_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5355,7 +5355,7 @@ x 830
 y 677
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count0_RBV"
+controlPv "VME01:MDIG4:ahit_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5376,7 +5376,7 @@ x 830
 y 692
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count2_RBV"
+controlPv "VME01:MDIG4:ahit_count2_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5397,7 +5397,7 @@ x 830
 y 707
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count4_RBV"
+controlPv "VME01:MDIG4:ahit_count4_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5418,7 +5418,7 @@ x 830
 y 721
 w 59
 h 15
-controlPv "VME04:MDIG4:ahit_count6_RBV"
+controlPv "VME01:MDIG4:ahit_count6_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -5481,7 +5481,7 @@ x 647
 y 677
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count1_RBV"
+controlPv "VME01:MDIG4:disc_count1_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5502,7 +5502,7 @@ x 647
 y 721
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count7_RBV"
+controlPv "VME01:MDIG4:disc_count7_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5523,7 +5523,7 @@ x 647
 y 692
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count3_RBV"
+controlPv "VME01:MDIG4:disc_count3_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5544,7 +5544,7 @@ x 647
 y 707
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count5_RBV"
+controlPv "VME01:MDIG4:disc_count5_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5565,7 +5565,7 @@ x 706
 y 677
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count0_RBV"
+controlPv "VME01:MDIG4:disc_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5586,7 +5586,7 @@ x 706
 y 692
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count2_RBV"
+controlPv "VME01:MDIG4:disc_count2_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5607,7 +5607,7 @@ x 706
 y 707
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count4_RBV"
+controlPv "VME01:MDIG4:disc_count4_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -5628,7 +5628,7 @@ x 706
 y 721
 w 59
 h 15
-controlPv "VME04:MDIG4:disc_count6_RBV"
+controlPv "VME01:MDIG4:disc_count6_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
