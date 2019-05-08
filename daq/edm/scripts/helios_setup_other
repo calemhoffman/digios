@@ -13,8 +13,10 @@ echo "############################################"
 
 echo "* setting array thresholds from ed,/script/array_saved."
 ./edm/scripts/array_saved
-echo "** done with array settings"
 
+echo "* setting array trace lengths from ed,/script/array_raw_data_windows_saved."
+./edm/scripts/array_raw_data_windows_saved
+echo "** done with array settings"
 #echo "* setting elum params"
 #./edm/scripts/elum_saved
 #echo "** done with elum settings"

@@ -19,6 +19,8 @@ echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.dat
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData value=0" --max-time 1 --connect-timeout 1
+
 echo wait 10 seconds before closing the IOCs
 sleep 10
 
