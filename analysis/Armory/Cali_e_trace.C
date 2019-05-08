@@ -173,25 +173,25 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          
          //========== coincident between array and RDT
          if( 0 <= det && det < iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 0;
          }else if( iDet <= det && det < 2*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 3;
          }else if( 2*iDet <= det && det < 3*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 2;
          }else if( 3*iDet <= det && det < 4*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 1;
          }
             
          //========== coincident time
