@@ -241,7 +241,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
 
       //=============================== TAC & RF TIMING
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) { //RF TIMING SWITCH
-        if (ProcessedEntries<NUMPRINT) printf("RF id %i, idDet %i\n",id[i],idDet);
+        //if (ProcessedEntries<NUMPRINT) printf("RF id %i, idDet %i\n",id[i],idDet);
         
         Int_t tacTemp = idDet-400;
         psd.TAC[tacTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
@@ -251,9 +251,12 @@ Bool_t GeneralSort::Process(Long64_t entry)
       //=============================== RECOIL
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
         Int_t rdtTemp = idDet-101;
-        psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])
-                -(float)(post_rise_energy[i]))/M;
+	float mtemp[8]={-10,-100,-100,-100,-10,-100,-100,-100};
+        psd.RDT[rdtTemp] = ((float)(-pre_rise_energy[i])
+                +(float)(post_rise_energy[i]))/mtemp[rdtTemp];
         psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
+	
+
       }
 
       //=============================== ELUM
