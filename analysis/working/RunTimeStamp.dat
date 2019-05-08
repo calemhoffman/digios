@@ -1,1 +1,215 @@
 RUN-001 start at Fri Apr 26 17:05:42 CDT 2019, alpha run, 150 HV, TraceLength = 2 us
+         stop at Sun Apr 28 22:00:24 CDT 2019
+RUN-002 start at Mon Apr 29 12:45:20 CDT 2019, alpha run new thresholds
+         stop at Mon Apr 29 13:17:37 CDT 2019
+RUN-003 start at Mon Apr 29 13:28:39 CDT 2019, changed trigger map
+         stop at Mon Apr 29 13:46:38 CDT 2019
+RUN-004 start at Mon Apr 29 16:50:51 CDT 2019, retest after de-noising
+         stop at Mon Apr 29 17:07:30 CDT 2019
+RUN-005 start at Mon Apr 29 17:25:51 CDT 2019, reduced bias to detector in breakdown vme4:dig2:channel4
+         stop at Mon Apr 29 17:26:36 CDT 2019
+RUN-006 start at Mon Apr 29 17:27:15 CDT 2019, same as run 005 but with 2us trace
+         stop at Mon Apr 29 18:04:52 CDT 2019
+RUN-007 start at Mon Apr 29 18:31:35 CDT 2019, Changed trace lengths: long for E, short for others
+         stop at Mon Apr 29 19:10:52 CDT 2019
+RUN-008 start at Wed May  1 12:14:48 CDT 2019, alpha run improved? thresholds
+         stop at Wed May  1 12:51:50 CDT 2019
+RUN-009 start at Wed May  1 12:52:26 CDT 2019, same parameters as run 8
+         stop at Wed May  1 13:02:14 CDT 2019
+RUN-010 start at Wed May  1 16:01:47 CDT 2019, alpha run
+         stop at Wed May  1 16:06:23 CDT 2019
+RUN-011 start at Wed May  1 16:25:23 CDT 2019, alpha run, noise spikes intermitent
+         stop at Wed May  1 16:35:02 CDT 2019
+RUN-012 start at Wed May  1 16:40:40 CDT 2019, alpha run, trig mode ExtTTCL
+         stop at Wed May  1 17:14:05 CDT 2019
+RUN-013 start at Wed May  1 18:00:48 CDT 2019, more alpha data after xfxn thresh adjust
+         stop at Wed May  1 18:59:12 CDT 2019
+RUN-014 start at Fri May  3 12:11:27 CDT 2019, 12B+Au recoils singles test
+         stop at Fri May  3 12:32:24 CDT 2019
+RUN-015 start at Fri May  3 12:34:03 CDT 2019, 12B+Au see if file 116 opens
+         stop at Fri May  3 12:36:29 CDT 2019
+RUN-016 start at Fri May  3 12:42:09 CDT 2019, test if file 104 opens
+         stop at Fri May  3 12:42:32 CDT 2019
+         stop at Fri May  3 12:59:09 CDT 2019
+RUN-017 start at Fri May  3 13:07:42 CDT 2019, run to see if file 112 opens
+         stop at Fri May  3 13:08:05 CDT 2019
+RUN-018 start at Fri May  3 13:28:43 CDT 2019, 12B+Au recoil singles run
+         stop at Fri May  3 13:47:20 CDT 2019
+RUN-019 start at Fri May  3 14:04:22 CDT 2019, changed M window to 10 for small signal rdts
+         stop at Fri May  3 14:27:42 CDT 2019
+RUN-020 start at Fri May  3 14:59:42 CDT 2019, recoil test CD2
+         stop at Fri May  3 15:18:49 CDT 2019
+RUN-021 start at Fri May  3 16:42:00 CDT 2019, increased to 150 pnA primary thick CD2
+         stop at Fri May  3 17:18:06 CDT 2019
+RUN-022 start at Fri May  3 17:28:58 CDT 2019, continue on CD2 with 200pnA primary beam
+         stop at Fri May  3 17:36:29 CDT 2019
+RUN-023 start at Fri May  3 17:56:24 CDT 2019, Resume running with 300micg/cm2 CD2 200 pnA primary
+         stop at Fri May  3 19:12:18 CDT 2019
+RUN-024 start at Fri May  3 19:13:39 CDT 2019, 12B+CD2 300
+         stop at Fri May  3 20:24:17 CDT 2019
+RUN-025 start at Fri May  3 20:25:27 CDT 2019, 12B+CD2 300mg, after some tuning interuptions
+         stop at Fri May  3 21:27:53 CDT 2019
+RUN-026 start at Fri May  3 21:28:30 CDT 2019, 12B+CD2 300
+         stop at Fri May  3 21:30:08 CDT 2019
+RUN-027 start at Fri May  3 21:31:21 CDT 2019, 12B+CD2 300, tuning during run
+         stop at Fri May  3 21:43:33 CDT 2019
+RUN-028 start at Fri May  3 21:44:14 CDT 2019, 12B+CD2 300
+         stop at Fri May  3 21:50:34 CDT 2019
+RUN-029 start at Fri May  3 22:09:22 CDT 2019, junk
+         stop at Fri May  3 22:09:26 CDT 2019
+RUN-030 start at Fri May  3 22:12:01 CDT 2019, 12B on 3H
+         stop at Fri May  3 22:17:27 CDT 2019
+RUN-031 start at Fri May  3 22:19:44 CDT 2019, 12B+3H DE only recoil trigger
+         stop at Fri May  3 22:44:31 CDT 2019
+RUN-032 start at Fri May  3 23:43:06 CDT 2019, 12B(t,p) increase source, increase threshold at downstream to 2000
+         stop at Sat May  4 00:41:16 CDT 2019
+RUN-033 start at Sat May  4 00:49:38 CDT 2019, continues
+         stop at Sat May  4 01:48:37 CDT 2019
+RUN-034 start at Sat May  4 01:48:45 CDT 2019, continues
+         stop at Sat May  4 01:50:23 CDT 2019
+RUN-035 start at Sat May  4 01:50:45 CDT 2019, continues
+         stop at Sat May  4 02:46:46 CDT 2019
+RUN-036 start at Sat May  4 02:47:08 CDT 2019, continue
+         stop at Sat May  4 04:20:52 CDT 2019
+RUN-037 start at Sat May  4 04:22:13 CDT 2019, 
+         stop at Sat May  4 05:27:09 CDT 2019
+RUN-038 start at Sat May  4 05:27:33 CDT 2019, 
+         stop at Sat May  4 06:25:32 CDT 2019
+RUN-039 start at Sat May  4 06:29:51 CDT 2019, change threshold for det%5==4, so that the rate is small
+         stop at Sat May  4 07:17:13 CDT 2019
+RUN-040 start at Sat May  4 07:18:58 CDT 2019, switch back the threshold
+         stop at Sat May  4 07:59:36 CDT 2019
+RUN-041 start at Sat May  4 09:11:30 CDT 2019, Test run to see if TR is sending data
+         stop at Sat May  4 09:17:27 CDT 2019
+RUN-042 start at Sat May  4 09:22:09 CDT 2019, Trying to figure out why VME 3:3 doesn't appear in sort
+         stop at Sat May  4 09:30:11 CDT 2019
+RUN-043 start at Sat May  4 10:02:07 CDT 2019, still looking for side TR VME3:3
+         stop at Sat May  4 11:06:27 CDT 2019
+RUN-044 start at Sat May  4 11:33:11 CDT 2019, 12B+2H, lower array rate, higher recoil
+         stop at Sat May  4 12:01:14 CDT 2019
+RUN-045 start at Sat May  4 12:02:27 CDT 2019, Took recoils out of trigger this run
+         stop at Sat May  4 12:04:22 CDT 2019
+RUN-046 start at Sat May  4 12:08:25 CDT 2019, Change trace length for recoil detectors to 8us
+         stop at Sat May  4 13:04:00 CDT 2019
+RUN-047 start at Sat May  4 13:06:00 CDT 2019, continue 12B+3H 0deg rate 350-400 after retune
+         stop at Sat May  4 14:11:05 CDT 2019
+RUN-048 start at Sat May  4 14:11:41 CDT 2019, 12B+3H array trigger
+         stop at Sat May  4 15:10:24 CDT 2019
+RUN-049 start at Sat May  4 15:10:52 CDT 2019, 12B+3H
+         stop at Sat May  4 16:17:55 CDT 2019
+RUN-050 start at Sat May  4 16:18:15 CDT 2019, 12B+3H
+         stop at Sat May  4 17:16:38 CDT 2019
+RUN-051 start at Sat May  4 17:17:16 CDT 2019, 12B+3H
+         stop at Sat May  4 18:15:16 CDT 2019
+RUN-052 start at Sat May  4 18:16:14 CDT 2019, continue 12B+3H no change from run 51
+         stop at Sat May  4 19:16:09 CDT 2019
+RUN-053 start at Sat May  4 19:17:27 CDT 2019, continue 12B+3H no changes from run 52
+         stop at Sat May  4 20:20:27 CDT 2019
+RUN-054 start at Sat May  4 20:21:12 CDT 2019, continue 12B+3H same as run 53
+         stop at Sat May  4 21:20:42 CDT 2019
+RUN-055 start at Sat May  4 21:21:26 CDT 2019, continue 12B+3H same as run 54
+         stop at Sat May  4 22:20:32 CDT 2019
+RUN-056 start at Sat May  4 22:26:46 CDT 2019, continue 12B+3H same as run 55
+         stop at Sat May  4 23:24:47 CDT 2019
+RUN-057 start at Sat May  4 23:25:39 CDT 2019, B12+H3
+         stop at Sun May  5 00:25:00 CDT 2019
+RUN-058 start at Sun May  5 00:25:37 CDT 2019, 12B + 3H
+         stop at Sun May  5 01:24:08 CDT 2019
+RUN-059 start at Sun May  5 01:24:38 CDT 2019, 12B + 3H
+         stop at Sun May  5 02:25:41 CDT 2019
+RUN-060 start at Sun May  5 02:26:11 CDT 2019, 12B + 3H
+         stop at Sun May  5 03:23:55 CDT 2019
+RUN-061 start at Sun May  5 03:24:15 CDT 2019, 12B + 3H
+         stop at Sun May  5 04:31:44 CDT 2019
+RUN-062 start at Sun May  5 04:32:08 CDT 2019, 12B+3H
+         stop at Sun May  5 05:26:33 CDT 2019
+RUN-063 start at Sun May  5 05:26:51 CDT 2019, 12B+3H
+         stop at Sun May  5 06:25:47 CDT 2019
+RUN-064 start at Sun May  5 06:26:10 CDT 2019, 12B+3H
+         stop at Sun May  5 07:23:11 CDT 2019
+RUN-065 start at Sun May  5 07:23:34 CDT 2019, 12B on 3H
+         stop at Sun May  5 08:19:20 CDT 2019
+RUN-066 start at Sun May  5 08:19:49 CDT 2019, same
+         stop at Sun May  5 09:16:07 CDT 2019
+RUN-067 start at Sun May  5 09:16:26 CDT 2019, same
+         stop at Sun May  5 10:09:18 CDT 2019
+RUN-068 start at Sun May  5 10:13:27 CDT 2019, beam stop for 5 mins
+         stop at Sun May  5 11:10:05 CDT 2019
+RUN-069 start at Sun May  5 11:10:31 CDT 2019, same
+         stop at Sun May  5 12:04:20 CDT 2019
+RUN-070 start at Sun May  5 12:04:51 CDT 2019, same
+         stop at Sun May  5 12:49:01 CDT 2019
+RUN-071 start at Sun May  5 12:54:06 CDT 2019, same
+         stop at Sun May  5 13:46:11 CDT 2019
+RUN-072 start at Sun May  5 13:46:45 CDT 2019, same
+         stop at Sun May  5 14:30:11 CDT 2019
+RUN-073 start at Sun May  5 15:46:45 CDT 2019, 12B + 3H
+         stop at Sun May  5 16:05:28 CDT 2019
+RUN-074 start at Sun May  5 16:12:46 CDT 2019, 12B + 3H
+         stop at Sun May  5 17:00:52 CDT 2019
+RUN-075 start at Sun May  5 17:07:32 CDT 2019, 12B + 3H
+         stop at Sun May  5 17:53:12 CDT 2019
+RUN-076 start at Sun May  5 19:05:33 CDT 2019, 12B + 3H
+         stop at Sun May  5 19:58:46 CDT 2019
+RUN-077 start at Sun May  5 20:03:00 CDT 2019, 12B + 3H
+         stop at Sun May  5 21:04:52 CDT 2019
+RUN-078 start at Sun May  5 21:05:17 CDT 2019, 12B+3H
+         stop at Sun May  5 21:12:46 CDT 2019
+RUN-079 start at Sun May  5 21:15:17 CDT 2019, 12B+3H continue after confusion with no data from 77
+         stop at Sun May  5 21:29:52 CDT 2019
+RUN-080 start at Sun May  5 23:15:34 CDT 2019, 12B+3H after recharging gas cell
+         stop at Sun May  5 23:52:01 CDT 2019
+RUN-081 start at Sun May  5 23:54:33 CDT 2019, 12B+3H same as last
+         stop at Mon May  6 00:43:22 CDT 2019
+RUN-082 start at Mon May  6 01:12:39 CDT 2019, Run 82 12B+T
+         stop at Mon May  6 02:16:36 CDT 2019
+RUN-083 start at Mon May  6 02:37:42 CDT 2019, 12B + T  run 83
+         stop at Mon May  6 03:26:04 CDT 2019
+RUN-084 start at Mon May  6 03:26:58 CDT 2019, run 84 12B+T continued
+         stop at Mon May  6 04:32:27 CDT 2019
+RUN-085 start at Mon May  6 04:33:17 CDT 2019, run 85 12B+T continued
+         stop at Mon May  6 05:27:57 CDT 2019
+RUN-086 start at Mon May  6 05:28:48 CDT 2019, RUN 86 12B+T continued
+         stop at Mon May  6 06:21:14 CDT 2019
+RUN-087 start at Mon May  6 06:22:16 CDT 2019, Run 87 12B+T continued
+         stop at Mon May  6 07:35:42 CDT 2019
+RUN-088 start at Mon May  6 07:36:59 CDT 2019, run 88 12B+T continued
+         stop at Mon May  6 08:25:22 CDT 2019
+RUN-089 start at Mon May  6 08:25:55 CDT 2019, 12B+3H
+         stop at Mon May  6 08:47:04 CDT 2019
+RUN-090 start at Mon May  6 09:30:03 CDT 2019, 12B+3H
+         stop at Mon May  6 10:40:44 CDT 2019
+RUN-091 start at Mon May  6 10:41:02 CDT 2019, 12B+3H
+         stop at Mon May  6 11:29:50 CDT 2019
+RUN-092 start at Mon May  6 11:30:20 CDT 2019, 12B+3H
+         stop at Mon May  6 12:10:26 CDT 2019
+RUN-093 start at Mon May  6 12:24:58 CDT 2019, 12B+3H
+         stop at Mon May  6 13:37:56 CDT 2019
+RUN-094 start at Mon May  6 13:42:36 CDT 2019, 12B+3H
+         stop at Mon May  6 14:30:34 CDT 2019
+RUN-095 start at Mon May  6 14:31:05 CDT 2019, 12B+3H
+         stop at Mon May  6 15:18:11 CDT 2019
+RUN-096 start at Mon May  6 15:34:30 CDT 2019, 12B+3H
+         stop at Mon May  6 16:28:08 CDT 2019
+RUN-097 start at Mon May  6 16:44:25 CDT 2019, continue with12B+3H
+         stop at Mon May  6 17:35:53 CDT 2019
+RUN-098 start at Mon May  6 17:39:43 CDT 2019, continue running 12B+3H
+         stop at Mon May  6 18:15:52 CDT 2019
+RUN-099 start at Mon May  6 18:16:41 CDT 2019, 12B+3H
+         stop at Mon May  6 19:12:51 CDT 2019
+RUN-100 start at Mon May  6 19:13:15 CDT 2019, 12B+3H
+         stop at Mon May  6 20:11:35 CDT 2019
+RUN-101 start at Mon May  6 20:12:06 CDT 2019, 12B+3H
+         stop at Mon May  6 21:10:54 CDT 2019
+RUN-102 start at Tue May  7 01:25:49 CDT 2019, degraded + CD2 120microns
+         stop at Tue May  7 02:46:44 CDT 2019
+RUN-103 start at Tue May  7 02:47:17 CDT 2019, degraded + CD2 120 microns
+         stop at Tue May  7 03:58:41 CDT 2019
+RUN-104 start at Tue May  7 04:17:54 CDT 2019, 11B+3H
+         stop at Tue May  7 05:37:22 CDT 2019
+RUN-105 start at Tue May  7 05:37:47 CDT 2019, 11B+3H
+         stop at Tue May  7 06:57:18 CDT 2019
+RUN-106 start at Tue May  7 06:57:53 CDT 2019, 11B+3H
+         stop at Tue May  7 08:19:02 CDT 2019
+RUN-107 start at Tue May  7 08:19:24 CDT 2019, 11B+3H
+         stop at Tue May  7 09:13:18 CDT 2019
