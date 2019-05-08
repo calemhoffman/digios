@@ -273,7 +273,11 @@ void recoil(void) {
   TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
-    crdt->cd(i+1); hrdt[i]->Draw("col");
+ 
+    crdt->cd(i+1);
+    hrdt[i]->SetMarkerStyle(20);
+    // gPad->SetMarkerSize(3);
+    hrdt[i]->Draw();
     //   cutG = (TCutG *)cutList->At(i);
     //   cutG->Draw("same");
   }
