@@ -17,7 +17,7 @@ void readTrace(TString fileName){
 /**///==============================================================   
 
    TFile * f1 = new TFile (fileName, "read");
-   TTree * tree = (TTree *) f1->Get("tree");
+   TTree * tree = (TTree *) f1->Get("gen_tree");
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
