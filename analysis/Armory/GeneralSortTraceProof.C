@@ -6,7 +6,13 @@
 #define MAXNUMHITS 20 //Highest multiplicity
 #define M -100 //M value for energy filter from digi setting
 
+//must be absolute path
+//Mac
 #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+//LCRC
+//#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+//by copy the GeneralSortMapping.h in to Armory, is not working
+//#include "GeneralSortMapping.h"
 
 //===================== setting
 bool isTraceON = true;
@@ -17,7 +23,7 @@ int traceLength = 300;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = false;
-bool isRecoil = false;
+bool isRecoil = true;
 bool isElum = false;
 bool isEZero = false;
 
@@ -137,7 +143,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
-      psd.Ring[i]    = TMath::QuietNaN();
+      psd.Ring[i]    = 0.0;
       psd.RDT[i]     = TMath::QuietNaN();
       psd.TAC[i]     = TMath::QuietNaN();
       if (i<32) psd.ELUM[i] = TMath::QuietNaN();
@@ -396,6 +402,6 @@ void GeneralSortTraceProof::Terminate()
    saveFile->Close();
    
    printf("=======================================================\n");
-   printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
+   //printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
    
 }
