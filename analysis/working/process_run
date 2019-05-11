@@ -10,8 +10,22 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ~/digios/expName.sh #load expName
-AnalysisDir=~/digios/analysis
+#=========== Check host name
+PCName=$(hostname)
+isLinux=0
+
+if [ ${PCName} == "digios1" ]; then
+  isLinux=1
+fi
+
+if [ ${PCName:0:5} == "bebop" ]; then
+    source /lcrc/project/HELIOS/digios/expName.sh
+    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
+    isLinux=1
+else
+    source ~/digios/expName.sh #load expName
+    AnalysisDir=~/digios/analysis
+fi
 
 #remote data path
 dataloc=/media/DIGIOSDATA3/${expName}/data
@@ -85,14 +99,13 @@ BLUE='\033[0;34m'
 Cyan='\033[0;36m'
 NC='\033[0m'
 
-#=========== Check host name
-PCName=$(hostname)
-
 #######################################
 ####################  Download raw data
 echo -e "${RED}######################### Download raw data${NC}"
 if [ ${PCName} == "digios1" ]; then
     echo "Already in digios1, no need to get data."
+elif [ ${PCName:0:5} == "bebop" ]; then
+    echo "in LCRC, no need to get data."
 else
     #============ Get the raw data
     IP=192.168.1.2
@@ -123,8 +136,10 @@ if [ $isMerge -eq 1 ]; then
   echo -e "${RED}######################### Merge raw data${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
-  if [ ${PCName} == "digios1" ]; then
-      echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
+  if [ ${isLinux} -eq 1 ]; then
+      if [ ${PCName} == "digios1" ]; then
+          echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
+      fi
       rawDataTime=`stat -c "%Z"  ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
   else
       rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
@@ -135,7 +150,11 @@ if [ $isMerge -eq 1 ]; then
 
   #==== if merged data exist, check timeStamp
   if [ ${isMergedDataExist} -gt 0 ]; then
-      mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      if [ ${isLinux} -eq 1 ]; then
+          mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      else
+          mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      fi
   else
       mergedDataTime=0
   fi
@@ -163,7 +182,7 @@ if [ $isSort -eq 1 ]; then
   echo -e "${RED}========= GEBSort started sorting run $RUN at `date`${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
-  if [ ${PCName} == "digios1" ]; then
+  if [ ${isLinux} -eq 1 ]; then
       mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
   else
       mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
@@ -172,7 +191,11 @@ if [ $isSort -eq 1 ]; then
   isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
   
   if [ ${isRootDataExist} -gt 0 ]; then
-    rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
+    if [ ${isLinux} -eq 1 ]; then
+        rootDataTime=`state -c "%Z" ${ROOTDIR}/run${RUN}.root`
+    else
+        rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
+    fi
   else
     rootDataTime=0
   fi
@@ -225,10 +248,13 @@ fi
 
 if [ $isGeneralSort -eq 3 ]; then
   echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
-  root -l -q "process_run.C(${runID}, 2)"
+  if[ ${PCName:0:5} == "bebop" ]; then
+      root -l -q "process_run.C(${runID}, 10)"
+  else
+      root -l -q "process_run.C(${runID}, 4)"
+  fi
 
   #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
-
   #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
