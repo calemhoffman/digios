@@ -21,7 +21,7 @@ void Cali_e_trace::Begin(TTree * /*tree*/)
 
 void Cali_e_trace::SlaveBegin(TTree * /*tree*/)
 {
-   TString option = GetOption();
+   TString optcion = GetOption();
 }
 
 Bool_t Cali_e_trace::Process(Long64_t entry)
@@ -116,6 +116,13 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       rdtC_t[i] = rdt_t[i]; 
       if( !TMath::IsNaN(rdt[i]) ) {
          rdtID[i] = i;
+         //rdtMultiHit ++;
+      }
+
+   }
+
+   for( int i = 0; i< 4 ; i++){
+      if( !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtMultiHit ++;
       }
    }
@@ -126,7 +133,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    for(int idet = 0 ; idet < numDet; idet++){
       
       if( !TMath::IsNaN(e[idet]) || e[idet] > 0 ){
-         eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
+         eC[idet]   = e[idet]*eCorr[idet][0] + eCorr[idet][1];  
          eC_t[idet] = e_t[idet]; // ch
       }else{
          continue; // when e is invalid, nothing need to do
@@ -266,7 +273,25 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    }//end of idet-loop
    
    //================================= for coincident time bewteen array and rdt
-   if( multiHit == 1 ) {
+   if( multiHit == 1 && rdtMultiHit == 1) {
+     for(int idet = 0 ; idet < numDet; idet++){
+       if( eC_t[idet] > 0 ) {
+         eTime = eC_t[idet];
+         break;
+       }
+     }
+
+     ULong64_t rdtTime = 0;
+     for(int idet = 0 ; idet < 4; idet++){
+       if( rdt_t[2*idet] > 0 ) {
+         rdtTime = rdt_t[2*idet];
+         break;
+       }
+     }
+
+     coin_t = (int)eTime - rdtTime;
+
+     /*
       ULong64_t rdtTime = 0;
       Float_t rdtQ = 0;
       Float_t trdtTime = 0.;
@@ -292,9 +317,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          double f7corr = f7[detTime]->Eval(x[detTime]) + cTCorr[detTime][8];
          coinTime = (coinTimeUC - f7corr)*10.;
       }
+     */
    }
    
-   if( rejZeroHit && multiHit == 0 ) return kTRUE;
+   //if( rejZeroHit && multiHit == 0 ) return kTRUE;
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file

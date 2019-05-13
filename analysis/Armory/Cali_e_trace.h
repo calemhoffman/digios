@@ -36,8 +36,8 @@ public :
    ULong64_t       xf_t[100];
    Float_t         xn[100];
    ULong64_t       xn_t[100];
-   Float_t         rdt[100];
-   ULong64_t       rdt_t[100];
+   Float_t         rdt[8];
+   ULong64_t       rdt_t[8];
    Float_t         tac[100];
    ULong64_t       tac_t[100];
    Float_t         elum[32];
@@ -343,12 +343,19 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUC/F");
       newTree->Branch("coinTime", &coinTime, "coinTime/F");
        
-      newTree->Branch("te",     &teS,     "teS/F");
-      newTree->Branch("te_t",   &te_tS,   "te_tS/F");
-      newTree->Branch("te_r",   &te_rS,   "te_rS/F");
-      newTree->Branch("trdt",   &trdtS,   "trdtS/F");
-      newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
-      newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
+//      newTree->Branch("te",     &teS,     "teS/F");
+//      newTree->Branch("te_t",   &te_tS,   "te_tS/F");
+//      newTree->Branch("te_r",   &te_rS,   "te_rS/F");
+//      newTree->Branch("trdt",   &trdtS,   "trdtS/F");
+//      newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
+//      newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
+
+         newTree->Branch("te",             te,  "Trace_Energy[24]/F");
+         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[24]/F");
+         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[24]/F");
+         newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
+         newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
+         newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
    }
    
    //=== clock
