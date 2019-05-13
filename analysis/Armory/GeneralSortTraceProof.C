@@ -1,3 +1,4 @@
+
 #define GeneralSortTraceProof_cxx
 
 #include "GeneralSortTraceProof.h"
@@ -95,17 +96,17 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
    newTree->Branch("runID", &psd.runID, "runID/I");
 
-   newTree->Branch("e",    psd.Energy,          "Energy[24]/F");
-   newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[24]/l");
-   newTree->Branch("xf",   psd.XF,              "XF[24]/F");
-   newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[24]/l");
-   newTree->Branch("xn",   psd.XN,              "XN[24]/F");
-   newTree->Branch("xn_t", psd.XNTimestamp,     "XNTimestamp[24]/l");
-   newTree->Branch("x",    psd.x,               "x[24]/F"); 
+   newTree->Branch("e",    psd.Energy,          "Energy[30]/F");
+   newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[30]/l");
+   newTree->Branch("xf",   psd.XF,              "XF[30]/F");
+   newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[30]/l");
+   newTree->Branch("xn",   psd.XN,              "XN[30]/F");
+   newTree->Branch("xn_t", psd.XNTimestamp,     "XNTimestamp[30]/l");
+   newTree->Branch("x",    psd.x,               "x[30]/F"); 
 
    if( isRecoil){
-      newTree->Branch("rdt",   psd.RDT,          "RDT[24]/F");
-      newTree->Branch("rdt_t", psd.RDTTimestamp, "RDTTimestamp[24]/l"); 
+      newTree->Branch("rdt",   psd.RDT,          "RDT[8]/F");
+      newTree->Branch("rdt_t", psd.RDTTimestamp, "RDTTimestamp[8]/l"); 
    }
    
    if( isTACRF ){
@@ -132,9 +133,9 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       
       if( traceMethod > 0 ){
 	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
-         newTree->Branch("te",             te,  "Trace_Energy[24]/F");
-         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[24]/F");
-         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[24]/F");
+         newTree->Branch("te",             te,  "Trace_Energy[30]/F");
+         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
+         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
          newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
          newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
          newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
@@ -149,10 +150,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    psd.runID = runIDLast;
 
    b_NumHits->GetEntry(entry);
-   if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
+   //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i<24; i++) {//num dets
+   for (Int_t i=0 ; i<30; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
@@ -175,7 +176,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    }
    
    if( isTraceON ){
-      for(int i = 0; i < 24; i++){
+      for(int i = 0; i < 30; i++){
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
