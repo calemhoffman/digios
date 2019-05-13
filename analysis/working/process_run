@@ -1,12 +1,12 @@
 #!/bin/sh
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run #RunNum #Merge #EventBld #GeneralSort #Monitor"
-  echo "              RunNum = a 3 digit run number, e.g. 001"
-  echo "               Merge = 1/0/-1, is Merge the raw data? -1 is force merge"  
-  echo "            EventBld = 1/0/-1, is building event from the meged data? -1 is force build"  
-  echo "          GenralSort = 3/2/1/0/-1, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C, 3 = GeneralSortTraceProof.C"
-  echo "             Monitor = 2/1/0, run ChainMonitor.C?  1 = single run, 2 = all runs"
+  echo "$./process_run [RunNum] [Merge] [EventBld] [GeneralSort] [Monitor]"
+  echo "     RunNum = a 3 digit run number, e.g. 001"
+  echo "      Merge = 1/0/-1     || -1 is force merge"  
+  echo "   EventBld = 1/0/-1     || -1 is force build"  
+  echo " GenralSort = n/2/1/0/-1 ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "    Monitor = 2/1/0      ||  1 = single run, 2 = all runs"
   exit 1
 fi;
 
@@ -192,7 +192,7 @@ if [ $isSort -eq 1 ]; then
   
   if [ ${isRootDataExist} -gt 0 ]; then
     if [ ${isLinux} -eq 1 ]; then
-        rootDataTime=`state -c "%Z" ${ROOTDIR}/run${RUN}.root`
+        rootDataTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root`
     else
         rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
     fi
@@ -228,10 +228,10 @@ fi
 if [ "${RUN:0:1}" == "0" ] ; then
     runID=${RUN:1:2}
     if [ "${runID:0:1}" == "0" ]; then
-	runID=${runID:1:1}
+	     runID=${runID:1:1}
     fi
 else
-      runID=$( printf '%d' $RUN )
+    runID=$( printf '%d' $RUN )
 fi;
 
 if [ $isGeneralSort -eq 1 ]; then
@@ -246,13 +246,9 @@ if [ $isGeneralSort -eq 2 ]; then
   root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
-if [ $isGeneralSort -eq 3 ]; then
+if [ $isGeneralSort -gt 2 ]; then
   echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
-  if[ ${PCName:0:5} == "bebop" ]; then
-      root -l -q "process_run.C(${runID}, 10)"
-  else
-      root -l -q "process_run.C(${runID}, 4)"
-  fi
+  root -l -q "process_run.C(${runID}, ${isGeneralSort})"
 
   #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
   #root -l ../Armory/runsCheck.C  #check the run Entries, and duration

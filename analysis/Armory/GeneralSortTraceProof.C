@@ -8,9 +8,9 @@
 
 //must be absolute path
 //Mac
-#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+//#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
 //LCRC
-//#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
 //by copy the GeneralSortMapping.h in to Armory, is not working
 //#include "GeneralSortMapping.h"
 
@@ -19,7 +19,7 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 300;
+int traceLength = 200;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = false;
@@ -47,6 +47,19 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    }
    printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
    
+   printf("===================== ID-MAP: \n");
+   printf("%11s|", ""); 
+   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
+   printf("\n");
+   for(int i = 0 ; i < 96; i++ ) printf("-");
+   for(int i = 0 ; i < 160; i ++){
+     if( (i) % 10 == 0 ) {
+       printf("\n");
+       if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
+     }
+     printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+   }
+   printf("\n==================== \n");
    
    saveFileName = option;
    int findslat = saveFileName.Last('/');
@@ -396,12 +409,15 @@ void GeneralSortTraceProof::Terminate()
    saveFile = TFile::Open(saveFileName);
    
    //get entries
-   TTree * tree = (TTree*) saveFile->FindObjectAny("tree");
-   int validCount = tree->GetEntries();
+   if( saveFile->IsOpen() ){
+     TTree * tree = (TTree*) saveFile->FindObjectAny("gen_tree");
+     int validCount = tree->GetEntries();
    
-   saveFile->Close();
+     saveFile->Close();
    
-   printf("=======================================================\n");
-   //printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
+     printf("=======================================================\n");
+     printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
+   }
+   
    
 }
