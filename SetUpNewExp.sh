@@ -158,4 +158,7 @@ if [ ${isBranchExist} -eq 0 ]; then
     git add -A
     git commit -m "new experiment ${expName}"
 
+    echo "======== git push "
+    git push origin ${expName}
+
 fi 
