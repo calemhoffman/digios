@@ -5,10 +5,12 @@ echo "#############################################"
 
 expName=$1
 
-if [ ${expName} == "master" ] || [ ${expName} == "Master" ]; then
-   expName="ARR01"
+if [ $# -ne 0 ]; then
+    if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
+	expName="ARR01"
+    fi
 fi
-
+    
 echo -e "--- Git Fetch"
 echo "when password is needed, please edit .git/config"
 git fetch
@@ -30,7 +32,7 @@ fi
 
 if [ $# -eq 0 ]; then
    git branch -a
-   read -p 'Enter the new experiment name: ' expName
+   read -p 'Enter the new experiment name: ' expName    
 fi
 
 PCName="$(hostname)"
@@ -49,7 +51,7 @@ if [ ${PCName} == "digios1" ]; then  #DAQ
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
-elif [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
+elif [ ${PCName:0:5} == "phywl" ]; then #MAC
    DATAPATH=~/experiments
    expDIR=~/digios
 
@@ -64,10 +66,11 @@ elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
    expDIR=/lcrc/project/HELIOS/digios
 
 else
-   read -p "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
-   echo "DATAPATH for    raw data : ${DATAPATH}/data"
-   echo "DATAPATH for merged_data : ${DATAPATH}/merged_data"
-   echo "DATAPATH for   root_data : ${DATAPATH}/root_data"   
+   path=$(pwd)
+   read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
+   echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
+   echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
+   echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
 
    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
