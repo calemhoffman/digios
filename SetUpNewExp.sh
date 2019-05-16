@@ -51,7 +51,7 @@ if [ ${PCName} == "digios1" ]; then  #DAQ
    spacePrecent="${spacePrecent:0:2}"
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
-elif [ ${PCName} == "phywl183.phy.anl.gov" ]; then #MAC
+elif [ ${PCName:0:5} == "phywl" ]; then #MAC
    DATAPATH=~/experiments
    expDIR=~/digios
 
