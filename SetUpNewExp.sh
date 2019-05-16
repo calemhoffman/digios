@@ -66,7 +66,7 @@ elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
    expDIR=/lcrc/project/HELIOS/digios
 
 else
-   read -p "Please enter DATAPATH (e.g. ~/experiments) " DATAPATH
+   read -p "Please enter absolute DATAPATH (e.g. /User/helios/experiments) " DATAPATH
    echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
    echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
    echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
