@@ -1,3 +1,3 @@
 #!/bin/bash -l
-expName=ARR01
-LastRunNum=47
+expName=h064_15N
+LastRunNum=0
