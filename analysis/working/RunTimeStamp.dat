@@ -1,0 +1,12 @@
+RUN-001 start at Mon May 20 13:16:01 CDT 2019, alpha run, internal accept all
+         stop at Mon May 20 13:40:55 CDT 2019
+RUN-002 start at Mon May 20 13:52:48 CDT 2019, again, checked cable connection
+         stop at Mon May 20 14:03:39 CDT 2019
+RUN-003 start at Mon May 20 14:41:43 CDT 2019, alpha again
+         stop at Mon May 20 14:51:57 CDT 2019
+RUN-004 start at Mon May 20 17:40:25 CDT 2019, alpha runs after alignment
+         stop at Mon May 20 17:52:09 CDT 2019
+RUN-005 start at Mon May 20 17:52:57 CDT 2019, alpha source again.
+         stop at Mon May 20 17:59:02 CDT 2019
+RUN-006 start at Mon May 20 18:05:19 CDT 2019, alpha run, TT-5 HV = 40 V
+         stop at Mon May 20 18:09:50 CDT 2019
