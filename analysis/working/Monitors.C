@@ -326,11 +326,7 @@ void Monitors::Begin(TTree *tree)
    rateGraph->SetTitle("Instantaneous Beam rate [pps]; Delta Time [sec]; Rate [pps]");
 	
    //Get any cuts;
-   //TFile * fCut = new TFile("cuts3.root");//t,p cuts		   // open file
-   //TFile * fCut = new TFile("dpcuts.root");	//d,p cuts	   // open file
-   //TFile * fCut = new TFile("tp2cuts.root");	//t,p cuts from 11B(t,p)	   // open file
-   //TFile * fCut = new TFile("tpcuts3.root");	//yet more t,p cuts from 11B(t,p)	   // open file
-   TFile * fCut = new TFile("tpcuts4.root");	//yet more t,p cuts from 11B(t,p)	   // open file
+   TFile * fCut = new TFile("rdtcuts.root");	
    isCutFileOpen = fCut->IsOpen();
    if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
    numCut = 0 ;
@@ -591,7 +587,7 @@ Bool_t Monitors::Process(Long64_t entry)
       //==================== Calibrations go here
       xfcal[i] = xf[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
       xncal[i] = xn[i]*xnCorr[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
-      eCal[i] = e[i]*eCorr[i][0]+eCorr[i][1];
+      eCal[i] = e[i]/eCorr[i][0]+eCorr[i][1];
 
       //if( eCal[i] < 1.5 ) continue;
 
@@ -632,10 +628,12 @@ Bool_t Monitors::Process(Long64_t entry)
       //=================== Gate
       bool coinFlag = false;
      
-      for(int i=0;i<4;i++){
-        cutG = (TCutG *)cutList->At(i) ;
-	if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate=1;
-	
+      if( isCutFileOpen ){
+         for(int i=0;i<4;i++){
+           cutG = (TCutG *)cutList->At(i) ;
+            if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate=1;
+      
+         }
       }
       
       // for( int j = 0; j < 8 ; j++){
@@ -815,6 +813,8 @@ void Monitors::SlaveTerminate()
 
 void Monitors::Terminate()
 {
+   
+   
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
    cCanvas  = new TCanvas("cCanvas",canvasTitle,1250,1300);
@@ -825,10 +825,10 @@ void Monitors::Terminate()
    gStyle->SetOptStat("neiou");
    
    
-   TFile * transfer = new TFile("transfer.root");
+   //TFile * transfer = new TFile("transfer.root");
    //TTree * treeT = (TTree *) transfer->FindObjectAny("tree"); 
-   TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
-   TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
+   //TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
+   //TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
    
    //cCanvas->cd(1);
    //treeT->Draw("thetaCM >> c0", "hit == 1 && ExID == 0", "");
@@ -837,16 +837,17 @@ void Monitors::Terminate()
    //treeT->Draw("thetaCM >> c3", "hit == 1 && ExID == 3", "");
    
    cCanvas->cd(1);
- 
-   heCalVz->Draw("colz");
+   
+   //heCalVz->Draw("colz");
    
    cCanvas->cd(2); htdiff->Draw();   
    
    //cCanvas->cd(3); heCalID->Draw("colz");
    cCanvas->cd(3);
-   heCalVzGC->SetMarkerStyle(20);
-   heCalVzGC->Draw();
-   gList->At(0)->Draw("same");
+   
+   //heCalVzGC->SetMarkerStyle(20);
+   //heCalVzGC->Draw();
+   //gList->At(0)->Draw("same");
    //gList->At(10)->Draw("same");
    //gList->At(20)->Draw("same");
    //fxList->At(0)->Draw("same");
@@ -861,10 +862,13 @@ void Monitors::Terminate()
    hrdtg[1]->SetMarkerStyle(20);
    hrdtg[2]->SetMarkerStyle(20);
    hrdtg[3]->SetMarkerStyle(20);
+   
    cCanvas->cd(5); hrdtg[0]->Draw(); cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");
    cCanvas->cd(6); hrdtg[1]->Draw(); cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");
    cCanvas->cd(7); hrdtg[2]->Draw(); cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");
    cCanvas->cd(8); hrdtg[3]->Draw(); cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");
+   
+   /*********/
    
    StpWatch.Start(kFALSE);
    
@@ -874,5 +878,9 @@ void Monitors::Terminate()
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");
    printf("=============== loaded Armory/AutoFit.C\n");
    gROOT->ProcessLine("listDraws()");
+   
+   gROOT->ProcessLine("rawID()");
+   
+   
    
 }
