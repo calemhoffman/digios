@@ -10,3 +10,17 @@ RUN-005 start at Mon May 20 17:52:57 CDT 2019, alpha source again.
          stop at Mon May 20 17:59:02 CDT 2019
 RUN-006 start at Mon May 20 18:05:19 CDT 2019, alpha run, TT-5 HV = 40 V
          stop at Mon May 20 18:09:50 CDT 2019
+RUN-007 start at Tue May 21 11:25:22 CDT 2019, 15N(d,p)
+         stop at Tue May 21 11:38:51 CDT 2019
+RUN-008 start at Tue May 21 11:41:48 CDT 2019, 15N(d,p) trace Length = 3 us
+         stop at Tue May 21 12:01:34 CDT 2019
+RUN-009 start at Tue May 21 12:08:26 CDT 2019, only 15N(d,p) only array energy trigger
+         stop at Tue May 21 12:09:10 CDT 2019
+RUN-010 start at Tue May 21 12:20:59 CDT 2019, last run is junk cont.
+         stop at Tue May 21 12:37:40 CDT 2019
+RUN-011 start at Tue May 21 12:38:06 CDT 2019, 15N(d,p) HV(E) = 140 V
+         stop at Tue May 21 12:48:17 CDT 2019
+RUN-012 start at Tue May 21 12:49:18 CDT 2019, 15N(d,p) all recoil-E = 200 V
+         stop at Tue May 21 12:51:39 CDT 2019
+RUN-013 start at Tue May 21 12:52:17 CDT 2019, 15N(d,p), Recoil-E, ch2 = 250 V
+         stop at Tue May 21 14:52:46 CDT 2019
