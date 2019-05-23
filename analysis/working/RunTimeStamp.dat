@@ -1,0 +1,114 @@
+RUN-001 start at Mon May 20 13:16:01 CDT 2019, alpha run, internal accept all
+         stop at Mon May 20 13:40:55 CDT 2019
+RUN-002 start at Mon May 20 13:52:48 CDT 2019, again, checked cable connection
+         stop at Mon May 20 14:03:39 CDT 2019
+RUN-003 start at Mon May 20 14:41:43 CDT 2019, alpha again
+         stop at Mon May 20 14:51:57 CDT 2019
+RUN-004 start at Mon May 20 17:40:25 CDT 2019, alpha runs after alignment
+         stop at Mon May 20 17:52:09 CDT 2019
+RUN-005 start at Mon May 20 17:52:57 CDT 2019, alpha source again.
+         stop at Mon May 20 17:59:02 CDT 2019
+RUN-006 start at Mon May 20 18:05:19 CDT 2019, alpha run, TT-5 HV = 40 V
+         stop at Mon May 20 18:09:50 CDT 2019
+RUN-007 start at Tue May 21 11:25:22 CDT 2019, 15N(d,p)
+         stop at Tue May 21 11:38:51 CDT 2019
+RUN-008 start at Tue May 21 11:41:48 CDT 2019, 15N(d,p) trace Length = 3 us
+         stop at Tue May 21 12:01:34 CDT 2019
+RUN-009 start at Tue May 21 12:08:26 CDT 2019, only 15N(d,p) only array energy trigger
+         stop at Tue May 21 12:09:10 CDT 2019
+RUN-010 start at Tue May 21 12:20:59 CDT 2019, last run is junk cont.
+         stop at Tue May 21 12:37:40 CDT 2019
+RUN-011 start at Tue May 21 12:38:06 CDT 2019, 15N(d,p) HV(E) = 140 V
+         stop at Tue May 21 12:48:17 CDT 2019
+RUN-012 start at Tue May 21 12:49:18 CDT 2019, 15N(d,p) all recoil-E = 200 V
+         stop at Tue May 21 12:51:39 CDT 2019
+RUN-013 start at Tue May 21 12:52:17 CDT 2019, 15N(d,p), Recoil-E, ch2 = 250 V
+         stop at Tue May 21 14:52:46 CDT 2019
+RUN-014 start at Tue May 21 20:09:04 CDT 2019, first look at 6LiF target!
+         stop at Tue May 21 20:47:16 CDT 2019
+RUN-015 start at Tue May 21 21:09:30 CDT 2019, more 6LiF w/ noise :(
+         stop at Tue May 21 21:18:45 CDT 2019
+RUN-016 start at Tue May 21 21:24:47 CDT 2019, 6LiF triggering on array only
+         stop at Tue May 21 22:21:35 CDT 2019
+RUN-017 start at Tue May 21 22:21:51 CDT 2019, acl Li6
+         stop at Tue May 21 23:14:17 CDT 2019
+RUN-018 start at Tue May 21 23:14:28 CDT 2019, ACL Li6
+         stop at Wed May 22 00:06:20 CDT 2019
+RUN-019 start at Wed May 22 00:06:41 CDT 2019, ACL Li6
+         stop at Wed May 22 00:52:08 CDT 2019
+RUN-020 start at Wed May 22 00:52:19 CDT 2019, ACL Li6
+         stop at Wed May 22 01:37:29 CDT 2019
+RUN-021 start at Wed May 22 01:37:42 CDT 2019, ACL Li6
+         stop at Wed May 22 02:05:46 CDT 2019
+RUN-022 start at Wed May 22 02:06:16 CDT 2019, TRIGGER RATE DOWN
+         stop at Wed May 22 02:20:17 CDT 2019
+RUN-023 start at Wed May 22 02:24:38 CDT 2019, ACL Li6
+         stop at Wed May 22 02:30:03 CDT 2019
+RUN-024 start at Wed May 22 02:46:58 CDT 2019, ACL Li6
+         stop at Wed May 22 03:20:52 CDT 2019
+RUN-025 start at Wed May 22 03:22:18 CDT 2019, ACL Li6
+         stop at Wed May 22 04:03:17 CDT 2019
+RUN-026 start at Wed May 22 04:05:11 CDT 2019, ACL Li6
+         stop at Wed May 22 04:56:19 CDT 2019
+RUN-027 start at Wed May 22 04:56:32 CDT 2019, ACL Li6
+         stop at Wed May 22 05:44:23 CDT 2019
+RUN-028 start at Wed May 22 05:44:33 CDT 2019, ACL Li6
+         stop at Wed May 22 05:55:27 CDT 2019
+RUN-029 start at Wed May 22 05:56:23 CDT 2019, ACL Li6
+         stop at Wed May 22 06:58:08 CDT 2019
+RUN-030 start at Wed May 22 06:58:18 CDT 2019, ACL Li
+         stop at Wed May 22 07:03:04 CDT 2019
+RUN-031 start at Wed May 22 07:03:22 CDT 2019, ACL Li6
+         stop at Wed May 22 08:03:24 CDT 2019
+RUN-032 start at Wed May 22 08:04:32 CDT 2019, same as last run
+         stop at Wed May 22 08:09:57 CDT 2019
+RUN-033 start at Wed May 22 08:11:14 CDT 2019, same
+RUN-034 start at Wed May 22 09:18:23 CDT 2019, same as last run
+         stop at Wed May 22 10:20:39 CDT 2019
+RUN-035 start at Wed May 22 10:44:09 CDT 2019, beam back 6Li
+         stop at Wed May 22 10:56:14 CDT 2019
+RUN-036 start at Wed May 22 12:44:12 CDT 2019, back after retune 6Li
+         stop at Wed May 22 14:08:05 CDT 2019
+RUN-037 start at Wed May 22 14:08:21 CDT 2019, same as last run 6Li
+         stop at Wed May 22 15:22:37 CDT 2019
+RUN-038 start at Wed May 22 15:22:55 CDT 2019, cont.
+         stop at Wed May 22 16:03:41 CDT 2019
+RUN-039 start at Wed May 22 16:04:18 CDT 2019, tuning beam
+         stop at Wed May 22 17:06:57 CDT 2019
+RUN-040 start at Wed May 22 17:14:46 CDT 2019, done with tuning back to 6Li stats
+         stop at Wed May 22 18:24:38 CDT 2019
+RUN-041 start at Wed May 22 18:25:02 CDT 2019, same old
+         stop at Wed May 22 19:45:40 CDT 2019
+RUN-042 start at Wed May 22 19:46:04 CDT 2019, more of the same
+         stop at Wed May 22 20:44:57 CDT 2019
+RUN-043 start at Wed May 22 20:53:02 CDT 2019, same old
+         stop at Wed May 22 21:01:46 CDT 2019
+RUN-044 start at Wed May 22 21:02:00 CDT 2019, same settings
+         stop at Wed May 22 22:19:27 CDT 2019
+RUN-045 start at Wed May 22 22:19:48 CDT 2019, same setting as 44
+         stop at Wed May 22 23:23:18 CDT 2019
+RUN-046 start at Wed May 22 23:23:51 CDT 2019, same settings as 45
+         stop at Thu May 23 00:03:51 CDT 2019
+RUN-047 start at Thu May 23 00:04:50 CDT 2019, same old
+         stop at Thu May 23 01:02:11 CDT 2019
+RUN-048 start at Thu May 23 01:02:36 CDT 2019, cont.
+         stop at Thu May 23 02:58:59 CDT 2019
+RUN-049 start at Thu May 23 03:00:00 CDT 2019, same as before
+         stop at Thu May 23 05:02:10 CDT 2019
+RUN-050 start at Thu May 23 05:03:06 CDT 2019, run 50 sane as before
+         stop at Thu May 23 06:33:16 CDT 2019
+RUN-051 start at Thu May 23 06:33:54 CDT 2019, run 51 same as before
+         stop at Thu May 23 07:51:24 CDT 2019
+RUN-052 start at Thu May 23 07:52:02 CDT 2019, continuing
+         stop at Thu May 23 09:18:54 CDT 2019
+RUN-053 start at Thu May 23 09:25:13 CDT 2019, changing to 7LiF!
+         stop at Thu May 23 10:32:19 CDT 2019
+RUN-054 start at Thu May 23 10:33:30 CDT 2019, more 7Li
+         stop at Thu May 23 11:37:19 CDT 2019
+RUN-055 start at Thu May 23 11:38:33 CDT 2019, more 7Li
+         stop at Thu May 23 12:42:00 CDT 2019
+RUN-056 start at Thu May 23 12:42:30 CDT 2019, more 7Li
+         stop at Thu May 23 13:50:15 CDT 2019
+RUN-057 start at Thu May 23 13:50:29 CDT 2019, same as previous run
+         stop at Thu May 23 14:22:59 CDT 2019
+RUN-058 start at Thu May 23 14:23:15 CDT 2019, cont.
