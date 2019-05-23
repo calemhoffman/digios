@@ -13,34 +13,13 @@ option=$1
 
 if [ ${option} == "start" ]; then
 
-#==== energy
-xterm -T database1 -geometry 80x4+0+0   -e "~/digios/daq/edm/scripts/databaseVME 1 1" & # top left, e-r
-xterm -T database2 -geometry 80x4+0+100 -e "~/digios/daq/edm/scripts/databaseVME 4 2" &  # top top, e-r
-xterm -T database3 -geometry 80x4+0+200 -e "~/digios/daq/edm/scripts/databaseVME 3 3" &  # top right, e-r
-xterm -T database4 -geometry 80x4+0+300 -e "~/digios/daq/edm/scripts/databaseVME 3 1" &  # bottm  right, e-r
-xterm -T database5 -geometry 80x4+0+400 -e "~/digios/daq/edm/scripts/databaseVME 2 2" &  # bottom bottom, e-r
-xterm -T database6 -geometry 80x4+0+500 -e "~/digios/daq/edm/scripts/databaseVME 1 3" &  # bottom  left, e-r
-
-#==== xf, xn
-xterm -T database7   -geometry 80x4+0+600  -e "~/digios/daq/edm/scripts/databaseVME 1 2" & # top left, 
-xterm -T database8   -geometry 80x4+0+700  -e "~/digios/daq/edm/scripts/databaseVME 4 3" &  # top top, e-r
-xterm -T database9   -geometry 80x4+0+800  -e "~/digios/daq/edm/scripts/databaseVME 4 1" &  # top right, e-r
-xterm -T database10  -geometry 80x4+0+900  -e "~/digios/daq/edm/scripts/databaseVME 3 2" &  # bottm  right, e-r
-xterm -T database11  -geometry 80x4+0+1000 -e "~/digios/daq/edm/scripts/databaseVME 2 3" &  # bottom bottom, e-r
-xterm -T database12  -geometry 80x4+100+0 -e "~/digios/daq/edm/scripts/databaseVME 2 1" &  # bottom  left, e-r
-
-#==== recoil
-xterm -T database15   -geometry 80x4+100+600  -e "~/digios/daq/edm/scripts/databaseVME 1 4" & # recoil 
-
-#===== threshold for every 4 min = 240 sec
-xterm -T database13  -geometry 80x4+100+100 -e "~/digios/daq/edm/scripts/databaseVME_Threshold 300" & 
-xterm -T database14  -geometry 80x4+100+200 -e "~/digios/daq/edm/scripts/databaseVME_Buffer" &
+xterm -T database1 -geometry 80x40+0+0 -e "~/digios/daq/edm/scripts/DataBase.py" & 
 
 fi
 
 
 if [ ${option} == "stop" ]; then
-    for a in {1..15} ; do 
+    for a in {1..2} ; do 
 	processID=$(ps aux | grep database$a | grep 'xterm' | awk '{print $2}')
 	kill -9 ${processID}
     done        
