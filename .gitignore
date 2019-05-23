@@ -5,6 +5,10 @@ merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 
+*.Ex.txt
+*.Xsec.txt
+*.in
+*.out
 core.*
 *.o
 *.root
