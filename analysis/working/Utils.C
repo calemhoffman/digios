@@ -33,7 +33,11 @@ void listDraws(void) {
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
   printf("-----------------------------------------------------\n");
-  printf("   ShowFitMethod() - Show various fittign methods \n");
+  printf("   ShowFitMethod() - Shows various fitting methods \n");
+  printf("   RDTCutCreator(\"*.root[TChain]\") - Create RDT Cuts \n");
+  printf("-----------------------------------------------------\n");
+  printf("   %s\n", canvasTitle.Data());
+  printf("-----------------------------------------------------\n");
 }
 
 
@@ -79,7 +83,7 @@ void newCanvas(int sizeX = 800, int sizeY = 600, int posX = 0, int posY = 0){
 
 void rawID(){
   TCanvas * cRawID = (TCanvas *) gROOT->FindObjectAny("cRawID");
-  if( cRawID == NULL ) cRawID = new TCanvas("cRawID", "Raw e, Ring, xf, xn vs ID", canvasSize[0], canvasSize[1]);
+  if( cRawID == NULL ) cRawID = new TCanvas("cRawID", Form("Raw e, Ring, xf, xn vs ID | %s", canvasTitle.Data()), canvasSize[0], canvasSize[1]);
   cRawID->Clear();cRawID->Divide(2,2);
   cRawID->cd(1);  cRawID->cd(1)->SetGrid(); heVID->Draw("colz");
   cRawID->cd(2);  cRawID->cd(2)->SetGrid(); hringVID->Draw("colz");
@@ -89,7 +93,7 @@ void rawID(){
 
 void rawe(Bool_t isLogy = false) {
   TCanvas *cRawE = (TCanvas *) gROOT->FindObjectAny("cRawE");
-  if( cRawE == NULL ) cRawE = new TCanvas("cRawE","E raw",canvasSize[0], canvasSize[1]);
+  if( cRawE == NULL ) cRawE = new TCanvas("cRawE",Form("E raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cRawE->Clear();cRawE->Divide(numCol,numRow);
   for (Int_t i=0; i<numDet; i++) {
     cRawE->cd(i+1); 
@@ -270,7 +274,7 @@ void elum(void) {
 }
 
 void recoil(void) {
-  TCanvas *crdt = new TCanvas("crdt","RDT",1000,1000);
+  TCanvas *crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
     crdt->cd(i+1); hrdt[i]->Draw("col");
@@ -302,7 +306,7 @@ void eCalVzRow() {
 }
 
 void excite(void) {
-  TCanvas *cex = new TCanvas("cex","EX",1000,650);
+  TCanvas *cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
   cex->Clear();cex->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cex->cd(1); hEx->Draw("");

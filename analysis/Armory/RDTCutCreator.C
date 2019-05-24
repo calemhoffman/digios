@@ -8,7 +8,7 @@
 #include <TString.h>
 #include <TObjArray.h>
 
-void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
+void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int eRange=6000, int deRange=4000){
 	
 	printf("================ Graphic Cut Creator for RDT ============== \n");
    
@@ -41,9 +41,10 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
       //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
       varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
 
-      expression[i].Form("%s:%s>>h(500, 0, 6000, 500, 0, 2000)", 
+      expression[i].Form("%s:%s>>h(500, 0, %d, 500, 0, %d)", 
             varY.Data(),
-            varX.Data());
+            varX.Data(),
+            eRange, deRange);
 
 
       chain->Draw(expression[i], "", "col");
