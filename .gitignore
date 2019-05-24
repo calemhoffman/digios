@@ -18,6 +18,7 @@ core.*
 *.pcm
 *.so
 .DS_Store
+tempDB.txt
 
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
