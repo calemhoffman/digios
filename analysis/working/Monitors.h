@@ -67,6 +67,9 @@ public :
    
    int A;
    void testingInput(int n){this->A = n;}
+   
+   double z[100];
+
 
    Monitors(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Monitors() { }
