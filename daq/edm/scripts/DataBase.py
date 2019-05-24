@@ -34,18 +34,25 @@ while loop == 1:
     for VME in range (1,5):
         pv="DAQC%d_CV_BuffersAvail" % (VME)
         result=caget(pv)
-        print("VME%d Buffer" % VME, result)
-        if ( float(result) < 300 ) :
-            caput("Online_CS_StartStop", "Stop")
-            print("=================== VME%d Buffer < 300!!!!!" % VME)
-            time.sleep(10)
-            caput("Online_CS_StartStop", "Start")
-            print("=================== resume")
-            f.close()
-            break
+        #print(type(result))
+        print("VME%d Buffer %s" % (VME, result))
+        
+        if ( isinstance(result, float) ) :
+            if ( float(result) < 300 ) :
+                caput("Online_CS_StartStop", "Stop")
+                print("=================== VME%d Buffer < 300!!!!!" % VME)
+                time.sleep(10)
+                caput("Online_CS_StartStop", "Start")
+                print("=================== resume")
+                f.close()
+                break
 
-        string="buffer,VME=%d value=%s\n" % (VME, result)
-        f.write(string)
+            string="buffer,VME=%d value=%s\n" % (VME, result)
+            f.write(string)
+        else :
+            string="buffer,VME=%d value=-100\n" % (VME)
+            f.write(string)
+
         for DIG in range (1,5):
             for CH in range(0, 10):
                 #timeStamp = int(round(time.time() * 1000 ))
