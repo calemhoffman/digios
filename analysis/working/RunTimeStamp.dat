@@ -112,3 +112,58 @@ RUN-056 start at Thu May 23 12:42:30 CDT 2019, more 7Li
 RUN-057 start at Thu May 23 13:50:29 CDT 2019, same as previous run
          stop at Thu May 23 14:22:59 CDT 2019
 RUN-058 start at Thu May 23 14:23:15 CDT 2019, cont.
+         stop at Thu May 23 15:36:47 CDT 2019
+RUN-059 start at Thu May 23 15:37:40 CDT 2019, same
+         stop at Thu May 23 16:26:38 CDT 2019
+RUN-060 start at Thu May 23 16:31:52 CDT 2019, slits 3x3
+         stop at Thu May 23 16:35:58 CDT 2019
+RUN-061 start at Thu May 23 16:36:13 CDT 2019, cont.
+         stop at Thu May 23 17:35:53 CDT 2019
+RUN-062 start at Thu May 23 17:36:10 CDT 2019, cont.
+         stop at Thu May 23 18:36:21 CDT 2019
+RUN-063 start at Thu May 23 18:36:38 CDT 2019, cont.
+         stop at Thu May 23 19:41:14 CDT 2019
+RUN-064 start at Thu May 23 19:55:04 CDT 2019, 7li is back
+         stop at Thu May 23 21:06:40 CDT 2019
+RUN-065 start at Thu May 23 21:06:51 CDT 2019, 7LI still
+         stop at Thu May 23 22:10:10 CDT 2019
+RUN-066 start at Thu May 23 22:10:16 CDT 2019, same
+RUN-067 start at Thu May 23 22:13:35 CDT 2019, same
+         stop at Thu May 23 23:13:25 CDT 2019
+RUN-068 start at Thu May 23 23:13:47 CDT 2019, contued
+         stop at Fri May 24 00:02:45 CDT 2019
+RUN-069 start at Fri May 24 00:02:57 CDT 2019, ACL Li7
+         stop at Fri May 24 00:55:33 CDT 2019
+RUN-070 start at Fri May 24 00:55:42 CDT 2019, ACL Li7
+         stop at Fri May 24 01:05:55 CDT 2019
+         stop at Fri May 24 01:06:25 CDT 2019
+RUN-071 start at Fri May 24 01:06:45 CDT 2019, ACL Li7
+         stop at Fri May 24 01:08:02 CDT 2019
+RUN-072 start at Fri May 24 01:09:11 CDT 2019, ACL Li7
+         stop at Fri May 24 01:17:41 CDT 2019
+RUN-073 start at Fri May 24 01:30:25 CDT 2019, ACL Li7
+         stop at Fri May 24 02:12:16 CDT 2019
+RUN-074 start at Fri May 24 02:18:09 CDT 2019, ACL Li
+         stop at Fri May 24 03:29:52 CDT 2019
+RUN-075 start at Fri May 24 03:30:06 CDT 2019, ACL Li7
+         stop at Fri May 24 04:34:17 CDT 2019
+RUN-076 start at Fri May 24 04:34:37 CDT 2019, ACL Li7
+         stop at Fri May 24 05:38:09 CDT 2019
+RUN-077 start at Fri May 24 05:38:19 CDT 2019, ACL Li7
+         stop at Fri May 24 06:29:41 CDT 2019
+RUN-078 start at Fri May 24 06:31:23 CDT 2019, ACL Li7
+         stop at Fri May 24 06:33:33 CDT 2019
+         stop at Fri May 24 06:40:45 CDT 2019
+         stop at Fri May 24 06:48:10 CDT 2019
+RUN-079 start at Fri May 24 07:22:24 CDT 2019, after reboot the daq, cont 7Li
+         stop at Fri May 24 08:21:33 CDT 2019
+RUN-080 start at Fri May 24 08:21:54 CDT 2019, continue
+         stop at Fri May 24 09:17:00 CDT 2019
+RUN-081 start at Fri May 24 09:17:25 CDT 2019, continue on 7Li
+         stop at Fri May 24 10:15:46 CDT 2019
+RUN-082 start at Fri May 24 10:16:13 CDT 2019, continued
+         stop at Fri May 24 11:21:15 CDT 2019
+RUN-083 start at Fri May 24 11:24:34 CDT 2019, continue data taking
+RUN-084 start at Fri May 24 11:33:06 CDT 2019, restart after resonator fixed
+         stop at Fri May 24 12:35:17 CDT 2019
+RUN-085 start at Fri May 24 12:36:14 CDT 2019, continue data

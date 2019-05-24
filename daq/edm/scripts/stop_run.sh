@@ -15,7 +15,7 @@ fi;
 echo -e "------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
 echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.dat
-echo "         stop at $(date)" > ~/digios/analysis/working/elog.txt
+echo "         stop at $(date)" >> ~/digios/analysis/working/elog.txt
 
 ~/digios/daq/edm/scripts/elog.sh stop
 
