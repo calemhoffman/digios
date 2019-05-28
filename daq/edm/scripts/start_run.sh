@@ -34,12 +34,15 @@ export DIGIOSRUNNUM
 
 #echo "RUN-${RUN} start at $(date), $COMMENT"
 echo "RUN-${RUN} start at $(date), $COMMENT" >> ~/digios/analysis/working/RunTimeStamp.dat
+echo "RUN-${RUN} start at $(date), $COMMENT" > ~/digios/analysis/working/elog.txt
+
+~/digios/daq/edm/scripts/elog.sh start
 
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
 caput Online_CS_StartStop Start
 
-curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData value=1" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=1" --max-time 1 --connect-timeout 1
 
 export TERM=vt100
 echo " terminals" 
