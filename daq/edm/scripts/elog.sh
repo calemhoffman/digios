@@ -32,4 +32,6 @@ if [ ${option} == "stop" ]; then
     message=$(elog -h www.phy.anl.gov -d elog -p 443 -l ${expName^^} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt)
     
     echo ${message}
+
+
 fi
