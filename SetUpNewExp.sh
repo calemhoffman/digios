@@ -137,6 +137,7 @@ Data=${DATAPATH}/${expName}/data
 mergedData=${DATAPATH}/${expName}/merged_data
 rootData=${DATAPATH}/${expName}/root_data
 
+mkdir -v ${DATAPATH}/${expName}
 mkdir -v ${Data}
 mkdir -v ${mergedData}
 mkdir -v ${rootData}
