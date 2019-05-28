@@ -19,6 +19,7 @@ core.*
 *.so
 .DS_Store
 tempDB.txt
+elog.txt
 
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
