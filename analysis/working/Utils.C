@@ -54,7 +54,7 @@ void FindBesCanvasDivision(int nPad){
 
 int nCanvas=0;
 void newCanvas(int sizeX = 800, int sizeY = 600, int posX = 0, int posY = 0){
-  TString name; name.Form("cNewCanvas%d", nCanvas);
+  TString name; name.Form("cNewCanvas%d | %s", nCanvas, canvasTitle.Data());
   TCanvas * cNewCanvas = new TCanvas(name, name, posX, posY, sizeX, sizeY);
   nCanvas++;
 }

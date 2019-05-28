@@ -167,3 +167,32 @@ RUN-083 start at Fri May 24 11:24:34 CDT 2019, continue data taking
 RUN-084 start at Fri May 24 11:33:06 CDT 2019, restart after resonator fixed
          stop at Fri May 24 12:35:17 CDT 2019
 RUN-085 start at Fri May 24 12:36:14 CDT 2019, continue data
+         stop at Fri May 24 13:24:08 CDT 2019
+RUN-086 start at Fri May 24 13:33:06 CDT 2019, beam back; wiggled plug; 7li
+         stop at Fri May 24 14:42:06 CDT 2019
+RUN-087 start at Fri May 24 14:42:28 CDT 2019, cont.
+         stop at Fri May 24 15:35:56 CDT 2019
+RUN-088 start at Fri May 24 15:36:26 CDT 2019, cont.
+         stop at Fri May 24 17:14:45 CDT 2019
+RUN-089 start at Fri May 24 17:15:24 CDT 2019, same as previous run
+         stop at Fri May 24 18:37:45 CDT 2019
+RUN-090 start at Fri May 24 18:38:00 CDT 2019, continued
+         stop at Fri May 24 19:49:28 CDT 2019
+RUN-091 start at Fri May 24 19:49:42 CDT 2019, same as previous
+         stop at Fri May 24 20:46:07 CDT 2019
+RUN-092 start at Fri May 24 20:46:19 CDT 2019, same as previous
+         stop at Fri May 24 21:47:50 CDT 2019
+RUN-093 start at Fri May 24 21:47:59 CDT 2019, same
+         stop at Fri May 24 22:45:23 CDT 2019
+RUN-094 start at Fri May 24 22:45:29 CDT 2019, cont
+RUN-095 start at Fri May 24 22:45:59 CDT 2019, trying again
+         stop at Fri May 24 22:48:40 CDT 2019
+RUN-096 start at Fri May 24 22:49:01 CDT 2019, hgfj
+         stop at Sat May 25 07:57:15 CDT 2019
+RUN-097 start at Sat May 25 12:06:09 CDT 2019, Th alpha source
+         stop at Sat May 25 13:08:00 CDT 2019
+RUN-098 start at Sat May 25 14:21:41 CDT 2019, Th source, alpha run, energy trigger only
+         stop at Mon May 27 10:19:18 CDT 2019
+RUN-099 start at Tue May 28 15:26:05 CDT 2019, testing VME problem?
+         stop at Tue May 28 15:32:09 CDT 2019
+RUN-100 start at Tue May 28 16:26:52 CDT 2019, testing
