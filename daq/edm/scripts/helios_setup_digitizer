@@ -126,7 +126,7 @@ echo "Misc X-plane"
 caput VME32:RTR1:reg_X_PLANE_MAP_A 31 
 caput VME32:RTR1:reg_X_PLANE_MAP_B 0
 caput VME32:RTR1:reg_X_PLANE_MAP_C 31
-caput VME32:RTR1:reg_X_PLANE_MAP_D 170
+caput VME32:RTR1:reg_X_PLANE_MAP_D 0
 
 echo "Setting X-plane - Si Array Energies Only"
 #caput VME32:RTR1:reg_X_PLANE_MAP_E 528
@@ -146,23 +146,23 @@ caput VME32:RTR2:reg_X_PLANE_MAP_G 0
 caput VME32:RTR2:reg_X_PLANE_MAP_H 0
 
 echo "Setting Y-plane - elum"
-caput VME32:RTR1:reg_Y_PLANE_MAP_A 992
+caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_B 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_C 992
-caput VME32:RTR1:reg_Y_PLANE_MAP_D 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_C 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_D 170
 
 caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_F 992
+caput VME32:RTR1:reg_Y_PLANE_MAP_F 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_G 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_H 0
 
-caput VME32:RTR2:reg_Y_PLANE_MAP_A 992
+caput VME32:RTR2:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_B 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_C 992
+caput VME32:RTR2:reg_Y_PLANE_MAP_C 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_D 0
 
 caput VME32:RTR2:reg_Y_PLANE_MAP_E 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_F 992
+caput VME32:RTR2:reg_Y_PLANE_MAP_F 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_G 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_H 0
 
