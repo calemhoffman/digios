@@ -56,7 +56,7 @@ if [ ${PCName} == "digios1" ]; then  #DAQ
    space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
    spacePrecent="${spacePrecent:0:2}"
-   echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+   echo "Free Space : ${space} MB |  ${spacePrecent}%-used"
 
 elif [ ${PCName:0:5} == "phywl" ]; then #MAC
    DATAPATH=~/experiments
