@@ -5,12 +5,12 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
 
   if( RUNNUM == -1){
     
-      chain->Add("../root_data/gen_run01[5-9].root"); // 6Li
+     /* chain->Add("../root_data/gen_run01[5-9].root"); // 6Li
       chain->Add("../root_data/gen_run02[0,1,4-9].root"); // 6Li
       chain->Add("../root_data/gen_run03[0-9].root"); // 6Li
       chain->Add("../root_data/gen_run04[0-9].root"); // 6Li
       chain->Add("../root_data/gen_run05[0-2].root"); // 6Li
-      
+      */
       
       /*chain->Add("../root_data/gen_run03[3-8].root"); // 6Li
       chain->Add("../root_data/gen_run040.root"); // 6Li
@@ -19,14 +19,14 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
      // chain->Add("../root_data/gen_run04[2-9].root"); // 6Li
      // chain->Add("../root_data/gen_run05[0-2].root"); // 6Li
 
-      
-     /* 
+     
       chain->Add("../root_data/gen_run05[3-9].root"); // 7Li
       chain->Add("../root_data/gen_run06[0-5,7-9].root"); // 7Li
       chain->Add("../root_data/gen_run07[1-6,9].root"); // 7Li
-      chain->Add("../root_data/gen_run08[0,1].root"); // 7Li
+      chain->Add("../root_data/gen_run08[5-9].root"); // 7Li
+      chain->Add("../root_data/gen_run09[0-2].root"); // 7Li
 
-*/
+
 
     //chain->Add("../root_data/gen_run10[2-3].root"); // B11+CD2 120ug
     // chain->Add("../root_data/gen_run10[4-9].root"); // B11+Ti+3H 450/30ug
