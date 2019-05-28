@@ -133,7 +133,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    for(int idet = 0 ; idet < numDet; idet++){
       
       if( !TMath::IsNaN(e[idet]) || e[idet] > 0 ){
-         eC[idet]   = e[idet]*eCorr[idet][0] + eCorr[idet][1];  
+         eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
          eC_t[idet] = e_t[idet]; // ch
       }else{
          continue; // when e is invalid, nothing need to do
