@@ -50,7 +50,7 @@ echo "=================== Checking disk space."
 echo "PC name : ${PCName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
-   DATAPATH=/media/DIGIOSDATA3
+   DATAPATH=/media/DIGIOSDATA4
    expDIR=~/digios
    
    space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
