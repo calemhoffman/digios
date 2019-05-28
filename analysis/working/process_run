@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "$./process_run [RunNum] [Merge] [EventBld] [GeneralSort] [Monitor]"
-  echo "     RunNum = run number"
+  echo "     RunNum = a 3 digit run number, e.g. 001"
   echo "      Merge = 1/0/-1     || -1 is force merge"  
   echo "   EventBld = 1/0/-1     || -1 is force build"  
   echo " GenralSort = n/2/1/0/-1 ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
@@ -28,7 +28,7 @@ else
 fi
 
 #remote data path
-dataloc=/media/DIGIOSDATA3/${expName}/data
+dataloc=/media/DIGIOSDATA4/${expName}/data
 daqDir=/home/helios/digios
 
 #===== directory and chat files
@@ -112,7 +112,6 @@ else
     echo "RUN $RUN: Get the raw data `date`"
     rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
     rsync -avuht --progress "helios@${IP}:${daqDir}/analysis/working/RunTimeStamp.dat" ${AnalysisDir}/working/.
-    rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
 fi
 
 echo "============================================="
@@ -162,7 +161,7 @@ if [ $isMerge -eq 1 ]; then
   
   if [ ${rawDataTime} -ge ${mergedDataTime} ]; then
     echo "RUN $RUN: GEBMerge started at `date`"
-    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` | tee ${MERGDIR}/GEBMerge_run${RUN}.log
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
     echo "RUN $RUN: GEBMerge DONE at `date`"
   else
     echo -e "${BLUE}Merged data are newer than raw data. No need to merged again.${NC}"
@@ -173,7 +172,7 @@ fi
 if [ $isMerge -eq -1 ]; then # force merge
   echo -e "${RED}######################### Merge raw data (force) ${NC}"
   echo "RUN $RUN: GEBMerge started at `date`"
-  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` | tee ${MERGDIR}/GEBMerge_run${RUN}.log
+  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 fi
 
@@ -202,8 +201,8 @@ if [ $isSort -eq 1 ]; then
   fi
 
   if [ ${mergedDataTime} -ge ${rootDataTime} ]; then
-    echo "GEBSort DONE at `date`"
     ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
+    echo "GEBSort DONE at `date`"
     echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "
     echo "============================================="
     echo "============================================="

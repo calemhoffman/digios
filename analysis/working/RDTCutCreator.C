@@ -13,10 +13,18 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
 	printf("================ Graphic Cut Creator for RDT ============== \n");
    
    TChain * chain = new TChain("gen_tree");
-   chain->Add(dataList);
+   //chain->Add(dataList);
    //chain->Add("data/gen_run70_74.root");
    //chain->Add("data/gen_run75_87.root");
-   
+   // chain->Add("../root_data/gen_run03[0-9].root"); // Ti+ 3H 450/30ug
+   // chain->Add("../root_data/gen_run04[0-9].root"); // Ti+ 3H 450/30ug
+   // chain->Add("../root_data/gen_run05[0-9].root"); // Ti+ 3H 450/30ug
+   // chain->Add("../root_data/gen_run06[0-9].root"); // Ti+ 3H 450/30ug
+   // chain->Add("../root_data/gen_run07[0-9].root"); // Ti+ 3H 450/30ug
+   // chain->Add("../root_data/gen_run08[0-9].root"); // Ti+ 3H 450/30ug
+   // chain->Add("../root_data/gen_run09[0-9].root"); // Ti+ 3H 450/30ug
+   //chain->Add("../root_data/gen_run10[2-3].root"); // 11B+CD2
+   chain->Add("../root_data/gen_run10[4-9].root"); // 11B+3H
    chain->GetListOfFiles()->Print();
    
 	TString varX, varY, tag;
@@ -38,10 +46,9 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
-      //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
       varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
 
-      expression[i].Form("%s:%s>>h(500, 0, 5000, 500, 0, 2000)", 
+      expression[i].Form("%s:%s>>h(500, 0, 8000, 500, 0, 5000)", 
             varY.Data(),
             varX.Data());
 
@@ -71,10 +78,10 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root"){
      
 	}
 	
-   TFile * cutFile = new TFile(saveFileName, "recreate");
+   TFile * cutFile = new TFile(saveFileName, "RECREATE");
 	cutList->Write("cutList", TObject::kSingleKey);
 	
 	printf("====> saved %d cuts into %s\n", 4, saveFileName.Data());
-   gROOT->ProcessLine(".q");
+	//gROOT->ProcessLine(".q");
 	
 }
