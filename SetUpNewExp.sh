@@ -7,7 +7,7 @@ expName=$1
 
 if [ $# -ne 0 ]; then
     if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
-	expName="ARR01"
+      expName="ARR01"
     fi
 fi
     
@@ -35,8 +35,14 @@ if [ $# -eq 0 ]; then
    read -p 'Enter the new experiment name: ' expName    
 fi
 
+if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
+   expName="ARR01"
+   echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m = master"
+else
+   echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
+fi
+
 PCName="$(hostname)"
-echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
 
 #------ Set up data folder, check disk space
 echo "=================== Checking disk space."
