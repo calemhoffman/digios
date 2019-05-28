@@ -68,7 +68,7 @@ void Check_e_z(TString rootfile){
       gate_RDT = "&& (cut0 || cut1 || cut2 || cut3)";
    }
    
-   TString detGate = "detID != 2 && detID !=5 && detID != 25 && detID != 14 && detID%5 != 4";
+   TString detGate = "detID != 2 && detID !=5 && detID != 10 && detID != 18 && detID != 19 && detID != 25";
 
 /**///======================================================== read tree   
    printf("################### Check_e_z.C ######################\n");

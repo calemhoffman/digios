@@ -18,6 +18,7 @@
 #include <string>
 #include <fstream>
 #include <TObjArray.h>
+#include <TCutG.h>
 #include "TClonesArray.h"
 
 // Headers needed by this particular selector
@@ -181,6 +182,10 @@ public :
    double beta, gamma;
    double alpha ;
    double Et, massB;
+
+   //======== RDT cut
+   bool isRDTCutExist;
+   TCutG ** cut = NULL;
 
 
 };
@@ -357,7 +362,11 @@ void Cali_e_trace::Init(TTree *tree)
          newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
          newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
    }
-   
+
+   printf("Is EBIS  exist : %d\n", isEBISExist);
+   printf("Is ELUM  exist : %d\n", isELUMExist);
+   printf("Is EZero exist : %d\n", isEZEROExist);
+   printf("Is Trace exist : %d\n", isTraceDataExist);
    //=== clock
    clock.Reset();
    clock.Start("timer");
@@ -642,6 +651,25 @@ void Cali_e_trace::Init(TTree *tree)
       isReaction = false;
    }
    file.close();
+
+   //====================================== load RDT cut
+   TFile * fileCut = new TFile("rdtCuts.root");   
+   TObjArray * cutList = NULL;
+   isRDTCutExist = false;
+   if( fileCut->IsOpen() ){
+      TObjArray * cutList = (TObjArray*) fileCut->FindObjectAny("cutList");
+      
+      if( cutList != NULL){
+         isRDTCutExist = true;
+         const int numCut = cutList->GetEntries();
+         cut = new TCutG * [numCut];
+         printf("=========== found %d cuts in %s \n", numCut, fileCut->GetName());
+         for( int i = 0 ; i < numCut; i++){
+            cut[i] = (TCutG* ) cutList->At(i);
+            printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
+         }
+      }
+   }
 
    printf("================================== numDet : %d \n", numDet);
    
