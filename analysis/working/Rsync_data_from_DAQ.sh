@@ -10,7 +10,7 @@ if [ ${PCName:0:5} == "bebop" ]; then
     exit
 fi 
 
-if [ ${PCName} = "phywl215.phy.anl.gov" ]; then
+if [ ${PCName} = "phywl183.phy.anl.gov" ]; then
     source ~/digios/expName.sh
     dir=~/experiments/${expName}/data
     mkdir -v ${dir}

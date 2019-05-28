@@ -251,8 +251,9 @@ Bool_t GeneralSort::Process(Long64_t entry)
       //=============================== RECOIL
       if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
         Int_t rdtTemp = idDet-101;
-	//float mtemp[8]={-10,-100,-100,-100,-10,-100,-100,-100};
-        psd.RDT[rdtTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+	float mtemp[8]={-10,-100,-100,-100,-10,-100,-100,-100};
+        psd.RDT[rdtTemp] = ((float)(-pre_rise_energy[i])
+                +(float)(post_rise_energy[i]))/mtemp[rdtTemp];
         psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
 	
 

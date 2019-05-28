@@ -257,10 +257,8 @@ void Cali_littleTree_trace::Init(TTree *tree)
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      for( int i = 0 ; i < numDet; i++){
-         xfxneCorr[i][0] = 0.0;
-         xfxneCorr[i][1] = 1.0;
-      }
+      Terminate();
+      return;
    }
    file.close();
 

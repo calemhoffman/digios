@@ -11,7 +11,7 @@
 int numRow = 6;
 int numCol = 5;
 const int numDet = numRow * numCol ;
-double rangeEx[3] = { 50, -1, 2}; // resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 50, -1, 5}; // resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; // resol. [deg], low deg, high deg
 
 double ExOffset[30] = { 
