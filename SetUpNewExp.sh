@@ -7,7 +7,7 @@ expName=$1
 
 if [ $# -ne 0 ]; then
     if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
-      expName="ARR01"
+	expName="ARR01"
     fi
 fi
     
@@ -34,6 +34,7 @@ if [ $# -eq 0 ]; then
    git branch -a
    read -p 'Enter the new experiment name: ' expName    
 fi
+
 
 if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
    expName="ARR01"
@@ -136,9 +137,9 @@ Data=${DATAPATH}/${expName}/data
 mergedData=${DATAPATH}/${expName}/merged_data
 rootData=${DATAPATH}/${expName}/root_data
 
-mkdir -vp ${Data}
-mkdir -vp ${mergedData}
-mkdir -vp ${rootData}
+mkdir -v ${Data}
+mkdir -v ${mergedData}
+mkdir -v ${rootData}
 
 
 #===== create symbolic links
