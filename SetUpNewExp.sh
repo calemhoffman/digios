@@ -130,9 +130,9 @@ Data=${DATAPATH}/${expName}/data
 mergedData=${DATAPATH}/${expName}/merged_data
 rootData=${DATAPATH}/${expName}/root_data
 
-mkdir -vp ${Data}
-mkdir -vp ${mergedData}
-mkdir -vp ${rootData}
+mkdir -v ${Data}
+mkdir -v ${mergedData}
+mkdir -v ${rootData}
 
 
 #===== create symbolic links
