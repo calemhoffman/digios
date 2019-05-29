@@ -4,6 +4,20 @@ echo "#     Set-up for new Experiment"
 echo "#############################################"
 
 daqDataPath=/media/DIGIOSDATA4
+
+echo " The bach script do following things "
+echo " 1) git-fetch  "
+echo " 2) check repository is clean"
+echo " 3) check disk space"
+echo " 4) check is git branch exist"
+echo "    branch exist --> git checkout "
+echo "    branch not exist --> create expName.sh"
+echo " 5) making directories for data, merged_data, root_data"
+echo " 6) create symbolic links to data, merged_data, root_data"
+echo " 7) if branch not exist --> clean up files, and git push"
+
+echo "#############################################"
+
 expName=$1
 
 if [ $# -ne 0 ]; then
@@ -92,7 +106,7 @@ if [ "${space}" -le 512000 ]; then
    read -p  '-------------------------- Continue? (Y/N) ' OKFlag
    
    if [ ${OKFlag} == "N" ]; then
-      echo "xxxxxxxxxxxxxx Abort SetUpNewExp.sh."
+      echo "xxxxxxxxxxxxxx Abort SetUpNewExp"
       exit
    fi
 fi
