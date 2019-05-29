@@ -206,6 +206,8 @@ void Monitors::Begin(TTree *tree)
    printf("------------ %d \n", A); //testing code for TSelector input
    
    //===================================================== loading parameter
+   printf("################## loading parameter files\n"); 
+
    //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    printf("=======================\n");
@@ -368,6 +370,47 @@ void Monitors::Begin(TTree *tree)
       isReaction = false;
    }
    file.close();
+
+
+   //================  Get Recoil cuts;
+   TFile * fCut = new TFile("rdtcuts.root");	
+   isCutFileOpen = fCut->IsOpen();
+   if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
+   numCut = 0 ;
+   if( isCutFileOpen ){
+      cutList = (TObjArray *) fCut->FindObjectAny("cutList");
+      numCut = cutList->GetEntries();
+      printf("=========== found %d cutG in %s \n", numCut, fCut->GetName());
+
+      cutG = new TCutG();
+      graphRateCut = new TGraph * [numCut];
+      for(int i = 0; i < numCut ; i++){
+         printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
+            cutList->At(i)->GetName(),
+            ((TCutG*)cutList->At(i))->GetVarX(),
+            ((TCutG*)cutList->At(i))->GetVarY(),
+            ((TCutG*)cutList->At(i))->GetN());
+         countFromCut.push_back(0);	
+      
+         graphRateCut[i] = new TGraph();
+         graphRateCut[i]->SetMarkerColor(i+1);	 
+         graphRateCut[i]->SetMarkerStyle(20+i);
+         graphRateCut[i]->SetMarkerSize(1);
+         rateGraph->Add(graphRateCut[i]);
+      }
+   }
+
+   //================  Get other cuts
+   //Ryan comment : the following is not so correct, but do the job
+   /*
+   TFile *cutfile = new TFile("6Li_cuts.root");
+   cutfileOpen = cutfile->IsOpen();
+   if(!cutfileOpen) cout<<"Failed to open cutfile"<<endl;
+   cutfile->ls();
+   EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
+   cutfile->Close();
+   */
+
    printf("======================================\n");
    
    //Generate all of the histograms needed for drawing later on
@@ -446,7 +489,7 @@ void Monitors::Begin(TTree *tree)
    
    for( int i = 0; i < numRow; i++){
       hecalVzRow[i] = new TH2F(Form("heCalVz%d", i),
-                               Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*i+numRow),
+                               Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*(i+1)-1),
                                500, zRange[0], zRange[1], 500, energyRange[0], energyRange[1]);
    }
 
@@ -506,51 +549,11 @@ void Monitors::Begin(TTree *tree)
    graphRate->SetMarkerStyle(20);
    graphRate->SetMarkerSize(1);
 
-   printf("################## loading parameter files\n"); 
 
    //rateGraph->Add(graphRate);
    rateGraph->SetTitle("Instantaneous Beam rate [pps]; Delta Time [sec]; Rate [pps]");
 	
-   //================  Get Recoil cuts;
-   TFile * fCut = new TFile("rdtcuts.root");	
-   isCutFileOpen = fCut->IsOpen();
-   if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
-   numCut = 0 ;
-   if( isCutFileOpen ){
-      cutList = (TObjArray *) fCut->FindObjectAny("cutList");
-      numCut = cutList->GetEntries();
-      printf("=========== found %d cutG in %s \n", numCut, fCut->GetName());
-
-      cutG = new TCutG();
-      graphRateCut = new TGraph * [numCut];
-      for(int i = 0; i < numCut ; i++){
-         printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
-            cutList->At(i)->GetName(),
-            ((TCutG*)cutList->At(i))->GetVarX(),
-            ((TCutG*)cutList->At(i))->GetVarY(),
-            ((TCutG*)cutList->At(i))->GetN());
-         countFromCut.push_back(0);	
-      
-         graphRateCut[i] = new TGraph();
-         graphRateCut[i]->SetMarkerColor(i+1);	 
-         graphRateCut[i]->SetMarkerStyle(20+i);
-         graphRateCut[i]->SetMarkerSize(1);
-         rateGraph->Add(graphRateCut[i]);
-      }
-   }
-
- //================  Get other cuts
  
- TFile *cutfile = new TFile("6Li_cuts.root");
- cutfileOpen = cutfile->IsOpen();
- if(!cutfileOpen) cout<<"Failed to open cutfile"<<endl;
- cutfile->ls();
- EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
- cutfile->Close();
- 
- 
-
-
    printf("========================================\n");
    StpWatch.Start();
 }
@@ -652,7 +655,6 @@ Bool_t Monitors::Process(Long64_t entry)
       
       arrayMulti++;
       
-      
       he[i]->Fill(e[i]);
       hring[i]->Fill(ring[i]);
       hxf[i]->Fill(xf[i]);
@@ -674,7 +676,6 @@ Bool_t Monitors::Process(Long64_t entry)
       //if( !TMath::IsNaN(ring[i]) ) hStat[i]->Fill(2);
       //if( !TMath::IsNaN(e[i])  ) hStat[i]->Fill(1);
       //if( TMath::IsNaN(e[i]) && TMath::IsNaN(ring[i]) && TMath::IsNaN(xf[i]) && TMath::IsNaN(xn[i]) ) hStat[i]->Fill(0);
-      
       
       //==================== Calibrations go here
       xfcal[i] = xf[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
@@ -703,7 +704,6 @@ Bool_t Monitors::Process(Long64_t entry)
         xcal[i] = TMath::QuietNaN();
       }
       
-      
       //==================== calculate Z
       if( firstPos > 0 ) {
          z[i] = length*(xcal[i]) + pos[i%numCol];
@@ -730,11 +730,10 @@ Bool_t Monitors::Process(Long64_t entry)
       }
       
       //=================== Other Gates
-      if(cutfileOpen){
-         if(EvsZ_cut->IsInside(z[i] , eCal[i]))  EvsZ=true;
-         else EvsZ = false;
-      }
-
+      //if(cutfileOpen){
+      //   if(EvsZ_cut->IsInside(z[i] , eCal[i]))  EvsZ=true;
+      //   else EvsZ = false;
+      //}
       
       //================ coincident with Recoil
       for( int j = 0; j < 8 ; j++){

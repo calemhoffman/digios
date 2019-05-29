@@ -22,7 +22,7 @@ void Cali_e_single(TTree * tree, int detID){
   
 /**///======================================================== initial input
    
-   int energyRange[2] = {500, 5000};
+   int energyRange[2] = {300, 7000};
    
    
 /**///========================================================  load tree
@@ -35,7 +35,7 @@ void Cali_e_single(TTree * tree, int detID){
 /**///======================================================== Browser or Canvas
 
    //TBrowser B ;   
-   Int_t Div[2] = {1,1};  //x,y
+   Int_t Div[2] = {3,1};  //x,y
    Int_t size[2] = {400,400}; //x,y
    TCanvas * cAlpha = new TCanvas("cAlpha", "cAlpha", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    cAlpha->Divide(Div[0],Div[1]);
@@ -148,8 +148,10 @@ void Cali_e_single(TTree * tree, int detID){
       }
       printf("----------------------------------\n");
       
+      cAlpha->cd(2);
       TGraph * graph = new TGraph(n, &energy[0], &refEnergy[0] );
-         
+      graph->Draw("AP");
+   
       TF1 * fit = new TF1("fit", "pol1" );
       graph->Fit("fit", "q");
       
@@ -159,7 +161,8 @@ void Cali_e_single(TTree * tree, int detID){
       //printf("a0: %9.6f, a1: %9.6f \n", a0, a1);
       
       printf("Please manually save to file as : %9.6f\t%9.6f\n", 1./a1, a0);
-         
+      
+      cAlpha->cd(3);
       TString name;
       name.Form("p%d", detID);
       TH1F * p = new TH1F(name, name, 200, 0., refEnergy.back() * 1.3);

@@ -11,16 +11,20 @@
 int numRow = 6;
 int numCol = 5;
 const int numDet = numRow * numCol ;
-double rangeEx[3] = { 50, -1, 2}; // resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 20, -0.5, 1}; // resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; // resol. [deg], low deg, high deg
 
+bool isExOffset = true;
 double ExOffset[30] = { 
- 0.021, 0.0105,   1000, 0.0129,  0.0423, 
-  1000, 0.0047, 0.0811,   1000, -0.0006, 
- 1000, 0.0384, 0.0093, 0.0041, -0.5447,
- 0.0011, 0.0249, 0.0229, 0.0535, -0.0004,
- 0.0243, 0.0247, 0.0083, -0.0126, -0.1546,
- 1000, -0.1075, 0.0211, 0.0551, 0.1028};
+   0.00,  0.0164,    1000,  0.0321,  0.0332, 
+   1000,  0.0130,  0.0114,    1000, -0.0006, 
+   1000, -0.0037, -0.0023,  0.0346,  0.0233,
+-0.0165,  0.0154,  0.0338,  0.0535, -0.0004,
+ 0.0080,  0.0185,  0.0109, -0.0012, -0.0038,
+   1000,  0.0043,  0.0211, -0.0297,  0.1028};
+
+int nBadDet = 0;
+int listOfBadDet[11] = {2, 5, 8, 9, 10, 18, 19, 25, 27, 28, 29 };
 
 
 //=========================== Global histograms
@@ -170,7 +174,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       
      //======== cut-e
      if( TMath::IsNaN(e[i]) ) continue;
-     if( e[i] < 1.2 ) continue;
+     //if( e[i] < 1.2 ) continue;
      
       //======== cut-x
       if( !(TMath::Abs(x[i]) < 0.95) ) continue;
@@ -182,18 +186,25 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( thetaCM < 10 ) continue;
       
       //======== cut-det
-      if( i == 2 || i == 5 || i == 8 || i == 10 || i == 14 || i == 24 || i == 29) continue;  // for ground state
+      bool badDetFlag = false;
+      for( int p = 0 ; p < nBadDet; p ++){
+        if( i == listOfBadDet[p] ) badDetFlag = true;
+      }
+      if( badDetFlag ) continue;
+      //if( i == 2 || i == 10 || i == 18 || i == 19 || i == 25) continue;  // for ground state
+      
       double scaling = 1;
-      if( i%numCol == 0 ) scaling = numRow/3.;
-      if( i%numCol == 1 ) scaling = numRow/6.;
-      if( i%numCol == 2 ) scaling = numRow/5.;
-      if( i%numCol == 3 ) scaling = numRow/5.;
-      if( i%numCol == 4 ) scaling = numRow/3.;
+      //TODO auto calculate from a list-of-bad-det
+      //if( i%numCol == 0 ) scaling = numRow/3.;
+      //if( i%numCol == 1 ) scaling = numRow/6.;
+      //if( i%numCol == 2 ) scaling = numRow/5.;
+      //if( i%numCol == 3 ) scaling = numRow/5.;
+      //if( i%numCol == 4 ) scaling = numRow/3.;
 
       //======== special gate;
       //if( i == 16 && e[i] < 6 ) continue;
       
-      Ex = Ex - ExOffset[i];
+      if( isExOffset) Ex = Ex - ExOffset[i];
       
       multiHit ++;
       

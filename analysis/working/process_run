@@ -180,7 +180,7 @@ fi
 #######################################
 #################### Sort
 if [ $isSort -eq 1 ]; then
-  echo -e "${RED}========= GEBSort started sorting run $RUN at `date`${NC}"
+  echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
   if [ ${isLinux} -eq 1 ]; then
@@ -235,33 +235,73 @@ else
     runID=$( printf '%d' $RUN )
 fi;
 
-if [ $isGeneralSort -eq 1 ]; then
-  echo -e "${RED}######################### GeneralSort.C${NC}"
-  root -l -q -b "process_run.C(${runID}, 0)"
-  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
-fi
+#---------- check gen_run date
+if [ $isGeneralSort -ge 1 ]; then
+  echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
+  
+  isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
 
-if [ $isGeneralSort -eq 2 ]; then
-  echo -e "${RED}######################### GeneralSortTrace.C${NC}"
-  root -l -q -b "process_run.C(${runID}, 1)"
-  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
-fi
+  if [ $isRootDataExist -eq 0 ]; then
+      
+      echo "====== ${ROOTDIR}/run${RUN}.root does not exist."
+  
+  else
+      #==== check run###.root timeStamp
+      if [ ${isLinux} -eq 1 ]; then
+          rootTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
+      else
+          rootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
+      fi
 
-if [ $isGeneralSort -gt 2 ]; then
-  echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
-  root -l -q "process_run.C(${runID}, ${isGeneralSort})"
+      #==== check gen_run###.root timeStamp
+      isGenRootDataExist=`ls -1 ${ROOTDIR}/gen_run${RUN}.root 2>/dev/null | wc -l`
 
-  #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
-  #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
-fi
+      if [ $isGenRootDataExist -gt 0 ]; then
+          if [ ${isLinux} -eq 1 ]; then
+              genRootTime=`stat -c "%Z" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
+          else
+              genRootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
+          fi
+      else
+          genRootTime=0
+      fi 
+
+      if [ $rootTime -ge $genRootTime ]; then
+
+          if [ $isGeneralSort -eq 1 ]; then
+              echo -e "${RED}######################### GeneralSort.C${NC}"
+              root -l -q -b "process_run.C(${runID}, 0)"
+              root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+          fi
+
+          if [ $isGeneralSort -eq 2 ]; then
+              echo -e "${RED}######################### GeneralSortTrace.C${NC}"
+              root -l -q -b "process_run.C(${runID}, 1)"
+              root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+          fi
+
+          if [ $isGeneralSort -gt 2 ]; then
+              echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
+              root -l -q "process_run.C(${runID}, ${isGeneralSort})"
+
+              #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
+              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+          fi
+      else
+          echo -e "${BLUE}gen_run${RUN}.root are newer than run${RUN}.root. No need to sort again.${NC}"
+          echo -e "${GREEN}You can Force sorting using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
+
+      fi
+
+   fi
+
+fi;
 
 ########################################
 #################### Monitor
 if [ $isMonitor -eq 1 ] ; then
   root -l "ChainMonitors.C(${runID})"
-fi
-
-if [ $isMonitor -eq 2 ] ; then
+elif [ $isMonitor -eq 2 ] ; then
   root -l ChainMonitors.C
 fi;  
   
