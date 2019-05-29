@@ -109,6 +109,26 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
 //      if( rdt[rID] > 5000 ) rdt_energy = true; 
 //   }
 //   if( !rdt_energy ) return kTRUE;
+
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
+   
+   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
+
+   bool coinFlag = false;
+   for( int i = 0; i < numDet ; i++){
+      for( int j = 0; j < 8 ; j++){
+         if( TMath::IsNaN(rdt[j]) ) continue; 
+         int tdiff = rdt_t[j] - e_t[i];
+         if( -20 < tdiff && tdiff < 20 )  {
+            coinFlag = true;
+         }
+      }
+   }
+   
+   if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    for(int i = 0 ; i < 8 ; i++){
@@ -143,6 +163,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       if( !TMath::IsNaN(xn[idet]) || xn[idet] > 0) xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
       //========= calculate x
+      
       if(xf[idet] > 0  && xn[idet] > 0 ) {
          x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
          hitID[idet] = 0;
@@ -155,6 +176,18 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       }else{
          x[idet] = TMath::QuietNaN();
       }
+      
+
+      //if(xfC[idet] > eC[idet]/2.){
+      //   x[idet] = 2*xfC[idet]/eC[idet] - 1. ;
+      //   hitID[idet] = 1;
+      //}else if(xnC[idet] > eC[idet]/2.){
+      //   x[idet] = 1. - 2* xnC[idet]/eC[idet];
+      //   hitID[idet] = 2;
+      //}else{
+      //   x[idet] = TMath::QuietNaN();
+      //}
+      
    
       x[idet] = x[idet] / xCorr[idet];
    
