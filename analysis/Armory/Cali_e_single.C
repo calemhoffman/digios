@@ -14,15 +14,13 @@
 #include <TSpectrum.h>
 
 
-void Cali_e_single(TTree * tree, int detID){
+void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEnergyRange = 7000){
   
   if( detID < 0 ){
     return;
   }
   
 /**///======================================================== initial input
-   
-   int energyRange[2] = {300, 7000};
    
    
 /**///========================================================  load tree
@@ -59,7 +57,7 @@ void Cali_e_single(TTree * tree, int detID){
    printf("############## e correction \n");
    TString name;
    name.Form("q%d", detID);
-   TH1F * q = new TH1F(name, name, 300, energyRange[0], energyRange[1]);
+   TH1F * q = new TH1F(name, name, 300, minEnergyRange, maxEnergyRange);
    q->SetXTitle(name);
    
    TString expression, gate;
