@@ -1,9 +1,0 @@
-#!/bin/bash -l
-export TERM=vt100
-cd /media/DIGIOSDATA2/data/infl001_19O
-
-xterm -T stopdata -geometry 130x35+500+20 -e "stop_run.sh"
-echo "Pause for a few seconds after stopped run."
-sleep 2
-echo "Terminal is now Free For Use"
-exit

@@ -3,6 +3,7 @@ echo "#############################################"
 echo "#     Set-up for new Experiment"
 echo "#############################################"
 
+daqDataPath=/media/DIGIOSDATA4
 expName=$1
 
 if [ $# -ne 0 ]; then
@@ -50,7 +51,7 @@ echo "=================== Checking disk space."
 echo "PC name : ${PCName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
-   DATAPATH=/media/DIGIOSDATA4
+   DATAPATH=${daqDataPath}
    expDIR=~/digios
    
    space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
@@ -129,6 +130,7 @@ if [ ${isBranchExist} -eq 0 ]; then
     touch ${DigiosDir}/expName.sh
     echo "#!/bin/bash -l" > ${DigiosDir}/expName.sh
     echo "expName=${expName}" >> ${DigiosDir}/expName.sh
+    echo "daqDataPath=${daqDataPath}" >> ${DigiosDir}/expName.sh
     echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
 fi
 

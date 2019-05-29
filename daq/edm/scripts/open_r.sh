@@ -2,7 +2,7 @@
 export TERM=vt100
 explocation=~/digios/daq
 source ~/digios/expName.sh #load expName
-datalocation=/media/DIGIOSDATA3/${expName}/data
+datalocation=${daqDataPath}/${expName}/data
 
 echo $datalocation
 

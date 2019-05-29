@@ -18,6 +18,7 @@ while loop == 1:
     fexp=open("/home/helios/digios/expName.sh", 'r')
     line=fexp.readline()
     line=fexp.readline()
+    line=fexp.readline()
     expName=line[8:-1]
     line=fexp.readline()
     runNum=line[11:-1]

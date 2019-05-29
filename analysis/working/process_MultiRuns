@@ -10,7 +10,7 @@ source ../../expName.sh #load expName
 AnalysisDir=../analysis
 
 #remote data path
-dataloc=/media/DIGIOSDATA3/${expName}/data
+dataloc=${daqDataPath}/${expName}/data
 daqDir=/home/helios/digios
 
 #===== directory and chat files
