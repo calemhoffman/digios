@@ -22,10 +22,10 @@ ULong64_t maxNumberEvent = 100000000;
 
 //---histogram seeting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {0, 15};
+int energyRange[2]= {0, 8};
 int rdtRange[2] = {6000, 4000}; // range for E, range for dE
 double exRange[3] = {25, -1, 10}; // bin [keV], low[MeV], high[MeV]
-int timeGate[2] = {-71, 10}; // min, max
+int timeGate[2] = {-20, 20}; // min, max
 
 //TODO switch for histogram
 
@@ -60,10 +60,6 @@ TString cutTag;
 Bool_t isCutFileOpen;
 int numCut;
 vector<int> countFromCut;
-TGraph ** graphRateCut; //!
-TMultiGraph * rateGraph; //!
-TGraph *graphRate;// = new TGraph(n,x,y);
-
 //======= Other Cuts
 
 TFile *f, *cutfile;
@@ -164,13 +160,9 @@ TH2I *hmult;
 TH1I *htdiff;
 TH1I *htdiffg;
 TH2I *hID2;
+TH2I *hID2g;
 /***************************
  ***************************/
-//==== time in sec
-Float_t timeZero=0;
-Float_t timeCurrent=0;
-Float_t timeRef=0;
-
 //==== global variables
 Float_t x[numDet],z[numDet];
 Float_t xcal[numDet],xfcal[numDet],xncal[numDet],eCal[numDet],ezero[10];
@@ -373,7 +365,7 @@ void Monitors::Begin(TTree *tree)
 
 
    //================  Get Recoil cuts;
-   TFile * fCut = new TFile("rdtcuts.root");	
+   TFile * fCut = new TFile("rdtCuts.root");	
    isCutFileOpen = fCut->IsOpen();
    if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
    numCut = 0 ;
@@ -383,7 +375,6 @@ void Monitors::Begin(TTree *tree)
       printf("=========== found %d cutG in %s \n", numCut, fCut->GetName());
 
       cutG = new TCutG();
-      graphRateCut = new TGraph * [numCut];
       for(int i = 0; i < numCut ; i++){
          printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
             cutList->At(i)->GetName(),
@@ -391,12 +382,6 @@ void Monitors::Begin(TTree *tree)
             ((TCutG*)cutList->At(i))->GetVarY(),
             ((TCutG*)cutList->At(i))->GetN());
          countFromCut.push_back(0);	
-      
-         graphRateCut[i] = new TGraph();
-         graphRateCut[i]->SetMarkerColor(i+1);	 
-         graphRateCut[i]->SetMarkerStyle(20+i);
-         graphRateCut[i]->SetMarkerSize(1);
-         rateGraph->Add(graphRateCut[i]);
       }
    }
 
@@ -501,7 +486,7 @@ void Monitors::Begin(TTree *tree)
       hrdtDEg[i] = new TH1F(Form("hrdtDEg%d",i),
                          Form("Raw Recoil DE(ch=%d) time gated; DE (channel)",i),
                          500,0,rdtRange[0]);
-     hrdt[i] = new TH2F(Form("hrdt%d",i),
+      hrdt[i] = new TH2F(Form("hrdt%d",i),
                          Form("Raw Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
                          500,0,rdtRange[0],500,0,rdtRange[1]);
       hrdtg[i] = new TH2F(Form("hrdtg%d",i),
@@ -510,10 +495,13 @@ void Monitors::Begin(TTree *tree)
    }
    
    //multiplicity
-   hmult=new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
-   hID2=new TH2I("hID2","Array ID vs Recoil ID; Array ID; Recoil ID",30,0,30,8,0,8);
-   htdiff=new TH1I("htdiff","Timestamp difference between array and recoil det", 200,-100,100);   
-   htdiffg=new TH1I("htdiffg","Timestamp difference between array and recoil det w/ EvsZ gate", 200,-100,100);
+   hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
+   hID2    = new TH2I("hID2", "Array ID vs Recoil ID; Array ID; Recoil ID",30,0,30,8,0,8);
+   hID2g   = new TH2I("hID2g","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
+
+   // coincident time 
+   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", 200,-100,100);   
+   htdiffg = new TH1I("htdiffg",Form("Coincident time (array, recoil) w/ %d < coinTime gate < %d; time [ch = 10ns]; count", timeGate[0], timeGate[1]), 200,-100,100);
 
    //TAC
    htac[0] = new TH1F("htac0","Array-RDT0 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
@@ -541,17 +529,6 @@ void Monitors::Begin(TTree *tree)
    h0de = new TH1F("h0de","EZERO DE ; DE [ch]",500,50,4050);//
    h0e = new TH1F("h0e","EZERO - E; E [ch]",500,50,4050);//
    h0tac = new TH1F("h0tac","EZERO RF; RF [ch]",500,50,4050);//
-
-   rateGraph = new TMultiGraph();
-   graphRate = new TGraph();
-   graphRate->SetTitle("Raw Total Rate");
-   graphRate->SetMarkerColor(4);
-   graphRate->SetMarkerStyle(20);
-   graphRate->SetMarkerSize(1);
-
-
-   //rateGraph->Add(graphRate);
-   rateGraph->SetTitle("Instantaneous Beam rate [pps]; Delta Time [sec]; Rate [pps]");
 	
  
    printf("========================================\n");
@@ -622,24 +599,26 @@ Bool_t Monitors::Process(Long64_t entry)
        lastRunID = runID;
     }
     
+
+    //initization
     for( int i = 0 ; i < numDet; i++){
        z[i] = TMath::QuietNaN();
+       x[i] = TMath::QuietNaN();
+       xcal[i] = TMath::QuietNaN();
+       eCal[i] = TMath::QuietNaN();
     }
    
 
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
-    Int_t rid = -1;
     Int_t recoilMulti = 0;
-    Int_t eid = -1;
     Int_t arrayMulti = 0;
     bool rdtgate = false;
     bool coinFlag = false;
-    bool EvsZ = false;
     bool isGoodEventFlag = false;
     for (Int_t i = 0; i < numDet; i++) {
       
-      if( TMath::IsNaN(xn[i]) || TMath::IsNaN(xf[i]) ) continue ; 
+      if( TMath::IsNaN(xn[i]) &&  TMath::IsNaN(xf[i]) ) continue ; 
       
       //reconstruct energy if needed
       //if( (e[i]<xf[i] && e[i] < xn[i]) && xn[i] > 100 && xf[i] > 100) e[i]=xn[i]+xf[i];
@@ -651,10 +630,8 @@ Bool_t Monitors::Process(Long64_t entry)
       //}
 
       if( TMath::IsNaN(e[i]) ) continue ; 
-      //if( ring[i] >50 ) return kTRUE;
-      
-      arrayMulti++;
-      
+      if( ring[i] >50 ) return kTRUE;
+
       he[i]->Fill(e[i]);
       hring[i]->Fill(ring[i]);
       hxf[i]->Fill(xf[i]);
@@ -682,7 +659,7 @@ Bool_t Monitors::Process(Long64_t entry)
       xncal[i] = xn[i]*xnCorr[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
       eCal[i] = e[i]/eCorr[i][0]+eCorr[i][1];
 
-      //if( eCal[i] < 1.5 ) continue;
+      if( eCal[i] < 0.5 ) continue;
 
       //===================== fill Calibrated  data
       heCal[i]->Fill(eCal[i]);
@@ -696,23 +673,33 @@ Bool_t Monitors::Process(Long64_t entry)
         x[i] = 0.5*((xf[i]-xn[i]) / e[i])+0.5;
       }
       
-      if (xfcal[i]>0.5*e[i]) {
-        xcal[i] = xfcal[i]/e[i];
-      }else if (xncal[i]>=0.5*e[i]) {
-        xcal[i] = 1.0 - xncal[i]/e[i];
-      }else{
-        xcal[i] = TMath::QuietNaN();
-      }
+      // range of x is (0, 1)
+      if  ( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) xcal[i] = 0.5 + 0.5 * (xfcal[i] - xncal[i] ) / e[i];
+      if  ( !TMath::IsNaN(xf[i]) &&  TMath::IsNaN(xn[i]) ) xcal[i] = xfcal[i]/ e[i];
+      if  (  TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) xcal[i] = 1.0 - xncal[i]/ e[i];
+      
+      /*
+      if  ( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) {
+        if (xfcal[i]>0.5*e[i]) {
+          xcal[i] = xfcal[i]/e[i];
+        }else if {
+          xcal[i] = 1.0 - xncal[i]/e[i];
+        }
+      }*/
+      
       
       //==================== calculate Z
       if( firstPos > 0 ) {
-         z[i] = length*(xcal[i]) + pos[i%numCol];
+        z[i] = length*(xcal[i]) + pos[i%numCol];
       }else{
-         z[i] = length*(xcal[i]-1.0) + pos[i%numCol];
+        z[i] = length*(xcal[i]-1.0) + pos[i%numCol];
       }
+
+      //===================== multiplicity
+      arrayMulti++; // multi-hit when both e, xf, xn are not NaN
+
       
       //=================== Array fill next
-
       heVx[i]->Fill(x[i],e[i]);
       hringVx[i]->Fill(x[i],ring[i]);
      
@@ -721,51 +708,45 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //=================== Recoil Gate
       if( isCutFileOpen ){
-         for(int i = 0 ; i < 4 ; i++ ){
-           cutG = (TCutG *)cutList->At(i) ;
-           if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate= true;
-         }
+        for(int i = 0 ; i < 4 ; i++ ){
+          cutG = (TCutG *)cutList->At(i) ;
+          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate= true;
+        }
       }else{
-         rdtgate = true;
+        rdtgate = true;
       }
       
-      //=================== Other Gates
-      //if(cutfileOpen){
-      //   if(EvsZ_cut->IsInside(z[i] , eCal[i]))  EvsZ=true;
-      //   else EvsZ = false;
-      //}
       
       //================ coincident with Recoil
       for( int j = 0; j < 8 ; j++){
-         if( TMath::IsNaN(rdt[j]) ) continue; 
-         
-         int tdiff = rdt_t[j] - e_t[i];
-         
-         if(j==1||j==3||j==5||j==7) hrtac[j/2]->Fill(i,tdiff);
-         
-         //htdiff->Fill(tdiff);
-         if(rdtgate && eCal[i]>0) htdiff->Fill(tdiff);
+        if( TMath::IsNaN(rdt[j]) ) continue; 
+	 
+        int tdiff = rdt_t[j] - e_t[i];
+	 
+        if(j==1||j==3||j==5||j==7) hrtac[j/2]->Fill(i,tdiff);
+        
+        htdiff->Fill(tdiff);
+        if(rdtgate && eCal[i]>0) htdiffg->Fill(tdiff);
 
-         if(rdtgate && eCal[i]>0 && EvsZ) htdiffg->Fill(tdiff);
-
-         
-         hID2->Fill(i, j); 
-           
-         if( timeGate[0] < tdiff && tdiff < timeGate[1] )  {
-            if(j % 2 == 0 ) hrdtg[j/2]->Fill(rdt[j],rdt[j+1]);
-            if(j % 2 == 0 ) hrdtDEg[j/2]->Fill(rdt[j+1]);
-            hID2->Fill(i, j); 
-            //if( rdtgate) hID2->Fill(i, j); 
-            coinFlag = true;
-         }
+        hID2->Fill(i, j); 
+	 
+        if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
+          if(j % 2 == 0 ) hrdtg[j/2]->Fill(rdt[j],rdt[j+1]);
+          if(j % 2 == 0 ) hrdtDEg[j/2]->Fill(rdt[j+1]);
+          hID2g->Fill(i, j); 
+          //if( rdtgate) hID2g->Fill(i, j); 
+          coinFlag = true;
+        }
       }
+
       if( coinFlag && rdtgate ) {
-         heCalVzGC->Fill( z[i] , eCal[i] );
-         isGoodEventFlag = true;
-      }  
+        heCalVzGC->Fill( z[i] , eCal[i] );
+        isGoodEventFlag = true;
+      }	 
       
     }//end of array loop
     
+    //=========== fill eCal Vs z for each row
     for( int i = 0; i < numRow; i++){
       for(int j = 0; j < numCol; j++){
          int k = numCol*i+j;
@@ -775,9 +756,8 @@ Bool_t Monitors::Process(Long64_t entry)
     
    /*********** RECOILS ************************************************/ 
    for (int ii = 0 ; ii < 4 ; ii++){
-      if(rdt[2*ii]>0 && rdt[2*ii+1]>0){
-         rid=2*ii;
-         recoilMulti++;
+     if( rdt[2*ii] > 0 && rdt[2*ii+1] > 0 && !TMath::IsNaN(rdt[2*ii]) && !TMath::IsNaN(rdt[2*ii+1])  ){
+         recoilMulti++; // when both dE and E are hit
       }
       hrdt[ii]->Fill(rdt[2*ii],rdt[2*ii+1]);
       hrdtDE[ii]->Fill(rdt[2*ii+1]);
@@ -785,33 +765,7 @@ Bool_t Monitors::Process(Long64_t entry)
    
    hmult->Fill(recoilMulti,arrayMulti);
 
-   /**********Timestamp subtraction*****/
-   // Ryan: I think too restrictive for multiplicity = 1 ,  check line 627 - 644
-   //Int_t tdiff=-999;
-   //Int_t rthresh[4]={250,200,250,400};
-   //Bool_t goodt=0;
-   // Int_t toff[4][30]={{ 6 , 3 , 0 , 5 , 13 , 7 , 4 , 5 , 0 , 11 , 0 , 5 , 5 , 5 , 0 , 6 , 7 , 3 , 5 , 0 , 5 , 6 , 3 , 7 , 0 , 0 , 5 , 5 , 5 , 18 },
-	//	      {-400 ,-400 ,0 ,7 ,-400 ,-400 ,5 ,6 ,0 ,21 , 0,3 , 5 , 7 ,21 ,0 ,3, 5 ,7 , -400 ,-400 ,7 ,-400 ,8 ,-400 ,0 ,-400 ,-400 ,11 ,-400 },
-	//	       {4 ,4 ,0 ,7 ,-400 ,-400 ,5 ,3 ,0 ,13 ,0 ,3 ,5 ,7 ,19 ,5 ,3 ,1 ,3 ,11 ,1 ,3 ,3 ,3 ,13 ,0, 3 ,3 ,8 ,8 },
-	//	       {9 ,7 ,0 ,9 ,13 ,-400 ,7 ,8 ,-400 ,19 ,0 ,5 ,5 ,11 ,17 ,7 ,6 ,7 ,9 ,13 ,7 ,7 ,7 ,7 ,21 ,0 ,7,7 ,7 ,21}};
-   //if( eid>-1 && rid>-1 && recoilMulti>=1 && arrayMulti>=1 ){
-   // tdiff=rdt_t[rid]-e_t[eid];
-   // tdiff+=toff[rid/2][eid];
-   // if(tdiff>-2&&tdiff<7) goodt=1;
-   // // htdiff->Fill(tdiff);
-   // hID2->Fill(eid,rid/2);
-   // //hrtac[rid/2]->Fill(eid,tdiff);
-   //}
-   //if(goodt&&eCal[eid]>2) hrdtg[rid/2]->Fill(rdt[rid],rdt[rid+1]);
-   //if(goodt&&recoilMulti>=1&&arrayMulti>=1&&rdtgate){
-   // heCalVzGC->Fill(z[eid]*10,eCal[eid]);
-   //
-   //
-   //}
-   //if(rdtgate&&recoilMulti>=1&&arrayMulti>=1){
-   //  htdiff->Fill(tdiff);
-   //  hrtac[rid/2]->Fill(eid,tdiff);
-   //}
+
    /*********** EZERO ************************************************/ 
    //he0dee->Fill(ezero[1],ezero[0]);
    //he0det->Fill(TMath::Abs(tac[0]),ezero[0]);
@@ -822,9 +776,7 @@ Bool_t Monitors::Process(Long64_t entry)
    //h0de->Fill(ezero[0]);
    //h0e->Fill(ezero[1]);
    //h0tac->Fill(TMath::Abs(tac[0]));
-  
-  
-
+ 
 
    /*********** Ex and thetaCM ************************************************/ 
    
@@ -942,10 +894,10 @@ void Monitors::Terminate()
    gStyle->SetOptStat("neiou");
    
    
-   //TFile * transfer = new TFile("transfer.root");
+   TFile * transfer = new TFile("transfer.root");
    //TTree * treeT = (TTree *) transfer->FindObjectAny("tree"); 
-   //TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
-   //TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
+   TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
+   TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
    
    //cCanvas->cd(1);
    //treeT->Draw("thetaCM >> c0", "hit == 1 && ExID == 0", "");
@@ -955,30 +907,27 @@ void Monitors::Terminate()
    
    cCanvas->cd(1);
    heCalVz->Draw("colz");
-   
+   fxList->At(0)->Draw("same");
+   fxList->At(1)->Draw("same");
+
    cCanvas->cd(2); 
-   htdiff->Draw();   
-   
+   htdiff->Draw();
+   htdiffg->SetLineColor(2);
+   htdiffg->Draw("same");   
    
    cCanvas->cd(3);
-   //heCalVz->Draw("colz");
-   
-   //heCalVzGC->SetMarkerStyle(20);
    heCalVzGC->Draw("colz");
    
+   //the constant thetaCM line
+   gList->At(0)->Draw("same");
    
-   //gList->At(0)->Draw("same");
-   //gList->At(10)->Draw("same");
-   //gList->At(20)->Draw("same");
-   //fxList->At(4)->Draw("same");
-   //fxList->At(5)->Draw("same");
-   //fxList->At(2)->Draw("same");
-   //fxList->At(3)->Draw("same");
-
+   //the e-z line for excitation 
+   fxList->At(0)->Draw("same");
+   fxList->At(1)->Draw("same");
    
-   //cCanvas->cd(4); hmult->Draw("colz");
-   cCanvas->cd(4);  hID2->Draw("colz");
    
+   cCanvas->cd(4); hmult->Draw("colz");
+   //cCanvas->cd(4);  hID2->Draw("colz");
    
    //hrdtg[0]->SetMarkerStyle(20);
    //hrdtg[1]->SetMarkerStyle(20);
@@ -1002,10 +951,5 @@ void Monitors::Terminate()
    gROOT->ProcessLine(".L ../Armory/RDTCutCreator.C");
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine("listDraws()");
-   
-   
-   //gROOT->ProcessLine("rawID()");
-   
-   
    
 }
