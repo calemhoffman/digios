@@ -21,6 +21,16 @@ DATADIR=$AnalysisDir/data
 MERGECHAT=$AnalysisDir/working/GEBMerge.chat
 SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+Cyan='\033[0;36m'
+NC='\033[0m'
+
+
 RUN1=$1
 RUN2=$2
 
@@ -41,14 +51,23 @@ do
 
   RUN=$(printf '%03d' ${iRUN})
 
+  echo -e "${Cyan}"
   echo "============================================="
-  echo "============ RUN $RUN ======================="
+  echo "============ RUN $RUN ========================"
   echo "============================================="
 
-  echo "######################### Download raw data"
+  echo -e "${RED}######################### Download raw data${NC}"
   PCName="$(hostname)"
-  if [ ${PCName} == "digios1" ]; then
+  if [ ${PCName} == "digios1" ] ; then
       echo "Already in digios1, no need to get data."
+  elif  [ ${PCName:0:5} == "bebop" ] ; then
+      echo "in Bebop, no way to download."
+      GEBDIR=/lcrc/project/HELIOS/digios/analysis/GEBSort
+      MERGDIR=/lcrc/project/HELIOS/${expName}/merged_data
+      ROOTDIR=/lcrc/project/HELIOS/${expName}/root_data
+      DATADIR=/lcrc/project/HELIOS/${expName}/data
+      MERGECHAT=/lcrc/project/HELIOS/digios/analysis/working/GEBMerge.chat
+      SORTCHAT=/lcrc/project/HELIOS/digios/analysis/working/GEBSort.chat
   else
     echo "RUN $RUN: Get the raw data `date`"
 
@@ -61,11 +80,12 @@ do
     echo "============================================"
   fi
   
+  echo -e "${YELLOW}"
   du -hsc $DATADIR/${expName}_run_$RUN*
 
-  count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
-  echo "========== Number of Files : ${count}"
-  if [$count == 0 ]; then
+  count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
+  echo -e "========== Number of Files : ${count} ${NC}"
+  if [ $count -eq 0 ] ; then
       echo "============================================"
       echo "====  RAW Files of RUN-${RUN} not found! "
       echo "============================================"
@@ -73,12 +93,12 @@ do
   fi
 
   #=========== Merge and Sort
-  echo "RUN $RUN: GEBMerge started at `date`"
-  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${expName}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
+  echo -e "${RED}####################### RUN-$RUN: GEBMerge started at `date` ${NC}"
+  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${expName}_run_$RUN.gtd*` >  $MERGDIR/GEBMerge_run$RUN.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 
-  echo "GEBSort started sorting run $RUN at `date`"
-  $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT 
+  echo -e "${RED}####################### RUN-$RUN: GEBSort started  at `date` ${NC}"
+  $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT > $ROOTDIR/GEBSort_run$RUN.log
   echo "GEBSort DONE at `date`"
 
   echo "saved root file -->  "  $ROOTDIR/run$RUN.root 
@@ -87,16 +107,16 @@ do
   echo "============================================="
 
   #========== Process_run.C, GeneralSort
+  echo -e "${RED}####################### GeneralSort  ${NC}"
   if [ "${RUN:0:1}" == "0" ] ; then
         runID=${RUN:1:2}
   else
         runID=$( printf '%d' $RUN )
   fi;
-
   root -q -b "process_run.C($runID)"
 
 done
 
-root -l ../Armory/runsCheck.C
+#root -l ../Armory/runsCheck.C
   
 exit 1

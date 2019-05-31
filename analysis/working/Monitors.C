@@ -895,8 +895,15 @@ void Monitors::Terminate()
    cCanvas->cd(2); 
    htdiff->Draw();
    htdiffg->SetLineColor(2);
-   htdiffg->Draw("same");   
-   
+   htdiffg->Draw("same");
+
+   TLatex text;
+   text.SetNDC();
+   text.SetTextFont(82);
+   text.SetTextSize(0.04);
+   text.SetTextColor(2);
+   text.DrawLatex(0.15, 0.8, "with coinTime and Recoil");
+
    cCanvas->cd(3);
    heCalVzGC->Draw("colz");
    

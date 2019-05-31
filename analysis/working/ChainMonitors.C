@@ -26,10 +26,6 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
       chain->Add("../root_data/gen_run08[5-9].root"); // 7Li
       chain->Add("../root_data/gen_run09[0-2].root"); // 7Li
 
-
-
-    //chain->Add("../root_data/gen_run10[2-3].root"); // B11+CD2 120ug
-    // chain->Add("../root_data/gen_run10[4-9].root"); // B11+Ti+3H 450/30ug
   }else{
     
     TString fileName;
