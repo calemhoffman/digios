@@ -37,6 +37,8 @@ public :
    ULong64_t       xf_t[100];
    Float_t         xn[100];
    ULong64_t       xn_t[100];
+   Float_t         ring[100];
+   ULong64_t       ring_t[100];
    Float_t         rdt[8];
    ULong64_t       rdt_t[8];
    Float_t         tac[100];
@@ -63,6 +65,8 @@ public :
    TBranch        *b_XFTimestamp;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_XNTimestamp;   //!
+   TBranch        *b_RING;   //!
+   TBranch        *b_RINGTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
    TBranch        *b_TAC;   //!
@@ -220,12 +224,15 @@ void Cali_e_trace::Init(TTree *tree)
    fChain->SetBranchAddress("e", e, &b_Energy);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
+   fChain->SetBranchAddress("ring", ring, &b_RING);
+ 
    
    fChain->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
    fChain->SetBranchAddress("rdt", rdt, &b_RDT);
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);   
    //fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
    //fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
+   //fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
    
    isRunIDExist = false;
    TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("runID");
@@ -315,6 +322,7 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("e" ,   eC, "e[30]/F");
    //newTree->Branch("xf",  xfC, "xf[30]/F");
    //newTree->Branch("xn",  xnC, "xn[30]/F");
+   newTree->Branch("ring",  ring, "xn[30]/F");
    newTree->Branch("x" ,    x, "x[30]/F");
    newTree->Branch("z" ,    z, "z[30]/F");
    newTree->Branch("detID", &det, "det/I");
@@ -376,8 +384,9 @@ void Cali_e_trace::Init(TTree *tree)
    //===================================================== loading parameter
    
    //========================================= detector Geometry
+   printf("======================= loading parameters files .... \n");
    string detGeoFileName = "detectorGeo.txt";
-   printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
+   printf("loading detector geometery : %s.", detGeoFileName.c_str());
    ifstream file;
    file.open(detGeoFileName.c_str());
    int i = 0;
@@ -413,12 +422,12 @@ void Cali_e_trace::Init(TTree *tree)
       printf("----------- list of detector position\n");
       for(int i = 0; i < iDet ; i++){
          if( firstPos > 0 ){
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
          }else{
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i] - length , pos[i]);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
          }
       }
-      printf("=======================\n");
+      printf("==================================\n");
       
    }else{
        printf("... fail\n");
@@ -437,9 +446,9 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
    numDet = iDet * jDet;
-   
+
    //========================================= xf = xn correction
-   printf("----- loading xf-xn correction.");
+   printf("loading xf-xn correction.");
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
       double a;
@@ -450,9 +459,9 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       
-      printf("... done.\n");
+      printf("..... done.\n");
    }else{
-      printf("... fail.\n");
+      printf("..... fail.\n");
       
       for(int i = 0; i < numDet; i++){
          xnCorr[i] = 1;
@@ -461,8 +470,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
    
    //========================================= e = xf + xn correction
-   
-   printf("----- loading xf/xn-e correction.");
+   printf("loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
    if( file.is_open() ){
       double a, b;
@@ -484,8 +492,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //========================================= e correction
-   
-   printf("----- loading e correction.");
+   printf("loading e correction.");
    file.open("correction_e.dat");
    if( file.is_open() ){
       double a, b;
@@ -497,10 +504,10 @@ void Cali_e_trace::Init(TTree *tree)
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("......... done.\n");
       
    }else{
-      printf("... fail.\n");
+      printf("......... fail.\n");
       for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
@@ -511,8 +518,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    
    //========================================= e correction
-   
-   printf("----- loading x correction.");
+   printf("loading x correction.");
    file.open("correction_scaleX.dat");
    if( file.is_open() ){
       double a;
@@ -522,10 +528,10 @@ void Cali_e_trace::Init(TTree *tree)
          xCorr[i] = a;  
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("......... done.\n");
       
    }else{
-      printf("... fail.\n");
+      printf("......... fail.\n");
       for( int i = 0; i < numDet ; i++){
          xCorr[i] = 1.;
       }
@@ -535,8 +541,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    
    //========================================= rdt correction
-   
-   printf("----- loading rdt correction.");
+   printf("loading rdt correction.");
    file.open("correction_rdt.dat");
    if( file.is_open() ){
       double a, b;
@@ -546,10 +551,10 @@ void Cali_e_trace::Init(TTree *tree)
          rdtCorr[i] = a;  //
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("....... done.\n");
       
    }else{
-      printf("... fail.\n");
+      printf("....... fail.\n");
       for( int i = 0; i < numDet ; i++){
          rdtCorr[i] = 1.;
       }
@@ -558,7 +563,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    //========================================= coinTime correction
    if( isTraceDataExist ){
-      printf("----- loading coin-Time correction parameters.");
+      printf("loading coin-Time correction parameters.");
       file.open("correction_coinTime.dat");
       
       f7 = new TF1*[numDet];

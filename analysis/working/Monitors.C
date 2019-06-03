@@ -15,7 +15,7 @@
 #include <fstream>
 using namespace std;
 
-/****  ======================= User setting */
+//############################################ User setting
 const int numDet = 30;
 const int numRow = 6;  
 
@@ -23,16 +23,16 @@ ULong64_t maxNumberEvent = 100000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {0, 15};
+int energyRange[2]= {0, 8};
 int rdtRange[2] = {6000, 5000}; // range for E, range for dE
-double exRange[3] = {25, -1, 10}; // bin [keV], low[MeV], high[MeV]
+double exRange[3] = {25, -1, 2}; // bin [keV], low[MeV], high[MeV]
 
 //---Gate
 int timeGate[2] = {-20, 20}; // min, max
 TString rdtCutFile = "rdtCuts.root";
-//TODO switch for histogram
 
-/*** ======================= end of user setting */
+//TODO switches for histograms on/off
+//############################################ end of user setting
 
 int numCol;
 ULong64_t NumEntries = 0;
@@ -875,6 +875,8 @@ void Monitors::SlaveTerminate()
 void Monitors::Terminate()
 {
    printf("============ finishing.\n");
+
+   //############################################ User is free to edit this section
    
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
@@ -888,9 +890,13 @@ void Monitors::Terminate()
    
    TFile * transfer = new TFile("transfer.root");
    //TTree * treeT = (TTree *) transfer->FindObjectAny("tree"); 
-   TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
-   TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
-   
+   TObjArray * gList  = NULL ;
+   TObjArray * fxList = NULL ;
+   if( transfer->IsOpen() ) {
+     gList  = (TObjArray *) transfer->FindObjectAny("gList");
+     fxList = (TObjArray *) transfer->FindObjectAny("fxList");
+   }
+
    //cCanvas->cd(1);
    //treeT->Draw("thetaCM >> c0", "hit == 1 && ExID == 0", "");
    //treeT->Draw("thetaCM >> c1", "hit == 1 && ExID == 1", "");
@@ -899,8 +905,8 @@ void Monitors::Terminate()
    
    cCanvas->cd(1);
    heCalVz->Draw("colz");
-   fxList->At(4)->Draw("same");
-   fxList->At(5)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
 
    cCanvas->cd(2); 
    //htdiff->Draw();
@@ -918,11 +924,11 @@ void Monitors::Terminate()
    heCalVzGC->Draw("colz");
    
    //the constant thetaCM line
-   gList->At(0)->Draw("same");
+   if( transfer->IsOpen() ) gList->At(0)->Draw("same");
    
    //the e-z line for excitation 
-   fxList->At(4)->Draw("same");
-   fxList->At(5)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
    
    
    //cCanvas->cd(4); hmult->Draw("colz");
