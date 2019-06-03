@@ -89,7 +89,7 @@ do
       echo "============================================"
       echo "====  RAW Files of RUN-${RUN} not found! "
       echo "============================================"
-      exit 
+      continue
   fi
 
   #=========== Merge and Sort

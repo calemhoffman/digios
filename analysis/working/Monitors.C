@@ -9,6 +9,7 @@
 #include <TMath.h>
 #include <TMultiGraph.h>
 #include <TString.h>
+#include <TLatex.h>
 #include <TSystem.h>
 #include <TObjArray.h>
 #include <fstream>
@@ -20,13 +21,15 @@ const int numRow = 6;
 
 ULong64_t maxNumberEvent = 100000000;
 
-//---histogram seeting
+//---histogram setting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {0, 8};
-int rdtRange[2] = {6000, 4000}; // range for E, range for dE
-double exRange[3] = {25, -1, 2}; // bin [keV], low[MeV], high[MeV]
-int timeGate[2] = {-20, 20}; // min, max
+int energyRange[2]= {0, 15};
+int rdtRange[2] = {6000, 5000}; // range for E, range for dE
+double exRange[3] = {25, -1, 10}; // bin [keV], low[MeV], high[MeV]
 
+//---Gate
+int timeGate[2] = {-20, 20}; // min, max
+TString rdtCutFile = "rdtCuts.root";
 //TODO switch for histogram
 
 /*** ======================= end of user setting */
@@ -367,7 +370,7 @@ void Monitors::Begin(TTree *tree)
 
 
    //================  Get Recoil cuts;
-   TFile * fCut = new TFile("rdtCuts.root");	
+   TFile * fCut = new TFile(rdtCutFile);	
    isCutFileOpen = fCut->IsOpen();
    if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
    numCut = 0 ;
@@ -889,13 +892,13 @@ void Monitors::Terminate()
    
    cCanvas->cd(1);
    heCalVz->Draw("colz");
-   fxList->At(0)->Draw("same");
-   fxList->At(1)->Draw("same");
+   fxList->At(4)->Draw("same");
+   fxList->At(5)->Draw("same");
 
    cCanvas->cd(2); 
-   htdiff->Draw();
+   //htdiff->Draw();
    htdiffg->SetLineColor(2);
-   htdiffg->Draw("same");
+   htdiffg->Draw("");
 
    TLatex text;
    text.SetNDC();
@@ -911,8 +914,8 @@ void Monitors::Terminate()
    gList->At(0)->Draw("same");
    
    //the e-z line for excitation 
-   fxList->At(0)->Draw("same");
-   fxList->At(1)->Draw("same");
+   fxList->At(4)->Draw("same");
+   fxList->At(5)->Draw("same");
    
    
    cCanvas->cd(4); hmult->Draw("colz");
