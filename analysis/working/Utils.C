@@ -32,6 +32,7 @@ void listDraws(void) {
   printf("     eCalVz() - Energy vs. Z\n");
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
+  printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
   printf("   RDTCutCreator(\"*.root[TChain]\") - Create RDT Cuts \n");
@@ -261,7 +262,8 @@ void ringVx(void) {
 }
 
 void eCalVxCal(void) {
-  TCanvas *cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",canvasSize[0], canvasSize[1]);
+  TCanvas *cecalVxcal =  (TCanvas *) gROOT->FindObjectAny("cecalVxcal");
+  if( cecalVxcal == NULL ) cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",canvasSize[0], canvasSize[1]);
   cecalVxcal->Clear(); cecalVxcal->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     cecalVxcal->cd(i+1); heCalVxCal[i]->Draw("col");
@@ -275,7 +277,8 @@ void elum(void) {
 }
 
 void recoil(void) {
-  TCanvas *crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
+  TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
     crdt->cd(i+1); hrdt[i]->Draw("col");
@@ -285,7 +288,8 @@ void recoil(void) {
 }
 
 void eCalVz(void) {
-  TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
+  TCanvas *cecalVz =  (TCanvas *) gROOT->FindObjectAny("cecalVz");
+  if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
   cecalVz->Clear(); cecalVz->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cecalVz->cd(1);heCalVz->Draw("col");
@@ -293,7 +297,8 @@ void eCalVz(void) {
 }
 
 void eCalVzRow() {
-  TCanvas *cecalVzRow = new TCanvas("cevalVzRow","ECALVZ",canvasSize[0], canvasSize[1]);
+  TCanvas *cecalVzRow =  (TCanvas *) gROOT->FindObjectAny("cecalVzRow");
+  if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow","ECALVZ",canvasSize[0], canvasSize[1]);
   FindBesCanvasDivision(numRow);
   cecalVzRow->Clear(); cecalVzRow->Divide(xD,yD);
   gStyle->SetOptStat("neiou");
@@ -307,15 +312,25 @@ void eCalVzRow() {
 }
 
 void excite(void) {
-  TCanvas *cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
+  TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");
+  if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
   cex->Clear();cex->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cex->cd(1); hEx->Draw("");
   cex->cd(2); hexR->Draw("");
 }
 
+void ExThetaCM(void) {
+  TCanvas *cExThetaCM =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM");
+  if( cExThetaCM == NULL ) cExThetaCM = new TCanvas("cExThetaCM",Form("EX - ThetaCM : %s", canvasTitle.Data()),650,650);
+  cExThetaCM->Clear();
+  gStyle->SetOptStat("neiou");
+  hExThetaCM->Draw("colz");
+}
+
 void tac(void) {
-  TCanvas *ctac = new TCanvas("ctac","ARRAY-RDT",1000,650);
+  TCanvas *ctac =  (TCanvas *) gROOT->FindObjectAny("ctac");
+  if( ctac == NULL ) ctac = new TCanvas("ctac",Form("ARRAY-RDT | %s", canvasTitle.Data() ),1000,650);
   ctac->Clear();ctac->SetGrid(0);ctac->Divide(numCol,numRow);
   gStyle->SetOptStat("neiou");
   for (Int_t i=0;i<numDet;i++) {
