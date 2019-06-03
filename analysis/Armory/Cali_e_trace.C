@@ -81,6 +81,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    b_Energy->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
+   b_RING->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
    b_EnergyTimestamp->GetEntry(entry,0);
    b_RDTTimestamp->GetEntry(entry,0);
