@@ -128,6 +128,8 @@ TH2F* hecalVzRow[numRow];
 TH1F* hEx;
 TH1F* hexR;
 
+TH2F* hExThetaCM;
+
 //====== TAC
 TH1F* htacE;
 TH1I* htacArray[numDet];
@@ -403,14 +405,16 @@ void Monitors::Begin(TTree *tree)
 
    printf("======================================\n");
    
-   //Generate all of the histograms needed for drawing later on
+   //========================= Generate all of the histograms needed for drawing later on
    heVID    = new TH2F("heVID",    "Raw e vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hringVID = new TH2F("hringVID", "Raw Ring vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxfVID   = new TH2F("hxfVID",   "Raw xf vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxnVID   = new TH2F("hxnVID",   "Raw xn vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
+
    for(Int_t j=0;j<4;j++){
      hrtac[j]=new TH2F(Form("hrtac%d",j),Form("Array-Recoil tac for recoil %d",j),numDet,0,numDet,500,-500,500);
-     }
+   }
+
    for (Int_t i=0;i<numDet;i++) {//array loop
       
       //hStat[i] = new TH1F(Form("hStat%d", i),
@@ -473,7 +477,7 @@ void Monitors::Begin(TTree *tree)
    
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
    
-   //E-Z plot
+   //====================== E-Z plot
    heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
    heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    
@@ -483,7 +487,7 @@ void Monitors::Begin(TTree *tree)
                                500, zRange[0], zRange[1], 500, energyRange[0], energyRange[1]);
    }
 
-   //Recoils
+   //===================== Recoils
    for (Int_t i=0;i<4;i++) {
       hrdtDE[i] = new TH1F(Form("hrdtDE%d",i),
                          Form("Raw Recoil DE(ch=%d); DE (channel)",i),
@@ -499,7 +503,7 @@ void Monitors::Begin(TTree *tree)
                           500,0,rdtRange[0],500,0,rdtRange[1]);
    }
    
-   //multiplicity
+   //===================== multiplicity
    hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
 
    hmultEZ = new TH1I("hmultEZ","Filled EZ with coinTime and recoil",10,0,10);
@@ -507,11 +511,11 @@ void Monitors::Begin(TTree *tree)
    hID2    = new TH2I("hID2", "Array ID vs Recoil ID; Array ID; Recoil ID",30,0,30,8,0,8);
    hID2g   = new TH2I("hID2g","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
 
-   // coincident time 
+   //===================== coincident time 
    htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", 200,-100,100);   
    htdiffg = new TH1I("htdiffg",Form("Coincident time (array, recoil) w/ %d < coinTime gate < %d; time [ch = 10ns]; count", timeGate[0], timeGate[1]), 200,-100,100);
 
-   //TAC
+   //===================== TAC
    htac[0] = new TH1F("htac0","Array-RDT0 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[1] = new TH1F("htac1","Array-RDT1 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[2] = new TH1F("htac2","Array-RDT2 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
@@ -519,15 +523,17 @@ void Monitors::Begin(TTree *tree)
 
    htacE = new TH1F("htacE","Elum-RDT TAC; DT [clock ticks]; Counts",4,0,4);
 
-   //energy spectrum
-   hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; E [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-   hexR = new TH1F("hexR","excitation spectrum with Recoil",(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-
    for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
    }
 
-   //EZERO
+   //===================== energy spectrum
+   hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; E [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   hexR = new TH1F("hexR","excitation spectrum with Recoil",(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+
+   hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+
+   //===================== EZERO
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
    he0det = new TH2F("he0det","EZERO DE-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
    he0et = new TH2F("he0et","EZERO E-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
@@ -844,6 +850,7 @@ Bool_t Monitors::Process(Long64_t entry)
      }
      //ungated excitation energy
      hEx->Fill(Ex);
+     hExThetaCM->Fill(thetaCM, Ex);
 	
      // recoil CUTS
      if( isCutFileOpen){
@@ -918,8 +925,9 @@ void Monitors::Terminate()
    fxList->At(5)->Draw("same");
    
    
-   cCanvas->cd(4); hmult->Draw("colz");
-   //cCanvas->cd(4);  hID2->Draw("colz");
+   //cCanvas->cd(4); hmult->Draw("colz");
+   //cCanvas->cd(4); hID2->Draw("colz");
+   cCanvas->cd(4); hExThetaCM->Draw("colz");
    
    //hrdtg[0]->SetMarkerStyle(20);
    //hrdtg[1]->SetMarkerStyle(20);
