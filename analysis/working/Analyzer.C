@@ -8,24 +8,30 @@
 #include <TBenchmark.h>
 #include <TMath.h>
 //#include "../AutoCali/AutoFit.C"
+
+
 int numRow = 6;
 int numCol = 5;
 const int numDet = numRow * numCol ;
-double rangeEx[3] = { 20, -0.5, 1}; // resol. [keV], low Ex, high Ex
+
+//######################################## User Inputs
+
+double rangeEx[3] = { 50, -0.5, 1}; // resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; // resol. [deg], low deg, high deg
 
 bool isExOffset = true;
-double ExOffset[30] = { 
-   0.00,  0.0164,    1000,  0.0321,  0.0332, 
-   1000,  0.0130,  0.0114,    1000, -0.0006, 
-   1000, -0.0037, -0.0023,  0.0346,  0.0233,
--0.0165,  0.0154,  0.0338,  0.0535, -0.0004,
- 0.0080,  0.0185,  0.0109, -0.0012, -0.0038,
-   1000,  0.0043,  0.0211, -0.0297,  0.1028};
+double ExOffset[30] = { // calibrated by h064_15N, (d,p), run013
+   0.00,  0.0154,    1000,  0.1314,  0.0091, 
+   1000,  0.0032,  0.0081,    1000,  0.1661, 
+   1000,  0.0614,  0.1070,  0.1453,  0.1785,
+-0.1202, -0.0240,  0.1119,  0.0535, -0.0004,
+ 0.0384, -0.0593,  0.0133,  0.0575,  0.0534,
+   1000, -0.0122,  0.1052,  0.2028,  0.0410};
 
 int nBadDet = 0;
 int listOfBadDet[11] = {2, 5, 8, 9, 10, 18, 19, 25, 27, 28, 29 };
 
+//######################################## End of User Input
 
 //=========================== Global histograms
 TH1F * hRun; // runID
@@ -61,6 +67,7 @@ TH1F ** hExr; // Ex for each row
 TH2F ** hExTr; // Ex vs thetaCM for each row 
 
 TH1F * hT; // thetaCM
+TH2F * hTz; // thetaCM vs z
 TH1F * hTa; // thetaCM, |x| < 0.9
 
 TCanvas * cAna;
@@ -82,7 +89,7 @@ void Analyzer::Begin(TTree *tree)
    // thetaCM spectrum
    hT  = new TH1F("hT",  Form("thetaCM ; thetaCM [deg]; count / %2.0f deg", rangeCM[0])     , (rangeCM[2]-rangeCM[1])/rangeCM[0], rangeCM[1], rangeCM[2]);
    hTa = new TH1F("hTa", Form("thetaCM (|x|<0.9); thetaCM [deg]; count / %2.0f deg", rangeCM[0]), (rangeCM[2]-rangeCM[1])/rangeCM[0], rangeCM[1], rangeCM[2]);
-   
+
    //E vs Z
    hez  = new TH2F("hez" , "e - z; z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
    heza = new TH2F("heza", "e - z (|x|<0.9); z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
@@ -90,6 +97,9 @@ void Analyzer::Begin(TTree *tree)
    //Ex vs thetaCM
    hExT  = new TH2F("hExT" , "Ex - thetaCM; thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
    hExTa = new TH2F("hExTa", "Ex - thetaCM (|x|<0.9); thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
+
+
+   hTz = new TH2F("hTz", "thetaCM vs z; z [mm]; thetaCM [deg]", 450, -450, 0, 500, rangeCM[1], rangeCM[2]);
 
    hEBISi = new TH1F *[numDet];
    hei = new TH1F *[numDet];
@@ -150,6 +160,7 @@ Bool_t Analyzer::Process(Long64_t entry)
    //b_xn->GetEntry(entry,0);
    b_x->GetEntry(entry,0);
    b_z->GetEntry(entry,0);
+   b_ring->GetEntry(entry,0);
    b_Ex->GetEntry(entry, 0);
    b_thetaCM->GetEntry(entry, 0);
    b_e_t->GetEntry(entry, 0);
@@ -167,13 +178,18 @@ Bool_t Analyzer::Process(Long64_t entry)
       
             
       //hEBISi[i]->Fill( (e_t[i]-ebis_t)/1e2 );
+
+     //======= cut ring
+     if( ring[i] > 50 ) continue;
       
       //======== cut-EBIS
       //if( !(100 < (e_t[i]-ebis_t)/1e2 && (e_t[i]-ebis_t)/1e2 < 900 )) continue;
       //if( 11000 < (e_t-EBIS_t)/1e2 && (e_t-EBIS_t)/1e2 < 19000 ) 
       
-     //======== cut-e
+     //======== cut-e, z
      if( TMath::IsNaN(e[i]) ) continue;
+     if( TMath::IsNaN(z[i]) ) continue;
+     
      //if( e[i] < 1.2 ) continue;
      
       //======== cut-x
@@ -216,31 +232,32 @@ Bool_t Analyzer::Process(Long64_t entry)
       hxExi[i]->Fill(Ex, x[i]);
 
       hez->Fill(z[i],e[i]);
-      hExT->Fill(thetaCM,Ex, scaling);
-      hT->Fill(thetaCM, scaling);      
+      hExT->Fill(thetaCM,Ex);
+      hT->Fill(thetaCM);      
+      
+      hTz->Fill(z[i], thetaCM);
       
       heza->Fill(z[i],e[i]);
-      hExTa->Fill(thetaCM,Ex, scaling);
-      hTa->Fill(thetaCM, scaling);
+      hExTa->Fill(thetaCM,Ex);
+      hTa->Fill(thetaCM);
       
       int row = -1;
       for( int ri = 0; ri < numRow; ri++){
         if( ri*numCol <= i && i < (ri+1)*numCol) row = ri;
       }
       hezr[row]->Fill(z[i], e[i]);
-      hExTr[row]->Fill(thetaCM, Ex, scaling);
+      hExTr[row]->Fill(thetaCM, Ex);
       hExzr[row]->Fill(z[i], Ex);
       
-      hExcA[i%numCol]->Fill(Ex, scaling);
+      hExcA[i%numCol]->Fill(Ex);
       hExr[row]->Fill(Ex, scaling);
       
       //======== special gate;
       //if( i == 1 || i == 5 || i == 17 || i == 6 || i == 7 || i == 8 || i == 12 || i == 18 || i == 19) continue;  // for beyound ground state
       
-      hExc[i%numCol]->Fill(Ex, scaling);
+      hExc[i%numCol]->Fill(Ex);
       hEx->Fill(Ex, scaling);
       
-     
       if( x[i] < 0) {
          hExca[i%numCol]->Fill(Ex);
       }else{
@@ -339,6 +356,7 @@ void Analyzer::Terminate()
      //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
      //hExi[i]->Draw();
    
+     //fitAuto(hExi[i]);
      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
    
      //hExPi[i]->SetLineColor(2);
