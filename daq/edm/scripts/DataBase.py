@@ -12,14 +12,15 @@ loop = 1
 tOld = 0
 
 while loop == 1:
-    f = open("tempDB.txt", 'w')
+    f = open("/home/helios/digios/daq/tempDB.txt", 'w')
     t1 = int(round(time.time() * 1000 ))
     
     fexp=open("/home/helios/digios/expName.sh", 'r')
-    line=fexp.readline()
-    line=fexp.readline()
+    line=fexp.readline() #this line is bashscript header
+    line=fexp.readline() #this line is expName
     expName=line[8:-1]
-    line=fexp.readline()
+    line=fexp.readline() #this line is daqDataPath
+    line=fexp.readline() #this line is LastRunNum
     runNum=line[11:-1]
     fexp.close()
     
@@ -104,7 +105,7 @@ while loop == 1:
     #usually take 4000 msec for all channels
     if( t2-tOld > 2000 ) :
         #bashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @tempDB.txt --max-time 10'
-        bashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @tempDB.txt --speed-time 5 --speed-limit 1000'
+        bashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @/home/helios/digios/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
         os.system(bashCommand)
         tOld = t2
     
