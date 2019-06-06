@@ -14,15 +14,18 @@ fi;
 
 echo -e "------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
-echo "         stop at $(date)" >> ~/digios/analysis/working/RunTimeStamp.dat
-echo "         stop at $(date)" >> ~/digios/analysis/working/elog.txt
+currentDate = $(date)
+
+echo "         stop at ${currentDate}"
+echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
 
 ~/digios/daq/edm/scripts/elog.sh stop
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
-curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData value=0" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
 
 echo wait 10 seconds before closing the IOCs
 sleep 10

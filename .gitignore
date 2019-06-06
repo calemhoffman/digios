@@ -21,6 +21,8 @@ core.*
 tempDB.txt
 elog.txt
 run_Summary.dat
+MakeDataLinks
+reaction.dat
 
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra

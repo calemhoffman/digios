@@ -138,7 +138,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    printf( "=========================================================================== \n");
    
    // Set branch addresses and branch pointers
-   if (!tree) return;
+   ////999999999   if (!tree) return;
    fChain = tree;
    fChain->SetMakeClass(1);
 

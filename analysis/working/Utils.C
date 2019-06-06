@@ -32,6 +32,7 @@ void listDraws(void) {
   printf("     eCalVz() - Energy vs. Z\n");
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
+  printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
   printf("   RDTCutCreator(\"*.root[TChain]\") - Create RDT Cuts \n");
@@ -57,6 +58,7 @@ void newCanvas(int sizeX = 800, int sizeY = 600, int posX = 0, int posY = 0){
   TString name; name.Form("cNewCanvas%d | %s", nCanvas, canvasTitle.Data());
   TCanvas * cNewCanvas = new TCanvas(name, name, posX, posY, sizeX, sizeY);
   nCanvas++;
+  cNewCanvas->cd();
 }
 
 
@@ -105,7 +107,7 @@ void rawe(Bool_t isLogy = false) {
 
 void rawring(Bool_t isLogy = false) {
   TCanvas *cRawRing = (TCanvas *) gROOT->FindObjectAny("cRawRing");
-  if( cRawRing == NULL ) cRawRing = new TCanvas("cRawRing","Ring raw",canvasSize[0], canvasSize[1]);
+  if( cRawRing == NULL ) cRawRing = new TCanvas("cRawRing",Form("Ring raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cRawRing->Clear();cRawRing->Divide(numCol,numRow);
   for (Int_t i=0; i<numDet; i++) {
     cRawRing->cd(i+1); 
@@ -117,7 +119,7 @@ void rawring(Bool_t isLogy = false) {
 
 void rawxf(Bool_t isLogy = false) {
   TCanvas *cRawXf = (TCanvas *) gROOT->FindObjectAny("cRawXf");
-  if( cRawXf == NULL ) cRawXf = new TCanvas("cRawXf","Xf raw",canvasSize[0], canvasSize[1]);
+  if( cRawXf == NULL ) cRawXf = new TCanvas("cRawXf",Form("Xf raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cRawXf->Clear();cRawXf->Divide(numCol,numRow);
   for (Int_t i=0; i<numDet; i++) {
     cRawXf->cd(i+1); 
@@ -129,7 +131,7 @@ void rawxf(Bool_t isLogy = false) {
 
 void rawxn(Bool_t isLogy = false) {
   TCanvas *cRawXn = (TCanvas *) gROOT->FindObjectAny("cRawXn");
-  if( cRawXn == NULL ) cRawXn = new TCanvas("cRawXn","Xn raw",canvasSize[0], canvasSize[1]);
+  if( cRawXn == NULL ) cRawXn = new TCanvas("cRawXn",Form("Xn raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cRawXn->Clear();cRawXn->Divide(numCol,numRow);
   for (Int_t i=0; i<numDet; i++) {
     cRawXn->cd(i+1); 
@@ -141,7 +143,7 @@ void rawxn(Bool_t isLogy = false) {
 
 void eVring(void) {
   TCanvas *cRawERing = (TCanvas *) gROOT->FindObjectAny("cRawERing");
-  if( cRawERing == NULL ) cRawERing = new TCanvas("cRawERing","e vs. ring",canvasSize[0], canvasSize[1]);
+  if( cRawERing == NULL ) cRawERing = new TCanvas("cRawERing",Form("e vs. ring | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cRawERing->Clear(); cRawERing->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     cRawERing->cd(i+1); 
@@ -152,7 +154,7 @@ void eVring(void) {
 
 void xfVxn(void) {
   TCanvas *cxfxn = (TCanvas *) gROOT->FindObjectAny("cxfxn");
-  if( cxfxn == NULL ) cxfxn = new TCanvas("cxfxn","XF vs. XN",canvasSize[0], canvasSize[1]);
+  if( cxfxn == NULL ) cxfxn = new TCanvas("cxfxn",Form("XF vs. XN | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cxfxn->Clear(); cxfxn->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     cxfxn->cd(i+1); 
@@ -163,7 +165,7 @@ void xfVxn(void) {
 
 void eVxs(void) {
   TCanvas *cxfxne = (TCanvas *) gROOT->FindObjectAny("cxfxne");
-  if( cxfxne == NULL ) cxfxne = new TCanvas("cxfxne","E - XF+XN",canvasSize[0], canvasSize[1]);
+  if( cxfxne == NULL ) cxfxne = new TCanvas("cxfxne",Form("E - XF+XN | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cxfxne->Clear(); cxfxne->Divide(numCol,numRow);
   TLine line(0,0, 4000, 4000); line.SetLineColor(2);
   for (Int_t i=0;i<numDet;i++) {
@@ -176,7 +178,7 @@ void eVxs(void) {
 
 void ecal(void) {
   TCanvas *cEC = (TCanvas *) gROOT->FindObjectAny("cEC");
-  if(cEC == NULL) cEC = new TCanvas("cEC","E corrected",canvasSize[0], canvasSize[1]);
+  if(cEC == NULL) cEC = new TCanvas("cEC",Form("E corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cEC->Clear();cEC->Divide(numCol,numRow);
   for (Int_t i=0; i<numDet; i++) {
     cEC->cd(i+1); 
@@ -187,7 +189,7 @@ void ecal(void) {
 
 void ecal2(void) {
   TCanvas *cECall = (TCanvas *) gROOT->FindObjectAny("cECall");
-  if(cECall == NULL) cECall = new TCanvas("cECall","E corrected",canvasSize[0], canvasSize[1]);
+  if(cECall == NULL) cECall = new TCanvas("cECall",Form("E corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   
   int maxRC = TMath::Max(numRow, numCol);
   cECall->Clear();cECall->Divide(maxRC,2);
@@ -219,7 +221,7 @@ void ecal2(void) {
 
 void xfCalVxnCal(void) {
   TCanvas *cxfxnC = (TCanvas *) gROOT->FindObjectAny("cxfxnC");
-  if(cxfxnC == NULL) cxfxnC = new TCanvas("cxfxnC","XF vs XN corrected",canvasSize[0], canvasSize[1]);
+  if(cxfxnC == NULL) cxfxnC = new TCanvas("cxfxnC",Form("XF vs XN corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cxfxnC->Clear(); cxfxnC->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     cxfxnC->cd(i+1); 
@@ -230,7 +232,7 @@ void xfCalVxnCal(void) {
 
 void eVxsCal(void) {
   TCanvas *cxfxneC = (TCanvas *) gROOT->FindObjectAny("cxfxneC");
-  if(cxfxneC == NULL)cxfxneC = new TCanvas("cxfxneC","Raw E - Corrected XF+XN",canvasSize[0], canvasSize[1]);
+  if(cxfxneC == NULL)cxfxneC = new TCanvas("cxfxneC",Form("Raw E - Corrected XF+XN | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cxfxneC->Clear(); cxfxneC->Divide(numCol,numRow);
   TLine line(0,0, 4000, 4000); line.SetLineColor(2);
   for (Int_t i=0;i<numDet;i++) {
@@ -243,7 +245,7 @@ void eVxsCal(void) {
 
 void eVx(void) {
   TCanvas *ceVx = (TCanvas *) gROOT->FindObjectAny("ceVx");
-  if(ceVx == NULL) ceVx = new TCanvas("ceVx","E vs. X = (xf-xn)/e",canvasSize[0], canvasSize[1]);
+  if(ceVx == NULL) ceVx = new TCanvas("ceVx",Form("E vs. X = (xf-xn)/e | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   ceVx->Clear(); ceVx->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     ceVx->cd(i+1); heVx[i]->Draw("col");
@@ -252,7 +254,7 @@ void eVx(void) {
 
 void ringVx(void) {
   TCanvas *cringVx = (TCanvas *) gROOT->FindObjectAny("cringVx");
-  if(cringVx == NULL) cringVx = new TCanvas("cringVx","ring vs X = (xf-xn)/e",canvasSize[0], canvasSize[1]);
+  if(cringVx == NULL) cringVx = new TCanvas("cringVx",Form("ring vs X = (xf-xn)/e | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cringVx->Clear(); cringVx->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     cringVx->cd(i+1); hringVx[i]->Draw("col");
@@ -260,7 +262,8 @@ void ringVx(void) {
 }
 
 void eCalVxCal(void) {
-  TCanvas *cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",canvasSize[0], canvasSize[1]);
+  TCanvas *cecalVxcal =  (TCanvas *) gROOT->FindObjectAny("cecalVxcal");
+  if( cecalVxcal == NULL ) cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",canvasSize[0], canvasSize[1]);
   cecalVxcal->Clear(); cecalVxcal->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
     cecalVxcal->cd(i+1); heCalVxCal[i]->Draw("col");
@@ -274,7 +277,8 @@ void elum(void) {
 }
 
 void recoil(void) {
-  TCanvas *crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
+  TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
     crdt->cd(i+1); hrdt[i]->Draw("col");
@@ -284,7 +288,8 @@ void recoil(void) {
 }
 
 void eCalVz(void) {
-  TCanvas *cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
+  TCanvas *cecalVz =  (TCanvas *) gROOT->FindObjectAny("cecalVz");
+  if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
   cecalVz->Clear(); cecalVz->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cecalVz->cd(1);heCalVz->Draw("col");
@@ -292,7 +297,8 @@ void eCalVz(void) {
 }
 
 void eCalVzRow() {
-  TCanvas *cecalVzRow = new TCanvas("cevalVzRow","ECALVZ",canvasSize[0], canvasSize[1]);
+  TCanvas *cecalVzRow =  (TCanvas *) gROOT->FindObjectAny("cecalVzRow");
+  if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow","ECALVZ",canvasSize[0], canvasSize[1]);
   FindBesCanvasDivision(numRow);
   cecalVzRow->Clear(); cecalVzRow->Divide(xD,yD);
   gStyle->SetOptStat("neiou");
@@ -306,15 +312,25 @@ void eCalVzRow() {
 }
 
 void excite(void) {
-  TCanvas *cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
+  TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");
+  if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
   cex->Clear();cex->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cex->cd(1); hEx->Draw("");
   cex->cd(2); hexR->Draw("");
 }
 
+void ExThetaCM(void) {
+  TCanvas *cExThetaCM =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM");
+  if( cExThetaCM == NULL ) cExThetaCM = new TCanvas("cExThetaCM",Form("EX - ThetaCM : %s", canvasTitle.Data()),650,650);
+  cExThetaCM->Clear();
+  gStyle->SetOptStat("neiou");
+  hExThetaCM->Draw("colz");
+}
+
 void tac(void) {
-  TCanvas *ctac = new TCanvas("ctac","ARRAY-RDT",1000,650);
+  TCanvas *ctac =  (TCanvas *) gROOT->FindObjectAny("ctac");
+  if( ctac == NULL ) ctac = new TCanvas("ctac",Form("ARRAY-RDT | %s", canvasTitle.Data() ),1000,650);
   ctac->Clear();ctac->SetGrid(0);ctac->Divide(numCol,numRow);
   gStyle->SetOptStat("neiou");
   for (Int_t i=0;i<numDet;i++) {

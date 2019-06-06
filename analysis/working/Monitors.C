@@ -9,35 +9,30 @@
 #include <TMath.h>
 #include <TMultiGraph.h>
 #include <TString.h>
+#include <TLatex.h>
 #include <TSystem.h>
 #include <TObjArray.h>
 #include <fstream>
 using namespace std;
 
-/****  ======================= User setting */
+//############################################ User setting
 const int numDet = 30;
 const int numRow = 6;  
 
 ULong64_t maxNumberEvent = 100000000;
 
-//---histogram seeting
+//---histogram setting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {0, 15};
-int rdtRange[2] = {6000, 4000}; // range for E, range for dE
-double exRange[3] = {25, -1, 10}; // bin [keV], low[MeV], high[MeV]
-int timeGate[2] = {-71, 10}; // min, max
+int energyRange[2]= {0, 8};
+int rdtRange[2] = {6000, 5000}; // range for E, range for dE
+double exRange[3] = {25, -1, 2}; // bin [keV], low[MeV], high[MeV]
 
-//TODO switch for histogram
+//---Gate
+int timeGate[2] = {-20, 20}; // min, max
+TString rdtCutFile = "rdtCuts.root";
 
-double length = 50.5; // default value
-double firstPos = -100; //will be overwrite by detectorGeo.dat
-vector<double> pos;
-
-//only use when reaction.dat is loaded, to calculate Ex from e-z plot to Ex-thetaCM using inverse transformation.
-double a = 11.5 ; // perpendicular distance of detector to axis [mm]
-double Bfield = 2.4996828363;
-
-/*** ======================= end of user setting */
+//TODO switches for histograms on/off
+//############################################ end of user setting
 
 int numCol;
 ULong64_t NumEntries = 0;
@@ -60,10 +55,6 @@ TString cutTag;
 Bool_t isCutFileOpen;
 int numCut;
 vector<int> countFromCut;
-TGraph ** graphRateCut; //!
-TMultiGraph * rateGraph; //!
-TGraph *graphRate;// = new TGraph(n,x,y);
-
 //======= Other Cuts
 
 TFile *f, *cutfile;
@@ -137,6 +128,8 @@ TH2F* hecalVzRow[numRow];
 TH1F* hEx;
 TH1F* hexR;
 
+TH2F* hExThetaCM;
+
 //====== TAC
 TH1F* htacE;
 TH1I* htacArray[numDet];
@@ -161,16 +154,13 @@ TH1F* h0e;
 TH1F* h0tac;
 
 TH2I *hmult;
+TH1I *hmultEZ;
 TH1I *htdiff;
 TH1I *htdiffg;
 TH2I *hID2;
+TH2I *hID2g;
 /***************************
  ***************************/
-//==== time in sec
-Float_t timeZero=0;
-Float_t timeCurrent=0;
-Float_t timeRef=0;
-
 //==== global variables
 Float_t x[numDet],z[numDet];
 Float_t xcal[numDet],xfcal[numDet],xncal[numDet],eCal[numDet],ezero[10];
@@ -182,6 +172,13 @@ Float_t xfxneCorr[numDet][2];
 Float_t eCorr[numDet][2];
 
 //==== parameters for Ex and thetaCM calcualtion
+
+double length ; // detector z-length 
+double firstPos;
+vector<double> pos;
+double a ; // perpendicular distance of detector to axis [mm]
+double Bfield ;
+
 double Ex, thetaCM;
 double q, alpha, Et, beta, gamm, G, massB, mass; //variables for Ex calculation
 bool isReaction;
@@ -206,6 +203,8 @@ void Monitors::Begin(TTree *tree)
    printf("------------ %d \n", A); //testing code for TSelector input
    
    //===================================================== loading parameter
+   printf("################## loading parameter files\n"); 
+
    //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    printf("=======================\n");
@@ -221,6 +220,8 @@ void Monitors::Begin(TTree *tree)
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( i == 0 ) Bfield  = atof(x.c_str());
+         if( i == 3 )     a   = atof(x.c_str());
          if( i == 5 ) length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
          if( i >= 18 ) {
@@ -351,33 +352,69 @@ void Monitors::Begin(TTree *tree)
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
       gamm = 1./TMath::Sqrt(1-beta*beta);
       G = alpha * gamm * beta * a ;
-      //printf("============\n");
-      //printf("mass-b  : %f MeV/c2 \n", mass);
-      //printf("charge-b: %f \n", q);
-      //printf("E-total : %f MeV \n", Et);
-      //printf("mass-B  : %f MeV/c2 \n", massB);      
-      //printf("beta    : %f \n", beta);
-      //printf("B-field : %f T \n", Bfield);
-      //printf("alpha   : %f MeV/mm \n", alpha);
-      //printf("a       : %f mm \n", a);
-      //printf("G       : %f MeV \n", G);
-      //printf("============\n");
+      printf("============\n");
+		printf("mass-b    : %f MeV/c2 \n", mass);
+		printf("charge-b  : %f \n", q);
+		printf("E-total   : %f MeV \n", Et);
+		printf("mass-B    : %f MeV/c2 \n", massB);		 
+		printf("beta      : %f \n", beta);
+		printf("B-field   : %f T \n", Bfield);
+		printf("alpha     : %f MeV/mm \n", alpha);
+		printf("det radius: %f mm \n", a);
+		printf("G-coeff   : %f MeV \n", G);
+		printf("============\n");
 
    }else{
       printf("... fail.\n");
       isReaction = false;
    }
    file.close();
+
+
+   //================  Get Recoil cuts;
+   TFile * fCut = new TFile(rdtCutFile);	
+   isCutFileOpen = fCut->IsOpen();
+   if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
+   numCut = 0 ;
+   if( isCutFileOpen ){
+      cutList = (TObjArray *) fCut->FindObjectAny("cutList");
+      numCut = cutList->GetEntries();
+      printf("=========== found %d cutG in %s \n", numCut, fCut->GetName());
+
+      cutG = new TCutG();
+      for(int i = 0; i < numCut ; i++){
+         printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
+            cutList->At(i)->GetName(),
+            ((TCutG*)cutList->At(i))->GetVarX(),
+            ((TCutG*)cutList->At(i))->GetVarY(),
+            ((TCutG*)cutList->At(i))->GetN());
+         countFromCut.push_back(0);	
+      }
+   }
+
+   //================  Get other cuts
+   //Ryan comment : the following is not so correct, but do the job
+   /*
+   TFile *cutfile = new TFile("6Li_cuts.root");
+   cutfileOpen = cutfile->IsOpen();
+   if(!cutfileOpen) cout<<"Failed to open cutfile"<<endl;
+   cutfile->ls();
+   EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
+   cutfile->Close();
+   */
+
    printf("======================================\n");
    
-   //Generate all of the histograms needed for drawing later on
+   //========================= Generate all of the histograms needed for drawing later on
    heVID    = new TH2F("heVID",    "Raw e vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hringVID = new TH2F("hringVID", "Raw Ring vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxfVID   = new TH2F("hxfVID",   "Raw xf vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxnVID   = new TH2F("hxnVID",   "Raw xn vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
+
    for(Int_t j=0;j<4;j++){
      hrtac[j]=new TH2F(Form("hrtac%d",j),Form("Array-Recoil tac for recoil %d",j),numDet,0,numDet,500,-500,500);
-     }
+   }
+
    for (Int_t i=0;i<numDet;i++) {//array loop
       
       //hStat[i] = new TH1F(Form("hStat%d", i),
@@ -440,17 +477,17 @@ void Monitors::Begin(TTree *tree)
    
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
    
-   //E-Z plot
+   //====================== E-Z plot
    heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
    heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    
    for( int i = 0; i < numRow; i++){
       hecalVzRow[i] = new TH2F(Form("heCalVz%d", i),
-                               Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*i+numRow),
+                               Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*(i+1)-1),
                                500, zRange[0], zRange[1], 500, energyRange[0], energyRange[1]);
    }
 
-   //Recoils
+   //===================== Recoils
    for (Int_t i=0;i<4;i++) {
       hrdtDE[i] = new TH1F(Form("hrdtDE%d",i),
                          Form("Raw Recoil DE(ch=%d); DE (channel)",i),
@@ -458,7 +495,7 @@ void Monitors::Begin(TTree *tree)
       hrdtDEg[i] = new TH1F(Form("hrdtDEg%d",i),
                          Form("Raw Recoil DE(ch=%d) time gated; DE (channel)",i),
                          500,0,rdtRange[0]);
-     hrdt[i] = new TH2F(Form("hrdt%d",i),
+      hrdt[i] = new TH2F(Form("hrdt%d",i),
                          Form("Raw Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
                          500,0,rdtRange[0],500,0,rdtRange[1]);
       hrdtg[i] = new TH2F(Form("hrdtg%d",i),
@@ -466,13 +503,19 @@ void Monitors::Begin(TTree *tree)
                           500,0,rdtRange[0],500,0,rdtRange[1]);
    }
    
-   //multiplicity
-   hmult=new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
-   hID2=new TH2I("hID2","Array ID vs Recoil ID; Array ID; Recoil ID",30,0,30,8,0,8);
-   htdiff=new TH1I("htdiff","Timestamp difference between array and recoil det", 200,-100,100);   
-   htdiffg=new TH1I("htdiffg","Timestamp difference between array and recoil det w/ EvsZ gate", 200,-100,100);
+   //===================== multiplicity
+   hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
 
-   //TAC
+   hmultEZ = new TH1I("hmultEZ","Filled EZ with coinTime and recoil",10,0,10);
+
+   hID2    = new TH2I("hID2", "Array ID vs Recoil ID; Array ID; Recoil ID",30,0,30,8,0,8);
+   hID2g   = new TH2I("hID2g","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
+
+   //===================== coincident time 
+   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", 200,-100,100);   
+   htdiffg = new TH1I("htdiffg",Form("Coincident time (array, recoil) w/ %d < coinTime gate < %d; time [ch = 10ns]; count", timeGate[0], timeGate[1]), 200,-100,100);
+
+   //===================== TAC
    htac[0] = new TH1F("htac0","Array-RDT0 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[1] = new TH1F("htac1","Array-RDT1 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[2] = new TH1F("htac2","Array-RDT2 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
@@ -480,15 +523,17 @@ void Monitors::Begin(TTree *tree)
 
    htacE = new TH1F("htacE","Elum-RDT TAC; DT [clock ticks]; Counts",4,0,4);
 
-   //energy spectrum
-   hEx  = new TH1F("hEx",Form("excitation spectrum; E [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-   hexR = new TH1F("hexR","excitation spectrum with Recoil",(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-
    for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
    }
 
-   //EZERO
+   //===================== energy spectrum
+   hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; E [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   hexR = new TH1F("hexR","excitation spectrum with Recoil",(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+
+   hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+
+   //===================== EZERO
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
    he0det = new TH2F("he0det","EZERO DE-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
    he0et = new TH2F("he0et","EZERO E-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
@@ -498,59 +543,7 @@ void Monitors::Begin(TTree *tree)
    h0de = new TH1F("h0de","EZERO DE ; DE [ch]",500,50,4050);//
    h0e = new TH1F("h0e","EZERO - E; E [ch]",500,50,4050);//
    h0tac = new TH1F("h0tac","EZERO RF; RF [ch]",500,50,4050);//
-
-   rateGraph = new TMultiGraph();
-   graphRate = new TGraph();
-   graphRate->SetTitle("Raw Total Rate");
-   graphRate->SetMarkerColor(4);
-   graphRate->SetMarkerStyle(20);
-   graphRate->SetMarkerSize(1);
-
-   printf("################## loading parameter files\n"); 
-
-   //rateGraph->Add(graphRate);
-   rateGraph->SetTitle("Instantaneous Beam rate [pps]; Delta Time [sec]; Rate [pps]");
 	
-   //================  Get Recoil cuts;
-   TFile * fCut = new TFile("rdtcuts.root");	
-   isCutFileOpen = fCut->IsOpen();
-   if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
-   numCut = 0 ;
-   if( isCutFileOpen ){
-      cutList = (TObjArray *) fCut->FindObjectAny("cutList");
-      numCut = cutList->GetEntries();
-      printf("=========== found %d cutG in %s \n", numCut, fCut->GetName());
-
-      cutG = new TCutG();
-      graphRateCut = new TGraph * [numCut];
-      for(int i = 0; i < numCut ; i++){
-         printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
-            cutList->At(i)->GetName(),
-            ((TCutG*)cutList->At(i))->GetVarX(),
-            ((TCutG*)cutList->At(i))->GetVarY(),
-            ((TCutG*)cutList->At(i))->GetN());
-         countFromCut.push_back(0);	
-      
-         graphRateCut[i] = new TGraph();
-         graphRateCut[i]->SetMarkerColor(i+1);	 
-         graphRateCut[i]->SetMarkerStyle(20+i);
-         graphRateCut[i]->SetMarkerSize(1);
-         rateGraph->Add(graphRateCut[i]);
-      }
-   }
-
- //================  Get other cuts
- 
- TFile *cutfile = new TFile("6Li_cuts.root");
- cutfileOpen = cutfile->IsOpen();
- if(!cutfileOpen) cout<<"Failed to open cutfile"<<endl;
- cutfile->ls();
- EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
- cutfile->Close();
- 
- 
-
-
    printf("========================================\n");
    StpWatch.Start();
 }
@@ -619,40 +612,27 @@ Bool_t Monitors::Process(Long64_t entry)
        lastRunID = runID;
     }
     
+
+    //initization
     for( int i = 0 ; i < numDet; i++){
        z[i] = TMath::QuietNaN();
+       x[i] = TMath::QuietNaN();
+       xcal[i] = TMath::QuietNaN();
+       eCal[i] = TMath::QuietNaN();
     }
    
 
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
-    Int_t rid = -1;
     Int_t recoilMulti = 0;
-    Int_t eid = -1;
     Int_t arrayMulti = 0;
+    Int_t multiEZ = 0;
     bool rdtgate = false;
     bool coinFlag = false;
-    bool EvsZ = false;
     bool isGoodEventFlag = false;
     for (Int_t i = 0; i < numDet; i++) {
       
-      if( TMath::IsNaN(xn[i]) || TMath::IsNaN(xf[i]) ) continue ; 
-      
-      //reconstruct energy if needed
-      //if( (e[i]<xf[i] && e[i] < xn[i]) && xn[i] > 100 && xf[i] > 100) e[i]=xn[i]+xf[i];
-      
-      //======================= fill raw data
-      //if(e[i]>100&&(xf[i]>40||xn[i]>40)){
-      //    eid=i;
-      //    arrayMulti++;
-      //}
-
-      if( TMath::IsNaN(e[i]) ) continue ; 
-      //if( ring[i] >50 ) return kTRUE;
-      
-      arrayMulti++;
-      
-      
+      //================== Filling raw data
       he[i]->Fill(e[i]);
       hring[i]->Fill(ring[i]);
       hxf[i]->Fill(xf[i]);
@@ -674,14 +654,18 @@ Bool_t Monitors::Process(Long64_t entry)
       //if( !TMath::IsNaN(ring[i]) ) hStat[i]->Fill(2);
       //if( !TMath::IsNaN(e[i])  ) hStat[i]->Fill(1);
       //if( TMath::IsNaN(e[i]) && TMath::IsNaN(ring[i]) && TMath::IsNaN(xf[i]) && TMath::IsNaN(xn[i]) ) hStat[i]->Fill(0);
-      
-      
+
+      //==================== Basic gate
+      if( TMath::IsNaN(e[i]) ) continue ; 
+      if( ring[i] > 50 ) continue; 
+      if( TMath::IsNaN(xn[i]) &&  TMath::IsNaN(xf[i]) ) continue ; 
+
       //==================== Calibrations go here
       xfcal[i] = xf[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
       xncal[i] = xn[i]*xnCorr[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
       eCal[i] = e[i]/eCorr[i][0]+eCorr[i][1];
 
-      //if( eCal[i] < 1.5 ) continue;
+      if( eCal[i] < 0.5 ) continue;
 
       //===================== fill Calibrated  data
       heCal[i]->Fill(eCal[i]);
@@ -695,24 +679,33 @@ Bool_t Monitors::Process(Long64_t entry)
         x[i] = 0.5*((xf[i]-xn[i]) / e[i])+0.5;
       }
       
-      if (xfcal[i]>0.5*e[i]) {
-        xcal[i] = xfcal[i]/e[i];
-      }else if (xncal[i]>=0.5*e[i]) {
-        xcal[i] = 1.0 - xncal[i]/e[i];
-      }else{
-        xcal[i] = TMath::QuietNaN();
-      }
+      // range of x is (0, 1)
+      if  ( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) xcal[i] = 0.5 + 0.5 * (xfcal[i] - xncal[i] ) / e[i];
+      if  ( !TMath::IsNaN(xf[i]) &&  TMath::IsNaN(xn[i]) ) xcal[i] = xfcal[i]/ e[i];
+      if  (  TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) xcal[i] = 1.0 - xncal[i]/ e[i];
+      //if  (  TMath::IsNaN(xn[i]) &&  TMath::IsNaN(xf[i]) ) xcal[i] = TMath::QuietNaN();
+      
+      /*
+      if  ( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) {
+        if (xfcal[i]>0.5*e[i]) {
+          xcal[i] = xfcal[i]/e[i];
+        }else if {
+          xcal[i] = 1.0 - xncal[i]/e[i];
+        }
+      }*/
       
       
       //==================== calculate Z
       if( firstPos > 0 ) {
-         z[i] = length*(xcal[i]) + pos[i%numCol];
+        z[i] = length*(xcal[i]) + pos[i%numCol];
       }else{
-         z[i] = length*(xcal[i]-1.0) + pos[i%numCol];
+        z[i] = length*(xcal[i]-1.0) + pos[i%numCol];
       }
-      
-      //=================== Array fill next
 
+      //===================== multiplicity
+      arrayMulti++; // multi-hit when both e, xf, xn are not NaN
+
+      //=================== Array fill next
       heVx[i]->Fill(x[i],e[i]);
       hringVx[i]->Fill(x[i],ring[i]);
      
@@ -721,52 +714,51 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //=================== Recoil Gate
       if( isCutFileOpen ){
-         for(int i = 0 ; i < 4 ; i++ ){
-           cutG = (TCutG *)cutList->At(i) ;
-           if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate= true;
-         }
+        for(int i = 0 ; i < 4 ; i++ ){
+          cutG = (TCutG *)cutList->At(i) ;
+          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+            rdtgate= true;
+            break; // only one is enough
+          }
+        }
       }else{
-         rdtgate = true;
+        rdtgate = true;
       }
       
-      //=================== Other Gates
-      if(cutfileOpen){
-         if(EvsZ_cut->IsInside(z[i] , eCal[i]))  EvsZ=true;
-         else EvsZ = false;
-      }
-
       
-      //================ coincident with Recoil
-      for( int j = 0; j < 8 ; j++){
-         if( TMath::IsNaN(rdt[j]) ) continue; 
-         
-         int tdiff = rdt_t[j] - e_t[i];
-         
-         if(j==1||j==3||j==5||j==7) hrtac[j/2]->Fill(i,tdiff);
-         
-         //htdiff->Fill(tdiff);
-         if(rdtgate && eCal[i]>0) htdiff->Fill(tdiff);
+      //================ coincident with Recoil when z is calculated.
+      if( !TMath::IsNaN(z[i]) ) { 
+        for( int j = 0; j < 8 ; j++){
+          if( TMath::IsNaN(rdt[j]) ) continue; 
+	 
+          int tdiff = rdt_t[j] - e_t[i];
+	 
+          if(j==1||j==3||j==5||j==7) hrtac[j/2]->Fill(i,tdiff);
+        
+          htdiff->Fill(tdiff);
+          if(rdtgate && eCal[i]>0) htdiffg->Fill(tdiff);
 
-         if(rdtgate && eCal[i]>0 && EvsZ) htdiffg->Fill(tdiff);
-
-         
-         hID2->Fill(i, j); 
-           
-         if( timeGate[0] < tdiff && tdiff < timeGate[1] )  {
+          hID2->Fill(i, j); 
+	 
+          if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
             if(j % 2 == 0 ) hrdtg[j/2]->Fill(rdt[j],rdt[j+1]);
             if(j % 2 == 0 ) hrdtDEg[j/2]->Fill(rdt[j+1]);
-            hID2->Fill(i, j); 
-            //if( rdtgate) hID2->Fill(i, j); 
+            hID2g->Fill(i, j); 
+            //if( rdtgate) hID2g->Fill(i, j); 
             coinFlag = true;
-         }
+          }
+        }
       }
+
       if( coinFlag && rdtgate ) {
-         heCalVzGC->Fill( z[i] , eCal[i] );
-         isGoodEventFlag = true;
-      }  
+        heCalVzGC->Fill( z[i] , eCal[i] );
+        multiEZ ++;
+        isGoodEventFlag = true;
+      }	 
       
     }//end of array loop
     
+    //=========== fill eCal Vs z for each row
     for( int i = 0; i < numRow; i++){
       for(int j = 0; j < numCol; j++){
          int k = numCol*i+j;
@@ -776,43 +768,18 @@ Bool_t Monitors::Process(Long64_t entry)
     
    /*********** RECOILS ************************************************/ 
    for (int ii = 0 ; ii < 4 ; ii++){
-      if(rdt[2*ii]>0 && rdt[2*ii+1]>0){
-         rid=2*ii;
-         recoilMulti++;
+     if( rdt[2*ii] > 0 && rdt[2*ii+1] > 0 && !TMath::IsNaN(rdt[2*ii]) && !TMath::IsNaN(rdt[2*ii+1])  ){
+         recoilMulti++; // when both dE and E are hit
       }
       hrdt[ii]->Fill(rdt[2*ii],rdt[2*ii+1]);
       hrdtDE[ii]->Fill(rdt[2*ii+1]);
    }
    
+   /******************* Multi-hit *************************************/
+   hmultEZ->Fill(multiEZ);
    hmult->Fill(recoilMulti,arrayMulti);
 
-   /**********Timestamp subtraction*****/
-   // Ryan: I think too restrictive for multiplicity = 1 ,  check line 627 - 644
-   //Int_t tdiff=-999;
-   //Int_t rthresh[4]={250,200,250,400};
-   //Bool_t goodt=0;
-   // Int_t toff[4][30]={{ 6 , 3 , 0 , 5 , 13 , 7 , 4 , 5 , 0 , 11 , 0 , 5 , 5 , 5 , 0 , 6 , 7 , 3 , 5 , 0 , 5 , 6 , 3 , 7 , 0 , 0 , 5 , 5 , 5 , 18 },
-	//	      {-400 ,-400 ,0 ,7 ,-400 ,-400 ,5 ,6 ,0 ,21 , 0,3 , 5 , 7 ,21 ,0 ,3, 5 ,7 , -400 ,-400 ,7 ,-400 ,8 ,-400 ,0 ,-400 ,-400 ,11 ,-400 },
-	//	       {4 ,4 ,0 ,7 ,-400 ,-400 ,5 ,3 ,0 ,13 ,0 ,3 ,5 ,7 ,19 ,5 ,3 ,1 ,3 ,11 ,1 ,3 ,3 ,3 ,13 ,0, 3 ,3 ,8 ,8 },
-	//	       {9 ,7 ,0 ,9 ,13 ,-400 ,7 ,8 ,-400 ,19 ,0 ,5 ,5 ,11 ,17 ,7 ,6 ,7 ,9 ,13 ,7 ,7 ,7 ,7 ,21 ,0 ,7,7 ,7 ,21}};
-   //if( eid>-1 && rid>-1 && recoilMulti>=1 && arrayMulti>=1 ){
-   // tdiff=rdt_t[rid]-e_t[eid];
-   // tdiff+=toff[rid/2][eid];
-   // if(tdiff>-2&&tdiff<7) goodt=1;
-   // // htdiff->Fill(tdiff);
-   // hID2->Fill(eid,rid/2);
-   // //hrtac[rid/2]->Fill(eid,tdiff);
-   //}
-   //if(goodt&&eCal[eid]>2) hrdtg[rid/2]->Fill(rdt[rid],rdt[rid+1]);
-   //if(goodt&&recoilMulti>=1&&arrayMulti>=1&&rdtgate){
-   // heCalVzGC->Fill(z[eid]*10,eCal[eid]);
-   //
-   //
-   //}
-   //if(rdtgate&&recoilMulti>=1&&arrayMulti>=1){
-   //  htdiff->Fill(tdiff);
-   //  hrtac[rid/2]->Fill(eid,tdiff);
-   //}
+
    /*********** EZERO ************************************************/ 
    //he0dee->Fill(ezero[1],ezero[0]);
    //he0det->Fill(TMath::Abs(tac[0]),ezero[0]);
@@ -823,105 +790,81 @@ Bool_t Monitors::Process(Long64_t entry)
    //h0de->Fill(ezero[0]);
    //h0e->Fill(ezero[1]);
    //h0tac->Fill(TMath::Abs(tac[0]));
-  
-  
-
+ 
 
    /*********** Ex and thetaCM ************************************************/ 
    
    if( !isGoodEventFlag ) return kTRUE;
    
-   for(Int_t i = 0; i < numRow ; i++){
-      for(Int_t j = 0; j < numCol; j++){
-     
-         int detID = i*numCol+j;
-         
-         if( TMath::IsNaN(e[detID]) ) continue ; 
-         if( TMath::IsNaN(z[detID]) ) continue ; 
-      
-         if( eCal[detID] < 1) continue;
-   
-         if( isReaction ){
-            //======== Ex calculation by Ryan 
-            double y = eCal[detID] + mass; // to give the KE + mass of proton;
-            double Z = alpha * gamm * beta * z[detID];
-            double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
-                 
-            if( TMath::Abs(Z) < H ) {            
-               //using Newton's method to solve 0 ==  H * sin(phi) - G * tan(phi) - Z = f(phi) 
-               double tolerrence = 0.001;
-               double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
-               double nPhi = 0; // new phi
+   for(Int_t detID = 0; detID < numDet ; detID++){
+     	
+     if( TMath::IsNaN(e[detID]) ) continue ; 
+     if( TMath::IsNaN(z[detID]) ) continue ; 
+     if( eCal[detID] < 1) continue;
 
-               int iter = 0;
-               do{
-                  phi = nPhi;
-                  nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));               
-                  iter ++;
-                  if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
-               }while( TMath::Abs(phi - nPhi ) > tolerrence);
-               phi = nPhi;
+     if( isReaction ){
+       //======== Ex calculation by Ryan 
+       double y = eCal[detID] + mass; // to give the KE + mass of proton;
+       double Z = alpha * gamm * beta * z[detID];
+       double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
+			  
+       if( TMath::Abs(Z) < H ) {				 
+			//using Newton's method to solve 0 ==	H * sin(phi) - G * tan(phi) - Z = f(phi) 
+			double tolerrence = 0.001;
+			double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
+			double nPhi = 0; // new phi
 
-               // check f'(phi) > 0
-               double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
-               if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
-                  double K = H * TMath::Sin(phi);
-                  double x = TMath::ACos( mass / ( y * gamm - K));
-                  double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
-                  double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
-                  Ex = EB - massB;
-                  
-                  double hahaha1 = gamm* TMath::Sqrt(mass * mass + momt * momt) - y;
-                  double hahaha2 = gamm* beta * momt;
-                  thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
-             
-               }else{
-                  Ex = TMath::QuietNaN();
-                  thetaCM = TMath::QuietNaN();
-               }	
-            }else{
-               Ex = TMath::QuietNaN();
-               thetaCM = TMath::QuietNaN();
-            }
-         }else{
-            Ex = TMath::QuietNaN();
-            thetaCM = TMath::QuietNaN();
+			int iter = 0;
+			do{
+           phi = nPhi;
+           nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));					 
+           iter ++;
+           if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
+			}while( TMath::Abs(phi - nPhi ) > tolerrence);
+			phi = nPhi;
+
+			// check f'(phi) > 0
+			double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
+			if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
+           double K = H * TMath::Sin(phi);
+           double x = TMath::ACos( mass / ( y * gamm - K));
+           double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
+           double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
+           Ex = EB - massB;
+				
+           double hahaha1 = gamm* TMath::Sqrt(mass * mass + momt * momt) - y;
+           double hahaha2 = gamm* beta * momt;
+           thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
+		 
+			}else{
+           Ex = TMath::QuietNaN();
+           thetaCM = TMath::QuietNaN();
+			}	
+       }else{
+			Ex = TMath::QuietNaN();
+			thetaCM = TMath::QuietNaN();
+       }
+     }else{
+       Ex = TMath::QuietNaN();
+       thetaCM = TMath::QuietNaN();
+     }
+     //ungated excitation energy
+     hEx->Fill(Ex);
+     hExThetaCM->Fill(thetaCM, Ex);
+	
+     // recoil CUTS
+     if( isCutFileOpen){
+		 for( int k = 0 ; k < numCut; k++ ){
+         cutG = (TCutG *)cutList->At(k) ;
+         if( cutG->IsInside(rdt[k], rdt[k+1]) ) { 
+           hexR->Fill(Ex);
+           break; // ensure fill only once
          }
-         //ungated excitation energy
-         hEx->Fill(Ex);
-         
-         // recoil CUTS
-          if( isCutFileOpen){
-             for( int k = 0 ; k < numCut; k++ ){
-                cutG = (TCutG *)cutList->At(k) ;
-                if( cutG->IsInside(rdt[k], rdt[k+1]) ) { //CRH
-                   
-                   hexR->Fill(Ex);
-                   
-                   //for (Int_t kk = 0; kk < 4; kk++) { 
-                   //   tacA[detID]= (int)(rdt_t[kk]-e_t[detID]);
-                   //   if(-30 < tacA[detID] && tacA[detID] < 30) {
-                   //      hexR->Fill(Ex);
-                   //      //heCalVzGC->Fill(z[detID],eCal[detID]);
-                   //   }
-                   //}
-                }
-             }
-          }
-     
-         if(e[detID]>100){
-            for (Int_t k = 0; k < 4; k++) {
-               tacA[detID]= (int)(rdt_t[k]-e_t[detID]);
-               htacArray[detID]->Fill(tacA[detID]);
-               if(-5 < tacA[detID] && tacA[detID] < 5 && rdt[k]>50 ){
-                  htac[k]->Fill(j+0.5);
-               }
-            }
-         }
-      }
+		 }
+     }
    }
   
-  return kTRUE;
+   return kTRUE;
 }
 
 void Monitors::SlaveTerminate()
@@ -932,6 +875,8 @@ void Monitors::SlaveTerminate()
 void Monitors::Terminate()
 {
    printf("============ finishing.\n");
+
+   //############################################ User is free to edit this section
    
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
@@ -943,11 +888,15 @@ void Monitors::Terminate()
    gStyle->SetOptStat("neiou");
    
    
-   //TFile * transfer = new TFile("transfer.root");
+   TFile * transfer = new TFile("transfer.root");
    //TTree * treeT = (TTree *) transfer->FindObjectAny("tree"); 
-   //TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
-   //TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
-   
+   TObjArray * gList  = NULL ;
+   TObjArray * fxList = NULL ;
+   if( transfer->IsOpen() ) {
+     gList  = (TObjArray *) transfer->FindObjectAny("gList");
+     fxList = (TObjArray *) transfer->FindObjectAny("fxList");
+   }
+
    //cCanvas->cd(1);
    //treeT->Draw("thetaCM >> c0", "hit == 1 && ExID == 0", "");
    //treeT->Draw("thetaCM >> c1", "hit == 1 && ExID == 1", "");
@@ -956,30 +905,35 @@ void Monitors::Terminate()
    
    cCanvas->cd(1);
    heCalVz->Draw("colz");
-   
+   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
+
    cCanvas->cd(2); 
-   htdiff->Draw();   
-   
-   
+   //htdiff->Draw();
+   htdiffg->SetLineColor(2);
+   htdiffg->Draw("");
+
+   TLatex text;
+   text.SetNDC();
+   text.SetTextFont(82);
+   text.SetTextSize(0.04);
+   text.SetTextColor(2);
+   text.DrawLatex(0.15, 0.8, "with coinTime and Recoil");
+
    cCanvas->cd(3);
-   //heCalVz->Draw("colz");
-   
-   //heCalVzGC->SetMarkerStyle(20);
    heCalVzGC->Draw("colz");
    
+   //the constant thetaCM line
+   if( transfer->IsOpen() ) gList->At(0)->Draw("same");
    
-   //gList->At(0)->Draw("same");
-   //gList->At(10)->Draw("same");
-   //gList->At(20)->Draw("same");
-   //fxList->At(4)->Draw("same");
-   //fxList->At(5)->Draw("same");
-   //fxList->At(2)->Draw("same");
-   //fxList->At(3)->Draw("same");
-
+   //the e-z line for excitation 
+   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
+   
    
    //cCanvas->cd(4); hmult->Draw("colz");
-   cCanvas->cd(4);  hID2->Draw("colz");
-   
+   //cCanvas->cd(4); hID2->Draw("colz");
+   cCanvas->cd(4); hExThetaCM->Draw("colz");
    
    //hrdtg[0]->SetMarkerStyle(20);
    //hrdtg[1]->SetMarkerStyle(20);
@@ -1003,10 +957,5 @@ void Monitors::Terminate()
    gROOT->ProcessLine(".L ../Armory/RDTCutCreator.C");
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine("listDraws()");
-   
-   
-   //gROOT->ProcessLine("rawID()");
-   
-   
    
 }
