@@ -83,7 +83,7 @@ elif [ ${PCName:0:5} == "phywl" ]; then #MAC
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
 elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
-   DATAPATH=/lcrc/project/HELIOS/
+   DATAPATH=/lcrc/project/HELIOS/experimentsData/
    space=100000000
    expDIR=/lcrc/project/HELIOS/digios
 
