@@ -27,6 +27,7 @@ public :
    Float_t         e[30];
    Float_t         x[30];
    Float_t         z[30];
+   Float_t         ring[30];
    Int_t           detID;
    Int_t           hitID[30];
    Int_t           multiHit;
@@ -50,6 +51,7 @@ public :
    TBranch        *b_e;   //!
    TBranch        *b_x;   //!
    TBranch        *b_z;   //!
+   TBranch        *b_ring;   //!
    TBranch        *b_det;   //!
    TBranch        *b_hitID;   //!
    TBranch        *b_multiHit;   //!
@@ -109,6 +111,7 @@ void Analyzer::Init(TTree *tree)
    fChain->SetBranchAddress("e", e, &b_e);
    fChain->SetBranchAddress("x", x, &b_x);
    fChain->SetBranchAddress("z", z, &b_z);
+   fChain->SetBranchAddress("ring", ring, &b_ring);
    fChain->SetBranchAddress("detID", &detID, &b_det);
    fChain->SetBranchAddress("hitID", hitID, &b_hitID);
    fChain->SetBranchAddress("multiHit", &multiHit, &b_multiHit);

@@ -98,6 +98,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
 
    newTree->Branch("e",    psd.Energy,          "Energy[30]/F");
    newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[30]/l");
+   newTree->Branch("ring",    psd.Ring,          "Ring[30]/F");
+   newTree->Branch("ring_t",  psd.RingTimestamp, "RingTimestamp[30]/l");
    newTree->Branch("xf",   psd.XF,              "XF[30]/F");
    newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[30]/l");
    newTree->Branch("xn",   psd.XN,              "XN[30]/F");

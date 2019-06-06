@@ -3,6 +3,21 @@ echo "#############################################"
 echo "#     Set-up for new Experiment"
 echo "#############################################"
 
+daqDataPath=/media/DIGIOSDATA4
+
+echo " The bach script do following things "
+echo " 1) git-fetch  "
+echo " 2) check repository is clean"
+echo " 3) check disk space"
+echo " 4) check is git branch exist"
+echo "    branch exist --> git checkout "
+echo "    branch not exist --> create expName.sh"
+echo " 5) making directories for data, merged_data, root_data"
+echo " 6) create symbolic links to data, merged_data, root_data"
+echo " 7) if branch not exist --> clean up files, and git push"
+
+echo "#############################################"
+
 expName=$1
 
 if [ $# -ne 0 ]; then
@@ -50,7 +65,7 @@ echo "=================== Checking disk space."
 echo "PC name : ${PCName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
-   DATAPATH=/media/DIGIOSDATA4
+   DATAPATH=${daqDataPath}
    expDIR=~/digios
    
    space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
@@ -68,7 +83,7 @@ elif [ ${PCName:0:5} == "phywl" ]; then #MAC
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
 elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
-   DATAPATH=/lcrc/project/HELIOS/
+   DATAPATH=/lcrc/project/HELIOS/experimentsData/
    space=100000000
    expDIR=/lcrc/project/HELIOS/digios
 
@@ -91,7 +106,7 @@ if [ "${space}" -le 512000 ]; then
    read -p  '-------------------------- Continue? (Y/N) ' OKFlag
    
    if [ ${OKFlag} == "N" ]; then
-      echo "xxxxxxxxxxxxxx Abort SetUpNewExp.sh."
+      echo "xxxxxxxxxxxxxx Abort SetUpNewExp"
       exit
    fi
 fi
@@ -129,6 +144,7 @@ if [ ${isBranchExist} -eq 0 ]; then
     touch ${DigiosDir}/expName.sh
     echo "#!/bin/bash -l" > ${DigiosDir}/expName.sh
     echo "expName=${expName}" >> ${DigiosDir}/expName.sh
+    echo "daqDataPath=${daqDataPath}" >> ${DigiosDir}/expName.sh
     echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
 fi
 

@@ -25,16 +25,18 @@ read -p 'Singleline comment for this run: ' COMMENT
 
 echo "#!/bin/bash -l" > ${constFile}
 echo "expName=${expName}" >> ${constFile}
+echo "daqDataPath=${daqDataPath}" >> ${constFile}
 echo "LastRunNum=${LastRunNum}" >> ${constFile}
 
 set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
 export DIGIOSRUNNUM
 
+currentDate = $(date)
 
-#echo "RUN-${RUN} start at $(date), $COMMENT"
-echo "RUN-${RUN} start at $(date), $COMMENT" >> ~/digios/analysis/working/RunTimeStamp.dat
-echo "RUN-${RUN} start at $(date), $COMMENT" > ~/digios/analysis/working/elog.txt
+echo "RUN-${RUN} start at ${currentDate}, $COMMENT"
+echo "RUN-${RUN} start at ${currentDate}, $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "RUN-${RUN} start at ${currentDate}, $COMMENT" > ~/digios/analysis/working/elog.txt
 
 ~/digios/daq/edm/scripts/elog.sh start
 
