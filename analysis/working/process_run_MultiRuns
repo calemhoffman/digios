@@ -6,11 +6,11 @@ if [ $# -ne 2 ] ; then
   exit 1
 fi
 
-source ../../expName.sh #load expName
-AnalysisDir=../analysis
+source ~/digios/expName.sh #load expName
+AnalysisDir=~/digios/analysis
 
 #remote data path
-dataloc=/media/DIGIOSDATA3/${expName}/data
+dataloc=/media/DIGIOSDATA4/${expName}/data
 daqDir=/home/helios/digios
 
 #===== directory and chat files
@@ -55,17 +55,17 @@ do
     #============ Get the raw data
     IP=192.168.1.2
     rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
-    rsync -avuht --progress "helios@${IP}:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
+    rsync -avuht --progress "helios@${IP}:${daqDir}/analysis/working/RunTimeStamp.dat" ${AnalysisDir}/working/.
     echo "============================================"
-    cat ${AnalysisDir}/working/RunTimeStamp.txt
+    cat ${AnalysisDir}/working/RunTimeStamp.dat
     echo "============================================"
   fi
   
   du -hsc $DATADIR/${expName}_run_$RUN*
 
-  count=`ls -1 ${DATADIR}/${exp}_run_$RUN* 2>/dev/null | wc -l`
+  count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
   echo "========== Number of Files : ${count}"
-  if [$count == 0 ]; then
+  if [${count} -eq 0 ]; then
       echo "============================================"
       echo "====  RAW Files of RUN-${RUN} not found! "
       echo "============================================"
@@ -74,27 +74,30 @@ do
 
   #=========== Merge and Sort
   echo "RUN $RUN: GEBMerge started at `date`"
-  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${expName}_run_$RUN.gtd*` > $MERGDIR/GEBMerge_run$RUN.log
+  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 
   echo "GEBSort started sorting run $RUN at `date`"
-  $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT 
+  ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
   echo "GEBSort DONE at `date`"
 
-  echo "saved root file -->  "  $ROOTDIR/run$RUN.root 
-
+ 
+  echo -e "========= saved root file --> ${ROOTDIR}/run${RUN}.root "
   echo "============================================="
   echo "============================================="
 
   #========== Process_run.C, GeneralSort
   if [ "${RUN:0:1}" == "0" ] ; then
-        runID=${RUN:1:2}
+      runID=${RUN:1:2}
+          if [ "${runID:0:1}" == "0" ]; then
+	      runID=${runID:1:1}
+	  fi
   else
         runID=$( printf '%d' $RUN )
   fi;
 
-  root -q -b "process_run.C($runID)"
-
+  root -l -q -b "process_run.C(${runID}, 0)"
+ 
 done
 
 root -l ../Armory/runsCheck.C

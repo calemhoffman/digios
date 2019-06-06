@@ -275,9 +275,9 @@ void recoil(void) {
   for (Int_t i=0;i<4;i++) {
  
     crdt->cd(i+1);
-    hrdt[i]->SetMarkerStyle(20);
+    // hrdt[i]->SetMarkerStyle(20);
     // gPad->SetMarkerSize(3);
-    hrdt[i]->Draw();
+    hrdt[i]->Draw("colz");
     //   cutG = (TCutG *)cutList->At(i);
     //   cutG->Draw("same");
   }

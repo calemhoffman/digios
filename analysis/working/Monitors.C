@@ -18,11 +18,11 @@ using namespace std;
 const int numDet = 30;
 const int numRow = 6;  
 
-ULong64_t maxNumberEvent = 100000000;
+ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram seeting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {0, 10};
+int energyRange[2]= {0, 12};
 int rdtRange[2] = {5000, 2000}; // range for E, range for dE
 
 //TODO switch for histogram
@@ -53,7 +53,9 @@ bool contFlag;
 //======= Recoil Cut
 TString cutName("cut1");
 TCutG* cutG; //!
+TCutG* unboundC; //!
 TObjArray * cutList;
+TObjArray * cutList2;
 TString cutTag;
 Bool_t isCutFileOpen;
 int numCut;
@@ -139,6 +141,10 @@ TH2F* hrdtg[4];
 TH2F* helum[2];
 TH2F* hrtac[4];
 
+
+TH2F* hderun[4];
+TH2F* herun[4];
+
 TH2F* he0dee;//ezero
 TH2F* he0det;
 TH2F* he0et;
@@ -196,7 +202,10 @@ void Monitors::Begin(TTree *tree)
    hxfVID   = new TH2F("hxfVID",   "Raw xf vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxnVID   = new TH2F("hxnVID",   "Raw xn vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    for(Int_t j=0;j<4;j++){
-     hrtac[j]=new TH2F(Form("hrtac%d",j),Form("Array-Recoil tac for recoil %d",j),numDet,0,numDet,500,-500,500);
+     hrtac[j]=new TH2F(Form("hrtac%d",j),Form("Array-Recoil tac for recoil %d",j),numDet,0,numDet,200,-100,100);
+        //Plot for checking changes to DE over time (runID)
+     hderun[j]=new TH2F(Form("hderun%d",j),Form("DE value vs run for DE %d",j),100,0,100,1000,0,1000);
+     herun[j]=new TH2F(Form("herun%d",j),Form("E value vs run for E %d",j),100,0,100,5000,0,5000);
      }
    for (Int_t i=0;i<numDet;i++) {//array loop
       
@@ -279,11 +288,13 @@ void Monitors::Begin(TTree *tree)
                           Form("Gated Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
                           500,0,rdtRange[0],500,0,rdtRange[1]);
    }
+
+  
    
    //multiplicity
    hmult=new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
    hID2=new TH2I("hID2","Array ID vs Recoil ID; Array ID; Recoil ID",30,0,30,4,0,4);
-   htdiff=new TH1I("htdiff","Timestamp difference between array and recoil det",1000,-500,500);
+   htdiff=new TH1I("htdiff","Timestamp difference between array and recoil det",200,-100,100);
    
    //TAC
    htac[0] = new TH1F("htac0","Array-RDT0 TAC; DT [clock ticks]; Counts",6,0,6);
@@ -330,9 +341,13 @@ void Monitors::Begin(TTree *tree)
    //TFile * fCut = new TFile("dpcuts.root");	//d,p cuts	   // open file
    //TFile * fCut = new TFile("tp2cuts.root");	//t,p cuts from 11B(t,p)	   // open file
    //TFile * fCut = new TFile("tpcuts3.root");	//yet more t,p cuts from 11B(t,p)	   // open file
-   TFile * fCut = new TFile("tpcuts4.root");	//yet more t,p cuts from 11B(t,p)	   // open file
+   // TFile * fCut = new TFile("li7dp.root");	//d,p cuts from 7Li(d,p)	   // open file
+   //TFile * fCut = new TFile("li7dp2.root");	//bound and unbound cuts from 7Li(d,p)	   // open file
+   //TFile * fCut = new TFile("li7dp3.root");	//bound and unbound cuts from 7Li(d,p)	   // open file
+   //TFile * fCut = new TFile("li7tp.root");	//bound and unbound cuts from 7Li(t,p)	   // open file
+   TFile * fCut = new TFile("li8tp.root");	//bound and unbound cuts from 7Li(t,p)	   // open file
    isCutFileOpen = fCut->IsOpen();
-   if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
+   if(!isCutFileOpen) cout<<"Failed to open recoil cutfile"<<endl;
    numCut = 0 ;
    if( isCutFileOpen ){
       cutList = (TObjArray *) fCut->FindObjectAny("cutList");
@@ -344,6 +359,34 @@ void Monitors::Begin(TTree *tree)
       for(int i = 0; i < numCut ; i++){
          printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
             cutList->At(i)->GetName(),
+            ((TCutG*)cutList->At(i))->GetVarX(),
+            ((TCutG*)cutList->At(i))->GetVarY(),
+            ((TCutG*)cutList->At(i))->GetN());
+         countFromCut.push_back(0);	
+      
+         graphRateCut[i] = new TGraph();
+         graphRateCut[i]->SetMarkerColor(i+1);	 
+         graphRateCut[i]->SetMarkerStyle(20+i);
+         graphRateCut[i]->SetMarkerSize(1);
+         rateGraph->Add(graphRateCut[i]);
+      }
+   }
+   isCutFileOpen=0;
+   numCut=0;
+   TFile * fCut2 = new TFile("evzcut.root");
+   isCutFileOpen = fCut2->IsOpen();
+   if(!isCutFileOpen) cout<<"Failed to open ez cutfile"<<endl;
+   numCut = 0 ;
+   if( isCutFileOpen ){
+      cutList2 = (TObjArray *) fCut2->FindObjectAny("cutList");
+      numCut = cutList2->GetEntries();
+      printf("=========== found %d cutG in %s \n", numCut, fCut2->GetName());
+
+      cutG = new TCutG();
+      graphRateCut = new TGraph * [numCut];
+      for(int i = 0; i < numCut ; i++){
+         printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
+            cutList2->At(i)->GetName(),
             ((TCutG*)cutList->At(i))->GetVarX(),
             ((TCutG*)cutList->At(i))->GetVarY(),
             ((TCutG*)cutList->At(i))->GetN());
@@ -409,7 +452,7 @@ void Monitors::Begin(TTree *tree)
    //========================================= e correction
    
    printf("----- loading e correction.");
-   file.open("correction_e.dat");
+   file.open("correction_e.dat.old");
    if( file.is_open() ){
       double a, b;
       int i = 0;
@@ -552,6 +595,7 @@ Bool_t Monitors::Process(Long64_t entry)
     Int_t eid=-1;
     Int_t amult=0;
     bool rdtgate=0;
+    bool unboundgate=0;
     for (Int_t i = 0; i < numDet; i++) {
       
       //reconstruct energy if needed
@@ -591,8 +635,8 @@ Bool_t Monitors::Process(Long64_t entry)
       //==================== Calibrations go here
       xfcal[i] = xf[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
       xncal[i] = xn[i]*xnCorr[i]*xfxneCorr[i][1]+xfxneCorr[i][0];
-      //eCal[i] = e[i]*eCorr[i][0]+eCorr[i][1];
-      eCal[i] = e[i]/eCorr[i][0]+eCorr[i][1];
+      eCal[i] = e[i]*eCorr[i][0]+eCorr[i][1];
+      //eCal[i] = e[i]/eCorr[i][0]+eCorr[i][1];
 
       //if( eCal[i] < 1.5 ) continue;
 
@@ -632,12 +676,14 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //=================== Gate
       bool coinFlag = false;
-     
+    
       for(int i=0;i<4;i++){
         cutG = (TCutG *)cutList->At(i) ;
-	if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate=1;
-	
+      	if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) rdtgate=1;
+	unboundC=(TCutG *)cutList->At(i+4);
+	if(unboundC->IsInside(rdt[2*i],rdt[2*i+1])) unboundgate=1;
       }
+     
       
       // for( int j = 0; j < 8 ; j++){
 
@@ -673,34 +719,51 @@ Bool_t Monitors::Process(Long64_t entry)
          rmult++;
       }
       hrdt[ii]->Fill(rdt[2*ii],rdt[2*ii+1]);
+      if(rdt[2*ii]>3000&&rdt[2*ii]<4000) hderun[ii]->Fill(runID,rdt[2*ii+1]);
+      if(rdt[2*ii+1]>140&&rdt[2*ii+1]<300) herun[ii]->Fill(runID,rdt[2*ii]);
    }
    hmult->Fill(rmult,amult);
-
+  
    /**********Timestamp subtraction*****/
    // Ryan: I think too restrictive for multiplicity = 1 ,  check line 627 - 644
    Int_t tdiff=-999;
    Int_t rthresh[4]={250,200,250,400};
    Bool_t goodt=0;
-    Int_t toff[4][30]={{ 6 , 3 , 0 , 5 , 13 , 7 , 4 , 5 , 0 , 11 , 0 , 5 , 5 , 5 , 0 , 6 , 7 , 3 , 5 , 0 , 5 , 6 , 3 , 7 , 0 , 0 , 5 , 5 , 5 , 18 },
-		      {-400 ,-400 ,0 ,7 ,-400 ,-400 ,5 ,6 ,0 ,21 , 0,3 , 5 , 7 ,21 ,0 ,3, 5 ,7 , -400 ,-400 ,7 ,-400 ,8 ,-400 ,0 ,-400 ,-400 ,11 ,-400 },
-		       {4 ,4 ,0 ,7 ,-400 ,-400 ,5 ,3 ,0 ,13 ,0 ,3 ,5 ,7 ,19 ,5 ,3 ,1 ,3 ,11 ,1 ,3 ,3 ,3 ,13 ,0, 3 ,3 ,8 ,8 },
-		       {9 ,7 ,0 ,9 ,13 ,-400 ,7 ,8 ,-400 ,19 ,0 ,5 ,5 ,11 ,17 ,7 ,6 ,7 ,9 ,13 ,7 ,7 ,7 ,7 ,21 ,0 ,7,7 ,7 ,21}};
+   // Int_t toff[4][30]={{ 3 , 2 , -400 , 3 , 4 , 9 , 3 , 1 , -400 , 3 , 0 , 2 , 3 , 3 , 3 , 3 , 1 , 1 , 0 , 3 , 1 , 3 , 1 , 2 , 1 , -400 , 3 , 1 , 2 , 3 },
+   // 		      {5 ,3 ,-400 ,3 ,5 ,11 ,3 ,3 ,-400 ,3 , -400 ,3 , 3 , 5 ,3  ,5 ,3, 3 ,-400 , 3 ,1 ,3 ,3 ,3 ,3 ,-400 ,3 ,3 ,3 ,5 },
+   // 		      {3 ,3 ,-400 ,6 ,9 ,11 ,3 ,3 ,-400 ,9 ,0 ,3 ,4 ,7 ,9 ,4 ,3 ,3 ,0 ,5 ,3 ,3 ,3 ,3 ,3 ,-400, 3 ,4 ,5 ,7 },
+   // 		      {5 ,5 ,-400 ,5 ,9 ,11 ,5 ,5 ,-400 ,9 ,0 ,3 ,5 ,5 ,9 ,5 ,5 ,5 ,0,5 ,4 ,5 ,5 ,7 ,7 ,31 ,5,3 ,4 ,5}};
+   // //Int_t toff[4][30]={{ 5 , 3 , -400 , 4 , 6 , 12 , 3 , 3 , -400 , 5 , 0 , 3 , 5 , 7 , 9 , 5 , 3 , 3 , 0 , 7 , 3 , 5 , 3 , 7 , 9 , -400 , 3 , 4 , 6 , 7 },
+   // 		      {5 ,5 ,-400 ,7 ,11 ,11 ,5 ,5 ,-400 ,8 , 0,3 , 5 , 5 ,5  ,5 ,5, 3 ,-400 , 5 ,4 ,5 ,5 ,7 ,7 ,-400 ,5 ,5 ,7 ,9 },
+   // 		      {3 ,3 ,-400 ,6 ,9 ,11 ,3 ,3 ,-400 ,9 ,0 ,3 ,4 ,7 ,9 ,4 ,3 ,3 ,0 ,5 ,3 ,3 ,3 ,3 ,3 ,-400, 3 ,4 ,5 ,7 },
+   // 		      {5 ,5 ,-400 ,5 ,9 ,11 ,5 ,5 ,-400 ,9 ,0 ,3 ,5 ,5 ,9 ,5 ,5 ,5 ,0,5 ,4 ,5 ,5 ,7 ,7 ,31 ,5,3 ,4 ,5}};
+   Float_t toff[4][30]={{-2.55046,-2.00179,-1.56113,-2.6907,-3.72288,-5.69668,-2.33819,-2.17182,-2.10844,-4.29668,-4.29668,-1.44096,-1.94672,-3.31633,-3.99937,-3.53982,-2.515,-1.5015,-1.22448,-4.04237,-2.96904,-1.67205,-2.01226,-2.11593,-2.93488,-3.57665,-2.21593,-2.22542,-2.35211,-3.11482},
+			{-4.21337,-3.54174,-2.90505,-3.83915,-4.83778,-5.98505,-3.2126,-3.15874,-3.15789,-4.44343,-4.42804,-2.60029,-3.21489,-4.17282,-4.70042,-4.67902,-3.87376,-3.07172,-2.77089,-5.18226,-4.30658,-2.62034,-3.03195,-3.24866,-3.60955,-3.78055,-3.51831,-3.54862,-3.74575,-4.46692},
+			{-2.89465,-2.17833,-1.5456,-2.93769,-3.67422,-5.09027,-2.16135,-2.09848,-2.06423,-3.71735,-3.72796,-1.26682,-1.78873,-3.36921,-3.83471,-3.3164,-2.55204,-1.37404,-1.07462,-4.30097,-3.13057,-1.60408,-1.93526,-2.27518,-3.10845,-3.96276,-2.26476,-2.21898,-2.33189,-3.19075},
+			{-4.23842,-3.48304,-2.81603,-3.94027,-4.67669,-5.71142,-3.52997,-3.33909,-3.2342,-4.8784,-4.8741,-2.27349,-3.02623,-4.28479,-4.67874,-4.42158,-3.57753,-2.66465,-2.41795,-5.21102,-4.00476,-2.83473,-3.05238,-3.14557,-3.8407,-4.26887,-3.67729,-3.45409,-3.65659,-4.43797}};
    if( eid>-1 && rid>-1 && rmult>=1 && amult>=1 ){
     tdiff=rdt_t[rid]-e_t[eid];
-    tdiff+=toff[rid/2][eid];
-    if(tdiff>-2&&tdiff<7) goodt=1;
-    // htdiff->Fill(tdiff);
-    hID2->Fill(eid,rid/2);
-    //hrtac[rid/2]->Fill(eid,tdiff);
+    tdiff-=toff[rid/2][eid];
+    if(tdiff>-1&&tdiff<5) goodt=1;
+    // htdiffFill(tdiff);
+    
+    hrtac[rid/2]->Fill(eid,tdiff);
    }
    if(goodt&&eCal[eid]>2) hrdtg[rid/2]->Fill(rdt[rid],rdt[rid+1]);
-   if(goodt&&rmult>=1&&amult>=1&&rdtgate){
+   cutG=(TCutG*) cutList2->At(0);
+   Bool_t goodez=0;
+   if(!cutG->IsInside(z[eid]*10,eCal[eid])) goodez=1;
+   
+   if(goodt&&rmult>=1&&amult>=1&&(rdtgate||unboundgate)&&goodez){
+     //  if(goodt&&rmult>=1&&amult>=1&&rdtgate){
+    
     heCalVzGC->Fill(z[eid]*10,eCal[eid]);
   
    
    }
-   if(rdtgate&&rmult>=1&&amult>=1){
-     htdiff->Fill(tdiff);
+   if(rmult>=1&&amult>=1&&(rdtgate||unboundgate)&&goodez){
+      htdiff->Fill(tdiff);
+     hID2->Fill(eid,rid/2);
      hrtac[rid/2]->Fill(eid,tdiff);
    }
    /*********** EZERO ************************************************/ 
@@ -826,10 +889,10 @@ void Monitors::Terminate()
    gStyle->SetOptStat("neiou");
    
    
-   TFile * transfer = new TFile("transfer.root");
-   //TTree * treeT = (TTree *) transfer->FindObjectAny("tree"); 
-   TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
-   TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
+   // TFile * transfer = new TFile("transfer.root");
+   // //TTree * treeT = (TTree *) transfer->FindObjectAny("tree"); 
+   // TObjArray * gList = (TObjArray *) transfer->FindObjectAny("gList");
+   // TObjArray * fxList = (TObjArray *) transfer->FindObjectAny("fxList");
    
    //cCanvas->cd(1);
    //treeT->Draw("thetaCM >> c0", "hit == 1 && ExID == 0", "");
@@ -847,7 +910,7 @@ void Monitors::Terminate()
    cCanvas->cd(3);
    heCalVzGC->SetMarkerStyle(20);
    heCalVzGC->Draw();
-   gList->At(0)->Draw("same");
+   // gList->At(0)->Draw("same");
    //gList->At(10)->Draw("same");
    //gList->At(20)->Draw("same");
    //fxList->At(0)->Draw("same");
@@ -862,10 +925,14 @@ void Monitors::Terminate()
    hrdtg[1]->SetMarkerStyle(20);
    hrdtg[2]->SetMarkerStyle(20);
    hrdtg[3]->SetMarkerStyle(20);
-   cCanvas->cd(5); hrdtg[0]->Draw(); cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");
-   cCanvas->cd(6); hrdtg[1]->Draw(); cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");
-   cCanvas->cd(7); hrdtg[2]->Draw(); cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");
-   cCanvas->cd(8); hrdtg[3]->Draw(); cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");
+   cCanvas->cd(5); hrdtg[0]->Draw("colz"); cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");
+   unboundC = (TCutG *)cutList->At(0+4) ; unboundC->Draw("same");
+   cCanvas->cd(6); hrdtg[1]->Draw("colz"); cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");
+   unboundC = (TCutG *)cutList->At(1+4) ; unboundC->Draw("same");
+   cCanvas->cd(7); hrdtg[2]->Draw("colz"); cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");
+   unboundC = (TCutG *)cutList->At(2+4) ; unboundC->Draw("same");
+   cCanvas->cd(8); hrdtg[3]->Draw("colz"); cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");
+   unboundC = (TCutG *)cutList->At(3+4) ; unboundC->Draw("same");
    
    StpWatch.Start(kFALSE);
    
