@@ -101,7 +101,7 @@ else
 
 fi
 
-if [ "${space}" -le 512000 ]; then
+if [ ${space} -le 512000 ]; then
    echo "The avalible space is less then 500 GB."
    read -p  '-------------------------- Continue? (Y/N) ' OKFlag
    
