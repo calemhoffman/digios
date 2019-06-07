@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 215
-y 282
+x 278
+y 231
 w 1800
 h 1100
 font "helvetica-bold-r-10.0"
@@ -63,7 +63,7 @@ commandLabel {
   0 "Set Values"
 }
 command {
-  0 "$EDMSCRIPTS/array_raw_data_windows_saved"
+  0 "$EDMSCRIPTS/array_saved"
 }
 endObjectProperties
 
