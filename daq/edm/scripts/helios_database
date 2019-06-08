@@ -5,6 +5,7 @@ if [ $# -eq 0 ] || ([ $1 != "start" ] && [ $1 != "stop" ]); then
     exit 1
 fi
 
+echo ""
 echo "###################################"
 echo "    $1  database for Grafana     "
 echo "###################################"
