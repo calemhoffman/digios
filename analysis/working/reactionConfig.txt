@@ -17,7 +17,7 @@ false           //isTargetScattering
 2.2e-4          //targetThickness_in_cm
 ../SRIM/20F_in_CD2.txt  //stopping_power_for_beam
 ../SRIM/3H_in_CD2.txt   //stopping_power_for_light_recoil
-../SRIM19F_in_CD2.txt  //stopping_power_for_heavy_recoil
+../SRIM/19F_in_CD2.txt  //stopping_power_for_heavy_recoil
 false           //isDacay
 1               //decayNucleus_A
 0               //decayNucleus_Z
