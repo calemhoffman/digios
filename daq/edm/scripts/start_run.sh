@@ -15,6 +15,7 @@ elif [ ${runLen} -eq 2 ]; then
    RUN="0"${RUN}
 fi;
 
+echo ""
 echo "=========================================="
 echo "Starting run : ${RUN}"
 echo "=========================================="
@@ -32,7 +33,7 @@ set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
 export DIGIOSRUNNUM
 
-currentDate = $(date)
+currentDate=$(date)
 
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT"
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
