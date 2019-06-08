@@ -314,7 +314,7 @@ void Transfer(
   
   TMacro hitMeaning;
   TString str;
-  str = "hit == 1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
+  str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
   str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
   str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
   str = "hit == -3 ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
