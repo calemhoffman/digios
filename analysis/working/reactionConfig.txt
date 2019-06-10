@@ -1,17 +1,17 @@
 //-------for_comment
-15             //beam_A
-7              //beam_Z
-7               //target_A
-3               //target_Z
-2               //recoil_light_A
+31             //beam_A
+14             //beam_Z
+2               //target_A
+1               //target_Z
+1               //recoil_light_A
 1               //recoil-light_Z
-9.00            //beam-energy_in_MeV/u
+9.6            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
 0.00            //x_offset_of_Beam_in_mm
 0.00            //y_offset_of_Beam_in_mm
-1000000         //number_of_Event_being_generated
+5000         //number_of_Event_being_generated
 false           //isTargetScattering
 0.913           //target_density_in_g/cm3
 2.2e-4          //targetThickness_in_cm
