@@ -1,6 +1,6 @@
 //-------for_comment
 31             //beam_A
-14              //beam_Z
+14             //beam_Z
 2               //target_A
 1               //target_Z
 1               //recoil_light_A
@@ -17,7 +17,7 @@ false           //isTargetScattering
 2.2e-4          //targetThickness_in_cm
 ../SRIM/20F_in_CD2.txt  //stopping_power_for_beam
 ../SRIM/3H_in_CD2.txt   //stopping_power_for_light_recoil
-../SRIM/19F_in_CD2.txt  //stopping_power_for_heavy_recoil
+../SRIM19F_in_CD2.txt  //stopping_power_for_heavy_recoil
 false           //isDacay
 1               //decayNucleus_A
 0               //decayNucleus_Z
