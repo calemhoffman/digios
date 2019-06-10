@@ -657,7 +657,7 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //==================== Basic gate
       if( TMath::IsNaN(e[i]) ) continue ; 
-      if( ring[i] > 50 ) continue; 
+      if( ring[i] > 300 ) continue; 
       if( TMath::IsNaN(xn[i]) &&  TMath::IsNaN(xf[i]) ) continue ; 
 
       //==================== Calibrations go here
