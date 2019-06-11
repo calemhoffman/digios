@@ -330,6 +330,7 @@ public:
    void SetCoincidentWithRecoil(bool TorF){
       this->isCoincidentWithRecoil = TorF;
    }
+   bool GetCoincidentWithRecoil(){return this->isCoincidentWithRecoil;}
    bool SetDetectorGeometry(string filename);
    
    void OverrideMagneticField(double BField){ this->Bfield = BField;}
@@ -538,7 +539,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
            if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
          }
          if( i == 9 )                        posRecoil1 = atof(x.c_str());
-         if( i == 10 )                        posRecoil2 = atof(x.c_str());
+         if( i == 10 )                       posRecoil2 = atof(x.c_str());
          if( i == 11)                            zElum1 = atof(x.c_str());
          if( i == 12 )                           zElum2 = atof(x.c_str());
          if( i == 13 )                           support = atof(x.c_str());
@@ -618,11 +619,24 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    Pb.RotateX(BfieldTheta);
    PB.RotateX(BfieldTheta);
 
-   //====================== X-Y plane
+   //====================== X-Y plane, light particle
    rho = Pb.Pt()  / Bfield / Zb / c * 1000; //mm
    theta = Pb.Theta();
    phi = Pb.Phi();
-
+   
+   //======================  recoil detector
+   thetaB = PB.Theta();
+   phiB = PB.Phi();
+   rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
+   vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
+   vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
+   tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   eB   = PB.E() - PB.M();
+   zB   = vp0B * tB;
+   rhoBHit = GetRecoilR(posRecoil);
+   rxHit = GetRecoilXPos(posRecoil);
+   ryHit = GetRecoilYPos(posRecoil);
+      
    if( isDetReady == false ) {
       //====================== infinite small detector   
       vt0 = Pb.Beta() * TMath::Sin(theta) * c ; // mm / nano-second  
@@ -632,19 +646,9 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       e = Pb.E() - Pb.M();
       dphi = TMath::TwoPi();
       
-		//======================  recoil detector
-      thetaB = PB.Theta();
-      phiB = PB.Phi();
-      rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
-      vt0B = Pb.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
-      vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-      tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
-      eB   = PB.E() - PB.M();
-      zB   = vp0 * tB;
-     
       return 0;
    }
-   
+
    if( bore > 2 * rho && ((firstPos > 0 && theta < TMath::PiOver2())  || (firstPos < 0 && theta > TMath::PiOver2())) ){
       //====================== infinite small detector   
       vt0 = Pb.Beta() * TMath::Sin(theta) * c ; // mm / nano-second  
@@ -652,20 +656,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       t0 = TMath::TwoPi() * rho / vt0; // nano-second   
       z0 = vp0 * t0; // mm        
       
-      //======================  recoil detector
-      thetaB = PB.Theta();
-      phiB = PB.Phi();
-      rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
-      tB   = posRecoil / (PB.Beta() * TMath::Cos(thetaB) * c ); // nano-second
-      eB   = PB.E() - PB.M();
-      zB   = vp0 * tB;
-      
-      //========== calculate particle-B hit radius on recoil dectector
-      vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
-      vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-      rhoBHit = GetRecoilR(posRecoil);
-      rxHit = GetRecoilXPos(posRecoil);
-      ryHit = GetRecoilYPos(posRecoil);
+      //========== check particle-B hit radius on recoil dectector
       if(isCoincidentWithRecoil && rhoBHit > rhoRecoil ) return -2; // when particle-B miss the recoil detector
 
       //========= check is particle-b was blocked by recoil detector

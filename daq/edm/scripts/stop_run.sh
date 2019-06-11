@@ -12,15 +12,16 @@ elif [ ${runLen} -eq 2 ]; then
    RUN="0"${RUN}
 fi;
 
-echo -e "------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
+echo -e "\n------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
-currentDate = $(date)
+currentDate=$(date)
 
 echo "         stop at ${currentDate}"
 echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
 
 ~/digios/daq/edm/scripts/elog.sh stop
+ssh heliosdatabase@heliosdb '/home/heliosdatabase/GrafanaElog.sh'
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"

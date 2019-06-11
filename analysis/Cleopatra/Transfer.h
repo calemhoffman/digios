@@ -149,23 +149,28 @@ void Transfer(
   }
   //helios.SetCoincidentWithRecoil(isCoincidentWithRecoil);
   int mDet = helios.GetNumberOfDetectorsInSamePos();
+
+  bool coinRecoil = helios.GetCoincidentWithRecoil();
+  printf(" is Coincident with Recoil and Array ? %s\n", coinRecoil ? "Yes" : "No");
   
   eSigma = helios.GetDetEnergyResol();
   zSigma = helios.GetDetPositionResol();
   
-  printf("                    energy resol.: %f MeV\n", eSigma);
-  printf("                     pos-Z resol.: %f mm \n", zSigma);
+  printf("  energy resol.: %f MeV\n", eSigma);
+  printf("   pos-Z resol.: %f mm \n", zSigma);
+  printf("=================================== Auxillary Detectors\n");
   
   double zElum1 = helios.GetElum1Pos();
   double zElum2 = helios.GetElum2Pos();
   double zRecoil1 = helios.GetRecoil1Pos();
   double zRecoil2 = helios.GetRecoil2Pos();
   
-  if( zElum1 != 0 ) printf("                      Elum 1 pos.: %f mm \n", zElum1);
-  if( zElum2 != 0 ) printf("                      Elum 2 pos.: %f mm \n", zElum2);
-  if( zRecoil1 != 0 ) printf("                    Recoil 1 pos.: %f mm \n", zRecoil1);
-  if( zRecoil2 != 0 ) printf("                    Recoil 2 pos.: %f mm \n", zRecoil2);
-  
+  if( zElum1 != 0 )   printf("   Elum 1 pos.: %f mm \n", zElum1);
+  if( zElum2 != 0 )   printf("   Elum 2 pos.: %f mm \n", zElum2);
+  if( zRecoil1 != 0 ) printf(" Recoil 1 pos.: %f mm \n", zRecoil1);
+  if( zRecoil2 != 0 ) printf(" Recoil 2 pos.: %f mm \n", zRecoil2);
+
+  printf("==================================== E-Z plot slope\n");
   double beta = reaction.GetReactionBeta() ;
   double gamma = reaction.GetReactionGamma();
   double mb = reaction.GetMass_b();
@@ -314,7 +319,7 @@ void Transfer(
   
   TMacro hitMeaning;
   TString str;
-  str = "hit == 1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
+  str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
   str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
   str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
   str = "hit == -3 ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
@@ -658,6 +663,8 @@ void Transfer(
       yHit2 = helios.GetYPos(zElum2);
       rhoHit2 = helios.GetR(zElum2);
     }
+
+    //Recoil
     recoilT = helios.GetRecoilTime();
     rxHit = helios.GetRecoilXHit();
     ryHit = helios.GetRecoilYHit();
