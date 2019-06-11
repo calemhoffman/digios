@@ -17,8 +17,20 @@
 
 void Check_Transfer(TString filename = "transfer.root"){
 
+//========================================== User Input
+  TString gate = "hit == 1 && rhoBHit > 10 && loop == 1";
+  //TString gate = "hit == 1 && loop == 1";
+
+  TString gate2 = "rhoHit1 < 50  && rhoHit2 > 60 "; // elum
+
+//============================================== 
   TFile * file = new TFile(filename, "read");
   TTree * tree = (TTree*) file->Get("tree");
+
+  TObjArray * fxList = (TObjArray *) file->FindObjectAny("fxList");
+  TObjArray * txList = (TObjArray *) file->FindObjectAny("txList");
+
+  const int nExID = fxList->GetLast()+1;
 
    gStyle->SetOptStat("");
    gStyle->SetStatY(0.9);
@@ -38,6 +50,8 @@ void Check_Transfer(TString filename = "transfer.root"){
    double length = 50.5;
    double firstPos = -110;
    double rhoRecoil = 50;
+   double posRecoil = 400;
+   double posRecoil1 = 400;
    
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
    ifstream detFile;
@@ -49,8 +63,10 @@ void Check_Transfer(TString filename = "transfer.root"){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          if( i == 5 ) length   = atof(x.c_str());
+	 if( i == 6 ) posRecoil = atof(x.c_str());
 	 if( i == 7 ) rhoRecoil = atof(x.c_str());
-         if( i == 14 ) firstPos = atof(x.c_str());
+	 if( i == 9 ) posRecoil1 = atof(x.c_str());
+	 if( i == 14 ) firstPos = atof(x.c_str());
          if( i == 17 ) cDet = atoi(x.c_str());
          if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
@@ -95,7 +111,7 @@ void Check_Transfer(TString filename = "transfer.root"){
    }
 
    //===================================================
-   Int_t Div[2] = {3,2}; // x,y
+   Int_t Div[2] = {4,2}; // x,y
    Int_t size[2] = {400,400}; //x,y
    TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
@@ -105,10 +121,9 @@ void Check_Transfer(TString filename = "transfer.root"){
       cCheck->cd(i)->SetGrid();
    }
 
-   TString gate = "hit == 1 && rhoBHit > 10";
-
    printf("============================== Gate\n");
-   printf("%s\n", gate.Data());
+   printf("gate : %s\n", gate.Data());
+   printf("gate2: %s\n", gate2.Data());
 
    printf("=======================meaning of Hit ID\n");
    printf("  1 = light recoil hit array & heavy recoil hit recoil\n");
@@ -133,11 +148,14 @@ void Check_Transfer(TString filename = "transfer.root"){
       
 
    cCheck->cd(2);
-   TH2F * hez = new TH2F("hez", "e-z [gated]; z [mm]; e [MeV]", zRange[0], zRange[1], zRange[2], 400, 0, 20);
+   TH2F * hez = new TH2F("hez", Form("e-z [gated] @ %5.0f mm; z [mm]; e [MeV]", firstPos), zRange[0], zRange[1], zRange[2], 400, 0, 20);
    tree->Draw("e:z>>hez", gate, "colz");
+   for( int i = 0; i < nExID ; i++){
+     fxList->At(i)->Draw("same");
+   }
 
    cCheck->cd(3);
-   TH2F * hRecoilXY = new TH2F("hRecoilXY", "RecoilXY [gated]; X [mm]; Y [mm]", 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+   TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
    tree->Draw("ryHit:rxHit>>hRecoilXY", gate, "colz");
    
    cCheck->cd(4);
@@ -152,4 +170,42 @@ void Check_Transfer(TString filename = "transfer.root"){
    TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  500, -1, 6);
    tree->Draw("ExCal>>hExCal", gate, "");
 
+   cCheck->cd(7);
+   cCheck->cd(7)->SetGrid(0,0);
+   
+   TH1F * hThetaCM[nExID];
+   double maxCount = 0;
+   for( int i = 0; i < nExID; i++){
+     hThetaCM[i] = new TH1F(Form("hThetaCM%d", i), Form("thetaCM [gated] (ExID=%d); thetaCM [deg]; count", i), 200, 0, 50);
+     hThetaCM[i]->SetLineColor(i+1);
+     hThetaCM[i]->SetFillColor(i+1);
+     hThetaCM[i]->SetFillStyle(3000+i);
+     tree->Draw(Form("thetaCM>>hThetaCM%d", i), gate + Form("&& ExID==%d", i), "");
+     double max = hThetaCM[i]->GetMaximum();
+     if( max > maxCount ) maxCount = max;
+   }
+
+   for( int i = 0; i < nExID; i++){
+     hThetaCM[i]->GetYaxis()->SetRangeUser(0, maxCount * 1.2);
+     if( i == 0 ) {
+       hThetaCM[i]->Draw();
+     }else{
+       hThetaCM[i]->Draw("same");
+     }
+   }
+
+   cCheck->cd(8);
+   TH2F *hThetaCM_Z = new TH2F("hThetaCM_Z","ThetaCM vs Z ; Z [mm]; thetaCM [deg]",zRange[0], zRange[1], zRange[2], 200,0,50);
+   tree->Draw("thetaCM:z>>hThetaCM_Z",gate,"col");
+   for( int i = 0; i < nExID ; i++){
+     txList->At(i)->Draw("same");
+   }
+
+   /*
+   cCheck->cd(9);
+   TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+   tree->Draw("ryHit1:rxHit1>>hRecoilXY1", gate, "colz");
+
+   cCheck->cd(10);
+   */
 }
