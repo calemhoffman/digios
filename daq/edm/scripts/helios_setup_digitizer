@@ -144,7 +144,7 @@ echo "Setting Y-plane"
 caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_B 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_C 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_D 170
+caput VME32:RTR1:reg_Y_PLANE_MAP_D 0
 
 caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_F 0
@@ -154,12 +154,12 @@ caput VME32:RTR1:reg_Y_PLANE_MAP_H 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_B 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_C 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_D 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_D 255
 
 caput VME32:RTR2:reg_Y_PLANE_MAP_E 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_F 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_G 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_H 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_H 255
 
 echo "End of Trigger Mapping ###"
 
