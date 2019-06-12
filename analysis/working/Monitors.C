@@ -134,16 +134,20 @@ TH2F* hExThetaCM;
 TH1F* htacE;
 TH1I* htacArray[numDet];
 TH1F* htac[4];//0 array-rdt, 1 elum-rdt
+TH2F* hrtac[4];
 
-//======= Others
+//======= Recoil
 TH1F* hrdtDE[4];
 TH1F* hrdtDEg[4];
 TH2F* hrdt[4];
 TH2F* hrdtg[4];
-TH2F* helum[2];
-TH2F* hrtac[4];
 
-TH2F* he0dee;//ezero
+//======= ELUM
+TH1F* helum[16];
+TH2F* helumID;
+
+//======= EZero
+TH2F* he0dee;
 TH2F* he0det;
 TH2F* he0et;
 TH1F* h0detet;
@@ -153,6 +157,7 @@ TH1F* h0de;
 TH1F* h0e;
 TH1F* h0tac;
 
+//======= multi-Hit
 TH2I *hmult;
 TH1I *hmultEZ;
 TH1I *htdiff;
@@ -533,6 +538,13 @@ void Monitors::Begin(TTree *tree)
 
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
 
+
+   //===================== ELUM
+   for( int i = 0; i < 16; i++){
+      helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 400, 0, 10000);
+   }
+   helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 400, 0, 10000);
+
    //===================== EZERO
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
    he0det = new TH2F("he0det","EZERO DE-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
@@ -620,7 +632,12 @@ Bool_t Monitors::Process(Long64_t entry)
        xcal[i] = TMath::QuietNaN();
        eCal[i] = TMath::QuietNaN();
     }
-   
+    
+    /*********** ELUM ************************************************/
+    for( int i = 0; i < 16; i++){
+       helum[i]->Fill(elum[i]);
+       helumID->Fill(i, elum[i]);
+    }
 
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
