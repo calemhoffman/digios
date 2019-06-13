@@ -258,7 +258,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       //=============================== RECOIL
       //if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) {
       if ( idDet >= 100 && idDet <= 110 ) {
-        Int_t rdtID = idDet-101;
+        Int_t rdtID = idDet-100;
         psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
@@ -266,8 +266,8 @@ Bool_t GeneralSort::Process(Long64_t entry)
       //=============================== ELUM
       //if ((id[i]>=1000 && id[i]<1130)&&(idDet>=200&&idDet<=240)) {
       if ( idDet >= 200 && idDet <= 240 ) {
-        Int_t elumID = idDet - 201;
-        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        Int_t elumID = idDet - 200;
+        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
@@ -341,12 +341,12 @@ void GeneralSort::Terminate()
   // cc0->Clear(); hEvents->Draw();  
   
   printf("=======================================================\n");
-  printf("----- Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
+  printf(" Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
   gClock.Stop("timer");
   Double_t time = gClock.GetRealTime("timer");
-  printf("----- Total run time : %6.0f sec \n", time);
-  printf("----- Sorting rate   : %6.3f k/sec\n",EffEntries/time/1000.0);
-  printf("----- saved as \e[31m %s \e[m. events saved: %d\n", saveFileName.Data() , savedEntries); 
-
+  printf(" Total run time : %6.0f sec \n", time);
+  printf(" Sorting rate   : %6.3f k/sec\n",EffEntries/time/1000.0);
+  printf(" saved as \e[31m %s \e[m. events saved: %d\n", saveFileName.Data() , savedEntries); 
+  printf("=======================================================\n");
   gROOT->ProcessLine(".q");
 }
