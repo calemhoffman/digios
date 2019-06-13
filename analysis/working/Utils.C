@@ -271,9 +271,19 @@ void eCalVxCal(void) {
 }
 
 void elum(void) {
-  TCanvas *celum = new TCanvas("celum","ELUM",1000,1000);
-  celum->Clear(); celum->Divide(2,2);
-  helum[0]->Draw("colz");
+  TCanvas *celum = (TCanvas *) gROOT->FindObjectAny("celum");
+  if( celum == NULL )  celum = new TCanvas("celum",Form("ELUM | %s", canvasTitle.Data()),1000,1000);
+  celum->Clear(); celum->Divide(4,4);
+  for( int i = 0 ; i < 16 ; i++){
+    celum->cd(i+1);
+    helum[i]->Draw("");
+  }
+  
+  TCanvas *celumID = (TCanvas *) gROOT->FindObjectAny("celumID");
+  if( celumID == NULL )  celumID = new TCanvas("celumID",Form("ELUM-ID | %s", canvasTitle.Data()),1100, 0, 500,500);
+  celumID->Clear();
+  helumID->Draw("colz");
+  
 }
 
 void recoil(void) {

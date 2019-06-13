@@ -26,6 +26,7 @@ int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
 int energyRange[2]= {0, 8};
 int rdtRange[2] = {6000, 5000}; // range for E, range for dE
 double exRange[3] = {25, -1, 2}; // bin [keV], low[MeV], high[MeV]
+int elumRange[2] = {500, 4000};
 
 //---Gate
 int timeGate[2] = {-20, 20}; // min, max
@@ -541,9 +542,9 @@ void Monitors::Begin(TTree *tree)
 
    //===================== ELUM
    for( int i = 0; i < 16; i++){
-      helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 400, 0, 10000);
+      helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 200, elumRange[0], elumRange[1]);
    }
-   helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 400, 0, 10000);
+   helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 200, elumRange[0], elumRange[1]);
 
    //===================== EZERO
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
@@ -920,16 +921,17 @@ void Monitors::Terminate()
    //treeT->Draw("thetaCM >> c2", "hit == 1 && ExID == 2", "");
    //treeT->Draw("thetaCM >> c3", "hit == 1 && ExID == 3", "");
    
-   cCanvas->cd(1);
-   heCalVz->Draw("colz");
-   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   cCanvas->cd(1); helumID->Draw("colz");
+   
+   //heCalVz->Draw("colz");
+   //if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
    //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
 
    cCanvas->cd(2); 
-   //htdiff->Draw();
+   htdiff->Draw();
    htdiffg->SetLineColor(2);
    htdiffg->Draw("");
-
+   
    TLatex text;
    text.SetNDC();
    text.SetTextFont(82);
