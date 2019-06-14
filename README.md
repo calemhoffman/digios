@@ -5,8 +5,12 @@
 - 4SideArray : the branch for the 4-side array, the main diff is the daq
 - ISS631 : the analysis code on 2018-Oct.
 
+## Update on June 11, 2019, Ryan
+- the code was updated and improved base on h064_15N (d,p) run 013.
+- the physical dimension of the new array is not known, assume old array.
+
 ## Minor update on March 25, 2019, Ryan
-- the code is tested with alpha source run, with ot without trace is OK.
+- the code is tested with alpha source run, with or without trace is OK.
 - AutoCalibration should be OK.
 - Simluation becomes obsolete.
 
