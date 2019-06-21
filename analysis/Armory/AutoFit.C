@@ -473,19 +473,23 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   specS->SetTitle(titleH);   
   specS->SetName("specS");
   
-  //=================== find peak and fit
-  printf("============= estimating background...\n");
-  TSpectrum * peak = new TSpectrum(50);
-  TH1 * h1 = peak->Background(hist, bgEst);
-  h1->Draw("same");
-
+  //=================== find peak and fi
+  
   //gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
   cFitNGauss->cd(2)->SetGrid();
   cFitNGauss->cd(2);
-  printf("============= substracting the linear background...\n");
   specS->Sumw2();
-  specS->Add(h1, -1.);
+  
+  if( bgEst > 0 ) {
+    printf("============= estimating background...\n");
+    TSpectrum * peak = new TSpectrum(50);
+    TH1 * h1 = peak->Background(hist, bgEst);
+    h1->Draw("same");
+    printf("============= substracting the linear background...\n");
+    specS->Add(h1, -1.);
+  }
+  
   specS->Draw("hist");
 
   //========== Fitting 

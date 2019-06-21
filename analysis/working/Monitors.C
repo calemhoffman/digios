@@ -23,10 +23,13 @@ ULong64_t maxNumberEvent = 100000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int energyRange[2]= {0, 8};
-int rdtRange[2] = {6000, 5000}; // range for E, range for dE
-double exRange[3] = {25, -1, 2}; // bin [keV], low[MeV], high[MeV]
-int elumRange[2] = {500, 4000};
+int    energyRange[2] = {   0,    8};
+int     rdtDERange[2] = {  50,  6000};
+int      rdtERange[2] = {  50,  6000};
+int      elumRange[2] = { 500, 4000};
+
+double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
+
 
 //---Gate
 int timeGate[2] = {-20, 20}; // min, max
@@ -138,10 +141,10 @@ TH1F* htac[4];//0 array-rdt, 1 elum-rdt
 TH2F* hrtac[4];
 
 //======= Recoil
-TH1F* hrdtDE[4];
-TH1F* hrdtDEg[4];
-TH2F* hrdt[4];
-TH2F* hrdtg[4];
+TH2F* hrdtID;
+TH1F* hrdt[8]; // single recoil
+TH2F* hrdt2D[4];
+TH2F* hrdt2Dg[4];
 
 //======= ELUM
 TH1F* helum[16];
@@ -494,20 +497,20 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<4;i++) {
-      hrdtDE[i] = new TH1F(Form("hrdtDE%d",i),
-                         Form("Raw Recoil DE(ch=%d); DE (channel)",i),
-                         500,0,rdtRange[0]);
-      hrdtDEg[i] = new TH1F(Form("hrdtDEg%d",i),
-                         Form("Raw Recoil DE(ch=%d) time gated; DE (channel)",i),
-                         500,0,rdtRange[0]);
-      hrdt[i] = new TH2F(Form("hrdt%d",i),
-                         Form("Raw Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
-                         500,0,rdtRange[0],500,0,rdtRange[1]);
-      hrdtg[i] = new TH2F(Form("hrdtg%d",i),
-                          Form("Gated Recoil DE vs Eres (ch=%d); Eres (channel); DE (channel)",i),
-                          500,0,rdtRange[0],500,0,rdtRange[1]);
+   for (Int_t i=0;i<8;i++) {
+      if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
+      if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
+      
+      //dE vs E
+      
+      if( i % 2 == 0 ) {
+         int tempID = i / 2;
+         hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
+         hrdt2Dg[tempID] = new TH2F(Form("hrdt2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
+      }
+      
    }
+   hrdtID = new TH2F("hrdtID", "RDT vs ID; ID; energy [ch]", 8, 0, 8, 500, TMath::Min(rdtERange[0], rdtDERange[0]), TMath::Max(rdtERange[1], rdtDERange[1])); 
    
    //===================== multiplicity
    hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
@@ -759,8 +762,7 @@ Bool_t Monitors::Process(Long64_t entry)
           hID2->Fill(i, j); 
 	 
           if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
-            if(j % 2 == 0 ) hrdtg[j/2]->Fill(rdt[j],rdt[j+1]);
-            if(j % 2 == 0 ) hrdtDEg[j/2]->Fill(rdt[j+1]);
+            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
             hID2g->Fill(i, j); 
             //if( rdtgate) hID2g->Fill(i, j); 
             coinFlag = true;
@@ -784,13 +786,16 @@ Bool_t Monitors::Process(Long64_t entry)
       }
     }
     
-   /*********** RECOILS ************************************************/ 
-   for (int ii = 0 ; ii < 4 ; ii++){
-     if( rdt[2*ii] > 0 && rdt[2*ii+1] > 0 && !TMath::IsNaN(rdt[2*ii]) && !TMath::IsNaN(rdt[2*ii+1])  ){
+   /*********** RECOILS ************************************************/    
+   for( int i = 0; i < 8 ; i++){
+      hrdtID->Fill(i, rdt[i]);
+      hrdt[i]->Fill(rdt[i]);
+      
+      if( i % 2 == 0  ){
          recoilMulti++; // when both dE and E are hit
+         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]);
       }
-      hrdt[ii]->Fill(rdt[2*ii],rdt[2*ii+1]);
-      hrdtDE[ii]->Fill(rdt[2*ii+1]);
+      
    }
    
    /******************* Multi-hit *************************************/
@@ -921,7 +926,7 @@ void Monitors::Terminate()
    //treeT->Draw("thetaCM >> c2", "hit == 1 && ExID == 2", "");
    //treeT->Draw("thetaCM >> c3", "hit == 1 && ExID == 3", "");
    
-   cCanvas->cd(1); helumID->Draw("colz");
+   cCanvas->cd(1); hrdtID->Draw("colz");
    
    //heCalVz->Draw("colz");
    //if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
@@ -954,15 +959,15 @@ void Monitors::Terminate()
    //cCanvas->cd(4); hID2->Draw("colz");
    cCanvas->cd(4); hExThetaCM->Draw("colz");
    
-   //hrdtg[0]->SetMarkerStyle(20);
-   //hrdtg[1]->SetMarkerStyle(20);
-   //hrdtg[2]->SetMarkerStyle(20);
-   //hrdtg[3]->SetMarkerStyle(20);
+   //hrdt2Dg[0]->SetMarkerStyle(20);
+   //hrdt2Dg[1]->SetMarkerStyle(20);
+   //hrdt2Dg[2]->SetMarkerStyle(20);
+   //hrdt2Dg[3]->SetMarkerStyle(20);
    
-   cCanvas->cd(5); hrdtg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
-   cCanvas->cd(6); hrdtg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
-   cCanvas->cd(7); hrdtg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
-   cCanvas->cd(8); hrdtg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   cCanvas->cd(5); hrdt2Dg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   cCanvas->cd(6); hrdt2Dg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   cCanvas->cd(7); hrdt2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   cCanvas->cd(8); hrdt2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /*********/
    

@@ -5,7 +5,7 @@ int canvasSize[2] = {2000, 1200};
 
 void listDraws(void) {
   printf("------------------- List of Plots -------------------\n");
-  printf("  newCanvas() - Creaet a new Canvas\n");
+  printf("  newCanvas() - Create a new Canvas\n");
   printf("-----------------------------------------------------\n");
   //printf("    HitStat() - Hit statistics for all %d detectors\n", numDet);
   printf("      rawID() - Raw \033[0;31me\033[0m, \033[0;31mring\033[0m, \033[0;31mxf\033[0m, \033[0;31mxn\033[0m vs detID\n");
@@ -291,9 +291,20 @@ void recoil(void) {
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
-    crdt->cd(i+1); hrdt[i]->Draw("col");
-    //   cutG = (TCutG *)cutList->At(i);
-    //   cutG->Draw("same");
+    crdt->cd(i+1); hrdt2D[i]->Draw("col");
+  }
+  
+  TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
+  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
+  crdtID->Clear();
+  hrdtID->Draw("colz");
+  
+  TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500,0, 800, 800);
+  crdtS->Clear(); crdtS->Divide(2,4);
+  for( int i = 0; i < 8; i ++){
+    crdtS->cd(i+1);
+    hrdt[i]->Draw("");
   }
 }
 
