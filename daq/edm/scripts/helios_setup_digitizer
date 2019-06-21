@@ -27,8 +27,9 @@ caput GLBL:DIG:d2_window 0.2
 caput GLBL:DIG:led_threshold 400
 caput GLBL:DIG:CFD_fraction 30
 caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
-caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
-caput GLBL:DIG:trigger_polarity FallEdge
+caput GLBL:DIG:raw_data_window 3.32 #raw_data_window is traceLength + data
+#caput GLBL:DIG:trigger_polarity FallEdge
+caput GLBL:DIG:trigger_polarity Both
 caput GLBL:DIG:pileup_mode Accept
 caput GLBL:DIG:trigger_mux_select ExtTTCL
 #caput GLBL:DIG:trigger_mux_select IntAcptAll 
@@ -101,13 +102,15 @@ caput GLBL:DIG:load_delays 0
 #caput VME01:MDIG3:channel_enable9 Reset
 #caput VME01:MDIG4:channel_enable2 Reset
 #caput VME01:MDIG4:channel_enable3 Reset
-caput VME03:MDIG4:trigger_mux_select IntAcptAll 
 #caput VME01:MDIG4:channel_enable4 Reset
 #caput VME01:MDIG4:channel_enable5 Reset
 #caput VME01:MDIG4:channel_enable6 Reset
 #caput VME01:MDIG4:channel_enable7 Reset
 #caput VME01:MDIG4:channel_enable8 Reset
 #caput VME01:MDIG4:channel_enable9 Reset
+
+caput VME02:MDIG4:trigger_mux_select IntAcptAll #for tac
+
 #echo "Setting internal trigger boards / channels"
 #caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
 #caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
