@@ -21,12 +21,13 @@ echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTime
 echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
 
 ~/digios/daq/edm/scripts/elog.sh stop
-ssh heliosdatabase@heliosdb '/home/heliosdatabase/GrafanaElog.sh'
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
 curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+
+ssh heliosdatabase@heliosdb '/home/heliosdatabase/GrafanaElog.sh'
 
 echo wait 10 seconds before closing the IOCs
 sleep 10

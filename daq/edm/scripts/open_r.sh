@@ -4,6 +4,9 @@ explocation=~/digios/daq
 source ~/digios/expName.sh #load expName
 datalocation=${daqDataPath}/${expName}/data
 
+newRunNum=$((LastRunNum+1))
+echo "############################### Start a new RUN : RUN\033[0;31m${newRunNum}\033[0m"
+
 echo $datalocation
 
 cd ${datalocation}
