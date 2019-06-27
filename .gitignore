@@ -17,6 +17,8 @@ core.*
 *.d
 *.pcm
 *.so
+*.png
+*.pdf
 .DS_Store
 tempDB.txt
 elog.txt
