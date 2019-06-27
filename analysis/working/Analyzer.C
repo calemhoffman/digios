@@ -16,17 +16,44 @@ const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-double rangeEx[3] = { 50, -0.5, 1}; // resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 50, -0.5, 7}; // resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; // resol. [deg], low deg, high deg
 
-bool isExOffset = true;
-double ExOffset[30] = { // calibrated by h064_15N, (d,p), run013
-   0.00,  0.0154,    1000,  0.1314,  0.0091, 
-   1000,  0.0032,  0.0081,    1000,  0.1661, 
-   1000,  0.0614,  0.1070,  0.1453,  0.1785,
--0.1202, -0.0240,  0.1119,  0.0535, -0.0004,
- 0.0384, -0.0593,  0.0133,  0.0575,  0.0534,
-   1000, -0.0122,  0.1052,  0.2028,  0.0410};
+bool isExOffset = false;
+double ExOffset[30] = { // calibrated by h066_31Si, (d,p), run025
+0.0959 ,
+0.0689 ,
+1000   ,
+0.0417 ,
+0.1112 ,
+1000   ,
+0.0268 ,
+-0.0033,
+10000  ,
+-0.0368,
+10000  ,
+-0.0218,
+-0.0172,
+-0.0022,
+-0.0007,
+0.1525 ,
+0.0847 ,
+0.0102 ,
+1000   ,
+10000  ,
+0.0907 ,
+0.1553 ,
+0.1237 ,
+0.1418 ,
+0.1102 ,
+1000   ,
+0.16   ,
+0.0905 ,
+0.0833 ,
+0.1708 };
+ 
+ 
+ 
 
 int nBadDet = 0;
 int listOfBadDet[11] = {2, 5, 8, 9, 10, 18, 19, 25, 27, 28, 29 };
@@ -353,8 +380,8 @@ void Analyzer::Terminate()
      //hxi[i]->Draw();
      
      //hEBISi[i]->Draw();
-     //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     //hExi[i]->Draw();
+     hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
+     hExi[i]->Draw();
    
      //fitAuto(hExi[i]);
      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
@@ -367,7 +394,7 @@ void Analyzer::Terminate()
      //hxExi[i]->SetMarkerStyle(7);
      //hxExi[i]->SetMarkerColor(4);
      //hxExi[i]->Draw("scat");
-     hxExi[i]->Draw("colz");
+     //hxExi[i]->Draw("colz");
    } 
    
    //for( int i = 0; i < numDet; i++){
