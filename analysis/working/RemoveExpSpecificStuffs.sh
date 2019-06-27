@@ -10,6 +10,8 @@ echo "   run_Summary.dat"
 echo "   example.*"
 echo "   RunTimeStamp.dat"
 echo "   *.root  "
+echo "   *.pdf  "
+echo "   *.png  "
 echo "   *.d  "
 echo "   *.so  "
 echo "   *.pcm  "
@@ -24,6 +26,8 @@ if [ ${conti} == "Yes" ] ; then
   rm -fv example.*
   rm -fv RunTimeStamp.dat
   rm -fv *.root
+  rm -fv *.pdf
+  rm -fv *.png
   rm -fv *.d
   rm -fv *.so
   rm -fv *.pcm

@@ -14,7 +14,8 @@ printevents       1
 beta              0.0
 modwrite          10000
 tsnumwrites       1000
-timewin           1000
+#timewin           1000
+timewin           200
 
 #-------------------------------------------
 # mode2 calibration pars. 
