@@ -276,7 +276,7 @@ void Cali_e_trace::Init(TTree *tree)
    isEZEROExist = false;
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("ezero");
    if( br == NULL ){
-      printf(" ++++++++ no zero data.\n");
+      printf(" ++++++++ no ezero data.\n");
    }else{
       isEZEROExist = true;
       fChain->SetBranchAddress("ezero", ezero, &b_EZERO);
@@ -363,9 +363,9 @@ void Cali_e_trace::Init(TTree *tree)
 //      newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
 //      newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
 
-         newTree->Branch("te",             te,  "Trace_Energy[24]/F");
-         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[24]/F");
-         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[24]/F");
+         newTree->Branch("te",             te,  "Trace_Energy[30]/F");
+         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
+         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
          newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
          newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
          newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
@@ -459,9 +459,9 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       
-      printf("..... done.\n");
+      printf("................... done.\n");
    }else{
-      printf("..... fail.\n");
+      printf("................... fail.\n");
       
       for(int i = 0; i < numDet; i++){
          xnCorr[i] = 1;
@@ -481,9 +481,9 @@ void Cali_e_trace::Init(TTree *tree)
          xfxneCorr[i][1] = b;
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("................. done.\n");
    }else{
-      printf("... fail.\n");
+      printf("................. fail.\n");
       for(int i = 0; i < numDet; i++){
          xfxneCorr[i][0] = 0;
          xfxneCorr[i][1] = 1;
@@ -504,10 +504,10 @@ void Cali_e_trace::Init(TTree *tree)
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
-      printf("......... done.\n");
+      printf("....................... done.\n");
       
    }else{
-      printf("......... fail.\n");
+      printf("....................... fail.\n");
       for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
@@ -528,10 +528,10 @@ void Cali_e_trace::Init(TTree *tree)
          xCorr[i] = a;  
          i = i + 1;
       }
-      printf("......... done.\n");
+      printf("....................... done.\n");
       
    }else{
-      printf("......... fail.\n");
+      printf("....................... fail.\n");
       for( int i = 0; i < numDet ; i++){
          xCorr[i] = 1.;
       }
@@ -551,10 +551,10 @@ void Cali_e_trace::Init(TTree *tree)
          rdtCorr[i] = a;  //
          i = i + 1;
       }
-      printf("....... done.\n");
+      printf("..................... done.\n");
       
    }else{
-      printf("....... fail.\n");
+      printf("..................... fail.\n");
       for( int i = 0; i < numDet ; i++){
          rdtCorr[i] = 1.;
       }
@@ -586,10 +586,10 @@ void Cali_e_trace::Init(TTree *tree)
             printf("\n%2d, a0: %f, a1: %f .... a7: %f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
-         printf("... done.\n");
+         printf(".... done.\n");
          
       }else{
-         printf("... fail.\n");
+         printf(".... fail.\n");
          for( int i = 0; i < numDet; i++){
             for( int j = 0 ; j < 9; j++){
                cTCorr[i][j] = 0.;
@@ -618,7 +618,7 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
    //========================================= reaction parameters
-   printf("----- loading reaction parameter.");
+   printf("loading reaction parameter.");
    file.open("reaction.dat");
    isReaction = false;
    if( file.is_open() ){
@@ -633,7 +633,7 @@ void Cali_e_trace::Init(TTree *tree)
          if( i == 4 ) massB = atof(x.c_str()); 
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("................. done.\n");
 
       isReaction = true;
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.;
@@ -652,7 +652,7 @@ void Cali_e_trace::Init(TTree *tree)
 
 
    }else{
-      printf("... fail.\n");
+      printf("................. fail.\n");
       isReaction = false;
    }
    file.close();
