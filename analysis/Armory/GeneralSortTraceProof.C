@@ -23,10 +23,10 @@ int traceMethod = 1; //0 = no process; 1 = fit;
 int traceLength = 200;
 float delayChannel = 100.; //initial guess of the time
 
-bool isTACRF = false;
+bool isTACRF = true;
 bool isRecoil = true;
-bool isElum = false;
-bool isEZero = false;
+bool isElum = true;
+bool isEZero = true;
 
 void GeneralSortTraceProof::Begin(TTree * /*tree*/)
 {
@@ -228,6 +228,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
                psd.XNTimestamp[idDet] = event_timestamp[i];
                break;
+            case 3: // Ring
+               psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.RingTimestamp[idDet] = event_timestamp[i];
+               break;
          }
       }
       
@@ -263,7 +267,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       /************************************************************************/
       if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
          Int_t rdtTemp = idDet-101;
-         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M;
+         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
       

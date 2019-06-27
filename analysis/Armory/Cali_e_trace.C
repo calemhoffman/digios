@@ -78,6 +78,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       b_runID->GetEntry(entry,0);  
       run = runID;
    }
+
    b_Energy->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
@@ -103,7 +104,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       b_Trace_RDT_Time->GetEntry(entry,0);
       b_Trace_RDT_RiseTime->GetEntry(entry,0);
    }
-   
+
    //#################################################################### gate
 //   bool rdt_energy = false;
 //   for( int rID = 0; rID < 8; rID ++){
@@ -130,7 +131,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    }
    
    if( coinFlag == false ) return kTRUE;
-   
+
    //#################################################################### processing
    for(int i = 0 ; i < 8 ; i++){
       rdtC[i]   = rdtCorr[i] * rdt[i];
@@ -213,6 +214,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          det = idet;
          
          //========== coincident between array and RDT
+         /*
          if( 0 <= det && det < iDet ){
             if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 1;
             if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 2;
@@ -234,7 +236,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
             if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 0;
             if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 1;
          }
-            
+         */   
          //========== coincident time
          detTime = idet;
          eTime  = eC_t[idet];
