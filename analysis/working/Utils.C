@@ -335,10 +335,11 @@ void eCalVzRow() {
 void excite(void) {
   TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");
   if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
-  cex->Clear();cex->Divide(2,1);
+  cex->Clear();//cex->Divide(2,1);
   gStyle->SetOptStat("neiou");
-  cex->cd(1); hEx->Draw("");
-  cex->cd(2); hexR->Draw("");
+  //cex->cd(1); 
+  hEx->Draw("");
+  //cex->cd(2); hexR->Draw("");
 }
 
 void ExThetaCM(void) {

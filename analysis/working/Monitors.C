@@ -414,6 +414,8 @@ void Monitors::Begin(TTree *tree)
 
    printf("======================================\n");
    
+   gROOT->cd();
+   
    //========================= Generate all of the histograms needed for drawing later on
    heVID    = new TH2F("heVID",    "Raw e vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hringVID = new TH2F("hringVID", "Raw Ring vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
@@ -530,7 +532,7 @@ void Monitors::Begin(TTree *tree)
    htac[2] = new TH1F("htac2","Array-RDT2 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[3] = new TH1F("htac3","Array-RDT3 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
 
-   htacE = new TH1F("htacE","Elum-RDT TAC; DT [clock ticks]; Counts",4,0,4);
+   htacE = new TH1F("htacE","Array-RF TAC; kind of time diff [a.u.]; Counts", 4000, -8000, 8000);
 
    for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
@@ -636,6 +638,9 @@ Bool_t Monitors::Process(Long64_t entry)
        xcal[i] = TMath::QuietNaN();
        eCal[i] = TMath::QuietNaN();
     }
+    
+    /*********** TAC ************************************************/ 
+    htacE->Fill(tac[0]);
     
     /*********** ELUM ************************************************/
     for( int i = 0; i < 16; i++){
@@ -899,10 +904,13 @@ void Monitors::Terminate()
 {
    printf("============ finishing.\n");
 
+   gROOT->cd();
+
    //############################################ User is free to edit this section
    
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
+   
    cCanvas  = new TCanvas("cCanvas",canvasTitle,1250,1300);
    cCanvas->Modified(); cCanvas->Update();
    
@@ -926,23 +934,22 @@ void Monitors::Terminate()
    //treeT->Draw("thetaCM >> c2", "hit == 1 && ExID == 2", "");
    //treeT->Draw("thetaCM >> c3", "hit == 1 && ExID == 3", "");
    
-   cCanvas->cd(1); hrdtID->Draw("colz");
-   
-   //heCalVz->Draw("colz");
+   cCanvas->cd(1);
+   heCalVz->Draw("colz");
    //if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
    //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
 
    cCanvas->cd(2); 
    htdiff->Draw();
    htdiffg->SetLineColor(2);
-   htdiffg->Draw("");
+   htdiffg->Draw("same");
    
    TLatex text;
    text.SetNDC();
    text.SetTextFont(82);
    text.SetTextSize(0.04);
    text.SetTextColor(2);
-   text.DrawLatex(0.15, 0.8, "with coinTime and Recoil");
+   text.DrawLatex(0.15, 0.8, "with Recoil");
 
    cCanvas->cd(3);
    heCalVzGC->Draw("colz");
@@ -969,7 +976,17 @@ void Monitors::Terminate()
    cCanvas->cd(7); hrdt2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
    cCanvas->cd(8); hrdt2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
-   /*********/
+   /************************* Save histograms to root file*/
+   
+   gROOT->cd();
+   TString outFileName = canvasTitle;
+   ((outFileName.ReplaceAll(" - ", "-")).ReplaceAll(" ", "_")).ReplaceAll(":", "");
+   //gROOT->GetList()->SaveAs(outFileName + ".root");
+   
+   cCanvas->SaveAs("Canvas_"+outFileName + ".png");
+   cCheckRDT->SaveAs("CheckRDT_"+outFileName + ".png");
+   
+   /************************************/
    
    StpWatch.Start(kFALSE);
    
