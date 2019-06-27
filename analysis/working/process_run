@@ -297,6 +297,12 @@ if [ $isGeneralSort -ge 1 ]; then
 
 fi;
 
+if [ $isGeneralSort -eq -1 ]; then # force GenralSort
+  echo -e "${RED}######################### GeneralSort.C${NC}"
+  root -l -q -b "process_run.C(${runID}, 0)"
+  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+fi
+
 ########################################
 #################### Monitor
 if [ $isMonitor -eq 1 ] ; then

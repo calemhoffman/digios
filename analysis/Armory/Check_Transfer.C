@@ -11,6 +11,7 @@
 #include <TSpectrum.h>
 #include <TGraph.h>
 #include <TLegend.h>
+#include <TLatex.h>
 #include <TObjArray.h>
 #include <fstream>
 #include <TCutG.h>
@@ -178,6 +179,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 
    cCheck->cd(7);
    cCheck->cd(7)->SetGrid(0,0);
+   cCheck->cd(7)->SetLogy();
    
    TH1F * hThetaCM[nExID];
    double maxCount = 0;
@@ -192,7 +194,8 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    }
 
    for( int i = 0; i < nExID; i++){
-     hThetaCM[i]->GetYaxis()->SetRangeUser(0, maxCount * 1.2);
+     hThetaCM[i]->GetYaxis()->SetRangeUser(1, maxCount * 1.2);
+     //TODO add TLatex
      if( i == 0 ) {
        hThetaCM[i]->Draw();
      }else{
