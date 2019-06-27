@@ -331,20 +331,27 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   //specS->GetYaxis()->SetTitleOffset(0.6);
   
   //=================== find peak and fit
-  printf("============= estimate background and find peak\n");
-  TSpectrum * peak = new TSpectrum(50);
-  nPeaks = peak->Search(hist, 1, "", peakThreshold); 
-  TH1 * h1 = peak->Background(hist, bgEst);
-  h1->Draw("same");
-
+  
   //gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
   cFitAuto->cd(2)->SetGrid();
   cFitAuto->cd(2);
-
-  specS->Add(h1, -1.);
-  specS->Sumw2();
-  specS->Draw();
+  //specS->Sumw2();
+  
+  TSpectrum * peak = new TSpectrum(50);
+  nPeaks = peak->Search(hist, 1, "", peakThreshold); 
+  
+  if( bgEst > 0 ) {
+    printf("============= estimating background...\n");
+    TH1 * h1 = peak->Background(hist, bgEst);
+    h1->Draw("same");
+    printf("============= substracting the linear background...\n");
+    specS->Add(h1, -1.);
+    specS->Sumw2();
+  }
+  
+  specS->Draw("hist");
+  
 
   //========== Fitting 
   printf("============= Fitting.....");
@@ -436,6 +443,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   }
   
   specS->Draw("hist same");
+  
 }
 
 //########################################
@@ -488,6 +496,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
     h1->Draw("same");
     printf("============= substracting the linear background...\n");
     specS->Add(h1, -1.);
+    specS->Sumw2();
   }
   
   specS->Draw("hist");

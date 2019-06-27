@@ -23,16 +23,16 @@ ULong64_t maxNumberEvent = 100000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,    8};
-int     rdtDERange[2] = {  50,  6000};
-int      rdtERange[2] = {  50,  6000};
+int    energyRange[2] = {   0,    15};
+int     rdtDERange[2] = {  50,  2000};
+int      rdtERange[2] = {  50,  4500};
 int      elumRange[2] = { 500, 4000};
 
-double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  50, -1, 12}; // bin [keV], low[MeV], high[MeV]
 
 
 //---Gate
-int timeGate[2] = {-20, 20}; // min, max
+int timeGate[2] = {-20, 20}; // min, max in ch, 1 ch = 10 ns
 TString rdtCutFile = "rdtCuts.root";
 
 //TODO switches for histograms on/off
@@ -59,20 +59,17 @@ TString cutTag;
 Bool_t isCutFileOpen;
 int numCut;
 vector<int> countFromCut;
+
 //======= Other Cuts
-
-TFile *f, *cutfile;
 TCutG *EvsZ_cut;
-Bool_t cutfileOpen;
+Bool_t isEZCutFileOpen;
 
-
-//Int_t n=1; //what is this for?
 
 /***************************************************
  variable and histogram naming rules
  name are case sensitive, so as any C/C++ code
   
- ID is dettector ID
+ ID is detector ID
  
  raw data from gen_tree are e, xf, xn, ring.
  the x from raw data is x
@@ -145,6 +142,13 @@ TH2F* hrdtID;
 TH1F* hrdt[8]; // single recoil
 TH2F* hrdt2D[4];
 TH2F* hrdt2Dg[4];
+TH2F* hrdt2Dg2[4]; // gated from e-z plot
+TH2F* hrdt_etot2D[4];
+TH2F* hrdt_etot2Dg[4];
+TH2F* hrdt_etot2Dg2[4]; // gated from e-z plot
+
+TH2F* hrdtCheck; //check for rdt-4
+TH1F* hrdtCheck2; //check for rdt-4
 
 //======= ELUM
 TH1F* helum[16];
@@ -168,6 +172,7 @@ TH1I *htdiff;
 TH1I *htdiffg;
 TH2I *hID2;
 TH2I *hID2g;
+
 /***************************
  ***************************/
 //==== global variables
@@ -402,17 +407,14 @@ void Monitors::Begin(TTree *tree)
    }
 
    //================  Get other cuts
-   //Ryan comment : the following is not so correct, but do the job
-   /*
-   TFile *cutfile = new TFile("6Li_cuts.root");
-   cutfileOpen = cutfile->IsOpen();
-   if(!cutfileOpen) cout<<"Failed to open cutfile"<<endl;
-   cutfile->ls();
-   EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
-   cutfile->Close();
-   */
+   TFile *ezCutFile = new TFile("ezCuts.root");
+   isEZCutFileOpen = ezCutFile->IsOpen();
+   if(!isEZCutFileOpen) printf("Failed to open E-Z cut file : %s \n", "ezCuts.root");
+   EvsZ_cut=(TCutG*) ezCutFile->FindObjectAny("EvsZ_cut");
 
    printf("======================================\n");
+
+   gROOT->cd();
    
    //========================= Generate all of the histograms needed for drawing later on
    heVID    = new TH2F("heVID",    "Raw e vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
@@ -507,10 +509,24 @@ void Monitors::Begin(TTree *tree)
          int tempID = i / 2;
          hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
          hrdt2Dg[tempID] = new TH2F(Form("hrdt2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
+         hrdt2Dg2[tempID] = new TH2F(Form("hrdt2Dg2%d",tempID), Form("E-Z Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
+      }
+      
+      //dE vs Etot
+      if( i % 2 == 0 ) {
+         int tempID = i / 2;
+         hrdt_etot2D[tempID] = new TH2F(Form("hrdt_etot2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres + DE (channel); DE (channel)", i+1, i), 500,rdtERange[0]+rdtDERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0], rdtDERange[1]);
+         hrdt_etot2Dg[tempID] = new TH2F(Form("hrdt_etot2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres + DE (channel); DE (channel)",i+1, i), 500,rdtERange[0]+rdtDERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0], rdtDERange[1]);
+         hrdt_etot2Dg2[tempID] = new TH2F(Form("hrdt_etot2Dg2%d",tempID), Form("E-Z Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres + DE (channel); DE (channel)",i+1, i), 500,rdtERange[0]+rdtDERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0], rdtDERange[1]);
       }
       
    }
    hrdtID = new TH2F("hrdtID", "RDT vs ID; ID; energy [ch]", 8, 0, 8, 500, TMath::Min(rdtERange[0], rdtDERange[0]), TMath::Max(rdtERange[1], rdtDERange[1])); 
+   
+   
+   hrdtCheck = new TH2F("hrdtCheck", Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres + DE (channel); DE (channel)",7, 6), 500,3500, 5000 ,500,1000, 2000);
+   hrdtCheck2 = new TH1F("hrdtCheck2", Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres + DE (channel); count ",7,6), 500,3500, 5000);
+      
    
    //===================== multiplicity
    hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
@@ -530,7 +546,7 @@ void Monitors::Begin(TTree *tree)
    htac[2] = new TH1F("htac2","Array-RDT2 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[3] = new TH1F("htac3","Array-RDT3 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
 
-   htacE = new TH1F("htacE","Elum-RDT TAC; DT [clock ticks]; Counts",4,0,4);
+   htacE = new TH1F("htacE","Arrat-RF TAC; kind of time Diff [clock ticks]; Counts",400,-8000,8000);
 
    for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
@@ -559,7 +575,7 @@ void Monitors::Begin(TTree *tree)
    h0de = new TH1F("h0de","EZERO DE ; DE [ch]",500,50,4050);//
    h0e = new TH1F("h0e","EZERO - E; E [ch]",500,50,4050);//
    h0tac = new TH1F("h0tac","EZERO RF; RF [ch]",500,50,4050);//
-	
+
    printf("========================================\n");
    StpWatch.Start();
 }
@@ -636,6 +652,9 @@ Bool_t Monitors::Process(Long64_t entry)
        xcal[i] = TMath::QuietNaN();
        eCal[i] = TMath::QuietNaN();
     }
+    
+    /*********** TAC ************************************************/ 
+    htacE->Fill(tac[0]);
     
     /*********** ELUM ************************************************/
     for( int i = 0; i < 16; i++){
@@ -737,7 +756,7 @@ Bool_t Monitors::Process(Long64_t entry)
       if( isCutFileOpen ){
         for(int i = 0 ; i < 4 ; i++ ){
           cutG = (TCutG *)cutList->At(i) ;
-          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+          if(cutG->IsInside(rdt[2*i]+rdt[2*i+1],rdt[2*i+1])) {
             rdtgate= true;
             break; // only one is enough
           }
@@ -762,7 +781,10 @@ Bool_t Monitors::Process(Long64_t entry)
           hID2->Fill(i, j); 
 	 
           if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
-            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
+            if(j % 2 == 0 ){
+                hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
+                hrdt_etot2Dg[j/2]->Fill(rdt[j]+rdt[j+1],rdt[j+1]);
+             }
             hID2g->Fill(i, j); 
             //if( rdtgate) hID2g->Fill(i, j); 
             coinFlag = true;
@@ -774,7 +796,7 @@ Bool_t Monitors::Process(Long64_t entry)
         heCalVzGC->Fill( z[i] , eCal[i] );
         multiEZ ++;
         isGoodEventFlag = true;
-      }	 
+      }
       
     }//end of array loop
     
@@ -791,9 +813,26 @@ Bool_t Monitors::Process(Long64_t entry)
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
       
+      if( i == 6 ) {
+         hrdtCheck->Fill( rdt[6]+rdt[7], rdt[7]);
+         hrdtCheck2->Fill( rdt[6]+rdt[7]);
+      }
+      
       if( i % 2 == 0  ){
          recoilMulti++; // when both dE and E are hit
          hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]);
+         hrdt_etot2D[i/2]->Fill(rdt[i]+rdt[i+1],rdt[i+1]);
+
+         //=============== E-Z gate, apply on Recoil
+         if ( isEZCutFileOpen ) {
+            for( int p = 0 ; p < numDet; p++ ) {
+               if( EvsZ_cut->IsInside( z[p], eCal[p] ) ){
+                  hrdt2Dg2[i/2]->Fill(rdt[i],rdt[i+1]);
+                  hrdt_etot2Dg2[i/2]->Fill(rdt[i]+rdt[i+1],rdt[i+1]);
+               }
+            }
+         }
+
       }
       
    }
@@ -901,6 +940,8 @@ void Monitors::Terminate()
 
    //############################################ User is free to edit this section
    
+   gROOT->cd();
+   
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
    cCanvas  = new TCanvas("cCanvas",canvasTitle,1250,1300);
@@ -919,40 +960,40 @@ void Monitors::Terminate()
      gList  = (TObjArray *) transfer->FindObjectAny("gList");
      fxList = (TObjArray *) transfer->FindObjectAny("fxList");
    }
-
-   //cCanvas->cd(1);
-   //treeT->Draw("thetaCM >> c0", "hit == 1 && ExID == 0", "");
-   //treeT->Draw("thetaCM >> c1", "hit == 1 && ExID == 1", "");
-   //treeT->Draw("thetaCM >> c2", "hit == 1 && ExID == 2", "");
-   //treeT->Draw("thetaCM >> c3", "hit == 1 && ExID == 3", "");
    
-   cCanvas->cd(1); hrdtID->Draw("colz");
-   
-   //heCalVz->Draw("colz");
-   //if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   cCanvas->cd(1); 
+   heCalVz->Draw("colz");
+   if( isEZCutFileOpen ) EvsZ_cut->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
    //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
 
    cCanvas->cd(2); 
    htdiff->Draw();
    htdiffg->SetLineColor(2);
-   htdiffg->Draw("");
+   htdiffg->Draw("same");
    
    TLatex text;
    text.SetNDC();
    text.SetTextFont(82);
    text.SetTextSize(0.04);
    text.SetTextColor(2);
-   text.DrawLatex(0.15, 0.8, "with coinTime and Recoil");
+   text.DrawLatex(0.15, 0.8, "with Recoil");
 
    cCanvas->cd(3);
    heCalVzGC->Draw("colz");
+   
+   text.DrawLatex(0.15, 0.8, "with Recoil");
+   text.DrawLatex(0.15, 0.7, Form("%d ch < coinTime < %d ch",timeGate[0], timeGate[1]));
    
    //the constant thetaCM line
    if( transfer->IsOpen() ) gList->At(0)->Draw("same");
    
    //the e-z line for excitation 
    if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
-   //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(1)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(2)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(3)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(4)->Draw("same");
    
    
    //cCanvas->cd(4); hmult->Draw("colz");
@@ -964,15 +1005,49 @@ void Monitors::Terminate()
    //hrdt2Dg[2]->SetMarkerStyle(20);
    //hrdt2Dg[3]->SetMarkerStyle(20);
    
-   cCanvas->cd(5); hrdt2Dg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
-   cCanvas->cd(6); hrdt2Dg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
-   cCanvas->cd(7); hrdt2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
-   cCanvas->cd(8); hrdt2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   //cCanvas->cd(5); hrdt2Dg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   //cCanvas->cd(6); hrdt2Dg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   //cCanvas->cd(7); hrdt2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   //cCanvas->cd(8); hrdt2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
-   /*********/
+   cCanvas->cd(5); hrdt_etot2Dg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   cCanvas->cd(6); hrdt_etot2Dg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   cCanvas->cd(7); hrdt_etot2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   cCanvas->cd(8); hrdt_etot2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
+   
+   TCanvas * cCheckRDT = new TCanvas("cCheckRDT", Form("check RDT | %s", canvasTitle.Data()), 1300, 0 , 800, 600);
+   cCheckRDT->Divide(1,2);
+   cCheckRDT->cd(1);hrdtCheck->Draw("colz");
+
+   
+   TFile *fRDTcut1 = new TFile("rdt30Si.root");
+   TCutG * rdtCut1 = (TCutG*) fRDTcut1->FindObjectAny("30Si");
+   rdtCut1->Draw("same");
+   
+   TFile *fRDTcut2 = new TFile("rdt31Si.root");
+   TCutG * rdtCut2 = (TCutG*) fRDTcut2->FindObjectAny("31Si");
+   rdtCut2->Draw("same");
+   
+   
+   cCheckRDT->cd(2);
+   cCheckRDT->cd(2)->SetLogy(1);
+   hrdtCheck2->Draw("");
+   
+   
+   /************************* Save histograms to root file*/
+   
+   gROOT->cd();
+   TString outFileName = canvasTitle;
+   (outFileName.ReplaceAll(" ", "_")).ReplaceAll(":", "");
+   gROOT->GetList()->SaveAs(outFileName + ".root");
+   
+   
+   cCanvas->SaveAs("Canvas_"+outFileName + ".png");
+   cCheckRDT->SaveAs("CheckRDT_"+outFileName + ".png");
+   
+   /**************************/
    StpWatch.Start(kFALSE);
-   
    gROOT->ProcessLine(".L Utils.C");
    //gROOT->ProcessLine(Form("FindBesCanvasDivision(%d)", numDet));
    printf("=============== loaded Utils.C\n");

@@ -23,12 +23,12 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
 
 void script_Ex(){
    
-   double ExRange[3] = {350, -1, 6};
+   double ExRange[3] = {350, -1, 8};
 	double eRange[3]  = {400, 0, 10};
 	double thetaCMRange[3]  = {40, 0, 40};
 
    
-   TFile * file0 = new TFile("A_gen_run60_99.root");
+   TFile * file0 = new TFile("A_gen_run025.root");
    TFile * file1 = new TFile("transfer.root");
    
    TFile * fileCut = new TFile("rdtCuts.root");

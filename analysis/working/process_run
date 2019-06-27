@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
+if [ $1 == "-help"  ]; then
   echo "$./process_run [RunNum] [Merge] [EventBld] [GeneralSort] [Monitor]"
   echo "     RunNum = run number"
   echo "      Merge = 1/0/-1     || -1 is force merge"  
@@ -41,8 +41,12 @@ SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
 RUN=$1
 
-if [ ${RUN} = "last" ]; then
+if [ ${RUN} = "latest" ]; then
     RUN=${LastRunNum}
+fi
+
+if [ $# == 0 ]; then
+  RUN=${LastRunNum}
 fi
 
 #make RUN to be 3 digit
@@ -271,13 +275,13 @@ if [ $isGeneralSort -ge 1 ]; then
           if [ $isGeneralSort -eq 1 ]; then
               echo -e "${RED}######################### GeneralSort.C${NC}"
               root -l -q -b "process_run.C(${runID}, 0)"
-              root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
           fi
 
           if [ $isGeneralSort -eq 2 ]; then
               echo -e "${RED}######################### GeneralSortTrace.C${NC}"
               root -l -q -b "process_run.C(${runID}, 1)"
-              root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
           fi
 
           if [ $isGeneralSort -gt 2 ]; then
@@ -300,7 +304,7 @@ fi;
 if [ $isGeneralSort -eq -1 ]; then # force GenralSort
   echo -e "${RED}######################### GeneralSort.C${NC}"
   root -l -q -b "process_run.C(${runID}, 0)"
-  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+  #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 ########################################

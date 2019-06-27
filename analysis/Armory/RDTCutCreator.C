@@ -16,6 +16,13 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
    chain->Add(dataList);
    //chain->Add("data/gen_run70_74.root");
    //chain->Add("data/gen_run75_87.root");
+   //chain->Add("../root_data/gen_run12[7-9].root");
+    //chain->Add("../root_data/gen_run13[0-9].root");
+    //chain->Add("../root_data/gen_run14[0-7,9].root");
+    //chain->Add("../root_data/gen_run15[1-9].root");
+    //chain->Add("../root_data/gen_run16[0-9].root");
+    //chain->Add("../root_data/gen_run17[0-9].root");
+    //chain->Add("../root_data/gen_run18[0-4].root");
    
    chain->GetListOfFiles()->Print();
    
@@ -39,12 +46,12 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
       //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-      varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
+      varX.Form("rdt[%d]+rdt[%d]",2*i,2*i+1); varY.Form("rdt[%d]",2*i+1);
 
       expression[i].Form("%s:%s>>h(500, 0, %d, 500, 0, %d)", 
             varY.Data(),
             varX.Data(),
-            eRange, deRange);
+            eRange+deRange, deRange);
 
 
       chain->Draw(expression[i], "", "col");
