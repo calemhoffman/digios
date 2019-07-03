@@ -331,13 +331,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   //specS->GetYaxis()->SetTitleOffset(0.6);
   
   //=================== find peak and fit
-  
-  //gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
-  cFitAuto->cd(2)->SetGrid();
-  cFitAuto->cd(2);
-  //specS->Sumw2();
-  
   TSpectrum * peak = new TSpectrum(50);
   nPeaks = peak->Search(hist, 1, "", peakThreshold); 
   
@@ -350,6 +344,8 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
     specS->Sumw2();
   }
   
+  cFitAuto->cd(2)->SetGrid();
+  cFitAuto->cd(2);
   specS->Draw("hist");
   
 

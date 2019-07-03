@@ -29,7 +29,7 @@ int      rdtERange[2] = {  50,  6000};
 int      elumRange[2] = { 500, 4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
-
+int  coinTimeRange[2] = { -80, 40};
 
 //---Gate
 int timeGate[2] = {-20, 20}; // min, max
@@ -65,9 +65,6 @@ TFile *f, *cutfile;
 TCutG *EvsZ_cut;
 Bool_t cutfileOpen;
 
-
-//Int_t n=1; //what is this for?
-
 /***************************************************
  variable and histogram naming rules
  name are case sensitive, so as any C/C++ code
@@ -92,8 +89,7 @@ Bool_t cutfileOpen;
  TH2D is always using "V" to seperate 2 variables, like eVx
  
 histogram with TCutG, add suffix "GC" for Graphical-Cut.
-  
- 
+   
 ***************************************************/
 //======== raw data
 //TH1F* hStat[numDet];
@@ -130,6 +126,7 @@ TH2F* hecalVzRow[numRow];
 
 //====== Ex data
 TH1F* hEx;
+TH1F* hExi[numDet];
 TH1F* hexR;
 
 TH2F* hExThetaCM;
@@ -523,9 +520,9 @@ void Monitors::Begin(TTree *tree)
    hID2g   = new TH2I("hID2g","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
 
    //===================== coincident time 
-   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", 200,-100,100);   
-   htdiffg = new TH1I("htdiffg",Form("Coincident time (array, recoil) w/ %d < coinTime gate < %d; time [ch = 10ns]; count", timeGate[0], timeGate[1]), 200,-100,100);
-
+   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
+   htdiffg = new TH1I("htdiffg","Coincident time (array, recoil) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[
+ 
    //===================== TAC
    htac[0] = new TH1F("htac0","Array-RDT0 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
    htac[1] = new TH1F("htac1","Array-RDT1 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
@@ -541,9 +538,11 @@ void Monitors::Begin(TTree *tree)
    //===================== energy spectrum
    hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; E [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    hexR = new TH1F("hexR","excitation spectrum with Recoil",(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   for(int i = 0 ; i < numDet; i++){
+      hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1
+   }
 
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-
 
    //===================== ELUM
    for( int i = 0; i < 16; i++){
@@ -878,18 +877,9 @@ Bool_t Monitors::Process(Long64_t entry)
      }
      //ungated excitation energy
      hEx->Fill(Ex);
+     hExi[detID]->Fill(Ex);
      hExThetaCM->Fill(thetaCM, Ex);
-	
-     // recoil CUTS
-     if( isCutFileOpen){
-		 for( int k = 0 ; k < numCut; k++ ){
-         cutG = (TCutG *)cutList->At(k) ;
-         if( cutG->IsInside(rdt[k], rdt[k+1]) ) { 
-           hexR->Fill(Ex);
-           break; // ensure fill only once
-         }
-		 }
-     }
+
    }
   
    return kTRUE;
@@ -952,7 +942,11 @@ void Monitors::Terminate()
    text.DrawLatex(0.15, 0.8, "with Recoil");
 
    cCanvas->cd(3);
-   heCalVzGC->Draw("colz");
+   heCalVzGC->SetMarkerStyle(20);
+   heCalVzGC->SetMarkerSize(0.3);
+   heCalVzGC->Draw("");
+   
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1]));
    
    //the constant thetaCM line
    if( transfer->IsOpen() ) gList->At(0)->Draw("same");
@@ -984,7 +978,6 @@ void Monitors::Terminate()
    //gROOT->GetList()->SaveAs(outFileName + ".root");
    
    cCanvas->SaveAs("Canvas_"+outFileName + ".png");
-   cCheckRDT->SaveAs("CheckRDT_"+outFileName + ".png");
    
    /************************************/
    
