@@ -8,6 +8,8 @@ import datetime
 
 print("======== DataBase for HELIOS ========")
 
+waitSec = 10
+
 loop = 1
 tOld = 0
 
@@ -50,7 +52,6 @@ while loop == 1:
                 dt = datetime.datetime.now()
                 gf.write("  stop : %s\n" % dt)
                 print("================ stop ACQ")
-                waitSec = 5
                 print("wait for %d sec" % waitSec)
                 for i in range (1, waitSec):
                     time.sleep(1)
