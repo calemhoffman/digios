@@ -32,6 +32,7 @@ void listDraws(void) {
   printf("     eCalVz() - Energy vs. Z\n");
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
+  printf("    exciteI() - Excitation Energy for Individual detector\n");
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
@@ -306,6 +307,15 @@ void recoil(void) {
     crdtS->cd(i+1);
     hrdt[i]->Draw("");
   }
+  
+  TCanvas *crdtsum = (TCanvas *) gROOT->FindObjectAny("crdtsum");
+  if( crdtsum == NULL ) crdtsum = new TCanvas("crdtsum",Form("sum RDT | %s", canvasTitle.Data()),1500,0, 800, 800);
+  crdtsum->Clear(); crdtsum->Divide(2,2);
+  for( int i = 0; i < 4; i ++){
+    crdtsum->cd(i+1);
+    hrdtsum[i]->Draw("");
+  }
+  
 }
 
 void eCalVz(void) {
@@ -340,6 +350,26 @@ void excite(void) {
   //cex->cd(1); 
   hEx->Draw("");
   //cex->cd(2); hexR->Draw("");
+  
+  TCanvas *cexdt =  (TCanvas *) gROOT->FindObjectAny("cexdt");
+  if( cexdt == NULL ) cexdt = new TCanvas("cexdt",Form("EX dt : %s", canvasTitle.Data()),1000, 0 , 1000,650);
+  cexdt->Clear(); cexdt->Divide(3,2);
+  for(int i=0;i<6;i++){
+    cexdt->cd(i+1);
+    hExdT[i]->Draw("");
+  }
+}
+
+
+void exciteI(void) {
+  TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
+  if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),1600,1000);
+  cexI->Clear();cexI->Divide(5,6);
+  gStyle->SetOptStat("neiou");
+  for( int i = 0; i < numDet; i++){
+    cexI->cd(i+1); 
+    hExi[i]->Draw("");
+  }
 }
 
 void ExThetaCM(void) {
