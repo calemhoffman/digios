@@ -5,9 +5,19 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
 
   if( RUNNUM == -1){
 
-    chain->Add("../root_data/gen_run039.root"); //31Si
-    chain->Add("../root_data/gen_run040.root"); //31Si
+    //chain->Add("../root_data/gen_run00[6-8].root"); //(d,p)
     
+    //---------- (12C,a)
+    //chain->Add("../root_data/gen_run009.root");
+    //chain->Add("../root_data/gen_run01[0-6].root");
+    //chain->Add("../root_data/gen_run018.root");
+    //chain->Add("../root_data/gen_run02[0-9].root");
+    //chain->Add("../root_data/gen_run03[0-9].root");
+    
+    //no recoils
+    chain->Add("../root_data/gen_run04[0-9].root");
+    chain->Add("../root_data/gen_run05[0-9].root");
+    chain->Add("../root_data/gen_run06[0-9].root");
   }else{
     
     TString fileName;
