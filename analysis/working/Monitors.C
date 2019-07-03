@@ -22,18 +22,39 @@ const int numRow = 6;
 ULong64_t maxNumberEvent = 100000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {-500, 8000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,    8};
-int     rdtDERange[2] = {  50,  6000};
-int      rdtERange[2] = {  50,  6000};
+int rawEnergyRange[2] = {-500, 20000}; // share with e, ring, xf, xn
+int    energyRange[2] = {   0,  25};
+int     rdtDERange[2] = {  -2000,  2000};
+int      rdtERange[2] = {  -2000,  2000};
 int      elumRange[2] = { 500, 4000};
 
-double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
-
+double     exRange[3] = {  20, -1, 12}; // bin [keV], low[MeV], high[MeV]
+int  coinTimeRange[2] = { -80, 40};
 
 //---Gate
-int timeGate[2] = {-20, 20}; // min, max
+int timeGate[2] = {-80, 40}; // min, max
 TString rdtCutFile = "rdtCuts.root";
+
+
+//---- using (d,p) data
+double ExOffset0[30] = {
+-0.0847, -0.0633,  0.0   , -0.0848,  0.0096,   
+ 0.0   ,  0.0518, -0.0477,  1.0000, -0.0389,   
+ 0.0   , -0.0529, -0.0640, -0.1207,  0.0485,
+ 0.0   ,  0.4184,  0.0   ,  0.0   ,  0.0,   
+ 0.0   ,  0.0   ,  0.0   ,  0.0   ,  0.0,   
+ 0.0   , -0.3980,  0.3220, -0.5407, -0.4440
+};
+
+double ExOffset1[30] = {
+ 1.0284,  1.0196,  1.0   ,  1.0231,  0.9989,   
+ 1.0   ,  0.9994,  1.0157,  1.0000,  1.0058,   
+ 1.0   ,  1.0512,  1.0231,  1.0542,  0.9868,  
+ 1.0   ,  0.9410, -1000.0, -1.0   , -1000.0,   
+-1.0   , -1.0   , -1.0   , -1.0   , -1.0   ,   
+-1.0   ,  1.0829,  0.9166,  1.0517,  1.0829
+};
+
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -130,6 +151,7 @@ TH2F* hecalVzRow[numRow];
 
 //====== Ex data
 TH1F* hEx;
+TH1F* hExi[numDet]; 
 TH1F* hexR;
 
 TH2F* hExThetaCM;
@@ -168,6 +190,28 @@ TH1I *htdiff;
 TH1I *htdiffg;
 TH2I *hID2;
 TH2I *hID2g;
+
+//======= Aux Histogram
+TH2F * hAux;
+TH2F * hAux2;
+TH2F * hAux3;
+TH2F * hAux4[4];
+TH2F * hRecE_Ex;
+TH2F * hTAC_dt;
+
+TH2F * hAux_1;
+TH2F * hAux_3;
+TH2F * hAux_4;
+
+TH1F * hrdtsum[4];
+TH2F * hrtac_detsel[4];
+TH2F * hrdt_dt_detsel[4];
+
+TH1F * hExdT[6];
+
+TH2F * hSiE_dT;
+TH2F * hSiE_dT_recsel[4];
+
 /***************************
  ***************************/
 //==== global variables
@@ -424,6 +468,7 @@ void Monitors::Begin(TTree *tree)
 
    for(Int_t j=0;j<4;j++){
      hrtac[j]=new TH2F(Form("hrtac%d",j),Form("Array-Recoil tac for recoil %d",j),numDet,0,numDet,500,-500,500);
+     hrdtsum[j] = new TH1F(Form("RecoilSum_%i",j),Form("Recoil detector E+dE %i",j),500,rawEnergyRange[0], rawEnergyRange[1]);
    }
 
    for (Int_t i=0;i<numDet;i++) {//array loop
@@ -523,8 +568,8 @@ void Monitors::Begin(TTree *tree)
    hID2g   = new TH2I("hID2g","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
 
    //===================== coincident time 
-   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", 200,-100,100);   
-   htdiffg = new TH1I("htdiffg",Form("Coincident time (array, recoil) w/ %d < coinTime gate < %d; time [ch = 10ns]; count", timeGate[0], timeGate[1]), 200,-100,100);
+   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
+   htdiffg = new TH1I("htdiffg","Coincident time (array, recoil) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
 
    //===================== TAC
    htac[0] = new TH1F("htac0","Array-RDT0 TAC; DT [clock ticks]; Counts",2000,-1000,1000);
@@ -541,6 +586,10 @@ void Monitors::Begin(TTree *tree)
    //===================== energy spectrum
    hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; E [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    hexR = new TH1F("hexR","excitation spectrum with Recoil",(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+
+   for(int i = 0 ; i < numDet; i++){
+      hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   }
 
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
 
@@ -561,7 +610,27 @@ void Monitors::Begin(TTree *tree)
    h0de = new TH1F("h0de","EZERO DE ; DE [ch]",500,50,4050);//
    h0e = new TH1F("h0e","EZERO - E; E [ch]",500,50,4050);//
    h0tac = new TH1F("h0tac","EZERO RF; RF [ch]",500,50,4050);//
-	
+   
+   //===================== Aux hisotgram
+   hAux = new TH2F("hAux", "coinTime vs recoi-5", 500, 0, 3000, coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   hAux2 = new TH2F("hAux2", "coinTime vs Ex", (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2], coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   hAux3 = new TH2F("hAux3", "coinTime vs good recoilE",500,0,3000,coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   hRecE_Ex = new TH2F("hRecE_Ex","recE vs Ex", (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2], 500,rdtERange[0],rdtERange[1]);
+   hTAC_dt = new TH2F("hTAC_dt","TAC vs dT",2000,-20,20,coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   for (Int_t i=0;i<6;i++) {
+      hExdT[i] = new TH1F(Form("hExDt_%i",i+1),Form("Excitation energy cyclotron time gate %i",i),540,-1,12);
+   }
+   for(int i=0;i<4;i++){
+      hAux4[i] = new TH2F(Form("hAux4_%i",i),Form("coinTime vs Ex %i",i+1),(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2], coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+      hrtac_detsel[i] = new TH2F(Form("hrtac_detsel_%i",i),Form("Recoil TAC selected on Si %i",i),numDet,0,numDet,500,-500,500);
+      hrdt_dt_detsel[i] = new TH2F(Form("hrdt_dt_detsel_%i",i),Form("Recoil E, dT, selected on Si %i",i),500, 0, 3000, coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+      hSiE_dT_recsel[i] = new TH2F(Form("hSiE_dT_%i",i),Form("hSiE_dT_%i",i),1600, 0, energyRange[1],200,-100,100);
+   }
+   hAux_1 = new TH2F("hAux_1", "coinTime vs recoi-1", 500, 0, 3000, coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   hAux_3 = new TH2F("hAux_3", "coinTime vs recoi-3", 500, 0, 3000, coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   hAux_4 = new TH2F("hAux_4", "coinTime vs recoi-4", 500, 0, 3000, coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+
+   hSiE_dT = new TH2F("hSiE_dT","hSiE_dT",1600, 0, energyRange[1],200,-100,100);
    printf("========================================\n");
    StpWatch.Start();
 }
@@ -647,6 +716,8 @@ Bool_t Monitors::Process(Long64_t entry)
        helum[i]->Fill(elum[i]);
        helumID->Fill(i, elum[i]);
     }
+
+    double tdiff_corr[4] = {5.5,-3.5,4.5,5.5};
 
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
@@ -748,10 +819,17 @@ Bool_t Monitors::Process(Long64_t entry)
           }
         }
       }else{
+        
+        //------------------------ custom for H067
+        //if( rdt[1] > 400 || rdt[5] < 2000 || rdt[7] < 2000 ) {
+        //   rdtgate = true ;
+        //}else{
+        //   rdtgate = false;
+        //}
         rdtgate = true;
       }
       
-      
+      //rdtgate = false;
       //================ coincident with Recoil when z is calculated.
       if( !TMath::IsNaN(z[i]) ) { 
         for( int j = 0; j < 8 ; j++){
@@ -760,23 +838,61 @@ Bool_t Monitors::Process(Long64_t entry)
           int tdiff = rdt_t[j] - e_t[i];
 	 
           if(j==1||j==3||j==5||j==7) hrtac[j/2]->Fill(i,tdiff);
-        
+         
+          if(j==1 && rdt[1] > 400 && (i > 4 && i < 10)){
+            hrtac_detsel[j/2]->Fill(i,tdiff);
+            hrdt_dt_detsel[j/2]->Fill(rdt[j],tdiff);
+           //rdtgate = true ;
+          }
+          if(j==3 && (i > 9 && i < 15)){
+            hrtac_detsel[j/2]->Fill(i,tdiff);
+            hrdt_dt_detsel[j/2]->Fill(rdt[j],tdiff);
+          }
+          if(j==5 && rdt[5] < 2000 && (i > 24 && i < 30)){
+            hrtac_detsel[j/2]->Fill(i,tdiff);
+            hrdt_dt_detsel[j/2]->Fill(rdt[j],tdiff);
+           //rdtgate = true ;
+          }
+          if(j==7 && rdt[7] < 2000 && (i > 14 && i < 20)){
+            hrtac_detsel[j/2]->Fill(i,tdiff);
+            hrdt_dt_detsel[j/2]->Fill(rdt[j],tdiff);
+           //rdtgate = true ;
+          }
+          
           htdiff->Fill(tdiff);
+          if(rdt[0] > 200){
+            hAux_1->Fill(rdt[0] + rdt[1], tdiff);
+          }else{
+            hAux_1->Fill(rdt[1], tdiff);
+          }
+          hAux_3->Fill(rdt[5], tdiff);
+          hAux_4->Fill(rdt[7], tdiff);
+          
           if(rdtgate && eCal[i]>0) htdiffg->Fill(tdiff);
 
           hID2->Fill(i, j); 
 	 
-          if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
+          //if( timeGate[0] < tdiff && tdiff < timeGate[1] ) coinFlag = true;
+          
+          
+          if( (tdiff + tdiff_corr[j/2]) > -80 && (tdiff + tdiff_corr[j/2]) < 20 ){
             if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
             hID2g->Fill(i, j); 
             //if( rdtgate) hID2g->Fill(i, j); 
             coinFlag = true;
+          }
+          
+          
+          if(j==1||j==3||j==5||j==7){
+            hSiE_dT->Fill(eCal[i],tdiff + tdiff_corr[j/2]);
+            hSiE_dT_recsel[j/2]->Fill(eCal[i],tdiff + tdiff_corr[j/2]);
           }
         }
       }
 
       if( coinFlag && rdtgate ) {
         heCalVzGC->Fill( z[i] , eCal[i] );
+        
         multiEZ ++;
         isGoodEventFlag = true;
       }	 
@@ -795,12 +911,16 @@ Bool_t Monitors::Process(Long64_t entry)
    for( int i = 0; i < 8 ; i++){
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
-      
       if( i % 2 == 0  ){
          recoilMulti++; // when both dE and E are hit
          hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]);
       }
-      
+   }   
+   for( int i = 0; i < 4 ; i++){
+      if(rdt[2*i] > 0)
+         hrdtsum[i]->Fill(rdt[2*i] + rdt[2*i+1]);
+      else
+         hrdtsum[i]->Fill(rdt[2*i+1]);
    }
    
    /******************* Multi-hit *************************************/
@@ -822,7 +942,6 @@ Bool_t Monitors::Process(Long64_t entry)
 
    /*********** Ex and thetaCM ************************************************/ 
    
-   if( !isGoodEventFlag ) return kTRUE;
    
    for(Int_t detID = 0; detID < numDet ; detID++){
      	
@@ -876,20 +995,35 @@ Bool_t Monitors::Process(Long64_t entry)
        Ex = TMath::QuietNaN();
        thetaCM = TMath::QuietNaN();
      }
+     
+     Ex = ExOffset1[detID] * Ex + ExOffset0[detID];
+     
      //ungated excitation energy
      hEx->Fill(Ex);
+     if( !isGoodEventFlag ) return kTRUE;
+     hExi[detID]->Fill(Ex);
      hExThetaCM->Fill(thetaCM, Ex);
-	
-     // recoil CUTS
-     if( isCutFileOpen){
-		 for( int k = 0 ; k < numCut; k++ ){
-         cutG = (TCutG *)cutList->At(k) ;
-         if( cutG->IsInside(rdt[k], rdt[k+1]) ) { 
-           hexR->Fill(Ex);
-           break; // ensure fill only once
-         }
-		 }
+     
+     for( int j = 0; j < 8 ; j++){
+       if( TMath::IsNaN(rdt[j]) ) continue; 	 
+       int tdiff = rdt_t[j] - e_t[detID];
+       hAux2->Fill(Ex,  tdiff + tdiff_corr[j/2]);
+       hTAC_dt->Fill(tac[2],tdiff);
+       if( j==1 || j==3 || j==5 || j==7)
+         hAux4[j/2]->Fill(Ex, tdiff + tdiff_corr[j/2]);
+       for(int i = 0;i < 6; i++){
+         if((-tdiff) > ((i+1) * 5.4 - 2.7) && (-tdiff) < ((i+1) * 5.4 + 2.7))
+            hExdT[i]->Fill(Ex);
+       }
+       hAux3->Fill(rdt[j],tdiff);
      }
+     if(rdt[1] > 400)
+       hRecE_Ex->Fill(Ex, rdt[1] + rdt[0]);
+     if(rdt[5] > 400)
+       hRecE_Ex->Fill(Ex, rdt[5]);
+     if(rdt[7] > 400)
+       hRecE_Ex->Fill(Ex, rdt[7]);
+       
    }
   
    return kTRUE;
@@ -936,6 +1070,13 @@ void Monitors::Terminate()
    
    cCanvas->cd(1);
    heCalVz->Draw("colz");
+   //the constant thetaCM line
+   if( transfer->IsOpen() ) gList->At(0)->Draw("same");
+   
+   //the e-z line for excitation 
+   if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(1)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(2)->Draw("same");
    //if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
    //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
 
@@ -952,13 +1093,19 @@ void Monitors::Terminate()
    text.DrawLatex(0.15, 0.8, "with Recoil");
 
    cCanvas->cd(3);
-   heCalVzGC->Draw("colz");
+   heCalVzGC->SetMarkerStyle(20);
+   heCalVzGC->SetMarkerSize(0.3);
+   heCalVzGC->Draw("");
+   
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1]));
    
    //the constant thetaCM line
    if( transfer->IsOpen() ) gList->At(0)->Draw("same");
    
    //the e-z line for excitation 
    if( transfer->IsOpen() ) fxList->At(0)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(1)->Draw("same");
+   if( transfer->IsOpen() ) fxList->At(2)->Draw("same");
    //if( transfer->IsOpen() ) fxList->At(5)->Draw("same");
    
    
@@ -971,20 +1118,31 @@ void Monitors::Terminate()
    //hrdt2Dg[2]->SetMarkerStyle(20);
    //hrdt2Dg[3]->SetMarkerStyle(20);
    
-   cCanvas->cd(5); hrdt2Dg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
-   cCanvas->cd(6); hrdt2Dg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
-   cCanvas->cd(7); hrdt2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
-   cCanvas->cd(8); hrdt2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   //cCanvas->cd(5); hrdt2Dg[0]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   //cCanvas->cd(6); hrdt2Dg[1]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   //cCanvas->cd(7); hrdt2Dg[2]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   //cCanvas->cd(8); hrdt2Dg[3]->Draw("colz"); if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   
+   cCanvas->cd(5) ; hAux->Draw("colz");
+   cCanvas->cd(6) ; 
+   hAux3->SetMarkerStyle(20);
+   hAux3->SetMarkerSize(0.2); hAux3->Draw("colz");
+   cCanvas->cd(7) ; 
+   //hAux2->SetMarkerStyle(20);
+   //hAux2->SetMarkerSize(0.3);
+   hAux2->Draw("colz");
+   cCanvas->cd(8) ;
+   hRecE_Ex->SetMarkerStyle(20); hRecE_Ex->SetMarkerSize(0.2);
+   hRecE_Ex->Draw("");
    
    /************************* Save histograms to root file*/
    
    gROOT->cd();
    TString outFileName = canvasTitle;
-   ((outFileName.ReplaceAll(" - ", "-")).ReplaceAll(" ", "_")).ReplaceAll(":", "");
-   //gROOT->GetList()->SaveAs(outFileName + ".root");
+   outFileName.ReplaceAll(" - ", "-").ReplaceAll(" ", "_").ReplaceAll(",", "").ReplaceAll(":", "");
+   gROOT->GetList()->SaveAs(outFileName + ".root");
    
    cCanvas->SaveAs("Canvas_"+outFileName + ".png");
-   cCheckRDT->SaveAs("CheckRDT_"+outFileName + ".png");
    
    /************************************/
    
