@@ -87,6 +87,8 @@ public :
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
+   void Draw2DHist(TH2F * hist);
+
    ClassDef(Monitors,0);
 };
 
