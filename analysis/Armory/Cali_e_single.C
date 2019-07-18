@@ -22,7 +22,8 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
   }
   
 /**///======================================================== initial input
-   
+
+   int nBin = 200;
 
   //TString gate; gate.Form("!TMath::IsNaN(e[%d])", detID);
    TString gate; gate.Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", detID, detID);
@@ -65,7 +66,7 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
    printf("############## e correction \n");
    TString name;
    name.Form("q%d", detID);
-   TH1F * q = new TH1F(name, name, 300, minEnergyRange, maxEnergyRange);
+   TH1F * q = new TH1F(name, name, nBin, minEnergyRange, maxEnergyRange);
    q->SetXTitle(name);
    
    TString expression;
@@ -180,7 +181,7 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
       cAlpha->cd(3);
       TString name;
       name.Form("p%d", detID);
-      TH1F * p = new TH1F(name, name, 200, 0., refEnergy.back() * 1.3);
+      TH1F * p = new TH1F(name, name, nBin, 0., refEnergy.back() * 1.3);
       p->SetXTitle(name);
          
       TString expression;
