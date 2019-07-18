@@ -7,7 +7,6 @@ void listDraws(void) {
   printf("------------------- List of Plots -------------------\n");
   printf("  newCanvas() - Create a new Canvas\n");
   printf("-----------------------------------------------------\n");
-  //printf("    HitStat() - Hit statistics for all %d detectors\n", numDet);
   printf("      rawID() - Raw \033[0;31me\033[0m, \033[0;31mring\033[0m, \033[0;31mxf\033[0m, \033[0;31mxn\033[0m vs detID\n");
   printf("       rawe() - Raw \033[0;31me\033[0m for all %d detectors\n", numDet);
   printf("    rawring() - Raw \033[0;31mring\033[0m for all %d detectors\n", numDet);
@@ -32,7 +31,6 @@ void listDraws(void) {
   printf("     eCalVz() - Energy vs. Z\n");
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
-  printf("    exciteI() - Excitation Energy for Individual detector\n");
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
@@ -66,24 +64,6 @@ void newCanvas(int sizeX = 800, int sizeY = 600, int posX = 0, int posY = 0){
 
 //TODO set histogram y-axis all the same heigh
 
-
-//void HitStat(void) {
-//  TCanvas *cStat = (TCanvas *) gROOT->FindObjectAny("cStat");
-//  if( cStat == NULL ) {
-//    cStat = new TCanvas("cStat","Hit Statistics",canvasSize[0], canvasSize[1]);
-//    cStat->Clear();cStat->Divide(numCol,numRow);
-//    gStyle->SetOptStat("neiou");
-//    for (Int_t i=0; i<numDet; i++) {
-//      cStat->cd(i+1); 
-//      cStat->cd(i+1)->SetGrid();
-//      cStat->cd(i+1)->SetLogy();
-//      hStat[i]->Draw("");
-//    }
-//  }else{
-//    cStat->Show();
-//  }
-//  
-//}
 
 void rawID(){
   TCanvas * cRawID = (TCanvas *) gROOT->FindObjectAny("cRawID");
@@ -311,16 +291,16 @@ void recoils(bool isLogz = false) {
     hrdt[i]->Draw("");
   }
   
-  TCanvas *crdtTAC =  (TCanvas *) gROOT->FindObjectAny("crdtTAC");
-  if( crdtTAC == NULL ) crdtTAC = new TCanvas("crdtTAC",Form("raw RDTtac | %s", canvasTitle.Data()),0,0, 1600, 1600);
-  crdtTAC->Clear(); crdtTAC->Divide(2,4);
-  for( int i = 0; i < 8; i ++){
-    crdtTAC->cd(i+1);
-    htacRecoil[i]->Draw("colz");
-  }
+  //TCanvas *crdtTAC =  (TCanvas *) gROOT->FindObjectAny("crdtTAC");
+  //if( crdtTAC == NULL ) crdtTAC = new TCanvas("crdtTAC",Form("raw RDTtac | %s", canvasTitle.Data()),0,0, 1600, 1600);
+  //crdtTAC->Clear(); crdtTAC->Divide(2,4);
+  //for( int i = 0; i < 8; i ++){
+  //  crdtTAC->cd(i+1);
+  //  htacRecoil[i]->Draw("colz");
+  //}
   //for( int i = 0; i < 4; i ++){
   //  crdtTAC->cd(i+1+8);
-  //  xshtacRecoilsum[i]->Draw("colz");
+  //  htacRecoilsum[i]->Draw("colz");
   //}
   
 }
@@ -355,10 +335,7 @@ void excite(void) {
   cex->Clear();
   gStyle->SetOptStat("neiou");
   hEx->Draw("");
-}
-
-
-void exciteI(void) {
+  
   TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
   if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),1600,1000);
   cexI->Clear();cexI->Divide(5,6);
@@ -368,6 +345,7 @@ void exciteI(void) {
     hExi[i]->Draw("");
   }
 }
+
 
 void ExThetaCM(void) {
   TCanvas *cExThetaCM =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM");

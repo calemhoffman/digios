@@ -99,7 +99,6 @@ histogram with TCutG, add suffix "GC" for Graphical-Cut.
    
 ***************************************************/
 //======== raw data
-//TH1F* hStat[numDet];
 TH1F* he[numDet];
 TH1F* hring[numDet];
 TH1F* hxf[numDet];
@@ -138,7 +137,7 @@ TH1F* hExi[numDet];
 TH2F* hExThetaCM;
 
 //====== TAC
-TH1F* htacE;
+TH1F* htac;
 TH1I* htacArray[numDet];
 TH2F* hrtac[4];
 TH2F* htacEx;
@@ -419,7 +418,7 @@ void Monitors::Begin(TTree *tree)
    cutfile->Close();
    */
 
-   printf("======================================\n");
+   printf("====================================== Histograms declaration\n");
    
    gROOT->cd();
    
@@ -434,11 +433,6 @@ void Monitors::Begin(TTree *tree)
    }
 
    for (Int_t i=0;i<numDet;i++) {//array loop
-      
-      //hStat[i] = new TH1F(Form("hStat%d", i),
-      //                    Form("Hit Statistics (ch=%d)", i),
-      //                    7, 1, 8); // 0 = no hit, 1 = e, 2 = ring, 3 = xf, 4 = xn, 5 = xf + xn, 6 = xf +xn + e, 7 = xf + xn + e + ring
-    
       
       he[i] = new TH1F(Form("he%d", i), 
                        Form("Raw e (ch=%d); e (channel); count", i),
@@ -532,7 +526,7 @@ void Monitors::Begin(TTree *tree)
    htdiffg = new TH1I("htdiffg","Coincident time (array, recoil) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
  
    //===================== TAC
-   htacE = new TH1F("htacE","Array-RF TAC; kind of time diff [a.u.]; Counts", 4000, -2500, -1000);
+   htac = new TH1F("htac","Array-RF TAC; kind of time diff [a.u.]; Counts", 4000, -2500, -1000);
 
    for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
@@ -563,6 +557,8 @@ void Monitors::Begin(TTree *tree)
    }
    helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 200, elumRange[0], elumRange[1]);
    helumSUM = new TH1F("helumSUM", "ElumSUM", 200, elumRange[0], elumRange[1]);
+   
+   
    //===================== EZERO
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
    he0det = new TH2F("he0det","EZERO DE-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
@@ -574,7 +570,7 @@ void Monitors::Begin(TTree *tree)
    h0e = new TH1F("h0e","EZERO - E; E [ch]",500,50,4050);//
    h0tac = new TH1F("h0tac","EZERO RF; RF [ch]",500,50,4050);//
 	
-   printf("========================================\n");
+   printf("======================================== End of histograms Declaration\n");
    StpWatch.Start();
 }
 
@@ -652,7 +648,7 @@ Bool_t Monitors::Process(Long64_t entry)
     }
     
     /*********** TAC ************************************************/ 
-    htacE->Fill(tac[0]);
+    htac->Fill(tac[0]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
     //if( !(-1800 < tac[0] &&  tac[0] < -800) ) return kTRUE;
