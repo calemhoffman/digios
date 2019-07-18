@@ -175,7 +175,7 @@ echo "=================== done."
 if [ ${isBranchExist} -eq 0 ]; then
 
     echo "======== Clean up working directory "
-    rm -fv ${expDIR}/analysis/working/correction_*.dat
+    #rm -fv ${expDIR}/analysis/working/correction_*.dat
     rm -fv ${expDIR}/analysis/working/reaction.dat
     rm -fv ${expDIR}/analysis/working/run_Summary.dat
     rm -fv ${expDIR}/analysis/working/example.*
