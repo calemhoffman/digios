@@ -17,13 +17,13 @@ printevents       1
 # v/c , gammasphere stuff
 beta              0.0
 # number of event to be written in Log
-modwrite          10000
+modwrite          100000
 
 # timestamp to be written in Log
-tsnumwrites       1000
+tsnumwrites       10000
 
 # event build windows
-timewin           200
+timewin           1000
 
 #-------------------------------------------
 # mode2 calibration pars. 
