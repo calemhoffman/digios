@@ -1,4 +1,4 @@
 #!/bin/bash -l
-expName=h068_29Al
-daqDataPath=/media/DIGIOSDATA4
-LastRunNum=0
+expName=ARR01
+daqDataPath=/media/DIGIOSDATA3
+LastRunNum=47
