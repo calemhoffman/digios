@@ -8,14 +8,15 @@
 #include <TString.h>
 #include <TObjArray.h>
 
-void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int eRange=6000, int deRange=4000){
+void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int eRange=5000, int deRange=3000, bool isLogz = false){
 	
 	printf("================ Graphic Cut Creator for RDT ============== \n");
    
    TChain * chain = new TChain("gen_tree");
-   chain->Add(dataList);
-   //chain->Add("data/gen_run70_74.root");
-   //chain->Add("data/gen_run75_87.root");
+   //chain->Add(dataList);
+   //chain->Add("../root_data/gen_run03[2,3,5,7].root"); 
+   //chain->Add("../root_data/gen_run04[1,3].root");
+   //chain->Add("../root_data/gen_run018.root");
    
    chain->GetListOfFiles()->Print();
    
@@ -27,12 +28,15 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
 	if( !cCutCreator->GetShowToolBar() ) cCutCreator->ToggleToolBar();
 	
    cCutCreator->Update();
+   if( isLogz ) cCutCreator->cd()->SetLogz();
 	
 	TCutG * cut = NULL;
 	TObjArray * cutList = new TObjArray();
 	
    
 	TString expression[10];
+
+   TH2F * h[4];
 
 	for (Int_t i = 0; i < 4; i++) {
 
@@ -41,13 +45,21 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
       //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
       varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
 
-      expression[i].Form("%s:%s>>h(500, 0, %d, 500, 0, %d)", 
+      h[i] = new TH2F(Form("h%d", i), Form("RDT%d - RDT%d", 2*i+1, 2*i), 500, 0, eRange, 500, 0, deRange);
+
+      expression[i].Form("%s:%s>>h%d", 
             varY.Data(),
             varX.Data(),
-            eRange, deRange);
-
+            i);
 
       chain->Draw(expression[i], "", "col");
+      
+      if( h[i]->Integral() < 1000 ) {
+         h[i]->SetMarkerStyle(20);
+         h[i]->SetMarkerSize(0.1);
+         h[i]->Draw("");
+      }
+      
       cCutCreator->Modified(); cCutCreator->Update();
 
       gPad->WaitPrimitive();
