@@ -16,10 +16,10 @@ const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-double rangeEx[3] = { 50, -0.5, 1}; // resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 50, -1, 9}; // resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; // resol. [deg], low deg, high deg
 
-bool isExOffset = true;
+bool isExOffset = false;
 double ExOffset[30] = { // calibrated by h064_15N, (d,p), run013
    0.00,  0.0154,    1000,  0.1314,  0.0091, 
    1000,  0.0032,  0.0081,    1000,  0.1661, 
@@ -345,7 +345,7 @@ void Analyzer::Terminate()
    
    for( int i = 0; i < numDet; i++){
      cAna->cd(i+1);
-     cAna->cd(i+1)->SetGrid();
+     //cAna->cd(i+1)->SetGrid();
      //cAna->cd(i+1)->SetLogy();
      //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
      //hei[i]->Draw();
@@ -354,7 +354,7 @@ void Analyzer::Terminate()
      
      //hEBISi[i]->Draw();
      //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     //hExi[i]->Draw();
+     hExi[i]->Draw();
    
      //fitAuto(hExi[i]);
      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
@@ -367,7 +367,7 @@ void Analyzer::Terminate()
      //hxExi[i]->SetMarkerStyle(7);
      //hxExi[i]->SetMarkerColor(4);
      //hxExi[i]->Draw("scat");
-     hxExi[i]->Draw("colz");
+     //hxExi[i]->Draw("colz");
    } 
    
    //for( int i = 0; i < numDet; i++){

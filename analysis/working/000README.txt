@@ -45,7 +45,7 @@ analysis
     |
     |-- Cleopatra (where all Ptolemy and new Transfer simulation codes are stored)
     |
-    |-- Simulation (where all kinematics simulation codes are stored)
+    |-- Simulation (obsolete)
     |
     |-- working ( This is where you are. 
                   All experimental-dependent codes, parameters, 
@@ -56,15 +56,27 @@ analysis
 =================================================
 
 Raw Data
+   |
+   | GEBMerge (this step will merge all the raw files to a single file)
+   |
+merged_run##
    |  
    | GEBSort  (this step is even builder, 
    |            the root tree structure is the digitizer output)
    V
 run##.root
    |
-   | Armory/GeneralSortTrace.h (this step is 
+   | Armory/GeneralSort.h (this step is 
    |                               Mapping digitizer to detectors)
    V
+gen_run##.root
+   |
+   | Monitors.C
+   V
+online analysis Canvas
+
+another way is create another root for calibrated, physical data
+
 gen_run##.root
    |
    | after Calibration for e, xf, xn, etc.. Armory/Cali_e_trace.h
@@ -86,14 +98,12 @@ To start with, you need to check/edit few things
 
         These are data will be stored. 
         ===== YOU NEED TO CREATE YOURSELF ======
-    
-    edit ==== MakeDataLinks.sh ====
         
 1) GeneralSortMapping.h
         
         This is the detector Mapping.
 
-2) process_run.sh   
+2) process_run   
 
         This is the bash script to retrive the raw data from 
         the DAQ computer, run the GEBsort, and produce root files.
@@ -126,7 +136,7 @@ Anyway~~~~~
 To sort/process/convert raw data to gen_run##.root. 
 Once you set up correctly, you type
 
-    >./process_run.sh ##
+    >./process_run RUNID
     
           step 1) get the raw data from DAQ server
           
@@ -141,6 +151,10 @@ You can load and "monitor" the gen_run##.root by
 
     >root gen_run##.root
     root> gen_tree->Process("Monitor.C++") 
+    
+To see more for the usage of ./process_run
+
+    >./process_run -help
 
 =================================================
 ======== 6) Calibration & sotre in a new root
@@ -148,8 +162,9 @@ You can load and "monitor" the gen_run##.root by
 For Calibration, we have to edit 
 
      runsList.txt
+     detectorGeo.txt
 
-this txt file will tell which gen_run##.root for Calibration
+these txt files will tell which gen_run##.root for Calibration
 
 then, we can call 
 
@@ -187,6 +202,10 @@ In the output are
 To run a simualtion
  
     >../Cleopatra/Transfer
+    
+To see more
+
+    >../Cleopatra/Transfer -help
 
 =================================================
 ======== 8) Cleopatra for DWBA calculation using Ptolemy
