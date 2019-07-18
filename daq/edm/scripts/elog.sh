@@ -17,9 +17,9 @@ if [ ${option} == "start" ]; then
 
     IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l ${expName^^} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt | tail -1 | awk '{print $4}')
 
-    #IDStr="elog"${IDStr}
-    #echo ${IDStr}
-    #echo $IDStr >> ${constFile}
+    IDStr="elog"${IDStr}
+    echo ${IDStr}
+    echo $IDStr >> ${constFile}
 
 fi
 
