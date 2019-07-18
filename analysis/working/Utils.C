@@ -26,7 +26,7 @@ void listDraws(void) {
   printf("-----------------------------------------------------\n");
   printf("  eCalVxCal() - Cal \033[0;31me\033[0m vs. \033[0;31mx\033[0m for all %d detectors\n", numDet);
   printf("-----------------------------------------------------\n");
-  printf("     recoil() - Raw DE vs. E Recoil spectra\n");
+  printf("    recoils() - Raw DE vs. E Recoil spectra\n");
   printf("       elum() - Luminosity Energy Spectra\n");
   printf("-----------------------------------------------------\n");
   printf("     eCalVz() - Energy vs. Z\n");
@@ -36,7 +36,8 @@ void listDraws(void) {
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
-  printf("   RDTCutCreator(\"*.root[TChain]\") - Create RDT Cuts \n");
+  printf("   RDTCutCreator() - Create RDT Cuts \n");
+  printf("         Check1D() - Count Integral within a range\n");
   printf("-----------------------------------------------------\n");
   printf("   %s\n", canvasTitle.Data());
   printf("-----------------------------------------------------\n");
@@ -287,12 +288,14 @@ void elum(void) {
   
 }
 
-void recoil(void) {
+void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
-    crdt->cd(i+1); hrdt2D[i]->Draw("col");
+    crdt->cd(i+1); 
+    if( isLogz ) crdt->cd(i+1)->SetLogz();
+    hrdt2D[i]->Draw("col");
   }
   
   TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
@@ -301,20 +304,24 @@ void recoil(void) {
   hrdtID->Draw("colz");
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
-  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500,0, 800, 800);
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500,0, 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
   for( int i = 0; i < 8; i ++){
     crdtS->cd(i+1);
     hrdt[i]->Draw("");
   }
   
-  TCanvas *crdtsum = (TCanvas *) gROOT->FindObjectAny("crdtsum");
-  if( crdtsum == NULL ) crdtsum = new TCanvas("crdtsum",Form("sum RDT | %s", canvasTitle.Data()),1500,0, 800, 800);
-  crdtsum->Clear(); crdtsum->Divide(2,2);
-  for( int i = 0; i < 4; i ++){
-    crdtsum->cd(i+1);
-    hrdtsum[i]->Draw("");
+  TCanvas *crdtTAC =  (TCanvas *) gROOT->FindObjectAny("crdtTAC");
+  if( crdtTAC == NULL ) crdtTAC = new TCanvas("crdtTAC",Form("raw RDTtac | %s", canvasTitle.Data()),0,0, 1600, 1600);
+  crdtTAC->Clear(); crdtTAC->Divide(2,4);
+  for( int i = 0; i < 8; i ++){
+    crdtTAC->cd(i+1);
+    htacRecoil[i]->Draw("colz");
   }
+  //for( int i = 0; i < 4; i ++){
+  //  crdtTAC->cd(i+1+8);
+  //  xshtacRecoilsum[i]->Draw("colz");
+  //}
   
 }
 
@@ -345,19 +352,9 @@ void eCalVzRow() {
 void excite(void) {
   TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");
   if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),1000,650);
-  cex->Clear();//cex->Divide(2,1);
+  cex->Clear();
   gStyle->SetOptStat("neiou");
-  //cex->cd(1); 
   hEx->Draw("");
-  //cex->cd(2); hexR->Draw("");
-  
-  TCanvas *cexdt =  (TCanvas *) gROOT->FindObjectAny("cexdt");
-  if( cexdt == NULL ) cexdt = new TCanvas("cexdt",Form("EX dt : %s", canvasTitle.Data()),1000, 0 , 1000,650);
-  cexdt->Clear(); cexdt->Divide(3,2);
-  for(int i=0;i<6;i++){
-    cexdt->cd(i+1);
-    hExdT[i]->Draw("");
-  }
 }
 
 
@@ -392,3 +389,41 @@ void tac(void) {
   }
 }
 
+
+
+void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1, double x2, Color_t color){
+   
+   int k1 = hist->FindBin(x1);
+   int k2 = hist->FindBin(x2);
+
+   int hight = 0 ;
+   for( int i = k1; i < k2 ; i ++){
+    int temp = hist->GetBinContent(i);
+    if( temp > hight ) hight = temp;
+   }
+   hight = hight * 1.2;
+   int max = hist->GetMaximum();
+   
+   canvas->cd(padID);
+   
+   if( color != 0 ){ 
+     TBox box;
+     box.SetFillColorAlpha(color, 0.1);
+     box.DrawBox(x1, 0, x2, hight);
+   }
+
+   int count = hist->Integral(k1, k2);
+
+   TLatex text;
+   text.SetTextFont(82);
+   text.SetTextSize(0.06);
+   if( color != 0 ){
+     text.SetTextColor(color);
+     text.DrawLatex(x1, hight, Form("%d", count));
+   }else{
+     text.DrawLatex((x1+x2)/2., max, Form("%d", count));
+   }
+
+   printf(" %s  : %d \n", name.Data(),  count);
+   
+}
