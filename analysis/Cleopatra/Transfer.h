@@ -644,9 +644,9 @@ void Transfer(
     detRowID = helios.GetDetRowID();
     dphi = helios.GetdPhi();
     rho = helios.GetRho();
-    rhoArray = helios.GetrhoArray();
+    rhoArray = helios.GetRhoHit();
 
-    rhoRecoil = helios.GetRecoilrhoArray();
+    rhoRecoil = helios.GetRecoilRhoHit();
     xArray = helios.GetXPos(z);
     yArray = helios.GetYPos(z);
     z += gRandom->Gaus(0, zSigma);
@@ -665,8 +665,8 @@ void Transfer(
 
     //Recoil
     recoilT = helios.GetRecoilTime();
-    xRecoil = helios.GetRecoilxArray();
-    yRecoil = helios.GetRecoilyArray();
+    xRecoil = helios.GetRecoilXHit();
+    yRecoil = helios.GetRecoilYHit();
 
     //other recoil detectors
     if ( zRecoil1 != 0 ){
