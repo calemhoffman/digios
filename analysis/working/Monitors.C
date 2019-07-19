@@ -11,6 +11,8 @@
 #include <TString.h>
 #include <TLatex.h>
 #include <TSystem.h>
+#include <TMacro.h>
+#include <TMD5.h>
 #include <TObjArray.h>
 #include <fstream>
 using namespace std;
@@ -24,8 +26,8 @@ ULong64_t maxNumberEvent = 100000000;
 //---histogram setting
 int rawEnergyRange[2] = {500, 8000}; // share with e, ring, xf, xn
 int    energyRange[2] = {   3,    10};
-int     rdtDERange[2] = {  200,  1500};
-int      rdtERange[2] = {  500,  4000};
+int     rdtDERange[2] = {  200,  6000};
+int      rdtERange[2] = {  500,  16000};
 int      elumRange[2] = { 200, 4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
@@ -40,7 +42,7 @@ int tacGate[2] = {-2400, -1000};
 int dEgate[2] = {500,1500};
 int Eresgate[2] = {1000,4000};
 
-TString rdtCutFile = "";
+TString rdtCutFile = "rdtCuts.root";
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -346,6 +348,16 @@ void Monitors::Begin(TTree *tree)
    file.close();
    
    //========================================= reaction parameters
+   //check is the transfer.root is using the latest reactionConfig.txt   
+   //sicne reaction.dat is generated as a by-product of transfer.root
+   TFile * transfer = new TFile("transfer.root");
+   TMacro * reactionConfig = (TMacro *) transfer->FindObjectAny("reactionConfig");
+   TMacro presentReactionConfig ("reactionConfig.txt");
+   if( ((TMD5*) reactionConfig->Checksum())->AsString() != ((TMD5 *)presentReactionConfig.Checksum())->AsString() ) {
+     printf("########################## recalculate transfer.root \n");
+     system("../Cleopatra/Transfer");
+     printf("########################## transfer.root updated\n");
+   }
    printf(" loading reaction parameters");
    file.open("reaction.dat");
    isReaction = false;
@@ -367,17 +379,16 @@ void Monitors::Begin(TTree *tree)
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
       gamm = 1./TMath::Sqrt(1-beta*beta);
       G = alpha * gamm * beta * a ;
-      printf("============\n");
 		printf("mass-b    : %f MeV/c2 \n", mass);
 		printf("charge-b  : %f \n", q);
 		printf("E-total   : %f MeV \n", Et);
 		printf("mass-B    : %f MeV/c2 \n", massB);		 
 		printf("beta      : %f \n", beta);
 		printf("B-field   : %f T \n", Bfield);
-		printf("alpha     : %f MeV/mm \n", alpha);
+		printf("slope     : %f MeV/mm \n", alpha * beta);
 		printf("det radius: %f mm \n", a);
 		printf("G-coeff   : %f MeV \n", G);
-		printf("============\n");
+		printf("=================================\n");
 
    }else{
       printf("... fail.\n");
@@ -418,7 +429,7 @@ void Monitors::Begin(TTree *tree)
    cutfile->Close();
    */
 
-   printf("====================================== Histograms declaration\n");
+   printf("======================================== Histograms declaration\n");
    
    gROOT->cd();
    
