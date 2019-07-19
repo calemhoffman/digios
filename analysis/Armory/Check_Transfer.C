@@ -163,15 +163,15 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 
    cCheck->cd(3);
    TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
-   tree->Draw("ryHit:rxHit>>hRecoilXY", gate, "colz");
+   tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
    
    cCheck->cd(4);
    TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoil);
-   tree->Draw("rhoBHit:thetaCM>>hRecoilRThetaCM", gate, "colz");
+   tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
 
    cCheck->cd(5);
    TH2F * hRecoilRZ = new TH2F("hRecoilRZ", "RecoilR - Z [gated]; z [mm]; RecoilR [mm]",  zRange[0], zRange[1], zRange[2], 400,0, rhoRecoil);
-   tree->Draw("rhoBHit:z>>hRecoilRZ", gate, "colz");
+   tree->Draw("rhoRecoil:z>>hRecoilRZ", gate, "colz");
 
    cCheck->cd(6);
    TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  500, ExRange[0], ExRange[1]);
@@ -214,12 +214,12 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 
    cCheck->cd(9);
    TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoil);
-   tree->Draw("rhoBHit:TB>>hRecoilRTR", gate, "colz");
+   tree->Draw("rhoRecoil:TB>>hRecoilRTR", gate, "colz");
 
    /*
    cCheck->cd(9);
    TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
-   tree->Draw("ryHit1:rxHit1>>hRecoilXY1", gate, "colz");
+   tree->Draw("yRecoil1:xRecoil1>>hRecoilXY1", gate, "colz");
 
    cCheck->cd(10);
    */
