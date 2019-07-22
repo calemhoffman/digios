@@ -353,7 +353,13 @@ void Monitors::Begin(TTree *tree)
    TFile * transfer = new TFile("transfer.root");
    TMacro * reactionConfig = (TMacro *) transfer->FindObjectAny("reactionConfig");
    TMacro presentReactionConfig ("reactionConfig.txt");
-   if( ((TMD5*) reactionConfig->Checksum())->AsString() != ((TMD5 *)presentReactionConfig.Checksum())->AsString() ) {
+   TString aaa1 = ((TMD5*) reactionConfig->Checksum())->AsString();
+   TString aaa2 = ((TMD5*) presentReactionConfig.Checksum())->AsString();
+
+   //printf("%s\n", aaa1.Data());
+   //printf("%s\n", aaa2.Data());
+
+   if( aaa1 != aaa2 ) {
      printf("########################## recalculate transfer.root \n");
      system("../Cleopatra/Transfer");
      printf("########################## transfer.root updated\n");
