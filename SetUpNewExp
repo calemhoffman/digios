@@ -36,14 +36,9 @@ if [ ${gitCheck} -eq 0 ]; then
     echo "---- clean."
 else
     git status
-    echo "=============== Please fix the git status"
-    exit 1;
+    echo -e "\e[93m=============== Please fix the git status \e[0m"
+    exit
 fi
-#read -p "========== Have you git the present experiment (Y/N)?" isGit
-#if [ ${isGit} == "N" ]; then
-#    echo "Please git it."
-#    exit 1
-#fi
 
 if [ $# -eq 0 ]; then
    git branch -a
@@ -83,9 +78,15 @@ elif [ ${PCName:0:5} == "phywl" ]; then #MAC
    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
 elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
-   DATAPATH=/lcrc/project/HELIOS/experimentsData/
-   space=100000000
-   expDIR=/lcrc/project/HELIOS/digios
+
+   echo -e "\e[93m In LCRC, better to use the master branch."
+   echo -e "\e[93m 1) Change the expName in expName.sh"
+   echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
+
+   exit
+   #DATAPATH=/lcrc/project/HELIOS/experimentsData/
+   #space=100000000
+   #expDIR=/lcrc/project/HELIOS/digios
 
 else
    path=$(pwd)
@@ -132,7 +133,7 @@ else
        if [ ${pullFlag} == "N" ]; then
 	   exit
        else
-	   git checkout ${expName}
+	        git checkout ${expName}
        fi
    fi
 fi

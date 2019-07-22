@@ -63,9 +63,9 @@ do
   elif  [ ${PCName:0:5} == "bebop" ] ; then
       echo "in Bebop, no way to download."
       GEBDIR=/lcrc/project/HELIOS/digios/analysis/GEBSort
-      MERGDIR=/lcrc/project/HELIOS/${expName}/merged_data
-      ROOTDIR=/lcrc/project/HELIOS/${expName}/root_data
-      DATADIR=/lcrc/project/HELIOS/${expName}/data
+      MERGDIR=/lcrc/project/HELIOS/digios/analysis/merged_data
+      ROOTDIR=/lcrc/project/HELIOS/digios/analysis/root_data
+      DATADIR=/lcrc/project/HELIOS/digios/analysis/data
       MERGECHAT=/lcrc/project/HELIOS/digios/analysis/working/GEBMerge.chat
       SORTCHAT=/lcrc/project/HELIOS/digios/analysis/working/GEBSort.chat
   else
