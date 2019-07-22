@@ -21,13 +21,13 @@ using namespace std;
 const int numDet = 30;
 const int numRow = 6;  
 
-ULong64_t maxNumberEvent = 100000000;
+ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {500, 8000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   3,    10};
-int     rdtDERange[2] = {  200,  6000};
-int      rdtERange[2] = {  500,  16000};
+int    energyRange[2] = {   0,    10};
+int     rdtDERange[2] = {  0,  2000};
+int      rdtERange[2] = {  0,  5000};
 int      elumRange[2] = { 200, 4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
@@ -37,7 +37,7 @@ int  coinTimeRange[2] = { -100, 100};
 double rdtot[4] = {};
 
 //---Gate
-int timeGate[2] = {-25, 60}; // min, max, 1 ch = 10 ns
+int timeGate[2] = {-20, 20}; // min, max, 1 ch = 10 ns
 int tacGate[2] = {-2400, -1000};
 int dEgate[2] = {500,1500};
 int Eresgate[2] = {1000,4000};

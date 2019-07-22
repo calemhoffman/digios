@@ -119,10 +119,11 @@ echo "============================================="
 cat ${AnalysisDir}/data/RunTimeStamp.dat
 echo "============================================="
 
+echo -e "\033[0;33m"
 du -hsc $DATADIR/${expName}_run_$RUN*
 
 count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
-echo "========== Number of Files : ${count}"
+echo -e "========== Number of Files : ${count}\033[0m"
 if [ ${count} -eq 0 ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
