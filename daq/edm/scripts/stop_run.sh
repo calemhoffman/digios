@@ -19,12 +19,12 @@ currentDate=$(date)
 echo "         stop at ${currentDate}"
 echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 
-#download the elog entry
-elogContent=~/digios/analysis/working/elog_content.txt
-elog -h www.phy.anl.gov -d elog -p 443 -l ${expName^^} -s -u GeneralHelios helios -w ${elogID} > ${elogContent}
-cutLineNum=$(grep -n "==============" elog_content.txt | cut -d: -f1)
-cutLineNum=$((cutLineNum+1))
-tail -n +${cutLineNum} ${elogContent} > ${elogContent} 
+echo "---- downloading the elog entry elohID=${elogID}$"
+elogContext=~/digios/analysis/working/elog_context.txt
+elog -h www.phy.anl.gov -d elog -p 443 -l ${expName^^} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
+cutLineNum=$(grep -n "==============" elog_context.txt | cut -d: -f1)
+cutLineNum=$((${cutLineNum}+1))
+tail -n +${cutLineNum} ${elogContext} > ${elogContext} 
 
 echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
 
