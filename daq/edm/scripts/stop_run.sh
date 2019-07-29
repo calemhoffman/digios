@@ -40,7 +40,7 @@ curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData
 echo "==== wait for 5 sec"
 sleep 5
 
-ssh heliosdatabase@heliosdb '/home/heliosdatabase/GrafanaElog.sh'
+ssh heliosdatabase@heliosdb '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
 
 echo wait 10 seconds before closing the IOCs
 sleep 10
