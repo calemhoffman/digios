@@ -22,7 +22,7 @@ const int numRow = 6;
 ULong64_t maxNumberEvent = 100000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {0, 17000}; // share with e, ring, xf, xn
+int rawEnergyRange[2] = {0, 8000}; // share with e, ring, xf, xn
 int    energyRange[2] = {   0,    14};
 int     rdtDERange[2] = {  0,  3000};
 int      rdtERange[2] = {  0,  8000};
@@ -41,7 +41,6 @@ int dEgate[2] = {500,1500};
 int Eresgate[2] = {1000,4000};
 
 TString rdtCutFile = "rdtCuts.root";
-//TString rdtCutFile = "h069_16O.root";
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -70,12 +69,8 @@ vector<int> countFromCut;
 //======= Other Cuts
 
 TFile *f, *cutfile;
-TFile *cutfile2p;
 TCutG *EvsZ_cut;
-TCutG *ezcut;
-TCutG *ezcut2p;
 Bool_t cutfileOpen;
-Bool_t cutfileOpen2p;
 Bool_t asiligood=kFALSE;
 Bool_t rsiligood=kFALSE;
 
@@ -138,8 +133,6 @@ TH2F* heCalVzGC;
 TH2F* hezgrsili;
 TH2F* hezgasili;
 TH2F* hecalVzRow[numRow];
-TH2F* hezgasili2p;
-TH2F* hezgrsili2p;
 
 //====== Ex data
 TH1F* hEx;
@@ -163,8 +156,6 @@ TH2F* hrdt2Dsum[4];
 TH2F* hrdt2Dg[4];
 TH2F* hrrsili[4];
 TH2F* hrasili[4];
-TH2F* hrrsili2p[4];
-TH2F* hrasili2p[4];
 
 //======= ELUM
 TH1F* helum[16];
@@ -187,7 +178,6 @@ TH2I *hmult;
 TH1I *hmultEZ;
 TH1I *htdiff;
 TH1I *htdiffg;
-TH1I *htdiffg2p;
 TH2I *hID2;
 TH2I *hID2g;
 
@@ -196,14 +186,7 @@ TH2I *hrsili;
 TH2I *hasili;
 TH2I *hrsilig;
 TH2I *hasilig;
-TH2I *harsilig;
-TH2I *hrsilig2p;
-TH2I *hasilig2p;
-TH2I *harsilig2p;
 TH1I *hsili;
-TH1I *hsilig;
-TH1I *hsili_t;
-TH1I *hsilig_t;
 
 /***************************
  ***************************/
@@ -440,23 +423,14 @@ void Monitors::Begin(TTree *tree)
 
    //================  Get other cuts
    //Ryan comment : the following is not so correct, but do the job
-   
-   TFile *cutfile = new TFile("newcuts.root");
+   /*
+   TFile *cutfile = new TFile("6Li_cuts.root");
    cutfileOpen = cutfile->IsOpen();
    if(!cutfileOpen) cout<<"Failed to open cutfile"<<endl;
    cutfile->ls();
-//   EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
-     ezcut=(TCutG *) gROOT->FindObject("ezcut"); 
+   EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
    cutfile->Close();
-   //2plus cuts
-   TFile *cutfile2p = new TFile("2pluscuts.root");
-   cutfileOpen2p = cutfile2p->IsOpen();
-   if(!cutfileOpen2p) cout<<"Failed to open cutfile"<<endl;
-   cutfile2p->ls();
-//   EvsZ_cut=(TCutG*) gROOT->FindObject("EvsZ_cut");
-     ezcut2p=(TCutG *) gROOT->FindObject("ezcut2p"); 
-   cutfile2p->Close();
-   
+   */
 
    printf("====================================== Histograms declaration\n");
    
@@ -530,12 +504,10 @@ void Monitors::Begin(TTree *tree)
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
    
    //====================== E-Z plot
-    heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
+   heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
    heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    hezgasili = new TH2F("hezgasili","E vs. Z gated on array-sili;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    hezgrsili = new TH2F("hezgrsili","E vs. Z gated on recoil-sili;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
-   hezgasili2p = new TH2F("hezgasili2p","E vs. Z gated on array-sili for 2plus;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
-   hezgrsili2p = new TH2F("hezgrsili2p","E vs. Z gated on recoil-sili for 2plus;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    
    for( int i = 0; i < numRow; i++){
       hecalVzRow[i] = new TH2F(Form("heCalVz%d", i),
@@ -556,8 +528,6 @@ void Monitors::Begin(TTree *tree)
          hrdt2Dg[tempID] = new TH2F(Form("hrdt2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
          hrrsili[tempID] = new TH2F(Form("hrrsili%d",tempID), Form("Raw Recoil DE vs Eres gated on recoil-sili(dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
          hrasili[tempID] = new TH2F(Form("hrasili%d",tempID), Form("Raw Recoil DE vs Eres gated on array-sili(dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
-         hrrsili2p[tempID] = new TH2F(Form("hrrsili%d2p",tempID), Form("Raw Recoil DE vs Eres gated on recoil-sili for 2plus(dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
-         hrasili2p[tempID] = new TH2F(Form("hrasili%d2p",tempID), Form("Raw Recoil DE vs Eres gated on array-sili for 2plus(dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i), 500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
       }
       
    }
@@ -572,21 +542,14 @@ void Monitors::Begin(TTree *tree)
    //===================== coincident time 
    htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
    htdiffg = new TH1I("htdiffg","Coincident time (array, recoil) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
-   htdiffg2p = new TH1I("htdiffg2p","Coincident time (array, recoil) w/ recoil gated and 2plus; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
    
    //===================SiLi coincident with array and recoil
-   hsili = new TH1I("hsili","SiLi detector ungated",2000,-8000,8000);
-   hsilig=new TH1I("hsilig","Gated SiLi energy",500,-2500,2500);
-   hsili_t = new TH1I("hsili_t","SiLi detector gated on triple coin",500,-2500,2500);
-   hsilig_t = new TH1I("hsilig_t","SiLi detector gated on triple coin and ez",500,-2500,2500);
-   hrsili  = new TH2I("hrsili" ,"Coincident time (sili-recoil, recoil-array); sili-recoil; recoil-array", 200,-4000,4000,200,-100,100);
-   hasili  = new TH2I("hasili" ,"Coincident time (sili-array, recoil-array); sili-array; recoil-array", 200,-4000,4000,200,-100,100);
-   hrsilig  = new TH2I("hrsilig" ,"Coincident time (sili-recoil, recoil-array) gated on rtc cuts; sili-recoil; recoil-array", 200,-4000,4000,200,-100,100);
-   hasilig  = new TH2I("hasilig" ,"Coincident time (sili-array, recoil-array) gated on rtc cuts; sili-array; recoil-array", 200,-4000,4000,200,-100,100);
-   harsilig = new TH2I("harsilig","Sili-AR vs Sili-Rec",200,-200,200,200,-200,200);
-   hrsilig2p  = new TH2I("hrsilig2p" ,"Coincident time (sili-recoil, recoil-array) gated on rtc cuts and 2plus; sili-recoil; recoil-array", 200,-400,400,200,-100,100);
-   hasilig2p  = new TH2I("hasilig2p" ,"Coincident time (sili-array, recoil-array) gated on rtc cuts and 2plus; sili-array; recoil-array", 200,-400,400,200,-100,100);
-   harsilig2p = new TH2I("harsilig2p","Sili-AR vs Sili-Rec gated on 2plus",200,-200,200,200,-200,200);
+   hsili = new TH1I("hsili","SiLi detector",1000,-8000,8000);
+   hrsili  = new TH2I("hrsili" ,"Coincident time (sili-recoil, recoil-array); sili-recoil; recoil-array", 200,-100,100,200,-100,100);
+   hasili  = new TH2I("hasili" ,"Coincident time (sili-array, recoil-array); sili-array; recoil-array", 200,-100,100,200,-100,100);
+   hrsilig  = new TH2I("hrsilig" ,"Coincident time (sili-recoil, recoil-array) gated on rtc cuts; sili-recoil; recoil-array", 200,-100,100,200,-100,100);
+   hasilig  = new TH2I("hasilig" ,"Coincident time (sili-array, recoil-array) gated on rtc cuts; sili-array; recoil-array", 200,-100,100,200,-100,100);
+   
    //===================== TAC
    htac = new TH1F("htac","Array-RF TAC; kind of time diff [a.u.]; Counts", 4000, -2500, -1000);
 
@@ -654,7 +617,6 @@ double solid_angle( double th ) {
 ###########################################################*/
 Bool_t Monitors::Process(Long64_t entry)
 {
-   Bool_t goodsili = kFALSE;
    if( ProcessedEntries > maxNumberEvent ) return kTRUE;
    ProcessedEntries++;
    
@@ -712,6 +674,7 @@ Bool_t Monitors::Process(Long64_t entry)
     
     /*********** TAC ************************************************/ 
     htac->Fill(tac[0]);
+    hsili->Fill(tac[1]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
     //if( !(-1800 < tac[0] &&  tac[0] < -800) ) return kTRUE;
@@ -729,12 +692,10 @@ Bool_t Monitors::Process(Long64_t entry)
     Int_t arrayMulti = 0;
     Int_t multiEZ = 0;
     bool rdtgate = false;
-    Bool_t goodez=kFALSE;
-    Bool_t good2p=kFALSE;
     bool coinFlag = false;
     bool isGoodEventFlag = false;
     for (Int_t detID = 0; detID < numDet; detID++) {
-      if(detID != 2 && detID != 5 && detID != 25 && detID != 27 && detID != 28){
+      
       //================== Filling raw data
       he[detID]->Fill(e[detID]);
       hring[detID]->Fill(ring[detID]);
@@ -796,8 +757,7 @@ Bool_t Monitors::Process(Long64_t entry)
       }else{
         z[detID] = length*(xcal[detID]-1.0) + pos[detID%numCol];
       }
-      if (ezcut->IsInside(z[detID],eCal[detID])) goodez=kTRUE;
-      if (ezcut2p->IsInside(z[detID],eCal[detID])) good2p=kTRUE;
+
       //===================== multiplicity
       arrayMulti++; // multi-hit when both e, xf, xn are not NaN
 
@@ -834,50 +794,27 @@ Bool_t Monitors::Process(Long64_t entry)
           
           asiligood = kFALSE;
           rsiligood = kFALSE;
-          goodsili = kFALSE;
 	 
           if(j==1||j==3||j==5||j==7) {hrtac[j/2]->Fill(detID,tdiff);
           
-          if(asili >= -55 && asili <= -15 && tdiff >= -10 && tdiff <= 0) hezgasili->Fill( z[detID] , eCal[detID] );
-          if(rsili >= -55 && rsili <= -15 && tdiff >= -10 && tdiff <= 0) hezgrsili->Fill( z[detID] , eCal[detID] );
-          if(asili >= -55 && asili <= -15 && tdiff >= -10 && tdiff <= 0) goodsili=kTRUE;
-          //if(asili >= -150 && asili <= 0 && tdiff >= -10 && tdiff <= 0) hezgasili->Fill( z[detID] , eCal[detID] );
-          //if(rsili >= -150 && rsili <= 0 && tdiff >= -10 && tdiff <= 0) hezgrsili->Fill( z[detID] , eCal[detID] );
-          //if(asili >= -150 && asili <= 0 && tdiff >= -10 && tdiff <= 0) goodsili=kTRUE;
-          if(asili >= -150 && asili <= 0 && tdiff >= -10 && tdiff <= 0) hezgasili2p->Fill( z[detID] , eCal[detID] );
-          if(rsili >= -150 && rsili <= 0 && tdiff >= -10 && tdiff <= 0) hezgrsili2p->Fill( z[detID] , eCal[detID] );
+          if(asili >= -6 && asili <= 2 && tdiff >= -8 && tdiff <= 1) hezgasili->Fill( z[detID] , eCal[detID] );
+          if(rsili >= -9 && rsili <= -2 && tdiff >= -8 && tdiff <= 1) hezgrsili->Fill( z[detID] , eCal[detID] );
           htdiff->Fill(tdiff);
           hasili->Fill(asili,tdiff);
           hrsili->Fill(rsili,tdiff);
           
-          if (goodez&&rdtgate) hsilig->Fill(tac[1]);
-          hsili->Fill(tac[1]);
-          if (goodsili) hsili_t->Fill(tac[1]);
-          if (goodsili && goodez) hsilig_t->Fill(tac[1]);
-          
           }
-          if(rdtgate && goodez) {
+          if(rdtgate && eCal[detID]>0) {
           htdiffg->Fill(tdiff);
           hasilig->Fill(asili,tdiff);
           hrsilig->Fill(rsili,tdiff);
-          harsilig->Fill(asili,rsili);
-       }
-          if(rdtgate && good2p) {
-          htdiffg2p->Fill(tdiff);
-          hasilig2p->Fill(asili,tdiff);
-          hrsilig2p->Fill(rsili,tdiff);
-          harsilig2p->Fill(asili,rsili);
        }
           hID2->Fill(detID, j); 
 	 
-          if( timeGate[0] < tdiff && tdiff < timeGate[1])	 {
+          if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
             if(j % 2 == 0 ){ hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
-            if(asili >= -55 && asili <= -15 && tdiff >= -10 && tdiff <= 0 &&goodez) hrrsili[j/2]->Fill(rdt[j],rdt[j+1]);
-            if(rsili >= -55 && rsili <= -15 && tdiff >= -10 && tdiff <= 0 &&goodez) hrasili[j/2]->Fill(rdt[j],rdt[j+1]);
-            //if(asili >= -150 && asili <= 0 && tdiff >= -10 && tdiff <= 0 &&goodez) hrrsili[j/2]->Fill(rdt[j],rdt[j+1]);
-            //if(rsili >= -150 && rsili <= 0 && tdiff >= -10 && tdiff <= 0 &&goodez) hrasili[j/2]->Fill(rdt[j],rdt[j+1]);
-            if(asili >= -55 && asili <= -15 && tdiff >= -10 && tdiff <= 0 &&goodez) hrrsili2p[j/2]->Fill(rdt[j],rdt[j+1]);
-            if(rsili >= -55 && rsili <= -15 && tdiff >= -10 && tdiff <= 0 &&goodez) hrasili2p[j/2]->Fill(rdt[j],rdt[j+1]);
+            if(asili >= -6 && asili <= 2 && tdiff >= -8 && tdiff <= 1) hrrsili[j/2]->Fill(rdt[j],rdt[j+1]);
+            if(rsili >= -9 && rsili <= -2 && tdiff >= -8 && tdiff <= 1) hrasili[j/2]->Fill(rdt[j],rdt[j+1]);
          }
             hID2g->Fill(detID, j); 
             //if( rdtgate) hID2g->Fill(detID, j); 
@@ -896,7 +833,7 @@ Bool_t Monitors::Process(Long64_t entry)
         multiEZ ++;
         isGoodEventFlag = true;
       }	 
-     }
+      
     }//end of array loop
     
     //=========== fill eCal Vs z for each row
@@ -907,8 +844,7 @@ Bool_t Monitors::Process(Long64_t entry)
          if( ((xf[k] > 0 || !TMath::IsNaN(xf[k]))  && ( xn[k]>0 || !TMath::IsNaN(xn[k]))) ) hecalVzRow[i] -> Fill( z[k], eCal[k]);
       }
     }
-        
-        
+    
    /*********** RECOILS ************************************************/    
    for( int i = 0; i < 8 ; i++){
       hrdtID->Fill(i, rdt[i]);
@@ -948,7 +884,7 @@ Bool_t Monitors::Process(Long64_t entry)
    if( !isGoodEventFlag ) return kTRUE;
    
    for(Int_t detID = 0; detID < numDet ; detID++){
-     	if(detID != 2 && detID != 5 && detID != 25 && detID != 27 && detID != 28){
+     	
      if( TMath::IsNaN(e[detID]) ) continue ; 
      if( TMath::IsNaN(z[detID]) ) continue ; 
      if( eCal[detID] < 1) continue;
@@ -1004,7 +940,7 @@ Bool_t Monitors::Process(Long64_t entry)
      hExi[detID]->Fill(Ex);
      hExThetaCM->Fill(thetaCM, Ex);
      htacEx->Fill(tac[0], Ex);
-    }
+
    }
   
    return kTRUE;
@@ -1062,17 +998,16 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 2
    cCanvas->cd(2); 
-   //htdiff->Draw();
-   //htdiffg->SetLineColor(2);
-   //htdiffg->Draw("same");
-   hasili->Draw("colz");
+   htdiff->Draw();
+   htdiffg->SetLineColor(2);
+   htdiffg->Draw("same");
    
    TLatex text;
    text.SetNDC();
    text.SetTextFont(82);
    text.SetTextSize(0.04);
    text.SetTextColor(2);
-   //text.DrawLatex(0.15, 0.8, "with Recoil");
+   text.DrawLatex(0.15, 0.8, "with Recoil");
 
    ///----------------------------------- Canvas - 3
    cCanvas->cd(3);
@@ -1096,7 +1031,7 @@ void Monitors::Terminate()
    //cCanvas->cd(4); hID2->Draw("colz");
    cCanvas->cd(4); 
    //Draw2DHist(hExThetaCM);
-   Draw2DHist(hezgrsili);
+   Draw2DHist(htacEx);
    
    ///----------------------------------- Canvas - 5
    cCanvas->cd(5); Draw2DHist(hrdt2Dg[0]);
@@ -1115,7 +1050,7 @@ void Monitors::Terminate()
    
    ///----------------------------------- Canvas - 8
    cCanvas->cd(8); Draw2DHist(hrdt2Dg[3]);
-    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /************************* Save histograms to root file*/
