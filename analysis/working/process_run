@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "$./process_run [RunNum] [Merge] [EventBld] [GeneralSort] [Monitor]"
