@@ -30,6 +30,12 @@ ROOTSOURCE=${ROOTPATH:0:$len-4}"thisroot.sh"
 echo $ROOTSOURCE
 source $ROOTSOURCE
 
+#===== go to Cleopatra and make
+currentPath=$(pwd)
+cd ../Cleopatra
+make
+cd ${cuurentPath}
+
 #================================ User Defualt Control
 CreateInFile=0   # 0 = false, 1 = true
 RunPtolemy=0
@@ -109,7 +115,7 @@ echo "##  @@    @@    @@@@ @@  @@ @@@@@ @@@@@@   @@   @@@@@  @@@@@@  ##"
 echo "##  @@    @@    @@   @@  @@ @@    @@  @@   @@   @@ @   @@  @@  ##"
 echo "##   @@@@ @@@@@ @@@@  @@@@  @@    @@  @@   @@   @@  @  @@  @@  ##"
 echo "#################################################################"
-echo "#####        Cleopatra, Ptolemy for (d,p),(p,d)             #####"
+echo "#####    Cleopatra, Ptolemy for (d,p),(p,d),(p,p),(d,d)     #####"
 echo "#################################################################"
 echo ""
 echo "USER OPTION:"
