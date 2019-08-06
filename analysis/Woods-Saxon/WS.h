@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h> //for atoi, atof
-//#include <math.h> //exp
 #include <cmath>
 #include <vector> 
 #include "RK4.h"
@@ -35,15 +34,19 @@ public:
 	vector<double> errorUratio; 
 
 	int A; // mass number
-	double r0, rSO; // reduced mass
+   //charge number already in class RKFourth
+	double r0, rSO, rc; // reduced mass
 
-	void SetWSRadius(int A, double r0, double rSO){
+	void SetWSRadius(int A, int Z,  double r0, double rSO, double rc){
 		this->A = A;
+      this->Z = Z;
 		this->r0 = r0;
 		this->rSO = rSO;
+      this->rc = rc;
 		
-		this->R0 = r0 * pow(A, 1./3.);
+		this->R0  = r0  * pow(A, 1./3.);
 		this->RSO = rSO * pow(A, 1./3.);
+      this->Rc  = rc  * pow(A, 1./3.);
 	}
 
 	void PrintEnergyLevels(){
@@ -55,9 +58,11 @@ public:
 
 	void PrintWSParas(){
 	  printf("================ Woods-Saxon parameters \n");
-	  printf("   A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, dr, nStep, dr * nStep);
-	  printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
+	  printf("  A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, dr, nStep, dr * nStep);
+	  printf("-------------------------------\n");
+     printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
 	  printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n", VSO,  RSO, rSO, aSO);
+     printf("  Z: %8.0f,      Rc: %8.4f(%4.2f) fm\n", Z, Rc, rc);
 	  printf("================================\n");
 	}
 
@@ -85,6 +90,7 @@ public:
 		 if( L == 5 ) orbital = "h";
 		 if( L == 6 ) orbital = "i";
 		 if( L == 7 ) orbital = "j";
+       if( L == 8 ) orbital = "k";
 
 		 //printf("----------- L : %d \n", L);
 
