@@ -142,6 +142,7 @@ void WSProof::SlaveBegin(TTree * /*tree*/)
    saveFileName = optionList[2];
 	wsNStep = atoi(optionList[3].c_str());
 	wsdr = atof(optionList[4].c_str());
+   wsZ = atoi(optionList[5].c_str());
 	printf(" ----- save File Name  : %s \n", saveFileName.Data());
    
    proofFile = new TProofOutputFile(saveFileName, "M"); // M for merge
@@ -211,6 +212,9 @@ Bool_t WSProof::Process(Long64_t entry)
    ws.r0 = r0;
    ws.rSO = rSO;
    ws.A = wsA;
+   ws.Z = wsZ;
+   ws.Rc = R0;
+   ws.rc = r0;
    ws.dr = wsdr;
    ws.nStep = wsNStep;
 

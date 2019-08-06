@@ -16,12 +16,8 @@ It will not do parameter search
 WSSearch will search parameters
 
 ===================== How to use WSSearch with parallel computation in LCRC
-using command 
- > sbatch ProofSlurm.sh
-
-to estimate the run time, 
-
- >root ProofWSSearch.C+
+edit the file <ProofSlurm.sh>
+and run as a batch script
 
 ===================== Code dependency
 
