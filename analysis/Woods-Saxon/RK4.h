@@ -14,22 +14,26 @@
 #include <stdlib.h> //for atoi, atof
 #include <cmath> //exp
 #include <vector> 
+#include "../Cleopatra/constant.h"
 
 using namespace std;
 
+/*
 double mp = 938.272;
 double mn = 939.5654133;
 double hbarc = 197.326979;
 double amu = 931.5;
 double ee  = 1.439964454;
-
-double mu = mn;
+*/
 
 bool isSaveWaveFunction = false;
 
 class RKFourth {
 public:
   RKFourth(){
+
+    mu = mn;
+    
     Z = 0;
     Rc = 10000;
 
@@ -49,6 +53,7 @@ public:
 
 	~RKFourth(){}
 	
+   double mu; // mass of nucleon
 	
 	double V0; // in negative MeV
 	double R0; // in fm
