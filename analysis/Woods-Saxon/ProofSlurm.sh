@@ -15,7 +15,7 @@ userName="ttang"
 #=====================================
 
 jobName=WS${isotope}
-outFile="ws_${isotope}.root"
+outFile="ws_${isotope}_all.root"
 
 echo "####################################"
 echo "Job Name     : "${jobName}
