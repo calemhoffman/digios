@@ -37,6 +37,18 @@ public:
    //charge number already in class RKFourth
 	double r0, rSO, rc; // reduced mass
 
+   void IsNeutron(){ this->mu = mn;}
+   void IsProton(){ this->mu = mp;}
+
+   void SetZ(int Z) {
+      this->Z = Z;
+      if( Z != 0) {
+        this->mu = mp;
+      }else{
+        this->mu = mn;
+      }
+   }
+
 	void SetWSRadius(int A, int Z,  double r0, double rSO, double rc){
 		this->A = A;
       this->Z = Z;
@@ -47,6 +59,12 @@ public:
 		this->R0  = r0  * pow(A, 1./3.);
 		this->RSO = rSO * pow(A, 1./3.);
       this->Rc  = rc  * pow(A, 1./3.);
+
+      if( Z != 0) {
+        this->mu = mp;
+      }else{
+        this->mu = mn;
+      }
 	}
 
 	void PrintEnergyLevels(){

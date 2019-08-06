@@ -208,7 +208,7 @@ int main(int argc, char *argv[]){
   WoodsSaxon ws;
   
   ws.A = A;
-  ws.Z = Z;
+  ws.SetZ(Z);
   ws.dr = 0.1;
   ws.nStep = 200;
 

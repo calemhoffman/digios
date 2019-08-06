@@ -212,7 +212,7 @@ Bool_t WSProof::Process(Long64_t entry)
    ws.r0 = r0;
    ws.rSO = rSO;
    ws.A = wsA;
-   ws.Z = wsZ;
+   ws.SetZ(wsZ);
    ws.Rc = R0;
    ws.rc = r0;
    ws.dr = wsdr;

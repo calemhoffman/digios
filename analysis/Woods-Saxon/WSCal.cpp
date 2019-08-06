@@ -79,6 +79,8 @@ int main(int argc, char *argv[]){
   //calculate WS eigen energy
   //ws.dr = 0.1; ws.nStep = 200;
   
+  ws.IsNeutron();
+  if( ws.Z != 0 ) ws.IsProton();
   ws.PrintWSParas();
   ws.CalWSEnergies();
   
