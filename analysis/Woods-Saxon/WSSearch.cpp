@@ -59,19 +59,21 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
 int main(int argc, char *argv[]){
 
-  if(argc != 5 ) {
+  if(argc != 6 ) {
     //TODO put the mass number out of paraFile
-    printf("Usage: ./WSSearch expFile A paraFile outRoot\n");
+    printf("Usage: ./WSSearch  expFile  A  Z  paraFile  outRoot\n");
     printf("       expFile = experimental energies\n");
     printf("             A = mass number\n");
+    printf("             Z = proton number [ ZERO for neutron levels, rc = r0 ]\n");
     printf("      paraFile = search setting\n");
     printf("       outRoot = output Root File name\n");
     exit(0);   }
 
   string readFile = argv[1];
   int A  = atoi(argv[2]);
-  string paraFile = argv[3];
-  string rootFile = argv[4];
+  int Z  = atoi(argv[3]);
+  string paraFile = argv[4];
+  string rootFile = argv[5];
 
   //========= reading expFile
   ifstream file_in;
@@ -183,6 +185,8 @@ int main(int argc, char *argv[]){
   searchRangeMsg.AddLine(str.Data());
   str.Form(" mass A : %d", A);
   searchRangeMsg.AddLine(str.Data());
+  str.Form(" proton number : %d,  rc = r0", Z);
+  searchRangeMsg.AddLine(str.Data());
   str.Form("  V0: (%9.4f, %9.4f) | step: %9.4f | %4d", v0min, v0max, v0step, v0N );
   searchRangeMsg.AddLine(str.Data());
   str.Form("  R0: (%9.4f, %9.4f) | step: %9.4f | %4d", r0min, r0max, r0step, r0N );
@@ -204,6 +208,7 @@ int main(int argc, char *argv[]){
   WoodsSaxon ws;
   
   ws.A = A;
+  ws.Z = Z;
   ws.dr = 0.1;
   ws.nStep = 200;
 
@@ -246,73 +251,78 @@ int main(int argc, char *argv[]){
   TStopwatch stpWatch;
   stpWatch.Start();
   int count = 0;
-  for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
-    ws.R0 = r0v * pow(A, 1./3.); 
-    ws.r0 = r0v;
-    //printf("---------------------R0  : %f fm (%f fm)\n", R0, r0);
-    for( double a0v = a0min; a0v <= a0max; a0v = a0v + a0step){
-      ws.a0 = a0v;
-      //printf("---------------------a0  : %f fm\n", a0);
-      for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
-        ws.RSO = rsov * pow(A, 1./3.); 
-        ws.rSO = rsov;
-        //printf("---------------------RSO : %f fm (%f fm)\n", RSO, rSO);        
-        for( double asov = asomin; asov <= asomax; asov = asov + asostep){
-          ws.aSO = asov;
-          //printf("---------------------aSO : %f fm\n", aSO);
-          for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
-            ws.V0 = v0;
-            double expTime = stpWatch.RealTime()* numCal/count / 60.;
-            system("clear");
-            printf("============ Input from %s.\n", readFile.c_str());
-            for( int i = 0; i < NLJ.size() ; i++){
-              printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);    
-            }
-            printf("==============================\n");
-            searchRangeMsg.Print();
-            printf("==============================\n");
-            printf("%7d/%7d [%4.1f%%]| %6.0f[%6.0f] min\n", 
-                   count, numCal, count*100./numCal, stpWatch.RealTime()/60., expTime);
-            printf("==============================\n");
-            stpWatch.Start(kFALSE);            
-            printf("%10s|%7s, %7s, %7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "", "V0", "R0", "r0", "a0", "VSO", "RSO", "rSO", "aSO", "rms");
-            printf("%10s|%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "current", ws.V0, ws.R0, ws.r0, ws.a0, ws.VSO, ws.RSO, ws.rSO, ws.aSO, rms);
-            printf("%10s|\e[31m%7.2f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", 
-                      "Best", V0best, R0best, r0best, a0best, Vsobest, Rsobest, rsobest, asobest, rmsMin);
-            printf("==============================\n");
-            printf("        Experiment       |         Woods-Saxon        |\n");
-            for( int i = 0; i < NLJ.size(); i++){
-              for( int j = 0; j < orbStringBest.size(); j++){
-                if( NLJ[i] == orbStringBest[j] ){
-                  double diff = BE[i] -  energyBest[j];
-                  printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, orbStringBest[j].c_str(), energyBest[j], diff);
-                  continue;
+
+  for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
+    ws.V0 = v0;
+
+    for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
+      ws.R0 = r0v * pow(A, 1./3.); 
+      ws.r0 = r0v;
+      ws.rc = ws.r0;
+      ws.Rc = ws.R0;
+
+      for( double a0v = a0min; a0v <= a0max; a0v = a0v + a0step){
+        ws.a0 = a0v;
+
+        for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
+          ws.VSO = vso;
+
+          for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
+            ws.RSO = rsov * pow(A, 1./3.); 
+            ws.rSO = rsov;
+
+            for( double asov = asomin; asov <= asomax; asov = asov + asostep){
+              ws.aSO = asov;
+
+              //############## Display
+              system("clear");              
+              double expTime = stpWatch.RealTime()* numCal/count / 60.;
+              printf("============ Input from %s.\n", readFile.c_str());
+              for( int i = 0; i < NLJ.size() ; i++) printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);    
+              printf("==============================\n");
+              searchRangeMsg.Print();
+              printf("==============================\n");
+              printf("%7d/%7d [%4.1f%%]| %6.0f[%6.0f] min\n",  count, numCal, count*100./numCal, stpWatch.RealTime()/60., expTime);
+              printf("==============================\n");
+              stpWatch.Start(kFALSE);            
+              printf("%10s|%7s, %7s, %7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "", "V0", "R0", "r0", "a0", "VSO", "RSO", "rSO", "aSO", "rms");
+              printf("%10s|%7.2f, %7.5f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "current", ws.V0, ws.R0, ws.r0, ws.a0, ws.VSO, ws.RSO, ws.rSO, ws.aSO, rms);
+              printf("%10s|\e[31m%7.2f, %7.5f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "Best", V0best, R0best, r0best, a0best, Vsobest, Rsobest, rsobest, asobest, rmsMin);
+              printf("==============================\n");
+              printf("      Experiment      |       Woods-Saxon    |\n");
+              for( int i = 0; i < NLJ.size(); i++){
+                for( int j = 0; j < orbStringBest.size(); j++){
+                  if( NLJ[i] == orbStringBest[j] ){
+                    double diff = BE[i] -  energyBest[j];
+                    printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, orbStringBest[j].c_str(), energyBest[j], diff);
+                    continue;
+                  }
                 }
               }
-            }
-            for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
-              ws.VSO = vso;
-              //ws.PrintWSParas();
+              //################ end of display
+
               ws.CalWSEnergies();
+              
               count++;
               rms = 0;
               int nDiff = 0;
-              
               for( int i = 0; i < NLJ.size(); i++){
                 for( int j = 0; j < ws.orbString.size(); j++){
                   if( NLJ[i] == ws.orbString[j] ){
                     double diff = BE[i] -  ws.energy[j];
-                    rms += pow(diff,2);
+                    rms += pow(diff, 2);
                     nDiff ++;
                     continue;
                   }
                 }
               }
+
               if( rms == 0 || nDiff != NLJ.size() ){
                 rms = TMath::QuietNaN();
               }else{
                 rms = sqrt(rms/NLJ.size());
               }
+
               if( rms < rmsMin ) {
                 rmsMin = rms;
                 V0best = ws.V0;
@@ -325,6 +335,11 @@ int main(int argc, char *argv[]){
                 asobest = ws.aSO;
                 energyBest = ws.energy;
                 orbStringBest = ws.orbString;
+               
+                //ws.PrintWSParas();
+                //ws.PrintEnergyLevels();
+                //printf("%10s|\e[31m%7.2f, %7.5f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "Best", V0best, R0best, r0best, a0best, Vsobest, Rsobest, rsobest, asobest, rmsMin);
+                //sleep(2);
               }
               tree->Fill();
               
@@ -344,11 +359,17 @@ int main(int argc, char *argv[]){
   ws.VSO = Vsobest;
   ws.RSO = Rsobest;
   ws.aSO = asobest;
+  ws.Rc = R0best;
+
+  ws.r0  = R0best * pow(A, -1./3.);
+  ws.rSO = Rsobest * pow(A, -1./3.);
+  ws.rc  = ws.r0;
+
   ws.CalWSEnergies();
   printf("================ Best Fit Woods-Saxon parameters \n");
   ws.PrintWSParas();
     
-  printf("    Experiment  |  Woods-Saxon   |\n");
+  printf("      Experiment    |    Woods-Saxon     |\n");
   rms = 0;
   for( int i = 0; i < NLJ.size(); i++){
     for( int j = 0; j < ws.orbString.size(); j++){
