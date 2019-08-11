@@ -1,1 +1,5 @@
+#need to add 
+#git config --global merge.ours.driver true
+
+
 expName.sh merge=ours
