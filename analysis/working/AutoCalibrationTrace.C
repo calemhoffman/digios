@@ -37,7 +37,6 @@ void PrintManual(){
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
    printf(" \e[31m     Please Edit runsList.txt  \e[0m\n");
-   //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
@@ -74,7 +73,7 @@ void toTransferReaction(){
       return;
    }
    system("../Cleopatra/Transfer");
-   gROOT->ProcessLine(".q");
+   //gROOT->ProcessLine(".q");
 
 }
 
@@ -238,15 +237,11 @@ void AutoCalibrationTrace(){
       printf("(1 = Yes / 0 = No ) ? ");
       temp = scanf("%d", &nextFlag);
       
-      if( nextFlag == 0 ){
-         printf(" ------ bye bye !------- \n");
-         gROOT->ProcessLine(".q");
-         return;
+      TString rootfileSim="transfer.root";
+      if( nextFlag == 1 ){
+         toTransferReaction();
       }
       
-      toTransferReaction();
-      
-      TString rootfileSim="transfer.root";
       TFile *fs = new TFile (rootfileSim, "read"); 
       if(!fs->IsOpen()){
          printf("!!!!! cannot open transfer.root !!!!! \n");

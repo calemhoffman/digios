@@ -6,14 +6,7 @@ source ${constFile} #load expName
 #==== next experiment number
 LastRunNum=$((LastRunNum + 1))
 
-echo "#!/bin/bash -l" > ${constFile}
-echo "expName=${expName}" >> ${constFile}
-echo "LastRunNum=${LastRunNum}" >> ${constFile}
-
-#read -p 'Enter the Run Number (e.g. 001): ' RUN
-
 RUN=${LastRunNum}
-
 #check RUN is 3 digit
 runLen=${#RUN}
 if [ ${runLen} -eq 1 ]; then
@@ -22,25 +15,37 @@ elif [ ${runLen} -eq 2 ]; then
    RUN="0"${RUN}
 fi;
 
+echo ""
 echo "=========================================="
 echo "Starting run : ${RUN}"
 echo "=========================================="
 
 #==== read comment
+echo 'Ctrl+C to cancel with no harm.'
 read -p 'Singleline comment for this run: ' COMMENT
 
+echo "#!/bin/bash -l" > ${constFile}
+echo "expName=${expName}" >> ${constFile}
+echo "daqDataPath=${daqDataPath}" >> ${constFile}
+echo "LastRunNum=${LastRunNum}" >> ${constFile}
 
 set DIGIOSRUNNUM
 DIGIOSRUNNUM=${RUN}
 export DIGIOSRUNNUM
 
+currentDate=$(date)
 
-#echo "RUN-${RUN} start at $(date), $COMMENT"
-echo "RUN-${RUN} start at $(date), $COMMENT" >> ~/digios/analysis/working/RunTimeStamp.dat
+echo "RUN-${RUN} start at ${currentDate}, $COMMENT"
+echo "RUN-${RUN} start at ${currentDate}, $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "RUN-${RUN} start at ${currentDate}, $COMMENT" > ~/digios/analysis/working/elog.txt
+
+~/digios/daq/edm/scripts/elog.sh start
 
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
 caput Online_CS_StartStop Start
+
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=1" --max-time 1 --connect-timeout 1
 
 export TERM=vt100
 echo " terminals" 

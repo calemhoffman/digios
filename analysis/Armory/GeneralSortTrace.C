@@ -19,7 +19,7 @@
 //================== TODO to be a setup file
 const int nDet=30; //number of PSD detector
 
-TString saveFileName = "sortedTrace.root"; //TODO add suffix to original file
+TString saveFileName;
 TFile *saveFile; //!
 TTree *newTree; //!
 
@@ -31,11 +31,11 @@ ULong64_t ProcessedEntries = 0;
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 0; //0 = no process, 1, fit, 2, Trapezoid (not implement yet) //TODO
+int traceMethod = 1; //0 = no process, 1, fit, 2, Trapezoid (not implement yet) //TODO
 int traceLength = 600;
 
 bool isTACRF = false;
-bool isRecoil = false;
+bool isRecoil = true;
 bool isElum = false;
 bool isEZero = false;
 
@@ -117,7 +117,7 @@ void GeneralSortTrace::Begin(TTree * tree)
    printf("Output Root File : %s \n", saveFileName.Data());
 
    saveFile = new TFile(saveFileName,"RECREATE");
-   newTree = new TTree("tree","PSD Tree w/ trace");
+   newTree = new TTree("gen_tree","PSD Tree w/ trace");
 
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
    newTree->Branch("runID", &psd.runID,"runID/I");
@@ -231,7 +231,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
-      psd.Ring[i]    = TMath::QuietNaN();
+      psd.Ring[i]    = 0.0;
       psd.RDT[i]     = TMath::QuietNaN();
       psd.TAC[i]     = TMath::QuietNaN();
       if (i<32) psd.ELUM[i] = TMath::QuietNaN();

@@ -11,19 +11,23 @@
 #include <TMath.h>
 #include <TGraph.h>
 #include <TLine.h>
+#include <TLatex.h>
 #include <TSpectrum.h>
 
 
-void Cali_e_single(TTree * tree, int detID){
+void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEnergyRange = 7000){
   
   if( detID < 0 ){
     return;
   }
   
 /**///======================================================== initial input
-   
-   int energyRange[2] = {500, 5000};
-   
+
+   int nBin = 200;
+
+  //TString gate; gate.Form("!TMath::IsNaN(e[%d])", detID);
+   TString gate; gate.Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", detID, detID);
+
    
 /**///========================================================  load tree
 
@@ -35,13 +39,16 @@ void Cali_e_single(TTree * tree, int detID){
 /**///======================================================== Browser or Canvas
 
    //TBrowser B ;   
-   Int_t Div[2] = {1,1};  //x,y
+   Int_t Div[2] = {3,1};  //x,y
    Int_t size[2] = {400,400}; //x,y
-   TCanvas * cAlpha = new TCanvas("cAlpha", "cAlpha", 0, 0, size[0]*Div[0], size[1]*Div[1]);
-   cAlpha->Divide(Div[0],Div[1]);
+   TCanvas * cAlpha = (TCanvas *) gROOT->FindObjectAny("cAlpha");
+   if( cAlpha == NULL ) {
+     cAlpha = new TCanvas("cAlpha", "cAlpha", 0, 0, size[0]*Div[0], size[1]*Div[1]);
+     cAlpha->Divide(Div[0],Div[1]);
    
-   for( int i = 1; i <= Div[0]*Div[1] ; i++){
-      cAlpha->cd(i)->SetGrid();
+     for( int i = 1; i <= Div[0]*Div[1] ; i++){
+       cAlpha->cd(i)->SetGrid();
+     }
    }
 
    gStyle->SetOptStat(0);
@@ -59,13 +66,11 @@ void Cali_e_single(TTree * tree, int detID){
    printf("############## e correction \n");
    TString name;
    name.Form("q%d", detID);
-   TH1F * q = new TH1F(name, name, 300, energyRange[0], energyRange[1]);
+   TH1F * q = new TH1F(name, name, nBin, minEnergyRange, maxEnergyRange);
    q->SetXTitle(name);
    
-   TString expression, gate;
+   TString expression;
    expression.Form("e[%d] >> q%d" ,detID, detID);
-   gate.Form("e[%d] > 0", detID);
-   
    cAlpha->cd(1);
    tree->Draw(expression, gate , "");
    cAlpha->Update();
@@ -148,21 +153,35 @@ void Cali_e_single(TTree * tree, int detID){
       }
       printf("----------------------------------\n");
       
+      cAlpha->cd(2);
       TGraph * graph = new TGraph(n, &energy[0], &refEnergy[0] );
-         
+      graph->Draw("A*");
+      gSystem->ProcessEvents();
+   
       TF1 * fit = new TF1("fit", "pol1" );
       graph->Fit("fit", "q");
+      gSystem->ProcessEvents();
       
       a0 = fit->GetParameter(0);
       a1 = fit->GetParameter(1);
-         
+
+      TLatex text;
+      text.SetNDC();
+      text.SetTextFont(82);
+      text.SetTextSize(0.04);
+      text.SetTextColor(2);
+
+      text.DrawLatex(0.15, 0.8, Form("1/a1 = %12.7f", 1./a1));
+      text.DrawLatex(0.15, 0.7, Form(" a0  = %12.7f", a0));
+
       //printf("a0: %9.6f, a1: %9.6f \n", a0, a1);
       
-      printf("Please manually save to file as : %9.6f\t%9.6f\n", 1./a1, a0);
-         
+      printf("Please manually save to file as : %12.7f\t%12.7f\n", 1./a1, a0);
+      
+      cAlpha->cd(3);
       TString name;
       name.Form("p%d", detID);
-      TH1F * p = new TH1F(name, name, 200, 0., refEnergy.back() * 1.3);
+      TH1F * p = new TH1F(name, name, nBin, 0., refEnergy.back() * 1.3);
       p->SetXTitle(name);
          
       TString expression;

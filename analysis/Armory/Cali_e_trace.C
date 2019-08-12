@@ -21,7 +21,7 @@ void Cali_e_trace::Begin(TTree * /*tree*/)
 
 void Cali_e_trace::SlaveBegin(TTree * /*tree*/)
 {
-   TString option = GetOption();
+   TString optcion = GetOption();
 }
 
 Bool_t Cali_e_trace::Process(Long64_t entry)
@@ -78,9 +78,11 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       b_runID->GetEntry(entry,0);  
       run = runID;
    }
+
    b_Energy->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
+   b_RING->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
    b_EnergyTimestamp->GetEntry(entry,0);
    b_RDTTimestamp->GetEntry(entry,0);
@@ -102,20 +104,47 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       b_Trace_RDT_Time->GetEntry(entry,0);
       b_Trace_RDT_RiseTime->GetEntry(entry,0);
    }
-   
+
    //#################################################################### gate
 //   bool rdt_energy = false;
 //   for( int rID = 0; rID < 8; rID ++){
 //      if( rdt[rID] > 5000 ) rdt_energy = true; 
 //   }
 //   if( !rdt_energy ) return kTRUE;
+
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
+   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
+
+   bool coinFlag = false;
+   for( int i = 0; i < numDet ; i++){
+      for( int j = 0; j < 8 ; j++){
+         if( TMath::IsNaN(rdt[j]) ) continue; 
+         int tdiff = rdt_t[j] - e_t[i];
+         if( -20 < tdiff && tdiff < 20 )  {
+            coinFlag = true;
+         }
+      }
+   }
+   
+   if( coinFlag == false ) return kTRUE;
+
    //#################################################################### processing
    for(int i = 0 ; i < 8 ; i++){
       rdtC[i]   = rdtCorr[i] * rdt[i];
       rdtC_t[i] = rdt_t[i]; 
       if( !TMath::IsNaN(rdt[i]) ) {
          rdtID[i] = i;
+         //rdtMultiHit ++;
+      }
+
+   }
+
+   for( int i = 0; i< 4 ; i++){
+      if( !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtMultiHit ++;
       }
    }
@@ -136,6 +165,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       if( !TMath::IsNaN(xn[idet]) || xn[idet] > 0) xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
       //========= calculate x
+      
       if(xf[idet] > 0  && xn[idet] > 0 ) {
          x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
          hitID[idet] = 0;
@@ -148,6 +178,18 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       }else{
          x[idet] = TMath::QuietNaN();
       }
+      
+
+      //if(xfC[idet] > eC[idet]/2.){
+      //   x[idet] = 2*xfC[idet]/eC[idet] - 1. ;
+      //   hitID[idet] = 1;
+      //}else if(xnC[idet] > eC[idet]/2.){
+      //   x[idet] = 1. - 2* xnC[idet]/eC[idet];
+      //   hitID[idet] = 2;
+      //}else{
+      //   x[idet] = TMath::QuietNaN();
+      //}
+      
    
       x[idet] = x[idet] / xCorr[idet];
    
@@ -172,28 +214,29 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          det = idet;
          
          //========== coincident between array and RDT
+         /*
          if( 0 <= det && det < iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 0;
          }else if( iDet <= det && det < 2*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 3;
          }else if( 2*iDet <= det && det < 3*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 2;
          }else if( 3*iDet <= det && det < 4*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[4]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[1]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[6]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[3]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 1;
+            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 2;
+            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 3;
+            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 0;
+            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 1;
          }
-            
+         */   
          //========== coincident time
          detTime = idet;
          eTime  = eC_t[idet];
@@ -266,7 +309,25 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    }//end of idet-loop
    
    //================================= for coincident time bewteen array and rdt
-   if( multiHit == 1 ) {
+   if( multiHit == 1 && rdtMultiHit == 1) {
+     for(int idet = 0 ; idet < numDet; idet++){
+       if( eC_t[idet] > 0 ) {
+         eTime = eC_t[idet];
+         break;
+       }
+     }
+
+     ULong64_t rdtTime = 0;
+     for(int idet = 0 ; idet < 4; idet++){
+       if( rdt_t[2*idet] > 0 ) {
+         rdtTime = rdt_t[2*idet];
+         break;
+       }
+     }
+
+     coin_t = (int)eTime - rdtTime;
+
+     /*
       ULong64_t rdtTime = 0;
       Float_t rdtQ = 0;
       Float_t trdtTime = 0.;
@@ -292,9 +353,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          double f7corr = f7[detTime]->Eval(x[detTime]) + cTCorr[detTime][8];
          coinTime = (coinTimeUC - f7corr)*10.;
       }
+     */
    }
    
-   if( rejZeroHit && multiHit == 0 ) return kTRUE;
+   //if( rejZeroHit && multiHit == 0 ) return kTRUE;
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file

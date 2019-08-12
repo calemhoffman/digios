@@ -5,6 +5,10 @@ merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 
+*.Ex.txt
+*.Xsec.txt
+*.in
+*.out
 core.*
 *.o
 *.root
@@ -13,7 +17,14 @@ core.*
 *.d
 *.pcm
 *.so
+*.png
+*.pdf
 .DS_Store
+tempDB.txt
+elog.txt
+run_Summary.dat
+MakeDataLinks
+reaction.dat
 
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra

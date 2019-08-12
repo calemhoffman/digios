@@ -106,6 +106,7 @@ public :
    TBranch        *b_trace;   //!
    
    //======================= new tree, new file
+   TString saveFileName;
    TFile *saveFile; //!
    TProofOutputFile * proofFile; //!
    TTree *newTree; //!
@@ -115,9 +116,9 @@ public :
    TGraph * gTrace; //!
    TF1 * gFit; //!
 
-   float te[24];    // energy from trace
-   float te_r[24];  // rising time from frace
-   float te_t[24];  // time
+   float te[30];    // energy from trace
+   float te_r[30];  // rising time from frace
+   float te_t[30];  // time
    float ttac[6];
    float ttac_t[6];
    float ttac_r[6];
@@ -132,25 +133,25 @@ public :
    typedef struct {
       Int_t   eventID;
       Int_t   runID;
-      Float_t Energy[24];
-      Float_t XF[24];
-      Float_t XN[24];
-      Float_t Ring[24];
-      Float_t RDT[24];
+      Float_t Energy[30];
+      Float_t XF[30];
+      Float_t XN[30];
+      Float_t Ring[30];
+      Float_t RDT[8];
       Float_t TAC[24];
       Float_t ELUM[32];
       Float_t EZERO[4];
 
-      ULong64_t EnergyTimestamp[24];
-      ULong64_t XFTimestamp[24];
-      ULong64_t XNTimestamp[24];
-      ULong64_t RingTimestamp[24];
-      ULong64_t RDTTimestamp[24];
+      ULong64_t EnergyTimestamp[30];
+      ULong64_t XFTimestamp[30];
+      ULong64_t XNTimestamp[30];
+      ULong64_t RingTimestamp[30];
+      ULong64_t RDTTimestamp[8];
       ULong64_t TACTimestamp[24];
       ULong64_t ELUMTimestamp[32];
       ULong64_t EZEROTimestamp[4];
       
-      Float_t x[24];
+      Float_t x[30];
       
    } PSD;
 

@@ -17,9 +17,9 @@ caget $GLBL | awk '{print "caput " $1 " " $2}' >> $sfile
 echo "########## Saving Individual Trace Length ##########"
 echo "#Saving Individual Trace Length" >> $sfile
 
-VME="02 03 04"
-DIG="1 2 3"
-CH="0 1 2 3 4 5 6 7"
+VME="01 02 03 04"
+DIG="1 2 3 4"
+CH="0 1 2 3 4 5 6 7 8 9"
 
 PVS="raw_data_window"
 
@@ -41,5 +41,8 @@ done
 
 date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> $sfile
 echo "########## Done Saving Trace Length ###########"
+rm -rf edm/scripts/array_raw_data_windows_saved
+ln -s ../../$sfile edm/scripts/array_raw_data_windows_saved
+
 exit
 

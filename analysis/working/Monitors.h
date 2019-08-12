@@ -67,6 +67,9 @@ public :
    
    int A;
    void testingInput(int n){this->A = n;}
+   
+   double z[100];
+
 
    Monitors(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Monitors() { }
@@ -83,6 +86,8 @@ public :
    virtual TList  *GetOutputList() const { return fOutput; }
    virtual void    SlaveTerminate();
    virtual void    Terminate();
+
+   void Draw2DHist(TH2F * hist);
 
    ClassDef(Monitors,0);
 };

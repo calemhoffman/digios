@@ -18,6 +18,7 @@
 #include <string>
 #include <fstream>
 #include <TObjArray.h>
+#include <TCutG.h>
 #include "TClonesArray.h"
 
 // Headers needed by this particular selector
@@ -36,8 +37,10 @@ public :
    ULong64_t       xf_t[100];
    Float_t         xn[100];
    ULong64_t       xn_t[100];
-   Float_t         rdt[100];
-   ULong64_t       rdt_t[100];
+   Float_t         ring[100];
+   ULong64_t       ring_t[100];
+   Float_t         rdt[8];
+   ULong64_t       rdt_t[8];
    Float_t         tac[100];
    ULong64_t       tac_t[100];
    Float_t         elum[32];
@@ -46,9 +49,9 @@ public :
    ULong64_t       ezero_t[10];
    
    //Trace
-   Float_t         te[24];
-   Float_t         te_r[24];
-   Float_t         te_t[24];
+   Float_t         te[30];
+   Float_t         te_r[30];
+   Float_t         te_t[30];
    Float_t         trdt[8];
    Float_t         trdt_t[8];
    Float_t         trdt_r[8];
@@ -62,6 +65,8 @@ public :
    TBranch        *b_XFTimestamp;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_XNTimestamp;   //!
+   TBranch        *b_RING;   //!
+   TBranch        *b_RINGTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
    TBranch        *b_TAC;   //!
@@ -113,14 +118,14 @@ public :
    //tree  
    Int_t eventID;
    Int_t run;
-   Float_t eC[24];
-   Float_t xfC[24];
-   Float_t xnC[24];
-   ULong64_t eC_t[24];
-   Float_t x[24]; // unadjusted position, range (-1,1)
-   Float_t z[24]; 
+   Float_t eC[30];
+   Float_t xfC[30];
+   Float_t xnC[30];
+   ULong64_t eC_t[30];
+   Float_t x[30]; // unadjusted position, range (-1,1)
+   Float_t z[30]; 
    int det;    //TODO, when multiHit, which is detID?
-   int hitID[24]; // is e, xf, xn are all fired.
+   int hitID[30]; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
    
    Float_t thetaCM;
@@ -165,14 +170,14 @@ public :
    double perpDist;
    double length;
    double firstPos;
-   double xnCorr[24]; // xn correction for xn = xf
-   double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
-   double xCorr[24]; // correction of x, scale to (-1,1)
+   double xnCorr[30]; // xn correction for xn = xf
+   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   double xCorr[30]; // correction of x, scale to (-1,1)
    
-   double eCorr[24][2]; // e-correction
+   double eCorr[30][2]; // e-correction
    double rdtCorr[8]; //rdt-correction
    
-   double cTCorr[24][9]; // coinTime correction
+   double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
    
    bool isReaction;
@@ -181,6 +186,10 @@ public :
    double beta, gamma;
    double alpha ;
    double Et, massB;
+
+   //======== RDT cut
+   bool isRDTCutExist;
+   TCutG ** cut = NULL;
 
 
 };
@@ -215,12 +224,15 @@ void Cali_e_trace::Init(TTree *tree)
    fChain->SetBranchAddress("e", e, &b_Energy);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
+   fChain->SetBranchAddress("ring", ring, &b_RING);
+ 
    
    fChain->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
    fChain->SetBranchAddress("rdt", rdt, &b_RDT);
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);   
    //fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
    //fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
+   //fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
    
    isRunIDExist = false;
    TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("runID");
@@ -264,7 +276,7 @@ void Cali_e_trace::Init(TTree *tree)
    isEZEROExist = false;
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("ezero");
    if( br == NULL ){
-      printf(" ++++++++ no zero data.\n");
+      printf(" ++++++++ no ezero data.\n");
    }else{
       isEZEROExist = true;
       fChain->SetBranchAddress("ezero", ezero, &b_EZERO);
@@ -307,20 +319,21 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("eventID",&eventID,"eventID/I"); 
    if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
    
-   newTree->Branch("e" ,   eC, "e[24]/F");
-   //newTree->Branch("xf",  xfC, "xf[24]/F");
-   //newTree->Branch("xn",  xnC, "xn[24]/F");
-   newTree->Branch("x" ,    x, "x[24]/F");
-   newTree->Branch("z" ,    z, "z[24]/F");
+   newTree->Branch("e" ,   eC, "e[30]/F");
+   //newTree->Branch("xf",  xfC, "xf[30]/F");
+   //newTree->Branch("xn",  xnC, "xn[30]/F");
+   newTree->Branch("ring",  ring, "xn[30]/F");
+   newTree->Branch("x" ,    x, "x[30]/F");
+   newTree->Branch("z" ,    z, "z[30]/F");
    newTree->Branch("detID", &det, "det/I");
-   newTree->Branch("hitID", hitID, "hitID[24]/I");
+   newTree->Branch("hitID", hitID, "hitID[30]/I");
    newTree->Branch("multiHit", &multiHit, "multiHit/I");
    
    newTree->Branch("Ex", &Ex, "Ex/F");
    newTree->Branch("thetaCM", &thetaCM, "thetaCM/F");
    newTree->Branch("thetaLab", &thetaLab, "thetaLab/F");
    
-   newTree->Branch("e_t", eC_t, "e_t[24]/l");
+   newTree->Branch("e_t", eC_t, "e_t[30]/l");
    
    newTree->Branch("rdt", rdtC, "rdtC[8]/F");
    newTree->Branch("rdt_t", rdtC_t, "rdtC_t[8]/l");
@@ -343,14 +356,25 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUC/F");
       newTree->Branch("coinTime", &coinTime, "coinTime/F");
        
-      newTree->Branch("te",     &teS,     "teS/F");
-      newTree->Branch("te_t",   &te_tS,   "te_tS/F");
-      newTree->Branch("te_r",   &te_rS,   "te_rS/F");
-      newTree->Branch("trdt",   &trdtS,   "trdtS/F");
-      newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
-      newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
+//      newTree->Branch("te",     &teS,     "teS/F");
+//      newTree->Branch("te_t",   &te_tS,   "te_tS/F");
+//      newTree->Branch("te_r",   &te_rS,   "te_rS/F");
+//      newTree->Branch("trdt",   &trdtS,   "trdtS/F");
+//      newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
+//      newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
+
+         newTree->Branch("te",             te,  "Trace_Energy[30]/F");
+         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
+         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
+         newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
+         newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
+         newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
    }
-   
+
+   printf("Is EBIS  exist : %d\n", isEBISExist);
+   printf("Is ELUM  exist : %d\n", isELUMExist);
+   printf("Is EZero exist : %d\n", isEZEROExist);
+   printf("Is Trace exist : %d\n", isTraceDataExist);
    //=== clock
    clock.Reset();
    clock.Start("timer");
@@ -360,8 +384,9 @@ void Cali_e_trace::Init(TTree *tree)
    //===================================================== loading parameter
    
    //========================================= detector Geometry
+   printf("======================= loading parameters files .... \n");
    string detGeoFileName = "detectorGeo.txt";
-   printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
+   printf("loading detector geometery : %s.", detGeoFileName.c_str());
    ifstream file;
    file.open(detGeoFileName.c_str());
    int i = 0;
@@ -397,12 +422,12 @@ void Cali_e_trace::Init(TTree *tree)
       printf("----------- list of detector position\n");
       for(int i = 0; i < iDet ; i++){
          if( firstPos > 0 ){
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
          }else{
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i] - length , pos[i]);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
          }
       }
-      printf("=======================\n");
+      printf("==================================\n");
       
    }else{
        printf("... fail\n");
@@ -421,9 +446,9 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
    numDet = iDet * jDet;
-   
+
    //========================================= xf = xn correction
-   printf("----- loading xf-xn correction.");
+   printf("loading xf-xn correction.");
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
       double a;
@@ -434,9 +459,9 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       
-      printf("... done.\n");
+      printf("................... done.\n");
    }else{
-      printf("... fail.\n");
+      printf("................... fail.\n");
       
       for(int i = 0; i < numDet; i++){
          xnCorr[i] = 1;
@@ -445,8 +470,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
    
    //========================================= e = xf + xn correction
-   
-   printf("----- loading xf/xn-e correction.");
+   printf("loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
    if( file.is_open() ){
       double a, b;
@@ -457,9 +481,9 @@ void Cali_e_trace::Init(TTree *tree)
          xfxneCorr[i][1] = b;
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("................. done.\n");
    }else{
-      printf("... fail.\n");
+      printf("................. fail.\n");
       for(int i = 0; i < numDet; i++){
          xfxneCorr[i][0] = 0;
          xfxneCorr[i][1] = 1;
@@ -468,8 +492,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //========================================= e correction
-   
-   printf("----- loading e correction.");
+   printf("loading e correction.");
    file.open("correction_e.dat");
    if( file.is_open() ){
       double a, b;
@@ -481,11 +504,11 @@ void Cali_e_trace::Init(TTree *tree)
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("....................... done.\n");
       
    }else{
-      printf("... fail.\n");
-      for( int i = 0; i < 24 ; i++){
+      printf("....................... fail.\n");
+      for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
       }
@@ -495,8 +518,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    
    //========================================= e correction
-   
-   printf("----- loading x correction.");
+   printf("loading x correction.");
    file.open("correction_scaleX.dat");
    if( file.is_open() ){
       double a;
@@ -506,11 +528,11 @@ void Cali_e_trace::Init(TTree *tree)
          xCorr[i] = a;  
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("....................... done.\n");
       
    }else{
-      printf("... fail.\n");
-      for( int i = 0; i < 24 ; i++){
+      printf("....................... fail.\n");
+      for( int i = 0; i < numDet ; i++){
          xCorr[i] = 1.;
       }
       //return;
@@ -519,8 +541,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    
    //========================================= rdt correction
-   
-   printf("----- loading rdt correction.");
+   printf("loading rdt correction.");
    file.open("correction_rdt.dat");
    if( file.is_open() ){
       double a, b;
@@ -530,11 +551,11 @@ void Cali_e_trace::Init(TTree *tree)
          rdtCorr[i] = a;  //
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("..................... done.\n");
       
    }else{
-      printf("... fail.\n");
-      for( int i = 0; i < 24 ; i++){
+      printf("..................... fail.\n");
+      for( int i = 0; i < numDet ; i++){
          rdtCorr[i] = 1.;
       }
    }
@@ -542,7 +563,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    //========================================= coinTime correction
    if( isTraceDataExist ){
-      printf("----- loading coin-Time correction parameters.");
+      printf("loading coin-Time correction parameters.");
       file.open("correction_coinTime.dat");
       
       f7 = new TF1*[numDet];
@@ -565,10 +586,10 @@ void Cali_e_trace::Init(TTree *tree)
             printf("\n%2d, a0: %f, a1: %f .... a7: %f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
-         printf("... done.\n");
+         printf(".... done.\n");
          
       }else{
-         printf("... fail.\n");
+         printf(".... fail.\n");
          for( int i = 0; i < numDet; i++){
             for( int j = 0 ; j < 9; j++){
                cTCorr[i][j] = 0.;
@@ -597,7 +618,7 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
    //========================================= reaction parameters
-   printf("----- loading reaction parameter.");
+   printf("loading reaction parameter.");
    file.open("reaction.dat");
    isReaction = false;
    if( file.is_open() ){
@@ -612,7 +633,7 @@ void Cali_e_trace::Init(TTree *tree)
          if( i == 4 ) massB = atof(x.c_str()); 
          i = i + 1;
       }
-      printf("... done.\n");
+      printf("................. done.\n");
 
       isReaction = true;
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.;
@@ -631,10 +652,29 @@ void Cali_e_trace::Init(TTree *tree)
 
 
    }else{
-      printf("... fail.\n");
+      printf("................. fail.\n");
       isReaction = false;
    }
    file.close();
+
+   //====================================== load RDT cut
+   TFile * fileCut = new TFile("rdtCuts.root");   
+   TObjArray * cutList = NULL;
+   isRDTCutExist = false;
+   if( fileCut->IsOpen() ){
+      TObjArray * cutList = (TObjArray*) fileCut->FindObjectAny("cutList");
+      
+      if( cutList != NULL){
+         isRDTCutExist = true;
+         const int numCut = cutList->GetEntries();
+         cut = new TCutG * [numCut];
+         printf("=========== found %d cuts in %s \n", numCut, fileCut->GetName());
+         for( int i = 0 ; i < numCut; i++){
+            cut[i] = (TCutG* ) cutList->At(i);
+            printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
+         }
+      }
+   }
 
    printf("================================== numDet : %d \n", numDet);
    
