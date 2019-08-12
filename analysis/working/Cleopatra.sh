@@ -31,10 +31,9 @@ echo $ROOTSOURCE
 source $ROOTSOURCE
 
 #===== go to Cleopatra and make
-currentPath=$(pwd)
 cd ../Cleopatra
 make
-cd ${cuurentPath}
+cd ../working
 
 #================================ User Defualt Control
 CreateInFile=0   # 0 = false, 1 = true

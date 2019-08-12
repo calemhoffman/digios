@@ -18,6 +18,9 @@ echo " 7) if branch not exist --> clean up files, and git push"
 
 echo "#############################################"
 
+#set git merge driver
+git config --global merge.ours.driver true
+
 expName=$1
 
 if [ $# -ne 0 ]; then
