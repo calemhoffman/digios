@@ -1,3 +1,4 @@
 #!/bin/bash -l
 expName=ARR01
-LastRunNum=36
+daqDataPath=/media/DIGIOSDATA3
+LastRunNum=47

@@ -8,12 +8,21 @@
 #-------------------------------------------
 # basic sort parameters 
 
-;nevents           100000
+# number of event in a block
 nevents           1000000000
+
+# number of event in a block to be printed out
 printevents       1
+
+# v/c , gammasphere stuff
 beta              0.0
-modwrite          10000
-tsnumwrites       1000
+# number of event to be written in Log
+modwrite          100000
+
+# timestamp to be written in Log
+tsnumwrites       10000
+
+# event build windows
 timewin           1000
 
 #-------------------------------------------

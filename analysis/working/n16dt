@@ -29,39 +29,7 @@
 #=======================================================================
 #reaction        gs-spin    orbital  spin-pi(Ex)   Ex   ELab      Potentials
 #206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AA
-#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   HH
-#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   BB
-#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   DD
-#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   CC
-#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   LL
-
 #206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AK
-#206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   QV
-
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ax
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Al
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ap
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ac
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     At
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ah
-#20F(d,t)19F    2   0d5/2   1/2+  0.000  10MeV/u     Ab
-
-#20F(d,t)19F   2   0d5/2   5/2+  0.197  10MeV/u     Kx
-#20F(d,t)19F   2   0d5/2   5/2+  1.698  10MeV/u     Kx
-#20F(d,t)19F   2   0d5/2   5/2+  2.809  10MeV/u     Kx
-#20F(d,t)19F   2   0d5/2   5/2+  4.873  10MeV/u     Kx
-#20F(d,t)19F   2   1s1/2   3/2+  5.155  10MeV/u     Kx
-#20F(d,t)19F   2   0p1/2   5/2-  4.708  10MeV/u     Kx
-#20F(d,t)19F   2   0p1/2   3/2-  4.899  10MeV/u     Kx
-#20F(d,t)19F   2   0p1/2   5/2-  7.447  10MeV/u     Kx
-#20F(d,t)19F   2   0p3/2   7/2-  7.637  10MeV/u     Kx
-
-#16N(d,3He)15C   2   0p1/2   5/2+  0.74  12MeV/u     Ax
-#16N(d,3He)15C   0   0p1/2   1/2+  0.00  12MeV/u     Ax
-#16N(d,3He)15C   2   0p1/2   5/2+  0.74  12MeV/u     Qx
-#16N(d,3He)15C   0   0p1/2   1/2+  0.00  12MeV/u     Qx
-#16N(d,3He)15C   2   0p1/2   5/2+  0.74  12MeV/u     At
-#16N(d,3He)15C   0   0p1/2   1/2+  0.00  12MeV/u     At
 
 16N(d,t)15N   2   0d5/2   1/2- 0.00  12MeV/u     Kx
 16N(d,t)15N   0   1s1/2   1/2- 0.00  12MeV/u     Kx

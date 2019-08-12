@@ -26,7 +26,7 @@ void Transfer(
         TString     saveFileName = "transfer.root",
         TString         filename = "reaction.dat"){ // when no file, no output.
 
-  //================================================= User Setting //TODO move to reactionConfig
+  //================================================= User Setting
   //---- reaction
   int AA, zA; //beam
   int Aa, za; //target
@@ -149,23 +149,28 @@ void Transfer(
   }
   //helios.SetCoincidentWithRecoil(isCoincidentWithRecoil);
   int mDet = helios.GetNumberOfDetectorsInSamePos();
+
+  bool coinRecoil = helios.GetCoincidentWithRecoil();
+  printf(" is Coincident with Recoil and Array ? %s\n", coinRecoil ? "Yes" : "No");
   
   eSigma = helios.GetDetEnergyResol();
   zSigma = helios.GetDetPositionResol();
   
-  printf("                    energy resol.: %f MeV\n", eSigma);
-  printf("                     pos-Z resol.: %f mm \n", zSigma);
+  printf("  energy resol.: %f MeV\n", eSigma);
+  printf("   pos-Z resol.: %f mm \n", zSigma);
+  printf("=================================== Auxillary Detectors\n");
   
   double zElum1 = helios.GetElum1Pos();
   double zElum2 = helios.GetElum2Pos();
   double zRecoil1 = helios.GetRecoil1Pos();
   double zRecoil2 = helios.GetRecoil2Pos();
   
-  if( zElum1 != 0 ) printf("                      Elum 1 pos.: %f mm \n", zElum1);
-  if( zElum2 != 0 ) printf("                      Elum 2 pos.: %f mm \n", zElum2);
-  if( zRecoil1 != 0 ) printf("                    Recoil 1 pos.: %f mm \n", zRecoil1);
-  if( zRecoil2 != 0 ) printf("                    Recoil 2 pos.: %f mm \n", zRecoil2);
-  
+  if( zElum1 != 0 )   printf("   Elum 1 pos.: %f mm \n", zElum1);
+  if( zElum2 != 0 )   printf("   Elum 2 pos.: %f mm \n", zElum2);
+  if( zRecoil1 != 0 ) printf(" Recoil 1 pos.: %f mm \n", zRecoil1);
+  if( zRecoil2 != 0 ) printf(" Recoil 2 pos.: %f mm \n", zRecoil2);
+
+  printf("==================================== E-Z plot slope\n");
   double beta = reaction.GetReactionBeta() ;
   double gamma = reaction.GetReactionGamma();
   double mb = reaction.GetMass_b();
@@ -311,6 +316,19 @@ void Transfer(
   TMacro detGeo(heliosDetGeoFile.c_str());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
+  
+  TMacro hitMeaning;
+  TString str;
+  str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
+  str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -3 ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
+  str = "hit == -4 ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -5 ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -6 ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
+  str = "hit == -7 ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
+  str = "hit == -8 ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
+  hitMeaning.Write("hitMeaning");
 
   int hit; // the output of Helios.CalHit
   tree->Branch("hit", &hit, "hit/I");
@@ -360,9 +378,9 @@ void Transfer(
   tree->Branch("thetaCMCal", &thetaCMCal, "thetaCMCal/D");
 
   double KEA, theta, phi;
-  tree->Branch("theta", &theta, "theta/D");
-  tree->Branch("phi", &phi, "phi/D");
-  tree->Branch("KEA", &KEA, "KEA/D");
+  tree->Branch("beamTheta", &theta, "beamTheta/D");
+  tree->Branch("beamPhi", &phi, "beamPhi/D");
+  tree->Branch("beamKEA", &KEA, "beamKEA/D");
   
   double TbLoss; // energy loss of particle-b from target scattering
   double KEAnew; //beam energy after target scattering
@@ -376,41 +394,43 @@ void Transfer(
     tree->Branch("decayTheta", &decayTheta, "decayTheta/D");
   }
   
-  double xHit, yHit, rhoHit; //x, y, rho positon of particle-b on PSD
-  tree->Branch("xHit", &xHit, "xHit/D");
-  tree->Branch("yHit", &yHit, "yHit/D");
-  tree->Branch("rhoHit", &rhoHit, "rhoHit/D");
+  double xArray, yArray, rhoArray; //x, y, rho positon of particle-b on PSD
+  tree->Branch("xArray", &xArray, "xArray/D");
+  tree->Branch("yArray", &yArray, "yArray/D");
+  tree->Branch("rhoArray", &rhoArray, "rhoArray/D");
   
-  double rxHit, ryHit, rhoBHit; // x, y, rho position of particle-B on recoil-detector
-  tree->Branch("rxHit", &rxHit, "rxHit/D");
-  tree->Branch("ryHit", &ryHit, "ryHit/D");
-  tree->Branch("rhoBHit", &rhoBHit, "rhoBHit/D");
+  double xRecoil, yRecoil, rhoRecoil; // x, y, rho position of particle-B on recoil-detector
+  tree->Branch("xRecoil", &xRecoil, "xRecoil/D");
+  tree->Branch("yRecoil", &yRecoil, "yRecoil/D");
+  tree->Branch("rhoRecoil", &rhoRecoil, "rhoRecoil/D");
   
   //in case need ELUM
-  double xHit1, yHit1, rhoHit1;
+  double xElum1, yElum1, rhoElum1;
   if( zElum1 != 0 ) {
-    tree->Branch("xHit1", &xHit1, "xHit1/D");
-    tree->Branch("yHit1", &yHit1, "yHit1/D");
-    tree->Branch("rhoHit1", &rhoHit1, "rhoHit1/D");
+    tree->Branch("xElum1", &xElum1, "xElum1/D");
+    tree->Branch("yElum1", &yElum1, "yElum1/D");
+    tree->Branch("rhoElum1", &rhoElum1, "rhoElum1/D");
   }
   
-  double xHit2, yHit2, rhoHit2;
+  double xElum2, yElum2, rhoElum2;
   if( zElum2 != 0 ) {
-    tree->Branch("xHit2", &xHit2, "xHit2/D");
-    tree->Branch("yHit2", &yHit2, "yHit2/D");
-    tree->Branch("rhoHit2", &rhoHit2, "rhoHit2/D");
+    tree->Branch("xElum2", &xElum2, "xElum2/D");
+    tree->Branch("yElum2", &yElum2, "yElum2/D");
+    tree->Branch("rhoElum2", &rhoElum2, "rhoElum2/D");
   }
   
   //in case need other recoil detector. 
-  double rxHit1, ryHit1;
+  double xRecoil1, yRecoil1, rhoRecoil1;
   if( zRecoil1 != 0 ){
-    tree->Branch("rxHit1", &rxHit1, "rxHit1/D");
-    tree->Branch("ryHit1", &ryHit1, "ryHit1/D");
+    tree->Branch("xRecoil1", &xRecoil1, "xRecoil1/D");
+    tree->Branch("yRecoil1", &yRecoil1, "yRecoil1/D");
+    tree->Branch("rhoRecoil1", &rhoRecoil1, "rhoRecoil1/D");
   }
-  double rxHit2, ryHit2;
+  double xRecoil2, yRecoil2, rhoRecoil2;
   if( zRecoil2 != 0 ){
-    tree->Branch("rxHit2", &rxHit2, "rxHit2/D");
-    tree->Branch("ryHit2", &ryHit2, "ryHit2/D");
+    tree->Branch("xRecoil2", &xRecoil2, "xRecoil2/D");
+    tree->Branch("yRecoil2", &yRecoil2, "yRecoil2/D");
+    tree->Branch("rhoRecoil2", &rhoRecoil2, "rhoRecoil2/D");
   }
   //======= function for e-z plot for ideal case
   printf("++++ generate functions\n");
@@ -624,38 +644,40 @@ void Transfer(
     detRowID = helios.GetDetRowID();
     dphi = helios.GetdPhi();
     rho = helios.GetRho();
-    rhoHit = helios.GetRhoHit();
+    rhoArray = helios.GetRhoHit();
 
-    rhoBHit = helios.GetRecoilRhoHit();
-    //rhoBHit = helios.GetR(134.8);
-    xHit = helios.GetXPos(z);
-    yHit = helios.GetYPos(z);
+    rhoRecoil = helios.GetRecoilRhoHit();
+    xArray = helios.GetXPos(z);
+    yArray = helios.GetYPos(z);
     z += gRandom->Gaus(0, zSigma);
 
     //ELUM
     if( zElum1 != 0 ){
-      xHit1 = helios.GetXPos(zElum1);
-      yHit1 = helios.GetYPos(zElum1);
-      rhoHit1 = helios.GetR(zElum1);
+      xElum1 = helios.GetXPos(zElum1);
+      yElum1 = helios.GetYPos(zElum1);
+      rhoElum1 = helios.GetR(zElum1);
     }
     if( zElum2 != 0 ){
-      xHit2 = helios.GetXPos(zElum2);
-      yHit2 = helios.GetYPos(zElum2);
-      rhoHit2 = helios.GetR(zElum2);
+      xElum2 = helios.GetXPos(zElum2);
+      yElum2 = helios.GetYPos(zElum2);
+      rhoElum2 = helios.GetR(zElum2);
     }
-    recoilT = helios.GetRecoilTime();
-    rxHit = helios.GetRecoilXHit();
-    ryHit = helios.GetRecoilYHit();
 
-    //TODO put this into detectorGeo.txt
+    //Recoil
+    recoilT = helios.GetRecoilTime();
+    xRecoil = helios.GetRecoilXHit();
+    yRecoil = helios.GetRecoilYHit();
+
     //other recoil detectors
     if ( zRecoil1 != 0 ){
-      rxHit1 = helios.GetRecoilXPos(zRecoil1);
-      ryHit1 = helios.GetRecoilYPos(zRecoil1);
+      xRecoil1 = helios.GetRecoilXPos(zRecoil1);
+      yRecoil1 = helios.GetRecoilYPos(zRecoil1);
+      rhoRecoil1 = helios.GetRecoilR(zRecoil1);
     }
     if ( zRecoil2 != 0 ){
-      rxHit2 = helios.GetRecoilXPos(zRecoil2);
-      ryHit2 = helios.GetRecoilYPos(zRecoil2);
+      xRecoil2 = helios.GetRecoilXPos(zRecoil2);
+      yRecoil2 = helios.GetRecoilYPos(zRecoil2);
+      rhoRecoil2 = helios.GetRecoilR(zRecoil2);
     }
     
     reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());

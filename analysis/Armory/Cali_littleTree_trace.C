@@ -73,6 +73,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    eventID += 1;
    
    b_Energy->GetEntry(entry,0);
+   b_Ring->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
@@ -86,8 +87,8 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    //=========== gate
    //bool rdt_energy = false;
-   //for( int rID = 0; rID < 8; rID ++){
-   //   if( rdt[rID] > rdtGate ) rdt_energy = true; 
+   //for( int rID = 0; rID < 4; rID ++){
+   //   if( rdt[ 2 * rID+1] > rdtGate ) rdt_energy = true; 
    //}
    //if( !rdt_energy ) return kTRUE;
    
@@ -98,19 +99,34 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    //
    //if( rdtMultiHit != 2 ) return kTRUE; //######### multiHit gate   
    
-   //bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[4], rdt[0] )) rejRDT1 = false;
-   //bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[5], rdt[1] )) rejRDT2 = false;
-   //bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[6], rdt[2] )) rejRDT3 = false;
-   //bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[7], rdt[3] )) rejRDT4 = false;
-   //
-   //if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
-
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
+   
+   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
+   
+   
+   bool coinFlag = false;
+   for( int i = 0; i < numDet ; i++){
+      for( int j = 0; j < 8 ; j++){
+         if( TMath::IsNaN(rdt[j]) ) continue; 
+         int tdiff = rdt_t[j] - e_t[i];
+         if( -20 < tdiff && tdiff < 20 )  {
+            coinFlag = true;
+         }
+      }
+   }
+   
+   if( coinFlag == false ) return kTRUE;
+   
    //#################################################################### processing
    ULong64_t eTime = -2000; //this will be the time for Ex valid
    Float_t teTime = TMath::QuietNaN(); //time from trace
    
    for(int idet = 0 ; idet < numDet; idet++){
       
+      //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
       if( TMath::IsNaN(xf[idet]) && TMath::IsNaN(xn[idet])  ) continue;
       
@@ -124,25 +140,44 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
       //========= calculate x
-      if(xf[idet] > 0  && xn[idet] > 0 ) {
-         xTemp = (xfC-xnC)/(xfC+xnC);
-         multiHit++;
-         hitID = 0;
-      }else if(xf[idet] == 0 && xn[idet] > 0 ){
-         xTemp = (1-2*xnC/e[idet]);
+      //if(xf[idet] > 0  && xn[idet] > 0 ) {
+      //   xTemp = (xfC-xnC)/(xfC+xnC);
+      //   multiHit++;
+      //   hitID = 0;
+      //}else if(xf[idet] == 0 && xn[idet] > 0 ){
+      //   xTemp = (1-2*xnC/e[idet]);
+      //   multiHit++;
+      //   hitID = 1;
+      //}else if(xf[idet] > 0 && xn[idet] == 0 ){
+      //   xTemp = (2*xfC/e[idet]-1);
+      //   multiHit++;
+      //   hitID = 2;
+      //}else{
+      //   xTemp = TMath::QuietNaN();
+      //}
+      
+      //if( xf[idet] > 0 && xn[idet] > 0 ){
+      //   xTemp = (xfC-xnC)/eTemp;
+      //   multiHit++;
+      //   hitID = 0;
+      //}
+      
+      
+      if(xfC > eTemp/2.){
+         xTemp = 2*xfC/eTemp - 1. ;
          multiHit++;
          hitID = 1;
-      }else if(xf[idet] > 0 && xn[idet] == 0 ){
-         xTemp = (2*xfC/e[idet]-1);
+      }else if(xnC > eTemp/2.){
+         xTemp = 1. - 2* xnC/eTemp;
          multiHit++;
          hitID = 2;
       }else{
          xTemp = TMath::QuietNaN();
       }
-      
+         
+         
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
-      //printf("%d, %d , %f \n", eventID, idet, e[idet]);
-      
+      //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
       
       //========= calculate z
       

@@ -1,16 +1,21 @@
+
 #define GeneralSortTraceProof_cxx
 
 #include "GeneralSortTraceProof.h"
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 20 //Highest multiplicity
-#define M 100 //M value for energy filter from digi setting
+#define M -100 //M value for energy filter from digi setting
 
-#include "GeneralSortMapping.h"
+//must be absolute path
+//Mac
+//#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+//LCRC
+#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+//by copy the GeneralSortMapping.h in to Armory, is not working
+//#include "GeneralSortMapping.h"
 
 //===================== setting
-TString saveFileName = "sortedTrace.root"; //TODO add suffix to original file
-
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
@@ -18,10 +23,10 @@ int traceMethod = 1; //0 = no process; 1 = fit;
 int traceLength = 200;
 float delayChannel = 100.; //initial guess of the time
 
-bool isTACRF = false;
+bool isTACRF = true;
 bool isRecoil = true;
-bool isElum = false;
-bool isEZero = false;
+bool isElum = true;
+bool isEZero = true;
 
 void GeneralSortTraceProof::Begin(TTree * /*tree*/)
 {
@@ -38,10 +43,33 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    printf( "  EZero  : %s \n", isEZero ?  "On" : "Off");
    TString traceMethodName;
    switch(traceMethod){
-   case 0: traceMethodName = "simply copy"; break;
+   case 0: traceMethodName = "copy"; break;
    case 1: traceMethodName = "fit"; break;
    }
    printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
+   
+   printf("===================== ID-MAP: \n");
+   printf("%11s|", ""); 
+   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
+   printf("\n");
+   for(int i = 0 ; i < 96; i++ ) printf("-");
+   for(int i = 0 ; i < 160; i ++){
+     if( (i) % 10 == 0 ) {
+       printf("\n");
+       if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
+     }
+     printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+   }
+   printf("\n==================== \n");
+   
+   saveFileName = option;
+   int findslat = saveFileName.Last('/');
+   saveFileName.Remove(0, findslat+1);
+   saveFileName = "../root_data/trace_" + saveFileName;
+   
+   printf("Save file Name : %s \n", saveFileName.Data());
+   
+   SetOption(saveFileName.Data());
    
    printf("====================== Begin. \n");
 }
@@ -52,27 +80,35 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    TString option = GetOption();
 
    //create tree in slave
-   proofFile = new TProofOutputFile(saveFileName);
+   
+   saveFileName = option;
+   int findslat = saveFileName.Last('/');
+   saveFileName.Remove(0, findslat+1);
+   saveFileName = "../root_data/trace_" + saveFileName;
+   
+   proofFile = new TProofOutputFile(saveFileName, "M");
    saveFile = proofFile->OpenFile("RECREATE");
    
-   newTree = new TTree("tree","PSD Tree w/ trace");
+   newTree = new TTree("gen_tree","PSD Tree w/ trace");
    newTree->SetDirectory(saveFile);
    newTree->AutoSave();
 
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
    newTree->Branch("runID", &psd.runID, "runID/I");
 
-   newTree->Branch("e",    psd.Energy,          "Energy[24]/F");
-   newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[24]/l");
-   newTree->Branch("xf",   psd.XF,              "XF[24]/F");
-   newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[24]/l");
-   newTree->Branch("xn",   psd.XN,              "XN[24]/F");
-   newTree->Branch("xn_t", psd.XNTimestamp,     "XNTimestamp[24]/l");
-   newTree->Branch("x",    psd.x,               "x[24]/F"); 
+   newTree->Branch("e",    psd.Energy,          "Energy[30]/F");
+   newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[30]/l");
+   newTree->Branch("ring",    psd.Ring,          "Ring[30]/F");
+   newTree->Branch("ring_t",  psd.RingTimestamp, "RingTimestamp[30]/l");
+   newTree->Branch("xf",   psd.XF,              "XF[30]/F");
+   newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[30]/l");
+   newTree->Branch("xn",   psd.XN,              "XN[30]/F");
+   newTree->Branch("xn_t", psd.XNTimestamp,     "XNTimestamp[30]/l");
+   newTree->Branch("x",    psd.x,               "x[30]/F"); 
 
    if( isRecoil){
-      newTree->Branch("rdt",   psd.RDT,          "RDT[24]/F");
-      newTree->Branch("rdt_t", psd.RDTTimestamp, "RDTTimestamp[24]/l"); 
+      newTree->Branch("rdt",   psd.RDT,          "RDT[8]/F");
+      newTree->Branch("rdt_t", psd.RDTTimestamp, "RDTTimestamp[8]/l"); 
    }
    
    if( isTACRF ){
@@ -99,9 +135,9 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       
       if( traceMethod > 0 ){
 	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
-         newTree->Branch("te",             te,  "Trace_Energy[24]/F");
-         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[24]/F");
-         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[24]/F");
+         newTree->Branch("te",             te,  "Trace_Energy[30]/F");
+         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
+         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
          newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
          newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
          newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
@@ -116,14 +152,14 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    psd.runID = runIDLast;
 
    b_NumHits->GetEntry(entry);
-   if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
+   //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i<24; i++) {//num dets
+   for (Int_t i=0 ; i<30; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
-      psd.Ring[i]    = TMath::QuietNaN();
+      psd.Ring[i]    = 0.0;
       psd.RDT[i]     = TMath::QuietNaN();
       psd.TAC[i]     = TMath::QuietNaN();
       if (i<32) psd.ELUM[i] = TMath::QuietNaN();
@@ -142,7 +178,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    }
    
    if( isTraceON ){
-      for(int i = 0; i < 24; i++){
+      for(int i = 0; i < 30; i++){
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
@@ -192,6 +228,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
                psd.XNTimestamp[idDet] = event_timestamp[i];
                break;
+            case 3: // Ring
+               psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.RingTimestamp[idDet] = event_timestamp[i];
+               break;
          }
       }
       
@@ -227,7 +267,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       /************************************************************************/
       if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
          Int_t rdtTemp = idDet-101;
-         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M;
+         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
       
@@ -330,7 +370,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             if( 30 > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = gFit->GetParameter(0);
+               te[idDet]   = gFit->GetParameter(0) * (-1);
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
             }
@@ -376,12 +416,15 @@ void GeneralSortTraceProof::Terminate()
    saveFile = TFile::Open(saveFileName);
    
    //get entries
-   TTree * tree = (TTree*) saveFile->FindObjectAny("tree");
-   int validCount = tree->GetEntries();
+   if( saveFile->IsOpen() ){
+     TTree * tree = (TTree*) saveFile->FindObjectAny("gen_tree");
+     int validCount = tree->GetEntries();
    
-   saveFile->Close();
+     saveFile->Close();
    
-   printf("=======================================================\n");
-   printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
+     printf("=======================================================\n");
+     printf("----- saved as %s. valid event: %d\n", saveFileName.Data() , validCount); 
+   }
+   
    
 }

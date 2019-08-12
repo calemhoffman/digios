@@ -14,43 +14,76 @@
 #include <stdlib.h> //for atoi, atof
 #include <cmath> //exp
 #include <vector> 
+#include "../Cleopatra/constant.h"
 
 using namespace std;
 
+/*
 double mp = 938.272;
 double mn = 939.5654133;
 double hbarc = 197.326979;
 double amu = 931.5;
-
-double mu = mn;
+double ee  = 1.439964454;
+*/
 
 bool isSaveWaveFunction = false;
 
 class RKFourth {
 public:
-	RKFourth(){}
+  RKFourth(){
+
+    mu = mn;
+    
+    Z = 0;
+    Rc = 10000;
+
+    V0 = 0;
+    R0 = 10;
+    a0 = 1;
+
+    VSO = 0;
+    RSO = 10;
+    aSO = 1;
+
+    LS = 0;
+
+    dr = 0.1;
+    nStep = 200;
+  }
+
 	~RKFourth(){}
 	
+   double mu; // mass of nucleon
 	
-	double V0;
-	double R0;
-	double a0;
+	double V0; // in negative MeV
+	double R0; // in fm
+	double a0; // in fm
 
-	double VSO;
-	double RSO;
-	double aSO;
+	double VSO; // in MeV
+	double RSO; // in fm
+	double aSO; // in fm
 
-	double LS;
+   double Z;   // total charge
+   double Rc;  // in fm
+
+	double LS;  // spin-orbital 
 	
-	double dr;
-	int nStep;
+	double dr;  // in fm
+	int nStep;  // number of step
 	
 	double Pot(double r){
 		// Wood-Saxon
 		double WSCentral = V0/(1+exp((r-R0)/a0));
 		// spin-orbital 
 		double SO = - LS * VSO * exp((r-RSO)/aSO) / pow(1+exp((r-RSO)/aSO), 2) / aSO/ r ;
-		return WSCentral + SO;
+      // Coulomb
+      double Vc = 0;
+      if( r > Rc ){
+        Vc = Z * ee / r;
+      }else{
+        Vc = Z * ee * (3*Rc*Rc - r*r)/(2*Rc*Rc*Rc);
+      }
+		return WSCentral + SO + Vc;
 	}
 	
 	double G(double r, double u, double T, double L, double Pot){

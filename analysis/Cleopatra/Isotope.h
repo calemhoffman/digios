@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "constant.h" // amu
 #include <stdlib.h>  //atoi
+#include <algorithm>
 using namespace std;
 
 string dataPath="../Cleopatra/mass16.txt";
@@ -43,7 +44,6 @@ public:
 private:
    void FindMassByAZ(int a, int z); // give mass, massError, BEA, Name, Symbol;
    void FindMassByName(string name); // give Z, mass, massError, BEA;
-   
 };
 
 Isotope::Isotope(int a, int z){
@@ -91,11 +91,14 @@ void Isotope::FindMassByAZ(int A, int Z){
             this->BEA       = atof((line.substr(54,11)).c_str());
       		this->Mass      = list_Z*mp + (list_A-list_Z)*mn - this->BEA/1000*list_A;
             this->MassError = atof((line.substr(65,7)).c_str());
-            this->Symbol    = line.substr(20,2);
+            string str = line.substr(20,2);
+            str.erase(remove(str.begin(), str.end(), ' '), str.end());
+            this->Symbol    = str;
+            
             ostringstream ss;
             ss << A << this->Symbol;
             this->Name      = ss.str();
-     		flag = 1;
+     		   flag = 1;
       	}else if ( list_A > A) {
           this->BEA  = -404;
           this->Mass = -404;
@@ -197,10 +200,15 @@ void Isotope::FindMassByName(string name){
             this->BEA       = atof((line.substr(54,11)).c_str());
       		this->Mass      = this->Z*mp + (list_A-this->Z)*mn - this->BEA/1000*list_A;
             this->MassError = atof((line.substr(65,7)).c_str());
+            
+            string str = line.substr(20,2);
+            str.erase(remove(str.begin(), str.end(), ' '), str.end());
+            this->Symbol    = str;
+            
             ostringstream ss;
             ss << this->A << this->Symbol;
             this->Name      = ss.str();
-     		flag = 1;
+            flag = 1;
           }else if ( list_A > this->A) {
             this->BEA  = -404;
             this->Mass = -404;

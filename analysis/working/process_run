@@ -1,20 +1,34 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run_simple.sh #RunNum #Merge #EventBld #GeneralSort #Monitor"
-  echo "              RunNum = a 3 digit run number, e.g. 001"
-  echo "               Merge = 1/0/-1, is Merge the raw data? -1 is force merge"  
-  echo "            EventBld = 1/0/-1, is building event from the meged data? -1 is force build"  
-  echo "          GenralSort = 2/1/0/-1, is GeneralSort?  1 = GeneralSort.C, 2 = GeneralSortTrace.C"
-  echo "             Monitor = 2/1/0, run ChainMonitor.C?  1 = single run, 2 = all runs"
+  echo "$./process_run [RunNum] [Merge] [EventBld] [GeneralSort] [Monitor]"
+  echo "     RunNum = run number"
+  echo "      Merge = 1/0/-1     || -1 is force merge"  
+  echo "   EventBld = 1/0/-1     || -1 is force build"  
+  echo " GenralSort = n/2/1/0/-1 ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "    Monitor = 2/1/0      ||  1 = single run, 2 = all runs"
   exit 1
 fi;
 
-source ~/digios/expName.sh #load expName
-AnalysisDir=~/digios/analysis
+#=========== Check host name
+PCName=$(hostname)
+isLinux=0
+
+if [ ${PCName} == "digios1" ]; then
+  isLinux=1
+fi
+
+if [ ${PCName:0:5} == "bebop" ]; then
+    source /lcrc/project/HELIOS/digios/expName.sh
+    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
+    isLinux=1
+else
+    source ../../expName.sh #load expName
+    AnalysisDir=../../analysis
+fi
 
 #remote data path
-dataloc=/media/DIGIOSDATA3/${expName}/data
+dataloc=${daqDataPath}/${expName}/data
 daqDir=/home/helios/digios
 
 #===== directory and chat files
@@ -61,10 +75,11 @@ if [ $# -ge 5 ]; then
  OverRideMonitor=""
 fi
 
-if [ ${isGeneralSort} -eq 2 ]; then
+if [ ${isGeneralSort} -ge 2 ]; then
   isMonitor=0;
   OverRideMonitor="overrided by GeneralSortTrace."
 fi
+
 
 echo "============================================="
 echo "============ RUN $RUN ========================"
@@ -84,30 +99,31 @@ BLUE='\033[0;34m'
 Cyan='\033[0;36m'
 NC='\033[0m'
 
-#=========== Check host name
-PCName=$(hostname)
-
 #######################################
 ####################  Download raw data
 echo -e "${RED}######################### Download raw data${NC}"
 if [ ${PCName} == "digios1" ]; then
     echo "Already in digios1, no need to get data."
+elif [ ${PCName:0:5} == "bebop" ]; then
+    echo "in LCRC, no need to get data."
 else
     #============ Get the raw data
     IP=192.168.1.2
     echo "RUN $RUN: Get the raw data `date`"
     rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
-    rsync -avuht --progress "helios@${IP}:${daqDir}/analysis/working/RunTimeStamp.dat" ${AnalysisDir}/working/.
+    rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
+    rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
 fi
 
 echo "============================================="
-cat ${AnalysisDir}/working/RunTimeStamp.dat
+cat ${AnalysisDir}/data/RunTimeStamp.dat
 echo "============================================="
 
+echo -e "\033[0;33m"
 du -hsc $DATADIR/${expName}_run_$RUN*
 
 count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
-echo "========== Number of Files : ${count}"
+echo -e "========== Number of Files : ${count}\033[0m"
 if [ ${count} -eq 0 ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
@@ -122,8 +138,10 @@ if [ $isMerge -eq 1 ]; then
   echo -e "${RED}######################### Merge raw data${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
-  if [ ${PCName} == "digios1" ]; then
-      echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
+  if [ ${isLinux} -eq 1 ]; then
+      if [ ${PCName} == "digios1" ]; then
+          echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
+      fi
       rawDataTime=`stat -c "%Z"  ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
   else
       rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
@@ -134,14 +152,18 @@ if [ $isMerge -eq 1 ]; then
 
   #==== if merged data exist, check timeStamp
   if [ ${isMergedDataExist} -gt 0 ]; then
-      mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      if [ ${isLinux} -eq 1 ]; then
+          mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      else
+          mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+      fi
   else
       mergedDataTime=0
   fi
   
   if [ ${rawDataTime} -ge ${mergedDataTime} ]; then
     echo "RUN $RUN: GEBMerge started at `date`"
-    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` | tee ${MERGDIR}/GEBMerge_run${RUN}.log
     echo "RUN $RUN: GEBMerge DONE at `date`"
   else
     echo -e "${BLUE}Merged data are newer than raw data. No need to merged again.${NC}"
@@ -152,17 +174,17 @@ fi
 if [ $isMerge -eq -1 ]; then # force merge
   echo -e "${RED}######################### Merge raw data (force) ${NC}"
   echo "RUN $RUN: GEBMerge started at `date`"
-  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` | tee ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 fi
 
 #######################################
 #################### Sort
 if [ $isSort -eq 1 ]; then
-  echo -e "${RED}========= GEBSort started sorting run $RUN at `date`${NC}"
+  echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
-  if [ ${PCName} == "digios1" ]; then
+  if [ ${isLinux} -eq 1 ]; then
       mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
   else
       mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
@@ -171,14 +193,18 @@ if [ $isSort -eq 1 ]; then
   isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
   
   if [ ${isRootDataExist} -gt 0 ]; then
-    rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
+    if [ ${isLinux} -eq 1 ]; then
+        rootDataTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root`
+    else
+        rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
+    fi
   else
     rootDataTime=0
   fi
 
   if [ ${mergedDataTime} -ge ${rootDataTime} ]; then
-    ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
     echo "GEBSort DONE at `date`"
+    ${GEBDIR}/GEBSort_nogeb -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
     echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "
     echo "============================================="
     echo "============================================="
@@ -202,30 +228,87 @@ fi
 
 # convert to normal number, without zero in front
 if [ "${RUN:0:1}" == "0" ] ; then
-      runID=${RUN:1:2}
+    runID=${RUN:1:2}
+    if [ "${runID:0:1}" == "0" ]; then
+	     runID=${runID:1:1}
+    fi
 else
-      runID=$( printf '%d' $RUN )
+    runID=$( printf '%d' $RUN )
 fi;
 
-if [ $isGeneralSort -eq 1 ]; then
-  echo -e "${RED}######################### GeneralSort.C${NC}"
-  root -q -b "process_run.C(${runID})"
-  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
-fi
+#---------- check gen_run date
+if [ $isGeneralSort -ge 1 ]; then
+  echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
+  
+  isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
 
-if [ $isGeneralSort -eq 2 ]; then
-  echo -e "${RED}######################### GeneralSortTrace.C${NC}"
-  root -q -b "process_run.C(${runID}, 1)"
-  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+  if [ $isRootDataExist -eq 0 ]; then
+      
+      echo "====== ${ROOTDIR}/run${RUN}.root does not exist."
+  
+  else
+      #==== check run###.root timeStamp
+      if [ ${isLinux} -eq 1 ]; then
+          rootTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
+      else
+          rootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
+      fi
+
+      #==== check gen_run###.root timeStamp
+      isGenRootDataExist=`ls -1 ${ROOTDIR}/gen_run${RUN}.root 2>/dev/null | wc -l`
+
+      if [ $isGenRootDataExist -gt 0 ]; then
+          if [ ${isLinux} -eq 1 ]; then
+              genRootTime=`stat -c "%Z" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
+          else
+              genRootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
+          fi
+      else
+          genRootTime=0
+      fi 
+
+      if [ $rootTime -ge $genRootTime ]; then
+
+          if [ $isGeneralSort -eq 1 ]; then
+              echo -e "${RED}######################### GeneralSort.C${NC}"
+              root -l -q -b "process_run.C(${runID}, 0)"
+              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+          fi
+
+          if [ $isGeneralSort -eq 2 ]; then
+              echo -e "${RED}######################### GeneralSortTrace.C${NC}"
+              root -l -q -b "process_run.C(${runID}, 1)"
+              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+          fi
+
+          if [ $isGeneralSort -gt 2 ]; then
+              echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
+              root -l -q "process_run.C(${runID}, ${isGeneralSort})"
+
+              #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
+              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+          fi
+      else
+          echo -e "${BLUE}gen_run${RUN}.root are newer than run${RUN}.root. No need to sort again.${NC}"
+          echo -e "${GREEN}You can Force sorting using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
+
+      fi
+
+   fi
+
+fi;
+
+if [ $isGeneralSort -eq -1 ]; then # force GenralSort
+  echo -e "${RED}######################### GeneralSort.C${NC}"
+  root -l -q -b "process_run.C(${runID}, 0)"
+  #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 ########################################
 #################### Monitor
 if [ $isMonitor -eq 1 ] ; then
   root -l "ChainMonitors.C(${runID})"
-fi
-
-if [ $isMonitor -eq 2 ] ; then
+elif [ $isMonitor -eq 2 ] ; then
   root -l ChainMonitors.C
 fi;  
   

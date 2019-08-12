@@ -281,8 +281,8 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     }
     
     if( isTransferReaction == false ){
-      fprintf(file_out, "$============================================ ELab=%5.2f(p+%s)%s\n", 
-                                                            totalBeamEnergy, isoA.c_str(), potential.c_str());
+      fprintf(file_out, "$============================================ ELab=%5.2f(%s+%s)%s\n", 
+	      totalBeamEnergy, ma.c_str(), isoA.c_str(), potential.c_str());
       fprintf(file_out, "reset\n");
       fprintf(file_out, "CHANNEL %s + %s\n", ma.c_str(), isoA.c_str());
       fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);

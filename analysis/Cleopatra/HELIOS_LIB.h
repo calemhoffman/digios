@@ -330,6 +330,7 @@ public:
    void SetCoincidentWithRecoil(bool TorF){
       this->isCoincidentWithRecoil = TorF;
    }
+   bool GetCoincidentWithRecoil(){return this->isCoincidentWithRecoil;}
    bool SetDetectorGeometry(string filename);
    
    void OverrideMagneticField(double BField){ this->Bfield = BField;}
@@ -538,7 +539,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
            if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
          }
          if( i == 9 )                        posRecoil1 = atof(x.c_str());
-         if( i == 10 )                        posRecoil2 = atof(x.c_str());
+         if( i == 10 )                       posRecoil2 = atof(x.c_str());
          if( i == 11)                            zElum1 = atof(x.c_str());
          if( i == 12 )                           zElum2 = atof(x.c_str());
          if( i == 13 )                           support = atof(x.c_str());
@@ -610,15 +611,32 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    ryHit = TMath::QuietNaN();
    phiB = TMath::QuietNaN();
    
+   //range of detector azimuth angle, for beam at center
+   double azimu = TMath::Pi()/ mDet; 
+   double azimuDet = TMath::ATan2(width/2., perpDist);
+   
    //rotate Pb and PB to B-Field 
    Pb.RotateX(BfieldTheta);
    PB.RotateX(BfieldTheta);
 
-   //====================== X-Y plane
+   //====================== X-Y plane, light particle
    rho = Pb.Pt()  / Bfield / Zb / c * 1000; //mm
    theta = Pb.Theta();
    phi = Pb.Phi();
-
+   
+   //======================  recoil detector
+   thetaB = PB.Theta();
+   phiB = PB.Phi();
+   rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
+   vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
+   vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
+   tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   eB   = PB.E() - PB.M();
+   zB   = vp0B * tB;
+   rhoBHit = GetRecoilR(posRecoil);
+   rxHit = GetRecoilXPos(posRecoil);
+   ryHit = GetRecoilYPos(posRecoil);
+      
    if( isDetReady == false ) {
       //====================== infinite small detector   
       vt0 = Pb.Beta() * TMath::Sin(theta) * c ; // mm / nano-second  
@@ -628,19 +646,9 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       e = Pb.E() - Pb.M();
       dphi = TMath::TwoPi();
       
-		//======================  recoil detector
-      thetaB = PB.Theta();
-      phiB = PB.Phi();
-      rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
-      vt0B = Pb.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
-      vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-      tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
-      eB   = PB.E() - PB.M();
-      zB   = vp0 * tB;
-     
       return 0;
    }
-   
+
    if( bore > 2 * rho && ((firstPos > 0 && theta < TMath::PiOver2())  || (firstPos < 0 && theta > TMath::PiOver2())) ){
       //====================== infinite small detector   
       vt0 = Pb.Beta() * TMath::Sin(theta) * c ; // mm / nano-second  
@@ -648,14 +656,9 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       t0 = TMath::TwoPi() * rho / vt0; // nano-second   
       z0 = vp0 * t0; // mm        
       
-      //======================  recoil detector
-      thetaB = PB.Theta();
-      phiB = PB.Phi();
-      rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
-      tB   = posRecoil / (PB.Beta() * TMath::Cos(thetaB) * c ); // nano-second
-      eB   = PB.E() - PB.M();
-      zB   = vp0 * tB;
-      
+      //========== check particle-B hit radius on recoil dectector
+      if(isCoincidentWithRecoil && rhoBHit > rhoRecoil ) return -2; // when particle-B miss the recoil detector
+
       //========= check is particle-b was blocked by recoil detector
       rhoHit = GetR(posRecoil) ;// radius of light particle b at recoil detector
       if( z0 > 0 && posRecoil > 0 && z0 > posRecoil && rhoHit < rhoRecoil) {
@@ -664,13 +667,6 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       if( z0 < 0 && posRecoil < 0 && z0 < posRecoil && rhoHit < rhoRecoil) {
           return -1 ;
       }
-      //========== calculate particle-B hit radius on recoil dectector
-      vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
-      vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-      rhoBHit = GetRecoilR(posRecoil);
-      rxHit = GetRecoilXPos(posRecoil);
-      ryHit = GetRecoilYPos(posRecoil);
-      if(isCoincidentWithRecoil && rhoBHit > rhoRecoil ) return -2; // when particle-B miss the recoil detector
 
       //================ Calulate z hit
       double zHit = TMath::QuietNaN();
@@ -686,9 +682,9 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          loop += 1;
          int n = 2*loop -1;
          
-         if( loop > 50 ) {
-            return -3;  // when loop > 50
-            break; // maximum 50 loops
+         if( loop > 10 ) {
+            return -3;  // when loop > 10
+            break; // maximum 10 loops
          }
          
          for( int j = startJ ; j < startJ + mDet; j++){
@@ -718,15 +714,15 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             // when dir == 0, no solution
 
             // calculate the distance from middle of detector
-            double xHit = GetXPos(zHit) + xOff;
+            double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
-         
+               
             //======= check Block
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support && sHit < perpDist/2. ) return -6; // blocked by support
+               if( pos[0] > zHit && zHit > pos[0] - support /*&& sHit < perpDist/2.*/ ) return -6; // blocked by support
             }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support && sHit < perpDist/2.) return -6;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support /*&& sHit < perpDist/2.*/) return -6;
             }
             
             //====== check hit
@@ -751,7 +747,13 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       
       //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
       if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
-      
+      double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
+      double yHit = GetYPos(zHit) + yOff;
+      //======= Check inside the detector
+      double eta = TMath::Abs(TMath::ATan2(yHit,xHit));
+      double etaMod = TMath::Abs(fmod(eta + azimu,  2* azimu) - azimu);
+      if ( etaMod > azimuDet ) return hit = -8;
+    
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
          if( firstPos > 0 ){

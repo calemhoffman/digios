@@ -26,8 +26,10 @@
 void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400){
 /**///======================================================== User Input
 
-   double a1Range[2] = {200, 450};
-   double a0Range[2] = {-0.7, 4.0};
+   double a1Range[2] = {600, 800};
+   double a0Range[2] = {-0.7, 2.0};
+   
+   double SSR = 150; // sum of square of residual of the fitting
 
    double distThreshold   = 0.01;
    bool isXFXN = false; // only use event for both XF and XN valid
@@ -93,8 +95,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    int numDet;
-   int rDet = 6; // number of detector at different position, row-Det
-   int cDet = 4; // number of detector at same position, column-Det
+   int rDet = 5; // number of detector at different position, row-Det
+   int cDet = 6; // number of detector at same position, column-Det
    vector<double> pos;
    double length = 50.5;
    double firstPos = -110;
@@ -143,7 +145,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    
    numDet = rDet * cDet;
    
-   /*//========================================= xf = xn correction
+   /* obsolete, the little tree already use the calibrations
+   //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
@@ -157,7 +160,9 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      return;
+      for( int i = 0; i < numDet ; i ++){
+         xnCorr[i] = 1;
+      }
    }
    file.close();
    
@@ -177,10 +182,14 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      return;
+      for( int i = 0; i < numDet ; i ++){
+         xfxneCorr[i][0] = 0;
+         xfxneCorr[i][1] = 1;
+      }
    }
-   file.close(); */
-
+   file.close();
+   */ 
+   
 /**///======================================================== setup tree
 
    double  eTemp;
@@ -217,6 +226,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    TGraph ** fx = new TGraph *[numFx];
    for( int i = 0; i < numFx ; i++){
       fx[i] = (TGraph*) fxList->At(i);
+      fx[i]->SetLineColor(2);
    }
    
 /**///======================================================== Extract tree entry, create new smaller trees, use that tree to speed up
@@ -306,9 +316,9 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       clock.Reset(); clock.Start("timer");
       
       double A0 = 0.;
-      double A1 = 260.;
+      double A1 = (a1Range[1] - a1Range[0])/2.;
       
-      double minTotalMinDist = 99.;
+      double minTotalMinDist = SSR;
       
       TString gDistName; 
       gDistName.Form("gDist%d", idet);
@@ -330,6 +340,13 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
         if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
         if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
         countEvent++;
+      }
+      
+      if( countEvent < 100 ) {
+         B1[idet] = 1;
+         B0[idet] = 0;
+         printf("======= skip for number of entries < 100 \n");
+         continue;
       }
       
       int countMax = 0;
@@ -417,7 +434,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 
          }
             
-      }// end of loop
+      }// end of trial loop
       
       //After founded the best fit, plot the result
       //======== time
@@ -440,7 +457,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
             exPlot[idet]->Fill(zTemp, eTemp);
          }
-         exPlot[idet]->Draw("box");
+         exPlot[idet]->Draw("colz");
          caliResult->cd(); exPlot[idet]->Write(); caliResult->Write("exPlot", TObject::kSingleKey);
          
          cScript->cd(2);

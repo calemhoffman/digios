@@ -37,6 +37,7 @@ public :
    // Declaration of leaf types
    Float_t         e[100];
    ULong64_t       e_t[100];
+   Float_t         ring[100];
    Float_t         xf[100];
    Float_t         xn[100];
    Float_t         rdt[100];
@@ -49,6 +50,7 @@ public :
    // List of branches
    TBranch        *b_Energy;   //!
    TBranch        *b_EnergyTimestamp;   //!
+   TBranch        *b_Ring;   //!
    TBranch        *b_XF;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_RDT;   //!
@@ -136,11 +138,12 @@ void Cali_littleTree_trace::Init(TTree *tree)
    printf( "=========================================================================== \n");
    
    // Set branch addresses and branch pointers
-   if (!tree) return;
+   ////999999999   if (!tree) return;
    fChain = tree;
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("e", e, &b_Energy);
+   fChain->SetBranchAddress("ring", ring, &b_Ring);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
    
@@ -233,13 +236,13 @@ void Cali_littleTree_trace::Init(TTree *tree)
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      Terminate();
-      return;
+      for( int i = 0 ; i < numDet; i++){
+         xnCorr[i] = 1;
+      }
    }
    file.close();
    
    //========================================= e = xf + xn correction
-   
    printf("----- loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
    if( file.is_open() ){
@@ -254,8 +257,10 @@ void Cali_littleTree_trace::Init(TTree *tree)
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      Terminate();
-      return;
+      for( int i = 0 ; i < numDet; i++){
+         xfxneCorr[i][0] = 0.0;
+         xfxneCorr[i][1] = 1.0;
+      }
    }
    file.close();
 

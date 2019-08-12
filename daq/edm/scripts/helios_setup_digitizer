@@ -27,11 +27,12 @@ caput GLBL:DIG:d2_window 0.2
 caput GLBL:DIG:led_threshold 400
 caput GLBL:DIG:CFD_fraction 30
 caput GLBL:DIG:raw_data_length 1.0 #really raw delay??
-caput GLBL:DIG:raw_data_window 4.32 #really data/trace length?
+caput GLBL:DIG:raw_data_window 3.32 #raw_data_window is traceLength + data
+#caput GLBL:DIG:trigger_polarity FallEdge
 caput GLBL:DIG:trigger_polarity Both
 caput GLBL:DIG:pileup_mode Accept
-#caput GLBL:DIG:trigger_mux_select ExtTTCL
-caput GLBL:DIG:trigger_mux_select IntAcptAll 
+caput GLBL:DIG:trigger_mux_select ExtTTCL
+#caput GLBL:DIG:trigger_mux_select IntAcptAll 
 caput GLBL:DIG:channel_enable Run
 caput GLBL:DIG:win_comp_min -10
 caput GLBL:DIG:win_comp_max  0
@@ -79,9 +80,9 @@ caput GLBL:DIG:load_delays 0
 #
 ###################################################################
 #echo "Setting deactivated boards / channels"
-caput DAQB2_4_CS_Ena Disable
-caput DAQB3_4_CS_Ena Disable
-caput DAQB4_4_CS_Ena Disable
+#caput DAQB2_4_CS_Ena Disable
+#caput DAQB3_4_CS_Ena Disable
+#caput DAQB4_4_CS_Ena Disable
 #caput VME01:MDIG1:channel_enable1 Reset
 #caput VME01:MDIG1:channel_enable2 Reset
 #caput VME01:MDIG1:channel_enable3 Reset
@@ -107,9 +108,12 @@ caput DAQB4_4_CS_Ena Disable
 #caput VME01:MDIG4:channel_enable7 Reset
 #caput VME01:MDIG4:channel_enable8 Reset
 #caput VME01:MDIG4:channel_enable9 Reset
+
+caput VME02:MDIG4:trigger_mux_select IntAcptAll #for tac
+
 #echo "Setting internal trigger boards / channels"
-caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
-caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
+#caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
+#caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
 #echo "Setting individual threshold"
 #echo "Setting other various individual parameters"
 
@@ -117,37 +121,33 @@ caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO
 #   With system linked up, HELIOS  X-plane and Y-plane
 #   mapping register values
 #  
-#   array RTR1 E-H, RTR2 A-H Energy X-plane
-#   elum RTR1 B-C ?? Y-plane
-#   Recoil RTR1 D ?? not in trigger
 ##################################################################
-echo "Misc X-plane"
-caput VME32:RTR1:reg_X_PLANE_MAP_A 0 
+echo "Setting X-plane"
+caput VME32:RTR1:reg_X_PLANE_MAP_A 31 
 caput VME32:RTR1:reg_X_PLANE_MAP_B 0
-caput VME32:RTR1:reg_X_PLANE_MAP_C 0
+caput VME32:RTR1:reg_X_PLANE_MAP_C 31
 caput VME32:RTR1:reg_X_PLANE_MAP_D 0
 
-echo "Setting X-plane - Si Array Energies Only"
-caput VME32:RTR1:reg_X_PLANE_MAP_E 252
-caput VME32:RTR1:reg_X_PLANE_MAP_F 0
-caput VME32:RTR1:reg_X_PLANE_MAP_G 63
+caput VME32:RTR1:reg_X_PLANE_MAP_E 0
+caput VME32:RTR1:reg_X_PLANE_MAP_F 31
+caput VME32:RTR1:reg_X_PLANE_MAP_G 0
 caput VME32:RTR1:reg_X_PLANE_MAP_H 0
 
-caput VME32:RTR2:reg_X_PLANE_MAP_A 0
-caput VME32:RTR2:reg_X_PLANE_MAP_B 15
-caput VME32:RTR2:reg_X_PLANE_MAP_C 192
+caput VME32:RTR2:reg_X_PLANE_MAP_A 31
+caput VME32:RTR2:reg_X_PLANE_MAP_B 0
+caput VME32:RTR2:reg_X_PLANE_MAP_C 31
 caput VME32:RTR2:reg_X_PLANE_MAP_D 0
 
-caput VME32:RTR2:reg_X_PLANE_MAP_E 3
-caput VME32:RTR2:reg_X_PLANE_MAP_F 240
+caput VME32:RTR2:reg_X_PLANE_MAP_E 0
+caput VME32:RTR2:reg_X_PLANE_MAP_F 31
 caput VME32:RTR2:reg_X_PLANE_MAP_G 0
 caput VME32:RTR2:reg_X_PLANE_MAP_H 0
 
-echo "Setting Y-plane - elum"
+echo "Setting Y-plane"
 caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_B 255
+caput VME32:RTR1:reg_Y_PLANE_MAP_B 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_C 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_D 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_D 255
 
 caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
 caput VME32:RTR1:reg_Y_PLANE_MAP_F 0
@@ -157,12 +157,12 @@ caput VME32:RTR1:reg_Y_PLANE_MAP_H 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_B 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_C 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_D 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_D 255
 
 caput VME32:RTR2:reg_Y_PLANE_MAP_E 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_F 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_G 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_H 0
+caput VME32:RTR2:reg_Y_PLANE_MAP_H 255
 
 echo "End of Trigger Mapping ###"
 
