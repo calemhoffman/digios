@@ -9,7 +9,7 @@ wavefunction av18
 r0=1 a=0.5 l=0 rc0=1.2
 ;
 TARGET
-JBIGA=2
+JBIGA=2-
 nodes=0 l=1 jp=1/2 $node is n-1 
 r0=1.25 a=.65 
 vso=6 rso0=1.10 aso=.65 
@@ -29,7 +29,7 @@ vsi  =  27.934  rsi0 =   1.207  asi =   0.736
 vso  =   3.000  rso0 =   1.269  aso =   0.900
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
 ;
-anglemin=0.000000 anglemax=60.000000 anglestep=1.000000
+anglemin=0.000000 anglemax=180.000000 anglestep=0.500000
 ;
 $============================================ Ex=0.00(0p1/2)Kx
 reset
@@ -42,7 +42,7 @@ wavefunction av18
 r0=1 a=0.5 l=0 rc0=1.2
 ;
 TARGET
-JBIGA=0
+JBIGA=0-
 nodes=0 l=1 jp=1/2 $node is n-1 
 r0=1.25 a=.65 
 vso=6 rso0=1.10 aso=.65 
@@ -62,6 +62,6 @@ vsi  =  27.808  rsi0 =   1.207  asi =   0.736
 vso  =   3.000  rso0 =   1.269  aso =   0.900
 vsoi =   0.000 rsoi0 =   0.000 asoi =   0.000  rc0 =   1.250
 ;
-anglemin=0.000000 anglemax=60.000000 anglestep=1.000000
+anglemin=0.000000 anglemax=180.000000 anglestep=0.500000
 ;
 end $================================== end of input

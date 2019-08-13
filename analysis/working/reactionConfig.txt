@@ -3,7 +3,7 @@
 7               //beam_Z
 2               //target_A
 1               //target_Z
-3               //recoil_light_A
+4               //recoil_light_A
 2               //recoil-light_Z
 12.00           //beam-energy_in_MeV/u
 0.100           //beam-energy_sigma_in_MeV/u
