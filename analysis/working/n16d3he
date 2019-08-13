@@ -29,5 +29,5 @@
 #=======================================================================
 #reaction        gs-spin    orbital  spin-pi(Ex)   Ex   ELab      Potentials
 
-16N(d,3He)15C   2   0p1/2   5/2+  0.74  12MeV/u     Kx
-16N(d,3He)15C   0   0p1/2   1/2+  0.00  12MeV/u     Kx
+16N(d,3He)15C   2-   0p1/2   5/2+  0.74  12MeV/u     Kx
+16N(d,3He)15C   0-   0p1/2   1/2+  0.00  12MeV/u     Kx
