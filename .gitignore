@@ -37,4 +37,7 @@ analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
 analysis/Woods-Saxon/WSSearch
 analysis/Woods-Saxon/WSMakeTree
+analysis/Woods-Saxon/WSRange
+analysis/Woods-Saxon/range.txt
+
 slurm-*.out

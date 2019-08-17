@@ -40,6 +40,15 @@ public:
    void IsNeutron(){ this->mu = mn;}
    void IsProton(){ this->mu = mp;}
 
+  void ClearVector(){
+    energy.clear();
+    orbString.clear();
+    errorU.clear();
+    errorE.clear();
+    errorUratio.clear();
+  }
+
+  
    void SetZ(int Z) {
       this->Z = Z;
       if( Z != 0) {
@@ -49,15 +58,21 @@ public:
       }
    }
 
-	void SetWSRadius(int A, int Z,  double r0, double rSO, double rc){
-		this->A = A;
+  void CalRadius(){
+      this->R0  = r0  * pow(A, 1./3.);
+      this->RSO = rSO * pow(A, 1./3.);
+      this->Rc  = rc  * pow(A, 1./3.);
+  }
+  
+  void SetWSRadius(int A, int Z,  double r0, double rSO, double rc){
+      this->A = A;
       this->Z = Z;
-		this->r0 = r0;
-		this->rSO = rSO;
+      this->r0 = r0;
+      this->rSO = rSO;
       this->rc = rc;
 		
-		this->R0  = r0  * pow(A, 1./3.);
-		this->RSO = rSO * pow(A, 1./3.);
+      this->R0  = r0  * pow(A, 1./3.);
+      this->RSO = rSO * pow(A, 1./3.);
       this->Rc  = rc  * pow(A, 1./3.);
 
       if( Z != 0) {
@@ -65,24 +80,25 @@ public:
       }else{
         this->mu = mn;
       }
-	}
+  }
 
-	void PrintEnergyLevels(){
-	  printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orb", "energy", "errorU", "errorE", "errorUratio");  
-	  for( int i = 0; i < (int) energy.size() ; i++){
-		 printf("%2d| %8s,  %12.6f | %12.5f | %12.4E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
-	  }
-	}
+  void PrintEnergyLevels(){
+    printf("================ result\n");
+    printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orbital", "energy", "errorU", "errorE", "errorUratio");  
+    for( int i = 0; i < (int) energy.size() ; i++){
+      printf("%2d| %8s,  %12.6f | %12.5f | %12.4E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
+    }
+  }
 
-	void PrintWSParas(){
-	  printf("================ Woods-Saxon parameters \n");
-	  printf("  A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, dr, nStep, dr * nStep);
-	  printf("-------------------------------\n");
-     printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
-	  printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n", VSO,  RSO, rSO, aSO);
-     printf("  Z: %8.0f,      Rc: %8.4f(%4.2f) fm\n", Z, Rc, rc);
-	  printf("================================\n");
-	}
+  void PrintWSParas(){
+    printf("================ Woods-Saxon parameters \n");
+    printf("  A: %d, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, dr, nStep, dr * nStep);
+    printf("-------------------------------\n");
+    printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
+    printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n", VSO,  RSO, rSO, aSO);
+    printf("  Z: %8.0f,      Rc: %8.4f(%4.2f) fm\n", Z, Rc, rc);
+    printf("================================\n");
+  }
 
 	// the potential parameters are global values
 	int CalWSEnergies(int maxL = 7, double torr = 500, double eTorr = 0.001, int maxLoop = 300, double dKE = 0.2){
