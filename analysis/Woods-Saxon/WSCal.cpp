@@ -85,12 +85,8 @@ int main(int argc, char *argv[]){
   ws.CalWSEnergies();
   
   //print all energy
-  printf("================ result\n");
-  printf(" %8s,  %12s |      u(%4.1f) | %12s |%12s \n", "Orbital", "Energy [MeV]", ws.dr * ws.nStep, "de", "u-Ratio"); 
-  for( int i = 0; i < ws.energy.size() ; i++){
-    if( abs(ws.errorU[i]) > torr || ws.errorE[i] > eTorr) continue;
-    printf("%2d| %8s,  %12.6f | %12.5f | %12.7E | %12f\n",i, ws.orbString[i].c_str(), ws.energy[i], ws.errorU[i], ws.errorE[i], ws.errorUratio[i]);  
-  }
+  ws.PrintEnergyLevels();
+
   printf("========== end of program ======= \n");
   
   return 0;
