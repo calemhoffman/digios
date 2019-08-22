@@ -17,13 +17,15 @@
 #include "RK4.h"
 #include "WS.h"
 
+//#include "../Cleopatra/Isotope.h"
+
 using namespace std;
 
 int main(int argc, char *argv[]){
 
-  if(argc != 9 && argc != 11 && argc != 13) {
+  if(argc != 9 && argc != 11 && argc != 13 && argc != 14) {
     printf("====== Runge-Kutta 4-th order method to solve SE =====\n");
-    printf("Usage: ./WSRange A1 A2 V0 r0 a0 <VSO rSO aSO>  <Z rc>  <nStep dx>\n");
+    printf("Usage: ./WSRange A1 A2 V0 r0 a0 <VSO rSO aSO>  <Z rc>  <nStep dx> <fileName>\n");
     printf("        A1 : start mass number\n");
     printf("        A2 : stop mass number\n");
     printf("        V0 : Wood-Saxons depth [MeV]\n");
@@ -32,10 +34,11 @@ int main(int argc, char *argv[]){
     printf("       VSO : Spin-orbital depth [MeV]\n");
     printf("       rSO : reduced half-maximum radius (fm) \n");
     printf("       aSO : diffusiveness (fm) \n");
-    printf("         Z : charge number \n");
+    printf("         Z : charge number, If Z != 0, the calucaltion will be on the isotope chain \n");
     printf("        rc : reduced Coulomb radius (fm) \n");
-    printf("      nStep: number of Step (300)\n");
+    printf("     nStep : number of Step (300)\n");
     printf("        dr : stepSize [fm] (0.1)\n");
+    printf("  fileName : default is range.txt\n");
     exit(0);
   }
   WoodsSaxon ws;
@@ -43,7 +46,7 @@ int main(int argc, char *argv[]){
   int A1 = atoi(argv[1]);
   int A2 = atoi(argv[2]);
   
-  ws.V0 = atof(argv[3]);
+  double V0 = atof(argv[3]);
   ws.r0 = atof(argv[4]);
   ws.a0 = atof(argv[5]);
   
@@ -64,6 +67,9 @@ int main(int argc, char *argv[]){
     ws.nStep = atoi(argv[11]);
     ws.dr = atof(argv[12]);
   }
+
+  string outFileName = "range.txt";
+  if( argc >= 14 ) outFileName = argv[13];
   
   double torr = 500; // u < torr
   double eTorr = 0.001; // energy torr
@@ -80,7 +86,6 @@ int main(int argc, char *argv[]){
 
 
   FILE * file_out;
-  string outFileName = "range.txt";
   file_out = fopen(outFileName.c_str(), "w+");
 
   fprintf(file_out, "# V0 = %f\n", ws.V0 );
@@ -90,14 +95,29 @@ int main(int argc, char *argv[]){
   fprintf(file_out, "#rSO = %f\n", ws.rSO );
   fprintf(file_out, "#aSO = %f\n", ws.aSO );
   fprintf(file_out, "#=========================\n");
+
+
+  ws.N = 127;
+  double kappa = 0.67;
   
   for( int massA = A2 ; massA >= A1 ; massA--){
     
     ws.A = massA;
+
+    // neutron
+    //double reducedMass = 931.5 * (1.008664 + massA - 1 )/1.008664/(massA - 1);
+    //ws.SetMass(reducedMass);
+
+    ws.V0 = V0 * ( 1 -  kappa * ( 2* ws.N - massA ) / massA );
+    
     ws.ClearVector();
     ws.CalRadius();
     ws.PrintWSParas();
-    ws.CalWSEnergies();
+    if( massA == A2 ) {
+      ws.CalWSEnergies();
+    }else{
+      ws.CalWSEnergies(false);
+    }
   
     //print all energy
     ws.PrintEnergyLevels();
