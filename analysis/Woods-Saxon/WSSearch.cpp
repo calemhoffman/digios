@@ -59,11 +59,12 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
 int main(int argc, char *argv[]){
 
-  if(argc != 6 ) {
+  if(argc != 7 ) {
     //TODO put the mass number out of paraFile
-    printf("Usage: ./WSSearch  expFile  A  Z  paraFile  outRoot\n");
+    printf("Usage: ./WSSearch  expFile  A N Z  paraFile  outRoot\n");
     printf("       expFile = experimental energies\n");
     printf("             A = mass number\n");
+    printf("             N = neutron number\n");
     printf("             Z = proton number [ ZERO for neutron levels, rc = r0 ]\n");
     printf("      paraFile = search setting\n");
     printf("       outRoot = output Root File name\n");
@@ -71,9 +72,10 @@ int main(int argc, char *argv[]){
 
   string readFile = argv[1];
   int A  = atoi(argv[2]);
-  int Z  = atoi(argv[3]);
-  string paraFile = argv[4];
-  string rootFile = argv[5];
+  int N  = atoi(argv[3]);
+  int Z  = atoi(argv[4]);
+  string paraFile = argv[5];
+  string rootFile = argv[6];
 
   //========= reading expFile
   ifstream file_in;
@@ -183,7 +185,7 @@ int main(int argc, char *argv[]){
   TString str;
   str.Form("============ Search Range : %s.", paraFile.c_str());
   searchRangeMsg.AddLine(str.Data());
-  str.Form(" mass A : %d", A);
+  str.Form(" mass A : %d,  N : %d", A, N);
   searchRangeMsg.AddLine(str.Data());
   str.Form(" proton number : %d,  rc = r0", Z);
   searchRangeMsg.AddLine(str.Data());
@@ -253,7 +255,7 @@ int main(int argc, char *argv[]){
   int count = 0;
 
   for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
-    ws.V0 = v0;
+    ws.V0 = v0 ;
 
     for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
       ws.R0 = r0v * pow(A, 1./3.); 

@@ -1,14 +1,16 @@
 reset
 
-set terminal qt size 1500,600
+set terminal qt size 1000,600
 
-set title "Woods-Saxon SPE" font ", 14"
+#set title "Woods-Saxon Barrier Energy - WS Energy" font ", 14"
+set title "Woods-Saxon Energy" font ", 14"
 set ylabel "Energy [MeV]" font ",14"
 
-n1=2
+inFile="range.txt"
+n1=24
 r0=1.25
 
-set yrange [-15:0]
+set yrange [-5:0]
 
 set grid
 
@@ -17,19 +19,22 @@ set key outside
 set key font ",14"
 
 N=`awk 'NR==8 {print NF}' range.txt`
+N=30
 
-#set xrange [0:400]
-set xtics 10
+####################################### plot
+
+set xrange [191:221]
+set xtics 191, 2, 221
 set xlabel "mass A" font ",14"
-plot for [i=n1:N] "range.txt" using 1:i with lines
+plot for [i=n1:N] inFile using 1:i with lines
 
 #set xrange [2:8]
-#set xlabel "R0=1.25 A^{1/3} [fm]"
-#plot for [i=n1:N] "range.txt" using (r0*(($1)**(1./3.))):i with lines
+#set xlabel "R0=1.25 A^{1/3} [fm]" font ",14"
+#plot for [i=n1:N] inFile using (r0*(($1)**(1./3.))):i with lines
 
 #########################################
 
-x1=0.16
+x1=0.3
 y1=0.27
 h1=0.03
 fs=14
@@ -43,3 +48,4 @@ set label 'r_{SO}=1.20  fm' at screen x1,y1-4*h1 right font fontsize(fs)
 set label 'a_{SO}=0.68  fm' at screen x1,y1-5*h1 right font fontsize(fs)
 
 replot
+
