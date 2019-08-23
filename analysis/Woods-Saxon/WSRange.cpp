@@ -23,12 +23,13 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
-  if(argc != 9 && argc != 11 && argc != 13 && argc != 14) {
+  if(argc != 10 && argc != 12 && argc != 14 && argc != 15) {
     printf("====== Runge-Kutta 4-th order method to solve SE =====\n");
-    printf("Usage: ./WSRange A1 A2 V0 r0 a0 <VSO rSO aSO>  <Z rc>  <nStep dx> <fileName>\n");
+    printf("Usage: ./WSRange A1 A2 V0 k r0 a0 <VSO rSO aSO>  <Z rc>  <nStep dx> <fileName>\n");
     printf("        A1 : start mass number\n");
     printf("        A2 : stop mass number\n");
     printf("        V0 : Wood-Saxons depth [MeV]\n");
+    printf("         k : isospin-dependent \n");
     printf("        r0 : reduced half-maximum radius (fm) \n");
     printf("        a0 : diffusiveness (fm) \n");
     printf("       VSO : Spin-orbital depth [MeV]\n");
@@ -47,29 +48,30 @@ int main(int argc, char *argv[]){
   int A2 = atoi(argv[2]);
   
   double V0 = atof(argv[3]);
-  ws.r0 = atof(argv[4]);
-  ws.a0 = atof(argv[5]);
+  double kappa = atof(argv[4]);
+  ws.r0 = atof(argv[5]);
+  ws.a0 = atof(argv[6]);
   
-  ws.VSO = atof(argv[6]);
-  ws.rSO = atof(argv[7]);
-  ws.aSO = atof(argv[8]);
+  ws.VSO = atof(argv[7]);
+  ws.rSO = atof(argv[8]);
+  ws.aSO = atof(argv[9]);
   
   ws.Z = 0; 
   ws.Rc = 1.25; 
-  if( argc >= 11 ){
-    ws.Z = atoi(argv[9]);
-    ws.rc = atof(argv[10]);
+  if( argc >= 12 ){
+    ws.Z = atoi(argv[10]);
+    ws.rc = atof(argv[11]);
   }
   
   ws.nStep = 200; 
   ws.dr = 0.1; 
-  if( argc >= 13 ){
-    ws.nStep = atoi(argv[11]);
-    ws.dr = atof(argv[12]);
+  if( argc >= 14 ){
+    ws.nStep = atoi(argv[12]);
+    ws.dr = atof(argv[13]);
   }
 
   string outFileName = "range.txt";
-  if( argc >= 14 ) outFileName = argv[13];
+  if( argc >= 15 ) outFileName = argv[14];
   
   double torr = 500; // u < torr
   double eTorr = 0.001; // energy torr
@@ -88,17 +90,17 @@ int main(int argc, char *argv[]){
   FILE * file_out;
   file_out = fopen(outFileName.c_str(), "w+");
 
-  fprintf(file_out, "# V0 = %f\n", ws.V0 );
+  fprintf(file_out, "# V0 = %f\n", V0 );
   fprintf(file_out, "# r0 = %f\n", ws.r0 );
   fprintf(file_out, "# a0 = %f\n", ws.a0 );
   fprintf(file_out, "#VSO = %f\n", ws.VSO );
   fprintf(file_out, "#rSO = %f\n", ws.rSO );
   fprintf(file_out, "#aSO = %f\n", ws.aSO );
+  fprintf(file_out, "#  k = %f\n", kappa );
   fprintf(file_out, "#=========================\n");
 
 
   ws.N = 127;
-  double kappa = 0.67;
   
   for( int massA = A2 ; massA >= A1 ; massA--){
     
