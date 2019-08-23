@@ -46,6 +46,7 @@ public:
     errorU.clear();
     errorE.clear();
     errorUratio.clear();
+    wf.clear();
   }
   
   void SetZ(int Z) {
@@ -83,6 +84,11 @@ public:
     }else{
       this->mu = mn;
     }
+  }
+
+  double GetFreeWaveNumber(double Energy){
+    if( Energy < 0 ) return 0;
+    return sqrt(2*mn*Energy)/hbarc; 
   }
 
   void PrintEnergyLevels(){
