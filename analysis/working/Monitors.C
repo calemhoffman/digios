@@ -351,11 +351,14 @@ void Monitors::Begin(TTree *tree)
    //check is the transfer.root is using the latest reactionConfig.txt   
    //sicne reaction.dat is generated as a by-product of transfer.root
    TFile * transfer = new TFile("transfer.root");
-   TMacro * reactionConfig = (TMacro *) transfer->FindObjectAny("reactionConfig");
-   TMacro presentReactionConfig ("reactionConfig.txt");
-   TString aaa1 = ((TMD5*) reactionConfig->Checksum())->AsString();
-   TString aaa2 = ((TMD5*) presentReactionConfig.Checksum())->AsString();
-
+   TString aaa1 = "";
+   TString aaa2 = "";
+   if( transfer->IsOpen() ){
+      TMacro * reactionConfig = (TMacro *) transfer->FindObjectAny("reactionConfig");
+      TMacro presentReactionConfig ("reactionConfig.txt");
+      aaa1 = ((TMD5*) reactionConfig->Checksum())->AsString();
+      aaa2 = ((TMD5*) presentReactionConfig.Checksum())->AsString();
+   }
    //printf("%s\n", aaa1.Data());
    //printf("%s\n", aaa2.Data());
 
