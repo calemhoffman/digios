@@ -24,6 +24,7 @@ if [ ${option} == "start" ]; then
 	echo -e "${YELLOW}!!!!!!!!!!!${RED}Helios_Database is already running${YELLOW}!!!!!!!!!!${NC}"
     else
 	xterm -T database -geometry 80x40+0+0 -e "~/digios/daq/edm/scripts/DataBase.py" &
+	xterm -T database -geometry 40x40+0+500 -e "python2.7 ~/digios/daq/edm/scripts/Edwards_D379_read.py" &
     fi
 
 fi

@@ -19,11 +19,11 @@
 void Check_Transfer(TString filename = "transfer.root", bool shownKELines = false){
 
 //========================================== User Input
-  double ExRange[2] = {-1, 4};
-  double eRange[2] = {0, 10};
-  double recoilERange[2] = {165, 200};
+  double ExRange[2] = {-1, 8};
+  double eRange[2] = {0, 15};
+  double recoilERange[2] = {190, 210};
 
-  TString gate = "hit == 1 && rhoBHit > 10 && loop == 1";
+  TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
   //TString gate = "hit == 1 && loop == 1";
 
   TString gate2 = "rhoHit1 < 50  && rhoHit2 > 60 "; // elum
@@ -116,7 +116,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    }
 
    //===================================================
-   Int_t Div[2] = {4,3}; // x,y
+   Int_t Div[2] = {4,2}; // x,y
    Int_t size[2] = {350,350}; //x,y
    TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
@@ -130,6 +130,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    printf("gate : %s\n", gate.Data());
    printf("gate2: %s\n", gate2.Data());
 
+   /*
    printf("=======================meaning of Hit ID\n");
    printf("  1 = light recoil hit array & heavy recoil hit recoil\n");
    printf("  0 = when no detector\n");
@@ -150,9 +151,9 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    cCheck->cd(1)->SetLogy();
    TH1F * hHit = new TH1F("hHit", "hit; hit-ID; count", 13, -11, 2);
    tree->Draw("hit>>hHit", "", "");
-      
+   */
 
-   cCheck->cd(2);
+   cCheck->cd(1);
    TH2F * hez = new TH2F("hez", Form("e-z [gated] @ %5.0f mm; z [mm]; e [MeV]", firstPos), zRange[0], zRange[1], zRange[2], 400, eRange[0], eRange[1]);
    tree->Draw("e:z>>hez", gate, "colz");
    if( shownKELines){
@@ -161,17 +162,26 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
      }
    }
 
-   cCheck->cd(3);
+   cCheck->cd(2);
    TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
    tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
    
-   cCheck->cd(4);
+   cCheck->cd(3);
    TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoil);
    tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
 
-   cCheck->cd(5);
+   cCheck->cd(4);
    TH2F * hRecoilRZ = new TH2F("hRecoilRZ", "RecoilR - Z [gated]; z [mm]; RecoilR [mm]",  zRange[0], zRange[1], zRange[2], 400,0, rhoRecoil);
    tree->Draw("rhoRecoil:z>>hRecoilRZ", gate, "colz");
+
+   cCheck->cd(5);
+   TH2F *hThetaCM_Z = new TH2F("hThetaCM_Z","ThetaCM vs Z ; Z [mm]; thetaCM [deg]",zRange[0], zRange[1], zRange[2], 200,0,50);
+   tree->Draw("thetaCM:z>>hThetaCM_Z",gate,"col");
+   if( shownKELines){
+     for( int i = 0; i < nExID ; i++){
+       txList->At(i)->Draw("same");
+     }
+   }
 
    cCheck->cd(6);
    TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  500, ExRange[0], ExRange[1]);
@@ -204,15 +214,6 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    }
 
    cCheck->cd(8);
-   TH2F *hThetaCM_Z = new TH2F("hThetaCM_Z","ThetaCM vs Z ; Z [mm]; thetaCM [deg]",zRange[0], zRange[1], zRange[2], 200,0,50);
-   tree->Draw("thetaCM:z>>hThetaCM_Z",gate,"col");
-   if( shownKELines){
-     for( int i = 0; i < nExID ; i++){
-       txList->At(i)->Draw("same");
-     }
-   }
-
-   cCheck->cd(9);
    TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoil);
    tree->Draw("rhoRecoil:TB>>hRecoilRTR", gate, "colz");
 

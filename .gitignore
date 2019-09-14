@@ -22,6 +22,8 @@ core.*
 .DS_Store
 tempDB.txt
 elog.txt
+elog_context.txt
+grafanaElog.jpg
 run_Summary.dat
 MakeDataLinks
 reaction.dat

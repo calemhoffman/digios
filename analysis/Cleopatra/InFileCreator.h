@@ -281,23 +281,58 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     }
     
     if( isTransferReaction == false ){
-      fprintf(file_out, "$============================================ ELab=%5.2f(%s+%s)%s\n", 
-	      totalBeamEnergy, ma.c_str(), isoA.c_str(), potential.c_str());
-      fprintf(file_out, "reset\n");
-      fprintf(file_out, "CHANNEL %s + %s\n", ma.c_str(), isoA.c_str());
-      fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
-      fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-      string pot1Name = potential.substr(0,1);
-      string pot1Ref = potentialRef(pot1Name);
-      fprintf(file_out, "$%s\n", pot1Ref.c_str());
-      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
-      fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
-      fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
-      fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
-      fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
-      fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
-      fprintf(file_out, "ELASTIC SCATTERING\n");
-      fprintf(file_out, ";\n");
+      if ( atof(Ex.c_str()) == 0.0 ) {
+	fprintf(file_out, "$============================================ ELab=%5.2f(%s+%s)%s\n", 
+		totalBeamEnergy, ma.c_str(), isoA.c_str(), potential.c_str());
+	fprintf(file_out, "reset\n");
+	fprintf(file_out, "CHANNEL %s + %s\n", ma.c_str(), isoA.c_str());
+	fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
+	fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+	string pot1Name = potential.substr(0,1);
+	string pot1Ref = potentialRef(pot1Name);
+	fprintf(file_out, "$%s\n", pot1Ref.c_str());
+	CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
+	fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+	fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+	fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+	fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+	fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+	fprintf(file_out, "ELASTIC SCATTERING\n");
+	fprintf(file_out, ";\n");
+      }else{
+	fprintf(file_out, "$============================================ Ex=%s(%s+%s|%s%s)%s,ELab=%5.2f\n", 
+		Ex.c_str(), ma.c_str(), isoA.c_str(), spin.c_str(), parity.c_str(), potential.c_str(),totalBeamEnergy);
+	fprintf(file_out, "reset\n");
+	fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
+               isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
+	fprintf(file_out, "PARAMETERSET ineloca2 r0target\n");
+	fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+	if( str0.size() >= 8 ){
+	  fprintf(file_out, "BETA=%s\n", str0[7].c_str());  //deformation length
+	}
+	string pot1Name = potential.substr(0,1);
+	string pot1Ref = potentialRef(pot1Name);
+	fprintf(file_out, "$%s\n", pot1Ref.c_str());
+	CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
+	fprintf(file_out, "INCOMING\n");
+	fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+	fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+	fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f  rc0 = %7.3f\n", vsi, rsi0, asi, rc0);
+        //fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+	//fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+	fprintf(file_out, ";\n");
+	
+	fprintf(file_out, "OUTGOING\n");
+	fprintf(file_out, "$%s\n", pot1Ref.c_str());
+	CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy - atof(Ex.c_str()), isotopea.Z);
+	fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+	fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+	fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f  rc0 = %7.3f\n", vsi, rsi0, asi, rc0);
+	//fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+	//fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+        //fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+	fprintf(file_out, ";\n");
+      }
     }
     
     
