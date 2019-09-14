@@ -18,3 +18,9 @@ cd ${explocation}
 
 echo Run is underway
 echo Done - Terminal Window is Free to use 
+
+
+~/digios/daq/edm/scripts/elog.sh start
+
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=1" --max-time 1 --connect-timeout 1
+

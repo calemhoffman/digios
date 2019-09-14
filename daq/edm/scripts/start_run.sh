@@ -39,11 +39,12 @@ echo "RUN-${RUN} start at ${currentDate}, $COMMENT"
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT" > ~/digios/analysis/working/elog.txt
 
-~/digios/daq/edm/scripts/elog.sh start
-
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
 caput Online_CS_StartStop Start
+
+
+~/digios/daq/edm/scripts/elog.sh start
 
 curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=1" --max-time 1 --connect-timeout 1
 

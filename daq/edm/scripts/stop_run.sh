@@ -19,19 +19,6 @@ currentDate=$(date)
 echo "         stop at ${currentDate}"
 echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 
-echo "---- downloading the elog entry elohID=${elogID}$"
-elogContext=~/digios/analysis/working/elog_context.txt
-elog -h www.phy.anl.gov -d elog -p 443 -l ${expName^^} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
-cutLineNum=$(grep -n "==============" elog_context.txt | cut -d: -f1)
-cutLineNum=$((${cutLineNum}+1))
-tail -n +${cutLineNum} ${elogContext} > ${elogContext} 
-
-echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
-
-# this will create seperated elog entry 
-~/digios/daq/edm/scripts/elog.sh stop
-# in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
-
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
@@ -40,7 +27,29 @@ curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData
 echo "==== wait for 5 sec"
 sleep 5
 
+# take screenshot and copy from heliosDB
+screenShot=~/digios/analysis/working/grafanaElog.jpg
 ssh heliosdatabase@heliosdb '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
+scp heliosdatabase@heliosdb:~/grafanaElog.jpg ${screenShot}
+
+if [ -z ${elogID} ]; then
+    # this will create seperated elog entry
+    echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
+    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt -f ${screenShot}
+
+else
+    # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
+    echo "---- downloading the elog entry elohID=${elogID}$"
+    elogContext=~/digios/analysis/working/elog_context.txt
+    #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
+    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
+    cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
+    sed -i "1,${cutLineNum}d" ${elogContext}
+    echo "         stop at ${currentDate}" >> ${elogContext}
+    echo "----- grafana screenshot is attached." >> ${elogContext}
+    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -e ${elogID} -n 1 -m ${elogContext} -f ${screenShot}
+
+fi
 
 echo wait 10 seconds before closing the IOCs
 sleep 10
