@@ -40,6 +40,12 @@ public:
    Isotope(int a, int z);
    Isotope(string name);
    double CalSp(int na, int nz);
+   double CalBeta(double T){
+     double Etot = Mass + T;
+     double gamma = 1 + T/Mass;
+     double beta = sqrt(1 - 1 / gamma / gamma ) ;
+     return beta;
+   }
    
 private:
    void FindMassByAZ(int a, int z); // give mass, massError, BEA, Name, Symbol;
