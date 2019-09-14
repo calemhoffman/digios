@@ -19,12 +19,12 @@
 void Check_Transfer(TString filename = "transfer.root", bool shownKELines = false){
 
 //========================================== User Input
-  double ExRange[2] = {-1, 4};
-  double eRange[2] = {0, 10};
-  double recoilERange[2] = {1300, 1500};
+  double ExRange[2] = {-1, 8};
+  double eRange[2] = {0, 15};
+  double recoilERange[2] = {190, 210};
 
-  //TString gate = "hit == 1 && rhoRecoil > 10 && loop == 1";
-  TString gate = "hit == 1 && loop == 1";
+  TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
+  //TString gate = "hit == 1 && loop == 1";
 
   TString gate2 = "rhoHit1 < 50  && rhoHit2 > 60 "; // elum
 
