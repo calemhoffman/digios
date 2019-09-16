@@ -42,12 +42,19 @@ else
     echo "---- downloading the elog entry elohID=${elogID}$"
     elogContext=~/digios/analysis/working/elog_context.txt
     #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
+    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -w ${elogID} > ${elogContext}
     cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
+    #check encoding
+    encoding=$(grep "Encoding" ${elogContext} | awk '{print $2}')
+    if [ $encoding = "plain" ]; then encodingID=1 ; fi
+    if [ $encoding = "HTML" ]; then encodingID=2 ; fi
+    if [ $encoding = "ELcode" ]; then encodingID=0 ; fi
+    #remove all header
     sed -i "1,${cutLineNum}d" ${elogContext}
+    #fill stop time
     echo "         stop at ${currentDate}" >> ${elogContext}
     echo "----- grafana screenshot is attached." >> ${elogContext}
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -e ${elogID} -n 1 -m ${elogContext} -f ${screenShot}
+    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
 
 fi
 
