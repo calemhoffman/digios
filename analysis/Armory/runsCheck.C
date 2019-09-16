@@ -38,7 +38,7 @@
    
    FILE * paraOut;
    TString filename;
-   filename.Form("run_Summary.dat");
+   filename.Form("run_Summary.txt");
    paraOut = fopen(filename.Data(), "w+");
    
    int numFile = rootFileName.size();
