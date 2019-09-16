@@ -23,7 +23,7 @@ if [ ${option} == "start" ]; then
 
     echo ${IDStr}
 
-    IDStr=$(${IDStr} | tail -1 | awk '{print $4}')
+    IDStr=$(echo ${IDStr} | tail -1 | awk '{print $4}')
 
     echo ${IDStr}
 
