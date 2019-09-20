@@ -13,68 +13,78 @@ VME=$1
 DIG=$2
 CH=$3
 
-if [ $# -eq 2 ]; then
+re='^[0-9]+$'
 
-    echo " Set threshold values for array-${VME} ${DIG}"
-
-    read -p " === Set thresholds to ? " newThreshold
-
+if ! [[ $1 =~ $re ]]; then
 
     if [ ${VME} = "TT" ]; then
-	VME=4
-	iDIG=2	
+	VME=2
+	iDIG=3	
     fi
     if [ ${VME} = "TL" ]; then
-	VME=1
+	VME=2
 	iDIG=1	
     fi
     if [ ${VME} = "TR" ]; then
 	VME=3
-	iDIG=3	
+	iDIG=1	
     fi
     if [ ${VME} = "BR" ]; then
 	VME=3
-	iDIG=1	
+	iDIG=3	
     fi
     if [ ${VME} = "BB" ]; then
-	VME=2
-	iDIG=2	
+	VME=4
+	iDIG=1	
     fi
     if [ ${VME} = "BL" ]; then
-	VME=1
+	VME=4
 	iDIG=3	
     fi
 
-   if [ ${DIG} = "Energy" ]; then
-	CHLIST="0 1 2 3 4"
+    if [ $# -eq 3 ]; then
+
+	echo " Set threshold values for array-$1 ${DIG} to $3"
+
+	if [ ${DIG} = "Energy" ]; then
+	    CHLIST="0 1 2 3 4"
+	fi
+
+	if [ ${DIG} = "XF" ]; then
+	    iDIG=$((iDIG+1))
+	    CHLIST="0 1 2 3 4"
+	fi
+	if [ ${DIG} = "XN" ]; then
+	    iDIG=$((iDIG+1))
+	    CHLIST="5 6 7 8 9"
+	fi
+	if [ ${DIG} = "Ring" ]; then
+	    CHLIST="5 6 7 8 9"
+	fi
+
+
+	for CH in $CHLIST
+	do
+	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $3		
+	done
     fi
 
-    if [ ${DIG} = "XF" ]; then
-	if [ $iDIG -eq 3 ]; then
-	    VME=$((VME+1))
-	    iDIG=1
-	else
-	    iDIG=$((iDIG+1))
-	fi
-	CHLIST="0 1 2 3 4"
-    fi
-    if [ ${DIG} = "XN" ]; then
-	if [ $iDIG -eq 3 ]; then
-	    VME=$((VME+1))
-	    iDIG=1
-	else
-	    iDIG=$((iDIG+1))
-	fi
-	CHLIST="5 6 7 8 9"
-    fi
-    if [ ${DIG} = "Ring" ]; then
-	CHLIST="5 6 7 8 9"
-    fi
 
-    for CH in $CHLIST
-    do
-	caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} ${newThreshold}		
-    done	
+
+    if [ $# -eq 2 ]; then
+	CHLIST="0 1 2 3 4 5 6 7 8 9"
+	echo " Set threshold values for array-$1 to $2"
+	for CH in $CHLIST
+	do
+	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2
+	done
+	iDIG=$(($iDIG+1))
+	for CH in $CHLIST
+	do
+	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2	
+	done
+    fi
+	
 
 else
 

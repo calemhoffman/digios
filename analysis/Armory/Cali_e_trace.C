@@ -92,7 +92,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
      b_ELUM->GetEntry(entry,0);
      b_ELUMTimestamp->GetEntry(entry,0);
    }
-   if( isEZEROExist) b_EZERO->GetEntry(entry,0);
+   if( isEZEROExist) {
+      b_EZERO->GetEntry(entry,0);
+      b_EZEROTimestamp->GetEntry(entry,0);
+   }
    if( isTACExist ) b_TAC->GetEntry(entry,0);
    
    if ( isTraceDataExist ){
@@ -117,19 +120,34 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
    bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
+   if( !isRDTCutExist ){
+      rejRDT1 = false;
+      rejRDT2 = false;
+      rejRDT3 = false;
+      rejRDT4 = false;
+   }
+   
    if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
-
+   
    bool coinFlag = false;
-   for( int i = 0; i < numDet ; i++){
-      for( int j = 0; j < 8 ; j++){
-         if( TMath::IsNaN(rdt[j]) ) continue; 
-         int tdiff = rdt_t[j] - e_t[i];
-         if( -20 < tdiff && tdiff < 20 )  {
-            coinFlag = true;
+   //if no recoil. i.e. all rdt are NAN, coinFlag == true
+   int countValidRDT = 0;
+   for( int j = 0; j < 8; j++){
+      if( TMath::IsNaN(rdt[j]) ) countValidRDT ++;
+   }
+   if( countValidRDT == 8 ) {
+      coinFlag = true;
+   }else{
+      for( int i = 0; i < numDet ; i++){
+         for( int j = 0; j < 8 ; j++){
+            if( TMath::IsNaN(rdt[j]) ) continue; 
+            int tdiff = rdt_t[j] - e_t[i];
+            if( -20 < tdiff && tdiff < 20 )  {
+               coinFlag = true;
+            }
          }
       }
    }
-   
    if( coinFlag == false ) return kTRUE;
 
    //#################################################################### processing
@@ -164,7 +182,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
       if( !TMath::IsNaN(xf[idet]) || xf[idet] > 0) xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
       if( !TMath::IsNaN(xn[idet]) || xn[idet] > 0) xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-      //========= calculate x
+      //========= calculate x, range (-1,1)
       
       if(xf[idet] > 0  && xn[idet] > 0 ) {
          x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
@@ -207,7 +225,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          if( pos[detID] < 0 ){
             z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
          }else{
-            z[idet] = pos[detID] + (x[idet] + 1.)*length/2 ; 
+            z[idet] = pos[detID] + (-x[idet] + 1.)*length/2 ; 
          }
          multiHit ++;
          count ++;

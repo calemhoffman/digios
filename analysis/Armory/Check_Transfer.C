@@ -20,11 +20,11 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 
 //========================================== User Input
   double ExRange[2] = {-1, 8};
-  double eRange[2] = {0, 15};
-  double recoilERange[2] = {190, 210};
+  double eRange[2] = {0, 40};
+  double recoilERange[2] = {1200, 1400};
 
-  TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
-  //TString gate = "hit == 1 && loop == 1";
+  //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
+  TString gate = "hit == 1 && loop <= 2";
 
   TString gate2 = "rhoHit1 < 50  && rhoHit2 > 60 "; // elum
 
@@ -111,9 +111,11 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
       zRange[1] = pos[0]-50;
       zRange[2] = pos[rDet-1] + length + 50;
    }else{
-      zRange[1] = pos[0]- length - 50;
-      zRange[2] = pos[rDet-1] + 50;
+      zRange[1] = pos[rDet-1]- length - 50;
+      zRange[2] = pos[0] + 50;
    }
+   
+   printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
 
    //===================================================
    Int_t Div[2] = {4,2}; // x,y

@@ -154,8 +154,8 @@ void Check_e_z(TString rootfile){
       zRange[1] = pos[0]-50;
       zRange[2] = pos[rDet-1] + length + 50;
    }else{
-      zRange[1] = pos[0]- length - 50;
-      zRange[2] = pos[rDet-1] + 50;
+      zRange[1] = pos[rDet-1]- length - 50;
+      zRange[2] = pos[0] + 50;
    }
 
 

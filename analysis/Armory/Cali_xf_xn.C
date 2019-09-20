@@ -84,7 +84,7 @@ void Cali_xf_xn(TTree * tree){
       TString expression;
       expression.Form("e[%d] >> q%d" ,i, i);
       //gate[i].Form("ring[%d]==0 && !TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", i, i, i);
-      gate[i].Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", i, i);
+      //gate[i].Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", i, i);
       //gate[i].Form("e[%d] > 0", i);
       
       cAlpha->cd(i+1);
@@ -292,14 +292,14 @@ void Cali_xf_xn(TTree * tree){
          gSystem->ProcessEvents();
       }
       
-      TCanvas * cAux = new TCanvas ("cAux", "cAux", 600, 800);
-      cAux->cd(1);
-      p[0]->Draw();
-      gSystem->ProcessEvents();
-      for( int  i = 1; i < numDet; i++){
-         p[i]->Draw("same");
-         gSystem->ProcessEvents();
-      }      
+      //TCanvas * cAux = new TCanvas ("cAux", "cAux", 600, 800);
+      //cAux->cd(1);
+      //p[0]->Draw();
+      //gSystem->ProcessEvents();
+      //for( int  i = 1; i < numDet; i++){
+      //   p[i]->Draw("same");
+      //   gSystem->ProcessEvents();
+      //}      
    }
    
 

@@ -320,8 +320,8 @@ void Cali_e_trace::Init(TTree *tree)
    if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
    
    newTree->Branch("e" ,   eC, "e[30]/F");
-   //newTree->Branch("xf",  xfC, "xf[30]/F");
-   //newTree->Branch("xn",  xnC, "xn[30]/F");
+   newTree->Branch("xf",  xfC, "xf[30]/F");
+   newTree->Branch("xn",  xnC, "xn[30]/F");
    newTree->Branch("ring",  ring, "xn[30]/F");
    newTree->Branch("x" ,    x, "x[30]/F");
    newTree->Branch("z" ,    z, "z[30]/F");
@@ -347,7 +347,10 @@ void Cali_e_trace::Init(TTree *tree)
      newTree->Branch("elum", elum, "elum[32]/F");
      newTree->Branch("elum_t", elum_t, "elum_t[32]/l");
    }
-   if( isEZEROExist ) newTree->Branch("ezero", ezero, "ezero[10]/F");
+   if( isEZEROExist ) {
+      newTree->Branch("ezero", ezero, "ezero[10]/F");
+      newTree->Branch("ezero_t", ezero_t, "ezero_t[10]/l");
+   }
    
    newTree->Branch("coin_t", &coin_t, "coin_t/I");
    
