@@ -24,8 +24,8 @@ const int numRow = 6;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {500, 8000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,   20}; // in the E-Z plot
+int rawEnergyRange[2] = { 500, 8000}; // share with e, ring, xf, xn
+int    energyRange[2] = {   0,   10}; // in the E-Z plot
 int     rdtDERange[2] = {  0,  2000};
 int      rdtERange[2] = {  0,  5000};
 int      elumRange[2] = { 200, 4000};
@@ -761,7 +761,8 @@ Bool_t Monitors::Process(Long64_t entry)
       //==================== Basic gate
       //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue; // TAC gate RUN67 onwards
       if( TMath::IsNaN(e[detID]) ) continue ; 
-      if( ring[detID] > 300 ) continue; 
+      if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
+      //if( ring[detID] > 300 ) continue; 
       if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
 
       //==================== Calibrations go here
@@ -809,7 +810,7 @@ Bool_t Monitors::Process(Long64_t entry)
       //===================== multiplicity
       arrayMulti++; // multi-hit when both e, xf, xn are not NaN
 
-      //=================== Array fill next
+      //=================== Array fill
       heVx[detID]->Fill(x[detID],e[detID]);
       hringVx[detID]->Fill(x[detID],ring[detID]);
      
@@ -872,6 +873,8 @@ Bool_t Monitors::Process(Long64_t entry)
       }
       
     }//end of array loop
+    
+    if( !isEZCutFileOpen ) ezGate = true;
     
     //=========== fill eCal Vs z for each row
     for( int i = 0; i < numRow; i++){
@@ -1145,7 +1148,7 @@ void Monitors::Terminate()
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine("listDraws()");
    
-   //gROOT->ProcessLine("rawID()");
+   gROOT->ProcessLine("rawID()");
    
    
    printf("count1: %d , count2: %d \n", count1, count2);

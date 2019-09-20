@@ -317,7 +317,7 @@ void eCalVz(void) {
 
 void eCalVzRow() {
   TCanvas *cecalVzRow =  (TCanvas *) gROOT->FindObjectAny("cecalVzRow");
-  if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow","ECALVZ",canvasSize[0], canvasSize[1]);
+  if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow",Form("eCal - Z : %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   FindBesCanvasDivision(numRow);
   cecalVzRow->Clear(); cecalVzRow->Divide(xD,yD);
   gStyle->SetOptStat("neiou");

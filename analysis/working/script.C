@@ -11,7 +11,7 @@
 void script(){
 
    
-   TFile * file0 = new TFile("A_gen_run60_99.root");
+   TFile * file0 = new TFile("A_gen_run16.root");
    TFile * file1 = new TFile("transfer.root");
    
    TFile * fileCut = new TFile("rdtCuts.root");
