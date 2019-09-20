@@ -20,7 +20,7 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 200;
+int traceLength = 300;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = true;

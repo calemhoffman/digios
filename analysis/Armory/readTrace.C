@@ -12,7 +12,7 @@
 
 const int nDet = 30;
 
-void readTrace(TString fileName){
+void readTrace(TString fileName, int detID = -1){
    
 /**///==============================================================   
 
@@ -22,7 +22,7 @@ void readTrace(TString fileName){
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 0, 800, 300);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 300);
    cRead->Divide(1,1);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
@@ -64,11 +64,14 @@ void readTrace(TString fileName){
          //if( e[i] > 0 ) nextFlag = false;
          
          printf("========= ev: %d, #trace: %d | %d, (e, xf, xn , te[i]) = (%7.2f, %7.2f, %7.2f, %7.2f)\n", 
-                    eventID, arr->GetEntriesFast(), i, e[i], xf[i], xn[i], te[i]);
+                    ev, arr->GetEntriesFast(), i, e[i], xf[i], xn[i], te[i]);
          
-         //f( e[i] < -500 ) nextFlag = false;
-         nextFlag = false;
+         // for negative pulse, e[i] > 0 
+         //if( (i != 10 && i != 8 ) &&  e[i] > 2000 ) nextFlag = false;
+         if( e[i] > 2000 ) nextFlag = false;
+         //nextFlag = false;
       }
+
       //for( int i = 0; i < 8; i++){
       //   if( TMath::IsNaN(rdt[i]) ) continue;    
       //   if( rdt[i] > 0 ){
@@ -79,6 +82,7 @@ void readTrace(TString fileName){
       //}
       
       if( nextFlag ) continue;
+      
       
       for( int j = 0; j < arr->GetEntriesFast() ; j++){
 
@@ -99,6 +103,10 @@ void readTrace(TString fileName){
             int kind = gFit->GetLineColor();
             int det  = gFit->GetLineStyle();
             
+            //if( det == 10 || det == 25 || det == 19) continue;
+            if ( detID != -1 &&  det != detID ) continue;
+            //if( time < 0 || time > 200 ) continue;
+            //if( energy < 2000 ) continue;
             //if( det < 100 ) continue;
             //if( det != 18 && det != 19 && det !=12 ) continue;
             
