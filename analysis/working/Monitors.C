@@ -276,11 +276,11 @@ void Monitors::Begin(TTree *tree)
       }
       
       if( firstPos > 0 ){
-         zRange[0] = pos[numCol-1] - 30;
-         zRange[1] = pos[0] + length + 30;
+         zRange[0] = pos[0] - 30;
+         zRange[1] = pos[numCol-1] + length + 30;
       }else{
-         zRange[0] = pos[0] -length - 30;
-         zRange[1] = pos[numCol-1] + 30;
+         zRange[0] = pos[numCol-1] -length - 30;
+         zRange[1] = pos[0] + 30;
       }
       
       printf("=======================\n");
