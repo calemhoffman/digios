@@ -1,11 +1,11 @@
 //-------for_comment
-146             //beam_A
-60             //beam_Z
+136             //beam_A
+54             //beam_Z
 2               //target_A
 1               //target_Z
 2               //recoil_light_A
 1               //recoil-light_Z
-10.00            //beam-energy_in_MeV/u
+9.7            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
