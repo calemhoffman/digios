@@ -696,9 +696,12 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             //========== calculate zHit
             double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
+            
+            //printf("%d | zHit : %f \n", 1, zHit);
+            
             if( firstPos > 0 ){
-               if( zHit < pos[0] )  continue; // goto next loop
-               if(zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
+               if( zHit < pos[nDet-1] )  continue; // goto next loop
+               if(zHit > pos[0] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
                if( pos[nDet-1] < zHit ) continue;
                if( zHit < pos[0] - length) return -4; 
@@ -718,9 +721,9 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
                
-            //======= check Block
+            //======= check Block By support
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support /*&& sHit < perpDist/2.*/ ) return -6; // blocked by support
+               if( pos[nDet-1] - support > zHit && zHit > pos[nDet-1] /*&& sHit < perpDist/2.*/ ) return -6; // blocked by support
             }else{
                if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support /*&& sHit < perpDist/2.*/) return -6;
             }

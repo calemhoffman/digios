@@ -25,24 +25,26 @@ ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {500, 8000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,    10};
+int    energyRange[2] = {   0,   20}; // in the E-Z plot
 int     rdtDERange[2] = {  0,  2000};
 int      rdtERange[2] = {  0,  5000};
 int      elumRange[2] = { 200, 4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
-int  coinTimeRange[2] = { -100, 100};
+int  coinTimeRange[2] = { -40, 40};
 
 
 double rdtot[4] = {};
 
 //---Gate
-int timeGate[2] = {-20, 20}; // min, max, 1 ch = 10 ns
+int timeGate[2] = {-100, 100}; // min, max, 1 ch = 10 ns
 int tacGate[2] = {-2400, -1000};
 int dEgate[2] = {500,1500};
 int Eresgate[2] = {1000,4000};
 
 TString rdtCutFile = "rdtCuts.root";
+
+TString ezCutFile = "ezCut.root";
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -68,11 +70,10 @@ TString cutTag;
 Bool_t isCutFileOpen;
 int numCut;
 vector<int> countFromCut;
-//======= Other Cuts
 
-TFile *f, *cutfile;
-TCutG *EvsZ_cut;
-Bool_t cutfileOpen;
+//======= Other Cuts
+TCutG* EZCut;
+Bool_t isEZCutFileOpen;
 
 /***************************************************
  variable and histogram naming rules
@@ -158,7 +159,16 @@ TH1F* helum[16];
 TH1F* helumSUM;
 TH2F* helumID;
 
-//======= EZero
+//======= EZero, or IonChamber
+TH1F* hic0; //ionChamber ch0
+TH1F* hic1;
+TH1F* hic2;
+
+TH2F* hic01; //ionChamber ch0-ch1
+TH2F* hic02;
+TH2F* hic12;
+
+/*
 TH2F* he0dee;
 TH2F* he0det;
 TH2F* he0et;
@@ -168,6 +178,7 @@ TH1F* h0ettact;
 TH1F* h0de;
 TH1F* h0e;
 TH1F* h0tac;
+*/
 
 //======= multi-Hit
 TH2I *hmult;
@@ -176,6 +187,9 @@ TH1I *htdiff;
 TH1I *htdiffg;
 TH2I *hID2;
 TH2I *hID2g;
+
+int count1, count2;
+
 /***************************
  ***************************/
 //==== global variables
@@ -262,8 +276,8 @@ void Monitors::Begin(TTree *tree)
       }
       
       if( firstPos > 0 ){
-         zRange[0] = pos[0] - 30;
-         zRange[1] = pos[numCol-1] + length + 30;
+         zRange[0] = pos[numCol-1] - 30;
+         zRange[1] = pos[0] + length + 30;
       }else{
          zRange[0] = pos[0] -length - 30;
          zRange[1] = pos[numCol-1] + 30;
@@ -271,10 +285,8 @@ void Monitors::Begin(TTree *tree)
       
       printf("=======================\n");
       
-      
-      
    }else{
-       printf("... fail\n");
+      printf("... fail\n");
    }
    
    //========================================= xf = xn correction
@@ -409,7 +421,7 @@ void Monitors::Begin(TTree *tree)
    //================  Get Recoil cuts;
    TFile * fCut = new TFile(rdtCutFile);	
    isCutFileOpen = fCut->IsOpen();
-   if(!isCutFileOpen) cout<<"Failed to open cutfile"<<endl;
+   if(!isCutFileOpen) printf( "Failed to open cutfile : %s\n" , rdtCutFile.Data());
    numCut = 0 ;
    if( isCutFileOpen ){
       cutList = (TObjArray *) fCut->FindObjectAny("cutList");
@@ -418,12 +430,29 @@ void Monitors::Begin(TTree *tree)
 
       cutG = new TCutG();
       for(int i = 0; i < numCut ; i++){
-         printf(" cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
+         printf("cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
             cutList->At(i)->GetName(),
             ((TCutG*)cutList->At(i))->GetVarX(),
             ((TCutG*)cutList->At(i))->GetVarY(),
             ((TCutG*)cutList->At(i))->GetN());
          countFromCut.push_back(0);	
+      }
+   }
+   
+   //================  Get EZ cuts;
+   TFile * fCutez = new TFile(ezCutFile);
+   isEZCutFileOpen = fCutez->IsOpen(); 
+   if( !isEZCutFileOpen)  printf( "Failed to open E-Z cutfile : %s\n" , ezCutFile.Data());
+   if( isEZCutFileOpen ) {
+      
+      EZCut = (TCutG *) fCutez->FindObjectAny("cutEZ");
+      if( EZCut != NULL ) {
+         printf("Found EZ cut| name : %s, VarX: %s, VarY: %s, numPoints: %d \n", 
+                  EZCut->GetName(),
+                  EZCut->GetVarX(),
+                  EZCut->GetVarY(),
+                  EZCut->GetN()
+            );
       }
    }
 
@@ -514,7 +543,7 @@ void Monitors::Begin(TTree *tree)
    heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    
    for( int i = 0; i < numRow; i++){
-      hecalVzRow[i] = new TH2F(Form("heCalVz%d", i),
+      hecalVzRow[i] = new TH2F(Form("heCalVzRow%d", i),
                                Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*(i+1)-1),
                                500, zRange[0], zRange[1], 500, energyRange[0], energyRange[1]);
    }
@@ -580,6 +609,16 @@ void Monitors::Begin(TTree *tree)
    
    
    //===================== EZERO
+   
+   hic0 = new TH1F("hic0", "IC0; IC-0 [ch]; count", 500, 0, 1000);
+   hic1 = new TH1F("hic1", "IC1; IC-1 [ch]; count", 500, 0, 1000);
+   hic2 = new TH1F("hic2", "IC2; IC-2 [ch]; count", 500, 0, 400);
+   
+   hic01 = new TH2F("hic01", "IC0 - IC1; IC-1 [ch]; IC-0[ch]", 1000, 0, 1000, 1000, 0, 1000);
+   hic02 = new TH2F("hic02", "IC0 - IC2; IC-2 [ch]; IC-0[ch]", 500, 0, 400, 500, 0, 400);
+   hic12 = new TH2F("hic12", "IC1 - IC2; IC-2 [ch]; IC-1[ch]", 500, 0, 400, 500, 0, 400);
+   
+   /*
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
    he0det = new TH2F("he0det","EZERO DE-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
    he0et = new TH2F("he0et","EZERO E-RF; RF [ch]; DE [ch]",500,2000,3500,500,0,8000);//
@@ -589,9 +628,12 @@ void Monitors::Begin(TTree *tree)
    h0de = new TH1F("h0de","EZERO DE ; DE [ch]",500,50,4050);//
    h0e = new TH1F("h0e","EZERO - E; E [ch]",500,50,4050);//
    h0tac = new TH1F("h0tac","EZERO RF; RF [ch]",500,50,4050);//
-	
+   */
    printf("======================================== End of histograms Declaration\n");
    StpWatch.Start();
+   
+   count1 = 0;
+   count2 = 0;
 }
 
 void Monitors::SlaveBegin(TTree * /*tree*/)
@@ -625,21 +667,33 @@ Bool_t Monitors::Process(Long64_t entry)
       Frac+=0.1;
    }
 
-    b_runID->GetEntry(entry);
-    b_Energy->GetEntry(entry);
-    b_XF->GetEntry(entry);
-    b_XN->GetEntry(entry);
-    b_Ring->GetEntry(entry);
-    b_RDT->GetEntry(entry);
-    b_TAC->GetEntry(entry);
-    b_ELUM->GetEntry(entry);
-    b_EZERO->GetEntry(entry);
-    b_EnergyTimestamp->GetEntry(entry);
-    b_RDTTimestamp->GetEntry(entry);
-    b_TACTimestamp->GetEntry(entry);
-    b_ELUMTimestamp->GetEntry(entry);
-    b_EZEROTimestamp->GetEntry(entry);
+   b_runID->GetEntry(entry);
+   b_Energy->GetEntry(entry);
+   b_XF->GetEntry(entry);
+   b_XN->GetEntry(entry);
+   b_Ring->GetEntry(entry);
+   b_RDT->GetEntry(entry);
+   b_TAC->GetEntry(entry);
+   b_ELUM->GetEntry(entry);
+   b_EZERO->GetEntry(entry);
+   b_EnergyTimestamp->GetEntry(entry);
+   b_RDTTimestamp->GetEntry(entry);
+   b_TACTimestamp->GetEntry(entry);
+   b_ELUMTimestamp->GetEntry(entry);
+   b_EZEROTimestamp->GetEntry(entry);
     
+    
+   /****** h070_146Nd, since recoil is no used, fill rdt data with ezero */
+
+   rdt[0] = ezero[0];
+   rdt[1] = ezero[1];
+   rdt[2] = ezero[0];
+   rdt[3] = ezero[2];
+   rdt[4] = ezero[1];
+   rdt[5] = ezero[2];
+   rdt_t[0] = ezero_t[0];
+   rdt_t[1] = ezero_t[1];
+   
     /*********** forming canvas Title **********************************/ 
     if( entry == 0 ) {
        if( runID == lastRunID + 1 ) {
@@ -658,7 +712,6 @@ Bool_t Monitors::Process(Long64_t entry)
        lastRunID = runID;
     }
     
-
     //initization
     for( int i = 0 ; i < numDet; i++){
        z[i] = TMath::QuietNaN();
@@ -687,6 +740,7 @@ Bool_t Monitors::Process(Long64_t entry)
     Int_t multiEZ = 0;
     bool rdtgate = false;
     bool coinFlag = false;
+    bool ezGate = false;
     bool isGoodEventFlag = false;
     for (Int_t detID = 0; detID < numDet; detID++) {
       
@@ -747,7 +801,7 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //==================== calculate Z
       if( firstPos > 0 ) {
-        z[detID] = length*(xcal[detID]) + pos[detID%numCol];
+        z[detID] = length*(1.0-xcal[detID]) + pos[detID%numCol];
       }else{
         z[detID] = length*(xcal[detID]-1.0) + pos[detID%numCol];
       }
@@ -764,7 +818,7 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //=================== Recoil Gate
       if( isCutFileOpen ){
-        for(int i = 0 ; i < 4 ; i++ ){
+        for(int i = 0 ; i < numCut ; i++ ){
           cutG = (TCutG *)cutList->At(i) ;
           if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
             rdtgate= true;
@@ -797,13 +851,25 @@ Bool_t Monitors::Process(Long64_t entry)
           }
         }
       }
+      
+      //================ E-Z gate
+      if( isEZCutFileOpen ) {
+         
+         if( EZCut->IsInside(z[detID], eCal[detID])  ){
+            ezGate = true;
+         }
+         
+      }else{
+         ezGate = true;
+      }
+      
 
-      if( coinFlag && rdtgate ) {
-
+      if( coinFlag && rdtgate && ezGate) {
         heCalVzGC->Fill( z[detID] , eCal[detID] );
         multiEZ ++;
         isGoodEventFlag = true;
-      }	 
+        count2++;
+      }
       
     }//end of array loop
     
@@ -812,7 +878,9 @@ Bool_t Monitors::Process(Long64_t entry)
       for(int j = 0; j < numCol; j++){
          int k = numCol*i+j;
          if( !isGoodEventFlag ) continue;
-         if( ((xf[k] > 0 || !TMath::IsNaN(xf[k]))  && ( xn[k]>0 || !TMath::IsNaN(xn[k]))) ) hecalVzRow[i] -> Fill( z[k], eCal[k]);
+         count1++;
+         //if( ((xf[k] > 0 || !TMath::IsNaN(xf[k]))  && ( xn[k]>0 || !TMath::IsNaN(xn[k]))) ) 
+         hecalVzRow[i] -> Fill( z[k], eCal[k]);
       }
     }
     
@@ -839,6 +907,18 @@ Bool_t Monitors::Process(Long64_t entry)
 
 
    /*********** EZERO ************************************************/ 
+   
+   //if( isGoodEventFlag ) {
+   if( ezGate ) {
+      hic0->Fill(ezero[0]);
+      hic1->Fill(ezero[1]);
+      hic2->Fill(ezero[2]);
+      
+      hic01->Fill(ezero[1], ezero[0]);
+      hic02->Fill(ezero[2], ezero[0]);
+      hic12->Fill(ezero[2], ezero[1]);
+   }
+   
    //he0dee->Fill(ezero[1],ezero[0]);
    //he0det->Fill(TMath::Abs(tac[0]),ezero[0]);
    //he0et->Fill(TMath::Abs(tac[0]),ezero[1]);
@@ -1005,24 +1085,43 @@ void Monitors::Terminate()
    Draw2DHist(htacEx);
    
    ///----------------------------------- Canvas - 5
-   cCanvas->cd(5); Draw2DHist(hrdt2Dg[0]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   cCanvas->cd(5); 
+   
+   cCanvas->cd(5)->SetLogy();
+   hic0->Draw();
+   
+   //Draw2DHist(hrdt2Dg[0]);
+   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   //if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 6
-   cCanvas->cd(6); Draw2DHist(hrdt2Dg[1]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   cCanvas->cd(6); 
+   cCanvas->cd(6)->SetLogy();
+   hic1->Draw();
+   
+   //Draw2DHist(hic02);
+   
+   //Draw2DHist(hrdt2Dg[1]);
+   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   //if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 7
-   cCanvas->cd(7); Draw2DHist(hrdt2Dg[2]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isCutFileOpen) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   cCanvas->cd(7); 
+   
+   
+   Draw2DHist(hic01);
+   //Draw2DHist(hic01);
+   
+   //Draw2DHist(hrdt2Dg[2]);
+   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 8
-   cCanvas->cd(8); Draw2DHist(hrdt2Dg[3]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   cCanvas->cd(8); 
+   
+   //Draw2DHist(hrdt2Dg[3]);
+   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   //if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /************************* Save histograms to root file*/
    
@@ -1045,5 +1144,11 @@ void Monitors::Terminate()
    gROOT->ProcessLine(".L ../Armory/RDTCutCreator.C");
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine("listDraws()");
+   
+   //gROOT->ProcessLine("rawID()");
+   
+   
+   printf("count1: %d , count2: %d \n", count1, count2);
+   
    
 }
