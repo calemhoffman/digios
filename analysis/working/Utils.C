@@ -27,6 +27,7 @@ void listDraws(void) {
   printf("-----------------------------------------------------\n");
   printf("    recoils() - Raw DE vs. E Recoil spectra\n");
   printf("       elum() - Luminosity Energy Spectra\n");
+  printf("         ic() - Ionization Chamber Spectra\n");
   printf("-----------------------------------------------------\n");
   printf("     eCalVz() - Energy vs. Z\n");
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
@@ -316,7 +317,7 @@ void eCalVz(void) {
 
 void eCalVzRow() {
   TCanvas *cecalVzRow =  (TCanvas *) gROOT->FindObjectAny("cecalVzRow");
-  if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow","ECALVZ",canvasSize[0], canvasSize[1]);
+  if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow",Form("eCal - Z : %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   FindBesCanvasDivision(numRow);
   cecalVzRow->Clear(); cecalVzRow->Divide(xD,yD);
   gStyle->SetOptStat("neiou");
@@ -365,6 +366,24 @@ void tac(void) {
     //   cutG = (TCutG *)cutList->At(i);
     //   cutG->Draw("same");
   }
+}
+
+
+void ic(){
+  
+  TCanvas *cic =  (TCanvas *) gROOT->FindObjectAny("cic");
+  if( cic == NULL ) cic = new TCanvas("cic",Form("Ionization Chamber | %s", canvasTitle.Data() ),1200,800);
+  
+  cic->Clear(); cic->SetGrid(0); cic->Divide(3,2);
+  gStyle->SetOptStat("neiou");
+  
+  cic->cd(1); hic0->Draw();
+  cic->cd(2); hic1->Draw();
+  cic->cd(3); hic2->Draw();
+  cic->cd(4); hic01->Draw("colz");
+  cic->cd(5); hic02->Draw("colz");
+  cic->cd(6); hic12->Draw("colz");
+  
 }
 
 

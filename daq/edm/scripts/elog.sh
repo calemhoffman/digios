@@ -10,8 +10,11 @@ option=$1
 constFile=~/digios/expName.sh
 source ${constFile} #load expName
 
-#echo ${expName}
-echo "H"${expName:1}
+if [ ${expName} == "ARR01" ]; then
+    elogName="ARR01"
+else
+    elogName="H"${expName:1}
+fi
 
 if [ ${option} == "start" ]; then
 
@@ -19,11 +22,11 @@ if [ ${option} == "start" ]; then
 
     #IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt)
 
-    IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt)
+    IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt)
 
     echo ${IDStr}
 
-    IDStr=$(${IDStr} | tail -1 | awk '{print $4}')
+    IDStr=$(echo ${IDStr} | tail -1 | awk '{print $4}')
 
     echo ${IDStr}
 

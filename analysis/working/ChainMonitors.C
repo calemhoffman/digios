@@ -5,8 +5,8 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
 
   if( RUNNUM == -1){
 
-    chain->Add("../root_data/gen_run039.root"); //31Si
-    chain->Add("../root_data/gen_run040.root"); //31Si
+    chain->Add("../root_data/gen_run016.root"); //136Xe
+    chain->Add("../root_data/gen_run02[0-7].root"); //136Xe
     
   }else{
     

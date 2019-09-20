@@ -38,6 +38,8 @@ currentDate=$(date)
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT"
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 echo "RUN-${RUN} start at ${currentDate}, $COMMENT" > ~/digios/analysis/working/elog.txt
+trigger=$(caget GLBL:DIG:trigger_mux_select | awk '{print$2}')
+echo "trigger : " $trigger >> ~/digios/analysis/working/elog.txt
 
 #Start run and save first!?!?
 caput Online_CS_SaveData Save

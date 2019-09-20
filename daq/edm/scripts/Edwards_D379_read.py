@@ -3,6 +3,7 @@
 import os
 import serial
 import time
+import datetime
 import Edwards_D379_driver
 
 route = Edwards_D379_driver.Route()
@@ -14,8 +15,10 @@ while 1:
    #output2 = gaude_read.vacuum_g2()/100.
    #output3 = gaude_read.vacuum_Punits()
    output4 = gaude_read.vacuum_allg()
+
+   dt=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
    
-   print "VacuumGauge = %f mbar." % output1
+   print  "%s| %f mbar." % (dt,output1)
    #print "VacuumGauge = %s mbar." % gaude_read.vacuum_g2()
    #print output4
 
