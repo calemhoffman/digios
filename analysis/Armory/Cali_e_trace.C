@@ -92,7 +92,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
      b_ELUM->GetEntry(entry,0);
      b_ELUMTimestamp->GetEntry(entry,0);
    }
-   if( isEZEROExist) b_EZERO->GetEntry(entry,0);
+   if( isEZEROExist) {
+      b_EZERO->GetEntry(entry,0);
+      b_EZEROTimestamp->GetEntry(entry,0);
+   }
    if( isTACExist ) b_TAC->GetEntry(entry,0);
    
    if ( isTraceDataExist ){
@@ -222,7 +225,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          if( pos[detID] < 0 ){
             z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
          }else{
-            z[idet] = pos[detID] + (x[idet] + 1.)*length/2 ; 
+            z[idet] = pos[detID] + (-x[idet] + 1.)*length/2 ; 
          }
          multiHit ++;
          count ++;
