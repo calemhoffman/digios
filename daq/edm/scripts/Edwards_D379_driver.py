@@ -11,7 +11,7 @@ import time
 
 class Route(object):
    def __init__(self):
-      self.inst = serial.Serial(port='/dev/ttyUSB1',
+      self.inst = serial.Serial(port='/dev/ttyUSB0',
                                 baudrate=9600,
                                 bytesize=serial.EIGHTBITS,
                                 parity=serial.PARITY_NONE,
