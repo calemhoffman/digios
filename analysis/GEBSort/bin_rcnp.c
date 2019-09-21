@@ -50,7 +50,7 @@ int
 sup_rcnp ()
 {
   /* declarations */
-  
+
   char str1[STRLEN], str2[STRLEN], TypeName[STRLEN];
   float pi;
   int i,ChannelID, TypeID, DetID;
@@ -131,9 +131,9 @@ sup_rcnp ()
     AngleDegree[ChannelID] = DetAng;
     i = fscanf (fp, "\n%i %i %i %s %f", &ChannelID, &TypeID, &DetID, TypeName, &DetAng);
   };
-  fclose (fp);  
+  fclose (fp);
   printf ("mapping - complete!!\n");
-  
+
   return (0);
 };
 
@@ -204,14 +204,14 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
 
   DGSEvent->chan_id = (*(ev + 0) & 0x0000000f);
   DGSEvent->board_id = ((*(ev + 0) & 0x0000fff0) >> 4);        // USER_DEF
-  DGSEvent->id = DGSEvent->board_id * 10 + DGSEvent->chan_id;  
+  DGSEvent->id = DGSEvent->board_id * 10 + DGSEvent->chan_id;
   DGSEvent->packet_length = ((*(ev + 0) & 0x07ff0000) >> 16);
   DGSEvent->geo_addr = ((*(ev + 0) & 0xf8000000) >> 27);
 
-  DGSEvent->header_type = ((*(ev + 2) & 0x000f0000)  >> 16); 
+  DGSEvent->header_type = ((*(ev + 2) & 0x000f0000)  >> 16);
   DGSEvent->event_type = ((*(ev + 2) & 0x03800000)  >> 23);     // hope this is right.
   DGSEvent->header_length = ((*(ev + 2) & 0xFC000000)  >> 26);  // hope this is right.
-    
+
   /* extract the LED time stamp */
 
   DGSEvent->event_timestamp = 0;
@@ -234,9 +234,9 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
       DGSEvent->timestamp_match_flag   = 0;
       DGSEvent->external_disc_flag     = 0;
       DGSEvent->cfd_valid_flag         = 0;
-      DGSEvent->pileup_only_flag       = 0;                                                  
-      DGSEvent->cfd_sample_0           = 0; 
-      DGSEvent->cfd_sample_1           = 0; 
+      DGSEvent->pileup_only_flag       = 0;
+      DGSEvent->cfd_sample_0           = 0;
+      DGSEvent->cfd_sample_1           = 0;
       DGSEvent->cfd_sample_2           = 0;
 
       DGSEvent->peak_valid_flag        = ((*(ev + 3) & 0x00000200) >> 9);                               // Word 3: 9
@@ -244,14 +244,14 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
       DGSEvent->sync_error_flag        = ((*(ev + 3) & 0x00001000) >> 12);                              // Word 3: 12
       DGSEvent->general_error_flag     = ((*(ev + 3) & 0x00002000) >> 13);                              // Word 3: 13
       DGSEvent->pileup_flag            = ((*(ev + 3) & 0x00008000) >> 15);                              // Word 3: 15
-      DGSEvent->last_disc_timestamp    = (((unsigned long long int)(*(ev + 3) & 0xFFFF0000)) >> 16 )|   // Word 3: 31..16 & 
-                                         (((unsigned long long int)(*(ev + 4) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0  
+      DGSEvent->last_disc_timestamp    = (((unsigned long long int)(*(ev + 3) & 0xFFFF0000)) >> 16 )|   // Word 3: 31..16 &
+                                         (((unsigned long long int)(*(ev + 4) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0
       DGSEvent->sampled_baseline       = ((*(ev + 5) & 0x00FFFFFF) >> 0);                               // Word 5: 23..0
       DGSEvent->pre_rise_energy        = ((*(ev + 7) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
-      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
-                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
-      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16 )|   // Word 8: 31..16 & 
-                                         (((unsigned long long int)(*(ev + 9) & 0xFFFFFFFF)) << 16);    // Word 9 :31..0  
+      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 &
+                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0
+      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16 )|   // Word 8: 31..16 &
+                                         (((unsigned long long int)(*(ev + 9) & 0xFFFFFFFF)) << 16);    // Word 9 :31..0
       DGSEvent->m1_begin_sample        = ((*(ev + 10) & 0x00003FFF) >> 0);                              // Word 10:13..0
       DGSEvent->m1_end_sample          = ((*(ev + 10) & 0x3FFF0000) >> 16);                             // Word 10:29..16
       DGSEvent->m2_begin_sample        = ((*(ev + 11) & 0x00003FFF) >> 0);                              // Word 11:13..0
@@ -259,29 +259,29 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
       DGSEvent->peak_sample            = ((*(ev + 12) & 0x00003FFF) >> 0);                              // Word 12:13..0
       DGSEvent->base_sample            = ((*(ev + 12) & 0x3FFF0000) >> 16);                             // Word 12:29..16
     break;
-                
+
     case 1:                // LED Header
       DGSEvent->timestamp_match_flag   = 0;
       DGSEvent->cfd_valid_flag         = 0;
-      DGSEvent->cfd_sample_0           = 0; 
-      DGSEvent->cfd_sample_1           = 0; 
+      DGSEvent->cfd_sample_0           = 0;
+      DGSEvent->cfd_sample_1           = 0;
       DGSEvent->cfd_sample_2           = 0;
-                        
+
       DGSEvent->external_disc_flag     = ((*(ev + 3) & 0x00000100) >> 8);                               // Word 3: 8
       DGSEvent->peak_valid_flag        = ((*(ev + 3) & 0x00000200) >> 9);                               // Word 3: 9
       DGSEvent->offset_flag            = ((*(ev + 3) & 0x00000400) >> 10);                              // Word 3: 10
       DGSEvent->sync_error_flag        = ((*(ev + 3) & 0x00001000) >> 12);                              // Word 3: 12
       DGSEvent->general_error_flag     = ((*(ev + 3) & 0x00002000) >> 13);                              // Word 3: 13
       DGSEvent->pileup_only_flag       = ((*(ev + 3) & 0x00004000) >> 14);                              // Word 3: 14
-      DGSEvent->pileup_flag            = ((*(ev + 3) & 0x00008000) >> 15);                              // Word 3: 15  
-      DGSEvent->last_disc_timestamp    = (((unsigned long long int)(*(ev + 3) & 0xFFFF0000)) >> 16 )|   // Word 3: 31..16 & 
-                                         (((unsigned long long int)(*(ev + 4) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0  
+      DGSEvent->pileup_flag            = ((*(ev + 3) & 0x00008000) >> 15);                              // Word 3: 15
+      DGSEvent->last_disc_timestamp    = (((unsigned long long int)(*(ev + 3) & 0xFFFF0000)) >> 16 )|   // Word 3: 31..16 &
+                                         (((unsigned long long int)(*(ev + 4) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0
       DGSEvent->sampled_baseline       = ((*(ev + 5) & 0x00FFFFFF) >> 0);                               // Word 5: 23..0
       DGSEvent->pre_rise_energy        = ((*(ev + 7) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
-      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
-                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
-      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16) |   // Word 8: 31..16 & 
-                                         (((unsigned long long int)(*(ev + 9) & 0xFFFFFFFF)) << 16);    // Word 9: 31..0  
+      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 &
+                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0
+      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16) |   // Word 8: 31..16 &
+                                         (((unsigned long long int)(*(ev + 9) & 0xFFFFFFFF)) << 16);    // Word 9: 31..0
       DGSEvent->m1_begin_sample        = ((*(ev + 10) & 0x00003FFF) >> 0);                              // Word 10:13..0
       DGSEvent->m1_end_sample          = ((*(ev + 10) & 0x3FFF0000) >> 16);                             // Word 10:29..16
       DGSEvent->m2_begin_sample        = ((*(ev + 11) & 0x00003FFF) >> 0);                              // Word 11:13..0
@@ -307,10 +307,10 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
       DGSEvent->cfd_sample_1           = ((*(ev + 6) & 0x00003FFF) >> 0);                               // Word 6: 13..0
       DGSEvent->cfd_sample_2           = ((*(ev + 6) & 0x3FFF0000) >> 16);                              // Word 6: 29..16
       DGSEvent->pre_rise_energy        = ((*(ev + 7) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
-      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
-                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
-      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16) |   // Word 8: 31..16 & 
-                                         (((unsigned long long int)(*(ev + 9) & 0xFFFFFFFF)) << 16);    // Word 9: 31..0  
+      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 &
+                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0
+      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16) |   // Word 8: 31..16 &
+                                         (((unsigned long long int)(*(ev + 9) & 0xFFFFFFFF)) << 16);    // Word 9: 31..0
       DGSEvent->m1_begin_sample        = ((*(ev + 10) & 0x00003FFF) >> 0);                              // Word 10:13..0
       DGSEvent->m1_end_sample          = ((*(ev + 10) & 0x3FFF0000) >> 16);                             // Word 10:29..16
       DGSEvent->m2_begin_sample        = ((*(ev + 11) & 0x00003FFF) >> 0);                              // Word 11:13..0
@@ -318,32 +318,32 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
       DGSEvent->peak_sample            = ((*(ev + 12) & 0x00003FFF) >> 0);                              // Word 12:13..0
       DGSEvent->base_sample            = ((*(ev + 12) & 0x3FFF0000) >> 16);                             // Word 12:29..16
     break;
-      
+
     case 3:                // 2015/16 LED Header
       DGSEvent->timestamp_match_flag   = 0;
       DGSEvent->cfd_valid_flag         = 0;
-      DGSEvent->cfd_sample_0           = 0; 
-      DGSEvent->cfd_sample_1           = 0; 
+      DGSEvent->cfd_sample_0           = 0;
+      DGSEvent->cfd_sample_1           = 0;
       DGSEvent->cfd_sample_2           = 0;
-                        
+
       DGSEvent->external_disc_flag     = ((*(ev + 3) & 0x00000100) >> 8);                               // Word 3: 8
       DGSEvent->peak_valid_flag        = ((*(ev + 3) & 0x00000200) >> 9);                               // Word 3: 9
       DGSEvent->offset_flag            = ((*(ev + 3) & 0x00000400) >> 10);                              // Word 3: 10
       DGSEvent->sync_error_flag        = ((*(ev + 3) & 0x00001000) >> 12);                              // Word 3: 12
       DGSEvent->general_error_flag     = ((*(ev + 3) & 0x00002000) >> 13);                              // Word 3: 13
       DGSEvent->pileup_only_flag       = ((*(ev + 3) & 0x00004000) >> 14);                              // Word 3: 14
-      DGSEvent->pileup_flag            = ((*(ev + 3) & 0x00008000) >> 15);                              // Word 3: 15  
-      DGSEvent->last_disc_timestamp    = (((unsigned long long int)(*(ev + 3) & 0xFFFF0000)) >> 16 )|   // Word 3: 31..16 & 
-                                         (((unsigned long long int)(*(ev + 4) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0  
+      DGSEvent->pileup_flag            = ((*(ev + 3) & 0x00008000) >> 15);                              // Word 3: 15
+      DGSEvent->last_disc_timestamp    = (((unsigned long long int)(*(ev + 3) & 0xFFFF0000)) >> 16 )|   // Word 3: 31..16 &
+                                         (((unsigned long long int)(*(ev + 4) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0
       DGSEvent->sampled_baseline       = ((*(ev + 5) & 0x00FFFFFF) >> 0);                               // Word 5: 23..0
       DGSEvent->pre_rise_energy        = ((*(ev + 7) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
-      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
-                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
-      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16);    // Word 8: 31..16  
+      DGSEvent->post_rise_energy       = ((*(ev + 7) & 0xFF000000) >> 28) |                             // Word 7: 31..24 &
+                                         ((*(ev + 8) & 0x0000FFFF) << 8);                               // Word 8: 15..0
+      DGSEvent->peak_timestamp         = (((unsigned long long int)(*(ev + 8) & 0xFFFF0000)) >> 16);    // Word 8: 31..16
       //DGSEvent->last_post_enter_sample =                                 // Word 9: 13..0  // /* need to understand these... */
       //DGSEvent->trigger_timestamp =                                      // Word 9: 31..16  //
-      DGSEvent->m1_begin_sample        = ((*(ev + 10) & 0x00003FFF) >> 0);                              // Word 10:13..0 
-      DGSEvent->m1_end_sample          = ((*(ev + 10) & 0x3FFF0000) >> 16);                             // Word 10:29..16 
+      DGSEvent->m1_begin_sample        = ((*(ev + 10) & 0x00003FFF) >> 0);                              // Word 10:13..0
+      DGSEvent->m1_end_sample          = ((*(ev + 10) & 0x3FFF0000) >> 16);                             // Word 10:29..16
       DGSEvent->m2_begin_sample        = ((*(ev + 11) & 0x00003FFF) >> 0);                              // Word 11:13..0
       DGSEvent->m2_end_sample          = ((*(ev + 11) & 0x3FFF0000) >> 16);                             // Word 11:29..16
       DGSEvent->peak_sample            = ((*(ev + 12) & 0x00003FFF) >> 0);                              // Word 12:13..0
@@ -368,9 +368,9 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
   /* done */
   if (Pars.CurEvNo <= Pars.NumToPrint)
     printf ("exit DGSEvDecompose_v4 :\n");
-  
+
   return (0);
-  
+
 };
 
 /* ----------------------------------------------------------------- */
@@ -409,7 +409,7 @@ bin_rcnp (GEB_EVENT * GEB_event)
               printf ("bin_rcnp, %2i> %2i, %s, TS=%lli\n", i, GEB_event->ptgd[i]->type, str,
                       GEB_event->ptgd[i]->timestamp);
             }
-	  DGSEvDecompose_v4 ((unsigned int *) GEB_event->ptinp[i], 
+	  DGSEvDecompose_v4 ((unsigned int *) GEB_event->ptinp[i],
 			     GEB_event->ptgd[i]->length / sizeof (unsigned int),
 			     &DGSEvent[EvtMult]);
 	  EvtMult++; HitCount++;
@@ -417,9 +417,9 @@ bin_rcnp (GEB_EVENT * GEB_event)
 
     }
 
-  // TTree work starts //  
+  // TTree work starts //
   EL->Reset(); //Reset variables
-  
+
   //Pass from DGSEvent -> EvtList
   EL->RunNumber = Pars.RunNumber;
   EL->NumHits = EvtMult;
