@@ -272,7 +272,7 @@ if [ $isGeneralSort -ge 1 ]; then
           if [ $isGeneralSort -eq 1 ]; then
               echo -e "${RED}######################### GeneralSort.C${NC}"
               root -l -q -b "process_run.C(${runID}, 0)"
-              #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+              root -l ../Armory/runsCheck.C  #check the run Entries, and duration
           fi
 
           if [ $isGeneralSort -eq 2 ]; then
@@ -291,7 +291,6 @@ if [ $isGeneralSort -ge 1 ]; then
       else
           echo -e "${BLUE}gen_run${RUN}.root are newer than run${RUN}.root. No need to sort again.${NC}"
           echo -e "${GREEN}You can Force sorting using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
-
       fi
 
    fi
@@ -301,7 +300,7 @@ fi;
 if [ $isGeneralSort -eq -1 ]; then # force GenralSort
   echo -e "${RED}######################### GeneralSort.C${NC}"
   root -l -q -b "process_run.C(${runID}, 0)"
-  #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 ########################################
