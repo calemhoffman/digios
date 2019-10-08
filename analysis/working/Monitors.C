@@ -12,6 +12,8 @@
 #include <TLatex.h>
 #include <TSystem.h>
 #include <TMacro.h>
+#include <TLine.h>
+#include <TBox.h>
 #include <TMD5.h>
 #include <TObjArray.h>
 #include <fstream>
@@ -24,11 +26,11 @@ const int numRow = 6;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = { 500, 8000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,   10}; // in the E-Z plot
-int     rdtDERange[2] = {  0,  2000};
-int      rdtERange[2] = {  0,  5000};
-int      elumRange[2] = { 200, 4000};
+int rawEnergyRange[2] = { 100, 12000}; // share with e, ring, xf, xn
+int    energyRange[2] = {   0,    20}; // in the E-Z plot
+int     rdtDERange[2] = {   0, 10000};
+int      rdtERange[2] = {   0,  4000};
+int      elumRange[2] = { 200,  4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -40, 40};
@@ -37,8 +39,8 @@ int  coinTimeRange[2] = { -40, 40};
 double rdtot[4] = {};
 
 //---Gate
-int timeGate[2] = {-100, 100}; // min, max, 1 ch = 10 ns
-int tacGate[2] = {-2400, -1000};
+int timeGate[2] = {-10, 5}; // min, max, 1 ch = 10 ns
+int tacGate[2] = {-8000, -3200};
 int dEgate[2] = {500,1500};
 int Eresgate[2] = {1000,4000};
 
@@ -400,16 +402,16 @@ void Monitors::Begin(TTree *tree)
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
       gamm = 1./TMath::Sqrt(1-beta*beta);
       G = alpha * gamm * beta * a ;
-		printf("mass-b    : %f MeV/c2 \n", mass);
-		printf("charge-b  : %f \n", q);
-		printf("E-total   : %f MeV \n", Et);
-		printf("mass-B    : %f MeV/c2 \n", massB);		 
-		printf("beta      : %f \n", beta);
-		printf("B-field   : %f T \n", Bfield);
-		printf("slope     : %f MeV/mm \n", alpha * beta);
-		printf("det radius: %f mm \n", a);
-		printf("G-coeff   : %f MeV \n", G);
-		printf("=================================\n");
+      printf("\tmass-b    : %f MeV/c2 \n", mass);
+      printf("\tcharge-b  : %f \n", q);
+      printf("\tE-total   : %f MeV \n", Et);
+      printf("\tmass-B    : %f MeV/c2 \n", massB);		 
+      printf("\tbeta      : %f \n", beta);
+      printf("\tB-field   : %f T \n", Bfield);
+      printf("\tslope     : %f MeV/mm \n", alpha * beta);
+      printf("\tdet radius: %f mm \n", a);
+      printf("\tG-coeff   : %f MeV \n", G);
+      printf("=================================\n");
 
    }else{
       printf("... fail.\n");
@@ -533,7 +535,7 @@ void Monitors::Begin(TTree *tree)
                            
       heCalVxCal[i] = new TH2F(Form("heCalVxCal%d",i),
                            Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
-                           500,-0.25,5.25,500,energyRange[0], energyRange[1]);
+                           500,-02.5,52.5,500,energyRange[0], energyRange[1]);
    }
    
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
@@ -575,16 +577,16 @@ void Monitors::Begin(TTree *tree)
    htdiffg = new TH1I("htdiffg","Coincident time (array, recoil) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
  
    //===================== TAC
-   htac = new TH1F("htac","Array-RF TAC; kind of time diff [a.u.]; Counts", 4000, -2500, -1000);
+   htac = new TH1F("htac","Array-RF TAC; kind of time diff [a.u.]; Counts", 4000, -5000, -1000);
 
    for (Int_t i=0;i<numDet;i++) {
       htacArray[i] = new TH1I(Form("htacArray%d",i), Form("Array-RDT TAC for ch%d",i), 200, -100,100);
    }
    
-   htacEx = new TH2F("htacEx", "Ex - TAC ; TAC [a.u.]; Ex [MeV]", 200, -2500, -1000, (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   htacEx = new TH2F("htacEx", "Ex - TAC ; TAC [a.u.]; Ex [MeV]", 200, -5000, -1000, (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
 
    for (Int_t i=0; i < 8; i++){
-      htacRecoil[i] = new TH2F(Form("htacRecoil%d", i), Form("RDT-%d - TAC; TAC ; RDT ", i), 200, -2500 , -1000 , 200, 0, 4000);
+      htacRecoil[i] = new TH2F(Form("htacRecoil%d", i), Form("RDT-%d - TAC; TAC ; RDT ", i), 200, -5000 , -1000 , 200, 0, 4000);
       
       if( i % 2 == 0 ) {
          int tempID2 = i / 2;
@@ -612,11 +614,11 @@ void Monitors::Begin(TTree *tree)
    
    hic0 = new TH1F("hic0", "IC0; IC-0 [ch]; count", 500, 0, 1000);
    hic1 = new TH1F("hic1", "IC1; IC-1 [ch]; count", 500, 0, 1000);
-   hic2 = new TH1F("hic2", "IC2; IC-2 [ch]; count", 500, 0, 400);
+   hic2 = new TH1F("hic2", "IC2; IC-2 [ch]; count", 500, 0, 1000);
    
    hic01 = new TH2F("hic01", "IC0 - IC1; IC-1 [ch]; IC-0[ch]", 1000, 0, 1000, 1000, 0, 1000);
-   hic02 = new TH2F("hic02", "IC0 - IC2; IC-2 [ch]; IC-0[ch]", 500, 0, 400, 500, 0, 400);
-   hic12 = new TH2F("hic12", "IC1 - IC2; IC-2 [ch]; IC-1[ch]", 500, 0, 400, 500, 0, 400);
+   hic02 = new TH2F("hic02", "IC0 - IC2; IC-2 [ch]; IC-0[ch]", 500, 0, 1000, 500, 0, 1000);
+   hic12 = new TH2F("hic12", "IC1 - IC2; IC-2 [ch]; IC-1[ch]", 500, 0, 1000, 500, 0, 1000);
    
    /*
    he0dee = new TH2F("he0dee","EZERO DE-E; E [ch]; DE [ch]",500,0,8000,500,0,8000);//ezero
@@ -682,19 +684,7 @@ Bool_t Monitors::Process(Long64_t entry)
    b_ELUMTimestamp->GetEntry(entry);
    b_EZEROTimestamp->GetEntry(entry);
     
-    
-   /****** h070_146Nd, since recoil is no used, fill rdt data with ezero */
-
-   rdt[0] = ezero[0];
-   rdt[1] = ezero[1];
-   rdt[2] = ezero[0];
-   rdt[3] = ezero[2];
-   rdt[4] = ezero[1];
-   rdt[5] = ezero[2];
-   rdt_t[0] = ezero_t[0];
-   rdt_t[1] = ezero_t[1];
-   
-    /*********** forming canvas Title **********************************/ 
+   /*********** forming canvas Title **********************************/ 
     if( entry == 0 ) {
        if( runID == lastRunID + 1 ) {
           int len = canvasTitle.Sizeof();
@@ -759,7 +749,7 @@ Bool_t Monitors::Process(Long64_t entry)
       hxnVID->Fill(detID, xn[detID]);
 
       //==================== Basic gate
-      //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue; // TAC gate RUN67 onwards
+      if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue; 
       if( TMath::IsNaN(e[detID]) ) continue ; 
       if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
       //if( ring[detID] > 300 ) continue; 
@@ -844,11 +834,13 @@ Bool_t Monitors::Process(Long64_t entry)
 
           hID2->Fill(detID, j); 
 	 
-          if( timeGate[0] < tdiff && tdiff < timeGate[1] )	 {
-            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
-            hID2g->Fill(detID, j); 
-            //if( rdtgate) hID2g->Fill(detID, j); 
-            coinFlag = true;
+          if( timeGate[0] < tdiff && tdiff < timeGate[1] ) {
+            if ((tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) {
+               if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
+               hID2g->Fill(detID, j); 
+               //if( rdtgate) hID2g->Fill(detID, j); 
+               coinFlag = true;
+            }
           }
         }
       }
@@ -880,7 +872,7 @@ Bool_t Monitors::Process(Long64_t entry)
     for( int i = 0; i < numRow; i++){
       for(int j = 0; j < numCol; j++){
          int k = numCol*i+j;
-         if( !isGoodEventFlag ) continue;
+         //if( !isGoodEventFlag ) continue;
          count1++;
          //if( ((xf[k] > 0 || !TMath::IsNaN(xf[k]))  && ( xn[k]>0 || !TMath::IsNaN(xn[k]))) ) 
          hecalVzRow[i] -> Fill( z[k], eCal[k]);
@@ -892,7 +884,7 @@ Bool_t Monitors::Process(Long64_t entry)
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
       
-      if( i % 2 == 0 /*&& tacGate[0] < tac[0] &&  tac[0] < tacGate[1]*/){
+      if( i % 2 == 0 && tacGate[0] < tac[0] &&  tac[0] < tacGate[1] ){
          recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
@@ -1052,6 +1044,8 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 2
    cCanvas->cd(2); 
+   double yMax = htdiff->GetMaximum()*1.2;
+   htdiff->GetYaxis()->SetRangeUser(0, yMax);
    htdiff->Draw();
    htdiffg->SetLineColor(2);
    htdiffg->Draw("same");
@@ -1062,6 +1056,10 @@ void Monitors::Terminate()
    text.SetTextSize(0.04);
    text.SetTextColor(2);
    text.DrawLatex(0.15, 0.8, "with Recoil");
+   
+   TBox * box = new TBox (timeGate[0], 0, timeGate[1], yMax);
+   box->SetFillColorAlpha(kGreen, 0.2);
+   box->Draw();
 
    ///----------------------------------- Canvas - 3
    cCanvas->cd(3);
@@ -1069,6 +1067,7 @@ void Monitors::Terminate()
 
    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1]));
    text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   text.DrawLatex(0.15, 0.6, "with Recoil");
    
    //the constant thetaCM line
    if( transfer->IsOpen() ) gList->At(0)->Draw("same");
@@ -1089,42 +1088,41 @@ void Monitors::Terminate()
    
    ///----------------------------------- Canvas - 5
    cCanvas->cd(5); 
+   //cCanvas->cd(5)->SetLogy();
+   //hic0->Draw();
    
-   cCanvas->cd(5)->SetLogy();
-   hic0->Draw();
-   
-   //Draw2DHist(hrdt2Dg[0]);
-   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   //if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[0]);
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 0 ) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 6
    cCanvas->cd(6); 
-   cCanvas->cd(6)->SetLogy();
-   hic1->Draw();
-   
+   //cCanvas->cd(6)->SetLogy();
+   //hic1->Draw();
    //Draw2DHist(hic02);
    
-   //Draw2DHist(hrdt2Dg[1]);
-   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   //if( isCutFileOpen) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[1]);
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 1) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 7
    cCanvas->cd(7); 
-   
-   
-   Draw2DHist(hic01);
    //Draw2DHist(hic01);
    
-   //Draw2DHist(hrdt2Dg[2]);
-   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isCutFileOpen) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[2]);
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 2) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 8
    cCanvas->cd(8); 
    
-   //Draw2DHist(hrdt2Dg[3]);
-   //text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   //if( isCutFileOpen) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[3]);
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 3) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /************************* Save histograms to root file*/
    
@@ -1148,10 +1146,12 @@ void Monitors::Terminate()
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine("listDraws()");
    
-   gROOT->ProcessLine("rawID()");
+   gROOT->ProcessLine("recoils()");
+   //gROOT->ProcessLine("rawID()");
    
    
-   printf("count1: %d , count2: %d \n", count1, count2);
+   //printf("count1: %d , count2: %d \n", count1, count2);
+
    
    
 }

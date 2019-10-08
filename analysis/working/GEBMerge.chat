@@ -25,7 +25,7 @@ chunksiz 2000000000
 #    +--- big size makes program slow;
 #         but it may be necessary sometimes
 
-bigbufsize 450
+bigbufsize 45000
 wosize     100
 #  |
 #  +--- in percent of bigbufsize
@@ -35,7 +35,7 @@ wosize     100
 # how often should we write 
 # statistics to output
 
-reportinterval 1000
+reportinterval 100000
 
 #---------------------------------------
 # TS jump recovery trigger limits

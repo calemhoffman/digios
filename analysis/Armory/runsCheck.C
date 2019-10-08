@@ -86,6 +86,46 @@
          if( breakFlag ) break;      
       }
       
+      //when no timestamp find in array, change to rdt
+      if( breakFlag == false ) {
+         
+         tree->SetBranchAddress("rdt_t", e_t, &b_EnergyTimestamp);
+         
+         for(int event = 1; event < totalEvent; event++){
+            tree->GetEntry(event);
+            for(int j = 0; j < 8; j++){
+               if( e_t[j] > 0 ) {
+                  firstTime = e_t[j];
+                  //printf("%d ", event);
+                  breakFlag = true;
+                  break;
+               }
+            }
+            if( breakFlag ) break;      
+         }
+         
+      }
+      
+      //when no timestamp find in array or rdt, change to ezero
+      if( breakFlag == false ) {
+         
+         tree->SetBranchAddress("ezero_t", e_t, &b_EnergyTimestamp);
+         
+         for(int event = 1; event < totalEvent; event++){
+            tree->GetEntry(event);
+            for(int j = 0; j < 3; j++){
+               if( e_t[j] > 0 ) {
+                  firstTime = e_t[j];
+                  //printf("%d ", event);
+                  breakFlag = true;
+                  break;
+               }
+            }
+            if( breakFlag ) break;      
+         }
+         
+      }
+      
       //find the last event time_recored
       breakFlag = false;
       for(int event = totalEvent-1; event > 0; event--){
