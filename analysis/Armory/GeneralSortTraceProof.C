@@ -20,7 +20,7 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 300;
+int traceLength = 600;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = true;
@@ -48,7 +48,7 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    }
    printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
    
-   printf("===================== ID-MAP: \n");
+   printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
    printf("\n");
@@ -58,7 +58,19 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
      }
-     printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+     if( 110 > idDetMap[i] && idDetMap[i] >= 100 ){
+       printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]);; // Cyan
+     }else{ 
+       switch (idKindMap[i]) {
+       case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 5: printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+       }
+     }
    }
    printf("\n==================== \n");
    
@@ -266,7 +278,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       //RECOIL
       /************************************************************************/
       if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
-         Int_t rdtTemp = idDet-101;
+         Int_t rdtTemp = idDet-100;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
@@ -376,7 +388,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             if( 200 > idDet && idDet >= 100 ) {
-               int rdtTemp = idDet-101;
+               int rdtTemp = idDet-100;
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);

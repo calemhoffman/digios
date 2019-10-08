@@ -171,23 +171,34 @@ void GeneralSortTrace::Begin(TTree * tree)
    }
 
   printf("======= ID-MAP: \n");
-  printf("%10s|", ""); 
+  printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
   printf("\n");
   for(int i = 0 ; i < 96; i++ ) printf("-");
-  printf("\n");
-  printf("%10s|", "VME1-Dig1"); 
   for(int i = 0 ; i < 160; i ++){
-    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
-    if( (i+1) % 10 == 0 ) {
+    if( (i) % 10 == 0 ) {
        printf("\n");
-       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)+1); 
+       if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
+    }
+    if( 110 > idDetMap[i] && idDetMap[i] >= 100 ){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]);; // Cyan
+    }else{ 
+      switch (idKindMap[i]) {
+       case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 5: printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+      }
     }
   }
-   gClock.Reset();
-   gClock.Start("timer");
+  printf("\n");
+  gClock.Reset();
+  gClock.Start("timer");
    
-   printf("====================== started \n");
+  printf("====================== started \n");
 }
 
 void GeneralSortTrace::SlaveBegin(TTree * /*tree*/)
@@ -422,12 +433,12 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             double temp = gTrace->Eval(80) - base;
 
             gFit->SetParameter(0, temp); //energy
-            gFit->SetParameter(1, 50); // time
-            gFit->SetParameter(2, 1); //riseTime
+            gFit->SetParameter(1, 100); // time
+            gFit->SetParameter(2, 10); //riseTime
             gFit->SetParameter(3, base);
 
-            if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
-            if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
+            //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
+            //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "qR");
