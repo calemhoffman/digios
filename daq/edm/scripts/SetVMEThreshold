@@ -42,6 +42,11 @@ if ! [[ $1 =~ $re ]]; then
 	iDIG=3	
     fi
 
+    if [ ${VME} = "Recoil" ]; then
+	VME=1
+	iDIG=2
+    fi
+
     if [ $# -eq 3 ]; then
 
 	echo " Set threshold values for array-$1 ${DIG} to $3"
@@ -62,6 +67,12 @@ if ! [[ $1 =~ $re ]]; then
 	    CHLIST="5 6 7 8 9"
 	fi
 
+	if [ ${DIG} = "E" ]; then
+	    CHLIST="0 2 4 6"
+	fi
+	if [ ${DIG} = "dE" ]; then
+	    CHLIST="1 3 5 7"
+	fi
 
 	for CH in $CHLIST
 	do
@@ -78,11 +89,14 @@ if ! [[ $1 =~ $re ]]; then
 	do
 	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2
 	done
-	iDIG=$(($iDIG+1))
-	for CH in $CHLIST
-	do
-	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2	
-	done
+
+	if [ $VME -ge 2 ] ; then
+	    iDIG=$(($iDIG+1))
+	    for CH in $CHLIST
+	    do
+		caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2	
+	    done
+	fi
     fi
 	
 
