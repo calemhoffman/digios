@@ -271,7 +271,7 @@ void elum(void) {
 
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
-  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1500, 0, 1000,1000);
   crdt->Clear();crdt->Divide(2,2);
   for (Int_t i=0;i<4;i++) {
     crdt->cd(i+1); 
@@ -279,13 +279,13 @@ void recoils(bool isLogz = false) {
     hrdt2D[i]->Draw("col");
   }
   
-  TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
-  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
-  crdtID->Clear();
-  hrdtID->Draw("colz");
+  //TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
+  //if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
+  //crdtID->Clear();
+  //hrdtID->Draw("colz");
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
-  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500,0, 1000, 1000);
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500, 500, 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
   for( int i = 0; i < 8; i ++){
     crdtS->cd(i+1);
@@ -308,7 +308,7 @@ void recoils(bool isLogz = false) {
 
 void eCalVz(void) {
   TCanvas *cecalVz =  (TCanvas *) gROOT->FindObjectAny("cecalVz");
-  if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
+  if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz",Form("ECALVZ : %s", canvasTitle.Data()),1000,650);
   cecalVz->Clear(); cecalVz->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cecalVz->cd(1);heCalVz->Draw("col");
@@ -337,14 +337,14 @@ void excite(void) {
   gStyle->SetOptStat("neiou");
   hEx->Draw("");
   
-  TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
-  if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),1600,1000);
-  cexI->Clear();cexI->Divide(5,6);
-  gStyle->SetOptStat("neiou");
-  for( int i = 0; i < numDet; i++){
-    cexI->cd(i+1); 
-    hExi[i]->Draw("");
-  }
+  //TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
+  //if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),1600,1000);
+  //cexI->Clear();cexI->Divide(5,6);
+  //gStyle->SetOptStat("neiou");
+  //for( int i = 0; i < numDet; i++){
+  //  cexI->cd(i+1); 
+  //  hExi[i]->Draw("");
+  //}
 }
 
 

@@ -7,7 +7,7 @@ if [ $# -ne 2 ] ; then
 fi
 
 source ../../expName.sh #load expName
-AnalysisDir=../analysis
+AnalysisDir=../../analysis
 
 #remote data path
 dataloc=${daqDataPath}/${expName}/data
@@ -117,6 +117,6 @@ do
 
 done
 
-#root -l ../Armory/runsCheck.C
+root -l ../Armory/runsCheck.C
   
 exit 1
