@@ -108,7 +108,10 @@ void Cali_xf_xn(TTree * tree){
    int method = 0;
    temp = scanf("%d", &method);
    
-   if( method == 9 ) return;
+   if( method == 9 ) {
+      gROOT->ProcessLine(".q");
+      return;
+   }
    
    double xHalf[numDet];
    if( method == 1 ){
@@ -223,6 +226,7 @@ void Cali_xf_xn(TTree * tree){
       printf("========== which detector to be the reference?\n");
       printf(" X =  det-X reference\n");
       printf("-1 =  manual reference\n");
+      printf("-2 =  use 228Th, first 5 strongest peaks \n");
       printf("-9 =  stop \n");
       printf("your choice = ");
       temp = scanf("%d", &refID);
@@ -253,12 +257,21 @@ void Cali_xf_xn(TTree * tree){
          }while(eng >= 0);
       }
       
+      if( refID == -2 ){
+         refEnergy.clear();
+         refEnergy.push_back(5.423);
+         refEnergy.push_back(5.685);
+         refEnergy.push_back(6.288);
+         refEnergy.push_back(6.778);
+         refEnergy.push_back(8.785);
+      }
+      
       printf("----- adjusting the energy to det-%d......\n", refID);
       int n = refEnergy.size();
       for( int k = 0; k < n; k++){
          printf("%2d-th peak : %f \n", k,  refEnergy[k]);
       }
-      printf("----------------------------------\n");
+      printf("---------------------------------- %d\n", numDet);
       TH1F ** p = new TH1F*[numDet];
       for( int i = 0; i < numDet; i ++){
         
@@ -267,6 +280,8 @@ void Cali_xf_xn(TTree * tree){
           a1[i] = 0;
           continue;
         }
+        
+        nPeaks = energy[i].size();
         
          TGraph * graph = new TGraph(nPeaks, &energy[i][0], &refEnergy[0] );
          
@@ -400,7 +415,7 @@ void Cali_xf_xn(TTree * tree){
    for( int i = 0; i < numDet; i ++){
       TString name;
       name.Form("k%d", i);
-      k[i] = new TH2F(name, name,  energyRange[0], energyRange[1], energyRange[2],  energyRange[0], energyRange[1], energyRange[2]);
+      k[i] = new TH2F(name, name,  energyRange[0], 0, energyRange[2],  energyRange[0], 0, energyRange[2]);
       name.Form("xf[%d]", i); k[i]->SetYTitle(name);
       name.Form("xn[%d]", i); k[i]->SetXTitle(name);
       
@@ -440,6 +455,7 @@ void Cali_xf_xn(TTree * tree){
       //cAlpha->SaveAs("alpha_xf_xn_corrected.pdf");
    }
    
+   gROOT->ProcessLine(".q");
    return;
    
 }

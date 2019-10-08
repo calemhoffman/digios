@@ -38,7 +38,7 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
 
    TH2F * h[4];
 
-	for (Int_t i = 0; i < 1; i++) {
+	for (Int_t i = 0; i < 4; i++) {
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
@@ -48,8 +48,8 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
       h[i] = new TH2F(Form("h%d", i), Form("RDT%d - RDT%d", 2*i+1, 2*i), 500, 0, eRange, 500, 0, deRange);
 
       expression[i].Form("%s:%s>>h%d", 
-            "ezero[0]", //varY.Data(),
-            "ezero[1]", //varX.Data(),
+            Form("rdt[%d]", 2*i+1), //varY.Data(),
+            Form("rdt[%d]", 2*i), //varX.Data(),
             i);
 
       chain->Draw(expression[i], "", "col");

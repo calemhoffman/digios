@@ -20,7 +20,7 @@ beta              0.0
 modwrite          100000
 
 # timestamp to be written in Log
-tsnumwrites       10000
+tsnumwrites       100000
 
 # event build windows
 timewin           1000
