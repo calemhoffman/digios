@@ -79,19 +79,19 @@ caput GLBL:DIG:load_delays 0
 # Globals finished now individual boards / channels
 #
 ###################################################################
-#echo "Setting deactivated boards / channels"
+echo "Setting deactivated boards / channels"
 #caput DAQB2_4_CS_Ena Disable
 #caput DAQB3_4_CS_Ena Disable
 #caput DAQB4_4_CS_Ena Disable
-#caput VME01:MDIG1:channel_enable1 Reset
-#caput VME01:MDIG1:channel_enable2 Reset
-#caput VME01:MDIG1:channel_enable3 Reset
-#caput VME01:MDIG1:channel_enable4 Reset
-#caput VME01:MDIG1:channel_enable5 Reset
-#caput VME01:MDIG1:channel_enable6 Reset
-#caput VME01:MDIG1:channel_enable7 Reset
-#caput VME01:MDIG1:channel_enable8 Reset
-#caput VME01:MDIG1:channel_enable9 Reset
+caput VME01:MDIG1:channel_enable1 Reset
+caput VME01:MDIG1:channel_enable2 Reset
+caput VME01:MDIG1:channel_enable3 Reset
+caput VME01:MDIG1:channel_enable4 Reset
+caput VME01:MDIG1:channel_enable5 Reset
+caput VME01:MDIG1:channel_enable6 Reset
+caput VME01:MDIG1:channel_enable7 Reset
+caput VME01:MDIG1:channel_enable8 Reset
+caput VME01:MDIG1:channel_enable9 Run  #for TAC
 #caput VME01:MDIG2:channel_enable0 Reset
 #caput VME01:MDIG2:channel_enable1 Reset
 #caput VME01:MDIG2:channel_enable2 Reset
@@ -109,7 +109,7 @@ caput GLBL:DIG:load_delays 0
 #caput VME01:MDIG4:channel_enable8 Reset
 #caput VME01:MDIG4:channel_enable9 Reset
 
-caput VME02:MDIG4:trigger_mux_select IntAcptAll #for tac
+caput VME01:MDIG1:trigger_mux_select IntAcptAll #for TAC
 
 #echo "Setting internal trigger boards / channels"
 #caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock

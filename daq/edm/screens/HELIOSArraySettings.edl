@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 430
-y 193
+x 157
+y 34
 w 1800
 h 1100
 font "helvetica-bold-r-10.0"
@@ -5082,7 +5082,7 @@ x 499
 y 998
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)9"
+controlPv "VME04:MDIG3:$(PVNAME)9"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -5110,7 +5110,7 @@ x 499
 y 1022
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)9_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)9_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -5137,7 +5137,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable9"
+controlPv "VME04:MDIG3:channel_enable9"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5162,7 +5162,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable8"
+controlPv "VME04:MDIG3:channel_enable8"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5181,7 +5181,7 @@ x 423
 y 1022
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)8_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)8_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -5202,7 +5202,7 @@ x 423
 y 998
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)8"
+controlPv "VME04:MDIG3:$(PVNAME)8"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -5230,7 +5230,7 @@ x 348
 y 998
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)7"
+controlPv "VME04:MDIG3:$(PVNAME)7"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -5258,7 +5258,7 @@ x 348
 y 1022
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)7_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)7_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -5285,7 +5285,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable7"
+controlPv "VME04:MDIG3:channel_enable7"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5310,7 +5310,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable6"
+controlPv "VME04:MDIG3:channel_enable6"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5329,7 +5329,7 @@ x 272
 y 1022
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)6_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)6_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -5350,7 +5350,7 @@ x 272
 y 998
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)6"
+controlPv "VME04:MDIG3:$(PVNAME)6"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -5378,7 +5378,7 @@ x 196
 y 998
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)5"
+controlPv "VME04:MDIG3:$(PVNAME)5"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -5406,7 +5406,7 @@ x 196
 y 1022
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)5_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)5_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -5433,7 +5433,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable5"
+controlPv "VME04:MDIG3:channel_enable5"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -5554,7 +5554,7 @@ x 196
 y 975
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count5_RBV"
+controlPv "VME04:MDIG3:disc_count5_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -5575,7 +5575,7 @@ x 272
 y 975
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count6_RBV"
+controlPv "VME04:MDIG3:disc_count6_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -5596,7 +5596,7 @@ x 348
 y 975
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count7_RBV"
+controlPv "VME04:MDIG3:disc_count7_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -5617,7 +5617,7 @@ x 423
 y 976
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count8_RBV"
+controlPv "VME04:MDIG3:disc_count8_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -5638,7 +5638,7 @@ x 499
 y 975
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count9_RBV"
+controlPv "VME04:MDIG3:disc_count9_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -12494,7 +12494,7 @@ x 501
 y 617
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count4_RBV"
+controlPv "VME04:MDIG3:disc_count4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -12555,7 +12555,7 @@ x 422
 y 618
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count3_RBV"
+controlPv "VME04:MDIG3:disc_count3_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -12576,7 +12576,7 @@ x 422
 y 641
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)3"
+controlPv "VME04:MDIG3:$(PVNAME)3"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -12604,7 +12604,7 @@ x 347
 y 641
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)2"
+controlPv "VME04:MDIG3:$(PVNAME)2"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -12652,7 +12652,7 @@ x 347
 y 618
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count2_RBV"
+controlPv "VME04:MDIG3:disc_count2_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -12673,7 +12673,7 @@ x 271
 y 618
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count1_RBV"
+controlPv "VME04:MDIG3:disc_count1_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -12735,7 +12735,7 @@ x 195
 y 618
 w 60
 h 14
-controlPv "VME04:MDIG4:disc_count0_RBV"
+controlPv "VME04:MDIG3:disc_count0_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -12756,7 +12756,7 @@ x 271
 y 641
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)1"
+controlPv "VME04:MDIG3:$(PVNAME)1"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -12784,7 +12784,7 @@ x 195
 y 641
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)0"
+controlPv "VME04:MDIG3:$(PVNAME)0"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -12812,7 +12812,7 @@ x 195
 y 665
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)0_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)0_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -12833,7 +12833,7 @@ x 271
 y 665
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)1_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)1_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -12854,7 +12854,7 @@ x 347
 y 664
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)2_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)2_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -12875,7 +12875,7 @@ x 422
 y 665
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)3_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)3_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -12896,7 +12896,7 @@ x 498
 y 641
 w 60
 h 18
-controlPv "VME04:MDIG4:$(PVNAME)4"
+controlPv "VME04:MDIG3:$(PVNAME)4"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -12924,7 +12924,7 @@ x 498
 y 665
 w 60
 h 14
-controlPv "VME04:MDIG4:$(PVNAME)4_RBV"
+controlPv "VME04:MDIG3:$(PVNAME)4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -12951,7 +12951,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable4"
+controlPv "VME04:MDIG3:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -12976,7 +12976,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable3"
+controlPv "VME04:MDIG3:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13001,7 +13001,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable2"
+controlPv "VME04:MDIG3:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13026,7 +13026,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable1"
+controlPv "VME04:MDIG3:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13051,7 +13051,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG4:channel_enable0"
+controlPv "VME04:MDIG3:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13337,7 +13337,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable0"
+controlPv "VME04:MDIG4:channel_enable0"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13356,7 +13356,7 @@ x 195
 y 785
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)0_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)0_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13377,7 +13377,7 @@ x 195
 y 761
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)0"
+controlPv "VME04:MDIG4:$(PVNAME)0"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13405,7 +13405,7 @@ x 195
 y 738
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count0_RBV"
+controlPv "VME04:MDIG4:disc_count0_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -13426,7 +13426,7 @@ x 271
 y 738
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count1_RBV"
+controlPv "VME04:MDIG4:disc_count1_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -13447,7 +13447,7 @@ x 271
 y 761
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)1"
+controlPv "VME04:MDIG4:$(PVNAME)1"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13475,7 +13475,7 @@ x 271
 y 785
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)1_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)1_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13502,7 +13502,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable1"
+controlPv "VME04:MDIG4:channel_enable1"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13527,7 +13527,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable2"
+controlPv "VME04:MDIG4:channel_enable2"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13546,7 +13546,7 @@ x 347
 y 785
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)2_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)2_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13567,7 +13567,7 @@ x 347
 y 761
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)2"
+controlPv "VME04:MDIG4:$(PVNAME)2"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13595,7 +13595,7 @@ x 347
 y 738
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count2_RBV"
+controlPv "VME04:MDIG4:disc_count2_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -13616,7 +13616,7 @@ x 422
 y 738
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count3_RBV"
+controlPv "VME04:MDIG4:disc_count3_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -13637,7 +13637,7 @@ x 422
 y 761
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)3"
+controlPv "VME04:MDIG4:$(PVNAME)3"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13665,7 +13665,7 @@ x 422
 y 785
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)3_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)3_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13692,7 +13692,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable3"
+controlPv "VME04:MDIG4:channel_enable3"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13717,7 +13717,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable4"
+controlPv "VME04:MDIG4:channel_enable4"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13736,7 +13736,7 @@ x 498
 y 785
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)4_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13757,7 +13757,7 @@ x 498
 y 761
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)4"
+controlPv "VME04:MDIG4:$(PVNAME)4"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13785,7 +13785,7 @@ x 498
 y 738
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count4_RBV"
+controlPv "VME04:MDIG4:disc_count4_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -13823,7 +13823,7 @@ x 498
 y 859
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count9_RBV"
+controlPv "VME04:MDIG4:disc_count9_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -13844,7 +13844,7 @@ x 498
 y 882
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)9"
+controlPv "VME04:MDIG4:$(PVNAME)9"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13872,7 +13872,7 @@ x 498
 y 906
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)9_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)9_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13899,7 +13899,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable9"
+controlPv "VME04:MDIG4:channel_enable9"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13924,7 +13924,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable8"
+controlPv "VME04:MDIG4:channel_enable8"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -13943,7 +13943,7 @@ x 422
 y 906
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)8_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)8_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -13964,7 +13964,7 @@ x 422
 y 882
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)8"
+controlPv "VME04:MDIG4:$(PVNAME)8"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -13992,7 +13992,7 @@ x 422
 y 859
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count8_RBV"
+controlPv "VME04:MDIG4:disc_count8_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -14013,7 +14013,7 @@ x 347
 y 859
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count7_RBV"
+controlPv "VME04:MDIG4:disc_count7_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -14034,7 +14034,7 @@ x 347
 y 882
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)7"
+controlPv "VME04:MDIG4:$(PVNAME)7"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -14062,7 +14062,7 @@ x 347
 y 906
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)7_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)7_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -14089,7 +14089,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable7"
+controlPv "VME04:MDIG4:channel_enable7"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14114,7 +14114,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable6"
+controlPv "VME04:MDIG4:channel_enable6"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14133,7 +14133,7 @@ x 271
 y 906
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)6_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)6_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -14154,7 +14154,7 @@ x 271
 y 882
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)6"
+controlPv "VME04:MDIG4:$(PVNAME)6"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -14182,7 +14182,7 @@ x 271
 y 859
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count6_RBV"
+controlPv "VME04:MDIG4:disc_count6_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -14203,7 +14203,7 @@ x 195
 y 859
 w 60
 h 14
-controlPv "VME04:MDIG3:disc_count5_RBV"
+controlPv "VME04:MDIG4:disc_count5_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 14
 bgColor index 0
@@ -14224,7 +14224,7 @@ x 195
 y 882
 w 60
 h 18
-controlPv "VME04:MDIG3:$(PVNAME)5"
+controlPv "VME04:MDIG4:$(PVNAME)5"
 format "float"
 font "helvetica-bold-r-12.0"
 fgColor index 14
@@ -14252,7 +14252,7 @@ x 195
 y 906
 w 60
 h 14
-controlPv "VME04:MDIG3:$(PVNAME)5_RBV"
+controlPv "VME04:MDIG4:$(PVNAME)5_RBV"
 font "helvetica-bold-r-12.0"
 fgColor index 13
 bgColor index 0
@@ -14279,7 +14279,7 @@ offColor index 80
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "VME04:MDIG3:channel_enable5"
+controlPv "VME04:MDIG4:channel_enable5"
 onLabel "Enabled"
 offLabel "Disabled"
 labelType "literal"
@@ -14409,7 +14409,7 @@ fgColor index 14
 bgColor index 0
 useDisplayBg
 value {
-  "Last update: 2019-09-20"
+  "Last update: 2019-10-01"
 }
 autoSize
 endObjectProperties

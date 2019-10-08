@@ -14,18 +14,25 @@ fi;
 
 echo -e "\n------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
+if [ $# -eq 0 ];then
+    echo 'Ctrl+C to cancel with no harm.'
+    read -p 'Singleline comment for this run: ' COMMENT
+else
+    COMMENT=$1
+fi
+
 currentDate=$(date)
 
 echo "         stop at ${currentDate}"
-echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "         stop at ${currentDate}| ${COMMENT}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
 curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
 
-echo "==== wait for 5 sec"
-sleep 5
+echo "==== wait for 2 sec"
+sleep 2
 
 # take screenshot and copy from heliosDB
 screenShot=~/digios/analysis/working/grafanaElog.jpg
@@ -39,8 +46,8 @@ if [ -z ${elogID} ]; then
 
 else
     # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
-    echo "---- downloading the elog entry elohID=${elogID}$"
-    elogContext=~/digios/analysis/working/elog_context.txt
+    echo "---- downloading the elog entry elohID=${elogID}"
+    elogContext=~/digios/analysis/working/elog.txt
     #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
     if [ $expName = "ARR01" ]; then
 	elogName=$expName
@@ -58,15 +65,20 @@ else
     #remove all header
     sed -i "1,${cutLineNum}d" ${elogContext}
     #fill stop time
-    echo "-----------------------------------------------" >> ${elogContext}
-    echo "         stop at ${currentDate}" >> ${elogContext}
-    echo "----- grafana screenshot is attached." >> ${elogContext}
+    echo "         stop at ${currentDate} <br />" >> ${elogContext}
+    echo "grafana screenshot is attached. <br />" >> ${elogContext}
+    echo "-----------------------------------------------</p>" >> ${elogContext}
+    echo "$COMMENT <br />" >> ${elogContext}
     elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
+
+    slackMsg="elogID=${elogID} is updated.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+    auxMsg="stop at ${currentDate} \n$COMMENT"
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' https://hooks.slack.com/services/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
 
 fi
 
-echo wait 10 seconds before closing the IOCs
-sleep 10
+echo wait 2 seconds before closing the IOCs
+sleep 2
 
 #number of IOCS/Rec. in use
 LIMIT=4
@@ -83,7 +95,7 @@ do
 done        
 rm -rf temp
 
-echo "=== wait 10 seconds before next run ==="
-sleep 10
+echo "=== wait 5 seconds before next run ==="
+sleep 5
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
