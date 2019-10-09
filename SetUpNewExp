@@ -97,7 +97,7 @@ elif [ ${Arch} == "Darwin" ]; then
         spacePrecent="${spacePrecent:0:2}"
         echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
-    elif
+    else
     
         path=$(pwd)
         read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
@@ -105,7 +105,6 @@ elif [ ${Arch} == "Darwin" ]; then
         echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
         echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
         exit
-    
     fi
     
 else
