@@ -8,12 +8,14 @@
 #define M -100 //M value for energy filter from digi setting
 
 //must be absolute path
-//Mac
-//#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-//LCRC
-#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+#ifdef __linux__
+   //LCRC
+   #include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+#elif __APPLE__
+   //Mac
+   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+#endif
 //by copy the GeneralSortMapping.h in to Armory, is not working
-//#include "GeneralSortMapping.h"
 
 //===================== setting
 bool isTraceON = true;
@@ -172,19 +174,19 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
       psd.Ring[i]    = 0.0;
-      psd.RDT[i]     = TMath::QuietNaN();
-      psd.TAC[i]     = TMath::QuietNaN();
-      if (i<32) psd.ELUM[i] = TMath::QuietNaN();
-      if (i<4) psd.EZERO[i] = TMath::QuietNaN();
+      if (i <  8) psd.RDT[i]     = TMath::QuietNaN();
+      if (i < 24) psd.TAC[i]     = TMath::QuietNaN();
+      if (i < 32) psd.ELUM[i] = TMath::QuietNaN();
+      if (i <  4) psd.EZERO[i] = TMath::QuietNaN();
 
       psd.EnergyTimestamp[i] = TMath::QuietNaN();
       psd.XFTimestamp[i]     = TMath::QuietNaN();
       psd.XNTimestamp[i]     = TMath::QuietNaN();
       psd.RingTimestamp[i]   = TMath::QuietNaN();
-      psd.RDTTimestamp[i]    = TMath::QuietNaN();
-      psd.TACTimestamp[i]    = TMath::QuietNaN();
-      if (i<32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
-      if (i<4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
+      if (i <  8) psd.RDTTimestamp[i]    = TMath::QuietNaN();
+      if (i < 24) psd.TACTimestamp[i]    = TMath::QuietNaN();
+      if (i < 32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
+      if (i <  4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
       
       psd.x[i]       = TMath::QuietNaN();    
    }
