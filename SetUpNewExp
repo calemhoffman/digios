@@ -68,43 +68,46 @@ if [ ${Arch} == "Linux" ]; then
 
     if [ ${PCName} == "digios1" ]; then  #DAQ
 
-	DATAPATH=${daqDataPath}
-	expDIR=~/digios
-	
-	space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
-	spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
-	spacePrecent="${spacePrecent:0:2}"
-	echo "Free Space : ${space} MB |  ${spacePrecent}%-used"
+        DATAPATH=${daqDataPath}
+        expDIR=~/digios
+        
+        space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
+        spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
+        spacePrecent="${spacePrecent:0:2}"
+        echo "Free Space : ${space} MB |  ${spacePrecent}%-used"
 
 
     elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
 
-	echo -e "\e[93m In LCRC, better to use the master branch."
-	echo -e "\e[93m 1) Change the expName in expName.sh"
-	echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
+        echo -e "\e[93m In LCRC, better to use the master branch."
+        echo -e "\e[93m 1) Change the expName in expName.sh"
+        echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
 
-	exit
+        exit
     fi
 
 elif [ ${Arch} == "Darwin" ]; then
 
     if [ ${PCName:0:5} == "phywl" ]; then #MAC
-	DATAPATH=~/experiments
-	expDIR=~/digios
+        DATAPATH=~/experiments
+        expDIR=~/digios
 
-	space=`df -ml | grep "/dev/disk2" | awk '{print $4}'` #in mb
-	spacePrecent=`df -ml | grep "/dev/disk2" | awk '{print $5}'`
-	spacePrecent="${spacePrecent:0:2}"
-	echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+        space=`df -ml | grep "/dev/disk2" | awk '{print $4}'` #in mb
+        spacePrecent=`df -ml | grep "/dev/disk2" | awk '{print $5}'`
+        spacePrecent="${spacePrecent:0:2}"
+        echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
     elif
-	path=$(pwd)
-	read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
-	echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
-	echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
-	echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
-	exit
+    
+        path=$(pwd)
+        read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
+        echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
+        echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
+        echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
+        exit
+    
     fi
+    
 else
    path=$(pwd)
    read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
