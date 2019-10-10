@@ -131,11 +131,11 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    
    bool coinFlag = false;
    //if no recoil. i.e. all rdt are NAN, coinFlag == true
-   int countValidRDT = 0;
+   int countInvalidRDT = 0;
    for( int j = 0; j < 8; j++){
-      if( TMath::IsNaN(rdt[j]) ) countValidRDT ++;
+      if( TMath::IsNaN(rdt[j]) ) countInvalidRDT ++;
    }
-   if( countValidRDT == 8 ) {
+   if( countInvalidRDT == 8 ) {
       coinFlag = true;
    }else{
       for( int i = 0; i < numDet ; i++){
@@ -158,7 +158,6 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          rdtID[i] = i;
          //rdtMultiHit ++;
       }
-
    }
 
    for( int i = 0; i< 4 ; i++){
@@ -171,52 +170,65 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    Float_t teTime = 0.; //time from trace
    int detTime = -1; // for coinTime
    for(int idet = 0 ; idet < numDet; idet++){
-      
-      if( !TMath::IsNaN(e[idet]) || e[idet] > 0 ){
-         eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
-         eC_t[idet] = e_t[idet]; // ch
-      }else{
-         continue; // when e is invalid, nothing need to do
-      }
-       
-      if( !TMath::IsNaN(xf[idet]) || xf[idet] > 0) xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
-      if( !TMath::IsNaN(xn[idet]) || xn[idet] > 0) xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
-      
-      //========= calculate x, range (-1,1)
-      
-      if(xf[idet] > 0  && xn[idet] > 0 ) {
-         x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
-         hitID[idet] = 0;
-      }else if((xf[idet] == 0 || TMath::IsNaN(xf[idet])) && ( xn[idet] > 0 || !TMath::IsNaN(xn[idet])) ){
-         x[idet] = (1-2*xnC[idet]/e[idet]);
-         hitID[idet] = 1;
-      }else if(( xf[idet] > 0 || !TMath::IsNaN(xf[idet])) && (xn[idet] == 0 || TMath::IsNaN(xn[idet])) ){
-         x[idet] = (2*xfC[idet]/e[idet]-1);
-         hitID[idet] = 2;
-      }else{
-         x[idet] = TMath::QuietNaN();
-      }
-      
 
-      //if(xfC[idet] > eC[idet]/2.){
-      //   x[idet] = 2*xfC[idet]/eC[idet] - 1. ;
-      //   hitID[idet] = 1;
-      //}else if(xnC[idet] > eC[idet]/2.){
-      //   x[idet] = 1. - 2* xnC[idet]/eC[idet];
-      //   hitID[idet] = 2;
-      //}else{
-      //   x[idet] = TMath::QuietNaN();
-      //}
+     hitID = 0; // hitID = 1 for only xf, hitID = 2 for only xn, hitID = 3 for both xf and xn
+     //======= Basic array gate
+     if( TMath::IsNaN(e[idet])) continue;
+     if( ring[idet] < -100 || ring[idet] > 100 ) continue;
+     if( !TMath::IsNaN(xf[idet]) ) hitID += 1;
+     if( !TMath::IsNaN(xn[idet]) ) hitID += 2;
+     if( hitID == 0 ) continue;
+     if( isTraceDataExist  && te_r[idet] > 50 ) continue; // when rise time > 50, skip 
+     
+     //====== Calibrations go here
+     if( isTraceDataExist ){
+       eC[idet] = te[idet]/eCorr[idet][0] + eCorr[idet][1];
+       eC_t[idet] = e_t[idet] - 100 + te_t[idet];
+       e[idet] = te[idet];
+     }else{
+       eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
+       eC_t[idet] = e_t[idet]; // ch
+     }
+       
+     xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
+     xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-   
-      x[idet] = x[idet] / xCorr[idet];
-   
-      //if( idet == 1 && e[idet] > 0 ){
-      //   printf(" e: %9.3f , %9.3f | xf : %9.3f, %9.3f | xn : %9.3f, %9.3f | x : %9.3f , hitID: %d\n", e[idet], eC[idet], xf[idet], xfC[idet], xn[idet], xnC[idet], x[idet], hitID[idet]);
-      //} 
+     //========= calculate x, range (-1,1)   
+     if( hitID == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
+     if( hitID == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
+     if( hitID == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
+
+
+     /*
+     if(xf[idet] > 0  && xn[idet] > 0 ) {
+       //x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
+       x[idet] = (xfC[idet]-xnC[idet])/(e[idet]);
+       hitID[idet] = 0;
+     }else if((xf[idet] == 0 || TMath::IsNaN(xf[idet])) && ( xn[idet] > 0 || !TMath::IsNaN(xn[idet])) ){
+       x[idet] = (1-2*xnC[idet]/e[idet]);
+       hitID[idet] = 1;
+     }else if(( xf[idet] > 0 || !TMath::IsNaN(xf[idet])) && (xn[idet] == 0 || TMath::IsNaN(xn[idet])) ){
+       x[idet] = (2*xfC[idet]/e[idet]-1);
+       hitID[idet] = 2;
+     }
+     */
       
-      //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
-      
+     x[idet] = x[idet] / xCorr[idet];
+
+     //========= Calculate z
+     int detID = idet%iDet;
+     if( pos[detID] < 0 ){
+       z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
+     }else{
+       z[idet] = pos[detID] + (-x[idet] + 1.)*length/2 ; 
+     }
+
+     //========= multiplicity the 2 array detectors are hit.
+     if( TMath::IsNaN(z[idet]) ) multiHit++;
+
+
+
+     /*   
       //========= calculate z, det
       if( TMath::IsNaN(x[idet]) ) {
          z[idet] = TMath::QuietNaN();
@@ -232,29 +244,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          det = idet;
          
          //========== coincident between array and RDT
-         /*
-         if( 0 <= det && det < iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 0;
-         }else if( iDet <= det && det < 2*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 3;
-         }else if( 2*iDet <= det && det < 3*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 1;
-            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 2;
-         }else if( 3*iDet <= det && det < 4*iDet ){
-            if( !TMath::IsNaN(rdt[0]) && !TMath::IsNaN(rdt[1]) ) arrayRDT = 2;
-            if( !TMath::IsNaN(rdt[2]) && !TMath::IsNaN(rdt[3]) ) arrayRDT = 3;
-            if( !TMath::IsNaN(rdt[4]) && !TMath::IsNaN(rdt[5]) ) arrayRDT = 0;
-            if( !TMath::IsNaN(rdt[6]) && !TMath::IsNaN(rdt[7]) ) arrayRDT = 1;
-         }
-         */   
+         
          //========== coincident time
          detTime = idet;
          eTime  = eC_t[idet];
@@ -325,7 +315,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          } //end of e is valid
       }//end of x is valid
    }//end of idet-loop
-   
+   */
+
    //================================= for coincident time bewteen array and rdt
    if( multiHit == 1 && rdtMultiHit == 1) {
      for(int idet = 0 ; idet < numDet; idet++){
