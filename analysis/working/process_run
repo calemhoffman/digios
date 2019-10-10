@@ -185,6 +185,7 @@ fi
 #################### Sort
 if [ $isSort -eq 1 ]; then
   echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
+  echo -e "${YELLOW} using ${GEBSort} ${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
   if [ ${isLinux} -eq 1 ]; then
@@ -219,6 +220,7 @@ fi
 
 if [ $isSort -eq -1 ]; then # force Sort
   echo -e "${RED}========= GEBSort started sorting run $RUN at `date` (force)${NC}"
+  echo -e "${YELLOW} using ${GEBSort} ${NC}"
   ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
   echo "GEBSort DONE at `date`"
   echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "

@@ -22,7 +22,8 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 600;
+int traceLengthRDT = 600;
+int traceLengthArray = 300;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = true;
@@ -36,7 +37,7 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    TString option = GetOption();
 
    printf( "=====================================================\n");
-   printf( "==========  GeneralSortTraceProof.C ================= \n");
+   printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
    printf( "  TAC/RF : %s \n", isTACRF ?  "On" : "Off");
@@ -48,7 +49,12 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    case 0: traceMethodName = "copy"; break;
    case 1: traceMethodName = "fit"; break;
    }
-   printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
+   printf( "  Trace  : %s , Method: %s, Save: %s \n", 
+               isTraceON ?  "On" : "Off", 
+               traceMethodName.Data(), 
+               isSaveTrace? "Yes": "No:");
+
+   printf( "  TraceLength :  %d (Array),  %d (RDT) \n", traceLengthArray, traceLengthRDT);
    
    printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
@@ -325,15 +331,19 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          idKind = idKindMap[idTemp];
          
          bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
+         bool isPSD = (30 > idDet && idDet >= 0);
          bool isRDT  = (130 > idDet && idDet >= 100 );
-         if( !isPSDe && !isRDT ) continue;
+         if( !isPSD && !isRDT ) continue;
+
+         int traceLength = 300;
+         if( isPSD )  traceLength = traceLengthArray;
+         if( isRDT  )  traceLength = traceLengthRDT;
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();
          countTrace ++;
          
          //Set gTrace
-         
          if( traceMethod == 0 ){
             for ( int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
@@ -360,7 +370,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                case  0: lineColor = 3; break;
                case  1: lineColor = 1; break;
                case  2: lineColor = 2; break;
-               case -1: lineColor = 4; break;
+               case  3: lineColor = 4; break;
+               case -1: lineColor = 6; break;
             }
             
             gFit->SetLineColor(lineColor);
