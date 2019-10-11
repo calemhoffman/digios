@@ -34,7 +34,7 @@ bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process, 1, fit, 2, Trapezoid (not implement yet) //TODO
 int traceLength = 600;
 
-bool isTACRF = false;
+bool isTACRF = true;
 bool isRecoil = true;
 bool isElum = false;
 bool isEZero = false;
@@ -320,36 +320,15 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
       
       //TAC & RF TIMING
       /***********************************************************************/
-      if( isTACRF && id[i] > 1160 && id[i] < 1171) { //RF TIMING SWITCH
-         //if (ProcessedEntries < NUMPRINT) printf("RF id %i, idDet %i\n",id[i],idDet);
-         switch(id[i]){
-            case 1163: //
-               psd.TAC[0] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[0] = event_timestamp[i];
-               break;
-            case 1164: // 
-               psd.TAC[1] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[1] = event_timestamp[i];
-               break;
-            case 1165: // 
-               psd.TAC[2] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[2] = event_timestamp[i];
-            case 1167: // 
-               psd.TAC[3] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[3] = event_timestamp[i];
-            case 1168: //
-               psd.TAC[4] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[4] = event_timestamp[i];
-            case 1169: //
-               psd.TAC[5] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[5] = event_timestamp[i];
-            break;
-         }
+      if( isTACRF && idDet >= 400 && idDet <= 450 ) {   
+        Int_t tacID = idDet - 400;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.TACTimestamp[tacID] = event_timestamp[i];
       }
 
       //RECOIL
       /************************************************************************/
-      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
+      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { 
          Int_t rdtTemp = idDet-101;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M;
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
@@ -367,7 +346,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
          }
          
          psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
-      }//end ELUM
+      }
 
       //EZERO
       /************************************************************************/
@@ -377,7 +356,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
             psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
          }
-      }//end EZERO
+      }
       
    }//end of NumHits
    
