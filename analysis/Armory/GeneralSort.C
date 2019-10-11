@@ -224,7 +224,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       idKind = idKindMap[idTemp];
       
       
-      //=============================== PSD
+      ///=============================== PSD
       if ( 0 <= idDet && idDet < 100 && 0 <= idKind && idKind <= 3 ) {         
         switch(idKind)
           {
@@ -250,44 +250,40 @@ Bool_t GeneralSort::Process(Long64_t entry)
           }
       }
 
-      //=============================== TAC & RF TIMING
-      //if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) {
+      ///=============================== TAC & RF TIMING
       if ( idDet >= 400 && idDet <= 450 ) {   
         Int_t tacID = idDet - 400;
         psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
         psd.TACTimestamp[tacID] = event_timestamp[i];
       }
        
-      //=============================== RECOIL
-      //if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) {
+      ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 110 ) {
         Int_t rdtID = idDet-100;
         psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 
-      //=============================== ELUM
-      //if ((id[i]>=1000 && id[i]<1130)&&(idDet>=200&&idDet<=240)) {
+      ///=============================== ELUM
       if ( idDet >= 200 && idDet <= 240 ) {
         Int_t elumID = idDet - 200;
         psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
-      //=============================== EZERO
-      //if ((id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
+      ///=============================== EZERO
       if ( idDet >= 300 && idDet < 310 ) {
         Int_t ezeroID = idDet - 300;
         psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M * (-1);
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
       }
       
-      //=============================== EBIS 
+      ///=============================== EBIS 
       if (id[i]==1010) {
         psd.EBISTimestamp = event_timestamp[i];
       }
          
-      //=============================== T1 proton pulse
+      ///=============================== T1 proton pulse
       if (id[i]==1013) {
         psd.T1Timestamp = event_timestamp[i];
       }
