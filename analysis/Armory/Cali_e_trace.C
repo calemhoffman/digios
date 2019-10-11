@@ -9,23 +9,29 @@
 #include <TH2.h>
 #include <TStyle.h>
 
-bool rejZeroHit = false;
+//#################################################################### User setting
 
-void Cali_e_trace::Begin(TTree * /*tree*/)
-{
+bool rejZeroHit = true; /// when no hit on array, don't save that event
+
+bool useTraceToReplaceArrayEnergy = false;
+
+
+//####################################################################
+
+
+void Cali_e_trace::Begin(TTree * /*tree*/){
    TString option = GetOption();  
    
-   if( rejZeroHit ) printf(" ================= reject when zero hit on array \n");
+   if( rejZeroHit ) printf(" ================= reject when zero hit on array.\n");
+   if( useTraceToReplaceArrayEnergy && isTraceDataExist) printf(" ================= use Trace energy replace array energy.\n");
    
 }
 
-void Cali_e_trace::SlaveBegin(TTree * /*tree*/)
-{
+void Cali_e_trace::SlaveBegin(TTree * /*tree*/){
    TString optcion = GetOption();
 }
 
-Bool_t Cali_e_trace::Process(Long64_t entry)
-{
+Bool_t Cali_e_trace::Process(Long64_t entry){
 
    //#################################################################### initialization
    for(int i = 0; i < numDet; i++){
@@ -41,9 +47,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    det   = -4;
    
    multiHit = 0;
-   rdtMultiHit = 0;
-   
-   arrayRDT = -4;
+   rdtdEMultiHit = 0;
    
    Ex  = TMath::QuietNaN();
    thetaCM  = TMath::QuietNaN();
@@ -130,7 +134,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
    
    bool coinFlag = false;
-   //if no recoil. i.e. all rdt are NAN, coinFlag == true
+   //if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
    int countInvalidRDT = 0;
    for( int j = 0; j < 8; j++){
       if( TMath::IsNaN(rdt[j]) ) countInvalidRDT ++;
@@ -142,80 +146,48 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
          for( int j = 0; j < 8 ; j++){
             if( TMath::IsNaN(rdt[j]) ) continue; 
             int tdiff = rdt_t[j] - e_t[i];
-            if( -20 < tdiff && tdiff < 20 )  {
-               coinFlag = true;
-            }
+            if( -20 < tdiff && tdiff < 20 )   coinFlag = true;
          }
       }
    }
    if( coinFlag == false ) return kTRUE;
 
    //#################################################################### processing
-   for(int i = 0 ; i < 8 ; i++){
-      rdtC[i]   = rdtCorr[i] * rdt[i];
-      rdtC_t[i] = rdt_t[i]; 
-      if( !TMath::IsNaN(rdt[i]) ) {
-         rdtID[i] = i;
-         //rdtMultiHit ++;
-      }
-   }
-
-   for( int i = 0; i< 4 ; i++){
-      if( !TMath::IsNaN(rdt[2*i+1]) ) {
-         rdtMultiHit ++;
-      }
-   }
    
-   ULong64_t eTime = -2000; //this will be the time for Ex valid
-   Float_t teTime = 0.; //time from trace
-   int detTime = -1; // for coinTime
+   //========================== Array
+   int uniqeDetID = -1;
    for(int idet = 0 ; idet < numDet; idet++){
 
-     hitID = 0; // hitID = 1 for only xf, hitID = 2 for only xn, hitID = 3 for both xf and xn
-     //======= Basic array gate
+     hitID[idet] = 0; /// hitID = 1 for only xf, hitID = 2 for only xn, hitID = 3 for both xf and xn
+     ///======= Basic array gate
      if( TMath::IsNaN(e[idet])) continue;
      if( ring[idet] < -100 || ring[idet] > 100 ) continue;
-     if( !TMath::IsNaN(xf[idet]) ) hitID += 1;
-     if( !TMath::IsNaN(xn[idet]) ) hitID += 2;
-     if( hitID == 0 ) continue;
-     if( isTraceDataExist  && te_r[idet] > 50 ) continue; // when rise time > 50, skip 
+     if( !TMath::IsNaN(xf[idet]) ) hitID[idet] += 1;
+     if( !TMath::IsNaN(xn[idet]) ) hitID[idet] += 2;
+     if( hitID[idet] == 0 ) continue;
+     if( isTraceDataExist  && te_r[idet] > 50 ) continue; /// when rise time > 50, skip 
      
-     //====== Calibrations go here
-     if( isTraceDataExist ){
+     ///====== Calibrations go here
+     if( isTraceDataExist  && useTraceToReplaceArrayEnergy ){
        eC[idet] = te[idet]/eCorr[idet][0] + eCorr[idet][1];
        eC_t[idet] = e_t[idet] - 100 + te_t[idet];
        e[idet] = te[idet];
      }else{
        eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
-       eC_t[idet] = e_t[idet]; // ch
+       eC_t[idet] = e_t[idet]; 
      }
        
      xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-     //========= calculate x, range (-1,1)   
-     if( hitID == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
-     if( hitID == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
-     if( hitID == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
-
-
-     /*
-     if(xf[idet] > 0  && xn[idet] > 0 ) {
-       //x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
-       x[idet] = (xfC[idet]-xnC[idet])/(e[idet]);
-       hitID[idet] = 0;
-     }else if((xf[idet] == 0 || TMath::IsNaN(xf[idet])) && ( xn[idet] > 0 || !TMath::IsNaN(xn[idet])) ){
-       x[idet] = (1-2*xnC[idet]/e[idet]);
-       hitID[idet] = 1;
-     }else if(( xf[idet] > 0 || !TMath::IsNaN(xf[idet])) && (xn[idet] == 0 || TMath::IsNaN(xn[idet])) ){
-       x[idet] = (2*xfC[idet]/e[idet]-1);
-       hitID[idet] = 2;
-     }
-     */
+     ///========= calculate x, range (-1,1)   
+     if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
+     if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
+     if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
       
      x[idet] = x[idet] / xCorr[idet];
 
-     //========= Calculate z
+     ///========= Calculate z
      int detID = idet%iDet;
      if( pos[detID] < 0 ){
        z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
@@ -223,149 +195,123 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
        z[idet] = pos[detID] + (-x[idet] + 1.)*length/2 ; 
      }
 
-     //========= multiplicity the 2 array detectors are hit.
-     if( TMath::IsNaN(z[idet]) ) multiHit++;
-
-
-
-     /*   
-      //========= calculate z, det
-      if( TMath::IsNaN(x[idet]) ) {
-         z[idet] = TMath::QuietNaN();
-      }else{ 
-         int detID = idet%iDet;
-         if( pos[detID] < 0 ){
-            z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
-         }else{
-            z[idet] = pos[detID] + (-x[idet] + 1.)*length/2 ; 
-         }
-         multiHit ++;
-         count ++;
-         det = idet;
-         
-         //========== coincident between array and RDT
-         
-         //========== coincident time
-         detTime = idet;
-         eTime  = eC_t[idet];
-         if ( isTraceDataExist ){
-            teTime = te_t[idet];
-            teS    = te[idet];
-            te_tS  = te_t[idet];
-            te_rS  = te_r[idet];
-         }
-         //printf(" det: %d, detID: %d, x: %f, pos:%f, z: %f \n", det, detID, x[idet], pos[detID], z[idet]);
+     ///========= multiplicity the 2 array detectors are hit.
+     if( !TMath::IsNaN(z[idet]) ) multiHit++;
+     
+     det = idet;
+   }
+   
+   //================ Calculate Ex and theta when single array hit.
+   if( multiHit == 1 ) {
+      validEventCount ++;
       
-         //========== Calculate Ex and thetaCM
-         if( TMath::IsNaN(eC[idet]) || isReaction == false ){
-            Ex = TMath::QuietNaN();
-            thetaCM = TMath::QuietNaN(); 
-            thetaLab = TMath::QuietNaN();
-            
-         }else{
-         
-            double y = eC[idet] + mass;
-            Z = alpha * gamma * beta * z[idet];
-            H = TMath::Sqrt(TMath::Power(gamma * beta,2) * (y*y - mass * mass) ) ;
-            
-            if( TMath::Abs(Z) < H ) {            
-              //using Newton's method to solve 0 ==  H * sin(phi) - G * tan(phi) - Z = f(phi) 
-              double tolerrence = 0.001;
-              double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
-              double nPhi = 0; // new phi
+      if( isReaction == true ){
 
-              int iter = 0;
-              do{
-                phi = nPhi;
-                nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));               
-                iter ++;
-                if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
-              }while( TMath::Abs(phi - nPhi ) > tolerrence);
-              phi = nPhi;
+         int idet = det;
 
-              // check f'(phi) > 0
-              double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
-              if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
-                double K = H * TMath::Sin(phi);
-                double x = TMath::ACos( mass / ( y * gamma - K));
-                double k = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
-                double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(k*k + mass * mass));
-                Ex = EB - massB;
-            
-                double hahaha1 = gamma* TMath::Sqrt(mass * mass + k * k) - y;
-                double hahaha2 = gamma* beta * k;
-                thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
-                
-                double pt = k * TMath::Sin(thetaCM * TMath::DegToRad());
-                double pp = gamma*beta*TMath::Sqrt(mass*mass + k*k) - gamma * k * TMath::Cos(thetaCM * TMath::DegToRad());
-                
-                thetaLab = TMath::ATan(pt/pp) * TMath::RadToDeg();
-                
-              }else{
-                Ex = TMath::QuietNaN();
-                thetaCM = TMath::QuietNaN();
-                thetaLab = TMath::QuietNaN();
-              }
+         double y = eC[idet] + mass;
+         Z = alpha * gamma * beta * z[idet];
+         H = TMath::Sqrt(TMath::Power(gamma * beta,2) * (y*y - mass * mass) ) ;
 
-            }else{
-              Ex = TMath::QuietNaN();
-              thetaCM = TMath::QuietNaN();  
-              thetaLab = TMath::QuietNaN();
-            } // end of if |Z| > H
-         } //end of e is valid
-      }//end of x is valid
-   }//end of idet-loop
-   */
+         if( TMath::Abs(Z) < H ) {            
+            ///using Newton's method to solve 0 ==  H * sin(phi) - G * tan(phi) - Z = f(phi) 
+            double tolerrence = 0.001;
+            double phi = 0; ///initial phi = 0 -> ensure the solution has f'(phi) > 0
+            double nPhi = 0; /// new phi
 
-   //================================= for coincident time bewteen array and rdt
-   if( multiHit == 1 && rdtMultiHit == 1) {
-     for(int idet = 0 ; idet < numDet; idet++){
-       if( eC_t[idet] > 0 ) {
-         eTime = eC_t[idet];
-         break;
-       }
-     }
+            int iter = 0;
+            do{
+               phi = nPhi;
+               nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));               
+               iter ++;
+               if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
+            }while( TMath::Abs(phi - nPhi ) > tolerrence);
+            phi = nPhi;
 
-     ULong64_t rdtTime = 0;
-     for(int idet = 0 ; idet < 4; idet++){
-       if( rdt_t[2*idet] > 0 ) {
-         rdtTime = rdt_t[2*idet];
-         break;
-       }
-     }
+            /// check f'(phi) > 0
+            double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
+            if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
+               double K = H * TMath::Sin(phi);
+               double x = TMath::ACos( mass / ( y * gamma - K));
+               double k = mass * TMath::Tan(x); /// momentum of particel b or B in CM frame
+               double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(k*k + mass * mass));
+               Ex = EB - massB;
 
-     coin_t = (int)eTime - rdtTime;
+               double hahaha1 = gamma* TMath::Sqrt(mass * mass + k * k) - y;
+               double hahaha2 = gamma* beta * k;
+               thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
 
-     /*
-      ULong64_t rdtTime = 0;
-      Float_t rdtQ = 0;
-      Float_t trdtTime = 0.;
-      for(int i = 0; i < 8 ; i++){
-         if( rdt[i] > rdtQ ) {
-            rdtQ    = rdt[i];
-            rdtTime = rdt_t[i];
-            
-            if ( isTraceDataExist ){
-               trdtTime = trdt_t[i];
-               trdtS    = trdt[i];
-               trdt_tS  = trdt_t[i];
-               trdt_rS  = trdt_r[i];
+               double pt = k * TMath::Sin(thetaCM * TMath::DegToRad());
+               double pp = gamma*beta*TMath::Sqrt(mass*mass + k*k) - gamma * k * TMath::Cos(thetaCM * TMath::DegToRad());
+
+               thetaLab = TMath::ATan(pt/pp) * TMath::RadToDeg();
             }
          }
       }
-     
-      coin_t = (int)eTime - rdtTime;
-      
-      if ( isTraceDataExist ){
-         tcoin_t = teTime - trdtTime;
-         coinTimeUC = coin_t + tcoin_t;
-         double f7corr = f7[detTime]->Eval(x[detTime]) + cTCorr[detTime][8];
-         coinTime = (coinTimeUC - f7corr)*10.;
-      }
-     */
    }
    
-   //if( rejZeroHit && multiHit == 0 ) return kTRUE;
+   //=============================== Recoil
+   for(int i = 0 ; i < 8 ; i++){
+      rdtC[i]   = rdtCorr[i] * rdt[i];
+      rdtC_t[i] = rdt_t[i]; 
+      if( !TMath::IsNaN(rdt[i]) )  rdtID[i] = i;
+   }
+
+   for( int i = 0; i< 4 ; i++){
+      if( !TMath::IsNaN(rdt[2*i+1]) ) {
+         rdtdEMultiHit ++;
+      }
+   }
+
+   //================================= for coincident time bewteen array and rdt
+   
+   Float_t teTime = 0.; ///time from trace
+   int detTime = -1; /// for coinTime
+   
+   if( multiHit == 1 && rdtdEMultiHit == 1) {
+      
+      int detID = -1;
+      int rdtID = -1;
+      
+      ///===== no Trace data
+      ULong64_t eTime = -2000; 
+      for(int idet = 0 ; idet < numDet; idet++){
+         if( z[idet] > 0 ) {
+            eTime = e_t[idet];
+            detID = idet;
+            break;
+         }
+      }
+
+      /// for dE detector only
+      ULong64_t rdtTime = 0;
+      for(int idet = 0 ; idet < 4; idet++){
+         if( rdt[2*idet+1] > 0 ) {
+            rdtID = 2*idet+1;
+            rdtTime = rdt_t[2*idet+1];
+            break;
+         }
+      }
+
+      coin_t = (int) eTime - rdtTime;
+     
+      ///======== with trace data
+      if( isTraceDataExist ) {
+         
+         Float_t teTime = te_t[detID];
+         Float_t trdtTime = trdt_t[rdtID];
+         
+         tcoin_t = teTime - trdtTime;
+         
+         coinTimeUC = 10.0*(coin_t + tcoin_t);
+         
+         //double f7corr = f7[detTime]->Eval(x[detTime]) + cTCorr[detTime][8];
+         //coinTime = (coinTimeUC - f7corr)*10.0;
+      }
+      
+   }
+   
+   if( rejZeroHit && multiHit == 0 ) return kTRUE;
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
@@ -393,18 +339,16 @@ Bool_t Cali_e_trace::Process(Long64_t entry)
    return kTRUE;
 }
 
-void Cali_e_trace::SlaveTerminate()
-{
+void Cali_e_trace::SlaveTerminate(){
 }
 
-void Cali_e_trace::Terminate()
-{
+void Cali_e_trace::Terminate(){
    
    saveFile->cd(); //set focus on this file
    newTree->Write(); 
    saveFile->Close();
 
-   printf("-------------- done. %s, z-valid count: %d\n", saveFileName.Data(), count);
+   printf("-------------- done. %s, z-valid count: %d\n", saveFileName.Data(), validEventCount);
    
    gROOT->ProcessLine(".q");
 
