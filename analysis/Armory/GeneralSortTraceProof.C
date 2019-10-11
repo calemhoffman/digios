@@ -8,19 +8,22 @@
 #define M -100 //M value for energy filter from digi setting
 
 //must be absolute path
-//Mac
-//#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-//LCRC
-#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+#ifdef __linux__
+   //LCRC
+   #include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+#elif __APPLE__
+   //Mac
+   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+#endif
 //by copy the GeneralSortMapping.h in to Armory, is not working
-//#include "GeneralSortMapping.h"
 
 //===================== setting
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 200;
+int traceLengthRDT = 600;
+int traceLengthArray = 300;
 float delayChannel = 100.; //initial guess of the time
 
 bool isTACRF = true;
@@ -34,7 +37,7 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    TString option = GetOption();
 
    printf( "=====================================================\n");
-   printf( "==========  GeneralSortTraceProof.C ================= \n");
+   printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
    printf( "  TAC/RF : %s \n", isTACRF ?  "On" : "Off");
@@ -46,9 +49,14 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    case 0: traceMethodName = "copy"; break;
    case 1: traceMethodName = "fit"; break;
    }
-   printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
+   printf( "  Trace  : %s , Method: %s, Save: %s \n", 
+               isTraceON ?  "On" : "Off", 
+               traceMethodName.Data(), 
+               isSaveTrace? "Yes": "No:");
+
+   printf( "  TraceLength :  %d (Array),  %d (RDT) \n", traceLengthArray, traceLengthRDT);
    
-   printf("===================== ID-MAP: \n");
+   printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
    printf("\n");
@@ -58,7 +66,19 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
      }
-     printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+     if( 110 > idDetMap[i] && idDetMap[i] >= 100 ){
+       printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]);; // Cyan
+     }else{ 
+       switch (idKindMap[i]) {
+       case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 5: printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+       }
+     }
    }
    printf("\n==================== \n");
    
@@ -160,19 +180,19 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
       psd.Ring[i]    = 0.0;
-      psd.RDT[i]     = TMath::QuietNaN();
-      psd.TAC[i]     = TMath::QuietNaN();
-      if (i<32) psd.ELUM[i] = TMath::QuietNaN();
-      if (i<4) psd.EZERO[i] = TMath::QuietNaN();
+      if (i <  8) psd.RDT[i]     = TMath::QuietNaN();
+      if (i < 24) psd.TAC[i]     = TMath::QuietNaN();
+      if (i < 32) psd.ELUM[i] = TMath::QuietNaN();
+      if (i <  4) psd.EZERO[i] = TMath::QuietNaN();
 
       psd.EnergyTimestamp[i] = TMath::QuietNaN();
       psd.XFTimestamp[i]     = TMath::QuietNaN();
       psd.XNTimestamp[i]     = TMath::QuietNaN();
       psd.RingTimestamp[i]   = TMath::QuietNaN();
-      psd.RDTTimestamp[i]    = TMath::QuietNaN();
-      psd.TACTimestamp[i]    = TMath::QuietNaN();
-      if (i<32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
-      if (i<4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
+      if (i <  8) psd.RDTTimestamp[i]    = TMath::QuietNaN();
+      if (i < 24) psd.TACTimestamp[i]    = TMath::QuietNaN();
+      if (i < 32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
+      if (i <  4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
       
       psd.x[i]       = TMath::QuietNaN();    
    }
@@ -266,7 +286,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       //RECOIL
       /************************************************************************/
       if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
-         Int_t rdtTemp = idDet-101;
+         Int_t rdtTemp = idDet-100;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
@@ -311,15 +331,19 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          idKind = idKindMap[idTemp];
          
          bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
+         bool isPSD = (30 > idDet && idDet >= 0);
          bool isRDT  = (130 > idDet && idDet >= 100 );
-         if( !isPSDe && !isRDT ) continue;
+         if( !isPSD && !isRDT ) continue;
+
+         int traceLength = 300;
+         if( isPSD )  traceLength = traceLengthArray;
+         if( isRDT  )  traceLength = traceLengthRDT;
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();
          countTrace ++;
          
          //Set gTrace
-         
          if( traceMethod == 0 ){
             for ( int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
@@ -346,7 +370,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                case  0: lineColor = 3; break;
                case  1: lineColor = 1; break;
                case  2: lineColor = 2; break;
-               case -1: lineColor = 4; break;
+               case  3: lineColor = 4; break;
+               case -1: lineColor = 6; break;
             }
             
             gFit->SetLineColor(lineColor);
@@ -376,7 +401,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             if( 200 > idDet && idDet >= 100 ) {
-               int rdtTemp = idDet-101;
+               int rdtTemp = idDet-100;
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);

@@ -4,6 +4,7 @@ root_data
 merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
+analysis/GEBSort/GEBSort_nogeb_trace
 
 *.Ex.txt
 *.Xsec.txt
