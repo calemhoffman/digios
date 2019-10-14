@@ -16,8 +16,18 @@
    #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
 #endif
 
+//=================================== setting
+=======
+<<<<<<< HEAD
+//by copy the GeneralSortMapping.h in to Armory, is not working
+
+//===================== setting
+=======
+
 
 //=================================== setting
+>>>>>>> fe51a3c
+>>>>>>> c313140
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
