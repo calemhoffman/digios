@@ -12,7 +12,8 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
 	
 	printf("================ Graphic Cut Creator for RDT ============== \n");
    
-   TChain * chain = new TChain("gen_tree");
+   //TChain * chain = new TChain("gen_tree");
+   TChain * chain = new TChain("tree");
    chain->Add(dataList);
    //chain->Add("../root_data/gen_run03[2,3,5,7].root"); 
    //chain->Add("../root_data/gen_run04[1,3].root");
@@ -43,14 +44,16 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
       //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-      varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
+      
+      varX.Form("trdt[%d]",2*i); 
+      varY.Form("trdt[%d]",2*i+1);
 
-      h[i] = new TH2F(Form("h%d", i), Form("RDT%d - RDT%d", 2*i+1, 2*i), 500, 0, eRange, 500, 0, deRange);
+      h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 0, eRange, 500, 0, deRange);
 
       expression[i].Form("%s:%s>>h%d", 
-            Form("rdt[%d]", 2*i+1), //varY.Data(),
-            Form("rdt[%d]", 2*i), //varX.Data(),
-            i);
+                         varY.Data(),
+                         varX.Data(),
+                         i);
 
       chain->Draw(expression[i], "", "col");
       

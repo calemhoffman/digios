@@ -15,14 +15,16 @@
 //   require processed by Cali_e_trace.C
 //######################################################
 
-void GetCoinTimeCorrectionCutG(TString fileName, int detID){
+void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
 
    int numGauss = 1;
-   if( detID%6 == 4) numGauss = 2;
-   if( detID%6 == 5) numGauss = 3;
+   //if( detID%6 == 4) numGauss = 2;
+   //if( detID%6 == 5) numGauss = 3;
+
+   int timeRange[2] ={-50, 400};
 
    //====================================================== read file, canvas, histogram
-   TFile * f1 = new TFile(fileName, "READ");
+   TFile * f1 = new TFile(A_fileName, "READ");
    TTree * tree = (TTree*) f1->Get("tree");
    
    int totnumEntry = tree->GetEntries();
@@ -51,10 +53,10 @@ void GetCoinTimeCorrectionCutG(TString fileName, int detID){
    
    TString name, expression, gate;
 
-   TH2F * hTX   = new TH2F("hTX",   "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, -30, 40);
-   TH2F * hTXg  = new TH2F("hTXg",  "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, -30, 40);
-   TH2F * hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, -30, 40);
-   TH1F * hT = new TH1F("hT", "", 100, -5, 10);
+   TH2F * hTX   = new TH2F("hTX",   "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, timeRange[0], timeRange[1] );
+   TH2F * hTXg  = new TH2F("hTXg",  "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, timeRange[0], timeRange[1] );
+   TH2F * hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, timeRange[0], timeRange[1] );
+   TH1F * hT = new TH1F("hT", "", 100, timeRange[0], timeRange[1]);
    TProfile * hp = new TProfile("hp", "time Profile", 400, -1.5,1.5);
    TSpectrum * spec = new TSpectrum(5);
    
@@ -91,23 +93,23 @@ void GetCoinTimeCorrectionCutG(TString fileName, int detID){
    printf("entries : %d \n", entries);
    if( entries < 100 ){
       printf("set bin = 30\n");
-      hTX->SetBins(30, -1.5, 1.5, 50, -10, 40);
-      hTXg->SetBins(30, -1.5, 1.5, 50, -10, 40);
-      hTXc2->SetBins(30, -1.5, 1.5, 50, -10, 40);
+      hTX->SetBins(30,   -1.5, 1.5, 50, timeRange[0], timeRange[1] );
+      hTXg->SetBins(30,  -1.5, 1.5, 50, timeRange[0], timeRange[1] );
+      hTXc2->SetBins(30, -1.5, 1.5, 50, timeRange[0], timeRange[1] );
       hp->SetBins(30, -1.5, 1.5); 
       tree->Draw(expression, gate, "colz");
    }else if( 100 <= entries && entries < 500 ){
       printf("set bin = 100\n");
-      hTX->SetBins(100, -1.5, 1.5, 100, -10, 40);
-      hTXg->SetBins(100, -1.5, 1.5, 100, -10, 40);
-      hTXc2->SetBins(100, -1.5, 1.5, 100, -10, 40);
+      hTX->SetBins(100,   -1.5, 1.5, 100, timeRange[0], timeRange[1] );
+      hTXg->SetBins(100,  -1.5, 1.5, 100, timeRange[0], timeRange[1] );
+      hTXc2->SetBins(100, -1.5, 1.5, 100, timeRange[0], timeRange[1] );
       hp->SetBins(100, -1.5, 1.5);
       tree->Draw(expression, gate, "colz");
    }else if ( 500 <= entries ){
       printf("set bin = 400\n");
-      hTX->SetBins(400, -1.5, 1.5, 400, -10, 40);
-      hTXg->SetBins(400, -1.5, 1.5, 400, -10, 40);
-      hTXc2->SetBins(400, -1.5, 1.5, 400, -10, 40);
+      hTX->SetBins(400,   -1.5, 1.5, 400, timeRange[0], timeRange[1] );
+      hTXg->SetBins(400,  -1.5, 1.5, 400, timeRange[0], timeRange[1] );
+      hTXc2->SetBins(400, -1.5, 1.5, 400, timeRange[0], timeRange[1] );
       hp->SetBins(400, -1.5, 1.5);
       tree->Draw(expression, gate, "colz");
    }      
@@ -218,7 +220,7 @@ void GetCoinTimeCorrectionCutG(TString fileName, int detID){
    //cAna->WaitPrimitive();
 
    //====================================================== save parameter
-   printf("=========== save parameters to %s \n", filename.Data());
+   printf("=========== saved parameters to %s \n", filename.Data());
    fprintf(paraOut, "%d\t", detID);
    for( int i = 0; i < 8; i++){
       fprintf(paraOut, "%11.6f\t", q[i]);

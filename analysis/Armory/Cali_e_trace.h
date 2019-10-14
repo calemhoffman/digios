@@ -308,7 +308,7 @@ void Cali_e_trace::Init(TTree *tree)
    saveFile = new TFile( saveFileName,"recreate");
    newTree =  new TTree("tree","tree");
    
-   eventID = 0;
+   eventID = -1;
    run = 0;
    
    newTree->Branch("eventID",&eventID,"eventID/I"); 
