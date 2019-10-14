@@ -258,7 +258,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
 
    for( int i = 0; i< 4 ; i++){
-      if( !TMath::IsNaN(rdt[2*i+1]) ) {
+      if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
       }
    }

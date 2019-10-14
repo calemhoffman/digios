@@ -7,11 +7,7 @@
 #define MAXNUMHITS 20 //Highest multiplicity
 #define M -100 //M value for energy filter from digi setting
 
-<<<<<<< HEAD
-//must be absolute path
-=======
 //must be absolute path, by copy the GeneralSortMapping.h in to Armory, is not working
->>>>>>> fe51a3c
 #ifdef __linux__
    //LCRC
    #include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
@@ -19,15 +15,8 @@
    //Mac
    #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
 #endif
-<<<<<<< HEAD
-//by copy the GeneralSortMapping.h in to Armory, is not working
-
-//===================== setting
-=======
-
 
 //=================================== setting
->>>>>>> fe51a3c
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
@@ -276,11 +265,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
       //RECOIL
       /************************************************************************/
-<<<<<<< HEAD
-      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
-=======
       if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { 
->>>>>>> fe51a3c
          Int_t rdtTemp = idDet-100;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
