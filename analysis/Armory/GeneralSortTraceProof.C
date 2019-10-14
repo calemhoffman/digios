@@ -17,17 +17,7 @@
 #endif
 
 //=================================== setting
-=======
-<<<<<<< HEAD
-//by copy the GeneralSortMapping.h in to Armory, is not working
-
-//===================== setting
-=======
-
-
-//=================================== setting
->>>>>>> fe51a3c
->>>>>>> c313140
+>>>>>>> 81a3cc5
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;

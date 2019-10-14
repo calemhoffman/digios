@@ -119,7 +119,7 @@ else
 fi
 
 echo "============================================="
-cat ${AnalysisDir}/data/RunTimeStamp.dat
+tail -10 ${AnalysisDir}/data/RunTimeStamp.dat
 echo "============================================="
 
 echo -e "\033[0;33m"
