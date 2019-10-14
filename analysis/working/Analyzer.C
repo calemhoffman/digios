@@ -28,8 +28,8 @@ double ExOffset[30] = { // calibrated by h064_15N, (d,p), run013
  0.0384, -0.0593,  0.0133,  0.0575,  0.0534,
    1000, -0.0122,  0.1052,  0.2028,  0.0410};
 
-int nBadDet = 0;
-int listOfBadDet[11] = {2, 5, 8, 9, 10, 18, 19, 25, 27, 28, 29 };
+int nBadDet = 9;
+int listOfBadDet[11] = {0, 1, 2, 3, 4, 5, 9, 11, 14, 29};
 
 //######################################## End of User Input
 
@@ -166,6 +166,15 @@ Bool_t Analyzer::Process(Long64_t entry)
    b_e_t->GetEntry(entry, 0);
    //b_EBIS_t->GetEntry(entry, 0);
    //b_hitID->GetEntry(entry, 0);
+
+   if( isTraceDataExist ) {
+     b_te->GetEntry(entry,0);
+     b_te_t->GetEntry(entry,0);
+     b_te_r->GetEntry(entry,0);
+     b_trdt->GetEntry(entry,0);
+     b_trdt_t->GetEntry(entry,0);
+     b_trdt_r->GetEntry(entry,0);
+   }
    
    hRun->Fill(run);
    
