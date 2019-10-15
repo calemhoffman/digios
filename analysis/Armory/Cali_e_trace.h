@@ -26,7 +26,7 @@
 
 class Cali_e_trace : public TSelector {
 public :
-   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+   TChain          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
    Int_t           runID;
@@ -212,7 +212,7 @@ void Cali_e_trace::Init(TTree *tree)
    printf( "=========================================================================== \n");
 
    
-   fChain = tree;
+   fChain = (TChain *)tree;
    //printf("========== number of tree loaded : %d \n", fChain->GetNTree());
    fChain->SetMakeClass(1);
 
@@ -295,15 +295,45 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
 
-   //=================
-   saveFileName = fChain->GetDirectory()->GetName();
-   //remove any folder path to get the name;
-   int found;
-   do{
-      found = saveFileName.First("/");
-      saveFileName.Remove(0,found+1);
-   }while( found >= 0 );
-   saveFileName = "A_" + saveFileName; 
+   //================= Formation of file name
+   int numFile = fChain->GetListOfFiles()->GetLast() + 1;   
+   int oldRunNum = -100;
+   bool contFlag = false; // is runNumber continue;
+   for( int i = 0; i < numFile ; i++){
+      TString name = fChain->GetListOfFiles()->At(i)->GetTitle();
+      int found = name.Last('/');
+      name.Remove(0, found + 1 ); // this should give "XXX_run0XX.root"
+      found = name.Last('.');
+      name.Remove(found); // this should give "XXX_run0XX"
+      if( i == 0 ) {
+         saveFileName = name;
+         int kk = saveFileName.Sizeof();
+         saveFileName.Remove(kk-4); // this should give "XXX_run"
+         saveFileName = "A_" + saveFileName;
+      }
+      found = name.Last('_');
+      int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
+
+      if( runNum == oldRunNum + 1 ){
+         int kk = saveFileName.Sizeof();
+         if( contFlag == false ){
+            saveFileName.Remove(kk-2); //remove the "-"
+            saveFileName += "-";
+         }else{
+            saveFileName.Remove(kk-5); //remove the runNum and "-"
+         }
+         contFlag = true;
+      }
+      if( runNum > oldRunNum + 1) contFlag = false;
+      
+      saveFileName += Form("%03d_", runNum);
+      oldRunNum = runNum;
+   }
+   int kk = saveFileName.Sizeof();
+   saveFileName.Remove(kk-2); // remove the last "-"
+   saveFileName += ".root";
+   
+   //printf("Output File  %s \n", saveFileName.Data());
    
    saveFile = new TFile( saveFileName,"recreate");
    newTree =  new TTree("tree","tree");
@@ -561,9 +591,10 @@ void Cali_e_trace::Init(TTree *tree)
       fList = new TObjArray();
       
       if( file.is_open() ){
-         double d, a0, a1, a2, a3, a4, a5, a6, a7, a8;
+         int d;
+         double a0, a1, a2, a3, a4, a5, a6, a7, a8;
          int i = 0;
-         while( file >> d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 >> a7 >> a8){
+         while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 >> a7 >> a8){
             if( i >= numDet) break;
             cTCorr[i][0] = a0;
             cTCorr[i][1] = a1;
@@ -573,8 +604,8 @@ void Cali_e_trace::Init(TTree *tree)
             cTCorr[i][5] = a5;
             cTCorr[i][6] = a6;
             cTCorr[i][7] = a7;
-            cTCorr[i][8] = a8;
-            printf("\n%2d, a0: %f, a1: %f .... a7: %f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
+            cTCorr[i][8] = a8; // this is the offset find by fitting the 1-D plot
+            printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
          printf(".... done.\n");
@@ -582,9 +613,7 @@ void Cali_e_trace::Init(TTree *tree)
       }else{
          printf(".... fail.\n");
          for( int i = 0; i < numDet; i++){
-            for( int j = 0 ; j < 9; j++){
-               cTCorr[i][j] = 0.;
-            } 
+            for( int j = 0 ; j < 9; j++) cTCorr[i][j] = 0.;
          }
       }
 

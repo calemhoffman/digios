@@ -264,10 +264,6 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
 
    //================================= for coincident time bewteen array and rdt
-   
-   Float_t teTime = 0.; ///time from trace
-   int detTime = -1; /// for coinTime
-   
    if( multiHit == 1 && rdtdEMultiHit == 1) {
       
       int detID = -1;
@@ -276,7 +272,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       ///===== no Trace data
       ULong64_t eTime = -2000; 
       for(int idet = 0 ; idet < numDet; idet++){
-         if( z[idet] > 0 ) {
+         if( !TMath::IsNaN(z[idet]) ) {
             eTime = e_t[idet];
             detID = idet;
             break;
@@ -305,9 +301,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          
          coinTimeUC = 10.0*(coin_t + tcoin_t);
          
-         //double f7corr = f7[detTime]->Eval(x[detTime]) + cTCorr[detTime][8];
-         //coinTime = (coinTimeUC - f7corr)*10.0;
+         double f7corr = f7[detID]->Eval(x[detID]) + cTCorr[detID][8];
+         
+         coinTime = (coinTimeUC - f7corr);
       }
+      
+   
       
    }
    
@@ -348,7 +347,7 @@ void Cali_e_trace::Terminate(){
    newTree->Write(); 
    saveFile->Close();
 
-   printf("-------------- done. %s, z-valid count: %d\n", saveFileName.Data(), validEventCount);
+   printf("-------------- done, saved in %s, z-valid count: %d\n", saveFileName.Data(), validEventCount);
    
    gROOT->ProcessLine(".q");
 

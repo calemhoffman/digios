@@ -17,7 +17,6 @@
 #endif
 
 //=================================== setting
->>>>>>> 81a3cc5
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;

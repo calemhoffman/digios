@@ -17,15 +17,20 @@
 
 void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
 
-   int numGauss = 1;
+   int numGauss = 3;
    //if( detID%6 == 4) numGauss = 2;
    //if( detID%6 == 5) numGauss = 3;
 
-   int timeRange[2] ={-50, 400};
+   int timeRange[2] ={-100, 400};
 
    //====================================================== read file, canvas, histogram
-   TFile * f1 = new TFile(A_fileName, "READ");
-   TTree * tree = (TTree*) f1->Get("tree");
+   
+   TChain * tree = new TChain("tree");
+   
+   tree->Add(A_fileName);
+   
+   //TFile * f1 = new TFile(A_fileName, "READ");
+   //TTree * tree = (TTree*) f1->Get("tree");
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
@@ -39,7 +44,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
 
    int Div[2] = {1,1};
    int size[2] = {600,600}; //x,y
-   TCanvas * cAna = new TCanvas("cAna", "cAna", 500, 0, size[0]*Div[0], size[1]*Div[1]);
+   TCanvas * cAna = new TCanvas("cAna", "cAna", 500, 500, size[0]*Div[0], size[1]*Div[1]);
    if( cAna->GetShowEditor() )  cAna->ToggleEditor();
    if( cAna->GetShowToolBar() ) cAna->ToggleToolBar();
    cAna->Divide(Div[0],Div[1]);
@@ -218,7 +223,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
                      TMath::Sqrt( eTime[0]*eTime[0] + eTime[1]*eTime[1]));
    
    //cAna->WaitPrimitive();
-
+   
    //====================================================== save parameter
    printf("=========== saved parameters to %s \n", filename.Data());
    fprintf(paraOut, "%d\t", detID);
@@ -234,5 +239,6 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    printf("========= double click to exit.\n");
    cAna->WaitPrimitive();
    
-   if( !isBranchDetIDExist ) gROOT->ProcessLine(".q");
+   //if( !isBranchDetIDExist ) 
+   gROOT->ProcessLine(".q");
 }
