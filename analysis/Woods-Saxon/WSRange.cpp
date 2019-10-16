@@ -102,7 +102,7 @@ int main(int argc, char *argv[]){
 
   ws.N = 127;
   
-  for( float massA = A2 ; massA >= A1 ; massA  -= 1.0){
+  for( float massA = A2 ; massA >= A1 ; massA  -= 0.2){
     
     ws.A = massA;
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
       fprintf(file_out,"\n");
       fprintf(file_out, "%6f, ", massA);
       for( int i = 0; i < orbitalStr.size(); i++){
-	fprintf(file_out,"%9.2f, ", ws.energy[i]);
+	fprintf(file_out,"%9.4f, ", ws.energy[i]);
       }
       fprintf(file_out,"\n");
     }else{
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
 	bool isMatched = false;
 	for( int j = 0; j < (ws.energy).size(); j++){
 	  if( orbitalStr[i] == ws.orbString[j] ) {
-	    fprintf(file_out,"%9.2f, ", ws.energy[j]);
+	    fprintf(file_out,"%9.4f, ", ws.energy[j]);
 	    isMatched = true;
 	  }
 	}
