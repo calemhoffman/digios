@@ -21,9 +21,7 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLengthRDT = 600;
-int traceLengthArray = 300;
-float delayChannel = 100.; //initial guess of the time
+float delayChannel = 150.; //initial guess of the time
 
 bool isTACRF = true;
 bool isRecoil = true;
@@ -54,8 +52,6 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
                traceMethodName.Data(), 
                isSaveTrace? "Yes": "No:");
 
-   printf( "  TraceLength :  %d (Array),  %d (RDT) \n", traceLengthArray, traceLengthRDT);
-   
    printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
@@ -219,7 +215,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    b_pre_rise_energy->GetEntry(entry);
    b_post_rise_energy->GetEntry(entry);
    b_event_timestamp->GetEntry(entry);
-   if( isTraceON ) b_trace->GetEntry(entry);
+   if( isTraceON ) {
+      b_trace->GetEntry(entry);
+      b_trace_length->GetEntry(entry);
+   }
 
    //ID PSD Channels
    Int_t idKind  = -1;
@@ -314,18 +313,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          bool isPSD = (30 > idDet && idDet >= 0);
          bool isRDT  = (130 > idDet && idDet >= 100 );
          if( !isPSD && !isRDT ) continue;
-
-         int traceLength = 300;
-         if( isPSD )  traceLength = traceLengthArray;
-         if( isRDT  )  traceLength = traceLengthRDT;
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();
          countTrace ++;
          
+         int traceLength = trace_length[i];
+         
          //Set gTrace
          if( traceMethod == 0 ){
-            for ( int j = 0 ; j < traceLength; j++){
+            for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
             continue;

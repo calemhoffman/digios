@@ -293,7 +293,7 @@ if [ $isGeneralSort -ge 1 ]; then
       fi
 
       if [ $isGeneralSort -gt 2 ]; then
-          echo -e "${RED}######################### Proof_GeneralSortTrace.C${NC}"
+          echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
           root -l -q "process_run.C(${runID}, ${isGeneralSort})"
 
           #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
