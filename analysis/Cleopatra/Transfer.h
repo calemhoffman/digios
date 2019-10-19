@@ -127,7 +127,7 @@ void Transfer(
   reaction.CalReactionConstant();
 
   printf("***************************************************\n");
-  printf("*\e[31m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
+  printf("*\e[33m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
   printf("***************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
   printf("#################################### Beam \n");
@@ -349,6 +349,7 @@ void Transfer(
   tree->Branch("e", &e, "e/D");
   tree->Branch("x", &x, "x/D");
   tree->Branch("z", &z, "z/D");
+  //double z0; tree->Branch("z0", &z0, "z0/D");
   tree->Branch("t", &t, "t/D");
   
   double recoilT; // particle-B hit time
@@ -637,6 +638,7 @@ void Transfer(
 
     e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
     z = helios.GetZ() ; 
+    //z0 = helios.GetZ0() ; 
     x = helios.GetX() + gRandom->Gaus(0, zSigma);
     t = helios.GetTime();
     loop = helios.GetLoop();
