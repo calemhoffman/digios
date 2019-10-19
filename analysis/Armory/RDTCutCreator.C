@@ -12,38 +12,41 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
 	
 	printf("================ Graphic Cut Creator for RDT ============== \n");
    
-   //TChain * chain = new TChain("gen_tree");
+   ///TChain * chain = new TChain("gen_tree");
    TChain * chain = new TChain("tree");
    chain->Add(dataList);
-   //chain->Add("../root_data/gen_run03[2,3,5,7].root"); 
-   //chain->Add("../root_data/gen_run04[1,3].root");
-   //chain->Add("../root_data/gen_run018.root");
+   ///chain->Add("../root_data/gen_run03[2,3,5,7].root"); 
+   ///chain->Add("../root_data/gen_run04[1,3].root");
+   ///chain->Add("../root_data/gen_run018.root");
    
    chain->GetListOfFiles()->Print();
    
-	TString varX, varY, tag;
-   
-	gStyle->SetOptStat(00000);
-	
-	TCanvas * cCutCreator = new TCanvas("cCutCreator", "RDT Cut Creator", 100, 100, 800, 800);
-	if( !cCutCreator->GetShowToolBar() ) cCutCreator->ToggleToolBar();
-	
+   TString varX, varY, tag;
+
+   gStyle->SetOptStat(00000);
+
+   TCanvas * cCutCreator = new TCanvas("cCutCreator", "RDT Cut Creator", 100, 100, 800, 800);
+   if( !cCutCreator->GetShowToolBar() ) cCutCreator->ToggleToolBar();
+
    cCutCreator->Update();
    if( isLogz ) cCutCreator->cd()->SetLogz();
-	
-	TCutG * cut = NULL;
-	TObjArray * cutList = new TObjArray();
-	
+
+   TCutG * cut = NULL;
+   TObjArray * cutList = new TObjArray();
+
+
+   TString expression[10], gate;
    
-	TString expression[10];
+   //Custom gate
+   gate = " abs(coinTime-17.5)<4.0 ";
 
    TH2F * h[4];
 
-	for (Int_t i = 0; i < 4; i++) {
+   for (Int_t i = 0; i < 4; i++) {
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
-      //varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
+      ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
       
       varX.Form("trdt[%d]",2*i); 
       varY.Form("trdt[%d]",2*i+1);
@@ -55,7 +58,7 @@ void RDTCutCreator(TString dataList, TString saveFileName = "rdtCuts.root", int 
                          varX.Data(),
                          i);
 
-      chain->Draw(expression[i], "", "col");
+      chain->Draw(expression[i], gate, "col");
       
       if( h[i]->Integral() < 1000 ) {
          h[i]->SetMarkerStyle(20);
