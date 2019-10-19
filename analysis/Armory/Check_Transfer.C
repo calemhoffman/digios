@@ -20,7 +20,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 
 //========================================== User Input
   double ExRange[2] = {-1, 8};
-  double eRange[2] = {0, 40};
+  double eRange[2] = {0, 20};
   double recoilERange[2] = {1200, 1400};
 
   //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
@@ -68,10 +68,10 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          if( i == 5 ) length   = atof(x.c_str());
-	 if( i == 6 ) posRecoil = atof(x.c_str());
-	 if( i == 7 ) rhoRecoil = atof(x.c_str());
-	 if( i == 9 ) posRecoil1 = atof(x.c_str());
-	 if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 6 ) posRecoil = atof(x.c_str());
+         if( i == 7 ) rhoRecoil = atof(x.c_str());
+         if( i == 9 ) posRecoil1 = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
          if( i == 17 ) cDet = atoi(x.c_str());
          if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
@@ -118,7 +118,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
 
    //===================================================
-   Int_t Div[2] = {4,2}; // x,y
+   Int_t Div[2] = {4,3}; // x,y
    Int_t size[2] = {350,350}; //x,y
    TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
@@ -218,6 +218,8 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    cCheck->cd(8);
    TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoil);
    tree->Draw("rhoRecoil:TB>>hRecoilRTR", gate, "colz");
+
+   cCheck->cd(9);
 
    /*
    cCheck->cd(9);
