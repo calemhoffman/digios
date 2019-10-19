@@ -71,9 +71,10 @@ else
     echo "$COMMENT <br />" >> ${elogContext}
     elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
 
+    source ~/Slack_Elog_Notification.sh
     slackMsg="elogID=${elogID} is updated.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
     auxMsg="stop at ${currentDate} \n$COMMENT"
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' https://hooks.slack.com/services/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
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 
 fi
 
