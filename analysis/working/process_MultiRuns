@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $# -ne 2 ] ; then
+if [ $# -ne 2 ] && [ $# -ne 3 ] ; then
    echo "Usage : "
-   echo "   $./process_run_MultiRuns.sh #1 #2 "
+   echo "   $./process_run_MultiRuns.sh #1 #2 [nCore_for_Trace]"
   exit 1
 fi
 
@@ -33,6 +33,12 @@ NC='\033[0m'
 
 RUN1=$1
 RUN2=$2
+
+isTrace=0
+if [ $# -eq 3 ] ; then
+    isTrace=$3
+    echo "Using trace analysis with $isTrace core."
+fi
 
 if [ "${RUN1:0:1}" == "0" ] ; then
       RUN1=${RUN1:1:2}
@@ -97,8 +103,14 @@ do
   $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${expName}_run_$RUN.gtd*` >  $MERGDIR/GEBMerge_run$RUN.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 
-  echo -e "${RED}####################### RUN-$RUN: GEBSort started  at `date` ${NC}"
-  $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT > $ROOTDIR/GEBSort_run$RUN.log
+  if [ $isTrace -eq 0 ] ; then
+      echo -e "${RED}####################### RUN-$RUN: GEBSort started  at `date` ${NC}"
+      $GEBDIR/GEBSort_nogeb -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT > $ROOTDIR/GEBSort_run$RUN.log
+  else
+      echo -e "${RED}####################### RUN-$RUN: GEBSort (TRACE) started  at `date` ${NC}"
+      $GEBDIR/GEBSort_nogeb_trace -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT > $ROOTDIR/GEBSort_run$RUN.log
+  fi
+
   echo "GEBSort DONE at `date`"
 
   echo "saved root file -->  "  $ROOTDIR/run$RUN.root 
@@ -107,13 +119,18 @@ do
   echo "============================================="
 
   #========== Process_run.C, GeneralSort
-  echo -e "${RED}####################### GeneralSort  ${NC}"
   if [ "${RUN:0:1}" == "0" ] ; then
         runID=${RUN:1:2}
   else
         runID=$( printf '%d' $RUN )
   fi;
-  root -q -b "process_run.C($runID)"
+  if [ $isTrace -eq 0 ]; then
+      echo -e "${RED}####################### GeneralSort  ${NC}"
+      root -q -b "process_run.C($runID)"
+  else
+      echo -e "${RED}####################### GeneralSortTraceProof  ${NC}"
+      root -q -b "process_run.C($runID, $isTrace)"
+  fi
 
 done
 
