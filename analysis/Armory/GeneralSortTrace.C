@@ -34,7 +34,7 @@ bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process, 1, fit, 2, Trapezoid (not implement yet) //TODO
 int traceLength = 600;
 
-bool isTACRF = false;
+bool isTACRF = true;
 bool isRecoil = true;
 bool isElum = false;
 bool isEZero = false;
@@ -171,23 +171,34 @@ void GeneralSortTrace::Begin(TTree * tree)
    }
 
   printf("======= ID-MAP: \n");
-  printf("%10s|", ""); 
+  printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
   printf("\n");
   for(int i = 0 ; i < 96; i++ ) printf("-");
-  printf("\n");
-  printf("%10s|", "VME1-Dig1"); 
   for(int i = 0 ; i < 160; i ++){
-    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
-    if( (i+1) % 10 == 0 ) {
+    if( (i) % 10 == 0 ) {
        printf("\n");
-       if(((i+1)/10)/4+1 < 5) printf("%10s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4)+1); 
+       if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
+    }
+    if( 110 > idDetMap[i] && idDetMap[i] >= 100 ){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]);; // Cyan
+    }else{ 
+      switch (idKindMap[i]) {
+       case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       case 5: printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+       default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+      }
     }
   }
-   gClock.Reset();
-   gClock.Start("timer");
+  printf("\n");
+  gClock.Reset();
+  gClock.Start("timer");
    
-   printf("====================== started \n");
+  printf("====================== started \n");
 }
 
 void GeneralSortTrace::SlaveBegin(TTree * /*tree*/)
@@ -309,36 +320,15 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
       
       //TAC & RF TIMING
       /***********************************************************************/
-      if( isTACRF && id[i] > 1160 && id[i] < 1171) { //RF TIMING SWITCH
-         //if (ProcessedEntries < NUMPRINT) printf("RF id %i, idDet %i\n",id[i],idDet);
-         switch(id[i]){
-            case 1163: //
-               psd.TAC[0] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[0] = event_timestamp[i];
-               break;
-            case 1164: // 
-               psd.TAC[1] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[1] = event_timestamp[i];
-               break;
-            case 1165: // 
-               psd.TAC[2] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[2] = event_timestamp[i];
-            case 1167: // 
-               psd.TAC[3] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[3] = event_timestamp[i];
-            case 1168: //
-               psd.TAC[4] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[4] = event_timestamp[i];
-            case 1169: //
-               psd.TAC[5] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[5] = event_timestamp[i];
-            break;
-         }
+      if( isTACRF && idDet >= 400 && idDet <= 450 ) {   
+        Int_t tacID = idDet - 400;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.TACTimestamp[tacID] = event_timestamp[i];
       }
 
       //RECOIL
       /************************************************************************/
-      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
+      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { 
          Int_t rdtTemp = idDet-101;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M;
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
@@ -356,7 +346,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
          }
          
          psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
-      }//end ELUM
+      }
 
       //EZERO
       /************************************************************************/
@@ -366,7 +356,7 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
             psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
          }
-      }//end EZERO
+      }
       
    }//end of NumHits
    
@@ -422,12 +412,12 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
             double temp = gTrace->Eval(80) - base;
 
             gFit->SetParameter(0, temp); //energy
-            gFit->SetParameter(1, 50); // time
-            gFit->SetParameter(2, 1); //riseTime
+            gFit->SetParameter(1, 100); // time
+            gFit->SetParameter(2, 10); //riseTime
             gFit->SetParameter(3, base);
 
-            if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
-            if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
+            //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
+            //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "qR");

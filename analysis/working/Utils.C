@@ -323,8 +323,10 @@ void eCalVzRow() {
   gStyle->SetOptStat("neiou");
   
   for(int row = 0; row < numRow; row ++){
-     cecalVzRow->cd(row+1);
-     cecalVzRow->cd(row+1)->SetGrid();
+    int ci = row + 1;
+    if( row > xD - 1 ) ci = xD  + numRow - row ;
+     cecalVzRow->cd(ci);
+     cecalVzRow->cd(ci)->SetGrid();
      hecalVzRow[row]->Draw("colz");
   }
   

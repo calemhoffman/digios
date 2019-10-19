@@ -28,8 +28,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = { 100, 12000}; // share with e, ring, xf, xn
 int    energyRange[2] = {   0,    20}; // in the E-Z plot
-int     rdtDERange[2] = {   0, 10000};
-int      rdtERange[2] = {   0,  4000};
+int     rdtDERange[2] = {   0,  2000};
+int      rdtERange[2] = {   0,  160};
 int      elumRange[2] = { 200,  4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
@@ -40,7 +40,7 @@ double rdtot[4] = {};
 
 //---Gate
 int timeGate[2] = {-10, 5}; // min, max, 1 ch = 10 ns
-int tacGate[2] = {-8000, -3200};
+int tacGate[2] = {-8000, 0};
 int dEgate[2] = {500,1500};
 int Eresgate[2] = {1000,4000};
 
@@ -229,7 +229,7 @@ void Monitors::Begin(TTree *tree)
    
    //canvasTitle.Form("#Events:%lld, Runs: ", NumEntries);
    canvasTitle.Form("Runs: ");
-   lastRunID = -1;
+   lastRunID = -100;
    contFlag = false;
    
       
@@ -789,7 +789,6 @@ Bool_t Monitors::Process(Long64_t entry)
         }
       }*/
       
-      
       //==================== calculate Z
       if( firstPos > 0 ) {
         z[detID] = length*(1.0-xcal[detID]) + pos[detID%numCol];
@@ -806,6 +805,9 @@ Bool_t Monitors::Process(Long64_t entry)
      
       heCalVxCal[detID]->Fill(xcal[detID]*length,eCal[detID]);
       heCalVz->Fill(z[detID],eCal[detID]);
+
+      int iRow = detID/numCol;
+      hecalVzRow[iRow] -> Fill( z[detID], eCal[detID]);
 
       //=================== Recoil Gate
       if( isCutFileOpen ){
@@ -867,17 +869,6 @@ Bool_t Monitors::Process(Long64_t entry)
     }//end of array loop
     
     if( !isEZCutFileOpen ) ezGate = true;
-    
-    //=========== fill eCal Vs z for each row
-    for( int i = 0; i < numRow; i++){
-      for(int j = 0; j < numCol; j++){
-         int k = numCol*i+j;
-         //if( !isGoodEventFlag ) continue;
-         count1++;
-         //if( ((xf[k] > 0 || !TMath::IsNaN(xf[k]))  && ( xn[k]>0 || !TMath::IsNaN(xn[k]))) ) 
-         hecalVzRow[i] -> Fill( z[k], eCal[k]);
-      }
-    }
     
    /*********** RECOILS ************************************************/    
    for( int i = 0; i < 8 ; i++){
@@ -1150,7 +1141,7 @@ void Monitors::Terminate()
    //gROOT->ProcessLine("rawID()");
    
    
-   //printf("count1: %d , count2: %d \n", count1, count2);
+   printf("count1: %d , count2: %d \n", count1, count2);
 
    
    

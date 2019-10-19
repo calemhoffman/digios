@@ -8,8 +8,8 @@
 #-------------------------------------------
 # basic sort parameters 
 
-# number of event in a block
-nevents           1000000000
+# max number of event output.
+nevents           2000000000
 
 # number of event in a block to be printed out
 printevents       1

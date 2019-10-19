@@ -84,9 +84,10 @@ if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
     echo "Elog is succefully pushed at ${elogIDStr}"
     echo ${elogIDStr} >> ${constFile}
 
+    source ~/Slack_Elog_Notification.sh
     slackMsg="new ${elogIDStr} for RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
     elogMsg=`cat ~/digios/analysis/working/elog.txt`
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' https://hooks.slack.com/services/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
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
 
 fi
 
