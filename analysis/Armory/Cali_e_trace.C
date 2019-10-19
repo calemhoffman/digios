@@ -113,16 +113,17 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
 
    //#################################################################### gate
-//   bool rdt_energy = false;
-//   for( int rID = 0; rID < 8; rID ++){
-//      if( rdt[rID] > 5000 ) rdt_energy = true; 
-//   }
-//   if( !rdt_energy ) return kTRUE;
+///   bool rdt_energy = false;
+///   for( int rID = 0; rID < 8; rID ++){
+///      if( rdt[rID] > 5000 ) rdt_energy = true; 
+///   }
+///   if( !rdt_energy ) return kTRUE;
 
-   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
-   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
-   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
-   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
+   // need to change manually depends on rdt or trdt
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( trdt[0], trdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( trdt[2], trdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( trdt[4], trdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( trdt[6], trdt[7] )) rejRDT4 = false;
    
    if( !isRDTCutExist ){
       rejRDT1 = false;
@@ -133,6 +134,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    
    if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
    
+   /**
    bool coinFlag = false;
    //if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
    int countInvalidRDT = 0;
@@ -146,12 +148,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          for( int j = 0; j < 8 ; j++){
             if( TMath::IsNaN(rdt[j]) ) continue; 
             int tdiff = rdt_t[j] - e_t[i];
-            if( -20 < tdiff && tdiff < 20 )   coinFlag = true;
+            if( -200 < tdiff && tdiff < 200 )   coinFlag = true;
          }
       }
    }
    if( coinFlag == false ) return kTRUE;
-
+   */
    //#################################################################### processing
    
    //========================== Array
@@ -259,6 +261,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
    for( int i = 0; i< 4 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
+      //if( !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
       }
    }
@@ -281,10 +284,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
       /// for dE detector only
       ULong64_t rdtTime = 0;
+      int rdtIDtemp = -1;
       for(int idet = 0 ; idet < 4; idet++){
-         if( rdt[2*idet+1] > 0 ) {
+         if( rdt[2*idet+1] > 0 && rdt[2*idet] > 0 ) {
             rdtID = 2*idet+1;
             rdtTime = rdt_t[2*idet+1];
+            rdtIDtemp = idet;
             break;
          }
       }
@@ -303,7 +308,16 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          
          double f7corr = f7[detID]->Eval(x[detID]) + cTCorr[detID][8];
          
-         coinTime = (coinTimeUC - f7corr);
+         //Ad-hoc solution 
+         double rdtCorr = 0;
+         switch(rdtIDtemp){
+            case 0: rdtCorr = 23.0 ; break;
+            case 1: rdtCorr = 0.0 ; break;
+            case 2: rdtCorr = 4.3 ; break;
+            case 3: rdtCorr = 15.3 ; break;
+         }
+         
+         coinTime = (coinTimeUC - f7corr) - rdtCorr;
       }
       
    

@@ -98,7 +98,6 @@ void Analyzer::Begin(TTree *tree)
    hExT  = new TH2F("hExT" , "Ex - thetaCM; thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
    hExTa = new TH2F("hExTa", "Ex - thetaCM (|x|<0.9); thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
 
-
    hTz = new TH2F("hTz", "thetaCM vs z; z [mm]; thetaCM [deg]", 450, -450, 0, 500, rangeCM[1], rangeCM[2]);
 
    hEBISi = new TH1F *[numDet];

@@ -538,7 +538,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
    
    
-   //========================================= e correction
+   //========================================= x-scale correction
    printf("loading x correction.");
    file.open("correction_scaleX.dat");
    if( file.is_open() ){
@@ -626,14 +626,13 @@ void Cali_e_trace::Init(TTree *tree)
             f7[i]->SetParameter(j, cTCorr[i][j]);
          }
 
-	 if(file.is_open()) fList->Add(f7[i]);
+         if(file.is_open()) fList->Add(f7[i]);
       }
 
       if( file.is_open()){
-	 fList->Write("fList", TObject::kSingleKey);
+         fList->Write("fList", TObject::kSingleKey);
       }
 
-      
       file.close();
    }
    
@@ -678,7 +677,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //====================================== load RDT cut
-   TFile * fileCut = new TFile("rdtCuts.root");   
+   TFile * fileCut = new TFile("rdtCuts_trace_C2.root");   
    TObjArray * cutList = NULL;
    isRDTCutExist = false;
    if( fileCut->IsOpen() ){
