@@ -20,7 +20,6 @@
 #include "../Armory/Cali_scale_x.C"
 #include "../Armory/Cali_compareF.C"
 #include "../Armory/Cali_e_trace.h"
-#include "../Armory/Cali_e_trace.h"
 #include "../Armory/GetCoinTimeCorrectionCutG.C"
 
 //==========================================
@@ -218,7 +217,7 @@ void AutoCalibrationTrace(){
       }
       printf("#######################################################\n");
       printf("Step 1) ========= creating smaller tree.\n");
-      chain->Process("../Armory/Cali_littleTree_trace.C+");
+      chain->Process("../Armory/Cali_littleTree_trace.C");
       double eThreshold = 300;
       Check_e_x("temp.root", eThreshold);
       

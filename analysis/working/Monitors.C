@@ -28,8 +28,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = { 100, 12000}; // share with e, ring, xf, xn
 int    energyRange[2] = {   0,    20}; // in the E-Z plot
-int     rdtDERange[2] = {   0, 10000};
-int      rdtERange[2] = {   0,  4000};
+int     rdtDERange[2] = {   0,  2000};
+int      rdtERange[2] = {   0,  160};
 int      elumRange[2] = { 200,  4000};
 
 double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
@@ -229,7 +229,7 @@ void Monitors::Begin(TTree *tree)
    
    //canvasTitle.Form("#Events:%lld, Runs: ", NumEntries);
    canvasTitle.Form("Runs: ");
-   lastRunID = -1;
+   lastRunID = -100;
    contFlag = false;
    
       
@@ -1137,7 +1137,7 @@ void Monitors::Terminate()
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine("listDraws()");
    
-   //gROOT->ProcessLine("recoils()");
+   gROOT->ProcessLine("recoils()");
    //gROOT->ProcessLine("rawID()");
    
    

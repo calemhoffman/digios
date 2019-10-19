@@ -127,7 +127,7 @@ void Transfer(
   reaction.CalReactionConstant();
 
   printf("***************************************************\n");
-  printf("*\e[31m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
+  printf("*\e[33m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
   printf("***************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
   printf("#################################### Beam \n");

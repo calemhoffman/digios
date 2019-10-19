@@ -2,4 +2,11 @@
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
 -../root_data/gen_run016.root
-+../root_data/gen_run04[3,6].root
+
+//+../root_data/gen_run04[3,6].root
+
+//+../root_data/trace_run051.root
+
++../root_data/trace_run05[1-9].root
++../root_data/trace_run06[0-9].root
++../root_data/trace_run070.root
