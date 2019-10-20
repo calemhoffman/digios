@@ -7,6 +7,14 @@
 
 //+../root_data/trace_run051.root
 
-+../root_data/trace_run05[1-9].root
-+../root_data/trace_run06[0-9].root
-+../root_data/trace_run070.root
+//140ug, @ 600 mm
+//+../root_data/trace_run05[1-9].root
+//+../root_data/trace_run06[0-9].root
+//+../root_data/trace_run070.root
+//+../root_data/trace_run07[7-9].root
+//+../root_data/trace_run08[0-2].root
+
+
+//440 ug @ 660 mm
++../root_data/trace_run07[1-6].root
+
