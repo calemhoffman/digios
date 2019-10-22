@@ -107,6 +107,12 @@ elif [ $IsExtractXSec -eq 2 ]; then
   ExtractXsecMsg=", for (d,d)(p,p), extract Total Xsec"
 fi;
 
+if [ $SimTransfer -eq 1 ]; then
+  angMin=0 
+  angMax=180
+  angStep=0.5
+fi
+
 echo "#################################################################"
 echo "##   @@@@ @@    @@@@  @@@@  @@@@@  @@@@  @@@@@@ @@@@@   @@@@   ##"
 echo "##  @@    @@    @@   @@  @@ @@ @@ @@  @@   @@   @@ @@  @@  @@  ##"
