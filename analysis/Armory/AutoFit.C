@@ -446,11 +446,6 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
 //########################################
 //########################################
 void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile = "AutoFit_para.txt"){
-   
-  //============ 131Xe
-  //energy.push_back(-2.8);  height.push_back(100); lowE.push_back(-3.0); highE.push_back(-2.4);
-  //energy.push_back(-1.4);  height.push_back(100); lowE.push_back(-2.0); highE.push_back(-1.0);
-  //energy.push_back( 0.2);  height.push_back(100); lowE.push_back(-0.5); highE.push_back( 0.5);
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {

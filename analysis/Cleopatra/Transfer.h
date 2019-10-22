@@ -351,6 +351,7 @@ void Transfer(
   tree->Branch("z", &z, "z/D");
   //double z0; tree->Branch("z0", &z0, "z0/D");
   tree->Branch("t", &t, "t/D");
+  double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
   
   double recoilT; // particle-B hit time
   tree->Branch("recoilT", &recoilT, "recoilT/D");
@@ -641,6 +642,7 @@ void Transfer(
     //z0 = helios.GetZ0() ; 
     x = helios.GetX() + gRandom->Gaus(0, zSigma);
     t = helios.GetTime();
+    tB = helios.GetRecoilTime();
     loop = helios.GetLoop();
     detID = helios.GetDetID();
     detRowID = helios.GetDetRowID();

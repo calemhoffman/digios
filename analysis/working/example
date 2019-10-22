@@ -32,4 +32,7 @@
 #206Hg(d,d)206Hg   0        1g9/2    9/2+         1.000   7.39MeV/u   AA        0.12    #inelastics_0.12=beta
 #206Hg(d,p)207Hg   0        1g9/2    9/2+         0.000   7.39MeV/u   AK
 #20F(d,t)19F       2        0d5/2    5/2+         0.197   10MeV/u     Vl
-#16N(d,3He)15C     2        0p1/2    5/2+         0.740   10MeV/u     Kx
+
+16N(d,3He)15C      2        0p1/2    5/2+         0.74   12MeV/u     Ax
+16N(d,3He)15C      2        0p3/2    3/2+         5.83   12MeV/u     Ax
+16N(d,3He)15C      0        0p1/2    1/2+         0.00   12MeV/u     Ax

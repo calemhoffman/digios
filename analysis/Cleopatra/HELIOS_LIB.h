@@ -630,7 +630,8 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
    vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
    vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-   tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   //tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   tB   = posRecoil / vp0B; // nano-second
    eB   = PB.E() - PB.M();
    zB   = vp0B * tB;
    rhoBHit = GetRecoilR(posRecoil);
