@@ -116,6 +116,12 @@ void Isotope::FindMassByAZ(int A, int Z){
 
       }
     }
+    
+    if( this->Name == "1H" ) this->Name = "p";
+    if( this->Name == "2H" ) this->Name = "d";
+    if( this->Name == "3H" ) this->Name = "t";
+    if( this->Name == "4He" ) this->Name = "a";
+    
     myfile.close();
   }else {
     printf("Unable to open %s\n", dataPath.c_str());
