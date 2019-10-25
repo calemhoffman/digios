@@ -12,20 +12,27 @@
 #include <TGraph.h>
 #include <TLegend.h>
 #include <TLatex.h>
+#include <TMacro.h>
 #include <TObjArray.h>
 #include <fstream>
 #include <TCutG.h>
 
+
+double * FindRange(TString branch, TString gate, TTree * tree, double output[2]){
+   tree->Draw(Form("%s>>temp1", branch.Data()), gate);
+   TH1F * temp1 = (TH1F *) gROOT->FindObjectAny("temp1");
+
+   output[1] = temp1->GetXaxis()->GetXmax();
+   output[0] = temp1->GetXaxis()->GetXmin();
+
+   delete temp1;
+   return output;
+}
+
 void Check_Transfer(TString filename = "transfer.root", bool shownKELines = false){
 
 //========================================== User Input
-  double ExRange[2] = {-1, 8};
   double eRange[2] = {0, 20};
-  double recoilERange[2] = {170, 200}; //need a way to auto it
-  double tDiffRange[2] = {34, 40}; 
-
-  TString Reaction="^{16}N^{m}(d,^{3}He) @ 12 MeV/u";
-  TString msg2 = "field = 2 T";
 
   //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
   TString gate = "hit == 1 && loop <= 2";
@@ -35,6 +42,15 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 //============================================== 
   TFile * file = new TFile(filename, "read");
   TTree * tree = (TTree*) file->Get("tree");
+  
+  TMacro * reactionConfig = (TMacro *) file->FindObjectAny("reactionConfig");
+  TString Reaction=reactionConfig->GetName(); //TODO change to Latex
+  
+  TMacro * detGeo = (TMacro *) file->FindObjectAny("detGeo");
+  TString field = detGeo->GetListOfLines()->At(0)->GetName();
+  int pp = field.First('/');
+  field.Remove(pp);
+  TString msg2; msg2.Form("field = %.2f T", field.Atof());
 
   TObjArray * fxList = (TObjArray *) file->FindObjectAny("fxList");
   TObjArray * txList = (TObjArray *) file->FindObjectAny("txList");
@@ -136,7 +152,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    printf("gate : %s\n", gate.Data());
    printf("gate2: %s\n", gate2.Data());
 
-   /*
+   /**
    printf("=======================meaning of Hit ID\n");
    printf("  1 = light recoil hit array & heavy recoil hit recoil\n");
    printf("  0 = when no detector\n");
@@ -181,6 +197,8 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    tree->Draw("rhoRecoil:z>>hRecoilRZ", gate, "colz");
 
    cCheck->cd(5);
+   double recoilERange[2];
+   FindRange("TB", gate, tree, recoilERange);
    TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoil);
    tree->Draw("rhoRecoil:TB>>hRecoilRTR", gate, "colz");
    
@@ -198,6 +216,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    cCheck->cd(7)->SetLogy();
    
    TH1F * hThetaCM[nExID];
+   TLegend * legend = new TLegend(0.8,0.2,0.99,0.8);
    double maxCount = 0;
    for( int i = 0; i < nExID; i++){
      hThetaCM[i] = new TH1F(Form("hThetaCM%d", i), Form("thetaCM [gated] (ExID=%d); thetaCM [deg]; count", i), 200, 0, 50);
@@ -205,25 +224,30 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
      hThetaCM[i]->SetFillColor(i+1);
      hThetaCM[i]->SetFillStyle(3000+i);
      tree->Draw(Form("thetaCM>>hThetaCM%d", i), gate + Form("&& ExID==%d", i), "");
+     legend->AddEntry(hThetaCM[i], Form("ExID=%d", i));
      double max = hThetaCM[i]->GetMaximum();
      if( max > maxCount ) maxCount = max;
    }
 
    for( int i = 0; i < nExID; i++){
      hThetaCM[i]->GetYaxis()->SetRangeUser(1, maxCount * 1.2);
-     //TODO add TLatex
      if( i == 0 ) {
        hThetaCM[i]->Draw();
      }else{
        hThetaCM[i]->Draw("same");
      }
-   }
+   }   
+   legend->Draw();
 
    cCheck->cd(8);
+   double tDiffRange [2];
+   FindRange("t-tB", gate, tree, tDiffRange);
    TH2F * hTDiffZ = new TH2F("hTDiffZ", "time(Array) - time(Recoil) vs Z [gated]; z [mm]; time diff [ns]", zRange[0], zRange[1], zRange[2],  500, tDiffRange[0], tDiffRange[1]);
    tree->Draw("t - tB : z >> hTDiffZ", gate, "colz");
 
    cCheck->cd(9);
+   double ExRange[2] ;
+   FindRange("ExCal", gate, tree, ExRange);
    TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  500, ExRange[0], ExRange[1]);
    tree->Draw("ExCal>>hExCal", gate, "");
 
@@ -235,17 +259,9 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    text.SetTextSize(0.06);
    text.SetTextColor(2);
 
-   text.DrawLatex(0.1, 0.9, Reaction);
-   text.DrawLatex(0.1, 0.8, msg2);
-   text.DrawLatex(0.1, 0.7, "gate:");
-   text.DrawLatex(0.1, 0.6, gate);
+   text.DrawLatex(0., 0.9, Reaction);
+   text.DrawLatex(0., 0.8, msg2);
+   text.DrawLatex(0., 0.7, "gate:");
+   text.DrawLatex(0., 0.6, gate);
 
-
-   /*
-   cCheck->cd(9);
-   TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
-   tree->Draw("yRecoil1:xRecoil1>>hRecoilXY1", gate, "colz");
-
-   cCheck->cd(10);
-   */
 }

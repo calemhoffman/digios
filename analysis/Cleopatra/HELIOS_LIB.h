@@ -33,6 +33,7 @@ public:
       nameA = temp.Name;
       isReady = false;
       isBSet = true;
+      
    }
    void Seta(int A, int Z){
       Isotope temp (A, Z);
@@ -42,6 +43,7 @@ public:
       namea = temp.Name;
       isReady = false;
       isBSet = false;
+      
    }
    void Setb(int A, int Z){
       Isotope temp (A, Z);
@@ -51,6 +53,7 @@ public:
       nameb = temp.Name;
       isReady = false;
       isBSet = false;
+      
    }
    void SetB(int A, int Z){
       Isotope temp (A, Z);
@@ -1163,11 +1166,6 @@ public:
       Z1 = Z;
       namea = temp.Name;
       name1 = temp.Name;
-      
-      if( namea == "1H " ) {
-         namea = "p";
-         name1 = "p";
-      }
    }
 
    void Set2(int A, int Z){
@@ -1176,10 +1174,6 @@ public:
       A2 = A;
       Z2 = Z;
       name2 = temp.Name;
-      
-      if( name2 == "1H " ) {
-         name2 = "p";
-      }
       
       AB = AA + Aa - A1 - A2;
       ZB = ZA + Za - Z1 - Z2;
