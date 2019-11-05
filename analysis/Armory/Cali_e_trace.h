@@ -605,7 +605,7 @@ void Cali_e_trace::Init(TTree *tree)
             cTCorr[i][6] = a6;
             cTCorr[i][7] = a7;
             cTCorr[i][8] = a8; // this is the offset find by fitting the 1-D plot
-            printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
+            //printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
          printf(".... done.\n");

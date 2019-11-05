@@ -148,6 +148,19 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
             paraA[0] / bw,   paraE[0] /bw, 
             paraA[1], paraE[1],
             paraA[2], paraE[2]);
+            
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.04);
+  text.SetTextColor(2);
+  
+    
+   text.DrawLatex(0.4, 0.65, Form("count : %5.0f(%5.0f)", paraA[0]/bw, paraE[0]/bw));
+   text.DrawLatex(0.4, 0.60, Form(" mean : %5.3f(%5.3f) MeV", paraA[1], paraE[1]));
+   text.DrawLatex(0.4, 0.55, Form("sigma : %5.3f(%5.3f) MeV", paraA[2], paraE[2]));
+   text.DrawLatex(0.4, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", paraA[2] *2.355, paraE[2]*2.355));
+
   
 }
 
@@ -454,7 +467,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   }
   nPeaks = energy.size();
 
-  TCanvas *cFitNGauss = new TCanvas("cFitNGauss","Fitting on Ex (fixed width)", 600,600);
+  TCanvas *cFitNGauss = new TCanvas("cFitNGauss","Fitting on Ex", 600,600);
   cFitNGauss->Divide(1,3);
   if(! cFitNGauss->GetShowEventStatus() ) cFitNGauss->ToggleEventStatus();
   

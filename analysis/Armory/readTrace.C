@@ -22,7 +22,7 @@ void readTrace(TString fileName, int detID = -1){
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 0, 800, 300);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 0, 1500, 800);
    cRead->Divide(1,1);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
@@ -134,7 +134,8 @@ void readTrace(TString fileName, int detID = -1){
          
          cRead->cd(1);
          cRead->Clear();
-         g->Draw("");
+         g->SetMarkerStyle(5);
+         g->Draw("AP");
          //g->GetXaxis()->SetRangeUser(0, 200);
          //g->GetYaxis()->SetRangeUser(7500, 35000);
          timeVLine.Draw("same");
