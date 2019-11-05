@@ -1,23 +1,23 @@
 //-------for_comment
-14             //beam_A
+16             //beam_A
 7             //beam_Z
 2               //target_A
 1               //target_Z
 3               //recoil_light_A
 2               //recoil-light_Z
-15            //beam-energy_in_MeV/u
+11.7            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
 0.00            //x_offset_of_Beam_in_mm
 0.00            //y_offset_of_Beam_in_mm
-500000         //number_of_Event_being_generated
+5000         //number_of_Event_being_generated
 false           //isTargetScattering
 0.913           //target_density_in_g/cm3
 2.2e-4          //targetThickness_in_cm
 ../SRIM/20F_in_CD2.txt  //stopping_power_for_beam
 ../SRIM/3H_in_CD2.txt   //stopping_power_for_light_recoil
-../SRIM19F_in_CD2.txt  //stopping_power_for_heavy_recoil
+../SRIM19F_in_CD2.txt   //stopping_power_for_heavy_recoil
 false           //isDacay
 1               //decayNucleus_A
 0               //decayNucleus_Z
