@@ -181,14 +181,14 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       if (i < 32) psd.ELUM[i] = TMath::QuietNaN();
       if (i <  4) psd.EZERO[i] = TMath::QuietNaN();
 
-      psd.EnergyTimestamp[i] = TMath::QuietNaN();
-      psd.XFTimestamp[i]     = TMath::QuietNaN();
-      psd.XNTimestamp[i]     = TMath::QuietNaN();
-      psd.RingTimestamp[i]   = TMath::QuietNaN();
-      if (i <  8) psd.RDTTimestamp[i]    = TMath::QuietNaN();
-      if (i < 24) psd.TACTimestamp[i]    = TMath::QuietNaN();
-      if (i < 32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
-      if (i <  4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
+      psd.EnergyTimestamp[i] = 0;
+      psd.XFTimestamp[i]     = 0;
+      psd.XNTimestamp[i]     = 0;
+      psd.RingTimestamp[i]   = 0;
+      if (i <  8) psd.RDTTimestamp[i]    = 0;
+      if (i < 24) psd.TACTimestamp[i]    = 0;
+      if (i < 32) psd.ELUMTimestamp[i]   = 0;
+      if (i <  4) psd.EZEROTimestamp[i]  = 0;
       
       psd.x[i]       = TMath::QuietNaN();    
    }
