@@ -1,45 +1,55 @@
 #!/bin/bash
 
-if [ $# -ne 2 ] && [ $# -ne 3 ]; then
-    echo "auto_start_stop  time  [min_int]        [repeatition]"
-    echo "auto_start_stop  size  [kilo-byte_int]  [repeatition]"
-    echo "****** if no repeatation, or repeatation = 0 or 1, only do once. "
+if [ $# -ne 2 ] && [ $# -ne 3 ] ; then
+    echo "AutoStartStop  time  [min_int]        [repeatition_int]"
+    echo "AutoStartStop  size  [kilo-byte_int]  [repeatition_int]"
+    echo "****** if no repeatation, or repeatation = 0 or 1 or  < -1, only do once. "
+    echo "       if repeatation = -1, infinity"
     exit
 fi
 
 method=$1
 
-if [ $# -eq 3 ]; then
+if [ $# -ge 3 ]; then
     repeat=$3
 else
     repeat=1
 fi
 
-if [ $repeat -eq 1 ]; then
-    msg1="Stop"
-else
+if [ $repeat -gt 1 ] || [ $repeat -eq -1 ] ; then
     msg1="Start & Stop"
+else
+    msg1="Stop"
 fi
-
 
 
 if [ $method == "time" ]; then
     stopCount=$2
     echo "###################################"
-    echo "   Auto $msg1 for $2 min            "
+    echo "   Auto $msg1 for ${stopCount} min            "
     echo "###################################"
 elif [ $method == "size" ]; then
     maxSize=$2
     echo "###################################"
-    echo "   Auto $msg1 for $2 byte           "
+    echo "   Auto $msg1 for ${maxSize} byte           "
     echo "###################################"
 else
     echo "Time or FileSize !!!"
-    echo "auto_start_stop  time  [min_int]"
-    echo "auto_start_stop  size  [kilo-byte_int]"
+    echo "AutoStartStop  time  [min_int]"
+    echo "AutoStartStop  size  [kilo-byte_int]"
     exit
 fi
 
+#=========== Check DAQ is saving
+isDAQSaving=$(caget Online_CS_SaveData | awk '{print $2}')
+if [ $isDAQSaving == "Save" ]; then
+    echo -e "\033[33m !!!!!! it seem that the DAQ is saving. Please fix that or call Ryan!!!! \033[m"
+    exit
+fi
+
+if [ $repeat -eq -1 ] ;then
+    echo -e "\033[1;33m !!!!! infinite runs !!!!! \033[m"
+fi
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -56,12 +66,11 @@ stopFlag=0
 sleepTime=60
 count=0
 
-
 #===== Check is the Run was started, if not, start
 isStarted=$(caget Online_CS_StartStop | awk '{print $2}')
 if [ $isStarted == "Stop" ]; then
     cd ${datalocation}
-    source ~/digios/daq/edm/scripts/start_run.sh "Auto start!"
+    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times."
     stopFlag=0
     cd ${currentLocation}
     source ~/digios/expName.sh
@@ -78,18 +87,20 @@ while [  $stopFlag -eq 0 ]; do
 	    echo $(date) " | Run" ${RUN} " | size:" $size " kB >= " $maxSize " kB ====> Stop!!!"	
 	    source ~/digios/daq/edm/scripts/stop_run.sh "Auto stop after ${maxSize} kB"
 	    
-	    if [ $repeat -gt 1 ]; then
+	    if [ $repeat -gt 1 ] || [ $reapet -eq -1 ] ; then
 		echo "################ wait for 10 sec before next run"
-		echo -e "######## ${YELLOW}CHANCE TO STOP the auto-Start!!!!${NC}"
+		echo -e "######## ${YELLOW}CHANCE TO STOP the auto!!!!${NC}"
 		echo "========== number of repeat : ${repeat}"
 		sleep 10
 		cd ${datalocation}
-		source ~/digios/daq/edm/scripts/start_run.sh "Auto start!"
+		source ~/digios/daq/edm/scripts/start_run.sh "Auto start! $repeat"
 		stopFlag=0
 		cd ${currentLocation}
 		source ~/digios/expName.sh
 		RUN=${LastRunNum}
-		repeat=$((repeat-1))
+		if [ $repeat -gt 1 ] ; then
+		    repeat=$((repeat-1))
+		fi
 		#echo $(date) " | Run" ${RUN} " | size:" $size " kB < " $maxSize " kB"
 	    fi
 	fi    
@@ -105,19 +116,21 @@ while [  $stopFlag -eq 0 ]; do
 	    echo $(date) " | Run" ${RUN} " | time:" $count " min >= " $stopCount " min ====> Stop!!!"	
 	    source ~/digios/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 	    
-	    if [ $repeat -gt 1 ]; then
+	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
-		echo -e "######## ${RED}CHANCE TO STOP the auto-Start!!!!${NC}"
+		echo -e "######## ${RED}CHANCE TO STOP the auto!!!!${NC}"
 		echo "========== number of repeat : ${repeat}"
 		sleep 10
 		cd ${datalocation}
-		source ~/digios/daq/edm/scripts/start_run.sh "Auto start!"
+		source ~/digios/daq/edm/scripts/start_run.sh "Auto start! $repeat"
 		cd ${currentLocation}
 		stopFlag=0
 		count=0
 		source ~/digios/expName.sh
 		RUN=${LastRunNum}
-		repeat=$((repeat-1))
+		if [ $repeat -gt 1 ]; then
+		    repeat=$((repeat-1))
+		fi
                 #echo $(date) " | Run" ${RUN} " | time:" $count " min < " $stopCount " min"	
 	    fi
 	fi
