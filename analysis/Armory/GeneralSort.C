@@ -68,7 +68,7 @@ void GeneralSort::Begin(TTree * tree)
   TString option = GetOption();
   NumEntries = tree->GetEntries();
   EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
-  
+
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
   saveFileName.Remove(0, findslat+1);
@@ -137,6 +137,11 @@ void GeneralSort::Begin(TTree * tree)
   printf("\n");
   gClock.Reset();
   gClock.Start("timer");
+
+
+  printf("============= Number of Event: %llu\n", NumEntries);
+  printf("=== Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
+
 
   printf("====================== started \n");
 
@@ -213,7 +218,6 @@ Bool_t GeneralSort::Process(Long64_t entry)
     //ID PSD Channels
     Int_t idKind = -1;
     Int_t idDet=-1; // Detector number
-    Int_t idConst=1010; //Temp value to get idDet
     
     //==============================================================
     /* --------------------- Loop over NumHits ------------------ */
