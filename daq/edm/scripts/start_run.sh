@@ -23,7 +23,7 @@ echo "=========================================="
 #==== read comment
 if [ $# -eq 0 ];then
     echo 'Ctrl+C to cancel with no harm.'
-    echo 'e.g. Target, beam rate, attenuation, slit, trigger, objective, etc... '
+    echo 'e.g. Target, beam rate, attenuation, slit, trigger, people on-shift, objective, etc... '
     read -p 'Singleline comment for this run: ' COMMENT
 else
     COMMENT=$1
@@ -96,13 +96,13 @@ curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData
 export TERM=vt100
 echo " terminals" 
 #Now spawn receiver windows
-xterm -T ioc1 -geometry 110x24+0+0  -sb  -sl 1000 -e "gtReceiver4" "ioc1" "${expName}_run_$DIGIOSRUNNUM.gtd01" "2000000000" "14" &
+xterm -T ioc1 -geometry 100x20+0+0  -sb  -sl 1000 -e "gtReceiver4" "ioc1" "${expName}_run_$DIGIOSRUNNUM.gtd01" "2000000000" "14" &
 
-xterm -T ioc2 -geometry 110x24+0+250  -sb  -sl 1000 -e "gtReceiver4" "ioc2" "${expName}_run_$DIGIOSRUNNUM.gtd02" "2000000000" "14" &
+xterm -T ioc2 -geometry 100x20+0+300  -sb  -sl 1000 -e "gtReceiver4" "ioc2" "${expName}_run_$DIGIOSRUNNUM.gtd02" "2000000000" "14" &
 
-xterm -T ioc3 -geometry 110x24+0+500  -sb  -sl 1000 -e "gtReceiver4" "ioc3" "${expName}_run_$DIGIOSRUNNUM.gtd03" "2000000000" "14" &
+xterm -T ioc3 -geometry 100x20+0+600  -sb  -sl 1000 -e "gtReceiver4" "ioc3" "${expName}_run_$DIGIOSRUNNUM.gtd03" "2000000000" "14" &
 
-xterm -T ioc4 -geometry 110x24+0+750  -sb  -sl 1000 -e "gtReceiver4" "ioc4" "${expName}_run_$DIGIOSRUNNUM.gtd04" "2000000000" "14" &
+xterm -T ioc4 -geometry 100x20+0+900  -sb  -sl 1000 -e "gtReceiver4" "ioc4" "${expName}_run_$DIGIOSRUNNUM.gtd04" "2000000000" "14" &
 
 ~/digios/daq/edm/scripts/helios_database start
 
