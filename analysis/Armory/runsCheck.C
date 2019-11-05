@@ -1,5 +1,24 @@
-{
-   TString folderPath ="../root_data/*_run*.root";
+#include <TROOT.h>
+#include <TChain.h>
+#include <TFile.h>
+#include <TSelector.h>
+#include <TMath.h>
+#include <TBenchmark.h>
+#include <TF1.h>
+#include <string>
+#include <fstream>
+#include <TObjArray.h>
+#include <TCutG.h>
+#include <TClonesArray.h>
+
+
+///only work in single thread run
+
+void runsCheck(TString prefix = "*"){
+   
+   TString folderPath;
+   folderPath.Form("../root_data/%s_run*.root", prefix.Data());
+   
    const char* treeName="gen_tree";
    
    //==============================================
@@ -10,6 +29,9 @@
    
    ULong64_t e_t[100];
    TBranch  *b_EnergyTimestamp;
+   
+   Float_t e[100];
+   TBranch  *b_Energy;
    
    double time1, time2, dTime;
    ULong64_t firstTime, lastTime;
@@ -42,25 +64,22 @@
    paraOut = fopen(filename.Data(), "w+");
    
    int numFile = rootFileName.size();
+   
+   printf("%30s, %10s, %8s, %11s, %11s, %11s\n", "file",  "#event", "size[MB]", "duration[s]", "[min]", "[hour]");   
+   
    for( int i = 0; i < numFile ; i++){
       
-      //printf("%s \n", rootFileName[i].Data());
+      
+      
       
       f = new TFile (rootFileName[i], "read");
       
       if( !f->IsOpen()) continue; 
-      printf("%15s is loaded.", rootFileName[i].Data());
-      
-      //TString prefix; //==== working on
-      //int findlast = rootFileName[i].Last('_');
-      //prefix = rootFileName[i].Remove(findLast);
-      
-      //if( prefix == "gen" ) treeName = "gen_tree";
-      //if( prefix == "trace" ) treeName = "tree";
       
       tree = (TTree*)f->Get(treeName);
 
       tree->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
+      tree->SetBranchAddress("e", e, &b_Energy);
       
       int totalEvent = tree->GetEntries();
       
@@ -75,10 +94,10 @@
       bool breakFlag = false;
       for(int event = 1; event < totalEvent; event++){
          tree->GetEntry(event);
-         for(int j = 0; j < 24; j++){
-            if( e_t[j] > 0 ) {
+         for(int j = 0; j < 30; j++){
+            if( e_t[j] > 0 && !TMath::IsNaN(e[j])) {
                firstTime = e_t[j];
-               //printf("%d ", event);
+               //printf("%d, %f, %llu \n ", event, e[j], e_t[j]);
                breakFlag = true;
                break;
             }
@@ -90,6 +109,7 @@
       if( breakFlag == false ) {
          
          tree->SetBranchAddress("rdt_t", e_t, &b_EnergyTimestamp);
+         tree->SetBranchAddress("rdt", e, &b_Energy);
          
          for(int event = 1; event < totalEvent; event++){
             tree->GetEntry(event);
@@ -110,6 +130,7 @@
       if( breakFlag == false ) {
          
          tree->SetBranchAddress("ezero_t", e_t, &b_EnergyTimestamp);
+         tree->SetBranchAddress("ezero", e, &b_Energy);
          
          for(int event = 1; event < totalEvent; event++){
             tree->GetEntry(event);
@@ -130,8 +151,8 @@
       breakFlag = false;
       for(int event = totalEvent-1; event > 0; event--){
          tree->GetEntry(event);
-         for(int j = 0; j < 24; j++){
-            if( e_t[j] > 0 ) {
+         for(int j = 0; j < 30; j++){
+            if( e_t[j] > 0 && !TMath::IsNaN(e[j]) ) {
                lastTime = e_t[j];
                //printf(", %d \n", event);
                breakFlag = true;
@@ -148,9 +169,7 @@
       //printf("%11f sec, %11f sec, %11f sec \n", time1, time2, dTime);
       
       double size = f->GetSize(); // in byte
-      printf("#Entry: %10d, size: %6.1f MB, duration: %10.2f sec = %7.2f min = %7.2f hr\n", 
-               totalEvent, size/1024/1024, dTime, dTime/60., dTime/60./60.);
-      
+      printf("%30s, %10d, %8.2f, %11.3f, %11.3f, %11.3f\n", rootFileName[i].Data(),  totalEvent, size/1024/1024, dTime, dTime/60., dTime/60./60.); 
       
       if( i == 0 ) {
          fprintf(paraOut, "%50s, %10s, %8s, %11s, %11s, %11s\n", "file",  "#event", "size[MB]", "duration[s]", "[min]", "[hour]");   

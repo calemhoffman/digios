@@ -87,6 +87,8 @@ void readTraceRDT(TString fileName){
             chiSq     = gFit->GetChisquare()/gFit->GetNDF();
             int kind = gFit->GetLineColor();
             int det  = gFit->GetLineStyle();
+            
+            if( det != 106 ) continue;
                         
             gTitle.Form("(%d,%d), base: %5.1f, rise: %5.3f, time: %5.2f, energy: %6.1f | chi2: %6.2f, %6.2f |(1 for break)",
                      det, kind, base, riseTime, time, energy, chiSq, TMath::Sqrt(chiSq)/energy);

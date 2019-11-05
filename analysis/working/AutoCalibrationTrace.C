@@ -25,6 +25,7 @@
 //==========================================
 //         This file show the steps for calibration 
 //         //TODO detect branch te_t and trdt_t exist or not, if exist, calibrate with coinTime
+//         //TODO rdtCut is in runslist.txt
 //==========================================
 
 int temp ;   
@@ -202,8 +203,9 @@ void AutoCalibrationTrace(){
       printf(" Step 1) Generate smaller root file to speed thing up.           \n");
       printf("         ** aware of the Gate in Armory/Cali_little_tree_trace.C \n");
       printf(" Step 2) Generate kinematics line using Simulation/transfer.C    \n");
-      printf("         ** make sure you have correct A) basicReactoinConfig.txt    \n");
-      printf("                                       B) excitation_energies.txt    \n");
+      printf("         ** make sure you have correct A) reactoinConfig.txt    \n");
+      printf("                                       B) detGeometry.txt    \n");
+      printf("                                       C) Ex.txt    \n");
       printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
       printf("=================================================================\n");
       int proceedFlag = 0;
@@ -217,7 +219,7 @@ void AutoCalibrationTrace(){
       }
       printf("#######################################################\n");
       printf("Step 1) ========= creating smaller tree.\n");
-      chain->Process("../Armory/Cali_littleTree_trace.C");
+      chain->Process("../Armory/Cali_littleTree_trace.C+");
       double eThreshold = 300;
       Check_e_x("temp.root", eThreshold);
       
@@ -250,6 +252,7 @@ void AutoCalibrationTrace(){
       
       printf("#######################################################\n");
       printf("Step 3) =============== Calibrate\n");
+      printf("           Please edit the gate on Armory/CompareF.C\n");
       float energyThreshold = 300;
       printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
       temp = scanf("%f", &energyThreshold);
