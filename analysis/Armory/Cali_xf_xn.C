@@ -425,7 +425,7 @@ void Cali_xf_xn(TTree * tree){
       
       cAlpha->cd(i+1);
       
-      tree->Draw(expression, gate[i] , "");
+      tree->Draw(expression, gate[i] , "colz");
       line.SetX2(para[i][0]);
       line.SetY1(para[i][0]);
       line.Draw("same");
