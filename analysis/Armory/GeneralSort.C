@@ -195,14 +195,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
       if (i<32) psd.ELUM[i]=TMath::QuietNaN();
       if (i<10) psd.EZERO[i]=TMath::QuietNaN();
     
-      psd.EnergyTimestamp[i]=TMath::QuietNaN();
-      psd.XFTimestamp[i]=TMath::QuietNaN();
-      psd.XNTimestamp[i]=TMath::QuietNaN();
-      psd.RingTimestamp[i]=TMath::QuietNaN();
-      psd.RDTTimestamp[i]=TMath::QuietNaN();
-      psd.TACTimestamp[i]=TMath::QuietNaN();
-      if (i<32) psd.ELUMTimestamp[i]=TMath::QuietNaN();
-      if (i<10) psd.EZEROTimestamp[i]=TMath::QuietNaN();	    
+      psd.EnergyTimestamp[i]= 0;
+      psd.XFTimestamp[i]    = 0; 
+		psd.XNTimestamp[i]	 = 0; 
+		psd.RingTimestamp[i]	 = 0; 
+		psd.RDTTimestamp[i]	 = 0; 
+		psd.TACTimestamp[i]	 = 0; 
+      if (i<32) psd.ELUMTimestamp[i] = 0;
+		if (i<10) psd.EZEROTimestamp[i]= 0;		 
     }
 
     

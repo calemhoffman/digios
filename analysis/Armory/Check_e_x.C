@@ -134,7 +134,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       
       gate.Form("detID == %d", idet);
 
-      tree->Draw(expression, gate, "colz");
+      tree->Draw(expression, gate, "box");
       line->Draw("same");
       cCheck->Modified();
       cCheck->Update();

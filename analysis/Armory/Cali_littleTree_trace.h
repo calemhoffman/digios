@@ -44,7 +44,8 @@ public :
    ULong64_t       rdt_t[100];
    
    //Trace
-   Float_t         te_t[24];
+   Float_t         te_t[30];
+   Float_t         trdt[8];
    Float_t         trdt_t[8];
 
    // List of branches
@@ -57,6 +58,7 @@ public :
    TBranch        *b_RDTTimestamp;   //!
    
    TBranch        *b_Trace_Energy_Time;  //!   
+   TBranch        *b_Trace_RDT;  //!
    TBranch        *b_Trace_RDT_Time;  //!
    
    bool isTraceDataExist; // if b_Trace_** exist
@@ -93,6 +95,7 @@ public :
    int detIDTemp;
    int hitID; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
+   int rdtdEMultiHit; // multipicity of recoil-dE
    
    Float_t coinTimeUC; 
    Float_t coinTime;
@@ -114,9 +117,9 @@ public :
    double length;
    double firstPos;
    
-   double xnCorr[24]; // xn correction for xn = xf
-   double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
-   double cTCorr[24][9]; // coinTime correction
+   double xnCorr[30]; // xn correction for xn = xf
+   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   double cTCorr[30][9]; // coinTime correction
    bool isCoinTimeLoaded;
    TF1 ** f7 ; //!
    
@@ -160,6 +163,14 @@ void Cali_littleTree_trace::Init(TTree *tree)
       traceData ++;
       fChain->SetBranchAddress("te_t", te_t, &b_Trace_Energy_Time);
    }
+
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("trdt");
+   if( br == NULL ) {
+      printf(" WARNING! cannot find Branch: trdt -> proceed without coincident-time calculation. \n");
+   }else {
+      traceData ++;
+      fChain->SetBranchAddress("trdt", trdt, &b_Trace_RDT);   
+   }
    
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("trdt_t");
    if( br == NULL ) {
@@ -170,7 +181,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    }
    
    isTraceDataExist = false;
-   if( traceData == 2 ) isTraceDataExist = true;
+   if( traceData == 3 ) isTraceDataExist = true;
    
    //===================================================== loading parameter
    //========================================= detector Geometry
