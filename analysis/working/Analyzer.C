@@ -7,7 +7,9 @@
 #include <TCanvas.h>
 #include <TBenchmark.h>
 #include <TMath.h>
-//#include "../AutoCali/AutoFit.C"
+#include <TCutG.h>
+#include <TObjArray.h>
+///#include "../AutoCali/AutoFit.C"
 
 
 int numRow = 6;
@@ -16,11 +18,11 @@ const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-double rangeEx[3] = { 50, -1, 9}; // resol. [keV], low Ex, high Ex
-double rangeCM[3] = {1, 0, 45}; // resol. [deg], low deg, high deg
+double rangeEx[3] = { 50, -1, 8}; ///resol. [keV], low Ex, high Ex
+double rangeCM[3] = {1, 0, 45}; ///resol. [deg], low deg, high deg
 
 bool isExOffset = false;
-double ExOffset[30] = { // calibrated by h064_15N, (d,p), run013
+double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
    0.00,  0.0154,    1000,  0.1314,  0.0091, 
    1000,  0.0032,  0.0081,    1000,  0.1661, 
    1000,  0.0614,  0.1070,  0.1453,  0.1785,
@@ -29,51 +31,64 @@ double ExOffset[30] = { // calibrated by h064_15N, (d,p), run013
    1000, -0.0122,  0.1052,  0.2028,  0.0410};
 
 int nBadDet = 9;
-int listOfBadDet[11] = {0, 1, 2, 3, 4, 5, 9, 11, 14, 29};
+int listOfBadDet[11] = {0, 1, 2, 3, 4, 9, 11, 14, 29};
+
+
+TString rdtCutFile = ""; //"rdt_15N_degraded.root";
 
 //######################################## End of User Input
 
 //=========================== Global histograms
-TH1F * hRun; // runID
+TH1F * hRun; /// runID
 TH1F * hMultiHit ; 
 
-TH1F ** hEBISi; // EBIS for each detector
+TH1F ** hEBISi; /// EBIS for each detector
 
-TH1F ** hei; // e
-TH2F ** hexi; // e vs x for each detector
+TH1F ** hei; /// e
+TH2F ** hexi; /// e vs x for each detector
 
-TH1F ** hxi; // x for each detector
+TH1F ** hxi; ///x for each detector
 
-TH2F * hez;  // e vs z
-TH2F * heza;  // e vs z, |x| < 0.9
-TH2F ** hezr; // e vs z for each row
+TH2F * hez;  ///e vs z
+TH2F * heza;  ///e vs z, |x| < 0.9
+TH2F ** hezr; ///e vs z for each row
 
-TH2F ** hxExi; // x vs Ex for each detector
+TH2F ** hxExi; ///x vs Ex for each detector
 
-TH1F * hEx; // Ex
-TH1F ** hExi; // Ex for each detector
+TH1F * hEx; ///Ex
+TH1F ** hExi; ///Ex for each detector
 
-TH1F ** hExc; // Ex for each column
-TH1F ** hExcA; // Ex for each column more detectors summed
-TH1F ** hExca; // Ex gated x<0
-TH1F ** hExcb; // Ex gated x>0
+TH1F ** hExc; ///Ex for each column
+TH1F ** hExcA; ///Ex for each column more detectors summed
+TH1F ** hExca; ///Ex gated x<0
+TH1F ** hExcb; ///Ex gated x>0
 
-TH2F ** hExzr; // Ex vs z
+TH2F ** hExzr; ///Ex vs z
 
-TH2F * hExT; // Ex vs thetaCM
-TH2F * hExTa; // Ex vs thetaCM, |x| < 0.9
+TH2F * hExT; ///Ex vs thetaCM
+TH2F * hExTa; ///Ex vs thetaCM, |x| < 0.9
 
-TH1F ** hExr; // Ex for each row
-TH2F ** hExTr; // Ex vs thetaCM for each row 
+TH1F ** hExr; ///Ex for each row
+TH2F ** hExTr; ///Ex vs thetaCM for each row 
 
-TH1F * hT; // thetaCM
-TH2F * hTz; // thetaCM vs z
-TH1F * hTa; // thetaCM, |x| < 0.9
+TH1F * hT; ///thetaCM
+TH2F * hTz; ///thetaCM vs z
+TH1F * hTa; ///thetaCM, |x| < 0.9
+
 
 TCanvas * cAna;
 Int_t totnumEntry;
 TBenchmark gClock;
 Bool_t shown;
+
+//======= Recoil Cut
+TString cutName("cut1");
+TCutG* cutG; //!
+TObjArray * cutList;
+TString cutTag;
+Bool_t isCutFileOpen;
+int numCut;
+vector<int> countFromCut;
 
 void Analyzer::Begin(TTree *tree)
 {
@@ -83,18 +98,18 @@ void Analyzer::Begin(TTree *tree)
    hRun = new TH1F("hRun", "runID with gate; runID; count / run", 50, 20, 70);
    hMultiHit = new TH1F("hMultiHit", "MultiHit; hit; count / hit ", 10, 0, 10);
    
-   //ex spectrum
+   ///ex spectrum
    hEx   = new TH1F("hEx"  ,  Form("Ex; Ex[MeV]; count / %2.0f keV", rangeEx[0]) , (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
 
-   // thetaCM spectrum
+   /// thetaCM spectrum
    hT  = new TH1F("hT",  Form("thetaCM ; thetaCM [deg]; count / %2.0f deg", rangeCM[0])     , (rangeCM[2]-rangeCM[1])/rangeCM[0], rangeCM[1], rangeCM[2]);
    hTa = new TH1F("hTa", Form("thetaCM (|x|<0.9); thetaCM [deg]; count / %2.0f deg", rangeCM[0]), (rangeCM[2]-rangeCM[1])/rangeCM[0], rangeCM[1], rangeCM[2]);
 
-   //E vs Z
+   ///E vs Z
    hez  = new TH2F("hez" , "e - z; z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
    heza = new TH2F("heza", "e - z (|x|<0.9); z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
    
-   //Ex vs thetaCM
+   ///Ex vs thetaCM
    hExT  = new TH2F("hExT" , "Ex - thetaCM; thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
    hExTa = new TH2F("hExTa", "Ex - thetaCM (|x|<0.9); thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
 
@@ -142,6 +157,27 @@ void Analyzer::Begin(TTree *tree)
    }
    
    
+   ///================  Get Recoil cuts;
+   TFile * fCut = new TFile(rdtCutFile);
+   isCutFileOpen = fCut->IsOpen();
+   if(!isCutFileOpen) printf( "Failed to open cutfile : %s\n" , rdtCutFile.Data());
+   numCut = 0 ;
+   if( isCutFileOpen ){
+      cutList = (TObjArray *) fCut->FindObjectAny("cutList");
+      numCut = cutList->GetEntries();
+      printf("=========== found %d cutG in %s \n", numCut, fCut->GetName());
+
+      cutG = new TCutG();
+      for(int i = 0; i < numCut ; i++){
+         printf("cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
+            cutList->At(i)->GetName(),
+            ((TCutG*)cutList->At(i))->GetVarX(),
+            ((TCutG*)cutList->At(i))->GetVarY(),
+            ((TCutG*)cutList->At(i))->GetN());
+         countFromCut.push_back(0);	
+      }
+   }
+   
    gClock.Reset();
    gClock.Start("timer");
    shown = 0;
@@ -156,16 +192,16 @@ Bool_t Analyzer::Process(Long64_t entry)
 {
    b_run->GetEntry(entry, 0);
    b_e->GetEntry(entry,0);
-   //b_xf->GetEntry(entry,0);
-   //b_xn->GetEntry(entry,0);
+   ///b_xf->GetEntry(entry,0);
+   ///b_xn->GetEntry(entry,0);
    b_x->GetEntry(entry,0);
    b_z->GetEntry(entry,0);
    b_ring->GetEntry(entry,0);
    b_Ex->GetEntry(entry, 0);
    b_thetaCM->GetEntry(entry, 0);
    b_e_t->GetEntry(entry, 0);
-   //b_EBIS_t->GetEntry(entry, 0);
-   //b_hitID->GetEntry(entry, 0);
+   ///b_EBIS_t->GetEntry(entry, 0);
+   ///b_hitID->GetEntry(entry, 0);
 
    if( isTraceDataExist ) {
      b_te->GetEntry(entry,0);
@@ -174,60 +210,85 @@ Bool_t Analyzer::Process(Long64_t entry)
      b_trdt->GetEntry(entry,0);
      b_trdt_t->GetEntry(entry,0);
      b_trdt_r->GetEntry(entry,0);
+     b_coinTime->GetEntry(entry, 0);
    }
+   
+   //#################### recoil gate
+   bool rdtgate = false;
+   if( isCutFileOpen ) {
+      for(int i = 0 ; i < numCut ; i++ ){
+         cutG = (TCutG *)cutList->At(i) ;
+         if(cutG->IsInside(trdt[2*i],trdt[2*i+1])) {
+            rdtgate= true;
+            break; // only one is enough
+         }
+      }
+   }else{
+      rdtgate = true;
+   }
+   if( !rdtgate ) return kTRUE; 
    
    hRun->Fill(run);
    
    int multiHit = 0;
 
-   
    for( int i = 0 ; i < numDet ; i++){
       
-     //if( e_t[i] == 0 ) continue;
+      //################################################## gate
+      
+      ///if( e_t[i] == 0 ) continue;
       
             
-      //hEBISi[i]->Fill( (e_t[i]-ebis_t)/1e2 );
+      ///hEBISi[i]->Fill( (e_t[i]-ebis_t)/1e2 );
 
-     //======= cut ring
-     if( ring[i] > 50 ) continue;
+      ///======= cut ring
+      if( ring[i] > 50 ) continue;
+
+      ///======== cut-EBIS
+      ///if( !(100 < (e_t[i]-ebis_t)/1e2 && (e_t[i]-ebis_t)/1e2 < 900 )) continue;
+      ///if( 11000 < (e_t-EBIS_t)/1e2 && (e_t-EBIS_t)/1e2 < 19000 ) 
       
-      //======== cut-EBIS
-      //if( !(100 < (e_t[i]-ebis_t)/1e2 && (e_t[i]-ebis_t)/1e2 < 900 )) continue;
-      //if( 11000 < (e_t-EBIS_t)/1e2 && (e_t-EBIS_t)/1e2 < 19000 ) 
-      
-     //======== cut-e, z
-     if( TMath::IsNaN(e[i]) ) continue;
-     if( TMath::IsNaN(z[i]) ) continue;
+      ///======== cut-e, z
+      if( TMath::IsNaN(e[i]) ) continue;
+      if( TMath::IsNaN(z[i]) ) continue;
      
-     //if( e[i] < 1.2 ) continue;
+      if( e[i] < 1.2 ) continue;
      
-      //======== cut-x
+      ///======== cut-coinTime;
+      if( abs(coinTime-19) > 9 ) continue;
+     
+      ///======== cut-x
       if( !(TMath::Abs(x[i]) < 0.95) ) continue;
       
-      //======== cut-hitID
-      //if( hitID[i] != 0 ) continue;
+      ///======== cut-hitID
+      ///if( hitID[i] != 0 ) continue;
       
-      //======== cut-thetaCM
+      ///======== cut-thetaCM
       if( thetaCM < 10 ) continue;
       
-      //======== cut-det
+      ///======== cut-det
       bool badDetFlag = false;
       for( int p = 0 ; p < nBadDet; p ++){
         if( i == listOfBadDet[p] ) badDetFlag = true;
       }
       if( badDetFlag ) continue;
-      //if( i == 2 || i == 10 || i == 18 || i == 19 || i == 25) continue;  // for ground state
+      ///if( i == 2 || i == 10 || i == 18 || i == 19 || i == 25) continue;  ///for ground state
       
       double scaling = 1;
-      //TODO auto calculate from a list-of-bad-det
-      //if( i%numCol == 0 ) scaling = numRow/3.;
-      //if( i%numCol == 1 ) scaling = numRow/6.;
-      //if( i%numCol == 2 ) scaling = numRow/5.;
-      //if( i%numCol == 3 ) scaling = numRow/5.;
-      //if( i%numCol == 4 ) scaling = numRow/3.;
+      ///TODO auto calculate from a list-of-bad-det
+      ///if( i%numCol == 0 ) scaling = numRow/3.;
+      ///if( i%numCol == 1 ) scaling = numRow/6.;
+      ///if( i%numCol == 2 ) scaling = numRow/5.;
+      ///if( i%numCol == 3 ) scaling = numRow/5.;
+      ///if( i%numCol == 4 ) scaling = numRow/3.;
 
-      //======== special gate;
-      //if( i == 16 && e[i] < 6 ) continue;
+      ///======== special gate;
+      ///if( i == 16 && e[i] < 6 ) continue;
+      
+      
+      
+      
+      //##################################################
       
       if( isExOffset) Ex = Ex - ExOffset[i];
       
@@ -262,7 +323,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       hExr[row]->Fill(Ex, scaling);
       
       //======== special gate;
-      //if( i == 1 || i == 5 || i == 17 || i == 6 || i == 7 || i == 8 || i == 12 || i == 18 || i == 19) continue;  // for beyound ground state
+      ///if( i == 1 || i == 5 || i == 17 || i == 6 || i == 7 || i == 8 || i == 12 || i == 18 || i == 19) continue;  ///for beyound ground state
       
       hExc[i%numCol]->Fill(Ex);
       hEx->Fill(Ex, scaling);
@@ -347,10 +408,10 @@ void Analyzer::Terminate()
    cAna->Divide(nX,nY);
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
    
-   //double max = findXMax(hei)
+   ///double max = findXMax(hei)
    double max = findXMax(hExi);
    
-   //hEx->Draw();
+   ///hEx->Draw();
    
    for( int i = 0; i < numDet; i++){
      cAna->cd(i+1);
@@ -379,52 +440,52 @@ void Analyzer::Terminate()
      //hxExi[i]->Draw("colz");
    } 
    
-   //for( int i = 0; i < numDet; i++){
-   //   //hei[i]->GetYaxis()->SetRangeUser(0, max);
-   //   hExi[i]->GetYaxis()->SetRangeUser(0, max);
-   //   if( i < 6 ) {
-   //      cAna->cd(i+1);
-   //      hExi[i]->Draw();
-   //   }
-   //   if( 6 <= i && i < 12) {
-   //      cAna->cd(i-6+1);
-   //      hExi[i]->SetLineColor(2); 
-   //      hExi[i]->Draw("same");
-   //   }
-   //   if(12 <= i && i < 18) {
-   //      cAna->cd(i-12+1);
-   //      hExi[i]->SetLineColor(kGreen+3); 
-   //      hExi[i]->Draw("same");
-   //   }
-   //   if(18 <= i && i < numDet) {
-   //      cAna->cd(i-18+1);
-   //      hExi[i]->SetLineColor(6); 
-   //      hExi[i]->Draw("same");
-   //   }
-   //} 
+   ///for( int i = 0; i < numDet; i++){
+   ///  //hei[i]->GetYaxis()->SetRangeUser(0, max);
+   ///  hExi[i]->GetYaxis()->SetRangeUser(0, max);
+   ///  if( i < 6 ) {
+   ///     cAna->cd(i+1);
+   ///     hExi[i]->Draw();
+   ///  }
+   ///  if( 6 <= i && i < 12) {
+   ///     cAna->cd(i-6+1);
+   ///     hExi[i]->SetLineColor(2); 
+   ///     hExi[i]->Draw("same");
+   ///  }
+   ///  if(12 <= i && i < 18) {
+   ///     cAna->cd(i-12+1);
+   ///     hExi[i]->SetLineColor(kGreen+3); 
+   ///     hExi[i]->Draw("same");
+   ///  }
+   ///  if(18 <= i && i < numDet) {
+   ///     cAna->cd(i-18+1);
+   ///     hExi[i]->SetLineColor(6); 
+   ///     hExi[i]->Draw("same");
+   ///  }
+   ///} 
    
-   //for( int i = 0; i < 4; i++){
-   //   cAna->cd(i+1);
-   //   //cAna->cd(i+1)->SetGrid();
-   //   //hezr[i]->Draw("colz");
-   //   //fxList->At(0)->Draw("same");
-   //   //fxList->At(2)->Draw("same");
-   //   //fxList->At(5)->Draw("same");
-   //   //fxList->At(7)->Draw("same");
-   //   //gList->At(0)->Draw("same");
-   //   //gList->At(10)->Draw("same");
-   //   //hezr[i]->Draw("colz same");
-   //   
-   //   hExTr[i]->Draw("colz");
-   //   //hExzr[i]->Draw("colz");
-   //   //hExPzr[i]->Draw("colz");
-   //}
+   ///for( int i = 0; i < 4; i++){
+   ///  cAna->cd(i+1);
+   ///  //cAna->cd(i+1)->SetGrid();
+   ///  //hezr[i]->Draw("colz");
+   ///  //fxList->At(0)->Draw("same");
+   ///  //fxList->At(2)->Draw("same");
+   ///  //fxList->At(5)->Draw("same");
+   ///  //fxList->At(7)->Draw("same");
+   ///  //gList->At(0)->Draw("same");
+   ///  //gList->At(10)->Draw("same");
+   ///  //hezr[i]->Draw("colz same");
+   ///  
+   ///  hExTr[i]->Draw("colz");
+   ///  //hExzr[i]->Draw("colz");
+   ///  //hExPzr[i]->Draw("colz");
+   ///}
    
-   //for( int i = 0; i < 6; i++){
-   //   cAna->cd(i+1);
-   //   cAna->cd(i+1)->SetGrid();
-   //   hExc[i]->Draw();
-   //}
+   ///for( int i = 0; i < 6; i++){
+   ///  cAna->cd(i+1);
+   ///  cAna->cd(i+1)->SetGrid();
+   ///  hExc[i]->Draw();
+   ///}
    
    /**/
 }
