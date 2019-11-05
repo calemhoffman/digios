@@ -77,9 +77,15 @@ fi
 
 
 GEBSort=GEBSort_nogeb
+GEBSortMsg="using GEBSort_nogeb"
+GeneralSortMsg="no trace"
+
 if [ ${isGeneralSort} -ge 2 ]; then
-  isMonitor=0;
+  isTrace=1
+  isMonitor=0
+  GEBSortMsg="using GEBSort_nogeb_trace"
   GEBSort=GEBSort_nogeb_trace
+  GeneralSortMsg="trace with ${isGeneralSort} core"
   OverRideMonitor="overrided by GeneralSortTrace."
 fi
 
@@ -89,15 +95,15 @@ echo "============ RUN $RUN ========================"
 echo "============================================="
 
 echo "Merge       : ${isMerge}"
-echo "Sort        : ${isSort}"
-echo "GeneralSort : ${isGeneralSort}"
+echo "Sort        : ${isSort}  ${GEBSortMsg}"  
+echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
 echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
 echo "============================================="
 
-RED='\033[0;31m'
+RED='\033[1;31m'
 YELLOW='\033[1;33m'
 ORANGE='\033[0;33m'
-GREEN='\033[0;32m'
+GREEN='\033[1;32m'
 BLUE='\033[0;34m'
 Cyan='\033[0;36m'
 NC='\033[0m'
@@ -115,6 +121,7 @@ else
     echo "RUN $RUN: Get the raw data `date`"
     rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
     rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
+    scp  "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
     rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
 fi
 
@@ -137,8 +144,12 @@ fi
 
 #######################################
 #################### Merge
+echo -e "${RED}######################### Merge raw data${NC}"
+if [ $isMegre -eq 0 ]; then
+    echo "------ skipped by user"
+fi
+
 if [ $isMerge -eq 1 ]; then
-  echo -e "${RED}######################### Merge raw data${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
   if [ ${isLinux} -eq 1 ]; then
@@ -166,25 +177,33 @@ if [ $isMerge -eq 1 ]; then
   
   if [ ${rawDataTime} -ge ${mergedDataTime} ]; then
     echo "RUN $RUN: GEBMerge started at `date`"
-    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` | tee ${MERGDIR}/GEBMerge_run${RUN}.log
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
     echo "RUN $RUN: GEBMerge DONE at `date`"
   else
     echo -e "${BLUE}Merged data are newer than raw data. No need to merged again.${NC}"
     echo -e "${GREEN}You can Force merging using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
   fi
+
 fi
 
 if [ $isMerge -eq -1 ]; then # force merge
-  echo -e "${RED}######################### Merge raw data (force) ${NC}"
+  echo -e "${RED} force merge by user ${NC}"
   echo "RUN $RUN: GEBMerge started at `date`"
-  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` | tee ${MERGDIR}/GEBMerge_run${RUN}.log
+  ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
   echo "RUN $RUN: GEBMerge DONE at `date`"
 fi
 
+tail -n 30 ${MERGDIR}/GEBMerge_run${RUN}.log
+
 #######################################
 #################### Sort
+echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
+
+if [ $isSort -eq 0 ]; then
+    echo "------ skipped by user"
+fi
+
 if [ $isSort -eq 1 ]; then
-  echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
   echo -e "${YELLOW} using ${GEBSort} ${NC}"
 
   #==== check Merged_data timeStamp, if newer then raw data, no Merge
@@ -208,7 +227,7 @@ if [ $isSort -eq 1 ]; then
 
   if [ ${mergedDataTime} -ge ${rootDataTime} ]; then
     echo "GEBSort DONE at `date`"
-    ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
+    ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
     echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "
     echo "============================================="
     echo "============================================="
@@ -221,12 +240,15 @@ fi
 if [ $isSort -eq -1 ]; then # force Sort
   echo -e "${RED}========= GEBSort started sorting run $RUN at `date` (force)${NC}"
   echo -e "${YELLOW} using ${GEBSort} ${NC}"
-  ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} 
+  ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
   echo "GEBSort DONE at `date`"
   echo -e "========= saved root file --> ${RED} ${ROOTDIR}/run${RUN}.root ${NC} "
   echo "============================================="
   echo "============================================="
 fi
+
+tail -n 20  $ROOTDIR/${GEBSort}_run$RUN.log
+      
 
 ########################################
 #################### Process_run.C, GeneralSort
@@ -242,8 +264,12 @@ else
 fi;
 
 #---------- check gen_run date
+echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
+
+if [ $isGeneralSort -eq 0 ]; then echo "------- skipped by user"; fi  
+
+
 if [ $isGeneralSort -ge 1 ]; then
-  echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
   
   isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
 
@@ -295,19 +321,18 @@ if [ $isGeneralSort -ge 1 ]; then
       if [ $isGeneralSort -gt 2 ]; then
           echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
           root -l -q "process_run.C(${runID}, ${isGeneralSort})"
-
-          #mv sortedTraced.root ../${ROOTDIR}/trace_run${RUN}.root
-          #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+         #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
       fi
 
    fi
 
 fi;
 
+#TODO when froce, negative number mean number of core
 if [ $isGeneralSort -eq -1 ]; then # force GenralSort
-  echo -e "${RED}######################### GeneralSort.C${NC}"
+  echo -e "${RED} froced by user ${NC}"
   root -l -q -b "process_run.C(${runID}, 0)"
-  root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+  #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
 fi
 
 ########################################
