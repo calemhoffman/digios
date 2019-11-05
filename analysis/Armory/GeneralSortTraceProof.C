@@ -1,4 +1,3 @@
-
 #define GeneralSortTraceProof_cxx
 
 #include "GeneralSortTraceProof.h"
@@ -171,24 +170,24 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i<30; i++) {//num dets
+   for (Int_t i=0 ; i< 100; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
       psd.Ring[i]    = 0.0;
-      if (i <  8) psd.RDT[i]     = TMath::QuietNaN();
-      if (i < 24) psd.TAC[i]     = TMath::QuietNaN();
-      if (i < 32) psd.ELUM[i] = TMath::QuietNaN();
-      if (i <  4) psd.EZERO[i] = TMath::QuietNaN();
+      psd.RDT[i]     = TMath::QuietNaN();
+      psd.TAC[i]     = TMath::QuietNaN();
+      if ( i < 32 ) psd.ELUM[i] = TMath::QuietNaN();
+      if ( i < 10 ) psd.EZERO[i] = TMath::QuietNaN();
 
-      psd.EnergyTimestamp[i] = TMath::QuietNaN();
-      psd.XFTimestamp[i]     = TMath::QuietNaN();
-      psd.XNTimestamp[i]     = TMath::QuietNaN();
-      psd.RingTimestamp[i]   = TMath::QuietNaN();
-      if (i <  8) psd.RDTTimestamp[i]    = TMath::QuietNaN();
-      if (i < 24) psd.TACTimestamp[i]    = TMath::QuietNaN();
-      if (i < 32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
-      if (i <  4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
+      psd.EnergyTimestamp[i] = 0;
+      psd.XFTimestamp[i]     = 0;
+      psd.XNTimestamp[i]     = 0;
+      psd.RingTimestamp[i]   = 0;
+      psd.RDTTimestamp[i]    = 0;
+      psd.TACTimestamp[i]    = 0;
+      if (i < 32) psd.ELUMTimestamp[i]   = 0;
+      if (i < 10) psd.EZEROTimestamp[i]  = 0;	
       
       psd.x[i]       = TMath::QuietNaN();    
    }
@@ -232,7 +231,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       //PSD
       /***********************************************************************/
-      if( (id[i] > 1000 && id[i] < 2000) &&  30> idDet && idDet>-1 ) {
+      if( 100 > idDet && idDet >= 0 && 3 >= idKind && idKind >= 0 ) {
          
          switch(idKind){
             case 0: /* Energy signal */
@@ -264,7 +263,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
       //RECOIL
       /************************************************************************/
-      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { 
+      if( isRecoil && idDet >= 100 && idDet <= 110 ) { 
          Int_t rdtTemp = idDet-100;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
