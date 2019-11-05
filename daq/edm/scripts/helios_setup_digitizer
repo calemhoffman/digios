@@ -111,6 +111,25 @@ caput VME01:MDIG1:channel_enable9 Run  #for TAC
 
 caput VME01:MDIG1:trigger_mux_select IntAcptAll #for TAC
 
+#trace for recoil
+caput VME01:MDIG2:raw_data_window2 8.32
+caput VME01:MDIG2:raw_data_window3 8.32
+caput VME01:MDIG2:raw_data_window4 8.32
+caput VME01:MDIG2:raw_data_window5 8.32
+caput VME01:MDIG2:raw_data_window6 8.32
+caput VME01:MDIG2:raw_data_window7 8.32
+
+caput VME01:MDIG3:raw_data_window2 8.32
+caput VME01:MDIG3:raw_data_window3 8.32
+caput VME01:MDIG3:raw_data_window4 8.32
+caput VME01:MDIG3:raw_data_window5 8.32
+caput VME01:MDIG3:raw_data_window6 8.32
+caput VME01:MDIG3:raw_data_window7 8.32
+
+#trace for ion chamber
+caput VME01:MDIG1:raw_data_window0 0.32
+caput VME01:MDIG1:raw_data_window1 0.32
+
 #echo "Setting internal trigger boards / channels"
 #caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
 #caput VME01:MDIG4:trigger_mux_select IntAcptAll #EZERO

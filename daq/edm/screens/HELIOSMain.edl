@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 415
-y 98
+x 277
+y 129
 w 1400
 h 816
 font "helvetica-bold-r-10.0"
@@ -5038,10 +5038,10 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 991
-y 342
-w 125
-h 50
+x 953
+y 333
+w 153
+h 32
 fgColor index 87
 bgColor index 79
 topShadowColor index 79
@@ -7225,5 +7225,30 @@ nullColor index 0
 newPos
 objType "monitors"
 noExecuteClipMask
+endObjectProperties
+
+# (Shell Command)
+object shellCmdClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 952
+y 371
+w 154
+h 29
+fgColor index 87
+bgColor index 79
+topShadowColor index 79
+botShadowColor index 79
+font "helvetica-bold-r-18.0"
+buttonLabel "Start AutoRun"
+numCmds 1
+commandLabel {
+  0 "Start Run"
+}
+command {
+  0 "$EDMSCRIPTS/open_r.sh Auto"
+}
 endObjectProperties
 

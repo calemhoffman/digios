@@ -96,7 +96,19 @@ do
 done        
 rm -rf temp
 
-echo "=== wait 5 seconds before next run ==="
+echo "=== wait 5 seconds before submit a transfer to LCRC ==="
 sleep 5
+
+/home/helios/digios/daq/edm/scripts/globus_out.py
+#/home/helios/digios/daq/edm/scripts/globus_in.py
+
+#===== Get root_data/ from LCRC to MAC
+#MACEndPoint=0910df94-fb59-11e9-9945-0a8c187e8c12
+#LCRCEndPoint=57b72e31-9f22-11e8-96e1-0a6d4e044368
+
+#LCRCPath=/lcrc/project/HELIOS/digios/analysis/root_data/
+#MACPath=/Users/heliosdigios/digios/analysis/root_data/
+#globus transfer -r -s checksum  $LCRCEndPoint:$LCRCPath  $MACEndPoint:$MACPath
+
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
