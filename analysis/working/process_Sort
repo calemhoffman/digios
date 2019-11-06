@@ -45,7 +45,9 @@ fi
 #################### Sort
 echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
 
-if [ $isSort -eq 0 ]; then echo "------ skipped by user"; fi
+if [ $isSort -eq 0 ]; then 
+    echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
+fi  
 
 if [ $isSort -eq 1 ]; then
     echo -e "${YELLOW} using ${GEBSort} ${NC}"
@@ -100,8 +102,9 @@ fi
 #---------- check gen_run date
 echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
 
-if [ $isGeneralSort -eq 0 ]; then echo "------ skipped by user"; fi  
-
+if [ $isGeneralSort -eq 0 ]; then 
+    echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
+fi  
 
 if [ $isGeneralSort -ge 1 ]; then
     
@@ -136,33 +139,27 @@ if [ $isGeneralSort -ge 1 ]; then
 
             if [ $isGeneralSort -eq 1 ]; then
                 echo -e "${RED}######################### GeneralSort.C${NC}"
-                root -l -q -b "process_run.C(${runID}, 0)"
+            #    root -l -q -b "process_run.C(${runID}, 1)"
+            #elif [ $isGeneralSort -eq 2 ]; then
+            #    echo -e "${RED}######################### GeneralSortTrace.C${NC}"
+            #    root -l -q -b "process_run.C(${runID}, 1)"
+            elif [ $isGeneralSort -ge 2 ]; then
+                echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
             fi
+            root -l -q -b "process_run.C(${runID}, ${isGeneralSort})"
 
         else
             echo -e "${BLUE}gen_run${RUN}.root are newer than run${RUN}.root. No need to sort again.${NC}"
             echo -e "${GREEN}You can Force sorting using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
         fi
 
-
-        if [ $isGeneralSort -eq 2 ]; then
-            echo -e "${RED}######################### GeneralSortTrace.C${NC}"
-            root -l -q -b "process_run.C(${runID}, 1)"
-        fi
-
-        if [ $isGeneralSort -gt 2 ]; then
-            echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
-            root -l -q "process_run.C(${runID}, ${isGeneralSort})"
-        fi
-
     fi
 
-fi;
+fi
 
-#TODO when froce, negative number mean number of core
-if [ $isGeneralSort -lt 0 ]; then # force GenralSort
+if [ ${isGeneralSort} -lt 0 ]; then 
     echo -e "${YELLOW} >>>>>> forced by user ${NC}"
     root -l -q -b "process_run.C(${runID}, ${isGeneralSort})"
 fi
-  
+
 exit 1

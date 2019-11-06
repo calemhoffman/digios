@@ -28,7 +28,7 @@ bool isElum = true;
 bool isEZero = true;
 //=================================== end of setting
 
-void GeneralSortTraceProof::Begin(TTree * /*tree*/)
+void GeneralSortTraceProof::Begin(TTree */*tree*/)
 {
 
    TString option = GetOption();
@@ -50,7 +50,10 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
                isTraceON ?  "On" : "Off", 
                traceMethodName.Data(), 
                isSaveTrace? "Yes": "No:");
-
+   printf( "=====================================================\n");   
+   //printf("                    file : %s \n", tree->GetDirectory()->GetName());
+   //printf("          Number of Event: %llu \n", tree->GetEntries());
+   
    printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);

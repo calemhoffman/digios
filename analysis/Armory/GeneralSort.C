@@ -74,6 +74,13 @@ void GeneralSort::Begin(TTree * tree)
   saveFileName.Remove(0, findslat+1);
   saveFileName = "../root_data/gen_" + saveFileName;
 
+  printf("=============================================================\n");
+  printf("=====================  GeneralSort.C  =======================\n");
+  printf("=============================================================\n");
+  printf("                    file : %s \n", tree->GetDirectory()->GetName());
+  printf("          Number of Event: %llu\n", NumEntries);
+  printf("Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
+
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
   oFile = new TFile(saveFileName,"RECREATE");
@@ -138,11 +145,6 @@ void GeneralSort::Begin(TTree * tree)
   gClock.Reset();
   gClock.Start("timer");
 
-
-  printf("============= Number of Event: %llu\n", NumEntries);
-  printf("=== Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
-
-
   printf("====================== started \n");
 
 }
@@ -160,7 +162,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
   if( entry == 0 ) {
       fileNum = fChain->GetDirectory()->GetName();
       
-      printf("----------------------- openning  %s \n", fileNum.Data());
+      //printf("----------------------- openning  %s \n", fileNum.Data());
       
       int findslat = fileNum.Last('/');
       fileNum.Remove(0, findslat+1);
