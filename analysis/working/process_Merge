@@ -24,7 +24,10 @@ RUN=$(printf '%03d' ${RUN})
 #######################################
 #################### Merge
 echo -e "${RED}######################### Merge raw data: run $RUN${NC}"
-if [ $isMerge -eq  0 ]; then echo "------ skipped by user"; fi
+
+if [ $isMerge -eq  0 ]; then 
+    echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
+fi  
 
 if [ $isMerge -eq 1 ]; then
 

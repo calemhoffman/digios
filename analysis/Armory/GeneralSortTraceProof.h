@@ -158,7 +158,7 @@ public :
    PSD psd; 
    
    //need to put NULL on pointer
-   GeneralSortTraceProof(TTree * /*tree*/ =0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
+ GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
    virtual ~GeneralSortTraceProof() { }
    
    virtual Int_t   Version() const { return 2; }
