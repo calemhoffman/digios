@@ -1,0 +1,57 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
+  echo "$./process_Download [RunNum]"
+  echo "    RunNum = run number"
+  exit 1
+fi;
+
+source ./process_PathSetting
+
+RUN=$1
+
+#just in case people put %03d as RUN
+if [ "${RUN:0:1}" == "0" ]; then
+    RUN=${RUN:1:2}
+else
+    RUN=$(printf '%d' $RUN)
+fi
+
+
+RUN=$(printf '%03d' ${RUN})
+
+#######################################
+####################  Download raw data
+echo -e "${RED}######################### Download raw data: run ${RUN}${NC}"
+if [ ${PCName} == "digios1" ]; then
+    echo "Already in digios1, no need to get data."
+elif [ ${PCName:0:5} == "bebop" ]; then
+    echo "in LCRC, no need to get data."
+else
+    #============ Get the raw data
+    IP=192.168.1.2
+    echo "RUN $RUN: Get the raw data `date`"
+    rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
+    rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
+    scp  "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
+    rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
+
+    echo "============================================="
+    tail -10 ${AnalysisDir}/data/RunTimeStamp.dat
+    echo "============================================="
+
+fi
+
+echo -e "${YELLOW}"
+du -hsc $DATADIR/${expName}_run_$RUN*
+
+count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
+echo -e "========== Number of Files : ${count}${NC}"
+if [ ${count} -eq 0 ]; then
+    echo "============================================"
+    echo "====  RAW Files of RUN-${RUN} not found! "
+    echo "============================================"
+    exit 
+fi
+  
+exit 1
