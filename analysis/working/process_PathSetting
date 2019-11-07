@@ -8,7 +8,7 @@ if [ ${PCName} == "digios1" ]; then
   isLinux=1
 fi
 
-if [ ${PCName:0:5} == "bebop" ]; then
+if [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
     source /lcrc/project/HELIOS/digios/expName.sh
     AnalysisDir=/lcrc/project/HELIOS/digios/analysis
     isLinux=1

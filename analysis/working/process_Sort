@@ -3,7 +3,7 @@
 if [ $# -lt 3 ] || [ $1 == "-help"  ]; then
   echo "$./process_Sort [RunNum] [Build] [GeneralSort]"
   echo "    RunNum  = run number"
-  echo "     Build  = 1/0/-1      || -1 is force build"  
+  echo "     Build  = 2/1/0/-1/-2 ||  2 is with trace, 1 is no tarce, negative == force"  
   echo " GenralSort = n/2/1/0/neg ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
   echo "                       |"
   echo "                       +---- negative for force"
@@ -21,7 +21,7 @@ GEBSort=GEBSort_nogeb
 GEBSortMsg="using GEBSort_nogeb"
 GeneralSortMsg="no trace"
 
-if [ ${isGeneralSort} -ge 2 ]; then
+if [ ${isGeneralSort} -ge 2 ] || [  $isSort -eq 2 ] || [ $isSort -eq -2 ] ; then
   isTrace=1
   GEBSort=GEBSort_nogeb_trace
 fi
@@ -47,9 +47,7 @@ echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
 
 if [ $isSort -eq 0 ]; then 
     echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
-fi  
-
-if [ $isSort -eq 1 ]; then
+elif [ $isSort -gt 0 ]; then
     echo -e "${YELLOW} using ${GEBSort} ${NC}"
 
     #==== check Merged_data timeStamp, if newer then raw data, no Merge
@@ -58,6 +56,8 @@ if [ $isSort -eq 1 ]; then
     else
         mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
     fi
+
+    ls -lh  ${MERGDIR}/GEBMerged_run${RUN}*
 
     #==== check if root data exist
     isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`    
@@ -83,10 +83,9 @@ if [ $isSort -eq 1 ]; then
         echo -e "${BLUE}Root data are newer than merged data. No need to do again.${NC}"
         echo -e "${GREEN}You can Force event buidling using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
     fi
-fi
-
-if [ $isSort -eq -1 ]; then # force Sort
+elif [ $isSort -lt 0 ]; then # force Sort
     echo -e "${RED}=================== RUN $RUN: ${GEBSort} started at `date`${NC}"
+    ls -lh  ${MERGDIR}/GEBMerged_run${RUN}*
     echo -e "${YELLOW} >>>>>>>>>>>>> force sort by user ${NC}"
     ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
     echo -e "${RED}====================== RUN $RUN: ${GEBSort} DONE at `date`${NC}"
@@ -104,9 +103,8 @@ echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
 
 if [ $isGeneralSort -eq 0 ]; then 
     echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
-fi  
 
-if [ $isGeneralSort -ge 1 ]; then
+elif [ $isGeneralSort -gt 0 ]; then
     
     isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
 
@@ -121,6 +119,8 @@ if [ $isGeneralSort -ge 1 ]; then
         else
             rootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
         fi
+
+        ls -lh  ${ROOTDIR}/run${RUN}.root
 
         #==== check gen_run###.root timeStamp
         isGenRootDataExist=`ls -1 ${ROOTDIR}/gen_run${RUN}.root 2>/dev/null | wc -l`
@@ -139,11 +139,7 @@ if [ $isGeneralSort -ge 1 ]; then
 
             if [ $isGeneralSort -eq 1 ]; then
                 echo -e "${RED}######################### GeneralSort.C${NC}"
-            #    root -l -q -b "process_run.C(${runID}, 1)"
-            #elif [ $isGeneralSort -eq 2 ]; then
-            #    echo -e "${RED}######################### GeneralSortTrace.C${NC}"
-            #    root -l -q -b "process_run.C(${runID}, 1)"
-            elif [ $isGeneralSort -ge 2 ]; then
+            elif [ $isGeneralSort -gt 1 ]; then
                 echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
             fi
             root -l -q -b "process_run.C(${runID}, ${isGeneralSort})"
@@ -155,11 +151,16 @@ if [ $isGeneralSort -ge 1 ]; then
 
     fi
 
-fi
+elif [ ${isGeneralSort} -lt 0 ]; then 
 
-if [ ${isGeneralSort} -lt 0 ]; then 
+    ls -lh  ${ROOTDIR}/run${RUN}.root
+
     echo -e "${YELLOW} >>>>>> forced by user ${NC}"
+    if [ $isGeneralSort -eq -1 ]; then
+        echo -e "${RED}######################### GeneralSort.C${NC}"
+    elif [ $isGeneralSort -lt -1 ]; then
+        echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
+    fi
     root -l -q -b "process_run.C(${runID}, ${isGeneralSort})"
 fi
 
-exit 1
