@@ -40,6 +40,8 @@ fi
 #remove any zero
 if [ "${RUN:0:1}" == "0" ]; then
     RUN=${RUN:1:2}
+elif [ "${RUN:0:2}" == "00" ]; then
+    RUN=${RUN:2:1}
 else
     RUN=$(printf '%d' $RUN)
 fi
