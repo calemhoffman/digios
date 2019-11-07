@@ -103,9 +103,11 @@ int main(int argc, char *argv[]){
   
   vector<string> NLJ; //orbital label
   vector<double> BE;  //binding enegry of orbital
+  vector<double> Error; //error/uncertaintly of the binding energy
   
   NLJ.clear();
   BE.clear();
+  Error.clear();
   
   while( file_in.good() ) {
     string tempLine;
@@ -119,6 +121,7 @@ int main(int argc, char *argv[]){
     
     NLJ.push_back(str0[0]);
     BE.push_back(atof(str0[1].c_str()));
+    if( str0.size() == 3) Error.push_back(atof(str0[2].c_str()));
     
   }
   
@@ -289,12 +292,14 @@ int main(int argc, char *argv[]){
   
   printf("      Experiment      |      Woods-Saxon      |     diff\n");
   double rms = 0;
+  double chisq = 0;
   int numMatch = 0;
   for( int i = 0; i < NLJ.size(); i++){
     for( int j = 0; j < ws.orbString.size(); j++){
       if( NLJ[i] == ws.orbString[j] ){
         double diff = BE[i] -  ws.energy[j];
         rms += pow(diff,2);
+	if(Error.size() == NLJ.size() )chisq += pow(diff,2)/pow(Error[i],2);
         numMatch ++;
         printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | %8.2f keV \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff * 1000.);
         continue;
@@ -307,7 +312,7 @@ int main(int argc, char *argv[]){
     printf("========================================= RMS = \e[31mfail\e[0m keV \n");
   }else{
     rms = sqrt(rms/NLJ.size());
-    printf("========================================= RMS = \e[31m%8.2f\e[0m keV \n", rms*1000.);
+    printf("========================================= RMS = \e[31m%8.2f\e[0m keV | Chi-sq = %8.2f.\n", rms*1000., chisq);
   }
 
   ws.PrintEnergyLevels();
