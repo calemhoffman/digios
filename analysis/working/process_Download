@@ -25,7 +25,7 @@ RUN=$(printf '%03d' ${RUN})
 echo -e "${RED}######################### Download raw data: run ${RUN}${NC}"
 if [ ${PCName} == "digios1" ]; then
     echo "Already in digios1, no need to get data."
-elif [ ${PCName:0:5} == "bebop" ]; then
+elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
     echo "in LCRC, no need to get data."
 else
     #============ Get the raw data
