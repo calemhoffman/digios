@@ -1,12 +1,13 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run [RunNum1] [RunNum2] [Merge] [EventBuild] [GeneralSort]"
+  echo "$./process_MultiRuns [RunNum1] [RunNum2] [Merge] [EventBuild] [GeneralSort]"
   echo "    RunNum1 = start run number"
   echo "    RunNum2 = stop run number"
-  echo "      Merge = 1/0/-1     || -1 is force merge"  
-  echo "   EventBld = 1/0/-1     || -1 is force build"  
-  echo " GenralSort = n/2/1/0/-1 ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "      Merge =   1/0*     "  
+  echo "   EventBld = 2/1/0*   || 2 = with Trace"  
+  echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "        * negative option = force "
   exit 1
 fi;
 
@@ -28,7 +29,7 @@ GEBSort=GEBSort_nogeb
 GEBSortMsg="using GEBSort_nogeb"
 GeneralSortMsg="no trace"
 
-if [ ${isGeneralSort} -ge 2 ]; then
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
   isTrace=1
   GEBSortMsg="using GEBSort_nogeb_trace"
   GEBSort=GEBSort_nogeb_trace
@@ -80,5 +81,5 @@ for iRUN in $(seq ${RUN1} ${RUN2}); do
 done
 
 #root -l ../Armory/runsCheck.C  #check the run Entries, and duration
-  
+
 exit 1

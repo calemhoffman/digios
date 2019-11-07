@@ -106,6 +106,3 @@ if [ $isMerge -eq -1 ]; then # force merge
     tail -n 30 ${MERGDIR}/GEBMerge_run${RUN}.log
     echo "=================================================================="
 fi
-
-  
-exit 1
