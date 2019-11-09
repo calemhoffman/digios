@@ -33,7 +33,7 @@ if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 
   isMonitor=0
   GEBSortMsg="using GEBSort_nogeb_trace"
   GEBSort=GEBSort_nogeb_trace
-  GeneralSortMsg="trace with ${isGeneralSort} core"
+  if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then GeneralSortMsg="trace with ${isGeneralSort} core"; fi
   OverRideMonitor="overrided by GeneralSortTrace."
 fi
 
