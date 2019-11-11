@@ -707,14 +707,17 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
             
-            //if( flag ) printf("%d | %d | zHit : %f | %f, %f, %f | E : %f\n", loop, j, zHit, pos[0], pos[nDet-1] + length, firstPos, Pb.E()-Pb.M());
-            
+            //if( flag ) 
+            //if( zHit < 0 ) {
+            //  printf("%d | %d | zHit : %f |theta : %f | E : %f\n", loop, j, zHit, theta*TMath::RadToDeg(), Pb.E()-Pb.M());
+            //}
+
             if( firstPos > 0 ){
                if( zHit < pos[0] ) continue; // goto next mDet, after progress of all side, still not OK, then next loop 
                if( zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-               if( zHit < pos[0] - length ) continue;
-               if( zHit > pos[nDet-1]) return -4; 
+              if( zHit < pos[0] - length ) return 4;
+               if( zHit > pos[nDet-1]) continue; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
