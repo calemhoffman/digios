@@ -268,9 +268,11 @@ void Monitors::Begin(TTree *tree)
       }
       file.close();
       printf("... done.\n");
-      
+
+      vector<double> posTemp = pos;
       for(int id = 0; id < numCol; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[numCol-1-id];
       }
       
       for(int i = 0; i < numCol ; i++){
@@ -285,8 +287,8 @@ void Monitors::Begin(TTree *tree)
          zRange[0] = pos[0] - 30;
          zRange[1] = pos[numCol-1] + length + 30;
       }else{
-         zRange[0] = pos[numCol-1] -length - 30;
-         zRange[1] = pos[0] + 30;
+         zRange[0] = pos[0] -length - 30;
+         zRange[1] = pos[numCol-1] + 30;
       }
       
       printf("=======================\n");
