@@ -85,8 +85,10 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){
@@ -112,8 +114,8 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       zRange[1] = pos[0]-50;
       zRange[2] = pos[rDet-1] + length + 50;
    }else{
-      zRange[1] = pos[rDet-1]- length - 50;
-      zRange[2] = pos[0] + 50;
+      zRange[1] = pos[0]- length - 50;
+      zRange[2] = pos[rDet-1] + 50;
    }
 
 /**///======================================================== Analysis
