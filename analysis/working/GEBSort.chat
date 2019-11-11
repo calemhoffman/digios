@@ -8,8 +8,7 @@
 #-------------------------------------------
 # basic sort parameters 
 
-;nevents           100000
-nevents           1000000000
+nevents           50000000
 printevents       1
 beta              0.0
 modwrite          10000
