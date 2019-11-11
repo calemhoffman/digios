@@ -431,8 +431,10 @@ void Cali_e_trace::Init(TTree *tree)
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < iDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet-1-id];
       }
       
       printf(" Bfield       : %6.2f T\n", Bfield);

@@ -560,9 +560,14 @@ bool HELIOS::SetDetectorGeometry(string filename){
       nDet = pos.size();
       file.close();
       printf("... done.\n");
+
+      vector<double> posTemp;
+      posTemp.clear();
+      posTemp = pos;
       
       for(int id = 0; id < nDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[nDet-1 - id];
       }
       
       printf("=====================================================\n");
@@ -706,10 +711,10 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             
             if( firstPos > 0 ){
                if( zHit < pos[0] ) continue; // goto next mDet, after progress of all side, still not OK, then next loop 
-               if(zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
+               if( zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-               if( pos[0] < zHit ) continue;
-               if( zHit < pos[nDet-1] - length) return -4; 
+               if( zHit < pos[0] - length ) continue;
+               if( zHit > pos[nDet-1]) return -4; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
@@ -730,7 +735,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             if( firstPos > 0 ){
                if( pos[0] - blocker < zHit && zHit < pos[0] /*&& sHit < perpDist/2.*/ ) return -6; // blocked by blocker
             }else{
-               if( pos[0] < zHit && zHit < pos[0] + blocker /*&& sHit < perpDist/2.*/) return -6;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + blocker /*&& sHit < perpDist/2.*/) return -6;
             }
             
             //printf("%d | zHit : %f \n", 2, zHit);
