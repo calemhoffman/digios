@@ -103,8 +103,10 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
       detFile.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){
@@ -131,8 +133,8 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
       zRange[1] = pos[0]-50;
       zRange[2] = pos[rDet-1] + length + 50;
    }else{
-      zRange[1] = pos[rDet-1]- length - 50;
-      zRange[2] = pos[0] + 50;
+      zRange[1] = pos[0]- length - 50;
+      zRange[2] = pos[rDet-1] + 50;
    }
    
    printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
