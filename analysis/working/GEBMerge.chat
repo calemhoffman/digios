@@ -35,7 +35,7 @@ wosize     100
 # how often should we write 
 # statistics to output
 
-reportinterval 1000
+reportinterval 100000
 
 #---------------------------------------
 # TS jump recovery trigger limits

@@ -27,18 +27,12 @@
 # h = Hyakutake et al., 1980         |    90 < E < 120 | About 58 < A < 92        | http://dx.doi.org/10.1016/0375-9474(80)90013-5
 # b = Becchetti and Greenlees, 1971  |         E < 40  | 40 < A       | Iso. Dep.
 #=======================================================================
-#reaction        gs-spin    orbital  spin-pi(Ex)   Ex   ELab      Potentials
-#206Hg(d,d)206Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AA
-#206Hg(d,p)207Hg   0        1g9/2     9/2+     0.000   7.39MeV/u   AK
-#20F(d,t)19F       2        0d5/2     5/2+     0.197   10MeV/u     Vl
-#16N(d,3He)15C     2        0p1/2     5/2+     0.740   10MeV/u     Kx
+#reaction          gs-spin  orbital  spin-pi(Ex)  Ex      ELab        Potentials
+#206Hg(d,d)206Hg   0        1g9/2    9/2+         0.000   7.39MeV/u   AA                  #elastic
+#206Hg(d,d)206Hg   0        1g9/2    9/2+         1.000   7.39MeV/u   AA        0.12    #inelastics_0.12=beta
+#206Hg(d,p)207Hg   0        1g9/2    9/2+         0.000   7.39MeV/u   AK
+#20F(d,t)19F       2        0d5/2    5/2+         0.197   10MeV/u     Vl
 
-#15N(d,p)16N       1/2       1d5/2     2-       0.000    9MeV/u     AK
-#15N(d,p)16N       1/2       1s1/2     0-       0.120    9MeV/u     AK
-#15N(d,p)16N       1/2       1d5/2     3-       0.298    9MeV/u     AK
-#15N(d,p)16N       1/2       1s1/2     1-       0.397    9MeV/u     AK
-
-31Si(d,p)32Si    3/2     1d3/2   0+    0.000     9.6MeV/u     AK
-31Si(d,p)32Si    3/2     1d3/2   0+    4.984     9.6MeV/u     AK
-31Si(d,p)32Si    3/2     2s1/2   1+    5.220     9.6MeV/u     AK
-31Si(d,p)32Si    3/2     1d5/2   1+    5.220     9.6MeV/u     AK
+16N(d,3He)15C      2        0p1/2    5/2+         0.74   12MeV/u     Ax
+16N(d,3He)15C      2        0p3/2    3/2+         5.83   12MeV/u     Ax
+16N(d,3He)15C      0        0p1/2    1/2+         0.00   12MeV/u     Ax

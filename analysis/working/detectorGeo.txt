@@ -1,23 +1,23 @@
-2.5      // Bfield_[T]
-0.00     // Bfield_direction_to_z-axis_[deg]
-462.5    // bore_[mm]
-11.5     // distance_from_axis_[mm]
-9.0      // width_of_detector_[mm]
-50       // length_of_detector_[mm]
-500      // recoil_position_+_for_downstream_[mm] - is this from tgt?
-52       // radius_of_recoil_detector_[mm]
-false    // is_coincident_with_recoil
-0.00     // Recoil_1_position_[mm]_when_0_disable_tree_branch - put this in
-0.00     // Recoil_2_position_[mm]
-0.00     // Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
-0.00     // Elum_2_position_[mm]_when_Elum=0_disable_tree_branch
-43.5     // support_length_[mm]
--180     // first_position_-_for_upstream_[mm]- distance btwn array and tgt? CHANGE THIS ONE
-0.07     // energy_resolution_of_PSD_array_[MeV] - in what? sigma?
-1.00     // position_resolution_of_PSD_array_[mm]
-6        // number_of_detector_as_same_side - probably number of sides of array
--236.2   // 1st_detector_near_position_in_reference_to_det6_[mm] - end, but don't change
--176.9   // 2nd_det - maybe all these are fixed and the offset changes?
--118.0 
--59.0
-0.0      //5th_det
+2.5      //Bfield_[T]
+0.00     //Bfield_direction_to_z-axis_[deg]
+462.5    //bore_radius[mm]
+11.5     //det_distance_from_axis_[mm]
+10       //width_of_detector_[mm]
+50       //length_of_detector_[mm]
+500      //recoil_position_+_for_downstream_[mm]
+76.2      //radius_of_recoil_detector_[mm]
+false    //is_coincident_with_recoil
+0.00     //Recoil_1_position_[mm]_when_0_disable_tree_branch
+0.00     //Recoil_2_position_[mm]
+0.00     //Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
+0.00     //Elum_2_position_[mm]_when_Elum=0_disable_tree_branch
+12.4     //blocker_length_from_1st_detector_[mm]
+-420      //nearest_position_to_target_-_for_upstream_[mm]
+0.07     //energy_resolution_of_PSD_array_[MeV]
+1.00     //position_resolution_of_PSD_array_[mm]
+6        //number_of_detector_as_same_side
+0.00      //1st_detector_relative_position_to_the_nearest_position_to_target[mm]
+60.87     //2nd_det
+120.93 
+176.01
+234.87      //5th_det

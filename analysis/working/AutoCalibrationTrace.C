@@ -20,12 +20,12 @@
 #include "../Armory/Cali_scale_x.C"
 #include "../Armory/Cali_compareF.C"
 #include "../Armory/Cali_e_trace.h"
-#include "../Armory/Cali_e_trace.h"
 #include "../Armory/GetCoinTimeCorrectionCutG.C"
 
 //==========================================
 //         This file show the steps for calibration 
 //         //TODO detect branch te_t and trdt_t exist or not, if exist, calibrate with coinTime
+//         //TODO rdtCut is in runslist.txt
 //==========================================
 
 int temp ;   
@@ -203,8 +203,9 @@ void AutoCalibrationTrace(){
       printf(" Step 1) Generate smaller root file to speed thing up.           \n");
       printf("         ** aware of the Gate in Armory/Cali_little_tree_trace.C \n");
       printf(" Step 2) Generate kinematics line using Simulation/transfer.C    \n");
-      printf("         ** make sure you have correct A) basicReactoinConfig.txt    \n");
-      printf("                                       B) excitation_energies.txt    \n");
+      printf("         ** make sure you have correct A) reactoinConfig.txt    \n");
+      printf("                                       B) detGeometry.txt    \n");
+      printf("                                       C) Ex.txt    \n");
       printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
       printf("=================================================================\n");
       int proceedFlag = 0;
@@ -251,6 +252,7 @@ void AutoCalibrationTrace(){
       
       printf("#######################################################\n");
       printf("Step 3) =============== Calibrate\n");
+      printf("           Please edit the gate on Armory/CompareF.C\n");
       float energyThreshold = 300;
       printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
       temp = scanf("%f", &energyThreshold);

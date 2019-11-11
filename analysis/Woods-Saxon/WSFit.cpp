@@ -55,8 +55,8 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
 int main(int argc, char *argv[]){
 
-  if( argc != 9 && argc != 10 && argc != 11 && argc != 12) { 
-    printf("Usage: ./WSFit expFile A V0 r0 a0 VSO rSO aSO nStep dr (showParErr)\n");
+  if( argc != 9 && argc != 11 && argc != 13 && argc != 14) { 
+    printf("Usage: ./WSFit expFile A V0 r0 a0 VSO rSO aSO Z rc nStep dr (showParErr)\n");
     printf("       expFile = experimental energies\n");
     printf("             A = mass number\n");
     printf("            V0 = inital guess of central depth [MeV]\n");
@@ -65,6 +65,8 @@ int main(int argc, char *argv[]){
     printf("           VSO = inital guess of Spin-Orbital depth [MeV]\n");
     printf("           rso = reduced radius for Spin-Orbital potential [fm]\n");
     printf("           aso = reduced radius for Spin-Orbital potential [fm]\n");
+    printf("             Z = proton number \n");
+    printf("            rc = reduced radius for Coulomb potential [fm]\n");
     printf("         nStep = number of r-grid\n");
     printf("            dr = grid size [fm]\n");
     printf("    showParErr = show Parameters Errors [1/0]\n");
@@ -79,12 +81,17 @@ int main(int argc, char *argv[]){
   double VSOini = atof(argv[6]);
   double rso = atof(argv[7]);
   double aso = atof(argv[8]);
+  int Z = 0;
+  if( argc > 10 ) Z = atoi(argv[9]);
+  double rc = 1.25;
+  if( argc > 11 ) rc = atof(argv[10]);
   int nStep = 200;
-  if( argc >= 10 ) nStep = atoi(argv[9]);
+  if( argc >= 12 ) nStep = atoi(argv[11]);
   double dr = 0.1;
-  if( argc >= 11 ) dr = atof(argv[10]);
+  if( argc >= 13 ) dr = atof(argv[12]);
   bool showParErr = 0;
-  if( argc >= 12 ) showParErr = atoi(argv[11]);
+  if( argc >= 14 ) showParErr = atoi(argv[13]);
+
   
   ifstream file_in;
   file_in.open(readFile.c_str(), ios::in);
@@ -96,9 +103,11 @@ int main(int argc, char *argv[]){
   
   vector<string> NLJ; //orbital label
   vector<double> BE;  //binding enegry of orbital
+  vector<double> Error; //error/uncertaintly of the binding energy
   
   NLJ.clear();
   BE.clear();
+  Error.clear();
   
   while( file_in.good() ) {
     string tempLine;
@@ -112,6 +121,7 @@ int main(int argc, char *argv[]){
     
     NLJ.push_back(str0[0]);
     BE.push_back(atof(str0[1].c_str()));
+    if( str0.size() == 3) Error.push_back(atof(str0[2].c_str()));
     
   }
   
@@ -125,7 +135,7 @@ int main(int argc, char *argv[]){
   
   ws.V0 = V0ini ;    ws.a0  = A0;
   ws.VSO = VSOini ;  ws.aSO = aso;
-  ws.SetWSRadius(A, r0, rso);
+  ws.SetWSRadius(A, Z, r0, rso, rc);
   
   ws.dr = dr; ws.nStep = nStep;
   
@@ -175,7 +185,7 @@ int main(int argc, char *argv[]){
       //--- gradiant of r0
       //printf("====================== r0: %d \n", i);
       dp = 0.01;
-      ws.SetWSRadius(A, r0 + dp, rso);
+      ws.SetWSRadius(A, Z, r0 + dp, rso, rc);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -185,7 +195,7 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.SetWSRadius(A, r0, rso);
+      ws.SetWSRadius(A, Z, r0, rso, rc);
         
       //--- gradiant of a0
       //printf("====================== a0: %d \n", i);
@@ -219,7 +229,7 @@ int main(int argc, char *argv[]){
       //--- gradiant of rSO
       //printf("====================== rSO: %d \n", i);
       dp = 0.01;
-      ws.SetWSRadius(A, r0, rso + dp);
+      ws.SetWSRadius(A, Z, r0, rso + dp, rc);
       //ws.PrintWSParas();
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
@@ -230,7 +240,7 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.SetWSRadius(A, r0, rso);
+      ws.SetWSRadius(A, Z, r0, rso, rc);
         
       //--- gradiant of aSO
       //printf("====================== aSO: %d \n", i);
@@ -274,7 +284,7 @@ int main(int argc, char *argv[]){
     //==== restore WS calcualtion
     ws.V0 = V0ini ;    ws.a0  = A0;
     ws.VSO = VSOini ;  ws.aSO = aso;
-    ws.SetWSRadius(A, r0, rso);  
+    ws.SetWSRadius(A, Z, r0, rso, rc);  
     ws.CalWSEnergies();
   }
 
@@ -282,12 +292,14 @@ int main(int argc, char *argv[]){
   
   printf("      Experiment      |      Woods-Saxon      |     diff\n");
   double rms = 0;
+  double chisq = 0;
   int numMatch = 0;
   for( int i = 0; i < NLJ.size(); i++){
     for( int j = 0; j < ws.orbString.size(); j++){
       if( NLJ[i] == ws.orbString[j] ){
         double diff = BE[i] -  ws.energy[j];
         rms += pow(diff,2);
+	if(Error.size() == NLJ.size() )chisq += pow(diff,2)/pow(Error[i],2);
         numMatch ++;
         printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | %8.2f keV \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff * 1000.);
         continue;
@@ -300,7 +312,7 @@ int main(int argc, char *argv[]){
     printf("========================================= RMS = \e[31mfail\e[0m keV \n");
   }else{
     rms = sqrt(rms/NLJ.size());
-    printf("========================================= RMS = \e[31m%8.2f\e[0m keV \n", rms*1000.);
+    printf("========================================= RMS = \e[31m%8.2f\e[0m keV | Chi-sq = %8.2f.\n", rms*1000., chisq);
   }
 
   ws.PrintEnergyLevels();
