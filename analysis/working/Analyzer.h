@@ -39,11 +39,18 @@ public :
    ULong64_t       rdt_t[8];
    Int_t           rdtID[8];
    Int_t           rdtMultiHit;
-   Int_t           arrayRDT;
    ULong64_t       ebis_t;
    Float_t         elum[32];
    Float_t         ezero[10];
    Int_t           coin_t;
+   Float_t         te[30];
+   Float_t         te_r[30];
+   Float_t         te_t[30];
+   Float_t         trdt[8];
+   Float_t         trdt_r[8];
+   Float_t         trdt_t[8];
+   Float_t         coinTime;
+   
 
    // List of branches
    TBranch        *b_eventID;   //!
@@ -63,11 +70,19 @@ public :
    TBranch        *b_rdtC_t;   //!
    TBranch        *b_rdtID;   //!
    TBranch        *b_rdtMultiHit;   //!
-   TBranch        *b_arrayRDT;   //!
    TBranch        *b_EBIS_t;   //!
    TBranch        *b_elum;   //!
    TBranch        *b_ezero;   //!
    TBranch        *b_coin_t;   //!
+   TBranch        *b_te;   //!
+   TBranch        *b_te_t;   //!
+   TBranch        *b_te_r;   //!
+   TBranch        *b_trdt;   //!
+   TBranch        *b_trdt_t;   //!
+   TBranch        *b_trdt_r;   //!
+   TBranch        *b_coinTime;   //!
+
+   bool isTraceDataExist;
 
    Analyzer(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Analyzer() { }
@@ -123,11 +138,29 @@ void Analyzer::Init(TTree *tree)
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_rdtC_t);
    fChain->SetBranchAddress("rdtID", rdtID, &b_rdtID);
    fChain->SetBranchAddress("rdtMultiHit", &rdtMultiHit, &b_rdtMultiHit);
-   fChain->SetBranchAddress("arrayRDT", &arrayRDT, &b_arrayRDT);
-   fChain->SetBranchAddress("ebis_t", &ebis_t, &b_EBIS_t);
+   //fChain->SetBranchAddress("ebis_t", &ebis_t, &b_EBIS_t);
    fChain->SetBranchAddress("elum", elum, &b_elum);
    fChain->SetBranchAddress("ezero", ezero, &b_ezero);
    fChain->SetBranchAddress("coin_t", &coin_t, &b_coin_t);
+
+
+   TBranch * br = (TBranch*) fChain->GetListOfBranches()->FindObject("te");
+   if( br == NULL ){
+     printf("+++++++++++++++++++ no trace date");
+     isTraceDataExist = false;
+   }else{
+     printf("+++++++++++++++++++ has trace date");
+     isTraceDataExist = true;
+     fChain->SetBranchAddress("te",     te,     &b_te);
+     fChain->SetBranchAddress("te_t",   te_t,   &b_te_t);
+     fChain->SetBranchAddress("te_r",   te_r,   &b_te_r);
+     fChain->SetBranchAddress("trdt",   trdt,   &b_trdt);
+     fChain->SetBranchAddress("trdt_t", trdt_t, &b_trdt_t);
+     fChain->SetBranchAddress("trdt_r", trdt_r, &b_trdt_r);
+     fChain->SetBranchAddress("coinTime", &coinTime, &b_coinTime);
+     
+   }
+
 }
 
 Bool_t Analyzer::Notify()

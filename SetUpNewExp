@@ -18,6 +18,9 @@ echo " 7) if branch not exist --> clean up files, and git push"
 
 echo "#############################################"
 
+#set git merge driver
+git config --global merge.ours.driver true
+
 expName=$1
 
 if [ $# -ne 0 ]; then
@@ -36,14 +39,9 @@ if [ ${gitCheck} -eq 0 ]; then
     echo "---- clean."
 else
     git status
-    echo "=============== Please fix the git status"
-    exit 1;
+    echo -e "\e[93m=============== Please fix the git status \e[0m"
+    exit
 fi
-#read -p "========== Have you git the present experiment (Y/N)?" isGit
-#if [ ${isGit} == "N" ]; then
-#    echo "Please git it."
-#    exit 1
-#fi
 
 if [ $# -eq 0 ]; then
    git branch -a
@@ -58,35 +56,57 @@ else
    echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
 fi
 
+Arch="$(uname -s)"
 PCName="$(hostname)"
 
 #------ Set up data folder, check disk space
 echo "=================== Checking disk space."
-echo "PC name : ${PCName}"
+echo "PC name  : ${PCName}"
+echo "Archetech: ${Arch}"
 
-if [ ${PCName} == "digios1" ]; then  #DAQ
-   DATAPATH=${daqDataPath}
-   expDIR=~/digios
-   
-   space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
-   spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
-   spacePrecent="${spacePrecent:0:2}"
-   echo "Free Space : ${space} MB |  ${spacePrecent}%-used"
+if [ ${Arch} == "Linux" ]; then 
 
-elif [ ${PCName:0:5} == "phywl" ]; then #MAC
-   DATAPATH=~/experiments
-   expDIR=~/digios
+    if [ ${PCName} == "digios1" ]; then  #DAQ
 
-   space=`df -ml | grep "/dev/disk2" | awk '{print $4}'` #in mb
-   spacePrecent=`df -ml | grep "/dev/disk2" | awk '{print $5}'`
-   spacePrecent="${spacePrecent:0:2}"
-   echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+        DATAPATH=${daqDataPath}
+        expDIR=~/digios
+        
+        space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
+        spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
+        spacePrecent="${spacePrecent:0:2}"
+        echo "Free Space : ${space} MB |  ${spacePrecent}%-used"
 
-elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
-   DATAPATH=/lcrc/project/HELIOS/experimentsData/
-   space=100000000
-   expDIR=/lcrc/project/HELIOS/digios
 
+    elif [ ${PCName:0:5} == "bebop" ]; then #LCRC-Bebop
+
+        echo -e "\e[93m In LCRC, better to use the master branch."
+        echo -e "\e[93m 1) Change the expName in expName.sh"
+        echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
+
+        exit
+    fi
+
+elif [ ${Arch} == "Darwin" ]; then
+
+    if [ ${PCName:0:5} == "phywl" ]; then #MAC
+        DATAPATH=~/experiments
+        expDIR=~/digios
+
+        space=`df -ml | grep "/dev/disk2" | awk '{print $4}'` #in mb
+        spacePrecent=`df -ml | grep "/dev/disk2" | awk '{print $5}'`
+        spacePrecent="${spacePrecent:0:2}"
+        echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+
+    else
+    
+        path=$(pwd)
+        read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
+        echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
+        echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
+        echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
+        exit
+    fi
+    
 else
    path=$(pwd)
    read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
@@ -132,7 +152,7 @@ else
        if [ ${pullFlag} == "N" ]; then
 	   exit
        else
-	   git checkout ${expName}
+	        git checkout ${expName}
        fi
    fi
 fi
@@ -175,7 +195,7 @@ echo "=================== done."
 if [ ${isBranchExist} -eq 0 ]; then
 
     echo "======== Clean up working directory "
-    rm -fv ${expDIR}/analysis/working/correction_*.dat
+    #rm -fv ${expDIR}/analysis/working/correction_*.dat
     rm -fv ${expDIR}/analysis/working/reaction.dat
     rm -fv ${expDIR}/analysis/working/run_Summary.dat
     rm -fv ${expDIR}/analysis/working/example.*

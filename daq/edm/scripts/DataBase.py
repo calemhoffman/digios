@@ -5,15 +5,27 @@ from epics import caput
 import os
 import time
 import datetime
+#import Edwards_D379_driver
 
 print("======== DataBase for HELIOS ========")
 
-loop = 1
+waitSec = 30
+alertLevel= 300
+
 tOld = 0
 
-while loop == 1:
+DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @/home/helios/digios/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
+
+#route = Edwards_D379_driver.Route()
+#gaude_read = Edwards_D379_driver.EdwardsD397(route)
+
+while 1:
     f = open("/home/helios/digios/daq/tempDB.txt", 'w')
     t1 = int(round(time.time() * 1000 ))
+
+    #VaccuumGauge = gaude_read.vacuum_g1()    
+    #string = "VaccuumGauge value=%f\n" % VaccuumGauge
+    #print(string)
     
     fexp=open("/home/helios/digios/expName.sh", 'r')
     line=fexp.readline() #this line is bashscript header
@@ -27,6 +39,7 @@ while loop == 1:
     string = "RunNum value=%s\n" % (runNum)
     f.write(string)
 
+
     bashCommand="du -c ~/digios/analysis/data/%s_run_%03d* | tail -1 | awk '{print $1}'" % (expName, int(runNum))
     result=os.popen(bashCommand).read().rstrip()
     print("ExpName : %s, runNum : %03d, file size : %s" % (expName, int(runNum),  result))
@@ -39,31 +52,35 @@ while loop == 1:
         #print(type(result))
         print("VME%d Buffer %s" % (VME, result))
         
-        #if VME == 2: 
-        #    result = 290.0
-        #    print("====== VME%d Buffer %s" % (VME, result))
-
         if ( isinstance(result, float) or isinstance(result, int) ) :
-            if ( float(result) < 300 ) :
+
+            string="buffer,VME=%d value=%s\n" % (VME, result)
+            f.write(string)
+
+            if ( float(result) < alertLevel ) :
+                #----- close file, push to database
+                f.close()
+                os.system(DB_BashCommand)
+                #----- stop ACQ, and wait
                 caput("Online_CS_StartStop", "Stop")
                 gf=open("/home/helios/helioBuffer.log", "a")
                 dt = datetime.datetime.now()
                 gf.write("  stop : %s\n" % dt)
                 print("================ stop ACQ")
-                waitSec = 5
                 print("wait for %d sec" % waitSec)
                 for i in range (1, waitSec):
                     time.sleep(1)
                     print(i)
+                #----- resume ACD
                 caput("Online_CS_StartStop", "Start")
                 dt = datetime.datetime.now()
                 gf.write("resume : %s\n" % dt)
                 print("================= resume")
                 gf.close()
-
-            string="buffer,VME=%d value=%s\n" % (VME, result)
-            f.write(string)
-
+                #----- reopen file
+                f = open("/home/helios/digios/daq/tempDB.txt", 'w')
+            
+        
             for DIG in range (1,5):
                 for CH in range(0, 10):
                     pv="VME0%d:MDIG%d:disc_count%d_RBV" % (VME, DIG, CH)
@@ -89,6 +106,14 @@ while loop == 1:
     string="sumHitY value=%s\n" % (result)
     f.write(string)
 
+    result=caget("VME32:RTR1:reg_MISC_STAT_RBV");
+    string="router1 value=%s\n" % (result)
+    f.write(string)
+
+    result=caget("VME32:RTR2:reg_MISC_STAT_RBV");
+    string="router2 value=%s\n" % (result)
+    f.write(string)
+
     f.close()
     #lineNum = len(open("tempDB.txt").readlines())
     #print "=== file Length : ", lineNum
@@ -104,12 +129,10 @@ while loop == 1:
     
     #usually take 4000 msec for all channels
     if( t2-tOld > 2000 ) :
-        #bashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @tempDB.txt --max-time 10'
-        bashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @/home/helios/digios/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
-        os.system(bashCommand)
+        os.system(DB_BashCommand)
         tOld = t2
     
-    time.sleep(3)
+    time.sleep(2.6) #--- to make a cycle is ~ 3.0 sec
 
 
 

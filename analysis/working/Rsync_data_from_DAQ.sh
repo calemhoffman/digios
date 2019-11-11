@@ -3,14 +3,12 @@
 PCName="$(hostname)"
 
 if [ ${PCName:0:5} == "bebop" ]; then
-    source /lcrc/project/HELIOS/digios/expName.sh
-    dir=/lcrc/project/${expName}/data
-    mkdir -v ${dir}
     echo " need to do ssh via sonata "
+    echo " OR, using Globus"
     exit
 fi 
 
-if [ ${PCName} = "phywl215.phy.anl.gov" ]; then
+if [ ${PCName} = "phywl158.phy.anl.gov" ]; then
     source ~/digios/expName.sh
     dir=~/experiments/${expName}/data
     mkdir -v ${dir}

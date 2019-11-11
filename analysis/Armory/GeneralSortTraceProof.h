@@ -133,32 +133,32 @@ public :
    typedef struct {
       Int_t   eventID;
       Int_t   runID;
-      Float_t Energy[30];
-      Float_t XF[30];
-      Float_t XN[30];
-      Float_t Ring[30];
-      Float_t RDT[8];
-      Float_t TAC[24];
+      Float_t Energy[100];
+      Float_t XF[100];
+      Float_t XN[100];
+      Float_t Ring[100];
+      Float_t RDT[100];
+      Float_t TAC[100];
       Float_t ELUM[32];
-      Float_t EZERO[4];
+      Float_t EZERO[10];
 
-      ULong64_t EnergyTimestamp[30];
-      ULong64_t XFTimestamp[30];
-      ULong64_t XNTimestamp[30];
-      ULong64_t RingTimestamp[30];
-      ULong64_t RDTTimestamp[8];
-      ULong64_t TACTimestamp[24];
+      ULong64_t EnergyTimestamp[100];
+      ULong64_t XFTimestamp[100];
+      ULong64_t XNTimestamp[100];
+      ULong64_t RingTimestamp[100];
+      ULong64_t RDTTimestamp[100];
+      ULong64_t TACTimestamp[100];
       ULong64_t ELUMTimestamp[32];
-      ULong64_t EZEROTimestamp[4];
+      ULong64_t EZEROTimestamp[10];
       
-      Float_t x[30];
+      Float_t x[100];
       
    } PSD;
 
    PSD psd; 
    
    //need to put NULL on pointer
-   GeneralSortTraceProof(TTree * /*tree*/ =0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
+ GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
    virtual ~GeneralSortTraceProof() { }
    
    virtual Int_t   Version() const { return 2; }

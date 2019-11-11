@@ -11,7 +11,7 @@
 0.000           //beam-emittance_in_mrad
 0.00            //x_offset_of_Beam_in_mm
 0.00            //y_offset_of_Beam_in_mm
-5000         //number_of_Event_being_generated
+500000         //number_of_Event_being_generated
 false           //isTargetScattering
 0.913           //target_density_in_g/cm3
 9.97e-5          //targetThickness_in_cm
@@ -22,4 +22,4 @@ false           //isDecay
 1               //decayNucleus_A
 0               //decayNucleus_Z
 false           //isReDo
-0.000           //excitation_energy_of_A[MeV]
+0.120           //excitation_energy_of_A[MeV]

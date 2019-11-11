@@ -1,9 +1,46 @@
 #!/bin/bash
-#SBATCH -J WS17O
-#SBATCH -p bdwall
-#SBATCH -N 1
-#SBATCH --ntasks-per-node=36
-#SBATCH -t 00:02:30
 
-root -b ProofWSSearch.C+
+#==================================== User Input
 
+isotope=17O
+IsNeutron=1;
+
+searchRangeFile="wsSearch_FineRange.txt"
+
+runTime="12:00:00"
+
+userName="ttang"
+
+
+#=====================================
+
+jobName=WS${isotope}
+outFile="ws_${isotope}_all.root"
+
+echo "####################################"
+echo "Job Name     : "${jobName}
+echo "is neutron   : "${IsNeutron}
+echo "search Range : "${searchRangeFile}
+echo "output file  : "${outFile}
+echo "####################################"
+
+scriptName="slurm.sh"
+
+#========== Generating the script
+echo "#!/bin/bash" > ${scriptName}
+echo ""           >> ${scriptName}
+echo "#SBATCH -J ${jobName}"          >> ${scriptName}
+echo "#SBATCH -p bdwall"              >> ${scriptName}
+echo "#SBATCH -N 1 "                  >> ${scriptName}
+echo "#SBATCH --ntasks-per-node=36 "  >> ${scriptName}
+echo "#SBATCH -t ${runTime}"          >> ${scriptName}
+echo ""                               >> ${scriptName}
+echo root -b "'"'ProofWSSearch.C+("'${isotope}'",'${IsNeutron}',"'${searchRangeFile}'","'${outFile}'")'"'" >> ${scriptName}
+
+#====================== run the script
+sbatch ${scriptName}
+#source ${scriptName}
+
+squeue -u ${userName} -l
+
+lcrc-sbank -q balance

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-caput Online_CS_StartStop Stop
-echo " stop ACQ at $(date), wait for 10 sec" >> ~/helioBuffer.log
-sleep 10
-caput Online_CS_StartStop Start
-echo "start ACQ at $(date)" >> ~/helioBuffer.log
