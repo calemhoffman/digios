@@ -56,7 +56,8 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
     TString name("gen.root");
     TFile ff(name);
     TTree *t2 = (TTree*)ff.Get("gen_tree");
-    t2->Process("../codes/Monitors.C++");
+    // t2->Process("../codes/Monitors.C++");
+    t2->Process("Monitors.C++");
     ff.Close();
   }
 }

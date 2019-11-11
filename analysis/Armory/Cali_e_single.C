@@ -22,7 +22,8 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
   }
   
 /**///======================================================== initial input
-   
+
+   int nBin = 200;
 
   //TString gate; gate.Form("!TMath::IsNaN(e[%d])", detID);
    TString gate; gate.Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", detID, detID);
@@ -65,7 +66,7 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
    printf("############## e correction \n");
    TString name;
    name.Form("q%d", detID);
-   TH1F * q = new TH1F(name, name, 300, minEnergyRange, maxEnergyRange);
+   TH1F * q = new TH1F(name, name, nBin, minEnergyRange, maxEnergyRange);
    q->SetXTitle(name);
    
    TString expression;
@@ -127,19 +128,39 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
       int n = 0;
       float eng = -1;
       printf("=================== input reference energy\n");
-      do{
-         printf("What should be the %2d-th peak energy [MeV] ? (< 0 to skip):", n  );
-         temp = scanf("%f", &eng);
-         if( eng >= 0 ) {
-            printf("       %f ch --> %f MeV\n", energy[n],  eng);
-            refEnergy.push_back(eng);
-            tempEnergy.push_back(energy[n]);
-         }else{
-            printf("       %f ch --> skipped \n", energy[n]);
-         }
-         n++;
-      }while( n < nPeaks);
       
+      int opt;
+      printf("Use 238Th source? (5 peaks) [1/0] ? ");
+      temp = scanf("%d", &opt);
+      
+      if( opt == 1 ) {
+         refEnergy.clear();
+         refEnergy.push_back(5.423);
+         refEnergy.push_back(5.685);
+         refEnergy.push_back(6.288);
+         refEnergy.push_back(6.778);
+         refEnergy.push_back(8.785);
+         
+         tempEnergy.clear();
+         for( n = 0 ; n < nPeaks; n++){
+            tempEnergy.push_back(energy[n]);
+         }
+         
+      }else{
+         do{
+            printf("What should be the %2d-th peak energy [MeV] ? (< 0 to skip):", n  );
+            temp = scanf("%f", &eng);
+            if( eng >= 0 ) {
+               printf("       %f ch --> %f MeV\n", energy[n],  eng);
+               refEnergy.push_back(eng);
+               tempEnergy.push_back(energy[n]);
+            }else{
+               printf("       %f ch --> skipped \n", energy[n]);
+            }
+            n++;
+         }while( n < nPeaks);
+         
+      }
       if( refEnergy.size() == 0 ) return;
       
       energy.clear();
@@ -180,7 +201,7 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
       cAlpha->cd(3);
       TString name;
       name.Form("p%d", detID);
-      TH1F * p = new TH1F(name, name, 200, 0., refEnergy.back() * 1.3);
+      TH1F * p = new TH1F(name, name, nBin, refEnergy[0] * 0.8, refEnergy.back() * 1.3);
       p->SetXTitle(name);
          
       TString expression;

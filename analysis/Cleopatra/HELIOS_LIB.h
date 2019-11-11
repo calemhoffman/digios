@@ -33,6 +33,7 @@ public:
       nameA = temp.Name;
       isReady = false;
       isBSet = true;
+      
    }
    void Seta(int A, int Z){
       Isotope temp (A, Z);
@@ -42,6 +43,7 @@ public:
       namea = temp.Name;
       isReady = false;
       isBSet = false;
+      
    }
    void Setb(int A, int Z){
       Isotope temp (A, Z);
@@ -51,6 +53,7 @@ public:
       nameb = temp.Name;
       isReady = false;
       isBSet = false;
+      
    }
    void SetB(int A, int Z){
       Isotope temp (A, Z);
@@ -434,7 +437,7 @@ private:
    double posRecoil; // recoil, downstream
    double rhoRecoil; // radius recoil
    double length; // length
-   double support;
+   double blocker;
    double firstPos; // m 
    vector<double> pos; // near position in m
    int nDet, mDet; // nDet = number of different pos, mDet, number of same pos
@@ -488,7 +491,7 @@ HELIOS::HELIOS(){
    posRecoil = 0;
    rhoRecoil = 0;
    length = 0;
-   support = 0;
+   blocker = 0;
    firstPos = 0;
    pos.clear();
    nDet = 0;
@@ -542,7 +545,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
          if( i == 10 )                       posRecoil2 = atof(x.c_str());
          if( i == 11)                            zElum1 = atof(x.c_str());
          if( i == 12 )                           zElum2 = atof(x.c_str());
-         if( i == 13 )                           support = atof(x.c_str());
+         if( i == 13 )                           blocker = atof(x.c_str());
          if( i == 14 && !overrideFirstPos )     firstPos = atof(x.c_str());
          if( i == 15 )                            eSigma = atof(x.c_str());
          if( i == 16 )                            zSigma = atof(x.c_str());
@@ -565,7 +568,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
       printf("=====================================================\n");
       printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta * TMath::RadToDeg());
       printf("     Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
-      printf("       gap of multi-loop: %8.2f mm \n", firstPos > 0 ? firstPos - support : firstPos + support );
+      printf("        Blocker Position: %8.2f mm \n", firstPos > 0 ? firstPos - blocker : firstPos + blocker );
       printf("          First Position: %8.2f mm \n", firstPos);
       printf("------------------------------------- Detector Position \n");
       for(int i = 0; i < nDet ; i++){
@@ -630,7 +633,8 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
    vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
    vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-   tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   //tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   tB   = posRecoil / vp0B; // nano-second
    eB   = PB.E() - PB.M();
    zB   = vp0B * tB;
    rhoBHit = GetRecoilR(posRecoil);
@@ -677,7 +681,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       loop = 0;
       int startJ = (int) fmod(TMath::Ceil(mDet*phi/TMath::TwoPi() - 0.5) ,mDet) ;
 
-      // loop until reach the detector position covrage.
+      // loop until reach the detector position covrage.      
       do{
          loop += 1;
          int n = 2*loop -1;
@@ -686,6 +690,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             return -3;  // when loop > 10
             break; // maximum 10 loops
          }
+         
          
          for( int j = startJ ; j < startJ + mDet; j++){
          
@@ -696,12 +701,15 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             //========== calculate zHit
             double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
+            
+            //if( flag ) printf("%d | %d | zHit : %f | %f, %f, %f | E : %f\n", loop, j, zHit, pos[0], pos[nDet-1] + length, firstPos, Pb.E()-Pb.M());
+            
             if( firstPos > 0 ){
-               if( zHit < pos[0] )  continue; // goto next loop
+               if( zHit < pos[0] ) continue; // goto next mDet, after progress of all side, still not OK, then next loop 
                if(zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-               if( pos[nDet-1] < zHit ) continue;
-               if( zHit < pos[0] - length) return -4; 
+               if( pos[0] < zHit ) continue;
+               if( zHit < pos[nDet-1] - length) return -4; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
@@ -718,24 +726,26 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
                
-            //======= check Block
+            //======= check Block By blocker
             if( firstPos > 0 ){
-               if( pos[0] > zHit && zHit > pos[0] - support /*&& sHit < perpDist/2.*/ ) return -6; // blocked by support
+               if( pos[0] - blocker < zHit && zHit < pos[0] /*&& sHit < perpDist/2.*/ ) return -6; // blocked by blocker
             }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + support /*&& sHit < perpDist/2.*/) return -6;
+               if( pos[0] < zHit && zHit < pos[0] + blocker /*&& sHit < perpDist/2.*/) return -6;
             }
+            
+            //printf("%d | zHit : %f \n", 2, zHit);
             
             //====== check hit
             if( !isReachArrayCoverage && isHitFromOutside && sHit < width/2.){      
                isHit = true;
-               isReachArrayCoverage = false;
+               isReachArrayCoverage = true;
                detRowID = (j+mDet) % mDet;
                break;     // if isHit, break, don't calculate for the rest of the detector
             }else{
-               isReachArrayCoverage = true;
+               isReachArrayCoverage = false;
             }
          }      
-      }while(isReachArrayCoverage); 
+      }while(!isReachArrayCoverage); 
       
       if( !isHit ) return -7; // zHit falls outside the detector, but could be in the gap of detector
       
@@ -1156,11 +1166,6 @@ public:
       Z1 = Z;
       namea = temp.Name;
       name1 = temp.Name;
-      
-      if( namea == "1H " ) {
-         namea = "p";
-         name1 = "p";
-      }
    }
 
    void Set2(int A, int Z){
@@ -1169,10 +1174,6 @@ public:
       A2 = A;
       Z2 = Z;
       name2 = temp.Name;
-      
-      if( name2 == "1H " ) {
-         name2 = "p";
-      }
       
       AB = AA + Aa - A1 - A2;
       ZB = ZA + Za - Z1 - Z2;
