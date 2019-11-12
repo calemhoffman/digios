@@ -36,7 +36,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    
    int nTrial = 1000;
    
-   double coinTimeGate = 10.; // TMath::Abs(coinTime) < coinTimeGate
+   double coinTimeCentral = 19;
+   double coinTimeGate = 30.; // TMath::Abs(coinTime - coinTimeCentral) < coinTimeGate
 
 /**///======================================================== 
    printf("==========================================================\n");
@@ -125,8 +126,10 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){
@@ -267,7 +270,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       
       TString name;
       name.Form("exPlot%d[%d]", idet, idet%rDet);
-      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 3000);
+      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 9000);
       exPlot[idet]->Reset();
       exPlot[idet]->SetTitle(title + "(exp)");
 
@@ -292,7 +295,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
             if( isXFXN && hitIDTemp != 0 ) continue;
-            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
             
             //printf("%d | %f, %f, %f \n", i, zTemp, eTemp, coinTimeTemp);
             
@@ -338,14 +341,14 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
         if( eTemp < eThreshold) continue;
         if( isXFXN && hitIDTemp != 0 ) continue;
         if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
-        if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+        if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
         countEvent++;
       }
       
-      if( countEvent < 100 ) {
+      if( countEvent < 10 ) {
          B1[idet] = 1;
          B0[idet] = 0;
-         printf("======= skip for number of entries < 100 \n");
+         printf("======= skip for number of entries < 10 \n");
          continue;
       }
       
@@ -365,7 +368,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( isXFXN && hitIDTemp != 0 ) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
-            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
             double minDist = 99;
             
             for( int i = 0; i < numFx; i++){
@@ -422,7 +425,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
                   if( detIDTemp != idet ) continue;
                   if( isXFXN && hitIDTemp != 0 ) continue;
                   if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
-                  if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+                  if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
                   exPlotC[idet]->Fill(zTemp, eTemp/A1 + A0);
                }
                cScript->cd(2);
@@ -457,7 +460,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
             exPlot[idet]->Fill(zTemp, eTemp);
          }
-         exPlot[idet]->Draw("colz");
+         exPlot[idet]->Draw("box");
          caliResult->cd(); exPlot[idet]->Write(); caliResult->Write("exPlot", TObject::kSingleKey);
          
          cScript->cd(2);

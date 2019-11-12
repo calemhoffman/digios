@@ -148,6 +148,19 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
             paraA[0] / bw,   paraE[0] /bw, 
             paraA[1], paraE[1],
             paraA[2], paraE[2]);
+            
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.04);
+  text.SetTextColor(2);
+  
+    
+   text.DrawLatex(0.4, 0.65, Form("count : %5.0f(%5.0f)", paraA[0]/bw, paraE[0]/bw));
+   text.DrawLatex(0.4, 0.60, Form(" mean : %5.3f(%5.3f) MeV", paraA[1], paraE[1]));
+   text.DrawLatex(0.4, 0.55, Form("sigma : %5.3f(%5.3f) MeV", paraA[2], paraE[2]));
+   text.DrawLatex(0.4, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", paraA[2] *2.355, paraE[2]*2.355));
+
   
 }
 
@@ -446,11 +459,6 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
 //########################################
 //########################################
 void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile = "AutoFit_para.txt"){
-   
-  //============ 131Xe
-  //energy.push_back(-2.8);  height.push_back(100); lowE.push_back(-3.0); highE.push_back(-2.4);
-  //energy.push_back(-1.4);  height.push_back(100); lowE.push_back(-2.0); highE.push_back(-1.0);
-  //energy.push_back( 0.2);  height.push_back(100); lowE.push_back(-0.5); highE.push_back( 0.5);
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -459,8 +467,8 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   }
   nPeaks = energy.size();
 
-  TCanvas *cFitNGauss = new TCanvas("cFitNGauss","Fitting on Ex (fixed width)", 600,600);
-  cFitNGauss->Divide(1,2);
+  TCanvas *cFitNGauss = new TCanvas("cFitNGauss","Fitting on Ex", 600,600);
+  cFitNGauss->Divide(1,3);
   if(! cFitNGauss->GetShowEventStatus() ) cFitNGauss->ToggleEventStatus();
   
   gStyle->SetOptStat(optStat);
@@ -489,7 +497,9 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
     printf("============= estimating background...\n");
     TSpectrum * peak = new TSpectrum(50);
     TH1 * h1 = peak->Background(hist, bgEst);
+    cFitNGauss->cd(1);
     h1->Draw("same");
+    cFitNGauss->cd(2);
     printf("============= substracting the linear background...\n");
     specS->Add(h1, -1.);
     specS->Sumw2();
@@ -590,6 +600,26 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   
   specS->Draw("hist same");
   //specS->Draw("E same");
+  
+  cFitNGauss->cd(3);
+  
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.06);
+  text.SetTextColor(2);
+  
+  text.DrawLatex(0.1, 0.9, Form("     %13s, %18s, %18s", "count", "mean", "sigma"));
+  
+  for( int i = 0; i < nPeaks; i++){
+  text.DrawLatex(0.1, 0.8-0.1*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]));
+  }
+  
+  
   
   cFitNGauss->Update();
 }

@@ -1,4 +1,0 @@
-1) combine GeneralSort.C and GeneralSortTrace.C
-
-2) improve SetUpNewExp
-   check disk full

@@ -4,7 +4,8 @@ root_data
 merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
-
+analysis/GEBSort/GEBSort_nogeb_trace
+analysis/working/slurm.sh
 *.Ex.txt
 *.Xsec.txt
 *.in

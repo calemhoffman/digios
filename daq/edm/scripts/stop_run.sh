@@ -14,18 +14,25 @@ fi;
 
 echo -e "\n------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
+if [ $# -eq 0 ];then
+    echo 'Ctrl+C to cancel with no harm.'
+    read -p 'Singleline comment for this run: ' COMMENT
+else
+    COMMENT=$1
+fi
+
 currentDate=$(date)
 
 echo "         stop at ${currentDate}"
-echo "         stop at ${currentDate}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "         stop at ${currentDate}| ${COMMENT}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
 curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
 
-echo "==== wait for 5 sec"
-sleep 5
+echo "==== wait for 2 sec"
+sleep 2
 
 # take screenshot and copy from heliosDB
 screenShot=~/digios/analysis/working/grafanaElog.jpg
@@ -39,10 +46,16 @@ if [ -z ${elogID} ]; then
 
 else
     # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
-    echo "---- downloading the elog entry elohID=${elogID}$"
-    elogContext=~/digios/analysis/working/elog_context.txt
+    echo "---- downloading the elog entry elohID=${elogID}"
+    elogContext=~/digios/analysis/working/elog.txt
     #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -w ${elogID} > ${elogContext}
+    if [ $expName = "ARR01" ]; then
+	elogName=$expName
+    else
+	elogName="H"${expName:1}
+    fi
+
+    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -w ${elogID} > ${elogContext}
     cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
     #check encoding
     encoding=$(grep "Encoding" ${elogContext} | awk '{print $2}')
@@ -52,14 +65,21 @@ else
     #remove all header
     sed -i "1,${cutLineNum}d" ${elogContext}
     #fill stop time
-    echo "         stop at ${currentDate}" >> ${elogContext}
-    echo "----- grafana screenshot is attached." >> ${elogContext}
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
+    echo "         stop at ${currentDate} <br />" >> ${elogContext}
+    echo "grafana screenshot is attached. <br />" >> ${elogContext}
+    echo "-----------------------------------------------</p>" >> ${elogContext}
+    echo "$COMMENT <br />" >> ${elogContext}
+    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
+
+    source ~/Slack_Elog_Notification.sh
+    slackMsg="elogID=${elogID} is updated.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+    auxMsg="stop at ${currentDate} \n$COMMENT"
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 
 fi
 
-echo wait 10 seconds before closing the IOCs
-sleep 10
+echo wait 2 seconds before closing the IOCs
+sleep 2
 
 #number of IOCS/Rec. in use
 LIMIT=4
@@ -76,7 +96,19 @@ do
 done        
 rm -rf temp
 
-echo "=== wait 10 seconds before next run ==="
-sleep 10
+echo "=== wait 5 seconds before submit a transfer to LCRC ==="
+sleep 5
+
+/home/helios/digios/daq/edm/scripts/globus_out.py
+#/home/helios/digios/daq/edm/scripts/globus_in.py
+
+#===== Get root_data/ from LCRC to MAC
+#MACEndPoint=0910df94-fb59-11e9-9945-0a8c187e8c12
+#LCRCEndPoint=57b72e31-9f22-11e8-96e1-0a6d4e044368
+
+#LCRCPath=/lcrc/project/HELIOS/digios/analysis/root_data/
+#MACPath=/Users/heliosdigios/digios/analysis/root_data/
+#globus transfer -r -s checksum  $LCRCEndPoint:$LCRCPath  $MACEndPoint:$MACPath
+
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
