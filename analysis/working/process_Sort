@@ -51,7 +51,7 @@ elif [ $isSort -gt 0 ]; then
     echo -e "${YELLOW} using ${GEBSort} ${NC}"
 
     #==== check Merged_data timeStamp, if newer then raw data, no Merge
-    if [ ${isLinux} -eq 1 ]; then
+    if [ ${Arch} == "Linux" ]; then
         mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
     else
         mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
@@ -62,7 +62,7 @@ elif [ $isSort -gt 0 ]; then
     #==== check if root data exist
     isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`    
     if [ ${isRootDataExist} -gt 0 ]; then
-        if [ ${isLinux} -eq 1 ]; then
+        if [ ${Arch} == "Linux" ]; then
             rootDataTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root`
         else
             rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
@@ -114,7 +114,7 @@ elif [ $isGeneralSort -gt 0 ]; then
         
     else
         #==== check run###.root timeStamp
-        if [ ${isLinux} -eq 1 ]; then
+        if [ ${Arch} == "Linux" ]; then
             rootTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
         else
             rootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
@@ -126,7 +126,7 @@ elif [ $isGeneralSort -gt 0 ]; then
         isGenRootDataExist=`ls -1 ${ROOTDIR}/gen_run${RUN}.root 2>/dev/null | wc -l`
 
         if [ $isGenRootDataExist -gt 0 ]; then
-            if [ ${isLinux} -eq 1 ]; then
+            if [ ${Arch} == "Linux" ]; then
                 genRootTime=`stat -c "%Z" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
             else
                 genRootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`

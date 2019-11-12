@@ -9,7 +9,7 @@ searchRangeFile="wsSearch_FineRange.txt"
 
 runTime="12:00:00"
 
-userName="ttang"
+userName=$(whoami)
 
 
 #=====================================

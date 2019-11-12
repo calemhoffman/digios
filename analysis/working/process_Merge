@@ -32,7 +32,7 @@ fi
 if [ $isMerge -eq 1 ]; then
 
     #==== check Merged_data timeStamp, if newer then raw data, no Merge
-    if [ ${isLinux} -eq 1 ]; then
+    if [ ${Arch} == "Linux" ]; then
         if [ ${PCName} == "digios1" ]; then
             echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
         fi
@@ -46,7 +46,7 @@ if [ $isMerge -eq 1 ]; then
 
     #==== if merged data exist, check timeStamp
     if [ ${isMergedDataExist} -gt 0 ]; then
-        if [ ${isLinux} -eq 1 ]; then
+        if [ ${Arch} == "Linux" ]; then
             mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
         else
             mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
