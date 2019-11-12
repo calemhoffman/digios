@@ -174,19 +174,39 @@ void runsCheck(TString prefix = "*"){
       
     //find the last event time_recored
     breakFlag = false;
+    Int_t lastEventID = 0;
+    Int_t lastEntry = 0;
+    Int_t lastj = -1;
     for(int event = totalEvent-1; event > 0; event--){
       tree->GetEntry(event);
-      if ( prefix == "trace" &&  eventID < totalEvent - 100 ) continue;
-      for(int j = 0; j < 30; j++){
-        if( e_t[j] > 0 && !TMath::IsNaN(e[j]) ) {
-          lastTime = e_t[j];
-          lastEvent = event;
-          //printf("%12d| %llu\n", event, lastTime);
-          breakFlag = true;
-          break;
+      if ( prefix == "trace") {
+        if( eventID < totalEvent - 500 ) continue;
+        for(int j = 0; j < 30; j++){
+          if( e_t[j] > 0 && !TMath::IsNaN(e[j]) ){
+            if( eventID > lastEventID ) {
+              lastEventID = eventID;
+              lastEntry = event;
+              lastj = j;
+            }
+          } 
         }
+      }else{
+        for(int j = 0; j < 30; j++){
+          if( e_t[j] > 0 && !TMath::IsNaN(e[j]) ) {
+            lastTime = e_t[j];
+            lastEvent = event;
+            //printf("%12d| %llu\n", event, lastTime);
+            breakFlag = true;
+            break;
+          }
+        }
+        if( breakFlag ) break;      
       }
-      if( breakFlag ) break;      
+    }
+
+    if( prefix == "trace"){
+      tree->GetEntry(lastEntry);
+      lastTime = e_t[lastj];
     }
       
       
