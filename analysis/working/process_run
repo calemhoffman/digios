@@ -10,8 +10,6 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-#source ./process_PathSetting
-
 RUN=$1
 
 isMerge=1

@@ -276,8 +276,8 @@ void Cali_xf_xn(TTree * tree){
       for( int i = 0; i < numDet; i ++){
         
         if( energy[i].size() == 0 ) {
-          a0[i] = 1;
-          a1[i] = 0;
+          a0[i] = 0;
+          a1[i] = 1;
           continue;
         }
         

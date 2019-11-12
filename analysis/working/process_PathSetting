@@ -2,20 +2,13 @@
 
 #=========== Check host name
 PCName=$(hostname)
-isLinux=0
+Arch=$(uname -s)
 
-if [ ${PCName} == "digios1" ]; then
-  isLinux=1
-fi
+#    source /lcrc/project/HELIOS/digios/expName.sh
+#    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
 
-if [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
-    source /lcrc/project/HELIOS/digios/expName.sh
-    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
-    isLinux=1
-else
-    source ../../expName.sh #load expName
-    AnalysisDir=../../analysis
-fi
+source ../../expName.sh #load expName
+AnalysisDir=../../analysis
 
 #remote data path
 dataloc=${daqDataPath}/${expName}/data
@@ -37,3 +30,8 @@ BLUE='\033[0;34m'
 Cyan='\033[0;36m'
 NC='\033[0m'
 
+dir=$(pwd)
+
+cd $GEBDIR
+make
+cd $dir
