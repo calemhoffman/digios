@@ -12,7 +12,7 @@
 
 const int nDet = 30;
 
-void readTrace(TString fileName){
+void readTrace(TString fileName, int detID = -1){
    
 /**///==============================================================   
 
@@ -22,7 +22,7 @@ void readTrace(TString fileName){
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 0, 800, 300);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 0, 1500, 800);
    cRead->Divide(1,1);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
@@ -64,11 +64,14 @@ void readTrace(TString fileName){
          //if( e[i] > 0 ) nextFlag = false;
          
          printf("========= ev: %d, #trace: %d | %d, (e, xf, xn , te[i]) = (%7.2f, %7.2f, %7.2f, %7.2f)\n", 
-                    eventID, arr->GetEntriesFast(), i, e[i], xf[i], xn[i], te[i]);
+                    ev, arr->GetEntriesFast(), i, e[i], xf[i], xn[i], te[i]);
          
-         //f( e[i] < -500 ) nextFlag = false;
-         nextFlag = false;
+         // for negative pulse, e[i] > 0 
+         //if( (i != 10 && i != 8 ) &&  e[i] > 2000 ) nextFlag = false;
+         if( e[i] > 200 ) nextFlag = false;
+         //nextFlag = false;
       }
+
       //for( int i = 0; i < 8; i++){
       //   if( TMath::IsNaN(rdt[i]) ) continue;    
       //   if( rdt[i] > 0 ){
@@ -79,6 +82,7 @@ void readTrace(TString fileName){
       //}
       
       if( nextFlag ) continue;
+      
       
       for( int j = 0; j < arr->GetEntriesFast() ; j++){
 
@@ -99,9 +103,21 @@ void readTrace(TString fileName){
             int kind = gFit->GetLineColor();
             int det  = gFit->GetLineStyle();
             
+            //if( det == 10 || det == 25 || det == 19) continue;
+            if ( detID != -1 &&  det != detID ) continue;
+            //if( time < 0 || time > 200 ) continue;
+            //if( energy < 2000 ) continue;
             //if( det < 100 ) continue;
             //if( det != 18 && det != 19 && det !=12 ) continue;
-            
+
+            switch(kind) {
+            case 1: kind = 1; break;
+            case 2: kind = 2; break;
+            case 3: kind = 0; break;
+            case 4: kind = 3; break;
+            case 6: kind = -1; break;
+            }
+
             gTitle.Form("(%d,%d), base: %5.1f, rise: %5.3f, time: %5.2f, energy: %6.1f | chi2: %6.2f, %6.2f |(1 for break)",
                      det, kind, base, riseTime, time, energy, chiSq, TMath::Sqrt(chiSq)/energy);
             
@@ -118,7 +134,8 @@ void readTrace(TString fileName){
          
          cRead->cd(1);
          cRead->Clear();
-         g->Draw("");
+         g->SetMarkerStyle(5);
+         g->Draw("AP");
          //g->GetXaxis()->SetRangeUser(0, 200);
          //g->GetYaxis()->SetRangeUser(7500, 35000);
          timeVLine.Draw("same");

@@ -35,7 +35,8 @@ void listDraws(void) {
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
-  printf("   RDTCutCreator() - Create RDT Cuts \n");
+  printf("   RDTCutCreator() - Create RDT Cuts [May need to edit]\n");
+  printf("       readTrace() - read trace \n");
   printf("         Check1D() - Count Integral within a range\n");
   printf("-----------------------------------------------------\n");
   printf("   %s\n", canvasTitle.Data());
@@ -271,21 +272,22 @@ void elum(void) {
 
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
-  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1000,1000);
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1500, 0, 1000,1000);
   crdt->Clear();crdt->Divide(2,2);
-  for (Int_t i=0;i<4;i++) {
-    crdt->cd(i+1); 
-    if( isLogz ) crdt->cd(i+1)->SetLogz();
-    hrdt2D[i]->Draw("col");
-  }
+
+  if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col");  
+  if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
+  if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  
+  if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
   
-  TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
-  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
-  crdtID->Clear();
-  hrdtID->Draw("colz");
+  
+  //TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
+  //if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
+  //crdtID->Clear();
+  //hrdtID->Draw("colz");
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
-  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500,0, 1000, 1000);
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500, 500, 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
   for( int i = 0; i < 8; i ++){
     crdtS->cd(i+1);
@@ -308,7 +310,7 @@ void recoils(bool isLogz = false) {
 
 void eCalVz(void) {
   TCanvas *cecalVz =  (TCanvas *) gROOT->FindObjectAny("cecalVz");
-  if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz","ECALVZ",1000,650);
+  if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz",Form("ECALVZ : %s", canvasTitle.Data()),1000,650);
   cecalVz->Clear(); cecalVz->Divide(2,1);
   gStyle->SetOptStat("neiou");
   cecalVz->cd(1);heCalVz->Draw("col");

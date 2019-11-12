@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
 
   TGraph * g1 = new TGraph();
   int count = 0;
-  for( Energy = 0.05; Energy <= .5; Energy += 0.05 ){
+  for( Energy = 0.05; Energy <= .5; Energy += 0.01 ){
 
     if( argc == 2) Energy = atof(argv[1]);
     
@@ -125,12 +125,13 @@ int main(int argc, char *argv[]){
 
     gr->Draw("AC*");
   
-    TF1 * fit = new TF1 ("fit", "[0]*sin([1]*x + [2])");
+    TF1 * fit = new TF1 ("fit", "[0]*sin([1]*x - [3] + [2])");
     fit->SetParameter(0, maxU);
     fit->FixParameter(1, waveNumber);
     fit->SetParameter(2, 0);
+    fit->FixParameter(3, L * 3.1415/2.);
 
-    fit->SetParLimits(2, -3.142, 3.142 );
+    fit->SetParLimits(2, 0, 3.142 );
 
     gr->Fit(fit, "Q");
 

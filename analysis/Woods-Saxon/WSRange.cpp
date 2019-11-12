@@ -102,7 +102,7 @@ int main(int argc, char *argv[]){
 
   ws.N = 127;
   
-  for( int massA = A2 ; massA >= A1 ; massA--){
+  for( float massA = A2 ; massA >= A1 ; massA  -= 0.2){
     
     ws.A = massA;
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]){
     //double reducedMass = 931.5 * (1.008664 + massA - 1 )/1.008664/(massA - 1);
     //ws.SetMass(reducedMass);
 
-    ws.V0 = V0 * ( 1 -  kappa * ( 2* ws.N - massA ) / massA );
+    ws.V0 = V0 * ( 1 -  kappa * ( 2.0* ws.N - massA ) / massA );
     
     ws.ClearVector();
     ws.CalRadius();
@@ -134,20 +134,20 @@ int main(int argc, char *argv[]){
 	fprintf(file_out,"%9s  ", temp.c_str());
       }
       fprintf(file_out,"\n");
-      fprintf(file_out, "%6d, ", massA);
+      fprintf(file_out, "%6f, ", massA);
       for( int i = 0; i < orbitalStr.size(); i++){
-	fprintf(file_out,"%9.2f, ", ws.energy[i]);
+	fprintf(file_out,"%9.4f, ", ws.energy[i]);
       }
       fprintf(file_out,"\n");
     }else{
       
       //matching orbital
-      fprintf(file_out, "%6d, ", massA);
+      fprintf(file_out, "%6f, ", massA);
       for( int i = 0; i < orbitalStr.size(); i++){
 	bool isMatched = false;
 	for( int j = 0; j < (ws.energy).size(); j++){
 	  if( orbitalStr[i] == ws.orbString[j] ) {
-	    fprintf(file_out,"%9.2f, ", ws.energy[j]);
+	    fprintf(file_out,"%9.4f, ", ws.energy[j]);
 	    isMatched = true;
 	  }
 	}

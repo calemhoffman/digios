@@ -33,7 +33,7 @@ public:
   vector<double> errorE; 
   vector<double> errorUratio; 
 
-  int A, N; // mass number, neutron number
+  float A, N; // mass number, neutron number
   //charge number already in class RKFourth
   double r0, rSO, rc; // reduced mass
 
@@ -49,7 +49,7 @@ public:
     wf.clear();
   }
   
-  void SetZ(int Z) {
+  void SetZ(float Z) {
     this->Z = Z;
     if( Z != 0) {
       this->mu = mp;
@@ -68,7 +68,7 @@ public:
     this->Rc  = rc  * pow(A, 1./3.);
   }
   
-  void SetWSRadius(int A, int Z,  double r0, double rSO, double rc){
+  void SetWSRadius(float A, float Z,  double r0, double rSO, double rc){
     this->A = A;
     this->Z = Z;
     this->r0 = r0;
@@ -102,7 +102,7 @@ public:
   void PrintWSParas(){
     printf("================ Woods-Saxon parameters \n");
     printf(" Reduced Mass : %f MeV/c2\n", mu);
-    printf("  A: %d, N: %d, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, N, dr, nStep, dr * nStep);
+    printf("  A: %4.1f, N: %4.1f, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, N, dr, nStep, dr * nStep);
     printf("-------------------------------\n");
     printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
     printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n", VSO,  RSO, rSO, aSO);

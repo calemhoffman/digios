@@ -1,6 +1,5 @@
 //---data_path
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
--../root_data/gen_run028.root
-+../root_data/gen_run016.root
-+../root_data/gen_run02[0-7].root
+-../root_data/gen_run016.root
++../root_data/gen_run04[3,6].root
