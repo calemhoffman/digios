@@ -4,8 +4,6 @@
 #include <TFile.h>
 #include <TProof.h>
 
-#include "GeneralSortMapping.h" //to ensure when the mapping changed macro will be recompile
-
 void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
   
   if (SORTNUM==0) {
@@ -35,7 +33,7 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
         TProof * p = TProof::Open("", Form("workers=%d", isTrace));
    
         chain->SetProof();
-        chain->Process("../Armory/GeneralSortTraceProof.C+", name);
+        chain->Process("../Armory/GeneralSortTraceProof.C++", name);
                 
         delete chain;
         delete p;

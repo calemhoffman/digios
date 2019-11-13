@@ -6,16 +6,14 @@
 #define MAXNUMHITS 20 //Highest multiplicity
 #define M -100 //M value for energy filter from digi setting
 
-#include "../working/GeneralSortMapping.h"
-
-//by copy the GeneralSortMapping.h in to Armory, is not working
-//#ifdef __linux__
+//must be absolute path, by copy the GeneralSortMapping.h in to Armory, is not working
+#ifdef __linux__
    //LCRC
-   //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
-//#elif __APPLE__
+   #include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+#elif __APPLE__
    //Mac
-//#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-//#endif
+   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+#endif
 
 //=================================== setting
 bool isTraceON = true;
