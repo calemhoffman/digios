@@ -16,8 +16,8 @@ false    //is_coincident_with_recoil
 0.07     //energy_resolution_of_PSD_array_[MeV]
 1.00     //position_resolution_of_PSD_array_[mm]
 6        //number_of_detector_as_same_side
-241.87     //1st_detector_relative_position_to_the_nearest_position_to_target[mm]
-181.01    //2nd_det
+0.00     //1st_detector_relative_position_to_the_nearest_position_to_target[mm]
+60.87    //2nd_det
 120.93 
-60.87
-0.00      //5th_det
+181.01
+241.87   //5th_det

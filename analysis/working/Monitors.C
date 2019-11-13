@@ -39,7 +39,7 @@ int  coinTimeRange[2] = { -40, 40};
 double rdtot[4] = {};
 
 //---Gate
-int timeGate[2] = {-12, 2}; // min, max, 1 ch = 10 ns
+int timeGate[2] = {-100, 100}; // min, max, 1 ch = 10 ns
 int tacGate[2] = {-8000, -2000};
 int dEgate[2] = {500,  1500};
 int Eresgate[2] = {1000,4000};
@@ -723,7 +723,7 @@ Bool_t Monitors::Process(Long64_t entry)
     htac->Fill(tac[0]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
-    if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
+    //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
       
     
     /*********** ELUM ************************************************/
