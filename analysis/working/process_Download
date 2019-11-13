@@ -27,6 +27,8 @@ if [ ${PCName} == "digios1" ]; then
     echo "Already in digios1, no need to get data."
 elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
     echo "in LCRC, no need to get data."
+elif [ ${PCName:0:4} == "phyw" ]; then
+    echo "in MAC, no need to download"
 else
     #============ Get the raw data
     IP=192.168.1.2
