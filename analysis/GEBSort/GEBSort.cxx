@@ -952,8 +952,16 @@ main (int argc, char **argv)
 		    }
 		}
 		for (int j=0;j<100;j++) {
-		  if (run_num[j]==5) {
-		    RunNum=1000*run_num[j]+100*run_num[j+1]+10*run_num[j+2]+run_num[j+3];
+		  // This only works if the run number has a 5 in it... GLW 20.xi.2019
+		  // if (run_num[j]==5) {
+		  // RunNum=1000*run_num[j]+100*run_num[j+1]+10*run_num[j+2]+run_num[j+3];
+		  // j=100;
+		  // }
+		  if(run_num[j]>0){
+		    RunNum=100*run_num[j] + 10*run_num[j+1] + run_num[j+2];
+		    if(run_num[j+2]==0){ // for run numbers <100
+		      RunNum = 10*run_num[j] + run_num[j+1];
+		    }
 		    j=100;
 		  }
 		}
