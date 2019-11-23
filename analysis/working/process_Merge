@@ -19,7 +19,7 @@ else
     RUN=$(printf '%d' $RUN)
 fi
 
-#RUN=$(printf '%03d' ${RUN})
+runID=$(printf '%03d' ${RUN})
 
 #######################################
 #################### Merge
@@ -42,14 +42,14 @@ if [ $isMerge -eq 1 ]; then
     fi
 
     #==== check if merged data exist
-    isMergedDataExist=`ls -1 ${MERGDIR}/GEBMerged_run${RUN}* 2>/dev/null | wc -l`
+    isMergedDataExist=`ls -1 ${MERGDIR}/GEBMerged_run${runID}* 2>/dev/null | wc -l`
 
     #==== if merged data exist, check timeStamp
     if [ ${isMergedDataExist} -gt 0 ]; then
         if [ ${Arch} == "Linux" ]; then
-            mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+            mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${runID}* | sort -rn | head -1`
         else
-            mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+            mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${runID}* | sort -rn | head -1`
         fi
     else
         mergedDataTime=0
@@ -64,7 +64,7 @@ if [ $isMerge -eq 1 ]; then
             echo -e "${NC}"
         fi
         echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
-        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${runID}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${runID}.log
         echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
 
         if [ ${expName} == "h072_16N" ]; then
@@ -74,7 +74,7 @@ if [ $isMerge -eq 1 ]; then
             echo -e "${NC}"
         fi
         echo "=================================================================="
-        tail -n 30 ${MERGDIR}/GEBMerge_run${RUN}.log
+        tail -n 30 ${MERGDIR}/GEBMerge_run${runID}.log
         echo "=================================================================="
     else
         echo -e "${BLUE}Merged data are newer than raw data. No need to merged again.${NC}"
@@ -93,7 +93,7 @@ if [ $isMerge -eq -1 ]; then # force merge
 
     echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
     echo -e "${YELLOW} >>>>>>>>>>>>> force merge by user ${NC}"
-    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${runID}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${runID}.log
     echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
 
     if [ ${expName} == "h072_16N" ]; then
@@ -103,6 +103,6 @@ if [ $isMerge -eq -1 ]; then # force merge
         echo -e "${NC}"
     fi
     echo "=================================================================="
-    tail -n 30 ${MERGDIR}/GEBMerge_run${RUN}.log
+    tail -n 30 ${MERGDIR}/GEBMerge_run${runID}.log
     echo "=================================================================="
 fi

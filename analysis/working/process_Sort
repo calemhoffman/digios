@@ -33,7 +33,7 @@ else
     RUN=$(printf '%d' $RUN)
 fi
 
-#RUN=$(printf '%03d' ${RUN})
+RUN=$(printf '%03d' ${RUN})
 
 if [ $# -eq 1 ]; then
     echo -e "${Cyan}============================================="
