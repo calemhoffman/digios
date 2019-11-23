@@ -25,8 +25,8 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
 
    int nBin = 200;
 
-  //TString gate; gate.Form("!TMath::IsNaN(e[%d])", detID);
-   TString gate; gate.Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", detID, detID);
+  TString gate; gate.Form("!TMath::IsNaN(e[%d])", detID);
+  //TString gate; gate.Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", detID, detID);
 
    
 /**///========================================================  load tree
