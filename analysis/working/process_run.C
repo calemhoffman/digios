@@ -8,7 +8,7 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
   
   if (SORTNUM==0) {
     TString name;
-    name.Form("../root_data/run%d.root", RUNNUM);
+    name.Form("../root_data/run%03d.root", RUNNUM);
     TFile f(name);
 
     if( !f.IsOpen() ) return;
