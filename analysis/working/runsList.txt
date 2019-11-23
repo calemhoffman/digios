@@ -1,6 +1,11 @@
 //---data_path
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
--../root_data/gen_run028.root
-+../root_data/gen_run016.root
-+../root_data/gen_run02[0-7].root
+-../root_data/gen_run20.root
+//--------- 28Mg
+//+../root_data/gen_run5[6-9].root
++../root_data/gen_run6[0-9].root
++../root_data/gen_run7[0-9].root
++../root_data/gen_run8[0-9].root
++../root_data/gen_run9[0-9].root
+//+../root_data/gen_run100.root

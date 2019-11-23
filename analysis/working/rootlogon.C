@@ -1,4 +1,5 @@
 {
-   printf("\n=================== Root v6\n");
+   printf("=================== Root v%s\n", gROOT->GetVersion());
    gStyle->SetOptStat("neiou");
+   
 }
