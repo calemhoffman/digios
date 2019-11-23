@@ -26,7 +26,7 @@ const int numRow = 6;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = { 100, 12000}; // share with e, ring, xf, xn
+int rawEnergyRange[2] = { 1000, 16000}; // share with e, ring, xf, xn
 int    energyRange[2] = {   0,    20}; // in the E-Z plot
 int     rdtDERange[2] = {   0,  16000};
 int      rdtERange[2] = {   0,  10000};
@@ -1032,7 +1032,7 @@ void Monitors::Terminate()
    
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
-   
+   /*
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile,1250,1300);
    cCanvas->Modified(); cCanvas->Update();
    

@@ -21,7 +21,7 @@ void Cali_xf_xn_to_e(TTree *tree){
    
    const int nDet = rowDet * colDet;
    
-   int energyRange[2] = {500, 5000};
+   //int energyRange[2] = {2000, 5000};
    
    gStyle->SetOptStat(11111111);
    
@@ -85,7 +85,7 @@ void Cali_xf_xn_to_e(TTree *tree){
    for( int i = 0; i < nDet; i ++){
       TString name;
       name.Form("d%d", i);
-      d[i] = new TH2F(name, name , 200, 0 , 5000 , 200, 0 , 5000);
+      d[i] = new TH2F(name, name , 200, 0 , 8000 , 200, 0 , 8000);
       d[i]->SetXTitle("xf+xn");
       d[i]->SetYTitle("e");
       
@@ -115,7 +115,7 @@ void Cali_xf_xn_to_e(TTree *tree){
       fit->SetParameter(0, 0);
       fit->SetParameter(1, 1);
       
-      d[i]->Fit("fit", "qR");
+      d[i]->Fit("fit", "qR", "", 2000, 8000);
       
       slope[i] = fit->GetParameter(1);
       intep[i] = fit->GetParameter(0);
