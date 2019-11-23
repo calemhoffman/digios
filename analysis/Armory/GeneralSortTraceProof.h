@@ -119,12 +119,18 @@ public :
    float te[30];    // energy from trace
    float te_r[30];  // rising time from frace
    float te_t[30];  // time
+   
    float ttac[6];
    float ttac_t[6];
    float ttac_r[6];
+   
    float trdt[8];
    float trdt_t[8];
    float trdt_r[8];
+   
+   float tezero[8];
+   float tezero_t[8];
+   float tezero_r[8];
 
    int runIDLast;
    TString fileNameTemp;
