@@ -99,8 +99,9 @@ sup_rcnp ()
   tree->Branch("base_sample",EL->base_sample,"base_sample[NumHits]/s");
   tree->Branch("baseline",EL->baseline,"baseline[NumHits]/I");
   tree->Branch("trace_length",EL->trace_length,"trace_length[NumHits]/s");
-  //tree->Branch("trace",EL->trace,"trace[NumHits][1024]/S");
-  //tree->GetBranch("trace")->SetCompressionSettings(205);
+  //TODO make it controlable from outside
+  tree->Branch("trace",EL->trace,"trace[NumHits][1024]/S");
+  tree->GetBranch("trace")->SetCompressionSettings(205);
 
   TH1D *mkTH1D (char *, char *, int, double, double);
   TH2F *mkTH2F (char *, char *, int, double, double, int, double, double);

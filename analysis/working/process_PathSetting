@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#=========== Check host name
+PCName=$(hostname)
+Arch=$(uname -s)
+
+#    source /lcrc/project/HELIOS/digios/expName.sh
+#    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
+
+source ../../expName.sh #load expName
+AnalysisDir=../../analysis
+
+#remote data path
+dataloc=${daqDataPath}/${expName}/data
+daqDir=/home/helios/digios
+
+#===== directory and chat files
+GEBDIR=$AnalysisDir/GEBSort
+MERGDIR=$AnalysisDir/merged_data
+ROOTDIR=$AnalysisDir/root_data
+DATADIR=$AnalysisDir/data
+MERGECHAT=$AnalysisDir/working/GEBMerge.chat
+SORTCHAT=$AnalysisDir/working/GEBSort.chat
+
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
+GREEN='\033[1;32m'
+BLUE='\033[0;34m'
+Cyan='\033[0;36m'
+NC='\033[0m'
+
+#dir=$(pwd)
+#cd $GEBDIR
+#make offline
+#cd $dir

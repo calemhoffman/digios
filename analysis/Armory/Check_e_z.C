@@ -13,6 +13,7 @@
 #include <TLegend.h>
 #include <TObjArray.h>
 #include <fstream>
+#include <TCutG.h>
 
 int nPeaks = 16;
 TTree *tree = NULL;
@@ -34,12 +35,12 @@ void Check_e_z(TString rootfile){
    const char* treeName="tree";
    const char* simfile="transfer.root"; const char* treeNameS="tree";
 
-   int Div[2] = {6,4};  //x,y
+   int Div[2] = {5,6};  //x,y
    
-   double ExRange[3] = {180, -1, 8};
+   double ExRange[3] = {180, -1, 6};
 	double eRange[3]  = {400, 0, 10};
    
-   bool showFx = false;
+   bool showFx = true;
    bool showTx = false;
 
    TString drawOption ="colz"; 
@@ -67,12 +68,12 @@ void Check_e_z(TString rootfile){
       gate_RDT = "&& (cut0 || cut1 || cut2 || cut3)";
    }
    
-   TString detGate = "detID != 11 && detID !=12 ";
+   TString detGate = "detID != 2 && detID !=5 && detID != 10 && detID != 18 && detID != 19 && detID != 25";
 
 /**///======================================================== read tree   
    printf("################### Check_e_z.C ######################\n");
    
-   printf("Gate : %s \n", detGate.Data());
+   printf("det Gate : %s \n", detGate.Data());
    
    printf("======================================== \n");
    
@@ -96,8 +97,8 @@ void Check_e_z(TString rootfile){
 //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    int numDet;
-   int rDet = 6; // number of detector at different position, row-Det
-   int cDet = 4; // number of detector at same position, column-Det
+   int rDet = 5; // number of detector at different position, row-Det
+   int cDet = 6; // number of detector at same position, column-Det
    vector<double> pos;
    double length = 50.5;
    double firstPos = -110;
@@ -113,10 +114,10 @@ void Check_e_z(TString rootfile){
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) cDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 5 ) length   = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 17 ) cDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -126,8 +127,10 @@ void Check_e_z(TString rootfile){
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){
@@ -178,7 +181,7 @@ void Check_e_z(TString rootfile){
       hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
       expression.Form("e:x>>hEX%02d", idet);
       gate.Form("detID == %d && hitID >= 0", idet);
-      tree->Draw(expression, gate);
+      tree->Draw(expression, gate, "colz");
       cCheck1->Update();
    }
    
@@ -364,7 +367,7 @@ void Check_e_z(TString rootfile){
       if( hTheta[i]->GetMaximum() > yMax ) yMax = hTheta[i]->GetMaximum();
       hTheta[0]->GetYaxis()->SetRangeUser(1, yMax*1.5);
       
-      cCheck6->SetLogy();
+      //cCheck6->SetLogy();
       cCheck6->Update();
    }
    

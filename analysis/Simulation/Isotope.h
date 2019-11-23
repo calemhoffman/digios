@@ -1,3 +1,13 @@
+/***********************************************************************
+ * 
+ *  This is Isotope.h, To extract the isotope mass from massXX.txt
+ * 
+ *-------------------------------------------------------
+ *  created by Ryan (Tsz Leung) Tang, Nov-18, 2018
+ *  email: goluckyryan@gmail.com
+ * ********************************************************************/
+
+
 #ifndef ISOTOPE_H
 #define ISOTOPE_H
 
@@ -6,7 +16,7 @@
 #include <sstream>
 #include <string>
 #include <stdio.h>
-#include "../Simulation/constant.h" // amu
+#include "constant.h" // amu
 #include <stdlib.h>  //atoi
 using namespace std;
 
@@ -106,6 +116,21 @@ void Isotope::FindMassByAZ(int A, int Z){
 void Isotope::FindMassByName(string name){
 
     // done seperate the Mass number and the name 
+  if( name == "n" ) {
+    this->Name = "1n";
+    this->BEA       = 0;
+    this->Mass      = mn;
+    this->MassError = 0;
+    this->Name      = "n";
+    this->A         = 1;
+    this->Z         = 0;
+    return;
+  }
+    if( name == "p" ) name = "1H";
+    if( name == "d" ) name = "2H";
+    if( name == "t" ) name = "3H";
+    if( name == "a" ) name = "4He";
+    
     string temp = name;
     int lastDigit = 0;
 
@@ -123,13 +148,18 @@ void Isotope::FindMassByName(string name){
     }
 
     this->Symbol = temp.erase(0,  lastDigit +1);
+    //check is Symbol is 2 charaters, if not, add " " at the end
+    if( this->Symbol.length() == 1 ){
+      this->Symbol = this->Symbol + " ";
+    }
+
 
     temp = name;
     int len = temp.length();
     temp = temp.erase(lastDigit+1, len);
     
     this->A = atoi(temp.c_str());    
-    //printf(" Symbol = %s , Mass = %d\n", this->Symbol.c_str(), this->A);
+    //printf(" Symbol = |%s| , Mass = %d\n", this->Symbol.c_str(), this->A);
 
     // find the nucleus in the data
     string line;
@@ -160,7 +190,7 @@ void Isotope::FindMassByName(string name){
           list_symbol  = line.substr(20,2);
           list_A       = atoi((line.substr(15,5)).c_str());
 
-          //printf(" A = %d, Sym = %s \n", list_A, list_symbol.c_str());
+          //printf(" A = %d, Sym = |%s| \n", list_A, list_symbol.c_str());
 
           if ( this->A == list_A &&  this->Symbol == list_symbol) {
             this->Z         = atoi((line.substr(10,5)).c_str());

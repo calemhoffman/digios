@@ -35,7 +35,7 @@ all:
 		make mkMap
 		make GEBMerge
 		make online
-offline:	GEBSort_nogeb GEBMerge
+offline:	GEBSort_nogeb GEBMerge GEBSort_nogeb_trace
 online:		GEBSort
 G4:		G4toMode2_EU G4toMode2_USa G4toMode2_USb
 		make G4toMode2_EU
@@ -75,6 +75,12 @@ GEBSort_nogeb:	GTPrintCC.o GEBSort_nogeb.o time_stampCC.o GEBHeaderCC.o get_a_se
 		$(CC) $^ -DHAVE_VXWORKS=0 $(ROOTLIB)  -o $@ -lz
 #		./GEBSort_nogeb -input disk GTDATA/g4_mode1.out -rootfile GTDATA/test.root RECREATE -chat GEBSort.chat 
 
+
+GEBSort_nogeb_trace:	GTPrintCC.o GEBSort_nogeb.o time_stampCC.o GEBHeaderCC.o get_a_seedCC.o\
+		bin_mode2.o bin_mode1.o bin_mode3.o bin_dgs.o bin_rcnp_trace.o bin_dgs.o \
+		spe_funCC.o bin_gtcal.o
+		$(CC) $^ -DHAVE_VXWORKS=0 $(ROOTLIB)  -o $@ -lz
+
 get_a_seedCC.o:	get_a_seed.c
 		$(CC)  -c $(CCFLAG) -o $@ $^
 
@@ -109,6 +115,10 @@ bin_mode1.o:	bin_mode1.c
 
 bin_rcnp.o:	bin_rcnp.c
 		$(CC) $(CCFLAG) $(ROOTINC) -c -o $@  $^
+
+bin_rcnp_trace.o:	bin_rcnp_trace.c
+		$(CC) $(CCFLAG) $(ROOTINC) -c -o $@  $^
+
 
 bin_dgs.o:	bin_dgs.c
 		$(CC) $(CCFLAG) -c -o $@  $^

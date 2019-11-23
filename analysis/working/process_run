@@ -1,0 +1,80 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
+  echo "$./process_run [RunNum] [Merge] [EventBuild] [GeneralSort] [Monitor]"
+  echo "     RunNum = run number"
+  echo "      Merge =   1/0*     "  
+  echo "   EventBld = 2/1/0*   || 2 = with Trace"  
+  echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "        * negative option = force "
+  exit 1
+fi;
+
+RUN=$1
+
+isMerge=1
+isSort=1
+isGeneralSort=1
+isMonitor=1
+
+if [ $# -ge 2 ]; then isMerge=$2; fi
+if [ $# -ge 3 ]; then isSort=$3; fi
+if [ $# -ge 4 ]; then isGeneralSort=$4; fi
+if [ $# -ge 5 ]; then isMonitor=$5; OverRideMonitor="" ; fi
+
+GEBSort=GEBSort_nogeb
+GEBSortMsg="using GEBSort_nogeb"
+GeneralSortMsg="no trace"
+
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
+  isTrace=1
+  isMonitor=0
+  GEBSortMsg="using GEBSort_nogeb_trace"
+  GEBSort=GEBSort_nogeb_trace
+  if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then GeneralSortMsg="trace with ${isGeneralSort} core"; fi
+  OverRideMonitor="overrided by GeneralSortTrace."
+fi
+
+#remove any zero
+if [ "${RUN:0:1}" == "0" ]; then
+    RUN=${RUN:1:2}
+elif [ "${RUN:0:2}" == "00" ]; then
+    RUN=${RUN:2:1}
+else
+    RUN=$(printf '%d' $RUN)
+fi
+
+runID=$(printf '%03d' $RUN)
+
+echo "============================================="
+echo "============ RUN $runID ========================"
+echo "============================================="
+
+echo "Merge       : ${isMerge}"
+echo "Sort        : ${isSort}  ${GEBSortMsg}"  
+echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
+echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
+echo "============================================="
+
+
+#######################################
+####################  Download raw data
+./process_Download $RUN 
+
+#######################################
+#################### Merge
+./process_Merge $RUN $isMerge 
+
+#######################################
+#################### Sort and GeneralSort
+./process_Sort $RUN $isSort $isGeneralSort 
+
+########################################
+#################### Monitor
+if [ $isMonitor -eq 1 ] ; then
+  root -l "ChainMonitors.C(${RUN})"
+elif [ $isMonitor -eq 2 ] ; then
+  root -l ChainMonitors.C
+fi  
+  
+exit 1

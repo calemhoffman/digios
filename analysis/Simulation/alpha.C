@@ -27,7 +27,8 @@ void alpha(){
    int numEvent = 1000000;
    
    //---- HELIOS detector geometry
-   string heliosDetGeoFile = "detectorGeo.txt";
+   //string heliosDetGeoFile = "detectorGeo.txt";
+   string heliosDetGeoFile = "";
    double BField = 2.5; // T
    double BFieldTheta = 0.; // direction of B-field
    bool isCoincidentWithRecoil = false; 

@@ -1,0 +1,79 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] || [ $# -ne 3  ]; then
+    echo "Please input VME, DIG and PLANE"
+    exit 1
+fi
+
+VME=$1
+DIG=$2
+PLANE=$3
+
+echo "===================================================="
+echo " Set Trigger for VME${VME}:DIG${DIG} on Plane-${PLANE}"
+echo "===================================================="
+
+#VME:DIG to router convertor
+
+if [ ${VME} -eq 1 ] || [ ${VME} -eq 2 ] ; then  
+    ROUTER=1
+fi
+
+if [ ${VME} -eq 3 ] || [ ${VME} -eq 4 ] ; then  
+    ROUTER=2
+fi
+
+
+if [ ${VME} -eq 1 ] || [ ${VME} -eq 3 ] ; then  
+    if [ ${DIG} -eq 1 ]; then
+	SYM="A"
+    fi
+    if [ ${DIG} -eq 2 ]; then
+	SYM="B"
+    fi
+    if [ ${DIG} -eq 3 ]; then
+	SYM="C"
+    fi
+    if [ ${DIG} -eq 4 ]; then
+	SYM="D"
+    fi
+fi
+
+if [ ${VME} -eq 2 ] || [ ${VME} -eq 4 ] ; then  
+    if [ ${DIG} -eq 1 ]; then
+	SYM="E"
+    fi
+    if [ ${DIG} -eq 2 ]; then
+	SYM="F"
+    fi
+    if [ ${DIG} -eq 3 ]; then
+	SYM="G"
+    fi
+    if [ ${DIG} -eq 4 ]; then
+	SYM="H"
+    fi
+fi
+
+D2B=({0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1})
+
+trigger=$(caget VME32:RTR${ROUTER}:reg_${PLANE}_PLANE_MAP_${SYM}| awk '{print $2}')
+
+echo "                          |--DIG9"
+echo "                          |   |--DIG5"
+echo "                          |   |    |--DIG0"
+echo " === current trigger is bx${D2B[${trigger}]} = ${trigger}"
+
+read -p " ===   Set trigger to ? bx" newTrigger
+
+temp=$((2#${newTrigger}))
+
+echo " ===     new trigger is bx${D2B[${temp}]} = ${temp}"
+
+if [ ${temp} -gt 1023 ]; then
+    echo "###### Incorrect input!"
+    exit 1
+fi
+
+caput  VME32:RTR${ROUTER}:reg_${PLANE}_PLANE_MAP_${SYM} ${temp}
+
+echo "========= done."
