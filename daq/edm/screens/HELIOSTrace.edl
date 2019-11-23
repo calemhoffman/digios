@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 284
-y 51
+x 1018
+y 657
 w 650
 h 600
 font "helvetica-medium-r-18.0"
@@ -218,6 +218,26 @@ bgColor index 0
 useDisplayBg
 value {
   "Length:"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 43
+y 500
+w 300
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Board ID and Channel started from 0"
 }
 autoSize
 endObjectProperties

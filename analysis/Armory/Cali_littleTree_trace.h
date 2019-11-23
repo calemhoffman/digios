@@ -37,24 +37,28 @@ public :
    // Declaration of leaf types
    Float_t         e[100];
    ULong64_t       e_t[100];
+   Float_t         ring[100];
    Float_t         xf[100];
    Float_t         xn[100];
    Float_t         rdt[100];
    ULong64_t       rdt_t[100];
    
    //Trace
-   Float_t         te_t[24];
+   Float_t         te_t[30];
+   Float_t         trdt[8];
    Float_t         trdt_t[8];
 
    // List of branches
    TBranch        *b_Energy;   //!
    TBranch        *b_EnergyTimestamp;   //!
+   TBranch        *b_Ring;   //!
    TBranch        *b_XF;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
    
    TBranch        *b_Trace_Energy_Time;  //!   
+   TBranch        *b_Trace_RDT;  //!
    TBranch        *b_Trace_RDT_Time;  //!
    
    bool isTraceDataExist; // if b_Trace_** exist
@@ -91,6 +95,7 @@ public :
    int detIDTemp;
    int hitID; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
+   int rdtdEMultiHit; // multipicity of recoil-dE
    
    Float_t coinTimeUC; 
    Float_t coinTime;
@@ -112,9 +117,9 @@ public :
    double length;
    double firstPos;
    
-   double xnCorr[24]; // xn correction for xn = xf
-   double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
-   double cTCorr[24][9]; // coinTime correction
+   double xnCorr[30]; // xn correction for xn = xf
+   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   double cTCorr[30][9]; // coinTime correction
    bool isCoinTimeLoaded;
    TF1 ** f7 ; //!
    
@@ -136,11 +141,12 @@ void Cali_littleTree_trace::Init(TTree *tree)
    printf( "=========================================================================== \n");
    
    // Set branch addresses and branch pointers
-   if (!tree) return;
+   ////999999999   if (!tree) return;
    fChain = tree;
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("e", e, &b_Energy);
+   fChain->SetBranchAddress("ring", ring, &b_Ring);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
    
@@ -157,6 +163,14 @@ void Cali_littleTree_trace::Init(TTree *tree)
       traceData ++;
       fChain->SetBranchAddress("te_t", te_t, &b_Trace_Energy_Time);
    }
+
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("trdt");
+   if( br == NULL ) {
+      printf(" WARNING! cannot find Branch: trdt -> proceed without coincident-time calculation. \n");
+   }else {
+      traceData ++;
+      fChain->SetBranchAddress("trdt", trdt, &b_Trace_RDT);   
+   }
    
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("trdt_t");
    if( br == NULL ) {
@@ -167,7 +181,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    }
    
    isTraceDataExist = false;
-   if( traceData == 2 ) isTraceDataExist = true;
+   if( traceData == 3 ) isTraceDataExist = true;
    
    //===================================================== loading parameter
    //========================================= detector Geometry
@@ -182,11 +196,11 @@ void Cali_littleTree_trace::Init(TTree *tree)
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          if( i == 0 ) Bfield   = atof(x.c_str());
-         if( i == 2 ) a        = atof(x.c_str());         
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) jDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 3 ) a        = atof(x.c_str());         
+         if( i == 5 ) length   = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 17 ) jDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -196,8 +210,10 @@ void Cali_littleTree_trace::Init(TTree *tree)
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < iDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet -1 - id];
       }
       
       for(int i = 0; i < iDet ; i++){
@@ -233,13 +249,13 @@ void Cali_littleTree_trace::Init(TTree *tree)
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      Terminate();
-      return;
+      for( int i = 0 ; i < numDet; i++){
+         xnCorr[i] = 1;
+      }
    }
    file.close();
    
    //========================================= e = xf + xn correction
-   
    printf("----- loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
    if( file.is_open() ){
@@ -254,8 +270,10 @@ void Cali_littleTree_trace::Init(TTree *tree)
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      Terminate();
-      return;
+      for( int i = 0 ; i < numDet; i++){
+         xfxneCorr[i][0] = 0.0;
+         xfxneCorr[i][1] = 1.0;
+      }
    }
    file.close();
 

@@ -10,17 +10,17 @@
 #include <TF1.h>
 #include <TLine.h>
 
-void readTrace(TString fileName){
+void readTrace(TString fileName,bool isGoodOnly = false, int minDetID = 0, int maxDetID = 1000){
    
 /**///==============================================================   
 
    TFile * f1 = new TFile (fileName, "read");
-   TTree * tree = (TTree *) f1->Get("tree");
+   TTree * tree = (TTree *) f1->Get("gen_tree");
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 0, 800, 300);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 300);
    cRead->Divide(1,1);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
@@ -32,54 +32,23 @@ void readTrace(TString fileName){
    tree->GetBranch("trace")->SetAutoDelete(kFALSE);
    tree->SetBranchAddress("trace", &arr);
    
-   int eventID;
-   float e[24], xf[24], xn[24];
-   float te[24];
-   float rdt[8];
-   
-   tree->SetBranchAddress("eventID",   &eventID);
-   tree->SetBranchAddress("e",         e);
-   tree->SetBranchAddress("xf",        xf);
-   tree->SetBranchAddress("xn",        xn);
-   tree->SetBranchAddress("te",        te);
-   tree->SetBranchAddress("rdt",      rdt);
-
 	char s [1] ;
 	char b [1] ;
-	b[0] = '1';
+	b[0] = 'q';
 
    TLine timeVLine;
 
    bool breakFlag = false;
    for( int ev = 0; ev < totnumEntry; ev++){
-      arr->Clear();
       tree->GetEntry(ev);
-      
-      bool nextFlag = true;
-      
-      for( int i = 0; i < 24; i++){
-         if( TMath::IsNaN(e[i]) ) continue;    
-         if( e[i] > 0 ){
-            nextFlag = false;
-         }
-         printf("========= ev: %d, #trace: %d | %d, (e, xf, xn , te[i]) = (%7.2f, %7.2f, %7.2f, %7.2f)\n", 
-                    eventID, arr->GetEntriesFast(), i, e[i], xf[i], xn[i], te[i]);
-        
-      }
-      for( int i = 0; i < 8; i++){
-         if( TMath::IsNaN(rdt[i]) ) continue;    
-         if( rdt[i] > 0 ){
-            nextFlag = false;
-         }
-         printf("      rdt: %d , %7.2f\n", i, rdt[i]);
-        
-      }
-      
-      if( nextFlag ) continue;
       
       for( int j = 0; j < arr->GetEntriesFast() ; j++){
 
          TGraph * g  = (TGraph*) arr->At(j);
+         
+         TString gTitle;
+         gTitle = g->GetName();
+         g->SetTitle(gTitle);
          
          TF1 * gFit = (TF1 *) g->FindObject("gFit");
          if( gFit != NULL ){ 
@@ -88,18 +57,25 @@ void readTrace(TString fileName){
             time     = gFit->GetParameter(1);
             riseTime = gFit->GetParameter(2);
             base     = gFit->GetParameter(3);
-            chiSq     = gFit->GetChisquare()/gFit->GetNDF();
+            chiSq    = gFit->GetChisquare()/gFit->GetNDF();
             int kind = gFit->GetLineColor();
             int det  = gFit->GetLineStyle();
             
-            //if( det < 100 ) continue;
-            if( det != 18 && det != 19 && det !=12 ) continue;
+            if( !(minDetID <= det && det <= maxDetID ) ) continue;
             
-            TString gTitle;
-            gTitle.Form("(%d,%d), base: %5.1f, rise: %5.3f, time: %5.2f, energy: %6.1f | chi2: %6.2f, %6.2f |(1 for break)",
-                     det, kind, base, riseTime, time, energy, chiSq, TMath::Sqrt(chiSq)/energy);
+            if( isGoodOnly){
+              if( abs(energy) < 1.5* g->GetRMS(2) ) continue;
+              if( time > gFit->GetXmax() || time < gFit->GetXmin()) continue;
+              if( time > 200 || time < 20) continue;
+              if( riseTime > gFit->GetXmax()/7. || riseTime < 0 ) continue;
+            }
             
-            printf("%s", gTitle.Data());
+            if( energy < 400 ) continue;
+                        
+            gTitle.Form("(%3d,%d), base: %8.1f, rise: %6.2f, time: %6.1f, energy: %8.1f | chi2: %8.1f, RMS: %6.1f",
+                     det, kind, base, riseTime, time, energy, chiSq, g->GetRMS(2));
+            
+            printf("%s |(%s for break)", gTitle.Data(), b);
             g->SetTitle(gTitle);
            
            
@@ -127,20 +103,9 @@ void readTrace(TString fileName){
          }
       }
       if( breakFlag ) break;
+      
    }
    
-   gROOT->ProcessLine(".q");
+   //gROOT->ProcessLine(".q");
 
-/*
-   TH2F * hEE = new TH2F("hEE", "jj; e(trace); e(digit)", 500, 0, 8000, 500, 0, 8000);
-   for( int ev = 0; ev < totnumEntry; ev++){
-      tree->GetEntry(ev);
-      for( int i = 0; i < 24; i++){
-         if( TMath::IsNaN(te[i]) || TMath::IsNaN(e[i]) ) continue;  
-         hEE->Fill(te[i] , e[i]);
-      }
-   }
-   hEE->Draw();
-   
-*/   
 }

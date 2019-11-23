@@ -26,15 +26,18 @@
 void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400){
 /**///======================================================== User Input
 
-   double a1Range[2] = {200, 450};
-   double a0Range[2] = {-0.7, 4.0};
+   double a1Range[2] = {600, 800};
+   double a0Range[2] = {-0.7, 2.0};
+   
+   double SSR = 150; // sum of square of residual of the fitting
 
    double distThreshold   = 0.01;
    bool isXFXN = false; // only use event for both XF and XN valid
    
    int nTrial = 1000;
    
-   double coinTimeGate = 10.; // TMath::Abs(coinTime) < coinTimeGate
+   double coinTimeCentral = 19;
+   double coinTimeGate = 30.; // TMath::Abs(coinTime - coinTimeCentral) < coinTimeGate
 
 /**///======================================================== 
    printf("==========================================================\n");
@@ -93,8 +96,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    int numDet;
-   int rDet = 6; // number of detector at different position, row-Det
-   int cDet = 4; // number of detector at same position, column-Det
+   int rDet = 5; // number of detector at different position, row-Det
+   int cDet = 6; // number of detector at same position, column-Det
    vector<double> pos;
    double length = 50.5;
    double firstPos = -110;
@@ -110,10 +113,10 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) cDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i == 5 ) length   = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 17 ) cDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -123,8 +126,10 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){
@@ -143,7 +148,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    
    numDet = rDet * cDet;
    
-   /*//========================================= xf = xn correction
+   /* obsolete, the little tree already use the calibrations
+   //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
@@ -157,7 +163,9 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      return;
+      for( int i = 0; i < numDet ; i ++){
+         xnCorr[i] = 1;
+      }
    }
    file.close();
    
@@ -177,10 +185,14 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       printf("... done.\n");
    }else{
       printf("... fail.\n");
-      return;
+      for( int i = 0; i < numDet ; i ++){
+         xfxneCorr[i][0] = 0;
+         xfxneCorr[i][1] = 1;
+      }
    }
-   file.close(); */
-
+   file.close();
+   */ 
+   
 /**///======================================================== setup tree
 
    double  eTemp;
@@ -217,6 +229,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    TGraph ** fx = new TGraph *[numFx];
    for( int i = 0; i < numFx ; i++){
       fx[i] = (TGraph*) fxList->At(i);
+      fx[i]->SetLineColor(2);
    }
    
 /**///======================================================== Extract tree entry, create new smaller trees, use that tree to speed up
@@ -257,7 +270,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       
       TString name;
       name.Form("exPlot%d[%d]", idet, idet%rDet);
-      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 3000);
+      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 9000);
       exPlot[idet]->Reset();
       exPlot[idet]->SetTitle(title + "(exp)");
 
@@ -282,7 +295,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
             if( isXFXN && hitIDTemp != 0 ) continue;
-            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
             
             //printf("%d | %f, %f, %f \n", i, zTemp, eTemp, coinTimeTemp);
             
@@ -306,9 +319,9 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       clock.Reset(); clock.Start("timer");
       
       double A0 = 0.;
-      double A1 = 260.;
+      double A1 = (a1Range[1] - a1Range[0])/2.;
       
-      double minTotalMinDist = 99.;
+      double minTotalMinDist = SSR;
       
       TString gDistName; 
       gDistName.Form("gDist%d", idet);
@@ -328,8 +341,15 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
         if( eTemp < eThreshold) continue;
         if( isXFXN && hitIDTemp != 0 ) continue;
         if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
-        if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+        if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
         countEvent++;
+      }
+      
+      if( countEvent < 10 ) {
+         B1[idet] = 1;
+         B0[idet] = 0;
+         printf("======= skip for number of entries < 10 \n");
+         continue;
       }
       
       int countMax = 0;
@@ -348,7 +368,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( isXFXN && hitIDTemp != 0 ) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
-            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+            if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
             double minDist = 99;
             
             for( int i = 0; i < numFx; i++){
@@ -405,7 +425,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
                   if( detIDTemp != idet ) continue;
                   if( isXFXN && hitIDTemp != 0 ) continue;
                   if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
-                  if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
+                  if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
                   exPlotC[idet]->Fill(zTemp, eTemp/A1 + A0);
                }
                cScript->cd(2);
@@ -417,7 +437,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 
          }
             
-      }// end of loop
+      }// end of trial loop
       
       //After founded the best fit, plot the result
       //======== time

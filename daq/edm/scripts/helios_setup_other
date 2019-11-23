@@ -4,29 +4,31 @@
 #
 
 echo "############################################"
-echo "##### Setting other params for iss000  #####"
+echo "### Setting thresholds from last save  #####"
 echo "############################################"
 
 #echo "* setting ezero params *"
 #./edm/scripts/ezero_saved
 #echo "** done with ezero settings **"
 
-echo "* setting array params"
+echo "* setting array thresholds from ed,/script/array_saved."
 ./edm/scripts/array_saved
-echo "** done with array settings"
 
-echo "* setting elum params"
-./edm/scripts/elum_saved
-echo "** done with elum settings"
+#echo "* setting array trace lengths from ed,/script/array_raw_data_windows_saved."
+#./edm/scripts/array_raw_data_windows_saved
+#echo "** done with array settings"
+#echo "* setting elum params"
+#./edm/scripts/elum_saved
+#echo "** done with elum settings"
 
-echo "* setting recoil params"
-./edm/scripts/recoil_saved
-echo "** done with recoil settings"
+#echo "* setting recoil params"
+#./edm/scripts/recoil_saved
+#echo "** done with recoil settings"
 
 #echo "setting timing params"
 #./edm/scripts/timing_saved
 #echo "done with timing settings"
 
 echo "###########################################"
-echo "#### finished with settings for iss000 ####"
+echo "#### finished                          ####"
 echo "###########################################"

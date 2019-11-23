@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 531
-y 360
+x 533
+y 386
 w 400
 h 200
 font "courier-medium-r-10.0"
@@ -29,14 +29,14 @@ minor 1
 release 0
 x 88
 y 17
-w 186
+w 179
 h 21
 font "helvetica-bold-r-18.0"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Crate Enable/Disable"
+  "VME Enable/Disable"
 }
 autoSize
 endObjectProperties
@@ -129,14 +129,15 @@ minor 1
 release 0
 x 308
 y 50
-w 50
+w 44
 h 16
 font "helvetica-bold-r-14.0"
+fontAlign "center"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Crate 4"
+  "VME 4"
 }
 autoSize
 endObjectProperties
@@ -249,14 +250,14 @@ minor 1
 release 0
 x 228
 y 50
-w 50
+w 44
 h 16
 font "helvetica-bold-r-14.0"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Crate 3"
+  "VME 3"
 }
 autoSize
 endObjectProperties
@@ -369,14 +370,14 @@ minor 1
 release 0
 x 148
 y 50
-w 50
+w 44
 h 16
 font "helvetica-bold-r-14.0"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Crate 2"
+  "VME 2"
 }
 autoSize
 endObjectProperties
@@ -489,14 +490,14 @@ minor 1
 release 0
 x 68
 y 50
-w 50
+w 44
 h 16
 font "helvetica-bold-r-14.0"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Crate 1"
+  "VME 1"
 }
 autoSize
 endObjectProperties

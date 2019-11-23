@@ -14,7 +14,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
 /**///======================================================== User input
    
    const char* treeName="tree";
-   double eRange[3]  = {400, 0, 4000};
+   double eRange[3]  = {400, 0, 9000};
 
 /**///======================================================== read tree and create Canvas
    printf("################### Check_e_x.C ######################\n");
@@ -23,7 +23,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    TTree *tree = (TTree*)file0->Get(treeName);
    printf("=====> /// %15s //// is loaded. Total #Entry: %10lld \n", rootFile.Data(),  tree->GetEntries());
    
-   Int_t Div[2] = {6,4};  //x,y
+   Int_t Div[2] = {5,6};  //x,y
    Int_t size[2] = {200,230}; //x,y
    
    TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
@@ -72,10 +72,10 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 6 ) length   = atof(x.c_str());
-         if( i == 8 ) firstPos = atof(x.c_str());
-         if( i == 9 ) cDet = atoi(x.c_str());
-         if( i >= 10 ) {
+         if( i ==  5 ) length   = atof(x.c_str());
+         if( i == 14 ) firstPos = atof(x.c_str());
+         if( i == 17 ) cDet = atoi(x.c_str());
+         if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -85,8 +85,10 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){

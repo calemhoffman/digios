@@ -106,6 +106,7 @@ public :
    TBranch        *b_trace;   //!
    
    //======================= new tree, new file
+   TString saveFileName;
    TFile *saveFile; //!
    TProofOutputFile * proofFile; //!
    TTree *newTree; //!
@@ -115,15 +116,21 @@ public :
    TGraph * gTrace; //!
    TF1 * gFit; //!
 
-   float te[24];    // energy from trace
-   float te_r[24];  // rising time from frace
-   float te_t[24];  // time
+   float te[30];    // energy from trace
+   float te_r[30];  // rising time from frace
+   float te_t[30];  // time
+   
    float ttac[6];
    float ttac_t[6];
    float ttac_r[6];
+   
    float trdt[8];
    float trdt_t[8];
    float trdt_r[8];
+   
+   float tezero[8];
+   float tezero_t[8];
+   float tezero_r[8];
 
    int runIDLast;
    TString fileNameTemp;
@@ -132,32 +139,32 @@ public :
    typedef struct {
       Int_t   eventID;
       Int_t   runID;
-      Float_t Energy[24];
-      Float_t XF[24];
-      Float_t XN[24];
-      Float_t Ring[24];
-      Float_t RDT[24];
-      Float_t TAC[24];
+      Float_t Energy[100];
+      Float_t XF[100];
+      Float_t XN[100];
+      Float_t Ring[100];
+      Float_t RDT[100];
+      Float_t TAC[100];
       Float_t ELUM[32];
-      Float_t EZERO[4];
+      Float_t EZERO[10];
 
-      ULong64_t EnergyTimestamp[24];
-      ULong64_t XFTimestamp[24];
-      ULong64_t XNTimestamp[24];
-      ULong64_t RingTimestamp[24];
-      ULong64_t RDTTimestamp[24];
-      ULong64_t TACTimestamp[24];
+      ULong64_t EnergyTimestamp[100];
+      ULong64_t XFTimestamp[100];
+      ULong64_t XNTimestamp[100];
+      ULong64_t RingTimestamp[100];
+      ULong64_t RDTTimestamp[100];
+      ULong64_t TACTimestamp[100];
       ULong64_t ELUMTimestamp[32];
-      ULong64_t EZEROTimestamp[4];
+      ULong64_t EZEROTimestamp[10];
       
-      Float_t x[24];
+      Float_t x[100];
       
    } PSD;
 
    PSD psd; 
    
    //need to put NULL on pointer
-   GeneralSortTraceProof(TTree * /*tree*/ =0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
+ GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
    virtual ~GeneralSortTraceProof() { }
    
    virtual Int_t   Version() const { return 2; }

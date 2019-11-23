@@ -12,7 +12,6 @@
 #include <TGraph.h>
 #include <fstream>
 #include <TProof.h>
-#include "../Simulation/transfer.C"
 #include "../Armory/Cali_littleTree_trace.h"
 #include "../Armory/Check_e_x.C"
 #include "../Armory/Cali_e_single.C"
@@ -21,22 +20,23 @@
 #include "../Armory/Cali_scale_x.C"
 #include "../Armory/Cali_compareF.C"
 #include "../Armory/Cali_e_trace.h"
-#include "../Armory/Cali_e_trace.h"
 #include "../Armory/GetCoinTimeCorrectionCutG.C"
 
 //==========================================
 //         This file show the steps for calibration 
 //         //TODO detect branch te_t and trdt_t exist or not, if exist, calibrate with coinTime
+//         //TODO rdtCut is in runslist.txt
 //==========================================
 
-void AutoCalibrationTrace(){
+int temp ;   
+int option;
+
+void PrintManual(){
    
-   int option;
    printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
-   printf("      Please Edit runsList.txt  \n");
-   //printf(" ------ GeneralSortTrace.C output : sorted.root --- \n");
+   printf(" \e[31m     Please Edit runsList.txt  \e[0m\n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
@@ -47,35 +47,46 @@ void AutoCalibrationTrace(){
    printf(" 4 = e calibration for single detector (alpha)\n");
    printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
    printf(" 6 = coinTimeUC calibration. (MANUAL) \n");
-   printf(" 7 = run Simulation/transfer.C\n");
+   printf(" 7 = run Cleopatra/transfer.C\n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
-   int temp = scanf("%d", &option);
+   temp = scanf("%d", &option);
    printf(" -------------------------------------------------- \n");
    
+}
+
+void toTransferReaction(){
+   
+   printf("========= Cleopatra/Transfer.C ========= \n");
+   printf("== Please check :\n");
+   printf("        1) detectorGeo.txt\n");
+   printf("        2) reactionConfig.txt\n");
+   printf("        3) Ex.txt\n");
+   printf("========================================= \n");
+   int nextFlag = 0; 
+   printf("Prceed (1 = Yes / 0 = No ) ? ");
+   temp = scanf("%d", &nextFlag);
+
+   if( nextFlag == 0 ){
+      printf(" ------ bye bye !------- \n");
+      gROOT->ProcessLine(".q");
+      return;
+   }
+   system("../Cleopatra/Transfer");
+   //gROOT->ProcessLine(".q");
+
+}
+
+
+//TODO in a while-loop that don't need to run the macro again
+void AutoCalibrationTrace(){
+
+   PrintManual();
    
 //====================================================  Transfer calculation
    if( option == 7 ) {
-      printf("========= Simulation/transfer.C ========= \n");
-      printf("== Please check :\n");
-      printf("        1) detectorGeo.txt\n");
-      printf("        2) basicReactionConfig.txt\n");
-      printf("        3) excitation_energies.txt\n");
-      printf("========================================= \n");
-      int nextFlag = 0; 
-      printf("Prceed (1 = Yes / 0 = No ) ? ");
-      temp = scanf("%d", &nextFlag);
-      
-      if( nextFlag == 0 ){
-         printf(" ------ bye bye !------- \n");
-         gROOT->ProcessLine(".q");
-         return;
-      }
-      transfer();
-      gROOT->ProcessLine(".q");
+      toTransferReaction();
    }
-   
-   
    
    printf(" ..... loading runsList.txt..");
 //==================================================== data files
@@ -166,14 +177,14 @@ void AutoCalibrationTrace(){
    }
    
    if( option == 0 || option == 4 || option == 5 ){
-      printf(" ============================= alpha source files :  \n");
+      printf(" ============================= alpha source files :  \033[0;31m\n");
       chainAlpha->GetListOfFiles()->Print();
-      printf(" ================================================== \n");
+      printf("\033[0m\n");
    }
    if( 1 <= option && option <= 3){
-      printf(" ================ files :  \n");
+      printf(" ================ files :  \033[0;31m\n");
       chain->GetListOfFiles()->Print();
-      printf(" ================================================== \n");
+      printf("\033[0m\n");
    }    
    
    if( option == 0 ) {
@@ -181,14 +192,10 @@ void AutoCalibrationTrace(){
       return ;
    }
    
-      
-
-   
    if( option == 1 ) {
       Cali_xf_xn_to_e(chain);
       gROOT->ProcessLine(".q");
    }
-   
       
    if( option == 2 ) {
       
@@ -196,8 +203,9 @@ void AutoCalibrationTrace(){
       printf(" Step 1) Generate smaller root file to speed thing up.           \n");
       printf("         ** aware of the Gate in Armory/Cali_little_tree_trace.C \n");
       printf(" Step 2) Generate kinematics line using Simulation/transfer.C    \n");
-      printf("         ** make sure you have correct A) basicReactoinConfig.txt    \n");
-      printf("                                       B) excitation_energies.txt    \n");
+      printf("         ** make sure you have correct A) reactoinConfig.txt    \n");
+      printf("                                       B) detGeometry.txt    \n");
+      printf("                                       C) Ex.txt    \n");
       printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
       printf("=================================================================\n");
       int proceedFlag = 0;
@@ -230,14 +238,11 @@ void AutoCalibrationTrace(){
       printf("(1 = Yes / 0 = No ) ? ");
       temp = scanf("%d", &nextFlag);
       
-      if( nextFlag == 0 ){
-         printf(" ------ bye bye !------- \n");
-         gROOT->ProcessLine(".q");
-         return;
-      }
-      transfer();
-      
       TString rootfileSim="transfer.root";
+      if( nextFlag == 1 ){
+         toTransferReaction();
+      }
+      
       TFile *fs = new TFile (rootfileSim, "read"); 
       if(!fs->IsOpen()){
          printf("!!!!! cannot open transfer.root !!!!! \n");
@@ -247,6 +252,7 @@ void AutoCalibrationTrace(){
       
       printf("#######################################################\n");
       printf("Step 3) =============== Calibrate\n");
+      printf("           Please edit the gate on Armory/CompareF.C\n");
       float energyThreshold = 300;
       printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
       temp = scanf("%f", &energyThreshold);
