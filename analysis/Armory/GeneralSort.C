@@ -8,7 +8,7 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 200 //Highest multiplicity
-#define M -100 //M value for energy filter from digi setting, number of channel
+#define M 100 //M value for energy filter from digi setting, number of channel
 
 ULong64_t MaxProcessedEntries=100000000;
 ULong64_t NumEntries = 0;
@@ -266,7 +266,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 110 ) {
         Int_t rdtID = idDet-100;
-        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 

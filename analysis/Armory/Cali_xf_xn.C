@@ -29,12 +29,16 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int rowDet = 6;
-   const int colDet = 5;
+   //TODO, load the detectorGeo.txt
+   const int rowDet = 4;
+   const int colDet = 6;
    
    const int numDet = rowDet * colDet;
    
-   int energyRange[3] = {150, 3100, 7000}; // bin, min, max
+   //TODO auot find range
+   int energyRange[3] = {200, 500, 2000}; // bin, min, max
+   
+   float threshold = 0.15;
    
 /**///========================================================  load tree
 
@@ -159,7 +163,7 @@ void Cali_xf_xn(TTree * tree){
       for( int i = 0; i < numDet; i++){
          
          TSpectrum * spec = new TSpectrum(10);
-         nPeaks = spec->Search(q[i], 1, "", 0.30);
+         nPeaks = spec->Search(q[i], 1, "", threshold);
          printf("%2d | found %d peaks | ", i,  nPeaks);
 
          double * xpos = spec->GetPositionX();

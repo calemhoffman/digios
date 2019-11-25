@@ -5,8 +5,10 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
 
   if( RUNNUM == -1){
 
-    chain->Add("../root_data/gen_run016.root"); 
-    chain->Add("../root_data/gen_run02[0-7].root");     
+    chain->Add("../root_data/gen_run06[0-9].root");     
+    chain->Add("../root_data/gen_run07[0-9].root");     
+    chain->Add("../root_data/gen_run08[0-9].root");     
+    chain->Add("../root_data/gen_run09[0-9].root");     
     
     
   }else{

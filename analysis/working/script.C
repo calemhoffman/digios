@@ -20,7 +20,7 @@
  
 void Aux(int cutID, TTree *tree0, TCutG ** cut_in, TCanvas * cScript, int startPadID, TObjArray * fxList, TObjArray * gList);
 
-void script1(){
+void script(){
 
    //========================== input file/cut/simulation
    //TString fileName = "A_trace_run008-013.root"; // 15N degraded
@@ -32,17 +32,15 @@ void script1(){
    //TTree * tree0 = (TTree*) file0->FindObjectAny("tree");
    
    TChain * tree0 = new TChain("tree");
-   //tree0->Add("A_trace_run056-057_059-085_087-099.root");
-   tree0->Add("A_trace_run101-144_147-194.root");
-   //TString fileName = "run056 - run194";
-   TString fileName = "run101 - run194";
+   tree0->Add("A_gen_run060-099.root");
+   TString fileName = "run060 - run099";
    
    TFile * file1 = new TFile("transfer.root");
    TTree * tree1 = (TTree*) file1->FindObjectAny("tree");
    TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
    TObjArray * gList = (TObjArray*) file1->FindObjectAny("gList");
    
-   TString rdtCutFile = "rdt_16N.root";
+   TString rdtCutFile = "rdtCuts.root";
    TFile * fileCut = new TFile(rdtCutFile);
    TObjArray * cutList = NULL;
    TCutG ** cut_in = NULL;
@@ -69,7 +67,7 @@ void script1(){
    TString gate_time = "abs(coinTime-19)<9 && Ex > -2";  ///change time gate
  //   TString gate_time = "abs(coinTime)<200";  
    //========================== Canvas
-   int div[2] = {6,4}; // x,y
+   int div[2] = {3,2}; // x,y
    
    TCanvas * cScript = new TCanvas("cScript", "cScript : " + fileName + "|" + rdtCutFile, 0, 0, 400 * div[0], 400 * div[1]);
    cScript->Divide(div[0], div[1]);
@@ -159,25 +157,31 @@ void script1(){
    ///cScript->cd(6); tree0->Draw("coinTime:z>>h5(400, 700, 1000, 400, -50, 200)", "int(detID/5)==5 && cut3", "colz");
    
    
-   //========================================== 
+   //========================================== RDT gate 
    
    ///Canvas size is 6 x 4
    
-   gStyle->SetPalette(kBird);
-   
-   Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
-   Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
-   Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
-   Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
+   ///gStyle->SetPalette(kBird);
+   ///
+   ///Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
+   ///Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
+   ///Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
+   ///Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
 
    //==========================================  E-Z and Ex
    
+   
    ///cScript->cd(1); tree0->Draw("e:z>>h1(400, 700, 1000, 400, 0, 20)", "(cut0 || cut1 || cut2 || cut3 ) && abs(coinTime - 19)< 8 && Ex > -2 && thetaCM > 10", "colz");
+   ///cScript->cd(1); tree0->Draw("e:z>>h1(400, -500, -100, 400, 0, 10)", "Ex > -2 && thetaCM > 10 && -5 < coin_t && coin_t < 10", "colz");
    ///fxList->At(0)->Draw("same");
    ///fxList->At(1)->Draw("same");
    ///gList->At(0)->Draw("same");
    ///cScript->cd(2); tree0->Draw("Ex:thetaCM>>h2(400, 0, 50, 400, -2, 5)", "(cut0 || cut1 || cut2 || cut3 ) && abs(coinTime - 19)< 8 && Ex > -2 && thetaCM > 10", "colz");
+   ///cScript->cd(2); tree0->Draw("Ex:thetaCM>>h2(400, 0, 50, 400, -2, 5)", "Ex > -2 && thetaCM > 10 && -5 < coin_t && coin_t < 10", "colz");
    ///cScript->cd(3); tree0->Draw("Ex>>h3(280, -2, 5)", "(cut0 || cut1 || cut2 || cut3 ) && abs(coinTime - 19)< 8 && Ex > -2 && thetaCM > 10", "colz");
+   ///cScript->cd(3); tree0->Draw("Ex>>h3(280, -2, 5)", "Ex > -2 && thetaCM > 10", "colz");
+   
+   ///cScript->cd(3); tree0->Draw("Ex:coin_t>>h3(100, -50, 50, 400, -2, 5)", "Ex > -2 && thetaCM > 10", "colz");
    ///
    ///TString gate ;
    ///TString express ;
@@ -187,17 +191,44 @@ void script1(){
    ///   gate.Form("(cut0 || cut1 || cut2 || cut3 ) && abs(coinTime - 19)< 10 && Ex > -2 && thetaCM > 10 && detID == %d", i);
    ///   tree0->Draw(express, gate, "");
    ///}
+   
+   
+   //========================================= Angular distribution
+   
+   TString gate = "Ex > -2 && thetaCM > 10 && -5 < coin_t && coin_t < 10 && abs(x)<0.7 && hitID > 0 ";
+   
+   ///cScript->cd(1); tree0->Draw("e:z>>h1(400, -500, -100, 400, 0, 10)", gate , "colz");
+   ///cScript->cd(2); tree0->Draw("Ex:thetaCM>>h2(400, 0, 50, 500, -1, 4)", gate, "colz");
+   ///cScript->cd(3); tree0->Draw("Ex>>h3(500, -1, 4)", gate, "colz");
+   
+   
+   cScript->cd(1); tree0->Draw("thetaCM>>k0(100, 0, 50)", gate + "&& abs(Ex-0)< 0.2 ", "colz");
+   cScript->cd(2); tree0->Draw("thetaCM>>k1(100, 0, 50)", gate + "&& abs(Ex-1.09)< 0.12 ", "colz");
+   cScript->cd(3); tree0->Draw("thetaCM>>k2(100, 0, 50)", gate + "&& abs(Ex-1.42)< 0.12 ", "colz");
+   cScript->cd(4); tree0->Draw("thetaCM>>k3(100, 0, 50)", gate + "&& abs(Ex-2.26)< 0.12 ", "colz");
+   cScript->cd(5); tree0->Draw("thetaCM>>k4(100, 0, 50)", gate + "&& abs(Ex-2.5)< 0.12 ", "colz");
+   cScript->cd(6); tree0->Draw("thetaCM>>k5(100, 0, 50)", gate + "&& abs(Ex-3.2)< 0.2 ", "colz");
+   
+   
+   ///cScript->cd(1); tree0->Draw("Ex>>k0(250, -1, 4)", gate + "&& detID%6 ==0 ", "colz");
+   ///cScript->cd(2); tree0->Draw("Ex>>k1(250, -1, 4)", gate + "&& detID%6 ==1 ", "colz");
+   ///cScript->cd(3); tree0->Draw("Ex>>k2(250, -1, 4)", gate + "&& detID%6 ==2 ", "colz");
+   ///cScript->cd(4); tree0->Draw("Ex>>k3(250, -1, 4)", gate + "&& detID%6 ==3 ", "colz");
+   ///cScript->cd(5); tree0->Draw("Ex>>k4(250, -1, 4)", gate + "&& detID%6 ==4 ", "colz");
+   ///cScript->cd(6); tree0->Draw("Ex>>k5(250, -1, 4)", gate + "&& detID%6 ==5 ", "colz");
+   
 
    //========================================= histogram offset
    
-   
+   /**
    /// Canvas size 5 x 5
    
    ///For H072_16N
    
    
-   div[0] = 5; // x
-   div[1] = 5; // y
+   div[0] = 6; // x
+   div[1] = 4; // y
+   const int numDet = div[0] * div[1];
    TCanvas * cJaJaJa = new TCanvas("cJaJaJa", "cJaJaJa : " + fileName + "|" + rdtCutFile, 0, 0, 200 * div[0], 200 * div[1]);
    cJaJaJa->Divide(div[0], div[1]);
    for( int i = 1; i <= div[0] * div[1] ; i++){
@@ -214,8 +245,8 @@ void script1(){
    ///                       -0.007,  0.082,  0.245,  1.083,  0.589,
    ///                        0.259,  0.264,  0.432,  0.456,     -1};
    
-   double ExOffset[30];
-   for( int i = 0; i < 30; i++) ExOffset[i] = 0;
+   double ExOffset[numDet];
+   for( int i = 0; i < numDet; i++) ExOffset[i] = 0;
    
    // testing
    //double ExOffset[30] ={     -1,     -1,     -1,     -1,     -1,
@@ -228,31 +259,33 @@ void script1(){
                           
    TString gate ;
    TString express ;
-   TH1F ** hh = new TH1F *[30];
-   double resol = 0.1;
-   int ExRange [2] = {-3, 7};
+   TH1F ** hh = new TH1F *[numDet];
+   double resol = 0.025;
+   int ExRange [2] = {-1, 6};
    TLegend * legend = new TLegend(0.85,0.1,.99,0.99);
    
    
-   for( int i = 5; i < 30 ; i++){
-      cJaJaJa->cd(i-4); 
+   for( int i = 0; i < numDet ; i++){
+      cJaJaJa->cd(i+1); 
       hh[i] = new TH1F( Form("hh%d", i), Form("hh%d", i), (ExRange[1] - ExRange[0])/resol, ExRange[0], ExRange[1]);
+      hh[i]->SetLineWidth(0);
       express.Form("Ex - %f>>hh%d", ExOffset[i], i);
-      gate.Form("(cut0 || cut1 || cut2 || cut3 ) && abs(coinTime - 19)< 10 && Ex > -2 && thetaCM > 10 && detID == %d", i);
+      gate.Form("detID == %d && -5 < coin_t && coin_t < 10", i);
+      //gate.Form("(cut0 || cut1 || cut2 || cut3 ) && abs(coinTime - 19)< 10 && Ex > -2 && thetaCM > 10 && detID == %d", i);
       tree0->Draw(express, gate, "");
       legend->AddEntry(hh[i]);
-
    }
                           
    THStack *hs = new THStack("hs","");
-   for( int i = 29; i > 4 ; i--){
+   
+   for( int i = numDet-1; i >= 0 ; i--){
       if( ExOffset[i] > -1 ) hs->Add(hh[i]);
    }
    
    TCanvas * hahaha = new TCanvas( "hahaha", "Stacked Ex histogram & all", 1600, 600);
    hahaha->Divide(2,1);
    hahaha->cd(1);
-   //gStyle->SetPalette(kRainbow);
+   gStyle->SetPalette(kRainBow);
    hs->Draw("pfc");
    gStyle->SetOptStat("000000");
    legend->Draw();
@@ -261,24 +294,22 @@ void script1(){
    gStyle->SetOptStat("neiour");   
    TH1F * hAll = new TH1F("hAll", Form("%s | %s", fileName.Data(), rdtCutFile.Data()), (ExRange[1] - ExRange[0])/resol, ExRange[0], ExRange[1]);
    
-   for( int i = 5; i < 30 ; i++){
+   for( int i = 0; i < numDet ; i++){
       if( ExOffset[i] == -1 ) continue;
-
       hAll->Add(hh[i]);
-      
    }
-   hAll->Add(hh[10],-1);
-   
    hahaha->cd(2);
    hAll->SetLineColor(4);
-   hAll->SetLineWidth(3);
-   hAll->SetXTitle(Form("Ex [%.1f keV]", resol * 1000));   
+   hAll->SetLineWidth(1);
+   hAll->SetXTitle("Ex [MeV]");
+   hAll->SetYTitle(Form("count / %.1f keV", resol * 1000. ));
    hAll->Draw("same");
    
    
    //TF1 * fit = new TF1("fit", "gaus");
    //hAll->Fit("fit", "", "R",0, 1.0 );
    
+   /*
    TF1 * fit = new TF1("fit", "gaus", 0.,1.1) ;
    TF1 * fit1 = new TF1("fit1", "gaus",-0.7,0.3); 
    TF1 * fit3 = new TF1("fit3", "gaus",0.2,0.5);
@@ -300,13 +331,11 @@ void script1(){
    //fit3->FixParameter(2,0.166); 
    hAll->Fit("fit3","R+");
    
-   
    fit->GetParameters(&par[0]);
    fit1->GetParameters(&par[3]);
    
    fit3->GetParameters(&par[6]);
 
-   
    fit2->SetParameters(par);
    fit2->FixParameter(5,0.166);
    fit2->FixParameter(2,0.166);
@@ -315,8 +344,6 @@ void script1(){
    fit2->FixParameter(7,0.35);
    fit2->FixParameter(6,15);
 
-
-   
    fit2->SetLineColor(kRed);
    fit2->SetLineWidth(5);
    hAll->Fit("fit2","R+");
@@ -330,11 +357,11 @@ void script1(){
    text.SetTextFont(82);
    text.SetTextSize(0.04);
    text.SetTextColor(2);
-  /*
+
    text.DrawLatex(0.4, 0.60, Form(" mean : %5.3f(%5.3f) MeV", fit->GetParameter(1), fit->GetParError(1)));
    text.DrawLatex(0.4, 0.55, Form("sigma : %5.3f(%5.3f) MeV", fit->GetParameter(2), fit->GetParError(2)));
    text.DrawLatex(0.4, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", fit->GetParameter(2) *2.355, fit->GetParError(2)*2.355));
-*/
+
    text.DrawLatex(0.6, 0.65, " g.s ");
    text.DrawLatex(0.6, 0.60, Form(" mean : %5.3f(%5.3f) MeV", par[10], par_err[1]));
    text.DrawLatex(0.6, 0.55, Form("sigma : %5.3f(%5.3f) MeV", par[11], par_err[2]));
@@ -344,7 +371,7 @@ void script1(){
    text.DrawLatex(0.6, 0.40, Form(" mean : %5.3f(%5.3f) MeV", par[13], par_err[4]));
    text.DrawLatex(0.6, 0.35, Form("sigma : %5.3f(%5.3f) MeV", par[14], par_err[5]));
    text.DrawLatex(0.6, 0.30, Form(" FWHM : %5.3f(%5.3f) MeV", par[14]*2.355, par_err[5]*2.355));
-    
+   */
    /**/
 }
 
