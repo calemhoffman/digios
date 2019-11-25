@@ -26,8 +26,8 @@
 void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400){
 /**///======================================================== User Input
 
-   double a1Range[2] = {600, 800};
-   double a0Range[2] = {-0.7, 2.0};
+   double a1Range[2] = {240, 280};
+   double a0Range[2] = {0.0, 0.5};
    
    double SSR = 150; // sum of square of residual of the fitting
 
@@ -36,6 +36,9 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    
    int nTrial = 1000;
    
+   double xGate[2] = {-0.7,0.7};
+   
+   //For trace
    double coinTimeCentral = 19;
    double coinTimeGate = 30.; // TMath::Abs(coinTime - coinTimeCentral) < coinTimeGate
 
@@ -197,6 +200,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 
    double  eTemp;
    double  zTemp;
+   double  xTemp;
    int detIDTemp; 
    int hitIDTemp;
    float coinTimeTemp = 0.0;
@@ -214,12 +218,14 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    expTree->SetBranchStatus("*",0);
    expTree->SetBranchStatus("e",1);
    expTree->SetBranchStatus("z",1);
+   expTree->SetBranchStatus("x",1);
    expTree->SetBranchStatus("detID",1);
    expTree->SetBranchStatus("hitID",1);
    if(isCoinTimeBranchExist) expTree->SetBranchStatus("coinTime",1);
    
    expTree->SetBranchAddress("e",     &eTemp);
    expTree->SetBranchAddress("z",     &zTemp);
+   expTree->SetBranchAddress("x",     &xTemp);
    expTree->SetBranchAddress("detID", &detIDTemp);
    expTree->SetBranchAddress("hitID", &hitIDTemp);
    if(isCoinTimeBranchExist) expTree->SetBranchAddress("coinTime", &coinTimeTemp);
@@ -270,17 +276,17 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       
       TString name;
       name.Form("exPlot%d[%d]", idet, idet%rDet);
-      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 9000);
+      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 3000);
       exPlot[idet]->Reset();
       exPlot[idet]->SetTitle(title + "(exp)");
 
       name.Form("exPlotC%d", idet);
-      exPlotC[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, 0, 13);
+      exPlotC[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, 0, 8);
       exPlotC[idet]->Reset();
       exPlotC[idet]->SetTitle(title + "(corr)");
       
       name.Form("dummy%d", idet);
-      dummy[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, 0, 13);
+      dummy[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, 0, 8);
       dummy[idet]->Reset();
       dummy[idet]->SetTitle(title + "(sim)");
       
@@ -295,6 +301,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
             if( isXFXN && hitIDTemp != 0 ) continue;
+            if( xGate[0] > xTemp || xTemp > xGate[1] ) continue;
             if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
             
             //printf("%d | %f, %f, %f \n", i, zTemp, eTemp, coinTimeTemp);
@@ -341,6 +348,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
         if( eTemp < eThreshold) continue;
         if( isXFXN && hitIDTemp != 0 ) continue;
         if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
+        if( xGate[0] > xTemp || xTemp > xGate[1] ) continue;
         if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
         countEvent++;
       }
@@ -368,6 +376,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( isXFXN && hitIDTemp != 0 ) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
+            if( xGate[0] > xTemp || xTemp > xGate[1] ) continue;
             if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
             double minDist = 99;
             
@@ -425,6 +434,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
                   if( detIDTemp != idet ) continue;
                   if( isXFXN && hitIDTemp != 0 ) continue;
                   if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
+                  if( xGate[0] > xTemp || xTemp > xGate[1] ) continue;
                   if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp-coinTimeCentral) > coinTimeGate ) continue;
                   exPlotC[idet]->Fill(zTemp, eTemp/A1 + A0);
                }
@@ -457,6 +467,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( eTemp < eThreshold) continue;
             if( isXFXN && hitIDTemp != 0 ) continue;
             if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
+            if( xGate[0] > xTemp || xTemp > xGate[1] ) continue;
             if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
             exPlot[idet]->Fill(zTemp, eTemp);
          }
@@ -484,6 +495,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
          if( detIDTemp != idet ) continue;
          if( isXFXN && hitIDTemp != 0 ) continue;
          if( cut != NULL &&  !cut->IsInside(zTemp, eTemp) ) continue; 
+         if( xGate[0] > xTemp || xTemp > xGate[1] ) continue;
          if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
          exPlotC[idet]->Fill(zTemp, eTemp/A1 + A0);
       } 

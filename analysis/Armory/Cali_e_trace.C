@@ -34,15 +34,6 @@ void Cali_e_trace::SlaveBegin(TTree * /*tree*/){
 Bool_t Cali_e_trace::Process(Long64_t entry){
 
    //#################################################################### initialization
-   for(int i = 0; i < numDet; i++){
-      eC[i]    = TMath::QuietNaN();
-      xfC[i]   = TMath::QuietNaN();
-      xnC[i]   = TMath::QuietNaN();
-      x[i]     = TMath::QuietNaN();
-      z[i]     = TMath::QuietNaN();
-      hitID[i] = -4;
-      eC_t[i]  = 0;
-   }
    
    det   = -4;
    
@@ -120,10 +111,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 ///   if( !rdt_energy ) return kTRUE;
 
    // need to change manually depends on rdt or trdt
-   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( trdt[0], trdt[1] )) rejRDT1 = false;
-   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( trdt[2], trdt[3] )) rejRDT2 = false;
-   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( trdt[4], trdt[5] )) rejRDT3 = false;
-   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( trdt[6], trdt[7] )) rejRDT4 = false;
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
    if( !isRDTCutExist ){
       rejRDT1 = false;
@@ -159,8 +150,15 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    //========================== Array
    int uniqeDetID = -1;
    for(int idet = 0 ; idet < numDet; idet++){
-
+     
+     eC[idet] = TMath::QuietNaN();
+     eC_t[idet] = 0;
+     xfC[idet] = TMath::QuietNaN();
+     xnC[idet] = TMath::QuietNaN();
+     x[idet] = TMath::QuietNaN();
+     z[idet] = TMath::QuietNaN();
      hitID[idet] = 0; /// hitID = 1 for only xf, hitID = 2 for only xn, hitID = 3 for both xf and xn
+     
      ///======= Basic array gate
      if( TMath::IsNaN(e[idet])) continue;
      if( ring[idet] < -100 || ring[idet] > 100 ) continue;

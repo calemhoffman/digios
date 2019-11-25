@@ -16,8 +16,8 @@
 void Cali_xf_xn_to_e(TTree *tree){
    
 /**///======================================================== initial input
-   const int rowDet = 6;
-   const int colDet = 5;
+   const int rowDet = 4;
+   const int colDet = 6;
    
    const int nDet = rowDet * colDet;
    

@@ -73,6 +73,8 @@ bool loadFitParameters(TString fitParaFile){
       
       if( x.substr(0,2) == "//" )  continue;
       
+      if( x.substr(0,2) == "##" ) break;
+      
       if( i%7 == 0 ) energy.push_back(atof(x.c_str()));
       if( i%7 == 1 ) lowE.push_back(atof(x.c_str()));
       if( i%7 == 2 ) highE.push_back(atof(x.c_str()));
