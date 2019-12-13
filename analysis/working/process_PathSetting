@@ -31,7 +31,6 @@ Cyan='\033[0;36m'
 NC='\033[0m'
 
 dir=$(pwd)
-
 cd $GEBDIR
-make
+make offline
 cd $dir

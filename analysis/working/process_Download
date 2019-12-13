@@ -23,11 +23,14 @@ RUN=$(printf '%03d' ${RUN})
 #######################################
 ####################  Download raw data
 echo -e "${RED}######################### Download raw data: run ${RUN}${NC}"
-if [ ${PCName} == "digios1" ]; then
-    echo "Already in digios1, no need to get data."
-elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
-    echo "in LCRC, no need to get data."
-else
+#f [ ${PCName} == "digios1" ]; then
+#    echo "Already in digios1, no need to get data."
+#elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
+#    echo "in LCRC, no need to get data."
+#elif [ ${PCName:0:4} == "phyw" ]; then
+#    echo "in MAC, no need to download"
+#else
+if [ ${PCName:0:5} == "phyw1" ]; then
     #============ Get the raw data
     IP=192.168.1.2
     echo "RUN $RUN: Get the raw data `date`"
@@ -39,7 +42,8 @@ else
     echo "============================================="
     tail -10 ${AnalysisDir}/data/RunTimeStamp.dat
     echo "============================================="
-
+else
+  echo "Only in MAC can donwload data. skip."
 fi
 
 echo -e "${YELLOW}"
