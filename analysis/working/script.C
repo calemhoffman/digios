@@ -195,19 +195,35 @@ void script(){
    
    //========================================= Angular distribution
    
-   TString gate = "Ex > -2 && thetaCM > 10 && -5 < coin_t && coin_t < 10 && abs(x)<0.7 && hitID > 0 ";
+   TString gate = "Ex > -2 && thetaCM > 10 && -5 < coin_t && coin_t < 10 && abs(x) < 0.9 && hitID > 0 ";
+   
+   ///cScript->cd(1); tree0->Draw("detID>>h1(24,0,24)", gate , "");
    
    ///cScript->cd(1); tree0->Draw("e:z>>h1(400, -500, -100, 400, 0, 10)", gate , "colz");
    ///cScript->cd(2); tree0->Draw("Ex:thetaCM>>h2(400, 0, 50, 500, -1, 4)", gate, "colz");
    ///cScript->cd(3); tree0->Draw("Ex>>h3(500, -1, 4)", gate, "colz");
    
    
-   cScript->cd(1); tree0->Draw("thetaCM>>k0(100, 0, 50)", gate + "&& abs(Ex-0)< 0.2 ", "colz");
-   cScript->cd(2); tree0->Draw("thetaCM>>k1(100, 0, 50)", gate + "&& abs(Ex-1.09)< 0.12 ", "colz");
-   cScript->cd(3); tree0->Draw("thetaCM>>k2(100, 0, 50)", gate + "&& abs(Ex-1.42)< 0.12 ", "colz");
-   cScript->cd(4); tree0->Draw("thetaCM>>k3(100, 0, 50)", gate + "&& abs(Ex-2.26)< 0.12 ", "colz");
-   cScript->cd(5); tree0->Draw("thetaCM>>k4(100, 0, 50)", gate + "&& abs(Ex-2.5)< 0.12 ", "colz");
-   cScript->cd(6); tree0->Draw("thetaCM>>k5(100, 0, 50)", gate + "&& abs(Ex-3.2)< 0.2 ", "colz");
+   ///cScript->cd(1); tree0->Draw("detID>>k0(24, 0, 24)", gate + "&& abs(Ex-0)< 0.2 ", "colz");
+   ///cScript->cd(2); tree0->Draw("detID>>k1(24, 0, 24)", gate + "&& abs(Ex-1.09)< 0.12 ", "colz");
+   ///cScript->cd(3); tree0->Draw("detID>>k2(24, 0, 24)", gate + "&& abs(Ex-1.42)< 0.12 ", "colz");
+   ///cScript->cd(4); tree0->Draw("detID>>k3(24, 0, 24)", gate + "&& abs(Ex-2.26)< 0.12 ", "colz");
+   ///cScript->cd(5); tree0->Draw("detID>>k4(24, 0, 24)", gate + "&& abs(Ex-2.5)< 0.12 ", "colz");
+   ///cScript->cd(6); tree0->Draw("detID>>k5(24, 0, 24)", gate + "&& abs(Ex-3.2)< 0.2 ", "colz");
+   
+   ///cScript->cd(1); tree0->Draw("thetaCM>>k0(100, 0, 50)", gate + "&& abs(Ex-0)< 0.2 ", "colz");
+   ///cScript->cd(2); tree0->Draw("thetaCM>>k1(100, 0, 50)", gate + "&& abs(Ex-1.09)< 0.12 ", "colz");
+   ///cScript->cd(3); tree0->Draw("thetaCM>>k2(100, 0, 50)", gate + "&& abs(Ex-1.42)< 0.12 ", "colz");
+   ///cScript->cd(4); tree0->Draw("thetaCM>>k3(100, 0, 50)", gate + "&& abs(Ex-2.26)< 0.12 ", "colz");
+   ///cScript->cd(5); tree0->Draw("thetaCM>>k4(100, 0, 50)", gate + "&& abs(Ex-2.5)< 0.12 ", "colz");
+   ///cScript->cd(6); tree0->Draw("thetaCM>>k5(100, 0, 50)", gate + "&& abs(Ex-3.2)< 0.2 ", "colz");
+
+   cScript->cd(1); tree0->Draw("TMath::Cos(thetaCM*TMath::DegToRad())>>k0(100, 0.7, 1)", gate + "&& abs(Ex-0)< 0.2 ", "colz");
+   cScript->cd(2); tree0->Draw("TMath::Cos(thetaCM*TMath::DegToRad())>>k1(100, 0.7, 1)", gate + "&& abs(Ex-1.09)< 0.12 ", "colz");
+   cScript->cd(3); tree0->Draw("TMath::Cos(thetaCM*TMath::DegToRad())>>k2(100, 0.7, 1)", gate + "&& abs(Ex-1.42)< 0.12 ", "colz");
+   cScript->cd(4); tree0->Draw("TMath::Cos(thetaCM*TMath::DegToRad())>>k3(100, 0.7, 1)", gate + "&& abs(Ex-2.26)< 0.12 ", "colz");
+   cScript->cd(5); tree0->Draw("TMath::Cos(thetaCM*TMath::DegToRad())>>k4(100, 0.7, 1)", gate + "&& abs(Ex-2.5)< 0.12 ", "colz");
+   cScript->cd(6); tree0->Draw("TMath::Cos(thetaCM*TMath::DegToRad())>>k5(100, 0.7, 1)", gate + "&& abs(Ex-3.2)< 0.2 ", "colz");
    
    
    ///cScript->cd(1); tree0->Draw("Ex>>k0(250, -1, 4)", gate + "&& detID%6 ==0 ", "colz");
