@@ -36,10 +36,10 @@ if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 
 fi
 
 #remove any zero
-if [ "${RUN:0:1}" == "0" ]; then
-    RUN=${RUN:1:2}
-elif [ "${RUN:0:2}" == "00" ]; then
+if [ "${RUN:0:2}" == "00" ]; then
     RUN=${RUN:2:1}
+elif [ "${RUN:0:1}" == "0" ]; then
+    RUN=${RUN:1:2}
 else
     RUN=$(printf '%d' $RUN)
 fi
@@ -59,7 +59,7 @@ echo "============================================="
 
 #######################################
 ####################  Download raw data
-./process_Download $RUN 
+./process_Download $RUN
 
 #######################################
 #################### Merge
