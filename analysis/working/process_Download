@@ -11,14 +11,16 @@ source ./process_PathSetting
 RUN=$1
 
 #just in case people put %03d as RUN
-if [ "${RUN:0:1}" == "0" ]; then
+if [ "${RUN:0:2}" == "00" ]; then
+    RUN=${RUN:2:1}
+elif [ "${RUN:0:1}" == "0" ]; then
     RUN=${RUN:1:2}
 else
     RUN=$(printf '%d' $RUN)
 fi
 
 
-RUN=$(printf '%03d' ${RUN})
+#RUN=$(printf '%03d' ${RUN})
 
 #######################################
 ####################  Download raw data
@@ -55,5 +57,5 @@ if [ ${count} -eq 0 ]; then
     echo "============================================"
     echo "====  RAW Files of RUN-${RUN} not found! "
     echo "============================================"
-    exit 
+    exit 1
 fi
