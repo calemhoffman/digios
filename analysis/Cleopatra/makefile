@@ -1,6 +1,6 @@
 CC=g++
 
-all: InFileCreator ExtractXSec PlotTGraphTObjArray FindThetaCM Transfer
+all: InFileCreator ExtractXSec ExtractXSecFromText PlotTGraphTObjArray FindThetaCM Transfer
 
 #Cleopatra: Cleopatra.C ../Simulation/Isotope.h ../Simulation/constant.h potentials.h InFileCreator.h ExtractXSec.h PlotTGraphTObjArray.h
 #	$(CC) Cleopatra.C -o Cleopatra `root-config --cflags --glibs`
@@ -10,6 +10,9 @@ InFileCreator: InFileCreator.C InFileCreator.h ../Cleopatra/Isotope.h ../Cleopat
 
 ExtractXSec: ExtractXSec.C ExtractXSec.h
 	$(CC) ExtractXSec.C -o ExtractXSec `root-config --cflags --glibs`
+
+ExtractXSecFromText: ExtractXSecFromText.C ExtractXSec.h
+	$(CC) ExtractXSecFromText.C -o ExtractXSecFromText `root-config --cflags --glibs`
 
 PlotTGraphTObjArray: PlotTGraphTObjArray.C PlotTGraphTObjArray.h
 	$(CC) PlotTGraphTObjArray.C -o PlotTGraphTObjArray `root-config --cflags --glibs`

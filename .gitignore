@@ -32,6 +32,7 @@ reaction.dat
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
 analysis/Cleopatra/ExtractXSec
+analysis/Cleopatra/ExtractXSecFromText
 analysis/Cleopatra/FindThetaCM
 analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray

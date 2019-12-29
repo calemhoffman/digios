@@ -29,15 +29,51 @@ double * FindRange(TString branch, TString gate, TTree * tree, double output[2])
    return output;
 }
 
-void Check_Transfer(TString filename = "transfer.root", bool shownKELines = false){
+vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
+
+  vector<string> output;
+
+  size_t pos;
+  do{
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
+      tempLine = tempLine.substr(pos+1);
+      continue;
+    }
+
+    string secStr;
+    if( pos == string::npos ){
+      secStr = tempLine;
+    }else{
+      secStr = tempLine.substr(0, pos+shift);
+      tempLine = tempLine.substr(pos+shift);
+    }
+
+    //check if secStr is begin with space
+    if( secStr.substr(0, 1) == " "){
+      secStr = secStr.substr(1);
+    }
+
+    output.push_back(secStr);
+    //printf(" |%s---\n", secStr.c_str());
+    
+  }while(pos != string::npos );
+
+  return output;
+}
+
+void Check_Simulation(TString filename = "transfer.root", bool shownKELines = false){
 
 //========================================== User Input
-  double eRange[2] = {0, 20};
+  double eRange[2] = {0, 18};
 
   //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
-  TString gate = "hit == 1 && loop <= 2";
+  TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
 
-  TString gate2 = "rhoHit1 < 50  && rhoHit2 > 60 "; // elum
+  TString gate2 = "";//"rhoHit1 < 50  && rhoHit2 > 60 "; // elum
+  
+  Int_t size[2] = {300,300}; //x,y, single Canvas size
+  Int_t theaCMRange[2] = {0, 60};
 
 //============================================== 
   TFile * file = new TFile(filename, "read");
@@ -140,15 +176,15 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
 
    //===================================================
-   Int_t Div[2] = {5,2}; // x,y
-   Int_t size[2] = {350,350}; //x,y
-   TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
+   Int_t Div[2] = {4,2}; // x,y
+   TCanvas * cCheck = new TCanvas("cCheck", "Check For Simulation", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
    if(cCheck->GetShowToolBar() )cCheck->ToggleToolBar();
    cCheck->Divide(Div[0],Div[1]);
    for( int i = 1; i <= Div[0]*Div[1] ; i++){
       cCheck->cd(i)->SetGrid();
    }
+   int nC = 1;
 
    printf("============================== Gate\n");
    printf("gate : %s\n", gate.Data());
@@ -177,7 +213,7 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
    tree->Draw("hit>>hHit", "", "");
    */
 
-   cCheck->cd(1);
+   cCheck->cd(nC);
    TH2F * hez = new TH2F("hez", Form("e-z [gated] @ %5.0f mm; z [mm]; e [MeV]", firstPos), zRange[0], zRange[1], zRange[2], 400, eRange[0], eRange[1]);
    tree->Draw("e:z>>hez", gate, "colz");
    if( shownKELines){
@@ -185,43 +221,49 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
        fxList->At(i)->Draw("same");
      }
    }
+   nC++;
 
-   cCheck->cd(2);
+   cCheck->cd(nC);
    TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
    tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
+   nC++;
    
-   cCheck->cd(3);
-   TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoil);
-   tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
+   //cCheck->cd(nC);
+   //TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoil);
+   //tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
+   //nC++
 
-   cCheck->cd(4);
+   cCheck->cd(nC);
    TH2F * hRecoilRZ = new TH2F("hRecoilRZ", "RecoilR - Z [gated]; z [mm]; RecoilR [mm]",  zRange[0], zRange[1], zRange[2], 400,0, rhoRecoil);
    tree->Draw("rhoRecoil:z>>hRecoilRZ", gate, "colz");
+   nC++;
 
-   cCheck->cd(5);
+   cCheck->cd(nC);
    double recoilERange[2];
    FindRange("TB", gate, tree, recoilERange);
    TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoil);
    tree->Draw("rhoRecoil:TB>>hRecoilRTR", gate, "colz");
+   nC++;
    
-   cCheck->cd(6);
-   TH2F *hThetaCM_Z = new TH2F("hThetaCM_Z","ThetaCM vs Z ; Z [mm]; thetaCM [deg]",zRange[0], zRange[1], zRange[2], 200,0,50);
+   cCheck->cd(nC);
+   TH2F *hThetaCM_Z = new TH2F("hThetaCM_Z","ThetaCM vs Z ; Z [mm]; thetaCM [deg]",zRange[0], zRange[1], zRange[2], 200, theaCMRange[0], theaCMRange[1]);
    tree->Draw("thetaCM:z>>hThetaCM_Z",gate,"col");
    if( shownKELines){
      for( int i = 0; i < nExID ; i++){
        txList->At(i)->Draw("same");
      }
    }
-
-   cCheck->cd(7);
-   cCheck->cd(7)->SetGrid(0,0);
-   cCheck->cd(7)->SetLogy();
-   
+   nC++;
+  
+   /**
+   cCheck->cd(nC);
+   cCheck->cd(nC)->SetGrid(0,0);
+   cCheck->cd(nC)->SetLogy();
    TH1F * hThetaCM[nExID];
    TLegend * legend = new TLegend(0.8,0.2,0.99,0.8);
    double maxCount = 0;
    for( int i = 0; i < nExID; i++){
-     hThetaCM[i] = new TH1F(Form("hThetaCM%d", i), Form("thetaCM [gated] (ExID=%d); thetaCM [deg]; count", i), 200, 0, 50);
+     hThetaCM[i] = new TH1F(Form("hThetaCM%d", i), Form("thetaCM [gated] (ExID=%d); thetaCM [deg]; count", i), 200, theaCMRange[0], theaCMRange[1]);
      hThetaCM[i]->SetLineColor(i+1);
      hThetaCM[i]->SetFillColor(i+1);
      hThetaCM[i]->SetFillStyle(3000+i);
@@ -240,21 +282,25 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
      }
    }   
    legend->Draw();
-
-   cCheck->cd(8);
+   nC++;
+   */
+    /**
+   cCheck->cd(nC);
    double tDiffRange [2];
    FindRange("t-tB", gate, tree, tDiffRange);
    TH2F * hTDiffZ = new TH2F("hTDiffZ", "time(Array) - time(Recoil) vs Z [gated]; z [mm]; time diff [ns]", zRange[0], zRange[1], zRange[2],  500, tDiffRange[0], tDiffRange[1]);
    tree->Draw("t - tB : z >> hTDiffZ", gate, "colz");
-
-   cCheck->cd(9);
+   nC++;
+   */
+   cCheck->cd(nC);
    double ExRange[2] ;
    FindRange("ExCal", gate, tree, ExRange);
-   TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  500, ExRange[0], ExRange[1]);
+   TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  200, ExRange[0], ExRange[1]);
    tree->Draw("ExCal>>hExCal", gate, "");
+   nC++;
 
-   cCheck->cd(10);
-   
+   ///Draw same text
+   cCheck->cd(nC);
    TLatex text;
    text.SetNDC();
    text.SetTextFont(82);
@@ -263,7 +309,18 @@ void Check_Transfer(TString filename = "transfer.root", bool shownKELines = fals
 
    text.DrawLatex(0., 0.9, Reaction);
    text.DrawLatex(0., 0.8, msg2);
+   text.SetTextColor(1);
    text.DrawLatex(0., 0.7, "gate:");
-   text.DrawLatex(0., 0.6, gate);
-
+   
+   text.SetTextColor(2);
+   //check gate text length, if > 30, break by "&&" 
+   int ll = gate.Length();
+   if( ll > 30 ) {
+     vector<string> strList = SplitStr( (string) gate.Data(), "&&");
+     for( int i = 0; i < strList.size(); i++){
+        text.DrawLatex(0., 0.6 - 0.05*i, (TString) strList[i]);
+     }
+   }else{
+      text.DrawLatex(0., 0.6, gate);
+   }
 }
