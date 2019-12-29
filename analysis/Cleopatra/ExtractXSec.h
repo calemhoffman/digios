@@ -52,6 +52,39 @@ bool isFloat( string str ) {
   return true;
 }
 
+vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
+
+  vector<string> output;
+
+  size_t pos;
+  do{
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
+      tempLine = tempLine.substr(pos+1);
+      continue;
+    }
+
+    string secStr;
+    if( pos == string::npos ){
+      secStr = tempLine;
+    }else{
+      secStr = tempLine.substr(0, pos+shift);
+      tempLine = tempLine.substr(pos+shift);
+    }
+
+    //check if secStr is begin with space
+    if( secStr.substr(0, 1) == " "){
+      secStr = secStr.substr(1);
+    }
+
+    output.push_back(secStr);
+    //printf(" |%s---\n", secStr.c_str());
+    
+  }while(pos != string::npos );
+
+  return output;
+}
+
 int ExtractXSec (string readFile, int indexForElastic=1) {
   
   //indexForElastic = 1 ; for Ratio
@@ -371,3 +404,167 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   return 0;
 }
  
+int ExtractXSecFromText(string readFile){
+  
+  //read file
+  ifstream file_in;
+  file_in.open(readFile.c_str(), ios::in);
+  if( !file_in){
+    printf("Unable to open %s \n", readFile.c_str());
+    exit(1);
+  }
+  
+    //---- variable for Xsec
+  vector<vector<double>> dataMatrix;
+  vector<double> angle;
+  vector<double> Ex;
+  
+  //================================== read file.out
+  string line;
+  int lineNum = 0;
+  vector<double> dataXsec;
+    
+  int numCal = 0;
+  printf("======================================================\n");
+  
+  bool headerDone = false;
+  
+  while(getline(file_in, line)){
+    lineNum ++;
+    
+    if( line.substr(0,1) == "#" ) continue;
+    
+    //printf("%d | %s\n", lineNum, line.c_str());
+    
+    //after the comment line, the next line must be column name
+    vector<string> header= SplitStr(line, " ");
+    //printf("---%lu #", header.size());
+    //for( int i = 0; i < header.size(); i++){
+    //  printf("%s|", header[i].c_str());
+    //}
+    //printf("\n");
+  
+    if ( !headerDone ) {
+      for( int i = 1 ; i < header.size(); i++){
+        string energy = header[i].substr(3, header[i].length());
+        Ex.push_back(atof(energy.c_str()));
+        //printf("%f---\n", Ex.back());
+      }
+      headerDone = true;
+    }else{
+    
+      vector<double> temp;
+      for( int i = 0; i < header.size(); i++){
+        if( i == 0 ) angle.push_back(atof(header[i].c_str()));
+        if( i > 0  ) temp.push_back(atof(header[i].c_str()));        
+      }
+      dataMatrix.push_back(temp);
+      
+    }
+    
+  }
+  file_in.close();
+  
+  double angleMin = angle.front();
+  double angleMax = angle.back();
+  double angleStep = (angleMax - angleMin)/(angle.size()-1);
+  
+  //------ print  out read data
+  printf("====================== data read as:\n");
+  printf("%5s,  ", "Ex");
+  for(int i = 0; i < Ex.size(); i++){
+    printf("%6.3f|", Ex[i]);
+  }
+  printf("\n");
+  for(int i = 0; i < dataMatrix.size(); i++){
+    printf("%5.2f,  ", angle[i]);
+    for( int j = 0; j < dataMatrix[i].size(); j++) printf("%6.3f|", dataMatrix[i][j]);
+    printf("\n");
+  }
+  printf("---------------------------------\n");
+  printf("angle min :%f\n", angleMin);
+  printf("angle max :%f\n", angleMax);
+  printf("angle step:%f\n", angleStep);
+  printf("---------------------------------\n");
+  
+  //------- calculate summed cross section
+  vector<double> partialXsec(Ex.size());
+  for( int i = 0; i < dataMatrix.size() ; i++){
+    for( int j = 0; j < (dataMatrix[i]).size() ; j++ ){
+      //double theta = (angle[j] + angleStep/2.) * TMath::DegToRad();
+      double theta = (angle[i]) * TMath::DegToRad();
+      double dTheta = angleStep * TMath::DegToRad();
+      double phi = TMath::TwoPi();
+      partialXsec[j] += dataMatrix[i][j] * sin( theta ) * dTheta * phi ;
+    }
+  }
+  for(int i = 0; i < Ex.size(); i++){
+    printf("Ex=%6.3f| Xsec(%3.0f-%3.0f deg) : %f mb\n", Ex[i] , angleMin, angleMax, partialXsec[i]);
+  }
+  printf("---------------------------------------------------\n");
+  
+  //================================== save *.Ex.txt
+  string saveExName = readFile;
+  int len = saveExName.length();
+  saveExName = saveExName.substr(0, len - 4); 
+  saveExName += ".Ex.txt";
+  printf("Output : %s \n", saveExName.c_str());
+  FILE * file_Ex;
+  file_Ex = fopen(saveExName.c_str(), "w+");
+  fprintf(file_Ex, "recoil\n");
+  for( int i = 0; i < Ex.size() ; i++){
+      fprintf(file_Ex, "%9.5f     %9.5f\n", Ex[i], partialXsec[i]);
+  }
+  
+  fclose(file_Ex);
+  
+  
+  //================================== Save in ROOT
+  string saveFileName = readFile;
+  len = saveFileName.length();
+  saveFileName = saveFileName.substr(0, len - 4);
+  TString fileName = saveFileName;
+  fileName += ".root"; 
+  printf("Output : %s \n", fileName.Data());
+  TFile * fileOut = new TFile(fileName, "RECREATE" );
+  
+  gList = new TObjArray();
+  gList->SetName("TGraph of distributions");
+  TObjArray * fList = new TObjArray();
+  gList->SetName("TF1 of distributions");
+  
+  TGraph ** gGraph = new TGraph *[numCal];
+  TF1 ** dist = new TF1*[numCal];
+  
+  for( int i = 0; i < Ex.size() ; i++){
+    gGraph[i] = new TGraph();
+    TString name ;
+    name.Form("Ex=%6.3f MeV", Ex[i]);
+    gGraph[i]->SetName(name);
+    for( int j = 0; j < angle.size() ; j++){
+        gGraph[i]->SetPoint(j, angle[j], dataMatrix[j][i]);
+    }
+    gList->Add(gGraph[i]);
+    
+    name.Form("dist%d", i);
+    dist[i] = new TF1(name, distfunct, angleMin, angleMax, 1 );
+    dist[i]->SetParameter(0, i);
+    
+    fList->Add(dist[i]);
+    
+    //delete tempFunc;
+    
+  }
+  gList->Write("qList", 1);
+  fList->Write("pList", 1);
+  
+  
+  fileOut->Write();
+  fileOut->Close();
+  printf("---------------------------------------------------\n");
+  
+  
+  return 0;
+  
+}
+

@@ -44,73 +44,27 @@ int main (int argc, char *argv[]) {
   TString     saveFileName = "transfer.root";
   TString         filename = "reaction.dat"; //when no file, no output
    
-  if( argc == 2){
-    basicConfig = argv[1];
-    heliosDetGeoFile = "";
-    excitationFile = "";
-    filename = "";
-    ptolemyRoot = "";
-  }
+  if( argc >= 2) basicConfig = argv[1];  
+  if( argc >= 3) heliosDetGeoFile = argv[2];  
+  if( argc >= 4) excitationFile = argv[3];  
+  if( argc >= 5) ptolemyRoot = argv[4];
+  if( argc >= 6) saveFileName = argv[5];
+  if( argc >= 7) filename = argv[6];
   
-  if( argc == 3){
-    basicConfig = argv[1];
-    heliosDetGeoFile = argv[2];
-    excitationFile = "";
-    filename = "";
-    ptolemyRoot = "";
-  }
-  
-  if( argc == 4) {
-    basicConfig = argv[1];
-    heliosDetGeoFile = argv[2];
-    excitationFile = argv[3];
-    filename = "";
-    ptolemyRoot = "";
-  }
-  
-  if( argc == 5) {
-    basicConfig = argv[1];
-    heliosDetGeoFile = argv[2];
-    excitationFile = argv[3];
-    ptolemyRoot = argv[4];
-    filename = "";
-    ptolemyRoot = "";
-  }
-  
-  if( argc == 6) {
-    basicConfig = argv[1];
-    heliosDetGeoFile = argv[2];
-    excitationFile = argv[3];
-    ptolemyRoot = argv[4];
-    saveFileName = argv[5];
-    filename = "";
-  }
-  
-  if( argc == 7) {
-    basicConfig = argv[1];
-    heliosDetGeoFile = argv[2];
-    excitationFile = argv[3];
-    ptolemyRoot = argv[4];
-    saveFileName = argv[5];
-    filename = argv[6];
-  }
-  
-  //printf("    reaction setting : %s \n", basicConfig.c_str());
-  //printf("      helios setting : %s \n", heliosDetGeoFile.c_str());
-  //if( excitationFile == "" ){
-  //  printf(" excitation energies : %s \n", excitationFile.c_str());
-  //}
-  //printf("     Ouput root file : %s \n", saveFileName.Data());
-  //if( ptolemyRoot != "" ) {
-  //  printf("  Ptolmey Xsec dist. : %s \n", ptolemyRoot.Data());
-  //}else{
-  //  printf(" No Ptolmey Xsec dist. \n");
-  //}
-  //if( filename != "") {
-  //  printf("save reaction const. : %s \n", filename.Data());
-  //}else{
-  //  printf(" Not save reaction const. \n");
-  //}
   Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
+
+  //run Armory/Check_Simulation
+  ifstream file_in;
+  file_in.open("../Armory/Check_Simulation.C", ios::in);
+  if( file_in){
+    
+    printf("---- running ../Armory/Check_Simulation.C on %s \n", saveFileName.Data());
+    TString cmd;
+    cmd.Form("root -l '../Armory/Check_Simulation.C(\"%s\")'", saveFileName.Data());
+    
+    system(cmd.Data());
+  }else{
+    printf("cannot find ../Armory/Check_Simulation.C \n");
+  }
   
 }
