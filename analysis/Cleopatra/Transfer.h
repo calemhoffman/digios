@@ -533,7 +533,18 @@ void Transfer(
   clock.Reset();
   clock.Start("timer");
   shown = false;
-  printf("\e[32m#################################### generating %d events \e[0m\n", numEvent);
+  
+  //change the number of event into human easy-to-read form
+  int digitLen = TMath::Floor(TMath::Log10(numEvent));
+  TString numEventStr;
+  if( 3 <= digitLen && digitLen < 6 ){
+    numEventStr.Form("%5.1f kilo", numEvent/1000.);
+  }else if ( 6<= digitLen && digitLen < 9 ){
+    numEventStr.Form("%6.2f million", numEvent/1e6);    
+  }else if ( 9<= digitLen ){
+    numEventStr.Form("%6.2f billion", numEvent/1e9);    
+  }
+  printf("\e[32m#################################### generating %s events \e[0m\n", numEventStr.Data());
 
   //====================================================== calculate event
   int count = 0;

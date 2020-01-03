@@ -209,7 +209,7 @@ void AutoCalibrationTrace(){
       printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
       printf("=================================================================\n");
       int proceedFlag = 0;
-      printf(" Proceed ? (1 = Yes / 0 = No) ");
+      printf(" Proceed ? (1 = Yes / 0 = No / -1 = to step 3) ");
       temp = scanf("%d", &proceedFlag);
       
       if( proceedFlag == 0 ) {
@@ -217,61 +217,81 @@ void AutoCalibrationTrace(){
          gROOT->ProcessLine(".q");
          return;
       }
-      printf("#######################################################\n");
-      printf("Step 1) ========= creating smaller tree.\n");
-      chain->Process("../Armory/Cali_littleTree_trace.C+");
-      double eThreshold = 300;
-      Check_e_x("temp.root", eThreshold);
       
-      TFile *caliFile = new TFile ("temp.root", "read");
-      if( !caliFile->IsOpen() ){
-         printf("!!!!!!!!!!! no temp.root, please run step 2.!!!!!!!\n");
-         gROOT->ProcessLine(".q");
-         return;
-      }
-      TTree * caliTree = (TTree*) caliFile->Get("tree");
+      TFile * caliFile = NULL;
+      TTree * caliTree = NULL;
+      TFile *fs = NULL;
+      TString rootfileSim;
       
-      printf("#######################################################\n");
-      printf("Step 2) =============== creating transfer.C\n");
+      if( proceedFlag == 1 ){
+        printf("#######################################################\n");
+        printf("Step 1) ========= creating smaller tree.\n");
+        chain->Process("../Armory/Cali_littleTree_trace.C+");
+        double eThreshold = 300;
+        Check_e_x("temp.root", eThreshold);
+        
+        caliFile = new TFile ("temp.root", "read");
+        if( !caliFile->IsOpen() ){
+           printf("!!!!!!!!!!! no temp.root, please run step 1.!!!!!!!\n");
+           gROOT->ProcessLine(".q");
+           return;
+        }
+        caliTree = (TTree*) caliFile->Get("tree");
+        
+        printf("#######################################################\n");
+        printf("Step 2) =============== creating transfer.C\n");
 
-      int nextFlag = 0; 
-      printf("(1 = Yes / 0 = No ) ? ");
-      temp = scanf("%d", &nextFlag);
-      
-      TString rootfileSim="transfer.root";
-      if( nextFlag == 1 ){
-         toTransferReaction();
+        int nextFlag = 0; 
+        printf("(1 = Yes / 0 = No ) ? ");
+        temp = scanf("%d", &nextFlag);
+        
+        rootfileSim="transfer.root";
+        if( nextFlag == 1 ){
+           toTransferReaction();
+        }
+        
+        fs = new TFile (rootfileSim, "read"); 
+        if(!fs->IsOpen()){
+           printf("!!!!! cannot open transfer.root !!!!! \n");
+           gROOT->ProcessLine(".q");
+           return;
+        }
       }
       
-      TFile *fs = new TFile (rootfileSim, "read"); 
-      if(!fs->IsOpen()){
-         printf("!!!!! cannot open transfer.root !!!!! \n");
-         gROOT->ProcessLine(".q");
-         return;
+      if ( proceedFlag == 1 || proceedFlag == -1){
+        if( proceedFlag == -1 ){
+          caliFile = new TFile ("temp.root", "read");
+          if( !caliFile->IsOpen() ){
+             printf("!!!!!!!!!!! no temp.root, please run step 1.!!!!!!!\n");
+             gROOT->ProcessLine(".q");
+             return;
+          }
+          caliTree = (TTree*) caliFile->Get("tree");
+          rootfileSim="transfer.root";
+          fs = new TFile (rootfileSim, "read"); 
+        }
+        printf("#######################################################\n");
+        printf("Step 3) =============== Calibrate\n");
+        printf("           Please edit the gate on Armory/CompareF.C\n");
+        float energyThreshold = 300;
+        printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
+        temp = scanf("%f", &energyThreshold);
+        if( energyThreshold < 0 ) {
+           printf(" ------ bye bye !------- \n");
+           gROOT->ProcessLine(".q");
+           return;
+        }
+        
+        int eCdet = -1; 
+        printf(" Choose detID (-1 for all & make new root): ");
+        temp = scanf("%d", &eCdet);
+        Cali_compareF(caliTree, fs, eCdet, energyThreshold);
+        
+        if( eCdet == -1) {
+           chain->Process("../Armory/Cali_e_trace.C+");
+           gROOT->ProcessLine(".q");
+        }
       }
-      
-      printf("#######################################################\n");
-      printf("Step 3) =============== Calibrate\n");
-      printf("           Please edit the gate on Armory/CompareF.C\n");
-      float energyThreshold = 300;
-      printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
-      temp = scanf("%f", &energyThreshold);
-      if( energyThreshold < 0 ) {
-         printf(" ------ bye bye !------- \n");
-         gROOT->ProcessLine(".q");
-         return;
-      }
-      
-      int eCdet = -1; 
-      printf(" Choose detID (-1 for all & make new root): ");
-      temp = scanf("%d", &eCdet);
-      Cali_compareF(caliTree, fs, eCdet, energyThreshold);
-      
-      if( eCdet == -1) {
-         chain->Process("../Armory/Cali_e_trace.C+");
-         gROOT->ProcessLine(".q");
-      }
-   
    }
    
    if( option == 3 ) {

@@ -25,27 +25,26 @@ const int numRow = 6;
 
 ULong64_t maxNumberEvent = 1000000000;
 
+//--- Canvas Size
+int canvasXY[2] = {800 , 1000} ;// x, y
+
 //---histogram setting
-int rawEnergyRange[2] = { 100, 12000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,    20}; // in the E-Z plot
-int     rdtDERange[2] = {   0,  16000};
+int rawEnergyRange[2] = {   0,  3000}; // share with e, ring, xf, xn
+int    energyRange[2] = {   0,    10}; // in the E-Z plot
+int     rdtDERange[2] = {   0,   5000};
 int      rdtERange[2] = {   0,  10000};
 int      elumRange[2] = { 200,  4000};
 
-double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -40, 40};
 
-
-double rdtot[4] = {};
-
 //---Gate
-int timeGate[2] = {-12, 2}; // min, max, 1 ch = 10 ns
+int timeGate[2] = {-5, 6}; // min, max, 1 ch = 10 ns
 int tacGate[2] = {-8000, -2000};
 int dEgate[2] = {500,  1500};
 int Eresgate[2] = {1000,4000};
 
-TString rdtCutFile = "rdt_15N6+.root";//"rdt_16N_wide.root";
-
+TString rdtCutFile = "rdtCuts.root";
 TString ezCutFile = "";// "ezCut.root";
 
 //TODO switches for histograms on/off
@@ -719,11 +718,13 @@ Bool_t Monitors::Process(Long64_t entry)
        eCal[i] = TMath::QuietNaN();
     }
     
+    double rdtot[4] = {TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN()};
+    
     /*********** TAC ************************************************/ 
     htac->Fill(tac[0]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
-    if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
+    //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
       
     
     /*********** ELUM ************************************************/
@@ -849,12 +850,12 @@ Bool_t Monitors::Process(Long64_t entry)
           hID2->Fill(detID, j); 
    
           if( timeGate[0] < tdiff && tdiff < timeGate[1] ) {
-            if ((tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) {
-               if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
-               hID2g->Fill(detID, j); 
-               //if( rdtgate) hID2g->Fill(detID, j); 
-               coinFlag = true;
-            }
+            if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
+            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
+            hID2g->Fill(detID, j); 
+            //if( rdtgate) hID2g->Fill(detID, j); 
+            coinFlag = true;
+            
           }
         }
       }
@@ -898,7 +899,8 @@ Bool_t Monitors::Process(Long64_t entry)
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
       
-      if( i % 2 == 0 && tacGate[0] < tac[0] &&  tac[0] < tacGate[1] ){
+      if( i % 2 == 0  ){        
+        if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
          recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
@@ -1033,7 +1035,7 @@ void Monitors::Terminate()
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
    
-   cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile,1250,1300);
+   cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    
    cCanvas->cd(); cCanvas->Divide(2,4);
