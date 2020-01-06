@@ -25,6 +25,52 @@ Double_t fpeaks(Double_t *x, Double_t *par) {
    return result;
 }
 
+vector<vector<double>> combination(const vector<double> arr, int r){
+  
+  vector<vector<double>> output;
+  
+  int n = arr.size();
+  std::vector<int> v(n);
+  std::fill(v.begin(), v.begin()+r, 1);
+  do {
+    ///printf("%d |", r);
+    ///for( int i = 0; i < n; i++) { printf("%d ", v[i]); }; printf("\n");
+    
+    vector<double> temp;
+    for (int i = 0; i < n; ++i) { 
+      if (v[i]) {
+        ///printf("%.1f, ", arr[i]); 
+        temp.push_back(arr[i]);
+      }
+    }
+    ///printf("\n");
+    
+    output.push_back(temp);
+    
+  } while (std::prev_permutation(v.begin(), v.end()));
+  
+  return output;
+}
+
+double* sumMeanVar(vector<double> data){
+  
+  
+  int n = data.size();
+  //for( int k = 0; k < n ; k++){ printf("%.1f, ", data[k]); }; printf("\n");
+  
+  double sum = 0;
+  for( int k = 0; k < n; k++) sum += data[k];
+  double mean = sum/n;
+  double var = 0;
+  for( int k = 0; k < n; k++) var += pow(data[k] - mean,2);
+  
+  static double output[3];
+  output[0] = sum;
+  output[1] = mean;
+  output[2] = var;
+  
+  return output;
+}
 
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
@@ -34,7 +80,7 @@ void Cali_xf_xn(TTree * tree){
    
    const int numDet = rowDet * colDet;
    
-   int energyRange[3] = {150, 3100, 7000}; // bin, min, max
+   int energyRange[3] = {200, 3100, 7000}; // bin, min, max
    
 /**///========================================================  load tree
 
@@ -239,10 +285,7 @@ void Cali_xf_xn(TTree * tree){
       //======== fill reference energy
       if( refID >= 0 ){
          int n = energy[refID].size();
-         for( int k = 0; k < n; k++){
-            refEnergy.push_back(energy[refID][k]);
-            
-         }
+         for( int k = 0; k < n; k++) refEnergy.push_back(energy[refID][k]);
       }
       
       if(refID == -1){
@@ -268,57 +311,179 @@ void Cali_xf_xn(TTree * tree){
       
       printf("----- adjusting the energy to det-%d......\n", refID);
       int n = refEnergy.size();
-      for( int k = 0; k < n; k++){
-         printf("%2d-th peak : %f \n", k,  refEnergy[k]);
-      }
-      printf("---------------------------------- %d\n", numDet);
-      TH1F ** p = new TH1F*[numDet];
+      for( int k = 0; k < n; k++) printf("%2d-th peak : %f \n", k,  refEnergy[k]);
+      
+      const vector<double> refEnergy0 = refEnergy; 
+      
       for( int i = 0; i < numDet; i ++){
         
-        if( energy[i].size() == 0 ) {
+        nPeaks = energy[i].size();
+        printf("------- refID - %d, nPeaks: %d \n", i, nPeaks);
+        
+        refEnergy = refEnergy0;
+        
+        if( refID >= 0 && refID == i ){
           a0[i] = 0;
           a1[i] = 1;
+          printf("skipped - itself\n");
           continue;
         }
         
-        nPeaks = energy[i].size();
+        if( energy[i].size() == 0) {
+          a0[i] = 0;
+          a1[i] = 1;
+          printf("skipped\n");
+          continue;
+        }
         
-         TGraph * graph = new TGraph(nPeaks, &energy[i][0], &refEnergy[0] );
-         
-         TF1 * fit = new TF1("fit", "pol1" );
-         graph->Fit("fit", "q");
-         
-         a0[i] = fit->GetParameter(0);
-         a1[i] = fit->GetParameter(1);
-         
-         printf("%2d | a0: %6.3f, a1: %6.3f (%14.8f) \n", i, a0[i], a1[i], 1./a1[i]);
-         
-         TString name;
-         name.Form("p%d", i);
-         p[i] = new TH1F(name, name,  energyRange[0], 1., refEnergy.back() * 1.3);
-         p[i]->SetXTitle(name);
-         
-         TString expression;
-         expression.Form("e[%d] * %f + %f >> p%d", i, a1[i], a0[i], i);
-         gate[i].Form("e[%d] > 0", i);
-         cAlpha->cd(i+1);
-         tree->Draw(expression, gate[i] , "");
-         cAlpha->Update();
-         gSystem->ProcessEvents();
+        vector<double> fitEnergy;
+        
+        //===== when nPeaks != refEnergy.size(), need to matching the two vector size by checking the r-squared.
+        if( nPeaks > n ){
+          
+          vector<vector<double>> output = combination(energy[i], n);
+        
+          double * smvY = sumMeanVar(refEnergy0);
+          double sumY = smvY[0];
+          double meanY = smvY[1];
+          double varY = smvY[2];
+          
+          double optRSquared = 0;
+          double absRSqMinusOne = 1;
+          int maxID = 0;
+          
+          for( int k = 0; k < output.size(); k++){
+            
+            ///for( int t = 0 ; t < nPeaks; t++) printf("%f\t", output[k][t]);
+            
+            double * smvX = sumMeanVar(output[k]);
+            double sumX = smvX[0];
+            double meanX = smvX[1];
+            double varX = smvX[2];
+            
+            double sumXY = 0;
+            for( int j = 0; j < n; j++) sumXY += output[k][j] * refEnergy0[j];
+            
+            double rSq = (sumXY - sumX*sumY/n)/sqrt(varX*varY);
+            
+            //for( int j = 0; j < n ; j++){ printf("%.1f, ", output[k][j]); }; printf("| %.10f\n", rSq);
+            
+            if( abs(rSq-1) < absRSqMinusOne ) {
+              absRSqMinusOne = abs(rSq-1);
+              optRSquared = rSq;
+              maxID = k;
+            }
+          }
+          
+          fitEnergy = output[maxID];
+          
+          printf(" R^2 : %.20f\n", optRSquared);      
+          
+          //calculation fitting coefficient
+          //double * si = fitSlopeIntercept(fitEnergy, refEnergy);
+          //printf( " y = %.4f x + %.4f\n", si[0], si[1]);
+          
+        }else if( nPeaks < n ){
+          
+          vector<vector<double>> output = combination(refEnergy0, energy[i].size());
+          
+          fitEnergy = energy[i];
+          
+          double * smvX = sumMeanVar(fitEnergy);
+          double sumX = smvX[0];
+          double meanX = smvX[1];
+          double varX = smvX[2];
+          
+          double optRSquared = 0;
+          double absRSqMinusOne = 1;
+          int maxID = 0;
+          
+          for( int k = 0; k < output.size(); k++){
+            
+            double * smvY = sumMeanVar(output[k]);
+            double sumY = smvY[0];
+            double meanY = smvY[1];
+            double varY = smvY[2];
+            
+            double sumXY = 0;
+            for( int j = 0; j < nPeaks; j++) sumXY += output[k][j] * fitEnergy[j];
+            
+            double rSq = (sumXY - sumX*sumY/nPeaks)/sqrt(varX*varY);
+            
+            //for( int j = 0; j < n ; j++){ printf("%.1f, ", output[k][j]); }; printf("| %.10f\n", rSq);
+            
+            if( abs(rSq-1) < absRSqMinusOne ) {
+              absRSqMinusOne = abs(rSq-1);
+              optRSquared = rSq;
+              maxID = k;
+            }
+          }
+          
+          refEnergy = output[maxID];
+          printf(" R^2 : %.20f\n", optRSquared);   
+        
+        }else{
+          fitEnergy = energy[i];
+        }
+        
+        printf("   Energy : ");
+        for( int k = 0; k < nPeaks; k++){ printf("%.1f, ", energy[i][k]);};printf("\n");
+        printf("fitEnergy : ");
+        for( int k = 0; k < min(n,nPeaks) ; k++){ printf("%.1f, ", fitEnergy[k]); }; printf("\n");
+        printf("refEnergy : ");
+        for( int k = 0; k < min(n,nPeaks) ; k++){ printf("%.1f, ", refEnergy[k]); }; printf("\n");
+        
+        TGraph * graph = new TGraph(min(n, nPeaks), &fitEnergy[0], &refEnergy[0] );
+        cAlpha->cd(i+1);
+        graph->Draw("A*");
+
+        TF1 * fit = new TF1("fit", "pol1" );
+        graph->Fit("fit", "q");
+
+        a0[i] = fit->GetParameter(0);
+        a1[i] = fit->GetParameter(1);
+
+        printf("%2d | a0: %6.3f, a1: %6.3f (%14.8f) \n", i, a0[i], a1[i], 1./a1[i]);
+        
       }
-      
-      //TCanvas * cAux = new TCanvas ("cAux", "cAux", 600, 800);
-      //cAux->cd(1);
-      //p[0]->Draw();
-      //gSystem->ProcessEvents();
-      //for( int  i = 1; i < numDet; i++){
-      //   p[i]->Draw("same");
-      //   gSystem->ProcessEvents();
-      //}      
+        
    }
    
+  //====== Plot adjusted spectrum
+  TCanvas * cAux = new TCanvas ("cAux", "cAux", 600, 400);
+  TH1F ** p = new TH1F*[numDet];
+  energyRange[1] = refEnergy[0] * 0.9;
+  energyRange[2] = refEnergy.back() * 1.1;
+  double yMax = 0;
 
+  for ( int i = 0; i < numDet; i ++){
+    TString name;
+    name.Form("p%d", i);
     
+    p[i] = new TH1F(name, name,  energyRange[0], energyRange[1], energyRange[2]);
+    p[i]->SetXTitle(name);
+    p[i]->SetLineColor(i+1);
+
+    TString expression;
+    expression.Form("e[%d] * %.8f + %.8f >> p%d", i, a1[i], a0[i], i);
+    gate[i].Form("");
+    tree->Draw(expression, gate[i] , "");
+    
+    if( p[i]->GetMaximum() > yMax ) yMax = p[i]->GetMaximum();
+    cAux->Update();
+    gSystem->ProcessEvents();
+  }   
+
+  cAux->cd(1);
+  yMax = yMax * 1.1;
+  p[0]->SetMaximum(yMax);
+  p[0]->Draw();
+  gSystem->ProcessEvents();
+  for( int  i = 0; i < numDet; i++){
+    p[i]->SetMaximum(yMax);
+    p[i]->Draw("same");
+    gSystem->ProcessEvents();
+  }
    
    //----------- 4, pause for saving correction parameters
    cAlpha->Update();
@@ -343,6 +508,8 @@ void Cali_xf_xn(TTree * tree){
       //cAlpha->SaveAs("alpha_e_corrected.pdf");
    }  
    
+   gSystem->ProcessEvents();
+   
    //############################################################  for xf-xn correction
    printf("############## xf - xn correction \n");
    TLine line(0,0,0,0);
@@ -350,6 +517,7 @@ void Cali_xf_xn(TTree * tree){
    
    double eGate = 0;
    if( method == 2) {
+      gSystem->ProcessEvents();
       int peakID = 0;
       printf("------ pick the i-th peak (0, 1, ... , %d, -1 to stop): ", (int) refEnergy.size() - 1);
       temp = scanf("%d", &peakID);
