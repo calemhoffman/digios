@@ -314,11 +314,13 @@ void Transfer(
 
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
+  TMacro exList(excitationFile.c_str());
   TString str;
   str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
   config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
+  exList.Write("ExList");
   
   TMacro hitMeaning;
   str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
