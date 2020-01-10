@@ -452,15 +452,13 @@ void Cali_xf_xn(TTree * tree){
   //====== Plot adjusted spectrum
   TCanvas * cAux = new TCanvas ("cAux", "cAux", 600, 400);
   TH1F ** p = new TH1F*[numDet];
-  energyRange[1] = refEnergy[0] * 0.9;
-  energyRange[2] = refEnergy.back() * 1.1;
   double yMax = 0;
 
   for ( int i = 0; i < numDet; i ++){
     TString name;
     name.Form("p%d", i);
     
-    p[i] = new TH1F(name, name,  energyRange[0], energyRange[1], energyRange[2]);
+    p[i] = new TH1F(name, name,  energyRange[0], refEnergy[0] * 0.9, refEnergy.back() * 1.1);
     p[i]->SetXTitle(name);
     p[i]->SetLineColor(i+1);
 
@@ -572,6 +570,13 @@ void Cali_xf_xn(TTree * tree){
    TF1 * fit = new TF1("fit", "pol1");
    for( int i = 0; i < numDet; i++){
       cAlpha->cd(i+1);
+      
+      if( energy[i].size() == 0) {
+        xnScale[i] = 0.000;
+        printf("skipped - detID-%d\n", i);
+        continue;
+      }
+      
       h[i]->ProfileX()->Fit("fit", "Q");
       fit->GetParameters(para[i]);
       xnScale[i] = -para[i][1]; 
