@@ -28,11 +28,11 @@
 # b = Becchetti and Greenlees, 1971  |         E < 40  | 40 < A       | Iso. Dep.
 #=======================================================================
 #reaction          gs-spin  orbital  spin-pi(Ex)  Ex      ELab        Potentials
-#206Hg(d,d)206Hg   0        1g9/2    9/2+         0.000   7.39MeV/u   AA                  #elastic
-#206Hg(d,d)206Hg   0        1g9/2    9/2+         1.000   7.39MeV/u   AA        0.12    #inelastics_0.12=beta
+#206Hg(d,d)206Hg   0        none     9/2+         0.000   7.39MeV/u   AA                #elastic
+#206Hg(d,d)206Hg   0        none     9/2+         1.000   7.39MeV/u   AA        0.12    #inelastics_0.12=beta
 #206Hg(d,p)207Hg   0        1g9/2    9/2+         0.000   7.39MeV/u   AK
 #20F(d,t)19F       2        0d5/2    5/2+         0.197   10MeV/u     Vl
+#16N9d,3He)15C     2        0p1/2    5/2+         0.74    12MeV/u     Ax
+#10Be(t,p)12Be     0        1L=0     0+           0.000   5MeV/u      lA                #two-nucleon_transfer   
+32Si(t,p)34Si     0        0L=0       0+           0.000   8MeV/u      lA                #two-nucleon_transfer
 
-16N(d,3He)15C      2        0p1/2    5/2+         0.74   12MeV/u     Ax
-16N(d,3He)15C      2        0p3/2    3/2+         5.83   12MeV/u     Ax
-16N(d,3He)15C      0        0p1/2    1/2+         0.00   12MeV/u     Ax
