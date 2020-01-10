@@ -322,6 +322,8 @@ void Transfer(
   detGeo.Write("detGeo");
   exList.Write("ExList");
   
+  distList->Write("DWBA", 1);
+  
   TMacro hitMeaning;
   str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
   str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
