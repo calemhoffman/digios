@@ -322,7 +322,7 @@ void Transfer(
   detGeo.Write("detGeo");
   exList.Write("ExList");
   
-  distList->Write("DWBA", 1);
+  if( distList != NULL ) distList->Write("DWBA", 1);
   
   TMacro hitMeaning;
   str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
