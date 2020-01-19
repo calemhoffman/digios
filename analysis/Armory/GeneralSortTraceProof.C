@@ -1,4 +1,3 @@
-
 #define GeneralSortTraceProof_cxx
 
 #include "GeneralSortTraceProof.h"
@@ -7,13 +6,14 @@
 #define MAXNUMHITS 20 //Highest multiplicity
 #define M -100 //M value for energy filter from digi setting
 
-//must be absolute path, by copy the GeneralSortMapping.h in to Armory, is not working
+//by copy the GeneralSortMapping.h in to Armory does not work
+//relative path does not work
 #ifdef __linux__
-   //LCRC
-   #include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+   //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"   
 #elif __APPLE__
-   //Mac
-   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+   //#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+  #include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
 #endif
 
 //=================================== setting
@@ -23,13 +23,13 @@ bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
 float delayChannel = 150.; //initial guess of the time
 
-bool isTACRF = true;
-bool isRecoil = true;
-bool isElum = true;
+bool isTACRF = false;
+bool isRecoil = false;
+bool isElum = false;
 bool isEZero = true;
 //=================================== end of setting
 
-void GeneralSortTraceProof::Begin(TTree * /*tree*/)
+void GeneralSortTraceProof::Begin(TTree */*tree*/)
 {
 
    TString option = GetOption();
@@ -51,7 +51,10 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
                isTraceON ?  "On" : "Off", 
                traceMethodName.Data(), 
                isSaveTrace? "Yes": "No:");
-
+   printf( "=====================================================\n");   
+   //printf("                    file : %s \n", tree->GetDirectory()->GetName());
+   //printf("          Number of Event: %llu \n", tree->GetEntries());
+   
    printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
@@ -154,9 +157,17 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          newTree->Branch("te",             te,  "Trace_Energy[30]/F");
          newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
          newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
-         newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
-         newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
-         newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+         
+         if( isRecoil ){
+            newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
+            newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
+            newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+         }
+         if ( isEZero ) {
+            newTree->Branch("tezero",       tezero,    "Trace_ezero[8]/F");
+            newTree->Branch("tezero_t",     tezero_t,  "Trace_ezero_Time[8]/F");
+            newTree->Branch("tezero_r",     tezero_r,  "Trace_ezero_RiseTime[8]/F");         
+         }
       }
    }
   
@@ -171,24 +182,24 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i<30; i++) {//num dets
+   for (Int_t i=0 ; i< 100; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
       psd.Ring[i]    = 0.0;
-      if (i <  8) psd.RDT[i]     = TMath::QuietNaN();
-      if (i < 24) psd.TAC[i]     = TMath::QuietNaN();
-      if (i < 32) psd.ELUM[i] = TMath::QuietNaN();
-      if (i <  4) psd.EZERO[i] = TMath::QuietNaN();
+      psd.RDT[i]     = TMath::QuietNaN();
+      psd.TAC[i]     = TMath::QuietNaN();
+      if ( i < 32 ) psd.ELUM[i] = TMath::QuietNaN();
+      if ( i < 10 ) psd.EZERO[i] = TMath::QuietNaN();
 
       psd.EnergyTimestamp[i] = 0;
       psd.XFTimestamp[i]     = 0;
       psd.XNTimestamp[i]     = 0;
       psd.RingTimestamp[i]   = 0;
-      if (i <  8) psd.RDTTimestamp[i]    = 0;
-      if (i < 24) psd.TACTimestamp[i]    = 0;
+      psd.RDTTimestamp[i]    = 0;
+      psd.TACTimestamp[i]    = 0;
       if (i < 32) psd.ELUMTimestamp[i]   = 0;
-      if (i <  4) psd.EZEROTimestamp[i]  = 0;
+      if (i < 10) psd.EZEROTimestamp[i]  = 0;	
       
       psd.x[i]       = TMath::QuietNaN();    
    }
@@ -199,10 +210,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
          
-         if( i < 8 ) {
+         if( isRecoil &&  i < 8 ) {
             trdt[i]   = TMath::QuietNaN();
             trdt_t[i] = TMath::QuietNaN();
             trdt_r[i] = TMath::QuietNaN();
+         }
+         
+         if( isEZero &&  i < 8 ) {
+            tezero[i]   = TMath::QuietNaN();
+            tezero_t[i] = TMath::QuietNaN();
+            tezero_r[i] = TMath::QuietNaN();
          }
       }
       
@@ -232,7 +249,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       //PSD
       /***********************************************************************/
-      if( (id[i] > 1000 && id[i] < 2000) &&  30> idDet && idDet>-1 ) {
+      if( 100 > idDet && idDet >= 0 && 3 >= idKind && idKind >= 0 ) {
          
          switch(idKind){
             case 0: /* Energy signal */
@@ -264,7 +281,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
       //RECOIL
       /************************************************************************/
-      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { 
+      if( isRecoil && idDet >= 100 && idDet <= 110 ) { 
          Int_t rdtTemp = idDet-100;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
@@ -286,7 +303,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
       //EZERO
       /************************************************************************/
-      if( isEZero && (id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
+      if( isEZero && ( 300 <= idDet && idDet < 310 )) {
          Int_t ezeroTemp = idDet - 300;
          if (ezeroTemp<4) {
             psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
@@ -309,10 +326,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          idDet  = idDetMap[idTemp];
          idKind = idKindMap[idTemp];
          
-         bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
+         //bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
          bool isPSD = (30 > idDet && idDet >= 0);
          bool isRDT  = (130 > idDet && idDet >= 100 );
-         if( !isPSD && !isRDT ) continue;
+         bool isezero  = (310 > idDet && idDet >= 300 );
+         if( !isPSD && !isRDT && !isezero) continue;
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();
@@ -382,6 +400,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);
+            }
+            
+            if( 310 > idDet && idDet >= 300 ) {
+               int ezeroTemp = idDet-300;
+               tezero[ezeroTemp]   = TMath::Abs(gFit->GetParameter(0));
+               tezero_t[ezeroTemp] = gFit->GetParameter(1);
+               tezero_r[ezeroTemp] = gFit->GetParameter(2);
             }
             
          }

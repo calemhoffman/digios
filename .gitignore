@@ -5,7 +5,7 @@ merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
 analysis/GEBSort/GEBSort_nogeb_trace
-
+analysis/working/slurm.sh
 *.Ex.txt
 *.Xsec.txt
 *.in
@@ -32,6 +32,7 @@ reaction.dat
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
 analysis/Cleopatra/ExtractXSec
+analysis/Cleopatra/ExtractXSecFromText
 analysis/Cleopatra/FindThetaCM
 analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray

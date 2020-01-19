@@ -68,11 +68,18 @@ void GeneralSort::Begin(TTree * tree)
   TString option = GetOption();
   NumEntries = tree->GetEntries();
   EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
-  
+
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
   saveFileName.Remove(0, findslat+1);
   saveFileName = "../root_data/gen_" + saveFileName;
+
+  printf("=============================================================\n");
+  printf("=====================  GeneralSort.C  =======================\n");
+  printf("=============================================================\n");
+  printf("                    file : %s \n", tree->GetDirectory()->GetName());
+  printf("          Number of Event: %llu\n", NumEntries);
+  printf("Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
 
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
@@ -155,7 +162,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
   if( entry == 0 ) {
       fileNum = fChain->GetDirectory()->GetName();
       
-      printf("----------------------- openning  %s \n", fileNum.Data());
+      //printf("----------------------- openning  %s \n", fileNum.Data());
       
       int findslat = fileNum.Last('/');
       fileNum.Remove(0, findslat+1);
@@ -190,14 +197,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
       if (i<32) psd.ELUM[i]=TMath::QuietNaN();
       if (i<10) psd.EZERO[i]=TMath::QuietNaN();
     
-      psd.EnergyTimestamp[i]=0;
-      psd.XFTimestamp[i]    =0;
-      psd.XNTimestamp[i]    =0;
-      psd.RingTimestamp[i]  =0;
-      psd.RDTTimestamp[i]   =0;
-      psd.TACTimestamp[i]   =0;
-      if (i<32) psd.ELUMTimestamp[i] =0;
-      if (i<10) psd.EZEROTimestamp[i]=0;
+      psd.EnergyTimestamp[i]= 0;
+      psd.XFTimestamp[i]    = 0; 
+		psd.XNTimestamp[i]	 = 0; 
+		psd.RingTimestamp[i]	 = 0; 
+		psd.RDTTimestamp[i]	 = 0; 
+		psd.TACTimestamp[i]	 = 0; 
+      if (i<32) psd.ELUMTimestamp[i] = 0;
+		if (i<10) psd.EZEROTimestamp[i]= 0;		 
     }
 
     
@@ -213,7 +220,6 @@ Bool_t GeneralSort::Process(Long64_t entry)
     //ID PSD Channels
     Int_t idKind = -1;
     Int_t idDet=-1; // Detector number
-    Int_t idConst=1010; //Temp value to get idDet
     
     //==============================================================
     /* --------------------- Loop over NumHits ------------------ */

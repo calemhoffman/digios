@@ -35,7 +35,7 @@ using namespace std;
 int main (int argc, char *argv[]) {
    
   printf("=================================================================\n");
-  printf("===       InfileCreator, Ptolemy for (d,p),(p,d)             ====\n");
+  printf("===       InfileCreator, Ptolemy for p,d,t,3He               ====\n");
   printf("=================================================================\n");
 
   if(argc < 2 || argc > 5) { 

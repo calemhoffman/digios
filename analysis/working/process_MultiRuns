@@ -1,157 +1,92 @@
 #!/bin/bash
 
-if [ $# -ne 2 ] && [ $# -ne 3 ] ; then
-   echo "Usage : "
-   echo "   $./process_run_MultiRuns.sh #1 #2 [nCore_for_Trace]"
+if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
+  echo "$./process_MultiRuns [RunNum1] [RunNum2] [Merge] [EventBuild] [GeneralSort]"
+  echo "    RunNum1 = start run number"
+  echo "    RunNum2 = stop run number"
+  echo "      Merge =   1/0*     "  
+  echo "   EventBld = 2/1/0*   || 2 = with Trace"  
+  echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "        * negative option = force "
   exit 1
-fi
+fi;
 
-source ../../expName.sh #load expName
-AnalysisDir=../../analysis
-
-#remote data path
-dataloc=${daqDataPath}/${expName}/data
-daqDir=/home/helios/digios
-
-#===== directory and chat files
-GEBDIR=$AnalysisDir/GEBSort
-MERGDIR=$AnalysisDir/merged_data  
-ROOTDIR=$AnalysisDir/root_data
-DATADIR=$AnalysisDir/data
-MERGECHAT=$AnalysisDir/working/GEBMerge.chat
-SORTCHAT=$AnalysisDir/working/GEBSort.chat
-
-
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-ORANGE='\033[0;33m'
-GREEN='\033[1;32m'
-BLUE='\033[0;34m'
-Cyan='\033[0;36m'
-NC='\033[0m'
-
+source ./process_PathSetting
 
 RUN1=$1
 RUN2=$2
 
-isTrace=0
+isMerge=1
+isSort=1
+isGeneralSort=1
+
+if [ $# -ge 3 ]; then isMerge=$3; fi
+if [ $# -ge 4 ]; then isSort=$4; fi
+if [ $# -ge 5 ]; then isGeneralSort=$5; fi
+
 GEBSort=GEBSort_nogeb
-if [ $# -eq 3 ] ; then
-    isTrace=$3
-    GEBSort=GEBSort_nogeb_trace
-    echo "Using trace analysis with $isTrace core."
+GEBSortMsg="using GEBSort_nogeb"
+GeneralSortMsg="no trace"
+
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
+  isTrace=1
+  GEBSortMsg="using GEBSort_nogeb_trace"
+  GEBSort=GEBSort_nogeb_trace
+  GeneralSortMsg="trace with ${isGeneralSort} core"
 fi
 
-if [ "${RUN1:0:1}" == "0" ] ; then
-      RUN1=${RUN1:1:2}
+if [ "${RUN1:0:1}" == "0" ]; then
+    RUN1=${RUN1:1:2}
+elif [ "${RUN1:0:2}" == "00" ]; then
+    RUN1=${RUN1:2:1}
 else
-      RUN1=$( printf '%d' $RUN1 )
-fi;
+    RUN1=$(printf '%d' $RUN1)
+fi
 
-if [ "${RUN2:0:1}" == "0" ] ; then
-      RUN2=${RUN2:1:2}
+if [ "${RUN2:0:1}" == "0" ]; then
+    RUN2=${RUN2:1:2}
+elif [ "${RUN2:0:2}" == "00" ]; then
+    RUN2=${RUN2:2:1}
 else
-      RUN2=$( printf '%d' $RUN2 )
-fi;
+    RUN2=$(printf '%d' $RUN2)
+fi
 
-for iRUN in $(seq ${RUN1} ${RUN2})
-do
+runID1=$(printf '%03d' $RUN1)
+runID2=$(printf '%03d' $RUN2)
 
-  RUN=$(printf '%03d' ${iRUN})
+echo "============================================="
+echo "============= RUN $runID1 to $runID2 ================"
+echo "============================================="
+echo "Merge       : ${isMerge}"
+echo "Sort        : ${isSort}  ${GEBSortMsg}"  
+echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
+echo "============================================="
 
-  echo -e "${Cyan}"
-  echo "============================================="
-  echo "============ RUN $RUN ========================"
-  echo "============================================="
 
-  echo -e "${RED}######################### Download raw data${NC}"
-  PCName="$(hostname)"
-  if [ ${PCName} == "digios1" ] ; then
-      echo "Already in digios1, no need to get data."
-  elif  [ ${PCName:0:5} == "bebop" ] ; then
-      echo "in Bebop, no way to download."
-      GEBDIR=/lcrc/project/HELIOS/digios/analysis/GEBSort
-      MERGDIR=/lcrc/project/HELIOS/digios/analysis/merged_data
-      ROOTDIR=/lcrc/project/HELIOS/digios/analysis/root_data
-      DATADIR=/lcrc/project/HELIOS/digios/analysis/data
-      MERGECHAT=/lcrc/project/HELIOS/digios/analysis/working/GEBMerge.chat
-      SORTCHAT=/lcrc/project/HELIOS/digios/analysis/working/GEBSort.chat
-  else
-    echo "RUN $RUN: Get the raw data `date`"
+for iRUN in $(seq ${RUN1} ${RUN2}); do
 
-    #============ Get the raw data
-    IP=192.168.1.2
-    rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
-    rsync -avuht --progress "helios@${IP}:${daqDir}/RunTimeStamp.txt" ${AnalysisDir}/working/.
-    echo "============================================"
-    cat ${AnalysisDir}/working/RunTimeStamp.txt
-    echo "============================================"
-  fi
-  
-  echo -e "${YELLOW}"
-  du -hsc $DATADIR/${expName}_run_$RUN*
+    runID=$(printf '%03d' $iRUN)
 
-  count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
-  echo -e "========== Number of Files : ${count} ${NC}"
-  if [ $count -eq 0 ] ; then
-      echo "============================================"
-      echo "====  RAW Files of RUN-${RUN} not found! "
-      echo "============================================"
-      continue
-  fi
+    echo -e "${Cyan}"
+    echo "========================================================="
+    echo "============ RUN $runID ===================================="
+    echo "========================================================="
+    echo -e "${NC}"
 
-  #=========== Merge 
-  echo -e "${RED}####################### RUN-$RUN: GEBMerge started at `date` ${NC}"
-  
-  if [ ${expName} == "h072_16N" ]; then 
-      echo -e "${GREEN}"
-      ## mv the vme 101 data to temp
-      mv -v $DATADIR/${expName}_run_$RUN.gtd01_000_0101  temp
-      echo -e "${NC}"
-  fi
-  
-  $GEBDIR/GEBMerge $MERGECHAT  $MERGDIR/GEBMerged_run$RUN.gtd `ls $DATADIR/${expName}_run_$RUN.gtd*` >  $MERGDIR/GEBMerge_run$RUN.log
-  echo -e "${RED}                           RUN $RUN: GEBMerge DONE at `date` ${NC}"
-  
-  if [ ${expName} == "h072_16N" ]; then
-      ## mv the temp back to vme 101
-      echo -e "${GREEN}"
-      mv -v temp $DATADIR/${expName}_run_$RUN.gtd01_000_0101
-      echo -e "${NC}"
-  fi
-  
-  tail -n 30  $MERGDIR/GEBMerge_run$RUN.log
-  
-  #============= Sort
-  echo -e "${RED}####################### RUN-$RUN: GEBSort started  at `date` ${NC}"
-  $GEBDIR/${GEBSort} -input disk $MERGDIR/GEBMerged_run$RUN.gtd_000 -rootfile $ROOTDIR/run$RUN.root RECREATE -chat $SORTCHAT > $ROOTDIR/${GEBSort}_run$RUN.log
-  echo -e "${RED}                                      GEBSort DONE at `date` ${NC}"
-  
-  tail -n 30  $ROOTDIR/${GEBSort}_run$RUN.log
-  echo "saved root file -->  "  $ROOTDIR/run$RUN.root 
-  
-  echo "============================================="
-  echo "============================================="
+    #######################################
+    ####################  Download raw data
+    ./process_Download $iRUN
 
-  #========== Process_run.C, GeneralSort
-  if [ "${RUN:0:1}" == "0" ] ; then
-        runID=${RUN:1:2}
-        if [ "${runID:0:1}" == "0" ] ; then
-            runID=${runID:1:1}  
-        fi
-  else
-        runID=$( printf '%d' $RUN )
-  fi;
-  if [ $isTrace -eq 0 ]; then
-      echo -e "${RED}####################### GeneralSort  ${NC}"
-      root -q -b "process_run.C($runID)"
-  else
-      echo -e "${RED}####################### GeneralSortTraceProof  ${NC}"
-      root -q -b "process_run.C($runID, $isTrace)"
-  fi
+    #######################################
+    #################### Merge
+    ./process_Merge $iRUN $isMerge
+
+    #######################################
+    #################### Sort and GeneralSort
+    ./process_Sort $iRUN $isSort $isGeneralSort
 
 done
 
-#root -l ../Armory/runsCheck.C
-  
+#root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+
 exit 1

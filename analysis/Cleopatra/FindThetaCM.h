@@ -109,9 +109,12 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
       iDet = pos.size();
       file.close();
       printf("... done.\n");
+
+      vector<double> posTemp = pos;
       
       for(int id = 0; id < iDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos  > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos  < 0 ) pos[id] = firstPos - posTemp[iDet-1 -id];
       }
       
       for(int i = 0; i < iDet ; i++){

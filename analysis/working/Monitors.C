@@ -25,27 +25,26 @@ const int numRow = 6;
 
 ULong64_t maxNumberEvent = 1000000000;
 
+//--- Canvas Size
+int canvasXY[2] = {800 , 1000} ;// x, y
+
 //---histogram setting
-int rawEnergyRange[2] = { 100, 12000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,    20}; // in the E-Z plot
-int     rdtDERange[2] = {   0,  16000};
+int rawEnergyRange[2] = {   0,  3000}; // share with e, ring, xf, xn
+int    energyRange[2] = {   0,    10}; // in the E-Z plot
+int     rdtDERange[2] = {   0,   5000};
 int      rdtERange[2] = {   0,  10000};
 int      elumRange[2] = { 200,  4000};
 
-double     exRange[3] = {  50, -1, 9}; // bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -40, 40};
 
-
-double rdtot[4] = {};
-
 //---Gate
-int timeGate[2] = {-12, 2}; // min, max, 1 ch = 10 ns
+int timeGate[2] = {-5, 6}; // min, max, 1 ch = 10 ns
 int tacGate[2] = {-8000, -2000};
 int dEgate[2] = {500,  1500};
 int Eresgate[2] = {1000,4000};
 
-TString rdtCutFile = "rdt_15N6+.root";//"rdt_16N_wide.root";
-
+TString rdtCutFile = "rdtCuts.root";
 TString ezCutFile = "";// "ezCut.root";
 
 //TODO switches for histograms on/off
@@ -196,6 +195,8 @@ TH2I *hID2g;
 
 int count1, count2;
 
+bool isTACGate;
+
 /***************************
  ***************************/
 //==== global variables
@@ -268,9 +269,11 @@ void Monitors::Begin(TTree *tree)
       }
       file.close();
       printf("... done.\n");
-      
+
+      vector<double> posTemp = pos;
       for(int id = 0; id < numCol; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[numCol-1-id];
       }
       
       for(int i = 0; i < numCol ; i++){
@@ -285,8 +288,8 @@ void Monitors::Begin(TTree *tree)
          zRange[0] = pos[0] - 30;
          zRange[1] = pos[numCol-1] + length + 30;
       }else{
-         zRange[0] = pos[numCol-1] -length - 30;
-         zRange[1] = pos[0] + 30;
+         zRange[0] = pos[0] -length - 30;
+         zRange[1] = pos[numCol-1] + 30;
       }
       
       printf("=======================\n");
@@ -639,6 +642,8 @@ void Monitors::Begin(TTree *tree)
    
    count1 = 0;
    count2 = 0;
+
+   isTACGate=false;
 }
 
 void Monitors::SlaveBegin(TTree * /*tree*/)
@@ -713,11 +718,14 @@ Bool_t Monitors::Process(Long64_t entry)
        eCal[i] = TMath::QuietNaN();
     }
     
+    double rdtot[4] = {TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN()};
+    
     /*********** TAC ************************************************/ 
     htac->Fill(tac[0]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
-    //if( !(-1800 < tac[0] &&  tac[0] < -800) ) return kTRUE;
+    //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
+      
     
     /*********** ELUM ************************************************/
     for( int i = 0; i < 16; i++){
@@ -752,7 +760,6 @@ Bool_t Monitors::Process(Long64_t entry)
       hxnVID->Fill(detID, xn[detID]);
 
       //==================== Basic gate
-      if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue; 
       if( TMath::IsNaN(e[detID]) ) continue ; 
       if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
       //if( ring[detID] > 300 ) continue; 
@@ -843,12 +850,12 @@ Bool_t Monitors::Process(Long64_t entry)
           hID2->Fill(detID, j); 
    
           if( timeGate[0] < tdiff && tdiff < timeGate[1] ) {
-            if ((tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) {
-               if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
-               hID2g->Fill(detID, j); 
-               //if( rdtgate) hID2g->Fill(detID, j); 
-               coinFlag = true;
-            }
+            if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
+            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
+            hID2g->Fill(detID, j); 
+            //if( rdtgate) hID2g->Fill(detID, j); 
+            coinFlag = true;
+            
           }
         }
       }
@@ -892,7 +899,8 @@ Bool_t Monitors::Process(Long64_t entry)
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
       
-      if( i % 2 == 0 && tacGate[0] < tac[0] &&  tac[0] < tacGate[1] ){
+      if( i % 2 == 0  ){        
+        if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
          recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
@@ -1027,7 +1035,7 @@ void Monitors::Terminate()
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
    
-   cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile,1250,1300);
+   cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    
    cCanvas->cd(); cCanvas->Divide(2,4);
@@ -1074,7 +1082,7 @@ void Monitors::Terminate()
    Draw2DHist(heCalVzGC);
 
    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1]));
-   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    text.DrawLatex(0.15, 0.6, "with Recoil");
    
    //the constant thetaCM line
@@ -1103,7 +1111,7 @@ void Monitors::Terminate()
    
    Draw2DHist(hrdt2Dg[0]);
    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 0 ) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 6
@@ -1114,7 +1122,7 @@ void Monitors::Terminate()
    
    Draw2DHist(hrdt2Dg[1]);
    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 1) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 7
@@ -1123,7 +1131,7 @@ void Monitors::Terminate()
    
    Draw2DHist(hrdt2Dg[2]);
    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 2) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 8
@@ -1131,7 +1139,7 @@ void Monitors::Terminate()
    
    Draw2DHist(hrdt2Dg[3]);
    text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 3) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /************************* Save histograms to root file*/

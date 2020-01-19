@@ -311,7 +311,7 @@ int main(int argc, char *argv[]){
 		orbStringBest = orbStringBest_1;
 	      }
 
-	      printf("============ A = %d\n", A);
+	      //printf("============ A = %d\n", A);
 	      //for( int i = 0; i < NLJ.size() ; i++) printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);    
 	      //printf("==============================\n");
 
@@ -338,12 +338,12 @@ int main(int argc, char *argv[]){
               //################ end of display
 
               ws.CalWSEnergies();
-	      printf("      Experiment      |       Woods-Saxon    |\n");
+              //printf("      Experiment      |       Woods-Saxon    |\n");
               for( int i = 0; i < NLJ.size(); i++){
                 for( int j = 0; j < ws.orbString.size(); j++){
                   if( NLJ[i] == ws.orbString[j] ){
                     double diff = BE[i] -  ws.energy[j];
-		    printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff);
+                    //printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | diff : %f \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff);
 		    rms += pow(diff, 2);
                     nDiff ++;
                     continue;
