@@ -33,6 +33,7 @@ public:
       nameA = temp.Name;
       isReady = false;
       isBSet = true;
+      
    }
    void Seta(int A, int Z){
       Isotope temp (A, Z);
@@ -42,6 +43,7 @@ public:
       namea = temp.Name;
       isReady = false;
       isBSet = false;
+      
    }
    void Setb(int A, int Z){
       Isotope temp (A, Z);
@@ -51,6 +53,7 @@ public:
       nameb = temp.Name;
       isReady = false;
       isBSet = false;
+      
    }
    void SetB(int A, int Z){
       Isotope temp (A, Z);
@@ -557,9 +560,14 @@ bool HELIOS::SetDetectorGeometry(string filename){
       nDet = pos.size();
       file.close();
       printf("... done.\n");
+
+      vector<double> posTemp;
+      posTemp.clear();
+      posTemp = pos;
       
       for(int id = 0; id < nDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[nDet-1 - id];
       }
       
       printf("=====================================================\n");
@@ -630,7 +638,8 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
    vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
    vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
-   tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   //tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
+   tB   = posRecoil / vp0B; // nano-second
    eB   = PB.E() - PB.M();
    zB   = vp0B * tB;
    rhoBHit = GetRecoilR(posRecoil);
@@ -698,14 +707,17 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
             
-            //if( flag ) printf("%d | %d | zHit : %f | %f, %f, %f | E : %f\n", loop, j, zHit, pos[0], pos[nDet-1] + length, firstPos, Pb.E()-Pb.M());
-            
+            //if( flag ) 
+            //if( zHit < 0 ) {
+            //  printf("%d | %d | zHit : %f |theta : %f | E : %f\n", loop, j, zHit, theta*TMath::RadToDeg(), Pb.E()-Pb.M());
+            //}
+
             if( firstPos > 0 ){
                if( zHit < pos[0] ) continue; // goto next mDet, after progress of all side, still not OK, then next loop 
-               if(zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
+               if( zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-               if( pos[0] < zHit ) continue;
-               if( zHit < pos[nDet-1] - length) return -4; 
+              if( zHit < pos[0] - length ) return 4;
+               if( zHit > pos[nDet-1]) continue; 
             }
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
@@ -726,7 +738,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             if( firstPos > 0 ){
                if( pos[0] - blocker < zHit && zHit < pos[0] /*&& sHit < perpDist/2.*/ ) return -6; // blocked by blocker
             }else{
-               if( pos[0] < zHit && zHit < pos[0] + blocker /*&& sHit < perpDist/2.*/) return -6;
+               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + blocker /*&& sHit < perpDist/2.*/) return -6;
             }
             
             //printf("%d | zHit : %f \n", 2, zHit);
@@ -1162,11 +1174,6 @@ public:
       Z1 = Z;
       namea = temp.Name;
       name1 = temp.Name;
-      
-      if( namea == "1H " ) {
-         namea = "p";
-         name1 = "p";
-      }
    }
 
    void Set2(int A, int Z){
@@ -1175,10 +1182,6 @@ public:
       A2 = A;
       Z2 = Z;
       name2 = temp.Name;
-      
-      if( name2 == "1H " ) {
-         name2 = "p";
-      }
       
       AB = AA + Aa - A1 - A2;
       ZB = ZA + Za - Z1 - Z2;

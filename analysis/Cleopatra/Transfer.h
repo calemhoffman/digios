@@ -126,11 +126,11 @@ void Transfer(
   reaction.SetIncidentEnergyAngle(KEAmean, 0, 0);
   reaction.CalReactionConstant();
 
-  printf("***************************************************\n");
-  printf("*\e[33m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
-  printf("***************************************************\n");
+  printf("*****************************************************************\n");
+  printf("*\e[1m\e[33m        %27s                            \e[0m*\n", reaction.GetReactionName().Data());
+  printf("*****************************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
-  printf("#################################### Beam \n");
+  printf("\e[32m#################################### Beam \e[0m\n");
   if( ExAList[0] != 0 ) printf("    Beam Ex: %7.4f MeV\n", ExAList[0]);
   printf("         KE: %7.4f +- %5.4f MeV/u, dp/p = %5.2f %% \n", KEAmean, KEAsigma, KEAsigma/KEAmean * 50.);
   printf("      theta: %7.4f +- %5.4f MeV/u \n", thetaMean, thetaSigma);
@@ -139,7 +139,7 @@ void Transfer(
   printf("     Max Ex: %7.4f MeV \n", reaction.GetMaxExB() );
 
   //======== Set HELIOS
-  printf("#################################### HELIOS configuration\n");   
+  printf("\e[32m#################################### HELIOS configuration\e[0m\n");   
   HELIOS helios;
   bool sethelios = helios.SetDetectorGeometry(heliosDetGeoFile);
   if( !sethelios){
@@ -199,7 +199,7 @@ void Transfer(
     fclose(keyParaOut);
   }
   //==== Target scattering, only energy loss
-  if(isTargetScattering) printf("#################################### Target Scattering\n");
+  if(isTargetScattering) printf("\e[32m#################################### Target Scattering\e[0m\n");
   TargetScattering msA;
   TargetScattering msB;
   TargetScattering msb;
@@ -218,11 +218,11 @@ void Transfer(
   //======= Decay of particle-B
   Decay decay;
   if(isDecay) {
-    printf("#################################### Decay\n");
+    printf("\e[32m#################################### Decay\e[0m\n");
     decay.SetMotherDaugther(AB, zB, AB-decayA,zB-decayZ); //decay
   }
   //======= loading excitation energy
-  printf("#################################### excitation energies\n");
+  printf("\e[32m#################################### excitation energies\e[0m\n");
   vector<double> ExKnown;
   vector<double> ExStrength;
   vector<double> y0; // intercept of e-z plot
@@ -290,7 +290,7 @@ void Transfer(
   }
   
   //======== Load DWBAroot for thetaCM distribution
-  printf("#################################### Load DWBA input : %s  \n", ptolemyRoot.Data());
+  printf("\e[32m#################################### Load DWBA input : %s  \e[0m\n", ptolemyRoot.Data());
   TF1 * dist = NULL;
   TFile * distFile = new TFile(ptolemyRoot, "read");
   TObjArray * distList = NULL;
@@ -308,17 +308,23 @@ void Transfer(
   }
 
   //====================== build tree
-  printf("#################################### building Tree in %s\n", saveFileName.Data());
+  printf("\e[32m#################################### building Tree in %s\e[0m\n", saveFileName.Data());
   TFile * saveFile = new TFile(saveFileName, "recreate");
   TTree * tree = new TTree("tree", "tree");
 
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
+  TMacro exList(excitationFile.c_str());
+  TString str;
+  str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
+  config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
+  exList.Write("ExList");
+  
+  if( distList != NULL ) distList->Write("DWBA", 1);
   
   TMacro hitMeaning;
-  TString str;
   str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
   str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
   str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
@@ -351,6 +357,7 @@ void Transfer(
   tree->Branch("z", &z, "z/D");
   //double z0; tree->Branch("z0", &z0, "z0/D");
   tree->Branch("t", &t, "t/D");
+  double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
   
   double recoilT; // particle-B hit time
   tree->Branch("recoilT", &recoilT, "recoilT/D");
@@ -530,7 +537,18 @@ void Transfer(
   clock.Reset();
   clock.Start("timer");
   shown = false;
-  printf("#################################### generating %d events \n", numEvent);
+  
+  //change the number of event into human easy-to-read form
+  int digitLen = TMath::Floor(TMath::Log10(numEvent));
+  TString numEventStr;
+  if( 3 <= digitLen && digitLen < 6 ){
+    numEventStr.Form("%5.1f kilo", numEvent/1000.);
+  }else if ( 6<= digitLen && digitLen < 9 ){
+    numEventStr.Form("%6.2f million", numEvent/1e6);    
+  }else if ( 9<= digitLen ){
+    numEventStr.Form("%6.2f billion", numEvent/1e9);    
+  }
+  printf("\e[32m#################################### generating %s events \e[0m\n", numEventStr.Data());
 
   //====================================================== calculate event
   int count = 0;
@@ -641,6 +659,7 @@ void Transfer(
     //z0 = helios.GetZ0() ; 
     x = helios.GetX() + gRandom->Gaus(0, zSigma);
     t = helios.GetTime();
+    tB = helios.GetRecoilTime();
     loop = helios.GetLoop();
     detID = helios.GetDetID();
     detRowID = helios.GetDetRowID();

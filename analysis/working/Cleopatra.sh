@@ -107,6 +107,12 @@ elif [ $IsExtractXSec -eq 2 ]; then
   ExtractXsecMsg=", for (d,d)(p,p), extract Total Xsec"
 fi;
 
+if [ $SimTransfer -eq 1 ]; then
+  angMin=0 
+  angMax=180
+  angStep=0.5
+fi
+
 echo "#################################################################"
 echo "##   @@@@ @@    @@@@  @@@@  @@@@@  @@@@  @@@@@@ @@@@@   @@@@   ##"
 echo "##  @@    @@    @@   @@  @@ @@ @@ @@  @@   @@   @@ @@  @@  @@  ##"
@@ -114,7 +120,7 @@ echo "##  @@    @@    @@@@ @@  @@ @@@@@ @@@@@@   @@   @@@@@  @@@@@@  ##"
 echo "##  @@    @@    @@   @@  @@ @@    @@  @@   @@   @@ @   @@  @@  ##"
 echo "##   @@@@ @@@@@ @@@@  @@@@  @@    @@  @@   @@   @@  @  @@  @@  ##"
 echo "#################################################################"
-echo "#####    Cleopatra, Ptolemy for (d,p),(p,d),(p,p),(d,d)     #####"
+echo "#####          Cleopatra, Ptolemy for p,d,t,3He             #####"
 echo "#################################################################"
 echo ""
 echo "USER OPTION:"
@@ -147,13 +153,15 @@ if [ ${RunPtolemy} -eq 1 ] ; then
   echo "=====   Ptolemy Calcualtion   ==================================="
   echo "================================================================="
   ptolemyOUTPUT="$(../Cleopatra/ptolemy <${infile}> ${outfile})"
-
-  if [ "${ptolemyOUTPUT}" = "" ] ; then
-      echo "Ptolmey finished without problem. "
-  else
-      echo "Ptolemy has error, check ${infile} or ${outfile}"
-      exit 1;
-  fi
+  
+  #somehow not work
+  #echo "ptolmey output : " $ptolemyOUTPUT
+  #if [ "${ptolemyOUTPUT}" = "" ] ; then
+  #    echo "Ptolmey finished without problem. "
+  #else
+  #    echo "Ptolemy has error, check ${infile} or ${outfile}"
+  #    exit 1;
+  #fi
 
 fi;
 

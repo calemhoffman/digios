@@ -15,16 +15,17 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
     
     TTree *t1 = (TTree*)f.Get("tree");
 
+    isTrace = abs(isTrace);
     
     TString processCmd;
-    if( isTrace == 0 ) {
+    if( isTrace == 1 ) {
         processCmd.Form("../Armory/GeneralSort.C+");
         t1->Process(processCmd);
         f.Close();
-    }else if(isTrace == 1){
-        processCmd.Form("../Armory/GeneralSortTrace.C+");
-        t1->Process(processCmd);
-        f.Close();
+        //}else if(isTrace == 1){
+        //processCmd.Form("../Armory/GeneralSortTrace.C+");
+        //t1->Process(processCmd);
+        //f.Close();
     }else if(isTrace > 1){
         TChain * chain = new TChain("tree");
         chain->Add(name); 

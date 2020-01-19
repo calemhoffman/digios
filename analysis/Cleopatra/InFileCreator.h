@@ -112,9 +112,9 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
 
     printf("  %s\n", tempLine.c_str());
     
-    //for( int i = 0 ; i < str0.size() ; i++){
-    //  printf(" str0[%d] %s \n", i,  str0[i].c_str());
-    //}
+    ///for( int i = 0 ; i < str0.size() ; i++){
+    ///  printf(" str0[%d] %s \n", i,  str0[i].c_str());
+    ///}
 
     vector<string> str1 = SplitStr(str0[0], "(", 0);
     vector<string> str2 = SplitStr(str1[1], ")", 1);
@@ -127,16 +127,16 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     string ma = str2[0].substr(1, posTemp1-1);
     size_t posTemp2 = str2[0].find(")");
     string mb = str2[0].substr(posTemp1+1, posTemp2-posTemp1-1);
-    //printf(" ma : |%s| , mb : |%s| \n", ma.c_str(), mb.c_str());
+    ///printf(" ma : |%s| , mb : |%s| \n", ma.c_str(), mb.c_str());
     Isotope isotopea(ma);
     Isotope isotopeb(mb);
     
     bool isReactionSupported = false;
     if( isotopea.A <= 3 && isotopea.Z <= 2 && isotopeb.A <=3 && isotopeb.Z <=2 ) isReactionSupported = true; 
 
-    //if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" || mb == "n"){
-    //  if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
-    //}
+    ///if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" || mb == "n"){
+    ///  if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
+    ///}
 
     if( isReactionSupported == false ){
       printf("  ===> Ignored. Reaction type not supported. \n"); 
@@ -162,9 +162,9 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     Isotope isotopeA(str1[0]);
     Isotope isotopeB(str2[1]);
     
-    //check reaction valid by balancing the A and Z number;
-    //printf("A: %d + %d = %d + %d \n", isotopeA.A, isotopea.A, isotopeB.A, isotopeb.A);
-    //printf("Z: %d + %d = %d + %d \n", isotopeA.Z, isotopea.Z, isotopeB.Z, isotopeb.Z);
+    ///check reaction valid by balancing the A and Z number;
+    ///printf("A: %d + %d = %d + %d \n", isotopeA.A, isotopea.A, isotopeB.A, isotopeb.A);
+    ///printf("Z: %d + %d = %d + %d \n", isotopeA.Z, isotopea.Z, isotopeB.Z, isotopeb.Z);
 
     if( isotopeA.A + isotopea.A != isotopeB.A + isotopeb.A || isotopeA.Z + isotopea.Z != isotopeB.Z + isotopeb.Z ) {
       printf("    ====> ERROR! A-number or Z-number not balanced. \n");
@@ -179,14 +179,36 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       continue;
     }
     
-    string node = orbital.substr(0,1);
-    string jValue = orbital.substr(2);
-    string lValue = orbital.substr(1,1);
-    int spdf = GetLValue(lValue);
-    //printf(" j = %s, l = %s = %d, parity = %s \n", jValue.c_str(), lValue.c_str(), spdf, parity.c_str());
-    if( spdf == -1 ){
-      printf(" ===> skipped. Not reconginzed L-label. (user input : %s) \n", lValue.c_str());
-      continue;
+    string node ;
+    string jValue ;
+    string lValue ;
+    int spdf = -1;
+    
+    if( isTransferReaction ) {
+      
+      ///printf("------------ %d nucleon(s) transfer \n", abs(isotopea.A - isotopeb.A));
+      
+      node = orbital.substr(0,1);
+      
+      // single nucleon transfer
+      if( abs(isotopea.A - isotopeb.A) == 1 ){
+        lValue = orbital.substr(1,1);
+        jValue = orbital.substr(2);
+        spdf = GetLValue(lValue);
+      }
+      
+      // two-nucleons transfer
+      if( abs(isotopea.A - isotopeb.A) == 2 ){
+        size_t posEq = orbital.find('=');
+        lValue = orbital.substr(posEq+1,1);
+        spdf=atoi(lValue.c_str());
+      }
+      
+      if( spdf == -1 ){
+        printf(" ===> skipped. Not reconginzed orbital-label. (user input : l=%s | %s) \n", lValue.c_str(), orbital.c_str());
+        continue;
+      }
+
     }
     
     //get Beam energy, distingusih MeV or MeV/u
@@ -203,20 +225,20 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     if( unit == "MeV/u") factor = isotopea.A;
     double totalBeamEnergy = atof(reactionEnergy.substr(0, pos+1).c_str()) * factor;
     
-    //printf("unit : %s , %f\n", unit.c_str(), totalBeamEnergy);
-    //printf("  target nucleus : %s \n", isoA.c_str());
-    //printf("        reaction : %s \n", reactionType.c_str());
-    //printf("          remain : %s \n", isoB.c_str());
-    //printf(" reaction energy : %s \n", reactionEnergy.c_str());
-    //printf("       Potential : %s \n", potential.c_str());
-    //printf("         orbital : %s \n", orbital.c_str());
-    //printf("        Ex [MeV] : %s \n", Ex.c_str());
+    ///printf("unit : |%s| , %f\n", unit.c_str(), totalBeamEnergy);
+    ///printf("  target nucleus : %s \n", isoA.c_str());
+    ///printf("        reaction : %s \n", reactionType.c_str());
+    ///printf("          remain : %s \n", isoB.c_str());
+    ///printf(" reaction energy : %s \n", reactionEnergy.c_str());
+    ///printf("       Potential : %s \n", potential.c_str());
+    ///printf("         orbital : %s \n", orbital.c_str());
+    ///printf("        Ex [MeV] : %s \n", Ex.c_str());
     
     double Qvalue = isotopea.Mass + isotopeA.Mass - isotopeb.Mass  - isotopeB.Mass;
-    //printf("Q-Value = %f MeV\n", Qvalue);
+    ///printf("Q-Value = %f MeV\n", Qvalue);
     
-    //printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeA.A, isotopeA.Z, isotopeA.Mass);
-    //printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeB.A, isotopeB.Z, isotopeB.Mass);
+    ///printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeA.A, isotopeA.Z, isotopeA.Mass);
+    ///printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeB.A, isotopeB.Z, isotopeB.Mass);
     if( isotopeA.Mass == -404 || isotopeB.Mass == -404 ){
       printf("  ===> Error! mass does not found. \n");
       continue;
@@ -238,7 +260,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         fprintf(file_out, "wavefunction av18 \n");
         fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
       }
-      if( isotopea.A == 3 ){
+      if( isotopea.A == 3 && abs(isotopea.A-isotopeb.A) == 1){
         fprintf(file_out, "PARAMETERSET alpha3 r0target \n");
         fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
         fprintf(file_out, "\n");
@@ -246,15 +268,34 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         fprintf(file_out, "wavefunction phiffer \n");
         fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
       } 
-      fprintf(file_out, ";\n");
-      fprintf(file_out, "TARGET\n");
-      fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-      fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
-      fprintf(file_out, "r0=1.25 a=.65 \n");
-      fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
-      fprintf(file_out, "rc0=1.3 \n");
+      if( abs(isotopea.A-isotopeb.A) == 2 ){
+        fprintf(file_out, "PARAMETERSET alpha2 r0target\n");
+        fprintf(file_out, "lstep=1 lmin=0 lmax=30 maxlextrap=0 ASYMPTOPIA=40\n");
+        fprintf(file_out, "\n");
+        fprintf(file_out, "PROJECTILE\n");
+        fprintf(file_out, "L = 0  NODES=0 R0 = 1.25  A = .65     RC0 = 1.25\n");
+      }
       fprintf(file_out, ";\n");
       
+      //===== TARGET
+      fprintf(file_out, "TARGET\n");
+      
+      if( abs(isotopea.A-isotopeb.A) == 1 ){
+        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
+        fprintf(file_out, "r0=1.25 a=.65 \n");
+        fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
+        fprintf(file_out, "rc0=1.3 \n");
+      }
+      
+      if( abs(isotopea.A-isotopeb.A) == 2 ){
+        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        fprintf(file_out, "nodes=%s L=%d  $node is n-1 \n", node.c_str(), spdf);
+      }
+      
+      fprintf(file_out, ";\n");
+      
+      //===== POTENTIAL
       string pot1Name = potential.substr(0,1);
       string pot1Ref = potentialRef(pot1Name);
       fprintf(file_out, "INCOMING $%s\n", pot1Ref.c_str());

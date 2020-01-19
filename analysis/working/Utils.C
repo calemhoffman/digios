@@ -339,14 +339,16 @@ void excite(void) {
   gStyle->SetOptStat("neiou");
   hEx->Draw("");
   
+  
   TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
   if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),1600,1000);
-  cexI->Clear();cexI->Divide(5,6);
+  cexI->Clear();cexI->Divide(numCol,numRow);
   gStyle->SetOptStat("neiou");
   for( int i = 0; i < numDet; i++){
     cexI->cd(i+1); 
     hExi[i]->Draw("");
   }
+  
 }
 
 
