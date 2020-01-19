@@ -20,29 +20,20 @@
  
 void Aux(int cutID, TTree *tree0, TCutG ** cut_in, TCanvas * cScript, int startPadID, TObjArray * fxList, TObjArray * gList);
 
-void script1(){
+void script(){
 
-   //========================== input file/cut/simulation
-   //TString fileName = "A_trace_run008-013.root"; // 15N degraded
-   //TString fileName = "A_trace_run023-034.root"; // 500ug, 16N, not well tuned.
-   //TString fileName = "A_trace_run056-057_059-085_087-099.root"; //226ug, 16N
-   //TString fileName = "A_trace_run101-144_147-170.root"; //366ug, 16N
-   //TString fileName = "A_trace_run056-057_059-085_088-099_101-112.root"; // all 16N
-   //TFile * file0 = new TFile(fileName);
-   //TTree * tree0 = (TTree*) file0->FindObjectAny("tree");
-   
+   //========================== input file/cut/simulation   
    TChain * tree0 = new TChain("tree");
-   //tree0->Add("A_trace_run056-057_059-085_087-099.root");
-   tree0->Add("A_trace_run101-144_147-194.root");
-   //TString fileName = "run056 - run194";
-   TString fileName = "run101 - run194";
+   tree0->Add("A_trace_run055-057_059-085_087-099.root");
+   tree0->Add("A_trace_run101-144_147-165_167-214.root");
+   TString fileName = "run056 - run214";
    
    TFile * file1 = new TFile("transfer.root");
    TTree * tree1 = (TTree*) file1->FindObjectAny("tree");
    TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
    TObjArray * gList = (TObjArray*) file1->FindObjectAny("gList");
    
-   TString rdtCutFile = "rdt_16N.root";
+   TString rdtCutFile = "rdtCuts.root";
    TFile * fileCut = new TFile(rdtCutFile);
    TObjArray * cutList = NULL;
    TCutG ** cut_in = NULL;
@@ -69,9 +60,9 @@ void script1(){
    TString gate_time = "abs(coinTime-19)<9 && Ex > -2";  ///change time gate
  //   TString gate_time = "abs(coinTime)<200";  
    //========================== Canvas
-   int div[2] = {6,4}; // x,y
-   
-   TCanvas * cScript = new TCanvas("cScript", "cScript : " + fileName + "|" + rdtCutFile, 0, 0, 400 * div[0], 400 * div[1]);
+   int div[2] = {3,2}; // x,y
+   int padSize = 300;
+   TCanvas * cScript = new TCanvas("cScript", "cScript : " + fileName + "|" + rdtCutFile, 0, 0, padSize * div[0], padSize * div[1]);
    cScript->Divide(div[0], div[1]);
    for( int i = 1; i <= div[0] * div[1] ; i++){
       cScript->cd(i)->SetGrid();
@@ -88,33 +79,31 @@ void script1(){
    //======================= Trace of recoil
    
    ///canvas size = 4 x 3
-   ///cScript->cd(1);  tree0->Draw("rdt[1]:rdt[0]>>rdt1(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///cScript->cd(2);  tree0->Draw("rdt[3]:rdt[2]>>rdt2(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///cScript->cd(3);  tree0->Draw("rdt[5]:rdt[4]>>rdt3(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///cScript->cd(4);  tree0->Draw("rdt[7]:rdt[6]>>rdt4(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///
-   ///
-   ///cScript->cd(5);  tree0->Draw("trdt[1]:trdt[0]>>trdt1(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///cScript->cd(6);  tree0->Draw("trdt[3]:trdt[2]>>trdt2(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///cScript->cd(7);  tree0->Draw("trdt[5]:trdt[4]>>trdt3(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///cScript->cd(8);  tree0->Draw("trdt[7]:trdt[6]>>trdt4(300, 0, 4000, 300, 0, 8000)", "", "colz");
-   ///
-   ///cScript->cd(9);  tree0->Draw("trdt[1]:trdt[0]>>trdt1g(300, 0, 4000, 300, 0, 8000)", "trdt_r[0]<20", "colz");
-   ///cScript->cd(10); tree0->Draw("trdt[3]:trdt[2]>>trdt2g(300, 0, 4000, 300, 0, 8000)", "trdt_r[2]<20", "colz");
-   ///cScript->cd(11); tree0->Draw("trdt[5]:trdt[4]>>trdt3g(300, 0, 4000, 300, 0, 8000)", "trdt_r[4]<20", "colz");
-   ///cScript->cd(12); tree0->Draw("trdt[7]:trdt[6]>>trdt4g(300, 0, 4000, 300, 0, 8000)", "trdt_r[6]<20", "colz");
-   
-
+   //cScript->cd(1);  tree0->Draw("rdt[1]:rdt[0]>>rdt1(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   //cScript->cd(2);  tree0->Draw("rdt[3]:rdt[2]>>rdt2(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   //cScript->cd(3);  tree0->Draw("rdt[5]:rdt[4]>>rdt3(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   //cScript->cd(4);  tree0->Draw("rdt[7]:rdt[6]>>rdt4(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   // 
+   // 
+   //cScript->cd(5);  tree0->Draw("trdt[1]:trdt[0]>>trdt1(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   //cScript->cd(6);  tree0->Draw("trdt[3]:trdt[2]>>trdt2(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   //cScript->cd(7);  tree0->Draw("trdt[5]:trdt[4]>>trdt3(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   //cScript->cd(8);  tree0->Draw("trdt[7]:trdt[6]>>trdt4(300, 0, 4000, 300, 0, 8000)", "", "colz");
+   // 
+   //cScript->cd(9);  tree0->Draw("trdt[1]:trdt[0]>>trdt1g(300, 0, 4000, 300, 0, 8000)", "trdt_r[0]<20", "colz");
+   //cScript->cd(10); tree0->Draw("trdt[3]:trdt[2]>>trdt2g(300, 0, 4000, 300, 0, 8000)", "trdt_r[2]<20", "colz");
+   //cScript->cd(11); tree0->Draw("trdt[5]:trdt[4]>>trdt3g(300, 0, 4000, 300, 0, 8000)", "trdt_r[4]<20", "colz");
+   //cScript->cd(12); tree0->Draw("trdt[7]:trdt[6]>>trdt4g(300, 0, 4000, 300, 0, 8000)", "trdt_r[6]<20", "colz");
    
    //======================== coinTime, RDT
    
-   /**
+   
    cScript->cd(2); tree0->Draw("coinTime:z>>h1(400, 700, 1000, 400, -50, 200)", "int(detID/5)==1", "colz");
    cScript->cd(3); tree0->Draw("coinTime:z>>h2(400, 700, 1000, 400, -50, 200)", "int(detID/5)==2", "colz");
    cScript->cd(6); tree0->Draw("coinTime:z>>h3(400, 700, 1000, 400, -50, 200)", "int(detID/5)==3", "colz");
    cScript->cd(5); tree0->Draw("coinTime:z>>h4(400, 700, 1000, 400, -50, 200)", "int(detID/5)==4", "colz");
    cScript->cd(4); tree0->Draw("coinTime:z>>h5(400, 700, 1000, 400, -50, 200)", "int(detID/5)==5", "colz");
-   */
+   
    
    ///cScript->cd(1);  tree0->Draw("coinTimeUC:x>>j1(400, -2, 2, 400, -100, 200)", "detID == 5 && cut1", "colz");
    ///
@@ -163,12 +152,12 @@ void script1(){
    
    ///Canvas size is 6 x 4
    
-   gStyle->SetPalette(kBird);
-   
-   Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
-   Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
-   Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
-   Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
+   ///gStyle->SetPalette(kBird);
+   /// 
+   ///Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
+   ///Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
+   ///Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
+   ///Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
 
    //==========================================  E-Z and Ex
    
@@ -195,7 +184,7 @@ void script1(){
    
    ///For H072_16N
    
-   
+   /*
    div[0] = 5; // x
    div[1] = 5; // y
    TCanvas * cJaJaJa = new TCanvas("cJaJaJa", "cJaJaJa : " + fileName + "|" + rdtCutFile, 0, 0, 200 * div[0], 200 * div[1]);
@@ -310,7 +299,7 @@ void script1(){
    fit2->SetParameters(par);
    fit2->FixParameter(5,0.166);
    fit2->FixParameter(2,0.166);
-   fit2->FixParameter(8,0.08xc);
+   fit2->FixParameter(8,0.08);
 
    fit2->FixParameter(7,0.35);
    fit2->FixParameter(6,15);
@@ -335,6 +324,7 @@ void script1(){
    text.DrawLatex(0.4, 0.55, Form("sigma : %5.3f(%5.3f) MeV", fit->GetParameter(2), fit->GetParError(2)));
    text.DrawLatex(0.4, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", fit->GetParameter(2) *2.355, fit->GetParError(2)*2.355));
 */
+   /*
    text.DrawLatex(0.6, 0.65, " g.s ");
    text.DrawLatex(0.6, 0.60, Form(" mean : %5.3f(%5.3f) MeV", par[10], par_err[1]));
    text.DrawLatex(0.6, 0.55, Form("sigma : %5.3f(%5.3f) MeV", par[11], par_err[2]));
