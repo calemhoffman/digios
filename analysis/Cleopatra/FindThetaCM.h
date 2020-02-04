@@ -109,9 +109,12 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
       iDet = pos.size();
       file.close();
       printf("... done.\n");
+
+      vector<double> posTemp = pos;
       
       for(int id = 0; id < iDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos  > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos  < 0 ) pos[id] = firstPos - posTemp[iDet-1 -id];
       }
       
       for(int i = 0; i < iDet ; i++){
@@ -154,10 +157,19 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
       px[i] = beta /slope * (gamma * beta * q - gamma * kCM * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
       py[i] = thetacm * TMath::RadToDeg();   
    }
-   
+
+   //find minimum z position when ThetaCM = 0;
+   TGraph * xt = new TGraph(100, py, px);
+   xt->SetName("xt");
+   double zMin0 = xt->Eval(0);
+   printf("min z for thetaCM = 0 : %f mm \n", zMin0);
+
+
    TGraph * tx = new TGraph(100, px, py);
    tx->SetName(Form("tx"));
    tx->SetLineColor(4);
+
+   //tx->Draw("AC*");
    
    /**///========================================================= result
       
@@ -174,7 +186,8 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
      for( int j = 0 ; j < nDivision+1 ; j++){
        
        double tMin = tx->Eval(zMin + j*zStep);
-       if( tMin < 0 ) tMin = 5;
+       //if( tMin < 0 ) tMin = 5;
+       if( zMin + j*zStep < zMin0 ) tMin = 10;
        double tMax = tx->Eval(zMin + (j+1)*zStep);
        if( tMax < 0 ) tMax = 5;
        
