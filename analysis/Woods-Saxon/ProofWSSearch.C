@@ -5,20 +5,30 @@
 #include "TSelector.h"
 #include "TProof.h"
 #include "TList.h"
-//#include "WSProof.h"
-//#include "WSProof.C"
 
-void ProofWSSearch(){
+//#include "WSProof.C+"
+
+#include "../Cleopatra/Isotope.h"
+
+void ProofWSSearch(string isoName, bool IsNeutron , TString searchRange, TString outRootFile){
    //=============== User input
-   int A = 209;
-   string sym = "Pb";
-   TString energyFile = "energy209Pb.dat";
-   TString searchRange = "wsSearch_Range.txt";
+
+   Isotope iso(isoName);
+
+   int A = iso.A;
+   int Z = iso.Z;
+   if( IsNeutron) Z = 0;
+   string sym = iso.Symbol;   
+   TString energyFile = Form("energy%d%s.dat", A, sym.c_str());
+   
    TString templateRoot = "template.root";
-   TString outRootFile = Form("ws_%d%s_all.root", A, sym.c_str());
+   
+   //TString searchRange = "wsSearch_test.txt";
+   //TString outRootFile = Form("ws_%d%s_all.root", A, sym.c_str());
+   //TString outRootFile = outFile;
 
    int numWorker = 36;
-   int maxEvent = 0; // if zero = All event
+   int maxEvent = 0; // if zero= All event
    
    int nStep = 200;
    double dr = 0.1; // fm
@@ -28,7 +38,7 @@ void ProofWSSearch(){
    //==================== End of User input
 
 	//WSMakeTree
-   TString expression = Form("./WSMakeTree %d %s %s", A, searchRange.Data(), templateRoot.Data());
+   TString expression = Form("./WSMakeTree %d %d %s %s", A, Z, searchRange.Data(), templateRoot.Data());
    system(expression.Data());
 
    
@@ -64,9 +74,11 @@ void ProofWSSearch(){
    //WSProof * selector = (WSProof *)TSelector::GetSelector("WSProof.C");
    //selector->ReadEnergyFile(energyFile);
    //chain->Process(selector, "", 1000);
+   
+   //solution to above, see ../working/ChainMonitors.C
 
    //Simplist way to do
-   TString option = Form("%d,%s,%s,%d,%f",A, energyFile.Data(),outRootFile.Data(), nStep, dr);
+   TString option = Form("%d,%s,%s,%d,%f,%d",A, energyFile.Data(),outRootFile.Data(), nStep, dr, Z);
    if( maxEvent > 0 ) {
      chain->Process("WSProof.C+", option, maxEvent);
    }else{

@@ -1,12 +1,25 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3517238.svg)](https://doi.org/10.5281/zenodo.3517238)
+
 # digios
+
+## Note
+- This repository mainly used in 4 places: HELIOS-DAQ, HELIOS-MAC, HELIOS-DB, and LCRC(/lcrc/project/HELIOS)
+- In HELIOS-DAQ, MAC, and DB, things are the same, can switch to other branches.
+- In LCRC, PLEASE only use the master branch at /lcrc/project/HELIOS/digios/
+-- To analysis different experiment, edit digios/expName.sh, and use MakeDataLinks.
 
 ## Major Branches
 - master : should be the latest branch with latest code
 - 4SideArray : the branch for the 4-side array, the main diff is the daq
 - ISS631 : the analysis code on 2018-Oct.
+- h072_16N : the analysis code for (d,3He)
+
+## Update on June 11, 2019, Ryan
+- the code was updated and improved base on h064_15N (d,p) run 013.
+- the physical dimension of the new array is not known, assume old array.
 
 ## Minor update on March 25, 2019, Ryan
-- the code is tested with alpha source run, with ot without trace is OK.
+- the code is tested with alpha source run, with or without trace is OK.
 - AutoCalibration should be OK.
 - Simluation becomes obsolete.
 

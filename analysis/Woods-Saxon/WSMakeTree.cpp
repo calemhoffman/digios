@@ -65,17 +65,19 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
 
 int main(int argc, char *argv[]){
 
-  if(argc != 4 ) {
+  if(argc != 5 ) {
     //TODO put the mass number out of paraFile
-    printf("Usage: ./WSMakeTree A paraFile outRoot\n");
+    printf("Usage: ./WSMakeTree  A  Z  paraFile  outRoot\n");
     printf("             A = mass number\n");
+    printf("             Z = proton number [ ZERO for neutron level ]\n");
     printf("      paraFile = search setting\n");
     printf("       outRoot = output Root File name\n");
     exit(0);   }
 
   int A  = atoi(argv[1]);
-  string paraFile = argv[2];
-  string rootFile = argv[3];
+  int Z  = atoi(argv[2]);
+  string paraFile = argv[3];
+  string rootFile = argv[4];
 
   //========= reading paraFile
   ifstream file_para;
@@ -162,6 +164,8 @@ int main(int argc, char *argv[]){
   str.Form("============ Search Range : %s.", paraFile.c_str());
   searchRangeMsg.AddLine(str.Data());
   str.Form(" mass A : %d", A);
+  searchRangeMsg.AddLine(str.Data());
+  str.Form(" proton number Z : %d,  rc = r0", Z);
   searchRangeMsg.AddLine(str.Data());
   str.Form("  V0: (%9.4f, %9.4f) | step: %9.4f | %4d", v0min, v0max, v0step, v0N );
   searchRangeMsg.AddLine(str.Data());

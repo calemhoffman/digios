@@ -68,11 +68,18 @@ void GeneralSort::Begin(TTree * tree)
   TString option = GetOption();
   NumEntries = tree->GetEntries();
   EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
-  
+
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
   saveFileName.Remove(0, findslat+1);
   saveFileName = "../root_data/gen_" + saveFileName;
+
+  printf("=============================================================\n");
+  printf("=====================  GeneralSort.C  =======================\n");
+  printf("=============================================================\n");
+  printf("                    file : %s \n", tree->GetDirectory()->GetName());
+  printf("          Number of Event: %llu\n", NumEntries);
+  printf("Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
 
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
@@ -121,7 +128,18 @@ void GeneralSort::Begin(TTree * tree)
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
-    printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
+    if( 120 > idDetMap[i] && idDetMap[i] >= 100){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Cyan
+    }else{   
+      switch (idKindMap[i]) {
+         case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+         case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
+         case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
+         case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
+         case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
+         default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+       }
+     }
   }
   printf("\n");
   gClock.Reset();
@@ -144,7 +162,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
   if( entry == 0 ) {
       fileNum = fChain->GetDirectory()->GetName();
       
-      printf("----------------------- openning  %s \n", fileNum.Data());
+      //printf("----------------------- openning  %s \n", fileNum.Data());
       
       int findslat = fileNum.Last('/');
       fileNum.Remove(0, findslat+1);
@@ -179,14 +197,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
       if (i<32) psd.ELUM[i]=TMath::QuietNaN();
       if (i<10) psd.EZERO[i]=TMath::QuietNaN();
     
-      psd.EnergyTimestamp[i]=TMath::QuietNaN();
-      psd.XFTimestamp[i]=TMath::QuietNaN();
-      psd.XNTimestamp[i]=TMath::QuietNaN();
-      psd.RingTimestamp[i]=TMath::QuietNaN();
-      psd.RDTTimestamp[i]=TMath::QuietNaN();
-      psd.TACTimestamp[i]=TMath::QuietNaN();
-      if (i<32) psd.ELUMTimestamp[i]=TMath::QuietNaN();
-      if (i<10) psd.EZEROTimestamp[i]=TMath::QuietNaN();	    
+      psd.EnergyTimestamp[i]= 0;
+      psd.XFTimestamp[i]    = 0; 
+		psd.XNTimestamp[i]	 = 0; 
+		psd.RingTimestamp[i]	 = 0; 
+		psd.RDTTimestamp[i]	 = 0; 
+		psd.TACTimestamp[i]	 = 0; 
+      if (i<32) psd.ELUMTimestamp[i] = 0;
+		if (i<10) psd.EZEROTimestamp[i]= 0;		 
     }
 
     
@@ -202,7 +220,6 @@ Bool_t GeneralSort::Process(Long64_t entry)
     //ID PSD Channels
     Int_t idKind = -1;
     Int_t idDet=-1; // Detector number
-    Int_t idConst=1010; //Temp value to get idDet
     
     //==============================================================
     /* --------------------- Loop over NumHits ------------------ */
@@ -213,7 +230,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       idKind = idKindMap[idTemp];
       
       
-      //=============================== PSD
+      ///=============================== PSD
       if ( 0 <= idDet && idDet < 100 && 0 <= idKind && idKind <= 3 ) {         
         switch(idKind)
           {
@@ -239,50 +256,40 @@ Bool_t GeneralSort::Process(Long64_t entry)
           }
       }
 
-      //=============================== TAC & RF TIMING
-      if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) { //RF TIMING SWITCH
-        //if (ProcessedEntries<NUMPRINT) printf("RF id %i, idDet %i\n",id[i],idDet);
-        
-        Int_t tacTemp = idDet-400;
-        psd.TAC[tacTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-        psd.TACTimestamp[tacTemp] = event_timestamp[i];
+      ///=============================== TAC & RF TIMING
+      if ( idDet >= 400 && idDet <= 450 ) {   
+        Int_t tacID = idDet - 400;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.TACTimestamp[tacID] = event_timestamp[i];
       }
        
-      //=============================== RECOIL
-      if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
-        Int_t rdtTemp = idDet-101;
-	//float mtemp[8]={-10,-100,-100,-100,-10,-100,-100,-100};
-        psd.RDT[rdtTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-        psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
-	
-
+      ///=============================== RECOIL
+      if ( idDet >= 100 && idDet <= 110 ) {
+        Int_t rdtID = idDet-100;
+        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 
-      //=============================== ELUM
-      if ((id[i]>=1000 && id[i]<1130)&&(idDet>200&&idDet<=240)) {
-        Int_t elumTemp = idDet - 201;
-        psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])
-                  -(float)(pre_rise_energy[i]))/M;
-        
-        psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
+      ///=============================== ELUM
+      if ( idDet >= 200 && idDet <= 240 ) {
+        Int_t elumID = idDet - 200;
+        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
+        psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
-      //=============================== EZERO
-      if ((id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
-        Int_t ezeroTemp = idDet - 300;
-        if (ezeroTemp<10) {
-          psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])
-              -(float)(pre_rise_energy[i]))/M;
-          psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
-        }
+      ///=============================== EZERO
+      if ( idDet >= 300 && idDet < 310 ) {
+        Int_t ezeroID = idDet - 300;
+        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M * (-1);
+        psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
       }
       
-      //=============================== EBIS 
+      ///=============================== EBIS 
       if (id[i]==1010) {
         psd.EBISTimestamp = event_timestamp[i];
       }
          
-      //=============================== T1 proton pulse
+      ///=============================== T1 proton pulse
       if (id[i]==1013) {
         psd.T1Timestamp = event_timestamp[i];
       }
@@ -294,7 +301,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
     }
 
-    //Clock
+    //Progress display
     /************************************************************************/
     oFile->cd(); //set focus on this file
     gen_tree->Fill();  
@@ -339,12 +346,12 @@ void GeneralSort::Terminate()
   // cc0->Clear(); hEvents->Draw();  
   
   printf("=======================================================\n");
-  printf("----- Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
+  printf(" Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
   gClock.Stop("timer");
   Double_t time = gClock.GetRealTime("timer");
-  printf("----- Total run time : %6.0f sec \n", time);
-  printf("----- Sorting rate   : %6.3f k/sec\n",EffEntries/time/1000.0);
-  printf("----- saved as \e[31m %s \e[m. events saved: %d\n", saveFileName.Data() , savedEntries); 
-
+  printf(" Total run time : %6.0f sec \n", time);
+  printf(" Sorting rate   : %6.3f k/sec\n",EffEntries/time/1000.0);
+  printf(" saved as \e[31m %s \e[m. events saved: %d\n", saveFileName.Data() , savedEntries); 
+  printf("=======================================================\n");
   gROOT->ProcessLine(".q");
 }

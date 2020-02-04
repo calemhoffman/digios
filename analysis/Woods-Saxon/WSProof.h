@@ -20,9 +20,11 @@
 //#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/RK4.h"
 //#include "/home/goluckyryan/Desktop/digios/analysis/Woods-Saxon/WS.h"
 
-#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/RK4.h"
-#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/WS.h"
+//#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/RK4.h"
+//#include "/lcrc/project/HELIOS/digios/analysis/Woods-Saxon/WS.h"
 
+#include "RK4.h"
+#include "WS.h"
 
 // Header file for the classes stored in the TTree if any.
 
@@ -66,6 +68,7 @@ public :
    TTree * newTree; //!
    
    int wsA; // mass number
+   int wsZ; // proton number
    int wsNStep; // number of step in solving radial Schrodinger equation
    double wsdr; // step size
 

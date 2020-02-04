@@ -14,7 +14,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
 /**///======================================================== User input
    
    const char* treeName="tree";
-   double eRange[3]  = {400, 0, 7000};
+   double eRange[3]  = {400, 0, 9000};
 
 /**///======================================================== read tree and create Canvas
    printf("################### Check_e_x.C ######################\n");
@@ -85,8 +85,10 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       
       for(int i = 0; i < rDet ; i++){
@@ -134,7 +136,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       
       gate.Form("detID == %d", idet);
 
-      tree->Draw(expression, gate, "colz");
+      tree->Draw(expression, gate, "box");
       line->Draw("same");
       cCheck->Modified();
       cCheck->Update();
