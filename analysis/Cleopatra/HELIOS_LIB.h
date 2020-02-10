@@ -208,24 +208,29 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
    //---- to CM frame
    TLorentzVector Pc = PA + Pa;
    TVector3 b = Pc.BoostVector();
-   TVector3 v0 (0,0,0);
-   TVector3 nb = v0 - b;
    
-   TLorentzVector PAc = PA; 
-   PAc.Boost(nb);
-   TVector3 vA = PAc.Vect();
+   TVector3 vb(0,0,0);
    
-   TLorentzVector Pac = Pa;
-   Pac.Boost(nb);
-   TVector3 va = Pac.Vect();
-   
-   //--- from vb
-   TVector3 vb = va;
-   vb.SetMag(p);
+   if( b.Mag() > 0 ){
+     TVector3 v0 (0,0,0);
+     TVector3 nb = v0 - b;
+     
+     TLorentzVector PAc = PA; 
+     PAc.Boost(nb);
+     TVector3 vA = PAc.Vect();
+     
+     TLorentzVector Pac = Pa;
+     Pac.Boost(nb);
+     TVector3 va = Pac.Vect();
+     
+     //--- construct vb
+     vb = va;
+     vb.SetMag(p);
 
-   TVector3 ub = vb.Orthogonal();
-   vb.Rotate(thetaCM, ub);
-   vb.Rotate(phiCM + TMath::PiOver2(), va); // somehow, the calculation turn the vector 90 degree.
+     TVector3 ub = vb.Orthogonal();
+     vb.Rotate(thetaCM, ub);
+     vb.Rotate(phiCM + TMath::PiOver2(), va); // somehow, the calculation turn the vector 90 degree.
+   }
    
    //--- from Pb
    TLorentzVector Pbc;
@@ -716,7 +721,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
                if( zHit < pos[0] ) continue; // goto next mDet, after progress of all side, still not OK, then next loop 
                if( zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-              if( zHit < pos[0] - length ) return 4;
+              if( zHit < pos[0] - length ) return -4;
                if( zHit > pos[nDet-1]) continue; 
             }
             
@@ -837,30 +842,36 @@ public:
       //printf("------- theta: %f deg, length: %f um, KE: %f MeV \n", theta * TMath::RadToDeg(), this->length * 1e+4, KE);
       
       //integrate the energy loss within the depth of A
-      double dx = length/100.; 
+      double dx = length/100.; // in cm
       double x = 0;
       double densityUse = density;
       if( unitID == 0 ) densityUse = 1.;
       do{
          //assume the particle will not be stopped
          //printf(" x: %f, KE:  %f, S: %f \n", x, KE, gA->Eval(KE));
-         KE = KE - densityUse * gA->Eval(KE) * 10. * dx ; // factor 10, convert MeV/mm -> MeV/cm
+         KE = KE - densityUse * gA->Eval(KE) * 10 * dx  ; // factor 10, convert MeV/cm -> MeV/cm
          
-         //TODO add angular Straggling
+         //angular Straggling, assume (Lateral Straggling)/(Projected range)
+         
          
          x = x + dx;
-      }while(x < length);
+      }while(x < length && KE > 0 );
       
       //printf(" depth: %f cm = %f um, KE : %f -> %f MeV , dE = %f MeV \n", depth, depth * 1e+4, KE0, KE, KE0 - KE);
-      
-      double newk = TMath::Sqrt(TMath::Power(mass+KE,2) - mass * mass);
-      
-      TVector3 vb = P.Vect();
-      vb.SetMag(newk);
+      double newk = 0;
       
       TLorentzVector Pnew;
-      Pnew.SetVectM(vb,mass);
+      TVector3 vb(0,0,0);
       
+      if( KE < 0 ) {
+        KE = 0.0; // somehow, when KE == 0 , the program has problem to rotate the 4-vector
+      }else{
+        newk = TMath::Sqrt(TMath::Power(mass+KE,2) - mass * mass);
+        vb = P.Vect();
+        vb.SetMag(newk);      
+      }
+      Pnew.SetVectM(vb,mass);
+
       return Pnew;
    }
    
@@ -933,7 +944,7 @@ vector<string> TargetScattering::SplitStr(string tempLine, string splitter, int 
 
 void TargetScattering::LoadStoppingPower(string filename){
    
-   printf("===== loading Stopping power: %s.", filename.c_str());
+   printf("loading Stopping power: %s.", filename.c_str());
    
    ifstream file;
    file.open(filename.c_str());
