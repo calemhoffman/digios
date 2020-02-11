@@ -120,10 +120,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 ///   if( !rdt_energy ) return kTRUE;
 
    // need to change manually depends on rdt or trdt
-   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( trdt[0], trdt[1] )) rejRDT1 = false;
-   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( trdt[2], trdt[3] )) rejRDT2 = false;
-   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( trdt[4], trdt[5] )) rejRDT3 = false;
-   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( trdt[6], trdt[7] )) rejRDT4 = false;
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
    if( !isRDTCutExist ){
       rejRDT1 = false;
