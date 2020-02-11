@@ -30,16 +30,16 @@ int canvasXY[2] = {800 , 1000} ;// x, y
 
 //---histogram setting
 int rawEnergyRange[2] = {   0,  3000}; // share with e, ring, xf, xn
-int    energyRange[2] = {   0,    10}; // in the E-Z plot
-int     rdtDERange[2] = {   0,   5000};
-int      rdtERange[2] = {   0,  10000};
+int    energyRange[2] = {   0,     8}; // in the E-Z plot
+int     rdtDERange[2] = {   0,   2000};
+int      rdtERange[2] = {   0,   6000};
 int      elumRange[2] = { 200,  4000};
 
 double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -40, 40};
 
 //---Gate
-int timeGate[2] = {-5, 6}; // min, max, 1 ch = 10 ns
+int timeGate[2] = {-2, 10}; // min, max, 1 ch = 10 ns
 int tacGate[2] = {-8000, -2000};
 int dEgate[2] = {500,  1500};
 int Eresgate[2] = {1000,4000};
@@ -1073,9 +1073,9 @@ void Monitors::Terminate()
    text.SetTextColor(2);
    text.DrawLatex(0.15, 0.8, "with Recoil");
    
-   TBox * box = new TBox (timeGate[0], 0, timeGate[1], yMax);
-   box->SetFillColorAlpha(kGreen, 0.2);
-   box->Draw();
+   //TBox * box = new TBox (timeGate[0], 0, timeGate[1], yMax);
+   //box->SetFillColorAlpha(kGreen, 0.2);
+   //box->Draw();
 
    ///----------------------------------- Canvas - 3
    cCanvas->cd(3);

@@ -148,12 +148,9 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
      
      printf("%d | %s \n", i, tempStr[0].c_str());
      
-     exList.push_back(atof(tempStr[0].c_str()));
-     
+     exList.push_back(atof(tempStr[0].c_str())); 
    }
-  
-   double exSpan = exList.back() - exList[0];
-   
+   double exSpan = exList.back() - exList[0];   
    double ExRange[2];
    
    ExRange[0] = exList[0] - exSpan * 0.1;
@@ -319,7 +316,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
        hThetaCM[i]->SetFillColor(i+1);
        hThetaCM[i]->SetFillStyle(3000+i);
        tree->Draw(Form("thetaCM>>hThetaCM%d", i), gate + Form("&& ExID==%d", i), "");
-       legend->AddEntry(hThetaCM[i], Form("ExID=%d", i));
+       legend->AddEntry(hThetaCM[i], Form("Ex =%.1f MeV", exList[i]));
        double max = hThetaCM[i]->GetMaximum();
        if( max > maxCount ) maxCount = max;
      }

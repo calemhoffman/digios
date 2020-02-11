@@ -2,8 +2,8 @@
    printf("=================== Root v%s\n", gROOT->GetVersion());
    gStyle->SetOptStat("neiou");
    
-   gStyle->SetPalette(1);
-   gStyle->SetLineWidth(2);
+   //gStyle->SetPalette(1);
+   //gStyle->SetLineWidth(2);
    gStyle->SetStatW(0.3);
    gStyle->SetStatH(0.3);
    gStyle->SetTitleW(0.4);
@@ -30,9 +30,9 @@
    gStyle->SetOptFit(1111);                        // the results of the fits
    gStyle->SetPadGridX(kTRUE);                     // draw horizontal and vertical grids
    gStyle->SetPadGridY(kTRUE);
-   gStyle->SetPalette(1,0);                        // pretty and useful palette
-   gStyle->SetHistLineWidth(2);                    // a thicker histogram line
-   gStyle->SetFrameFillColor(10);                  // a different frame colour   
+   //gStyle->SetPalette(1,0);                        // pretty and useful palette
+   //gStyle->SetHistLineWidth(2);                    // a thicker histogram line
+   //gStyle->SetFrameFillColor(10);                  // a different frame colour   
    gStyle->SetTitleFillColor(33);                 // title colour to highlight it
    gStyle->SetTitleW(.76);                         // Title Width
    gStyle->SetTitleH(.07);                        // Title height

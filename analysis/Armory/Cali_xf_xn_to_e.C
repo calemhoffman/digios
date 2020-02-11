@@ -114,6 +114,7 @@ void Cali_xf_xn_to_e(TTree *tree){
       
       fit->SetParameter(0, 0);
       fit->SetParameter(1, 1);
+      fit->SetLineColor(2);
       
       d[i]->Fit("fit", "qR");
       
