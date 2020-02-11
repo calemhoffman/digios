@@ -99,11 +99,11 @@ double*  fitSlopeIntercept(vector<double> dataX, vector<double> dataY){
 void Cali_gamma(TTree * tree, float threshold = 0.1){
   /**///======================================================== initial input
 
-  const int numDet = 4;
+  const int numDet = 1;
 
-  int detID[numDet] = {2,3,4,5}; 
+  int detID[numDet] = {16}; 
 
-  int energyRange[3] = {12000, 0, 12000}; // bin, min, max
+  int energyRange[3] = {1000, 3200, 7000}; // bin, min, max
 
   /**///========================================================  load tree
 

@@ -79,6 +79,8 @@ void Cali_xf_xn(TTree * tree){
    const int colDet = 5;
    
    const int numDet = rowDet * colDet;
+
+   const double threshold = 0.2;
    
    int energyRange[3] = {200, 3100, 7000}; // bin, min, max
    
@@ -205,7 +207,7 @@ void Cali_xf_xn(TTree * tree){
       for( int i = 0; i < numDet; i++){
          
          TSpectrum * spec = new TSpectrum(10);
-         nPeaks = spec->Search(q[i], 1, "", 0.30);
+         nPeaks = spec->Search(q[i], 1, "", threshold);
          printf("%2d | found %d peaks | ", i,  nPeaks);
 
          double * xpos = spec->GetPositionX();
