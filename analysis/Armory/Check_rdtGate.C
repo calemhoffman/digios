@@ -15,15 +15,7 @@
 #include <fstream>
 #include <TCutG.h>
 
-void Check_rdtGate(TString rootfile,TString rdtCut){  
-/**///======================================================== User input
-
-   const char* treeName="tree";
-   
-   double deRange = 3000;
-	double eRange  = 6000;
-   
-   TString drawOption ="colz"; 
+void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tree", double eRange = 6000, double deRange = 4000){  
    
    //============================= RDT cut
    TFile * fileCut = new TFile(rdtCut);
@@ -45,12 +37,12 @@ void Check_rdtGate(TString rootfile,TString rdtCut){
       }   
    }
    
-/**///======================================================== read tree   
-   printf("################### Check_rdtGate.C ######################\n");
-      
-   TFile *file0 = new TFile (rootfile, "read"); 
-   TTree * tree = (TTree*)file0->Get(treeName);
-   printf("=====> /// %20s //// is loaded. Total #Entry: %10lld \n", rootfile.Data(),  tree->GetEntries());
+/**///======================================================== read tree         
+   TChain * chain = new TChain(treeName);
+   chain->Add(dataList);
+   chain->GetListOfFiles()->Print();
+
+   printf("===================> Total #Entry: %10lld \n",  chain->GetEntries());
    
    gStyle->SetOptStat(10001);
    gStyle->SetStatY(0.9);
@@ -60,7 +52,7 @@ void Check_rdtGate(TString rootfile,TString rdtCut){
    gStyle->SetLabelSize(0.05, "XY");
    gStyle->SetTitleFontSize(0.1);
 
-   TCanvas * cRDTCut = new TCanvas("cRDTCut", "RDT Cut Checker | " + rootfile + " | " + rdtCut, 100, 100, 800, 800);
+   TCanvas * cRDTCut = new TCanvas("cRDTCut", "RDT Cut Checker | " + dataList + " | " + rdtCut, 100, 100, 800, 800);
    if( cRDTCut->GetShowToolBar() ) cRDTCut->ToggleToolBar();
    cRDTCut->Divide(2,2);
 
@@ -83,7 +75,7 @@ void Check_rdtGate(TString rootfile,TString rdtCut){
                         i);
 
      cRDTCut->cd(i+1);
-     tree->Draw(expression[i],"", "colz");
+     chain->Draw(expression[i],"", "colz");
      cut[i]->Draw("same");
      
 

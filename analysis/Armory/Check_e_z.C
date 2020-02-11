@@ -181,7 +181,7 @@ void Check_e_z(TString rootfile){
       hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
       expression.Form("e:x>>hEX%02d", idet);
       gate.Form("detID == %d && hitID >= 0", idet);
-      tree->Draw(expression, gate, "colz");
+      tree->Draw(expression, gate + gate_RDT, "colz");
       cCheck1->Update();
    }
    
