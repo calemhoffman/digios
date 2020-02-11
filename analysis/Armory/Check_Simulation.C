@@ -30,8 +30,10 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
 
   //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
   //TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
-  TString gate = "hit == 1 && loop <= 1 && thetaCM > 10";
-  
+  //TString gate = "hit == 1 && loop <= 1 && thetaCM > 10";
+  TString gate = "hit == 1 && thetaCM > 0";
+  //TString gate = "hit == 1 && loop <= 1";
+  //TString gate = "hit == 1";
   Int_t size[2] = {padSize,padSize}; //x,y, single Canvas size
     
 //============================================== 
@@ -319,7 +321,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
        hThetaCM[i]->SetFillColor(i+1);
        hThetaCM[i]->SetFillStyle(3000+i);
        tree->Draw(Form("thetaCM>>hThetaCM%d", i), gate + Form("&& ExID==%d", i), "");
-       legend->AddEntry(hThetaCM[i], Form("ExID=%d", i));
+       legend->AddEntry(hThetaCM[i], Form("Ex=%.f MeV", exList[i]));
        double max = hThetaCM[i]->GetMaximum();
        if( max > maxCount ) maxCount = max;
      }

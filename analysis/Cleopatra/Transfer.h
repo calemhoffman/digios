@@ -356,7 +356,7 @@ void Transfer(
   tree->Branch("e", &e, "e/D");
   tree->Branch("x", &x, "x/D");
   tree->Branch("z", &z, "z/D");
-  //double z0; tree->Branch("z0", &z0, "z0/D");
+  double z0; tree->Branch("z0", &z0, "z0/D");
   tree->Branch("t", &t, "t/D");
   double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
   
@@ -661,10 +661,10 @@ void Transfer(
     //==== Helios
     if( Tb > 0  || TB > 0 ){
       hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
-
+      
     e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
     z = helios.GetZ() ; 
-    //z0 = helios.GetZ0() ; 
+    z0 = helios.GetZ0() ; 
     x = helios.GetX() + gRandom->Gaus(0, zSigma);
     t = helios.GetTime();
     tB = helios.GetRecoilTime();
