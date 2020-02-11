@@ -663,7 +663,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       return 0;
    }
 
-   if( bore > 2 * rho && ((firstPos > 0 && theta < TMath::PiOver2())  || (firstPos < 0 && theta > TMath::PiOver2())) ){
+   if( bore > 2 * rho && 2*rho > perpDist && ((firstPos > 0 && theta < TMath::PiOver2())  || (firstPos < 0 && theta > TMath::PiOver2())) ){
       //====================== infinite small detector   
       vt0 = Pb.Beta() * TMath::Sin(theta) * c ; // mm / nano-second  
       vp0 = Pb.Beta() * TMath::Cos(theta) * c ; // mm / nano-second  
@@ -691,16 +691,26 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       loop = 0;
       int startJ = (int) fmod(TMath::Ceil(mDet*phi/TMath::TwoPi() - 0.5) ,mDet) ;
 
-      // loop until reach the detector position covrage.      
+      //printf("======================= T : %5.2f,  theta : %7.2f , phi : %7.2f \n", Pb.E() - Pb.M(), theta*TMath::RadToDeg(), phi*TMath::RadToDeg());
+
+      // loop until reach the detector position covrage.    
       do{
          loop += 1;
          int n = 2*loop -1;
+         
+         if( blocker != 0.0 && abs(firstPos/blocker) < loop ) return -6;
+         
+         //======= check Block By blocker using z0, speed thing up
+         if( firstPos > 0 ){
+             if( pos[0] - blocker < z0 * loop  && z0 * loop < pos[0] ) return -6; // blocked by blocker
+         }else{
+             if( pos[nDet-1] < z0 * loop && z0 * loop < pos[nDet-1] + blocker ) return -6;
+         }
          
          if( loop > 10 ) {
             return -3;  // when loop > 10
             break; // maximum 10 loops
          }
-         
          
          for( int j = startJ ; j < startJ + mDet; j++){
          
@@ -708,45 +718,45 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             isReachArrayCoverage = false;
             isHitFromOutside = false;
             
-            //========== calculate zHit
-            double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));
+            //========== calculate zHit by solving the cycltron orbit and the detector planes. 
+            double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));                            
             zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
+            e = Pb.E() - Pb.M();
+            z = zHit;
             
-            //if( flag ) 
-            //if( zHit < 0 ) {
-            //  printf("%d | %d | zHit : %f |theta : %f | E : %f\n", loop, j, zHit, theta*TMath::RadToDeg(), Pb.E()-Pb.M());
-            //}
+            //======= calculate the distance from middle of detector
+            double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
+            double yHit = GetYPos(zHit) + yOff;
+            double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist); // is it hit on the detector
+            if( sHit > width /2.) continue; // if the sHit is large, it does not hit on detector, go to next mDet 
+            
+            //======== this is the particel direction (normalized) dot normal vector of the detector plane
+            double dir = TMath::Cos( TMath::Tan(theta) * zHit/ rho + phi - phiDet);
+            if( dir < 0) {// when dir == 0, no solution
+              isHitFromOutside = true;
+            }else{
+              return -5 ; // hit from inside.
+            }
+            
+            //### after this, the particle is hit on detector, from outside. 
+            
+            //======= check Block By blocker  using z0 and zHit; z0 has to be inside the nearst array, but zHit is in the blocker.
+            if( firstPos > 0  && blocker > 0.0){
+                if( pos[0] < z0*loop  &&  pos[0] - blocker < zHit && zHit < pos[0] ) return -6;
+            }else{
+                if( z0*loop < pos[nDet-1] &&  pos[nDet-1] < zHit && zHit < pos[nDet-1] + blocker ) return -6;
+            }
 
+            //### after this, the particle is hit on detector, from outside, and not blocked by blocker             
+            
+            //======= check within the detector range
             if( firstPos > 0 ){
                if( zHit < pos[0] ) continue; // goto next mDet, after progress of all side, still not OK, then next loop 
                if( zHit > pos[nDet-1] + length) return -4; // since the zHit is mono-increse, when zHit shoot over the detector
             }else{
-              if( zHit < pos[0] - length ) return -4;
+               if( zHit < pos[0] - length ) return -4; 
                if( zHit > pos[nDet-1]) continue; 
             }
-            
-            //======== this is the particel direction (normalized) dot normal vector of the detector plane
-            double dir = TMath::Cos( TMath::Tan(theta) * zHit/ rho + phi - phiDet);
-            if( dir < 0) {
-              isHitFromOutside = true;
-            }else{
-              return -5; // hit from inside.
-            }
-            // when dir == 0, no solution
-
-            // calculate the distance from middle of detector
-            double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
-            double yHit = GetYPos(zHit) + yOff;
-            double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist);
-               
-            //======= check Block By blocker
-            if( firstPos > 0 ){
-               if( pos[0] - blocker < zHit && zHit < pos[0] /*&& sHit < perpDist/2.*/ ) return -6; // blocked by blocker
-            }else{
-               if( pos[nDet-1] < zHit && zHit < pos[nDet-1] + blocker /*&& sHit < perpDist/2.*/) return -6;
-            }
-            
-            //printf("%d | zHit : %f \n", 2, zHit);
             
             //====== check hit
             if( !isReachArrayCoverage && isHitFromOutside && sHit < width/2.){      
@@ -760,7 +770,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          }      
       }while(!isReachArrayCoverage); 
       
-      if( !isHit ) return -7; // zHit falls outside the detector, but could be in the gap of detector
+      if( !isHit ) return -7; // zHit in the gap of detector
       
       //===== final calculation for light particle
       e = Pb.E() - Pb.M();
@@ -769,13 +779,13 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       dphi = t * vt0 / rho;
       
       //sometimes, dphi = 2pi + something, i.e. loop a bit more than a single loop.
-      if( dphi / TMath::TwoPi() > loop ) return hit = -8; 
+      if( dphi / TMath::TwoPi() > loop ) return -8; 
       double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
       double yHit = GetYPos(zHit) + yOff;
       //======= Check inside the detector
       double eta = TMath::Abs(TMath::ATan2(yHit,xHit));
       double etaMod = TMath::Abs(fmod(eta + azimu,  2* azimu) - azimu);
-      if ( etaMod > azimuDet ) return hit = -8;
+      if ( etaMod > azimuDet ) return -8;
     
       //=========== check hit on detector gap
       for( int i = 0 ; i < nDet ; i++){
