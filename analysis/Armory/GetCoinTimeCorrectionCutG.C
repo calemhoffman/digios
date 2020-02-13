@@ -28,14 +28,16 @@ Double_t nGauss(Double_t *x, Double_t *par) {
 }
 
 
-void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
+void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
 
-   int timeRange[2] ={-100, 400};
+   int timeRange[2] ={-70, 200};
+   TString rdtCutName = "rdtCuts.root";
 
    //====================================================== read file, canvas, histogram
    
    TChain * tree = new TChain("tree");
-   tree->Add(A_fileName);
+   tree->Add(A_fileName_TChain);
+   tree->GetListOfFiles()->Print();
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
@@ -46,7 +48,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
       return;
    }
    
-   TFile * fileCut = new TFile("rdtCuts_trace_C.root");
+   TFile * fileCut = new TFile(rdtCutName);
    TObjArray * cutList = NULL;
    TCutG ** cut_in = NULL;
    if( fileCut->IsOpen() ){
@@ -62,9 +64,9 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
       }
    }
 
-   int Div[2] = {1,1};
+   int Div[2] = {4,1};
    int size[2] = {600,600}; //x,y
-   TCanvas * cAna = new TCanvas("cAna", "cAna", 500, 500, size[0]*Div[0], size[1]*Div[1]);
+   TCanvas * cAna = new TCanvas("cAna", "cAna", 100, 100, size[0]*Div[0], size[1]*Div[1]);
    if( cAna->GetShowEditor() )  cAna->ToggleEditor();
    if( cAna->GetShowToolBar() ) cAna->ToggleToolBar();
    cAna->Divide(Div[0],Div[1]);
@@ -78,9 +80,9 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    
    TString name, expression, gate, gateCut;
 
-   TH2F * hTX   = new TH2F("hTX",   "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, timeRange[0], timeRange[1] );
-   TH2F * hTXg  = new TH2F("hTXg",  "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, timeRange[0], timeRange[1] );
-   TH2F * hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTime [ch]", 300, -1.5, 1.5, 300, timeRange[0], timeRange[1] );
+   TH2F * hTX   = new TH2F("hTX",   "time vs X; x; coinTimeUC [ch]", 200, -1.5, 1.5, 200, timeRange[0], timeRange[1] );
+   TH2F * hTXg  = new TH2F("hTXg",  "time vs X; x; coinTimeUC [ch]", 200, -1.5, 1.5, 200, timeRange[0], timeRange[1] );
+   TH2F * hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTimeUC [ch]", 200, -1.5, 1.5, 200, timeRange[0], timeRange[1] );
    TH1F * hT = new TH1F("hT", "", 200, timeRange[0], timeRange[1]);
    TProfile * hp = new TProfile("hp", "time Profile", 400, -1.5,1.5);
    TSpectrum * spec = new TSpectrum(5);
@@ -90,9 +92,9 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    bool isBranchDetIDExist = false;
    br = (TBranch *) tree->GetListOfBranches()->FindObject("detID");
    if( br == NULL ){
-      printf(" detected as sorted.root file. \n");
+      printf(" not detected detID branch. \n");
    }else{
-      printf(" detected as little.root file. \n");
+      printf(" detected detID branch. \n");
       isBranchDetIDExist = true;
    }
    
@@ -113,10 +115,13 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    }
    
    ///***************
-   gate = gate +=  " && cut1";
+   //if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
+   //if( fileCut->IsOpen() ) gate = "cut0 && " + gate;
    
-   name.Form("time vs X (detID-%d); x; coinTime [ch]", detID);
+   printf("%s \n", gate.Data());
+   name.Form("time vs X (detID-%d); x; coinTimeUC [ch]", detID);
    hTX->SetTitle(name);
+   cAna->cd(1);
    tree->Draw(expression, gate, "colz");
    int entries = hTX->Integral();
    printf("entries : %d \n", entries);
@@ -153,15 +158,20 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    cut->SetName("cutG");
    cut->SetVarX("x");
    cut->SetVarY("coinTimeUC");
+   printf("Got the TCut.\n");
+   
    if( isBranchDetIDExist ) {   
       gate.Form("cutG && detID==%d", detID);
    }else{
       gate.Form("cutG && Iteration$==%d", detID);
    }
-   
-   expression.Form("coinTimeUC:x>>hTXg");   
+   //if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
+
+   cAna->cd(2);
+   expression.Form("coinTimeUC:x>>hTXg");
    tree->Draw(expression, gate, "colz");
    cut->Draw("same");
+   gSystem->ProcessEvents();
    
    //==== create profile and fit
    hTXg->ProfileX("hp");
@@ -169,9 +179,10 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    
    TF1 * fit7 = new TF1("fit7", "pol7", -2, 2);
    hp->Fit("fit7", "");
+   gSystem->ProcessEvents();
    
-   printf("---------- double click for flatten.\n");
-   cAna->WaitPrimitive();
+   ///printf("---------- double click for flatten.\n");
+   ///cAna->WaitPrimitive();
    
    //==== create substract
    double q[8];
@@ -191,17 +202,18 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    } 
    
    ///***************
-   gate = gate +=  " && cut1";
-   
+   cAna->cd(3);   
    expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) :x>>hTXc2", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
-   
-   printf("---------- double click for 1D plot.\n");
-   cAna->WaitPrimitive();
+   gSystem->ProcessEvents();
+   ///printf("---------- double click for 1D plot.\n");
+   ///cAna->WaitPrimitive();
    
    //==== 1-D plot
+   cAna->cd(4);
    expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) >>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
+   gSystem->ProcessEvents();
    
    numPeaks = spec->Search(hT);
    printf("find %d peaks\n", numPeaks);
@@ -269,9 +281,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    fflush(paraOut);
    fclose(paraOut);
    
-   printf("========= double click to exit.\n");
-   cAna->WaitPrimitive();
-   
-   //if( !isBranchDetIDExist ) 
-   gROOT->ProcessLine(".q");
+   ///printf("========= double click to exit.\n");
+   ///cAna->WaitPrimitive();
+   ///gROOT->ProcessLine(".q");
 }
