@@ -679,7 +679,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //====================================== load RDT cut
-   TFile * fileCut = new TFile("rdtCuts_trace_C2.root");   
+   TFile * fileCut = new TFile("rdtCuts.root");   
    TObjArray * cutList = NULL;
    isRDTCutExist = false;
    if( fileCut->IsOpen() ){
