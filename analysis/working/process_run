@@ -59,8 +59,9 @@ echo "============================================="
 
 #######################################
 ####################  Download raw data
-./process_Download $RUN
-
+if [ $isMerge -ne 0 ]; then
+  ./process_Download $RUN
+fi
 #######################################
 #################### Merge
 ./process_Merge $RUN $isMerge 

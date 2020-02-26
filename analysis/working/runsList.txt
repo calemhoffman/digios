@@ -1,5 +1,22 @@
-//---data_path
-//-----------alpha_source_data_with_-_sign
-//-----------data_with_+_sign
--../root_data/gen_run016.root
-+../root_data/gen_run04[3,6].root
+///---data_path
+///-----------alpha_source_data_with_-_sign
+///-----------data_with_+_sign
+-../root_data/gen_run006.root
+
+
+///TAC setting 1, various change made during runs.
+//+../root_data/gen_run01[0-8].root
+
+
+///TAC settign 2, still bad, 83Kr
+//+../root_data/gen_run019.root
+//+../root_data/gen_run02[0-9].root
+//+../root_data/gen_run03[0-9].root
+//+../root_data/gen_run04[0-9].root
+//+../root_data/gen_run05[0-9].root
+//+../root_data/gen_run06[0-9].root
+//+../root_data/gen_run07[0-9].root
+//+../root_data/gen_run080.root
+
+///83Se
++../root_data/gen_run08[1-9].root
