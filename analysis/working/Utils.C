@@ -33,6 +33,8 @@ void listDraws(void) {
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
+  printf("    ExVxCal() - Ex vs X for all %d detectors\n", numDet);
+  //printf("    eSVeRaw() - e(Ex,z) vs eRaw for all %d detectors\n", numDet);
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
   printf("   RDTCutCreator() - Create RDT Cuts [May need to edit]\n");
@@ -247,10 +249,23 @@ void ringVx(void) {
 
 void eCalVxCal(void) {
   TCanvas *cecalVxcal =  (TCanvas *) gROOT->FindObjectAny("cecalVxcal");
-  if( cecalVxcal == NULL ) cecalVxcal = new TCanvas("cecalVxcal","ECALVXCAL",canvasSize[0], canvasSize[1]);
+  if( cecalVxcal == NULL ) cecalVxcal = new TCanvas("cecalVxcal",Form("ECALVXCAL | %s",canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   cecalVxcal->Clear(); cecalVxcal->Divide(numCol,numRow);
   for (Int_t i=0;i<numDet;i++) {
-    cecalVxcal->cd(i+1); heCalVxCal[i]->Draw("col");
+    cecalVxcal->cd(i+1); 
+    heCalVxCal[i]->SetMarkerStyle(7);
+    heCalVxCal[i]->Draw("");
+  } 
+}
+
+void eCalVxCalG(void) {
+  TCanvas *cecalVxcalG =  (TCanvas *) gROOT->FindObjectAny("cecalVxcalG");
+  if( cecalVxcalG == NULL ) cecalVxcalG = new TCanvas("cecalVxcalG",Form("ECALVXCAL | %s",canvasTitle.Data()),canvasSize[0], canvasSize[1]);
+  cecalVxcalG->Clear(); cecalVxcalG->Divide(numCol,numRow);
+  for (Int_t i=0;i<numDet;i++) {
+    cecalVxcalG->cd(i+1); 
+    heCalVxCalG[i]->SetMarkerStyle(7);
+    heCalVxCalG[i]->Draw("");
   } 
 }
 
@@ -354,11 +369,42 @@ void excite(void) {
 
 void ExThetaCM(void) {
   TCanvas *cExThetaCM =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM");
-  if( cExThetaCM == NULL ) cExThetaCM = new TCanvas("cExThetaCM",Form("EX - ThetaCM : %s", canvasTitle.Data()),650,650);
+  if( cExThetaCM == NULL ) cExThetaCM = new TCanvas("cExThetaCM",Form("EX - ThetaCM | %s", canvasTitle.Data()),650,650);
   cExThetaCM->Clear();
   gStyle->SetOptStat("neiou");
   hExThetaCM->Draw("colz");
 }
+
+void ExVxCal(void) {
+  TCanvas *cExVxCal =  (TCanvas *) gROOT->FindObjectAny("cExVxCal");
+  if( cExVxCal == NULL ) cExVxCal = new TCanvas("cExVxCal",Form("EX | %s", canvasTitle.Data()),1000,650);
+  cExVxCal->Clear();
+  gStyle->SetOptStat("neiou");
+  
+  cExVxCal->Divide(numCol,numRow);
+  for( int i = 0; i < numDet; i++){
+    cExVxCal->cd(i+1); 
+    hExVxCal[i]->SetMarkerStyle(7);
+    hExVxCal[i]->Draw("");
+  }
+  
+}
+
+
+//void eSVeRaw(void) {
+//  TCanvas *ceSVeRaw =  (TCanvas *) gROOT->FindObjectAny("ceSVeRaw");
+//  if( ceSVeRaw == NULL ) ceSVeRaw = new TCanvas("ceSVeRaw",Form("e(Ex,z) vs eRaw | %s", canvasTitle.Data()),1000,650);
+//  ceSVeRaw->Clear();
+//  gStyle->SetOptStat("neiou");
+//  
+//  ceSVeRaw->Divide(numCol,numRow);
+//  for( int i = 0; i < numDet; i++){
+//    ceSVeRaw->cd(i+1); 
+//    heSVeRaw[i]->SetMarkerStyle(7);
+//    heSVeRaw[i]->Draw("");
+//  }
+//  
+//}
 
 void tac(void) {
   TCanvas *ctac =  (TCanvas *) gROOT->FindObjectAny("ctac");
