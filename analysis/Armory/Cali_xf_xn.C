@@ -75,12 +75,12 @@ double* sumMeanVar(vector<double> data){
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int rowDet = 6;
-   const int colDet = 5;
+   const int rowDet = 4;
+   const int colDet = 6;
    
    const int numDet = rowDet * colDet;
    
-   int energyRange[3] = {200, 3100, 7000}; // bin, min, max
+   int energyRange[3] = {200, 1000, 2500}; // bin, min, max
    
 /**///========================================================  load tree
 
@@ -273,6 +273,7 @@ void Cali_xf_xn(TTree * tree){
       printf(" X =  det-X reference\n");
       printf("-1 =  manual reference\n");
       printf("-2 =  use 228Th, first 5 strongest peaks \n");
+      //printf("-3 =  use 241Am, 5.481 MeV \n");
       printf("-9 =  stop \n");
       printf("your choice = ");
       temp = scanf("%d", &refID);
@@ -307,6 +308,12 @@ void Cali_xf_xn(TTree * tree){
          refEnergy.push_back(6.288);
          refEnergy.push_back(6.778);
          refEnergy.push_back(8.785);
+      }
+      
+      if( refID == -3 ){
+         refEnergy.clear();
+         refEnergy.push_back(5.481);
+         refEnergy.push_back(5.685);
       }
       
       printf("----- adjusting the energy to det-%d......\n", refID);

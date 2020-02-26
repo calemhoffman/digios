@@ -13,8 +13,11 @@
 void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
 /**///======================================================== User input
    
+   const int numRow = 4; // number of size of the array
+   const int numCol = 6;
+   
    const char* treeName="tree";
-   double eRange[3]  = {400, 0, 9000};
+   double eRange[3]  = {400, 0, 3000};
 
 /**///======================================================== read tree and create Canvas
    printf("################### Check_e_x.C ######################\n");
@@ -22,24 +25,6 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    TFile *file0 = new TFile (rootFile, "read"); 
    TTree *tree = (TTree*)file0->Get(treeName);
    printf("=====> /// %15s //// is loaded. Total #Entry: %10lld \n", rootFile.Data(),  tree->GetEntries());
-   
-   Int_t Div[2] = {5,6};  //x,y
-   Int_t size[2] = {200,230}; //x,y
-   
-   TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
-   cCheck->Divide(Div[0],Div[1]);
-   for( int i = 1; i <= Div[0]*Div[1] ; i++){
-      cCheck->cd(i)->SetGrid();
-   }
-
-   gStyle->SetOptStat(0);
-   gStyle->SetStatY(0.9);
-   gStyle->SetStatX(0.9);
-   gStyle->SetStatW(0.2);
-   gStyle->SetStatH(0.1);
-   gStyle->SetLabelSize(0.05, "X");
-   gStyle->SetLabelSize(0.05, "Y");
-   gStyle->SetTitleFontSize(0.1);
    
    TFile * cutFile = new TFile("cut.root", "read");
    TCutG * cut = NULL;
@@ -119,7 +104,24 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    }
 
 /**///======================================================== Analysis
+/*
+   Int_t Div[2] = {numCol,numRow};  //x,y
+   Int_t size[2] = {200,230}; //x,y
    
+   TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
+   cCheck->Divide(Div[0],Div[1]);
+   for( int i = 1; i <= Div[0]*Div[1] ; i++){
+      cCheck->cd(i)->SetGrid();
+   }
+
+   gStyle->SetOptStat(0);
+   gStyle->SetStatY(0.9);
+   gStyle->SetStatX(0.9);
+   gStyle->SetStatW(0.2);
+   gStyle->SetStatH(0.1);
+   gStyle->SetLabelSize(0.05, "X");
+   gStyle->SetLabelSize(0.05, "Y");
+   gStyle->SetTitleFontSize(0.1);
    if( cCheck->GetShowEditor() )cCheck->ToggleEditor();
    if( cCheck->GetShowToolBar())cCheck->ToggleToolBar();
    
@@ -132,11 +134,12 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       cCheck->cd(idet+1);  
       name.Form("hEX%02d", idet);
       hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
+      hEX[idet]->SetMarkerStyle(7);
       expression.Form("e:x>>hEX%02d", idet);
       
       gate.Form("detID == %d", idet);
 
-      tree->Draw(expression, gate, "box");
+      tree->Draw(expression, gate, "colz");
       line->Draw("same");
       cCheck->Modified();
       cCheck->Update();
@@ -144,10 +147,28 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    }
    
 /**///======================================================== e vs z
-   TCanvas * cCheck2 = new TCanvas("cCheck2", "cCheck2", 700, 50,  600, 400);
-   cCheck2->SetGrid();
+   TCanvas * cCheck2 = new TCanvas("cCheck2", "cCheck2", 700, 50,  1600, 1200);
+   if( cCheck2->GetShowEditor() )cCheck2->ToggleEditor();
+   if(!cCheck2->GetShowToolBar())cCheck2->ToggleToolBar();
    
-   gStyle->SetOptStat(11111);
+   int xD, yD ;
+   for( int i = TMath::Sqrt(numRow); i >= 2 ; i--){
+    if( numRow % i == 0 ) {
+      yD = i;
+      xD = numRow/i;      
+      break;
+    }
+   }
+   
+   printf("---- %d x %d ---- \n", xD, yD);
+   
+   cCheck2->Divide(xD,yD);
+   
+   //for( int i = 1; i <= xD * yD ; i++){
+   //   cCheck2->cd(i)->SetGrid();
+   //}
+   
+   gStyle->SetOptStat("");
    gStyle->SetStatY(0.9);
    gStyle->SetStatX(0.35);
    gStyle->SetStatW(0.25);
@@ -156,31 +177,40 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    gStyle->SetLabelSize(0.035, "Y");
    gStyle->SetTitleFontSize(0.035);
    
-   if( cCheck2->GetShowEditor() )cCheck2->ToggleEditor();
-   if(!cCheck2->GetShowToolBar())cCheck2->ToggleToolBar();
-   
-   TH2F * hEZ = new TH2F("hEZ", "e:z; z [mm]; e [MeV]", zRange[0], zRange[1], zRange[2], eRange[0], eRange[1]-100, eRange[2]);
-   
-   tree->Draw("e:z >> hEZ", "", "colz" );
-   if( cut != NULL ) cut->Draw("same");
-   
-   TLine * line2 = new TLine(zRange[1], eThreshold, zRange[2], eThreshold);
-   line2->SetLineColor(2);
-   line2->Draw("same");
-   
-   TLatex latex;
-   latex.SetTextSize(0.04);
-   latex.SetTextAlign(11);  //align bottom
-   latex.SetTextColor(2);
-   latex.DrawLatex(zRange[1]+30,eThreshold,"e-Threshold");
 
-   cCheck2->Modified();
-   cCheck2->Update();
-   gSystem->ProcessEvents();
+   TH2F * hEZ[numRow];
    
+   for( int i = 0; i < numRow ; i++){
+      cCheck2->cd(i+1);
+      
+      hEZ[i] = new TH2F(Form("hEZ%d", i), 
+                             Form("e:z det(%d - %d); z [mm]; e [MeV]", numCol*i, numCol*(i+1)-1 ), 
+                               zRange[0], zRange[1], zRange[2], eRange[0], eRange[1]-100, eRange[2]);
+      
+      TString gate;
+      gate.Form("%d <= detID && detID  < %d", numCol * i , numCol * (i+1) );
+      
+      tree->Draw(Form("e:z >> hEZ%d", i), gate, "colz" );
+      if( cut != NULL ) { cut->SetLineColor(2); cut->Draw("same");}
+      
+      TLine * line2 = new TLine(zRange[1], eThreshold, zRange[2], eThreshold);
+      line2->SetLineColor(2);
+      line2->Draw("same");
+      
+      TLatex latex;
+      latex.SetTextSize(0.04);
+      latex.SetTextAlign(11);  //align bottom
+      latex.SetTextColor(2);
+      latex.DrawLatex(zRange[1]+30,eThreshold,"e-Threshold");
+
+      cCheck2->Modified();
+      cCheck2->Update();
+      gSystem->ProcessEvents();
+   }
    printf("=========== you may want to make a TCutG and rename it as cutEZ, and save into cut.root.\n");
    
 /**///======================================================== multi
+/*
    TCanvas * cCheck3 = new TCanvas("cCheck3", "cCheck3", 700, 600,  600, 300);
    cCheck3->SetGrid();
    gStyle->SetStatY(0.9);
@@ -194,6 +224,6 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    cCheck3->Update();
 
    gSystem->ProcessEvents(); 
-   
-   
+
+/**/
 }
