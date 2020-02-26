@@ -29,6 +29,8 @@ run_Summary.dat
 MakeDataLinks
 reaction.dat
 
+daq/saves/trigger.txt
+
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
 analysis/Cleopatra/ExtractXSec
