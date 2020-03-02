@@ -145,7 +145,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       cCheck->Update();
        gSystem->ProcessEvents();
    }
-   
+*/
 /**///======================================================== e vs z
    TCanvas * cCheck2 = new TCanvas("cCheck2", "cCheck2", 700, 50,  1600, 1200);
    if( cCheck2->GetShowEditor() )cCheck2->ToggleEditor();
@@ -225,5 +225,5 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
 
    gSystem->ProcessEvents(); 
 
-/**/
+*/
 }

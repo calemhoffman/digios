@@ -377,6 +377,11 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("ezero_t", ezero_t, "ezero_t[10]/l");
    }
    
+   if( isTACExist ){
+      newTree->Branch("tac", tac, "tac[100]/F");
+      newTree->Branch("tac_t", tac_t, "tac_t[100]/l");
+   }
+   
    newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
    
    if( isTraceDataExist ){
@@ -395,6 +400,7 @@ void Cali_e_trace::Init(TTree *tree)
    printf("Is EBIS  exist : %d\n", isEBISExist);
    printf("Is ELUM  exist : %d\n", isELUMExist);
    printf("Is EZero exist : %d\n", isEZEROExist);
+   printf("Is TAC   exist : %d\n", isTACExist);
    printf("Is Trace exist : %d\n", isTraceDataExist);
    //=== clock
    clock.Reset();
