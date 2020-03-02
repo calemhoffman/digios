@@ -1,0 +1,118 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 832
+y 693
+w 300
+h 450
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 0
+bgColor index 82
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 92
+y 29
+w 103
+h 42
+font "helvetica-medium-r-18.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "$(P)s for"
+  "Board $(DB)"
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 59
+y 113
+w 60
+h 20
+controlPv "VME$(DN):$(DB):$(P)"
+format "float"
+font "helvetica-medium-r-14.0"
+fgColor index 83
+bgColor index 0
+editable
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+useAlarmBorder
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 96
+y 77
+w 84
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Whole Board"
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 152
+y 113
+w 60
+h 20
+controlPv "VME$(DN):$(DB):$(P)_RBV"
+format "float"
+font "helvetica-medium-r-14.0"
+fontAlign "center"
+fgColor index 16
+bgColor index 10
+autoHeight
+motifWidget
+limitsFromDb
+nullColor index 0
+useHexPrefix
+newPos
+objType "controls"
+noExecuteClipMask
+endObjectProperties
+
