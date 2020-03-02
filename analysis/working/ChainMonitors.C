@@ -1,29 +1,30 @@
-#include "Monitors.C+" // the plus sign mean compilation
+#include "Monitors2.C+" // the plus sign mean compilation
 
 void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
 
   if( RUNNUM == -1){
-
-    //chain->Add("../root_data/gen_run02[8,9].root"); //14N, 440ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run038.root");     //14N, 440ug/cm2, 700mm, good run
     
-    //chain->Add("../root_data/gen_run03[1-2].root"); //14N, 140ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run033.root");     //14N, 140ug/cm2, 700mm, good run
-    //chain->Add("../root_data/gen_run03[4-7].root"); //14N, 140ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run04[3,6].root"); //14N, 140ug/cm2, 700mm
+    ///adjusting things
+    //chain->Add("../root_data/gen_run009.root"); //82Kr
+    //chain->Add("../root_data/gen_run01[0-8].root"); //82Kr
     
-    //chain->Add("../root_data/gen_run047.root"); //14N, gold foil, slit normal
-    //chain->Add("../root_data/gen_run048.root"); //14N, gold foil, slit out
+    ///start a stable run
+    //chain->Add("../root_data/gen_run019.root"); //82Kr
+    //chain->Add("../root_data/gen_run02[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run03[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run04[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run05[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run06[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run07[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run080.root"); //82Kr
     
-    chain->Add("../root_data/gen_run049.root");     //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run05[0-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run06[0-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run070.root");     //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run07[7-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run08[0-2].root"); //14N, 140ug/cm2, 600mm
     
-    //chain->Add("../root_data/gen_run07[1-6].root"); //14N, 400ug/cm2, 600mm
+    chain->Add("../root_data/gen_run08[1-9].root"); //82Se
+    chain->Add("../root_data/gen_run09[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run10[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run11[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run12[0-9].root"); //82Se
     
   }else{
     
@@ -47,7 +48,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   
   //Some input to TSelector
-  Monitors * selector = new Monitors();
+  Monitors2 * selector = new Monitors2();
   selector->testingInput(1231441241);
   chain->Process(selector, "");
 
