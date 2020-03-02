@@ -75,6 +75,9 @@ if [ $isStarted == "Stop" ]; then
     cd ${currentLocation}
     source ~/digios/expName.sh
     RUN=${LastRunNum}
+else
+    echo "======= Please stop the ACQ, or stop the run, and start again ========"
+    exit
 fi
 
 while [  $stopFlag -eq 0 ]; do  

@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 215
-y 86
+x 84
+y 24
 w 1340
 h 800
 font "helvetica-bold-r-10.0"
@@ -4489,7 +4489,7 @@ major 4
 minor 0
 release 0
 x 598
-y 464
+y 452
 w 293
 h 121
 
@@ -4502,7 +4502,7 @@ major 4
 minor 1
 release 0
 x 598
-y 564
+y 552
 w 60
 h 16
 font "helvetica-bold-r-14.0"
@@ -4522,7 +4522,7 @@ major 4
 minor 1
 release 0
 x 598
-y 541
+y 529
 w 60
 h 16
 font "helvetica-bold-r-14.0"
@@ -4542,7 +4542,7 @@ major 4
 minor 1
 release 0
 x 598
-y 517
+y 505
 w 60
 h 16
 font "helvetica-bold-r-14.0"
@@ -4562,7 +4562,7 @@ major 4
 minor 1
 release 0
 x 598
-y 493
+y 481
 w 60
 h 16
 font "helvetica-bold-r-14.0"
@@ -4582,7 +4582,7 @@ major 4
 minor 1
 release 0
 x 736
-y 464
+y 452
 w 80
 h 16
 font "helvetica-bold-r-14.0"
@@ -4602,7 +4602,7 @@ major 4
 minor 1
 release 0
 x 650
-y 464
+y 452
 w 100
 h 16
 font "helvetica-bold-r-14.0"
@@ -4622,7 +4622,7 @@ major 4
 minor 1
 release 0
 x 811
-y 464
+y 452
 w 80
 h 16
 font "helvetica-bold-r-14.0"
@@ -4642,7 +4642,7 @@ major 4
 minor 0
 release 0
 x 660
-y 560
+y 548
 w 231
 h 25
 
@@ -4655,7 +4655,7 @@ major 4
 minor 4
 release 0
 x 660
-y 560
+y 548
 w 80
 h 25
 controlPv "DAQC4_CV_SendRate"
@@ -4677,7 +4677,7 @@ major 4
 minor 4
 release 0
 x 736
-y 560
+y 548
 w 80
 h 25
 controlPv "DAQC4_CV_BuffersAvail"
@@ -4699,7 +4699,7 @@ major 4
 minor 4
 release 0
 x 811
-y 560
+y 548
 w 80
 h 25
 controlPv "DAQC4_CV_NumSendBuffers"
@@ -4725,7 +4725,7 @@ major 4
 minor 0
 release 0
 x 660
-y 537
+y 525
 w 231
 h 25
 
@@ -4738,7 +4738,7 @@ major 4
 minor 4
 release 0
 x 811
-y 537
+y 525
 w 80
 h 25
 controlPv "DAQC3_CV_NumSendBuffers"
@@ -4760,7 +4760,7 @@ major 4
 minor 4
 release 0
 x 736
-y 537
+y 525
 w 80
 h 25
 controlPv "DAQC3_CV_BuffersAvail"
@@ -4782,7 +4782,7 @@ major 4
 minor 4
 release 0
 x 660
-y 537
+y 525
 w 80
 h 25
 controlPv "DAQC3_CV_SendRate"
@@ -4808,7 +4808,7 @@ major 4
 minor 0
 release 0
 x 660
-y 513
+y 501
 w 231
 h 25
 
@@ -4821,7 +4821,7 @@ major 4
 minor 4
 release 0
 x 811
-y 513
+y 501
 w 80
 h 25
 controlPv "DAQC2_CV_NumSendBuffers"
@@ -4843,7 +4843,7 @@ major 4
 minor 4
 release 0
 x 736
-y 513
+y 501
 w 80
 h 25
 controlPv "DAQC2_CV_BuffersAvail"
@@ -4865,7 +4865,7 @@ major 4
 minor 4
 release 0
 x 660
-y 513
+y 501
 w 80
 h 25
 controlPv "DAQC2_CV_SendRate"
@@ -4891,7 +4891,7 @@ major 4
 minor 4
 release 0
 x 811
-y 489
+y 477
 w 80
 h 25
 controlPv "DAQC1_CV_NumSendBuffers"
@@ -4913,7 +4913,7 @@ major 4
 minor 4
 release 0
 x 736
-y 489
+y 477
 w 80
 h 25
 controlPv "DAQC1_CV_BuffersAvail"
@@ -4935,7 +4935,7 @@ major 4
 minor 4
 release 0
 x 660
-y 489
+y 477
 w 80
 h 25
 controlPv "DAQC1_CV_SendRate"
@@ -5072,216 +5072,6 @@ menuLabel {
 symbols {
   0 "PVNAME=led_threshold"
 }
-endObjectProperties
-
-endGroup
-
-endObjectProperties
-
-# (Group)
-object activeGroupClass
-beginObjectProperties
-major 4
-minor 0
-release 0
-x 1160
-y 649
-w 155
-h 110
-
-beginGroup
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1190
-y 737
-w 60
-h 22
-controlPv "VME01:MDIG2:disc_count7_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-fgAlarm
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1256
-y 737
-w 59
-h 22
-controlPv "VME01:MDIG2:ahit_count7_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1256
-y 716
-w 59
-h 22
-controlPv "VME01:MDIG2:ahit_count6_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1190
-y 716
-w 60
-h 22
-controlPv "VME01:MDIG2:disc_count6_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-fgAlarm
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1190
-y 695
-w 60
-h 22
-controlPv "VME01:MDIG2:disc_count5_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-fgAlarm
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1256
-y 695
-w 59
-h 22
-controlPv "VME01:MDIG2:ahit_count5_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1256
-y 674
-w 59
-h 22
-controlPv "VME01:MDIG2:ahit_count4_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 1190
-y 674
-w 60
-h 22
-controlPv "VME01:MDIG2:disc_count4_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-fgAlarm
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Static Text)
-object activeXTextClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 1160
-y 649
-w 107
-h 21
-font "helvetica-bold-r-18.0"
-fontAlign "center"
-fgColor index 0
-bgColor index 0
-useDisplayBg
-value {
-  "ELUM Rates"
-}
-autoSize
 endObjectProperties
 
 endGroup
@@ -6553,15 +6343,200 @@ endGroup
 
 endObjectProperties
 
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 939
+y 644
+w 155
+h 110
+
+beginGroup
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 969
+y 732
+w 60
+h 22
+controlPv "VME01:MDIG2:disc_count7_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+fgAlarm
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 1035
+y 732
+w 59
+h 22
+controlPv "VME01:MDIG2:ahit_count7_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 1035
+y 711
+w 59
+h 22
+controlPv "VME01:MDIG2:ahit_count6_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 969
+y 711
+w 60
+h 22
+controlPv "VME01:MDIG2:disc_count6_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+fgAlarm
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 969
+y 690
+w 60
+h 22
+controlPv "VME01:MDIG2:disc_count5_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+fgAlarm
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 1035
+y 690
+w 59
+h 22
+controlPv "VME01:MDIG2:ahit_count5_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 1035
+y 669
+w 59
+h 22
+controlPv "VME01:MDIG4:ahit_count0_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 969
+y 669
+w 60
+h 22
+controlPv "VME01:MDIG4:disc_count0_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+fgAlarm
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
 # (Static Text)
 object activeXTextClass
 beginObjectProperties
 major 4
 minor 1
 release 0
-x 909
-y 667
-w 202
+x 939
+y 644
+w 107
 h 21
 font "helvetica-bold-r-18.0"
 fontAlign "center"
@@ -6569,9 +6544,13 @@ fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Weak Beam Diagnostic"
+  "ELUM Rates"
 }
 autoSize
+endObjectProperties
+
+endGroup
+
 endObjectProperties
 
 # (Group)
@@ -6580,23 +6559,10 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 961
-y 696
-w 154
-h 33
-
-beginGroup
-
-# (Group)
-object activeGroupClass
-beginObjectProperties
-major 4
-minor 0
-release 0
-x 961
-y 696
-w 20
-h 33
+x 619
+y 585
+w 271
+h 105
 
 beginGroup
 
@@ -6606,8 +6572,29 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 967
-y 713
+x 619
+y 585
+w 111
+h 21
+font "helvetica-bold-r-18.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Recoil Rates"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 851
+y 674
 w 9
 h 16
 font "helvetica-bold-r-14.0"
@@ -6627,8 +6614,479 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 961
-y 696
+x 791
+y 674
+w 20
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "DE"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 772
+y 610
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count1_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 772
+y 654
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count6_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 772
+y 625
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count3_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 772
+y 640
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count4_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 831
+y 610
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count0_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 831
+y 625
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count2_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 831
+y 640
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count5_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 831
+y 654
+w 59
+h 15
+controlPv "VME01:MDIG3:ahit_count7_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 80
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 727
+y 674
+w 9
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "E"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 667
+y 674
+w 20
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "DE"
+}
+autoSize
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 648
+y 610
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count1_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 648
+y 654
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count6_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 648
+y 625
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count3_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 648
+y 640
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count4_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 707
+y 610
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count0_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 707
+y 625
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count2_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 707
+y 640
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count5_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 707
+y 654
+w 59
+h 15
+controlPv "VME01:MDIG3:disc_count7_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 681
+y 705
+w 202
+h 21
+font "helvetica-bold-r-18.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Weak Beam Diagnostic"
+}
+autoSize
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 733
+y 734
+w 154
+h 33
+
+beginGroup
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 733
+y 734
+w 20
+h 33
+
+beginGroup
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 739
+y 751
+w 9
+h 16
+font "helvetica-bold-r-14.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "E"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 733
+y 734
 w 20
 h 16
 font "helvetica-bold-r-14.0"
@@ -6652,8 +7110,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 1056
-y 697
+x 828
+y 735
 w 59
 h 30
 
@@ -6665,8 +7123,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1056
-y 712
+x 828
+y 750
 w 59
 h 15
 controlPv "VME01:MDIG4:ahit_count1_RBV"
@@ -6686,8 +7144,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1056
-y 697
+x 828
+y 735
 w 59
 h 15
 controlPv "VME01:MDIG4:ahit_count0_RBV"
@@ -6711,8 +7169,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 991
-y 697
+x 763
+y 735
 w 60
 h 30
 
@@ -6724,8 +7182,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 991
-y 712
+x 763
+y 750
 w 60
 h 15
 controlPv "VME01:MDIG4:disc_count1_RBV"
@@ -6746,8 +7204,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 991
-y 697
+x 763
+y 735
 w 60
 h 15
 controlPv "VME01:MDIG4:disc_count0_RBV"
@@ -6776,9 +7234,9 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 618
-y 652
-w 111
+x 1124
+y 664
+w 38
 h 21
 font "helvetica-bold-r-18.0"
 fontAlign "center"
@@ -6786,7 +7244,7 @@ fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "Recoil Rates"
+  "TAC"
 }
 autoSize
 endObjectProperties
@@ -6797,38 +7255,17 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 850
-y 741
-w 9
-h 16
-font "helvetica-bold-r-14.0"
+x 1130
+y 690
+w 32
+h 21
+font "helvetica-bold-r-18.0"
 fontAlign "center"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "E"
-}
-autoSize
-endObjectProperties
-
-# (Static Text)
-object activeXTextClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 790
-y 741
-w 20
-h 16
-font "helvetica-bold-r-14.0"
-fontAlign "center"
-fgColor index 0
-bgColor index 0
-useDisplayBg
-value {
-  "DE"
+  "BIC"
 }
 autoSize
 endObjectProperties
@@ -6839,11 +7276,11 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 771
-y 677
+x 1235
+y 668
 w 59
 h 15
-controlPv "VME01:MDIG3:ahit_count1_RBV"
+controlPv "VME01:MDIG1:ahit_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -6860,14 +7297,15 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 771
-y 721
-w 59
+x 1175
+y 668
+w 60
 h 15
-controlPv "VME01:MDIG3:ahit_count6_RBV"
+controlPv "VME01:MDIG1:disc_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
-fgColor index 80
+fgColor index 81
+fgAlarm
 bgColor index 0
 nullColor index 0
 newPos
@@ -6881,11 +7319,11 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 771
+x 1235
 y 692
 w 59
 h 15
-controlPv "VME01:MDIG3:ahit_count3_RBV"
+controlPv "VME01:MDIG2:ahit_count9_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -6902,53 +7340,33 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 771
-y 707
-w 59
-h 15
-controlPv "VME01:MDIG3:ahit_count4_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 830
-y 677
-w 59
-h 15
-controlPv "VME01:MDIG3:ahit_count0_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 830
+x 1175
 y 692
+w 60
+h 15
+controlPv "VME01:MDIG2:disc_count9_RBV"
+font "helvetica-bold-r-12.0"
+fontAlign "right"
+fgColor index 81
+fgAlarm
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 1238
+y 736
 w 59
 h 15
-controlPv "VME01:MDIG3:ahit_count2_RBV"
+controlPv "VME01:MDIG2:ahit_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -6965,35 +7383,15 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 830
-y 707
-w 59
+x 1178
+y 736
+w 60
 h 15
-controlPv "VME01:MDIG3:ahit_count5_RBV"
+controlPv "VME01:MDIG2:disc_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
-fgColor index 80
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 830
-y 721
-w 59
-h 15
-controlPv "VME01:MDIG3:ahit_count7_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 80
+fgColor index 81
+fgAlarm
 bgColor index 0
 nullColor index 0
 newPos
@@ -7007,207 +7405,18 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 726
-y 741
-w 9
-h 16
-font "helvetica-bold-r-14.0"
+x 1127
+y 732
+w 48
+h 21
+font "helvetica-bold-r-18.0"
 fontAlign "center"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "E"
+  "TAC2"
 }
 autoSize
-endObjectProperties
-
-# (Static Text)
-object activeXTextClass
-beginObjectProperties
-major 4
-minor 1
-release 0
-x 666
-y 741
-w 20
-h 16
-font "helvetica-bold-r-14.0"
-fontAlign "center"
-fgColor index 0
-bgColor index 0
-useDisplayBg
-value {
-  "DE"
-}
-autoSize
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 647
-y 677
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count1_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 647
-y 721
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count6_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 647
-y 692
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count3_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 647
-y 707
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count4_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 706
-y 677
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count0_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 706
-y 692
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count2_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 706
-y 707
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count5_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
-endObjectProperties
-
-# (Text Monitor)
-object activeXTextDspClass:noedit
-beginObjectProperties
-major 4
-minor 4
-release 0
-x 706
-y 721
-w 59
-h 15
-controlPv "VME01:MDIG3:disc_count7_RBV"
-font "helvetica-bold-r-12.0"
-fontAlign "right"
-fgColor index 81
-bgColor index 0
-nullColor index 0
-newPos
-objType "monitors"
-noExecuteClipMask
 endObjectProperties
 
