@@ -43,6 +43,15 @@ else
     RUN1=$(printf '%d' $RUN1)
 fi
 
+#if RUN2 == -1, find the last runID from daq.
+if [ ${RUN2} -eq -1 ]; then
+  IP=192.168.1.2
+  rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
+  source ../../expName.sh #load expName and last RUN
+  RUN2=$LastRunNum
+  echo "---- Last run is $RUN2"
+fi
+
 if [ "${RUN2:0:1}" == "0" ]; then
     RUN2=${RUN2:1:2}
 elif [ "${RUN2:0:2}" == "00" ]; then

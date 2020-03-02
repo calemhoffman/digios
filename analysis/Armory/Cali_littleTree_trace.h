@@ -119,6 +119,7 @@ public :
    
    double xnCorr[30]; // xn correction for xn = xf
    double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   double xScale[30]; //scale x to full range
    double cTCorr[30][9]; // coinTime correction
    bool isCoinTimeLoaded;
    TF1 ** f7 ; //!
@@ -255,6 +256,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    }
    file.close();
    
+   
    //========================================= e = xf + xn correction
    printf("----- loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
@@ -273,6 +275,27 @@ void Cali_littleTree_trace::Init(TTree *tree)
       for( int i = 0 ; i < numDet; i++){
          xfxneCorr[i][0] = 0.0;
          xfxneCorr[i][1] = 1.0;
+      }
+   }
+   file.close();
+   
+   //========================================= xf = xn correction
+   printf("----- loading scale-X correction.");
+   file.open("correction_scaleX.dat");
+   if( file.is_open() ){
+      double a;
+      int i = 0;
+      while( file >> a ){
+         if( i >= numDet) break;
+         xScale[i] = a;
+         i = i + 1;
+      }
+      
+      printf("... done.\n");
+   }else{
+      printf("... fail.\n");
+      for( int i = 0 ; i < numDet; i++){
+         xScale[i] = 1;
       }
    }
    file.close();

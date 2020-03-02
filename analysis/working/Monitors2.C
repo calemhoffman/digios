@@ -35,15 +35,15 @@ int     rdtDERange[2] = {     0,   5000};
 int      rdtERange[2] = {     0,  10000};
 int      elumRange[2] = {   200,   6000};
 int       TACRange[3] = { 300,    700,  1500};  // #bin, min, max
-int      TAC2Range[3] = { 30,    500,    530};
+int      TAC2Range[3] = { 20,    480,    500};
 
 double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -400, 400};
-int    elumRateTimeRange[2] = {5200, 6500};
+int    elumRateTimeRange[2] = {10100, 11000};
 
 //---Gate
 int timeGate[2] = {-5, 6}; // min, max, 1 ch = 10 ns
-int tacGate[2]  = {-8000, -2000};
+int tacGate[2]  = { 500,  525};
 int dEgate[2]   = {500,  1500};
 int Eresgate[2] = {1000,4000};
 
@@ -141,6 +141,7 @@ TH2F* hecalVzRow[numRow];
 //====== Ex data
 TH1F* hEx;
 TH1F* hExi[numDet];
+TH1F* hExc[numDet/numRow];
 
 TH2F* hExThetaCM;
 TH2F* hExVxCal[numDet];
@@ -213,6 +214,7 @@ Int_t tacA[numDet];
 //==== correction parameters
 Float_t xnCorr[numDet];
 Float_t xfxneCorr[numDet][2];
+Float_t xScale[numDet];
 Float_t eCorr[numDet][2];
 Float_t eCorrEx[numDet][2];
 Float_t eCorrFlat[numDet][4];
@@ -241,7 +243,7 @@ void Monitors2::Begin(TTree *tree)
    NumEntries = tree->GetEntries();
    
    //canvasTitle.Form("#Events:%lld, Runs: ", NumEntries);
-   canvasTitle.Form("Runs: ");
+   canvasTitle.Form("Monitors2 | Runs: ");
    lastRunID = -1;
    contFlag = false;
    
@@ -333,7 +335,6 @@ void Monitors2::Begin(TTree *tree)
    file.close();
    
    //========================================= e = xf + xn correction
-   
    printf(" loading xf/xn-e correction.");
    file.open("correction_xfxn_e.dat");
    if( file.is_open() ){
@@ -351,6 +352,27 @@ void Monitors2::Begin(TTree *tree)
       for(int i = 0; i < numDet; i++){
          xfxneCorr[i][0] = 0;
          xfxneCorr[i][1] = 1;
+      }
+   }
+   file.close();
+   
+   //========================================= X-Scale correction
+   printf(" loading x-Scale correction.");
+   file.open("correction_scaleX.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a ){
+         if( i >= numDet) break;
+         xScale[i] = a;  
+         i = i + 1;
+      }
+      printf("......... done.\n");
+      
+   }else{
+      printf("......... fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         xScale[i] = 1.;
       }
    }
    file.close();
@@ -684,7 +706,11 @@ void Monitors2::Begin(TTree *tree)
    //===================== energy spectrum
    hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    for(int i = 0 ; i < numDet; i++){
-      hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+      hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%d) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   }
+   
+   for(int i = 0 ; i < numCol; i++){
+      hExc[i] = new TH1F(Form("hExc%d", i), Form("Ex (col=%d) w/goodFlag; Ex [MeV]; Count / %4.0f keV", i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    }
 
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
@@ -880,6 +906,9 @@ Bool_t Monitors2::Process(Long64_t entry)
       if  (  TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 1.0 - xncal[detID]/ e[detID];
       //if  (  TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) xcal[detID] = TMath::QuietNaN();
       
+      //======= Scale xcal from (0,1)      
+      //xcal[detID] = (xcal[detID]-0.5)/xScale[detID] + 0.5; // if include this scale, need to also inclused in Cali_littleTree
+      
       /*
       if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) {
         if (xfcal[detID]>0.5*e[detID]) {
@@ -967,7 +996,7 @@ Bool_t Monitors2::Process(Long64_t entry)
       int tac2 = tac_t[2]-e_t[detID];        
       htac2->Fill(tac2);
 
-      if( coinFlag && rdtgate && ezGate ){//&& tac2 > 512 && tac2 < 518) {
+      if( coinFlag && rdtgate && ezGate){// && 484 < tac2 && tac2 < 495) {
         heCalVzGC->Fill( z[detID] , eCal[detID] );
         
         heCalVxCalG[detID]->Fill(xcal[detID]*length,eCal[detID]);
@@ -1102,7 +1131,7 @@ Bool_t Monitors2::Process(Long64_t entry)
 
       Ex = eCorrEx[detID][0] + eflat / eCorrEx[detID][1];
       
-      Ex = Ex - 0.7786; // offset for 82Se(d,p)
+      if( detID < 18 ) Ex = Ex - 0.7786; // offset for 82Se(d,p)
 
       //=================== calulate thetaCM
       double q = (pow(Et,2)+ pow(mass,2) - pow(massB+Ex,2))/2./Et;
@@ -1112,7 +1141,7 @@ Bool_t Monitors2::Process(Long64_t entry)
 
       double cosThetaCM = beta*q/momt - alpha*z[detID]/gamm/momt ;
 
-      thetaCM = acos(cosThetaCM)*TMath::RadToDeg();
+      thetaCM = acos(cosThetaCM)*TMath::RadToDeg(); //offset by ~ 5 deg 
 
       //=================== calulate supposed e
       double eSpp = - mass + q/gamm  + alpha * beta * z[detID];
@@ -1127,6 +1156,8 @@ Bool_t Monitors2::Process(Long64_t entry)
       hEx->Fill(Ex);
       hExThetaCM->Fill(thetaCM, Ex);
       hExi[detID]->Fill(Ex);
+      
+      hExc[detID%numCol]->Fill(Ex); 
 
    }
   
