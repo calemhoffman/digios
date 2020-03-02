@@ -100,8 +100,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       b_EZERO->GetEntry(entry,0);
       b_EZEROTimestamp->GetEntry(entry,0);
    }
-   if( isTACExist ) b_TAC->GetEntry(entry,0);
-   
+   if( isTACExist ) {
+      b_TAC->GetEntry(entry,0);
+      b_TACTimestamp->GetEntry(entry,0);
+   }
    if ( isTraceDataExist ){
       b_Trace_Energy->GetEntry(entry,0);
       b_Trace_Energy_Time->GetEntry(entry,0);

@@ -369,7 +369,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
          
          double a1, a0;
          a1 = a1Range[0] + (a1Range[1] - a1Range[0])*ranGen->Rndm();
-         a0 = a0Range[0] + (a0Range[1] - a0Range[0])*ranGen->Rndm();
+         a0 = a0Range[0] + (a0Range[1] - a0Range[0])*ranGen->Rndm(); // a0 can be a1 depends
          
          double totalMinDist    = 0.;
          int count = 0; 
@@ -530,7 +530,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    if( option < 0 ){
       FILE * paraOut;
       TString filename;
-      filename.Form("correction_e.dat");
+      filename.Form("correction_e_KE.dat");
       paraOut = fopen (filename.Data(), "w+");
 
       printf("=========== save parameters to %s \n", filename.Data());
