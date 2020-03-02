@@ -1,6 +1,6 @@
-#define Monitors_cxx
+#define Monitors2_cxx
 
-#include "Monitors.h"
+#include "Monitors2.h"
 #include <TH2.h>
 #include <TH1.h>
 #include <TStyle.h>
@@ -29,7 +29,7 @@ ULong64_t maxNumberEvent = 1000000000;
 int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
-int rawEnergyRange[2] = {  1200,   2500}; // share with e, ring, xf, xn
+int rawEnergyRange[2] = {     0,   4000}; // share with e, ring, xf, xn
 int    energyRange[2] = {     0,     10}; // in the E-Z plot
 int     rdtDERange[2] = {     0,   5000};
 int      rdtERange[2] = {     0,  10000};
@@ -39,7 +39,7 @@ int      TAC2Range[3] = { 30,    500,    530};
 
 double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -400, 400};
-int    elumRateTimeRange[2] = {5000, 7000};
+int    elumRateTimeRange[2] = {5200, 6500};
 
 //---Gate
 int timeGate[2] = {-5, 6}; // min, max, 1 ch = 10 ns
@@ -141,9 +141,11 @@ TH2F* hecalVzRow[numRow];
 //====== Ex data
 TH1F* hEx;
 TH1F* hExi[numDet];
-TH2F* hExVxCal[numDet];
 
 TH2F* hExThetaCM;
+TH2F* hExVxCal[numDet];
+
+TH2F* heSVeRaw[numDet]; // raw energy to e(Ex,z)
 
 //====== TAC
 TH1F* htac;   // by TAC
@@ -212,6 +214,8 @@ Int_t tacA[numDet];
 Float_t xnCorr[numDet];
 Float_t xfxneCorr[numDet][2];
 Float_t eCorr[numDet][2];
+Float_t eCorrEx[numDet][2];
+Float_t eCorrFlat[numDet][4];
 
 //==== parameters for Ex and thetaCM calcualtion
 
@@ -228,7 +232,7 @@ bool isReaction;
 /***************************
  ***************************/
 
-void Monitors::Begin(TTree *tree)
+void Monitors2::Begin(TTree *tree)
 {
    TString option = GetOption();
    
@@ -242,7 +246,7 @@ void Monitors::Begin(TTree *tree)
    contFlag = false;
    
    printf("#################################################\n");
-   printf("##########         Monitors.C           #########\n");
+   printf("##########         Monitors2.C          #########\n");
    printf("#################################################\n");
    
       
@@ -350,9 +354,8 @@ void Monitors::Begin(TTree *tree)
       }
    }
    file.close();
-
-   //========================================= e correction
    
+   //========================================= e correction
    printf(" loading e correction.");
    file.open("correction_e.dat");
    if( file.is_open() ){
@@ -372,6 +375,59 @@ void Monitors::Begin(TTree *tree)
       for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
+      }
+   }
+   file.close();
+   
+   //========================================= e-flat correction
+   printf(" loading e flat correction.");
+   file.open("correction_e_flat.dat");
+   if( file.is_open() ){
+      double a, b, c, d;
+      int i = 0;
+      while( file >> a >> b >> c >> d){
+         if( i >= numDet) break;
+         eCorrFlat[i][0] = a;  // 1st power
+         eCorrFlat[i][1] = b;  // 2nd power
+         eCorrFlat[i][2] = c;  // 3rd power
+         eCorrFlat[i][3] = d;  // 4th power
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f, e2: %9.4f, e3: %9.4f", i, eCorrFlat[i][0], eCorrFlat[i][1], eCorrFlat[i][2], eCorrFlat[i][3]);
+         i = i + 1;
+      }
+      printf("......... done.\n");
+      
+   }else{
+      printf("......... fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         eCorrFlat[i][0] = 0.;
+         eCorrFlat[i][1] = 0.;
+         eCorrFlat[i][2] = 0.;
+         eCorrFlat[i][3] = 0.;
+      }
+   }
+   file.close();
+
+   //========================================= e-flat to Ex correction
+   
+   printf(" loading e-flat to Ex correction.");
+   file.open("correction_eflat_Ex.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= numDet) break;
+         eCorrEx[i][0] = a;  // 1/a1
+         eCorrEx[i][1] = b;  //  a0 , e' = e * a1 + a0
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorrEx[i][0], eCorrEx[i][1]);
+         i = i + 1;
+      }
+      printf("......... done.\n");
+      
+   }else{
+      printf("......... fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         eCorrEx[i][0] = 1.;
+         eCorrEx[i][1] = 0.;
       }
    }
    file.close();
@@ -556,11 +612,13 @@ void Monitors::Begin(TTree *tree)
                            Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
                            500,-02.5,52.5,500,energyRange[0], energyRange[1]);
                            
-                                 
       hExVxCal[i] = new TH2F(Form("hExVxCal%d",i), 
                              Form("Ex vs X (ch=%d); X (cm); Ex (MeV)", i),
                              500,-0.1,1.1,(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
                              
+      heSVeRaw[i] = new TH2F(Form("heSVeRaw%d", i),
+                             Form("e(Ex,z) vs e-Raw (ch=%d)", i),
+                             500,rawEnergyRange[0], rawEnergyRange[1],500,energyRange[0], energyRange[1]);
    }
    
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
@@ -665,7 +723,7 @@ void Monitors::Begin(TTree *tree)
    isTACGate=false;
 }
 
-void Monitors::SlaveBegin(TTree * /*tree*/)
+void Monitors2::SlaveBegin(TTree * /*tree*/)
 {
    TString option = GetOption();
 }
@@ -681,7 +739,7 @@ double solid_angle( double th ) {
 /*###########################################################
  * Process
 ###########################################################*/
-Bool_t Monitors::Process(Long64_t entry)
+Bool_t Monitors2::Process(Long64_t entry)
 {
    if( ProcessedEntries > maxNumberEvent ) return kTRUE;
    ProcessedEntries++;
@@ -791,11 +849,11 @@ Bool_t Monitors::Process(Long64_t entry)
       //if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
       //if( ring[detID] > 300 ) continue; 
       if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
-      //if( detID > 19 ) continue;
-      if( detID == 5 ) continue;
+      //if( detID > 17 ) continue;
       if( detID ==10 ) continue;
+      if( detID ==17 ) continue;
       if( detID ==11 ) continue;
-      if( detID ==18 ) continue;
+      if( detID == 5 ) continue;
 
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
@@ -839,7 +897,7 @@ Bool_t Monitors::Process(Long64_t entry)
       }else{
         z[detID] = length*(xcal[detID]-1.0) + pos[detID%numCol];
       }
-
+      
       //===================== multiplicity
       arrayMulti++; // multi-hit when both e, xf, xn are not NaN
 
@@ -975,11 +1033,12 @@ Bool_t Monitors::Process(Long64_t entry)
    if( !isGoodEventFlag ) return kTRUE;
    
    for(Int_t detID = 0; detID < numDet ; detID++){
-     	
+     
      if( TMath::IsNaN(e[detID]) ) continue ; 
      if( TMath::IsNaN(z[detID]) ) continue ; 
-     if( eCal[detID] < 1) continue;
-
+     if( eCal[detID] < 2) continue;
+     
+     /*
      if( isReaction ){
        //======== Ex calculation by Ryan 
        double y = eCal[detID] + mass; // to give the KE + mass of proton;
@@ -1026,32 +1085,60 @@ Bool_t Monitors::Process(Long64_t entry)
        Ex = TMath::QuietNaN();
        thetaCM = TMath::QuietNaN();
      }
+     */
      //ungated excitation energy
      
-     Ex = 1.1586 * Ex - 0.0983;// cheated
+     //Ex = 1.1586 * Ex - 0.0983;// cheated
      
-     htacEx->Fill(tac[0], Ex);
-     htac2Ex->Fill(tac_t[2]-e_t[detID], Ex);
-     
+      //==================== calculate Ex
+      double xtemp = 2*(xcal[detID] - 0.5);
 
+      double xflat =       xtemp*eCorrFlat[detID][0]+
+                 pow(xtemp,2)*eCorrFlat[detID][1]+
+                 pow(xtemp,3)*eCorrFlat[detID][2]+
+                 pow(xtemp,4)*eCorrFlat[detID][3];
+                 
+      double eflat = e[detID] - xflat;
+
+      Ex = eCorrEx[detID][0] + eflat / eCorrEx[detID][1];
+      
+      Ex = Ex - 0.7786; // offset for 82Se(d,p)
+
+      //=================== calulate thetaCM
+      double q = (pow(Et,2)+ pow(mass,2) - pow(massB+Ex,2))/2./Et;
+      double haha1 = Et*Et - pow(mass + massB + Ex,2);
+      double haha2 = Et*Et - pow(mass - massB - Ex,2);
+      double momt = sqrt(haha1*haha2)/2./Et;
+
+      double cosThetaCM = beta*q/momt - alpha*z[detID]/gamm/momt ;
+
+      thetaCM = acos(cosThetaCM)*TMath::RadToDeg();
+
+      //=================== calulate supposed e
+      double eSpp = - mass + q/gamm  + alpha * beta * z[detID];
+
+      heSVeRaw[detID]->Fill(e[detID], eSpp);
+
+      hExVxCal[detID]->Fill(xcal[detID], Ex);
+           
+      htacEx->Fill(tac[0], Ex);
+      htac2Ex->Fill(tac_t[2]-e_t[detID], Ex);
      
-     if( thetaCM > 6 ) {
-         hEx->Fill(Ex);
-         hExThetaCM->Fill(thetaCM, Ex);
-         hExi[detID]->Fill(Ex);
-         hExVxCal[detID]->Fill(xcal[detID], Ex);
-      }
+      hEx->Fill(Ex);
+      hExThetaCM->Fill(thetaCM, Ex);
+      hExi[detID]->Fill(Ex);
+
    }
   
    return kTRUE;
 }
 
-void Monitors::SlaveTerminate()
+void Monitors2::SlaveTerminate()
 {
   
 }
 
-void Monitors::Draw2DHist(TH2F * hist){
+void Monitors2::Draw2DHist(TH2F * hist){
    
    if( hist->Integral() < 1000 ){
       hist->SetMarkerStyle(20);
@@ -1062,7 +1149,7 @@ void Monitors::Draw2DHist(TH2F * hist){
    }
 }
 
-void Monitors::Terminate()
+void Monitors2::Terminate()
 {
    printf("============ finishing.\n");
 
@@ -1204,7 +1291,7 @@ void Monitors::Terminate()
    
    //helum4C->Draw();
    
-   helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC", 500, 4000, 7000);
+   helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]);
    helumDBIC->Divide(helum4D, hBIC);
    helumDBIC->Draw();
    

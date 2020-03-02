@@ -4,6 +4,8 @@
 PCName=$(hostname)
 Arch=$(uname -s)
 
+#echo "PC Name : " $PCName 
+
 #    source /lcrc/project/HELIOS/digios/expName.sh
 #    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
 
