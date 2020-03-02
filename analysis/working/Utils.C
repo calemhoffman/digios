@@ -1,3 +1,6 @@
+#ifndef Utilities
+#define Utilities
+
 //This file runs after on Monitor.C
 //This file is parasite on Monitor.C
 
@@ -364,6 +367,15 @@ void excite(void) {
     hExi[i]->Draw("");
   }
   
+  TCanvas *cexC =  (TCanvas *) gROOT->FindObjectAny("cexC");
+  if( cexC == NULL ) cexC = new TCanvas("cexC",Form("EX : %s", canvasTitle.Data()),1600,300);
+  cexC->Clear();cexC->Divide(numCol,1);
+  gStyle->SetOptStat("neiou");
+  for( int i = 0; i < numCol; i++){
+    cexC->cd(i+1); 
+    hExc[i]->Draw("");
+  }
+  
 }
 
 
@@ -375,17 +387,17 @@ void ExThetaCM(void) {
   hExThetaCM->Draw("colz");
 }
 
-void ExVxCal(void) {
+void ExVxCal(TString drawOpt = "") {
   TCanvas *cExVxCal =  (TCanvas *) gROOT->FindObjectAny("cExVxCal");
-  if( cExVxCal == NULL ) cExVxCal = new TCanvas("cExVxCal",Form("EX | %s", canvasTitle.Data()),1000,650);
+  if( cExVxCal == NULL ) cExVxCal = new TCanvas("cExVxCal",Form("EX | %s", canvasTitle.Data()),1600,1000);
   cExVxCal->Clear();
   gStyle->SetOptStat("neiou");
   
   cExVxCal->Divide(numCol,numRow);
   for( int i = 0; i < numDet; i++){
     cExVxCal->cd(i+1); 
-    hExVxCal[i]->SetMarkerStyle(7);
-    hExVxCal[i]->Draw("");
+    if( drawOpt == "" )hExVxCal[i]->SetMarkerStyle(7);
+    hExVxCal[i]->Draw(drawOpt);
   }
   
 }
@@ -474,3 +486,5 @@ void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1
    printf(" %s  : %d \n", name.Data(),  count);
    
 }
+
+#endif 
