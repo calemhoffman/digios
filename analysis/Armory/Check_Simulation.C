@@ -155,7 +155,6 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
    double exSpan = exList.back() - exList[0];
    
    double ExRange[2];
-   
    ExRange[0] = exList[0] - exSpan * 0.1;
    ExRange[1] = exList.back() + exSpan * 0.1;
    
@@ -260,7 +259,8 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
    TH1F * hHit = new TH1F("hHit", "hit; hit-ID; count", 13, -11, 2);
    tree->Draw("hit>>hHit", "", "");
    */
-
+   
+   ///========= E-Z
    cCheck->cd(nC);
    TH2F * hez = new TH2F("hez", Form("e-z [gated] @ %5.0f mm; z [mm]; e [MeV]", firstPos), zRange[0], zRange[1], zRange[2], 400, eRange[0], eRange[1]);
    tree->Draw("e:z>>hez", gate, "colz");
@@ -271,6 +271,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
    }
    nC++;
 
+  
    cCheck->cd(nC);
    TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
    tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
@@ -306,6 +307,14 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
    }
    nC++;
   
+   cCheck->cd(nC);
+   //override ExRange;
+   ExRange[0] = -2;
+   ExRange[1] = 6;
+   TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  200, ExRange[0], ExRange[1]);
+   tree->Draw("ExCal>>hExCal", gate, "");
+   nC++;
+  
    if( withDWBA ) {
      cCheck->cd(nC);
      cCheck->cd(nC)->SetGrid(0,0);
@@ -313,20 +322,21 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
      TH1F * hThetaCM[nExID];
      TLegend * legend = new TLegend(0.8,0.2,0.99,0.8);
      double maxCount = 0;
-     for( int i = 0; i < nExID; i++){
+     int startID = 0; // set the start ExID
+     for( int i = startID; i < nExID; i++){
        hThetaCM[i] = new TH1F(Form("hThetaCM%d", i), Form("thetaCM [gated] (ExID=%d); thetaCM [deg]; count", i), 200, thetaCMRange[0], thetaCMRange[1]);
-       hThetaCM[i]->SetLineColor(i+1);
-       hThetaCM[i]->SetFillColor(i+1);
-       hThetaCM[i]->SetFillStyle(3000+i);
+       hThetaCM[i]->SetLineColor(i+1-startID);
+       hThetaCM[i]->SetFillColor(i+1-startID);
+       hThetaCM[i]->SetFillStyle(3000+i-startID);
        tree->Draw(Form("thetaCM>>hThetaCM%d", i), gate + Form("&& ExID==%d", i), "");
-       legend->AddEntry(hThetaCM[i], Form("ExID=%d", i));
+       legend->AddEntry(hThetaCM[i], Form("Ex=%5.1f MeV", exList[i]));
        double max = hThetaCM[i]->GetMaximum();
        if( max > maxCount ) maxCount = max;
      }
 
-     for( int i = 0; i < nExID; i++){
+     for( int i = startID; i < nExID; i++){
        hThetaCM[i]->GetYaxis()->SetRangeUser(1, maxCount * 1.2);
-       if( i == 0 ) {
+       if( i == startID ) {
          hThetaCM[i]->Draw();
        }else{
          hThetaCM[i]->Draw("same");
@@ -343,13 +353,6 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
      nC++;
    }
    
-   cCheck->cd(nC);
-   //override ExRange;
-   //ExRange[0] = -1;
-   //ExRange[1] = 1;
-   TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  200, ExRange[0], ExRange[1]);
-   tree->Draw("ExCal>>hExCal", gate, "");
-   nC++;
 
    ///Draw same text
    cCheck->cd(nC);

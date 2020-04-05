@@ -72,7 +72,7 @@ void RDTCutCreator(TString dataList,
       ///printf("\n %s \n", expression[i].Data());
       
       //gate.Form("abs(coinTime-19)< 9 && Ex > -2 && trdt_r[%d] < 20", 2*i);
-      //gate.Form("abs(coinTime-19)< 9 && Ex > -2");
+      gate.Form("abs(coinTime-15)< 9 && Ex > -2");
 
       chain->Draw(expression[i], gate, "col");
       
