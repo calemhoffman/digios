@@ -2,4 +2,14 @@
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
 -../root_data/gen_run098.root
-+../root_data/gen_run013.root
+
+//======== 15N(d,p)
+//+../root_data/gen_run013.root
+
+
+//======== 15N(6Li,d)
++../root_data/gen_run02[4-7].root
++../root_data/gen_run029.root
++../root_data/gen_run03[2-9].root
++../root_data/gen_run04[0-9].root
++../root_data/gen_run05[0-2].root
