@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TH1F.h>
 #include <TSelector.h>
 
 // Header file for the classes stored in the TTree if any.
@@ -99,7 +100,10 @@ public :
    virtual TList  *GetOutputList() const { return fOutput; }
    virtual void    SlaveTerminate();
    virtual void    Terminate();
-
+   
+   double ExCal(double e, double z);
+   double findXMax(TH1F ** hist);
+   
    ClassDef(Analyzer,0);
 };
 
@@ -137,7 +141,7 @@ void Analyzer::Init(TTree *tree)
    fChain->SetBranchAddress("rdt", rdt, &b_rdtC);
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_rdtC_t);
    fChain->SetBranchAddress("rdtID", rdtID, &b_rdtID);
-   fChain->SetBranchAddress("rdtMultiHit", &rdtMultiHit, &b_rdtMultiHit);
+   //fChain->SetBranchAddress("rdtMultiHit", &rdtMultiHit, &b_rdtMultiHit);
    //fChain->SetBranchAddress("ebis_t", &ebis_t, &b_EBIS_t);
    fChain->SetBranchAddress("elum", elum, &b_elum);
    fChain->SetBranchAddress("ezero", ezero, &b_ezero);
