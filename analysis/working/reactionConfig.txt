@@ -5,7 +5,7 @@
 1               //target_Z
 3               //recoil_light_A
 2               //recoil-light_Z
-12            //beam-energy_in_MeV/u
+11.8            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
@@ -22,4 +22,4 @@ false           //isDacay
 1               //decayNucleus_A
 0               //decayNucleus_Z
 false           //isReDo
-0.120           //excitation_energy_of_A[MeV]
+0.00           //excitation_energy_of_A[MeV]

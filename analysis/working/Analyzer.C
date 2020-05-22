@@ -18,23 +18,23 @@ const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-double rangeEx[3] = { 50, -1, 8}; ///resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 100, -2, 4}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; ///resol. [deg], low deg, high deg
 
-bool isExOffset = false;
+bool isExOffset = true;
 double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
-   0.00,  0.0154,    1000,  0.1314,  0.0091, 
-   1000,  0.0032,  0.0081,    1000,  0.1661, 
-   1000,  0.0614,  0.1070,  0.1453,  0.1785,
--0.1202, -0.0240,  0.1119,  0.0535, -0.0004,
- 0.0384, -0.0593,  0.0133,  0.0575,  0.0534,
-   1000, -0.0122,  0.1052,  0.2028,  0.0410};
+   0.0000,  0.0000,  0.0000,  0.0000,  0.0000, 
+   0.0000,  0.1590,  0.0000,  0.0570,  0.0000, 
+   0.0000,  0.0000,  0.4800,  0.2700,  0.0000,
+   0.0000,  0.0601,  0.0000,  0.0000,  0.0000,
+   0.0000,  0.0000,  0.0400,  0.0000, -0.0100,
+   0.0000,  0.1485,  0.1900,  0.0000,  0.0000};
 
-int nBadDet = 9;
-int listOfBadDet[11] = {0, 1, 2, 3, 4, 9, 11, 14, 29};
+const int nBadDet = 15;
+int listOfBadDet[nBadDet] = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
 
 
-TString rdtCutFile = ""; //"rdt_15N_degraded.root";
+TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
 
 //######################################## End of User Input
 
@@ -242,7 +242,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       ///hEBISi[i]->Fill( (e_t[i]-ebis_t)/1e2 );
 
       ///======= cut ring
-      if( ring[i] > 50 ) continue;
+      //if( ring[i] > 50 ) continue;
 
       ///======== cut-EBIS
       ///if( !(100 < (e_t[i]-ebis_t)/1e2 && (e_t[i]-ebis_t)/1e2 < 900 )) continue;
@@ -252,13 +252,13 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( TMath::IsNaN(e[i]) ) continue;
       if( TMath::IsNaN(z[i]) ) continue;
      
-      if( e[i] < 1.2 ) continue;
+      if( e[i] < 3.5 ) continue;
      
       ///======== cut-coinTime;
-      if( abs(coinTime-19) > 9 ) continue;
+      if( abs(coinTime-17) > 9 ) continue;
      
       ///======== cut-x
-      if( !(TMath::Abs(x[i]) < 0.95) ) continue;
+      ///if( !(TMath::Abs(x[i]) < 0.95) ) continue;
       
       ///======== cut-hitID
       ///if( hitID[i] != 0 ) continue;
@@ -284,13 +284,25 @@ Bool_t Analyzer::Process(Long64_t entry)
 
       ///======== special gate;
       ///if( i == 16 && e[i] < 6 ) continue;
+
+      //################################################## 
       
-      
-      
+      //if( Ex > 0.4 ) {
+      //   Ex = ExCal( e[i] , z[i] );
+      //}
       
       //##################################################
+      if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
+      if( i == 10 ) Ex = 1.10 * Ex - 0.078;
+      if( i == 15 ) Ex = 1.00 * Ex + 0.035;
+      if( i == 20 ) Ex = 1.07 * Ex - 0.107;
+      if( i == 21 ) Ex = 0.89 * Ex - 0.054;
+      if( i == 25 ) Ex = 1.07 * Ex - 0.062;
+      
       
       if( isExOffset) Ex = Ex - ExOffset[i];
+      
+      Ex = Ex - 0.15;
       
       multiHit ++;
       
@@ -365,7 +377,70 @@ void Analyzer::SlaveTerminate()
 {
 }
 
-double findXMax(TH1F ** hist){
+double Analyzer::ExCal(double e, double z){
+   
+   double mass = 2808.3914;
+   double q = 2;
+   double beta = 0.14024096;
+   
+   double Et = 16802.7129;
+   double massB = 13979.2181;
+   
+   double Bfield = 2.0;
+   double a = 11.5;
+
+   double gamm = 1./TMath::Sqrt(1-beta*beta);
+
+   double alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
+   double G = alpha * gamm * beta * a ;
+
+   double Ex, thetaCM;
+   
+   //======== Ex calculation by Ryan 
+   double y = e + mass; // to give the KE + mass of proton;
+   double Z = alpha * gamm * beta * z;
+   double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
+   
+   if( TMath::Abs(Z) < H ) {				 
+      //using Newton's method to solve 0 ==	H * sin(phi) - G * tan(phi) - Z = f(phi) 
+      double tolerrence = 0.001;
+      double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
+      double nPhi = 0; // new phi
+      
+      int iter = 0;
+      do{
+         phi = nPhi;
+         nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));					 
+         iter ++;
+         if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
+      }while( TMath::Abs(phi - nPhi ) > tolerrence);
+      
+      phi = nPhi;
+      
+      // check f'(phi) > 0
+      double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
+      if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
+         double K = H * TMath::Sin(phi);
+         double x = TMath::ACos( mass / ( y * gamm - K));
+         double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
+         double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
+         Ex = EB - massB;
+         
+         double hahaha1 = gamm* TMath::Sqrt(mass * mass + momt * momt) - y;
+         double hahaha2 = gamm* beta * momt;
+         thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();   
+      }else{
+         Ex = TMath::QuietNaN();
+         thetaCM = TMath::QuietNaN();
+      }
+   }else{
+      Ex = TMath::QuietNaN();
+      thetaCM = TMath::QuietNaN();
+   }
+   return Ex;
+}
+
+double Analyzer::findXMax(TH1F ** hist){
   
   double max = 0;
   int maxDetID = -1;
@@ -402,19 +477,24 @@ void Analyzer::Terminate()
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");
   
    //=========== Plot
-   int nX = 5, nY = 6;
-   int sizeX = 250, sizeY = 150;
+   int nX = 5, nY = 5;
+   int sizeX = 250, sizeY = 250;
    cAna = new TCanvas("cAna", "Analyzer", nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
+   for( int i = 1; i <= nX * nY ; i++) cAna->cd(i)->SetGrid();
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
    
    ///double max = findXMax(hei)
    double max = findXMax(hExi);
    
-   ///hEx->Draw();
+   //hEx->Draw();
    
-   for( int i = 0; i < numDet; i++){
-     cAna->cd(i+1);
+   
+   //for( int i = 5; i < numDet; i++){
+   for( int r = 1; r < 6; r++){
+      for( int c = 0; c < 5; c++){
+      int iDet = 5*r + c ;
+     cAna->cd( 5*c + r );
      //cAna->cd(i+1)->SetGrid();
      //cAna->cd(i+1)->SetLogy();
      //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
@@ -424,8 +504,11 @@ void Analyzer::Terminate()
      
      //hEBISi[i]->Draw();
      //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     hExi[i]->Draw();
-   
+     if( iDet == 9 ) {
+        hEx->Draw();
+     }else{
+        hExi[iDet]->Draw();
+     }
      //fitAuto(hExi[i]);
      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
    
@@ -439,6 +522,7 @@ void Analyzer::Terminate()
      //hxExi[i]->Draw("scat");
      //hxExi[i]->Draw("colz");
    } 
+}
    
    ///for( int i = 0; i < numDet; i++){
    ///  //hei[i]->GetYaxis()->SetRangeUser(0, max);
