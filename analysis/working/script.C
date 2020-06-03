@@ -89,8 +89,9 @@ void script(){
    
    //########################################### Plot
    
-   tree0->Process("Analyzer.C+");
+   ///tree0->Process("Analyzer.C+");
    
+   tree0->Process("Tree4NN.C+");
    
    //======================= recoi-ID vs det-ID
    
