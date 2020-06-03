@@ -30,8 +30,7 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
    0.0000,  0.0000,  0.0400,  0.0000, -0.0100,
    0.0000,  0.1485,  0.1900,  0.0000,  0.0000};
 
-const int nBadDet = 15;
-int listOfBadDet[nBadDet] = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
+vector<int> listOfBadDet = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
 
 
 TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
@@ -268,7 +267,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       
       ///======== cut-det
       bool badDetFlag = false;
-      for( int p = 0 ; p < nBadDet; p ++){
+      for( int p = 0 ; p < (int) listOfBadDet.size(); p ++){
         if( i == listOfBadDet[p] ) badDetFlag = true;
       }
       if( badDetFlag ) continue;
@@ -291,18 +290,19 @@ Bool_t Analyzer::Process(Long64_t entry)
       //   Ex = ExCal( e[i] , z[i] );
       //}
       
+      Ex = ExCal( e[i] , z[i] );
+      
       //##################################################
-      if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
-      if( i == 10 ) Ex = 1.10 * Ex - 0.078;
-      if( i == 15 ) Ex = 1.00 * Ex + 0.035;
-      if( i == 20 ) Ex = 1.07 * Ex - 0.107;
-      if( i == 21 ) Ex = 0.89 * Ex - 0.054;
-      if( i == 25 ) Ex = 1.07 * Ex - 0.062;
+      //if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
+      //if( i == 10 ) Ex = 1.10 * Ex - 0.078;
+      //if( i == 15 ) Ex = 1.00 * Ex + 0.035;
+      //if( i == 20 ) Ex = 1.07 * Ex - 0.107;
+      //if( i == 21 ) Ex = 0.89 * Ex - 0.054;
+      //if( i == 25 ) Ex = 1.07 * Ex - 0.062;
+      //
+      //if( isExOffset) Ex = Ex - ExOffset[i];
       
-      
-      if( isExOffset) Ex = Ex - ExOffset[i];
-      
-      Ex = Ex - 0.15;
+      //Ex = Ex - 0.15;
       
       multiHit ++;
       
@@ -381,9 +381,9 @@ double Analyzer::ExCal(double e, double z){
    
    double mass = 2808.3914;
    double q = 2;
-   double beta = 0.14024096;
+   double beta = 0.13906620;
    
-   double Et = 16802.7129;
+   double Et = 16802.3556;
    double massB = 13979.2181;
    
    double Bfield = 2.0;
