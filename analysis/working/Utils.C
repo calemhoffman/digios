@@ -23,6 +23,7 @@ void listDraws(void) {
   printf("-----------------------------------------------------\n");
   printf("    eVxsCal() - Raw \033[0;31me\033[0m vs. Corrected \033[0;31mxs\033[0m for all %d detectors\n", numDet);
   printf("       ecal() - Calibrated \033[0;31me\033[0m for all %d detectors\n", numDet);
+  printf("     ecalID() - Calibrated \033[0;31me\033[0m for all %d detectors\n", numDet);
   printf("      ecal2() - Calibrated \033[0;31me\033[0m for all %d detectors (same row or same col)\n", numDet);
   printf("xfCalVxnCal() - Calibrated \033[0;31mxf\033[0m vs. \033[0;31mxn\033[0m for all %d detectors\n", numDet);
   printf("-----------------------------------------------------\n");
@@ -174,6 +175,14 @@ void ecal(void) {
     cEC->cd(i+1)->SetGrid();
     heCal[i]->Draw("");
   }
+}
+
+
+void ecalID(void) {
+  TCanvas *cECID = (TCanvas *) gROOT->FindObjectAny("cECID");
+  if(cECID == NULL) cECID = new TCanvas("cECID",Form("E corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
+  cECID->Clear();
+  heCalID->Draw("colz");
 }
 
 void ecal2(void) {
