@@ -12,13 +12,13 @@
 ///#include "../AutoCali/AutoFit.C"
 
 
-int numRow = 6;
-int numCol = 5;
+int numRow = 4;
+int numCol = 6;
 const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-double rangeEx[3] = { 50, -1, 8}; ///resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 10, -1, 4}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; ///resol. [deg], low deg, high deg
 
 bool isExOffset = false;
@@ -29,9 +29,37 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
 -0.1202, -0.0240,  0.1119,  0.0535, -0.0004,
  0.0384, -0.0593,  0.0133,  0.0575,  0.0534,
    1000, -0.0122,  0.1052,  0.2028,  0.0410};
+   
+bool isExScale = true;
+double ExScale[24][2]={
+{	1.00481232	,	0.031865255	},
+{	1.033506736	,	-0.062278968	},
+{	1.027668062	,	-0.017346632	},
+{	1.031903862	,	-0.030702943	},
+{	1.025426573	,	-0.041904606	},
+{	0	,	0	},
+{	0.992281038	,	0.038637905	},
+{	1.032112683	,	0.038505229	},
+{	1.021366726	,	0.008205996	},
+{	1.025546461	,	0.033888946	},
+{	0	,	0	},
+{	0	,	0	},
+{	1.007425814	,	0.019266133	},
+{	1.014058773	,	0.065134244	},
+{	1.015066405	,	0.072397502	},
+{	1.032686891	,	-0.04168907	},
+{	1.024961406	,	-0.062399128	},
+{	1.048161865	,	-0.162006102	},
+{	0	,	0	},
+{	1.036123377	,	0.011784783	},
+{	1.027751637	,	-0.045094669	},
+{	1.052132701	,	-0.067481517	},
+{	0	,	0	},
+{	0	,	0	}
+};
+  
 
-int nBadDet = 9;
-int listOfBadDet[11] = {0, 1, 2, 3, 4, 9, 11, 14, 29};
+vector<int> listOfBadDet = {5, 10, 11, 18, 21, 22, 23};
 
 
 TString rdtCutFile = ""; //"rdt_15N_degraded.root";
@@ -242,7 +270,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       ///hEBISi[i]->Fill( (e_t[i]-ebis_t)/1e2 );
 
       ///======= cut ring
-      if( ring[i] > 50 ) continue;
+      ///if( ring[i] > 50 ) continue;
 
       ///======== cut-EBIS
       ///if( !(100 < (e_t[i]-ebis_t)/1e2 && (e_t[i]-ebis_t)/1e2 < 900 )) continue;
@@ -255,7 +283,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( e[i] < 1.2 ) continue;
      
       ///======== cut-coinTime;
-      if( abs(coinTime-19) > 9 ) continue;
+      ///if( abs(coinTime-19) > 9 ) continue;
      
       ///======== cut-x
       if( !(TMath::Abs(x[i]) < 0.95) ) continue;
@@ -264,11 +292,11 @@ Bool_t Analyzer::Process(Long64_t entry)
       ///if( hitID[i] != 0 ) continue;
       
       ///======== cut-thetaCM
-      if( thetaCM < 10 ) continue;
+      if( thetaCM < 8 ) continue;
       
       ///======== cut-det
       bool badDetFlag = false;
-      for( int p = 0 ; p < nBadDet; p ++){
+      for( int p = 0 ; p < (int)listOfBadDet.size(); p ++){
         if( i == listOfBadDet[p] ) badDetFlag = true;
       }
       if( badDetFlag ) continue;
@@ -285,12 +313,10 @@ Bool_t Analyzer::Process(Long64_t entry)
       ///======== special gate;
       ///if( i == 16 && e[i] < 6 ) continue;
       
-      
-      
-      
       //##################################################
       
       if( isExOffset) Ex = Ex - ExOffset[i];
+      if( isExScale ) Ex = Ex * ExScale[i][0] + ExScale[i][1];
       
       multiHit ++;
       
@@ -400,9 +426,12 @@ void Analyzer::Terminate()
    
    //=========== load AutoFit.C
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");
+   printf("========== AutoFit is loaded.\n");
   
    //=========== Plot
-   int nX = 5, nY = 6;
+   int nX = numCol, nY = numRow;
+   nX = 2;
+   nY = 1;
    int sizeX = 250, sizeY = 150;
    cAna = new TCanvas("cAna", "Analyzer", nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
@@ -411,8 +440,13 @@ void Analyzer::Terminate()
    ///double max = findXMax(hei)
    double max = findXMax(hExi);
    
-   ///hEx->Draw();
+   cAna->cd(1);
+   hEx->Draw();
    
+   cAna->cd(2);
+   hExT->Draw("colz");
+   
+   /**
    for( int i = 0; i < numDet; i++){
      cAna->cd(i+1);
      //cAna->cd(i+1)->SetGrid();
@@ -424,7 +458,7 @@ void Analyzer::Terminate()
      
      //hEBISi[i]->Draw();
      //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     hExi[i]->Draw();
+     //hExi[i]->Draw();
    
      //fitAuto(hExi[i]);
      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
@@ -435,10 +469,11 @@ void Analyzer::Terminate()
      //2-D 
      //hexi[i]->Draw(); 
      //hxExi[i]->SetMarkerStyle(7);
-     //hxExi[i]->SetMarkerColor(4);
-     //hxExi[i]->Draw("scat");
+     hxExi[i]->SetMarkerColorAlpha(1,0.2);
+     hxExi[i]->Draw("");
      //hxExi[i]->Draw("colz");
-   } 
+   }
+   */
    
    ///for( int i = 0; i < numDet; i++){
    ///  //hei[i]->GetYaxis()->SetRangeUser(0, max);
@@ -481,7 +516,7 @@ void Analyzer::Terminate()
    ///  //hExPzr[i]->Draw("colz");
    ///}
    
-   ///for( int i = 0; i < 6; i++){
+   ///for( int i = 0; i < numCol; i++){
    ///  cAna->cd(i+1);
    ///  cAna->cd(i+1)->SetGrid();
    ///  hExc[i]->Draw();

@@ -12,8 +12,8 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     //chain->Add("../root_data/gen_run01[0-8].root"); //82Kr
     
     ///start a stable run
-    chain->Add("../root_data/gen_run019.root"); //82Kr
-    chain->Add("../root_data/gen_run02[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run019.root"); //82Kr
+    //chain->Add("../root_data/gen_run02[0-9].root"); //82Kr
     //chain->Add("../root_data/gen_run03[0-9].root"); //82Kr
     //chain->Add("../root_data/gen_run04[0-9].root"); //82Kr
     //chain->Add("../root_data/gen_run05[0-9].root"); //82Kr
@@ -32,11 +32,11 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     
     //chain->Add("../root_data/gen_run16[4-9].root"); //82Se (after modified tune and ELUM)
     //chain->Add("../root_data/gen_run17[0-9].root"); //82Se
-    //chain->Add("../root_data/gen_run18[0-9].root"); //82Se
-    //chain->Add("../root_data/gen_run19[0-9].root"); //82Se
-    //chain->Add("../root_data/gen_run20[0-9].root"); //82Se
-    //chain->Add("../root_data/gen_run21[0-9].root"); //82Se
-    //chain->Add("../root_data/gen_run220.root"); //82Se
+    chain->Add("../root_data/gen_run18[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run19[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run20[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run21[0-9].root"); //82Se
+    chain->Add("../root_data/gen_run220.root"); //82Se
     
     
     //chain->Add("../root_data/gen_run12[6-9].root"); //carbon

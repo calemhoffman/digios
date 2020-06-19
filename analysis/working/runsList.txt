@@ -1,7 +1,7 @@
 ///---data_path
 ///-----------alpha_source_data_with_-_sign
 ///-----------data_with_+_sign
-+../root_data/gen_run006.root
+-../root_data/gen_run006.root
 
 
 ///TAC setting 1, various change made during runs.
@@ -31,9 +31,9 @@
 ///83Se smaller BG
 //+../root_data/gen_run16[4-9].root
 //+../root_data/gen_run17[0-9].root
-//+../root_data/gen_run18[0-9].root
-//+../root_data/gen_run19[0-9].root
-//+../root_data/gen_run200.root
++../root_data/gen_run18[0-9].root
++../root_data/gen_run19[0-9].root
++../root_data/gen_run200.root
 
 
 ///carbon BG

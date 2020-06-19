@@ -30,7 +30,7 @@ int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
 int rawEnergyRange[2] = {  1200,   2500}; // share with e, ring, xf, xn
-int    energyRange[2] = {     0,     10}; // in the E-Z plot
+int    energyRange[2] = {     2,     10}; // in the E-Z plot
 int     rdtDERange[2] = {     0,   5000};
 int      rdtERange[2] = {     0,  10000};
 int      elumRange[2] = {   200,   6000};
@@ -585,11 +585,11 @@ void Monitors::Begin(TTree *tree)
                              
    }
    
-   heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
+   heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 1000, energyRange[0], energyRange[1]);
    
    //====================== E-Z plot
    heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
-   heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
+   heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
    
    for( int i = 0; i < numRow; i++){
       hecalVzRow[i] = new TH2F(Form("heCalVzRow%d", i),
@@ -818,13 +818,13 @@ Bool_t Monitors::Process(Long64_t entry)
       //if( ring[detID] > 300 ) continue; 
       if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
       //if( detID > 19 ) continue;
-      if( detID == 5 ) continue;
-      if( detID ==10 ) continue;
-      if( detID ==16 ) continue;
-      if( detID ==11 ) continue;
-      if( detID ==17 ) continue;
-      if( detID ==18 ) continue;
-      if( detID >=20 ) continue;
+      //if( detID == 5 ) continue;
+      //if( detID ==10 ) continue;
+      //if( detID ==16 ) continue;
+      //if( detID ==11 ) continue;
+      //if( detID ==17 ) continue;
+      //if( detID ==18 ) continue;
+      //if( detID >=20 ) continue;
 
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
