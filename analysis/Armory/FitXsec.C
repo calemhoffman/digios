@@ -117,8 +117,12 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
      
     TF1 * fit = new TF1("fit", func0, 0, 50, 1);
     fit->SetParameter(0, 1);
-    fit->SetParLimits(0, 0, 10);
-    fit->SetLineColor(i+1);
+    fit->SetParLimits(0, 0, 10000);
+    if( ID2 == -1 ) {
+      fit->SetLineColor(i+1);
+    }else{
+      fit->SetLineColor(2);
+    }
     gX->Fit("fit", "Rnq", "", 0, xRange[1] * 1.1);
     
     const double* paraE = fit->GetParErrors();

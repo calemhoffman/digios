@@ -28,7 +28,7 @@ void script_Ex(){
 	double thetaCMRange[3]  = {40, 0, 40};
 
    
-   TFile * file0 = new TFile("A_gen_run60_99.root");
+   TFile * file0 = new TFile("A_gen_run180-200.root");
    TFile * file1 = new TFile("transfer.root");
    
    TFile * fileCut = new TFile("rdtCuts.root");
@@ -55,14 +55,11 @@ void script_Ex(){
    }
    
    //============= Gate
-   //TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && -20 < coin_t && coin_t < 40 && rdtMultiHit == 2 && arrayRDT == 0 && multiHit == 1 ";
-   
-   TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && -20 < coin_t && coin_t < 40";
-   
-   //TString gate_RDT = "cut3 && -20 < coin_t && coin_t < 40 && rdtMultiHit == 2 && arrayRDT == 0 && multiHit == 1 ";
+   ///TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && -20 < coin_t && coin_t < 40 && rdtMultiHit == 2 && arrayRDT == 0 && multiHit == 1 ";
+   ///TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && -20 < coin_t && coin_t < 40";
+   TString gate_RDT = "e>2";
    
    TString detGate = "&& detID != 11";
-   
    
    //============== Plot
    TCanvas * cScript = new TCanvas("cScript", "cScript", 0, 0, 1600, 900);

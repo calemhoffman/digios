@@ -23,26 +23,16 @@ void Aux(int cutID, TTree *tree0, TCutG ** cut_in, TCanvas * cScript, int startP
 void script1(){
 
    //========================== input file/cut/simulation
-   //TString fileName = "A_trace_run008-013.root"; // 15N degraded
-   //TString fileName = "A_trace_run023-034.root"; // 500ug, 16N, not well tuned.
-   //TString fileName = "A_trace_run056-057_059-085_087-099.root"; //226ug, 16N
-   //TString fileName = "A_trace_run101-144_147-170.root"; //366ug, 16N
-   //TString fileName = "A_trace_run056-057_059-085_088-099_101-112.root"; // all 16N
-   //TFile * file0 = new TFile(fileName);
-   //TTree * tree0 = (TTree*) file0->FindObjectAny("tree");
-   
    TChain * tree0 = new TChain("tree");
-   //tree0->Add("A_trace_run056-057_059-085_087-099.root");
-   tree0->Add("A_trace_run101-144_147-194.root");
-   //TString fileName = "run056 - run194";
-   TString fileName = "run101 - run194";
+   tree0->Add("A_gen_run180-220.root");
+   TString fileName = "run180 - run220";
    
    TFile * file1 = new TFile("transfer.root");
    TTree * tree1 = (TTree*) file1->FindObjectAny("tree");
    TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
    TObjArray * gList = (TObjArray*) file1->FindObjectAny("gList");
    
-   TString rdtCutFile = "rdt_16N.root";
+   TString rdtCutFile = "";
    TFile * fileCut = new TFile(rdtCutFile);
    TObjArray * cutList = NULL;
    TCutG ** cut_in = NULL;
@@ -61,22 +51,22 @@ void script1(){
    
    //========================== Gate
    ///TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && detID != 12 && -20 < coin_t && coin_t < 40 && rdtMultiHit == 2 && arrayRDT == 0 && multiHit == 1 ";   
-   
    ///TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && -20 < coin_t && coin_t < 40 ";
-
-   TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && multiHit == 1 && rdtdEMultiHit == 1";
+   ///TString gate_RDT = "(cut0 || cut1 || cut2 || cut3) && multiHit == 1 && rdtdEMultiHit == 1";   
+   TString gate_RDT = "";
    
-   TString gate_time = "abs(coinTime-19)<9 && Ex > -2";  ///change time gate
- //   TString gate_time = "abs(coinTime)<200";  
+   ///TString gate_time = "abs(coinTime-19)<9 && Ex > -2";  ///change time gate
+   TString gate_time = "";  ///change time gate
+   
    //========================== Canvas
-   int div[2] = {6,4}; // x,y
+   //int div[2] = {6,4}; // x,y
    
    TCanvas * cScript = new TCanvas("cScript", "cScript : " + fileName + "|" + rdtCutFile, 0, 0, 400 * div[0], 400 * div[1]);
-   cScript->Divide(div[0], div[1]);
-   for( int i = 1; i <= div[0] * div[1] ; i++){
-      cScript->cd(i)->SetGrid();
-      ///cScript->cd(i)->SetLogz();
-   }
+   //cScript->Divide(div[0], div[1]);
+   //for( int i = 1; i <= div[0] * div[1] ; i++){
+   //   cScript->cd(i)->SetGrid();
+   //   ///cScript->cd(i)->SetLogz();
+   //}
    
    gStyle->SetOptStat("neiou");
    if(cScript->GetShowEditor() )cScript->ToggleEditor();
@@ -163,12 +153,12 @@ void script1(){
    
    ///Canvas size is 6 x 4
    
-   gStyle->SetPalette(kBird);
-   
-   Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
-   Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
-   Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
-   Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
+   ///gStyle->SetPalette(kBird);
+   ///
+   ///Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
+   ///Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
+   ///Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
+   ///Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
 
    //==========================================  E-Z and Ex
    
@@ -193,7 +183,7 @@ void script1(){
    
    /// Canvas size 5 x 5
    
-   ///For H072_16N
+   /*///For H072_16N
    
    
    div[0] = 5; // x
@@ -330,11 +320,10 @@ void script1(){
    text.SetTextFont(82);
    text.SetTextSize(0.04);
    text.SetTextColor(2);
-  /*
+  
    text.DrawLatex(0.4, 0.60, Form(" mean : %5.3f(%5.3f) MeV", fit->GetParameter(1), fit->GetParError(1)));
    text.DrawLatex(0.4, 0.55, Form("sigma : %5.3f(%5.3f) MeV", fit->GetParameter(2), fit->GetParError(2)));
    text.DrawLatex(0.4, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", fit->GetParameter(2) *2.355, fit->GetParError(2)*2.355));
-*/
    text.DrawLatex(0.6, 0.65, " g.s ");
    text.DrawLatex(0.6, 0.60, Form(" mean : %5.3f(%5.3f) MeV", par[10], par_err[1]));
    text.DrawLatex(0.6, 0.55, Form("sigma : %5.3f(%5.3f) MeV", par[11], par_err[2]));
