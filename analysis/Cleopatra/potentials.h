@@ -680,7 +680,7 @@ bool PangPotential(int A, int Z, double E, int Zproj){
   rsoi0 = 0.;
   asoi  = 0.;
 
-  rc0 = A3 / rc;
+  rc0 = rc/ A3;
   
   return true;
 }
