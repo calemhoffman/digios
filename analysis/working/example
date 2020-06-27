@@ -26,13 +26,21 @@
 # t = Trost et al., 1987             |    10 < E < 220 | 10 < A < 208             | http://dx.doi.org/10.1016/0375-9474(87)90551-3
 # h = Hyakutake et al., 1980         |    90 < E < 120 | About 58 < A < 92        | http://dx.doi.org/10.1016/0375-9474(80)90013-5
 # b = Becchetti and Greenlees, 1971  |         E < 40  | 40 < A       | Iso. Dep.
+#========================= alpha
+# s = Su and Han, 2015               |         E < 398 | 20 < A < 209             | http://dx.doi/org/10.1142/S0218301315500925
+# a = Avrigeanu et al., 2009         |         E ???   |      A  ???              | http://dx.doi/org/10.1016/j.adt.2009.02.001
+# f = Bassani and Picard, 1969(FIXED)|    24 < E < 31  |      A = 90              | https://doi.org/10.1016/0375-9474(69)90601-0
 #=======================================================================
 #reaction          gs-spin  orbital  spin-pi(Ex)  Ex      ELab        Potentials
 #206Hg(d,d)206Hg   0        none     9/2+         0.000   7.39MeV/u   AA                #elastic
 #206Hg(d,d)206Hg   0        none     9/2+         1.000   7.39MeV/u   AA        0.12    #inelastics_0.12=beta
 #206Hg(d,p)207Hg   0        1g9/2    9/2+         0.000   7.39MeV/u   AK
 #20F(d,t)19F       2        0d5/2    5/2+         0.197   10MeV/u     Vl
-#16N9d,3He)15C     2        0p1/2    5/2+         0.74    12MeV/u     Ax
+#16N(d,3He)15C     2        0p1/2    5/2+         0.74    12MeV/u     Ax
 #10Be(t,p)12Be     0        1L=0     0+           0.000   5MeV/u      lA                #two-nucleon_transfer   
-32Si(t,p)34Si     0        0L=0       0+           0.000   8MeV/u      lA                #two-nucleon_transfer
+#32Si(t,p)34Si     0        0L=0       0+           0.000   8MeV/u      lA                #two-nucleon_transfer
+#133Sb(t,3He)133Sn  7/2      0g7/2    0+          0.000    8.5MeV/u     Ax .... cannot cal
 
+
+133Sb(t,a)132Sn    7/2      0g7/2    0+          0.000    8.5MeV/u     ps
+133Sb(t,a)132Sn    7/2      0g7/2    0+          0.000    8.5MeV/u     pf
