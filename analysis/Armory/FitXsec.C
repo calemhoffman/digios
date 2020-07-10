@@ -13,8 +13,14 @@ Double_t func0(Double_t *x, Double_t *para) {
   return para[0] * (g0->Eval(x[0]));
 }
 
+TGraph * g1;
+Double_t func1(Double_t *x, Double_t * para){
+  
+  return para[0] * (g0->Eval(x[0])) + para[1] * (g1->Eval(x[0])) ;
+}
 
-void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
+
+void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1, int ID3 = -1){
   
   
   printf("========================================================\n");
@@ -91,20 +97,19 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
   
   TObjArray * gList = (TObjArray*) fPtolemy->FindObjectAny("qList");
   int n = gList->GetLast() + 1 ; 
-
-  if( ID2 >= 0 &&  0 <= ID2 && ID2 < n ) {
-    n = 1;
-  }else{
-    ID2= 0;
-  }
-
+  
   TGraph * gr[n];
   
-  for ( int i = 0 ; i < n ; i++){
-    
-    gr[i] = (TGraph *) gList->At(i + ID2);
+  int startID = 0;
+  int endID = n;
+  if( 0 <= ID2 && ID2 < n) {
+    startID = ID2;
+    endID = ID2+1;
+  }
+  
+  for ( int i = 0 ; i < n ; i++){    
+    gr[i] = (TGraph *) gList->At(i);
     gr[i]->SetLineColor(i+1);
-    
   }
   
   //============ Fit 
@@ -112,7 +117,7 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
   double dSF [n];
   double chi [n];
   
-  for( int i = 0; i < n ; i ++){
+  for( int i = startID; i < endID ; i ++){
     g0 = gr[i];
      
     TF1 * fit = new TF1("fit", func0, 0, 50, 1);
@@ -130,13 +135,13 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
     int ndf = fit->GetNDF();
     double chisquared = fit->GetChisquare(); // checked. the chisquared is calculated correctly
     chi[i] = chisquared/ndf;
-    printf(" %s | SF = %5.3f(%5.3f), chi2 = %f \n", gr[i]->GetName(), paraA[0], paraE[0], chisquared/ndf);  
+    printf(" %s | SF = %5.3f(%5.3f), chi2/ndf = %f \n", gr[i]->GetName(), paraA[0], paraE[0], chisquared/ndf);  
     
   }
   printf("!!!!! if the uncertainties of Xsec are ZERO. the chisquare should be as small as possible!!!!!\n");
   
   //============= Scale TGraph with SF
-  for( int i = 0; i < n; i++){
+  for( int i = startID; i < endID; i++){
     for(int j = 0; j < gr[i]->GetN(); j++){
       (gr[i]->GetY())[j] *= SF[i];
     }
@@ -146,7 +151,7 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
     
   }
   
-  legend->Draw();
+  legend->Draw();  
   
   //Draw Latex
   TLatex text;
@@ -154,7 +159,7 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
   text.SetTextFont(82);
   text.SetTextSize(0.03);
   
-  for( int i = 0 ; i < n; i++){
+  for( int i = startID ; i < endID; i++){
     TString nlj = gr[i]->GetName();
     int length = nlj.Length();
     nlj.Remove(0, length - 8);
@@ -162,6 +167,45 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1){
     nlj.Insert(2, "_{");
     nlj.Append("}");
     text.DrawLatex(0.15, 0.8 - 0.05 *i ,Form("%s| SF: %5.3f(%3.0f), #chi^{2}: %5.3e", nlj.Data(), SF[i], dSF[i]*1000, chi[i]));
+  }
+  
+  //================= Fit with 2 
+  printf(" ID2 = %d , n = %d \n", ID2, n);
+  
+  if( ID3 >= 0  || n == 2){
+    printf("--------------------------\n");
+    if( ID2 < 0 ) {
+      ID2 =  0;
+      ID3 = 1;
+    }
+    g0 = gr[ID2];
+    g1 = gr[ID3];
+    
+    TF1 * fit2 = new TF1("fit2", func1, 0, 50, 2);
+    fit2->SetParameter(0, 1);
+    fit2->SetParameter(1, 1);
+    fit2->SetParLimits(0, 0, 10);
+    fit2->SetParLimits(1, 0, 10);
+    fit2->SetLineColor(1);
+    
+    //printf(" fit2(16 deg) = %f \n", fit2->Eval(16));
+    
+    gX->Fit("fit2", "Rnq", "", 0, xRange[1] * 1.1);
+    
+    const double* paraE = fit2->GetParErrors();
+    const double* paraA = fit2->GetParameters();
+    
+    int ndf = fit2->GetNDF();
+    double chisquared = fit2->GetChisquare(); // checked. the chisquared is calculated correctly
+    printf("A f1 + B f2 | chi2/ndf = %f\n", chisquared/ndf);  
+    printf(" A = %5.3f(%5.3f) \n", paraA[0], paraE[0]);  
+    printf(" B = %5.3f(%5.3f) \n", paraA[1], paraE[1]);  
+    
+    text.DrawLatex(0.15, 0.45 ,Form("A f_{1} + B f_{2} | #chi^2/ndf : %f", chisquared/ndf));
+    text.DrawLatex(0.15, 0.40 ,Form("A : %5.3f(%3.0f)", paraA[0], paraE[0]*1000));
+    text.DrawLatex(0.15, 0.35 ,Form("B : %5.3f(%3.0f)", paraA[1], paraE[1]*1000));
+
+    
   }
   
 }
