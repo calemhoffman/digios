@@ -88,7 +88,7 @@ if [ ${Arch} == "Linux" ]; then
 
 elif [ ${Arch} == "Darwin" ]; then
 
-    if [ ${PCName:0:5} == "phywl" ]; then #MAC
+    if [ ${PCName} == "helioss-iMac" ]; then #MAC
         DATAPATH=~/experiments
         expDIR=~/digios
 
@@ -104,7 +104,7 @@ elif [ ${Arch} == "Darwin" ]; then
         echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
         echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
         echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
-        exit
+        
     fi
     
 else
