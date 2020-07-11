@@ -213,9 +213,9 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300, b
    
    ///thetaCMRange
    Int_t thetaCMRange[2] = {0, 60};
-   double momentum = sqrt(( Et*Et - pow(mass + massB - exList[0],2)) * ( Et*Et - pow(mass - massB + exList[0],2)))/2/Et;
-   double thetaMax = acos( (beta * QQ- alpha / gamm * zRange[2])/momentum) * TMath::RadToDeg();
-   thetaCMRange[1] = (int) TMath::Ceil(thetaMax/10.)*10;
+   //double momentum = sqrt(( Et*Et - pow(mass + massB - exList[0],2)) * ( Et*Et - pow(mass - massB + exList[0],2)))/2/Et;
+   //double thetaMax = acos( (beta * QQ- alpha / gamm * zRange[2])/momentum) * TMath::RadToDeg();
+   //thetaCMRange[1] = (int) TMath::Ceil(thetaMax/10.)*10;
    //printf(" momentum    : %f \n", momentum);
    //printf(" thetaCM Max : %f \n", thetaMax);
    //printf(" thetaCM Range : %d \n", thetaCMRange[1]);
