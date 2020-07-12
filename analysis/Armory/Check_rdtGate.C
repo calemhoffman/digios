@@ -37,6 +37,10 @@ void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tre
       }   
    }
    
+   ///TString ezCutFile = "EZCut.root";
+   ///TFile * fileEZCut = new TFile(ezCutFile);
+   ///TCutG * ezCut = (TCutG *) fileEZCut->FindObjectAny("cutez"); 
+   
 /**///======================================================== read tree         
    TChain * chain = new TChain(treeName);
    chain->Add(dataList);

@@ -142,7 +142,8 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
   const Double_t* paraE = fit->GetParErrors();
   const Double_t* paraA = fit->GetParameters();
   
-  
+  double chisquare = fit->GetChisquare();
+  int ndf = fit->GetNDF();
   double bw = hist->GetBinWidth(1);
 
   printf("%s ====== count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
@@ -158,12 +159,13 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
   text.SetTextColor(2);
   
     
-   text.DrawLatex(0.4, 0.65, Form("count : %5.0f(%5.0f)", paraA[0]/bw, paraE[0]/bw));
-   text.DrawLatex(0.4, 0.60, Form(" mean : %5.3f(%5.3f) MeV", paraA[1], paraE[1]));
-   text.DrawLatex(0.4, 0.55, Form("sigma : %5.3f(%5.3f) MeV", paraA[2], paraE[2]));
-   text.DrawLatex(0.4, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", paraA[2] *2.355, paraE[2]*2.355));
-
-  
+   text.DrawLatex(0.15, 0.65, Form("count : %5.0f(%5.0f)", paraA[0]/bw, paraE[0]/bw));
+   text.DrawLatex(0.15, 0.60, Form(" mean : %5.3f(%5.3f) MeV", paraA[1], paraE[1]));
+   text.DrawLatex(0.15, 0.55, Form("sigma : %5.3f(%5.3f) MeV", paraA[2], paraE[2]));
+   text.DrawLatex(0.15, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", paraA[2] *2.355, paraE[2]*2.355));
+   
+   
+   text.DrawLatex(0.15, 0.40, Form("#chi^2/ndf : %5.3f", chisquare/ndf));
 }
 
 //########################################
