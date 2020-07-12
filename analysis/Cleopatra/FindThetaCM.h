@@ -54,7 +54,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    
    /**///========================================================= load files
    vector<double> pos;
-   double a = 10.5;
+   double a = 11.5;
    double length = 50.5;
    double firstPos = 0;
    int iDet = 6;

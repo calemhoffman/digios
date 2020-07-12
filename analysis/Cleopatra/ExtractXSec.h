@@ -35,7 +35,7 @@ double distfunct(double *x, double *par){
   
   TGraph * gTemp = (TGraph *) gList->At(par[0]);
   
-  return gTemp->Eval(x[0]);
+  return (gTemp->Eval(x[0]))* sin(x[0] * TMath::DegToRad());
 }
 
 bool isFloat( string str ) {
