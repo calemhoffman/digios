@@ -304,10 +304,6 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          
          tcoin_t = teTime - trdtTime;
          
-         coinTimeUC = 10.0*(coin_t + tcoin_t); // in nano-sec
-         
-         double f7corr = f7[detID]->Eval(x[detID]) + cTCorr[detID][8];
-         
          //Ad-hoc solution 
          double rdtCorr = 0;
          switch(rdtIDtemp){
@@ -317,10 +313,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
             case 3: rdtCorr = 15.3 ; break;
          }
          
-         coinTime = (coinTimeUC - f7corr) - rdtCorr;
+         coinTimeUC = 10.0*(coin_t + tcoin_t) - rdtCorr; // in nano-sec
+         
+         double f7corr = f7[detID]->Eval(x[detID]) + cTCorr[detID][8];
+         
+         coinTime = (coinTimeUC - f7corr);
       }
-      
-   
       
    }
    
