@@ -46,7 +46,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
       return;
    }
    
-   TFile * fileCut = new TFile("rdtCuts_trace_C.root");
+   TFile * fileCut = new TFile("rdtCuts.root");
    TObjArray * cutList = NULL;
    TCutG ** cut_in = NULL;
    if( fileCut->IsOpen() ){
@@ -113,7 +113,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName, int detID){
    }
    
    ///***************
-   gate = gate +=  " && cut1";
+   if( fileCut->IsOpen() ) gate = gate +=  " && cut1";
    
    name.Form("time vs X (detID-%d); x; coinTime [ch]", detID);
    hTX->SetTitle(name);
