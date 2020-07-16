@@ -124,6 +124,14 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    for(int idet = 0 ; idet < numDet; idet++){
       
+      //if( idet > 17 ) continue;
+      //if( idet == 4 ) continue;
+      //if( idet ==10 ) continue;
+      //if( idet ==17 ) continue;
+      //if( idet == 7 ) continue;
+      //if( idet ==  5 ) continue;
+      if( e[idet] < 500 ) continue;
+      
       //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
       if( TMath::IsNaN(xf[idet]) && TMath::IsNaN(xn[idet])  ) continue;
@@ -131,12 +139,19 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       if( e[idet] == 0 ) continue;
       if( xf[idet] == 0 && xn[idet] == 0 ) continue;
    
-            
       double xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
       double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
       eTemp = e[idet];
       
+      // range (-1,1)      
+      if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
+      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2* xfC/ eTemp - 1;
+      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
+      
+      xTemp = xTemp/xScale[idet];
+      
+      /*
       if(xfC > eTemp/2.){
          xTemp = 2*xfC/eTemp - 1. ;
          hitID = 1;
@@ -145,7 +160,9 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
          hitID = 2;
       }else{
          xTemp = TMath::QuietNaN();
-      }
+      }*/
+      
+      if( abs(xTemp) > 0.9 ) continue;
          
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
       //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);

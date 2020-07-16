@@ -1,6 +1,6 @@
-#define Monitors_cxx
+#define Monitors2_cxx
 
-#include "Monitors.h"
+#include "Monitors2.h"
 #include <TH2.h>
 #include <TH1.h>
 #include <TStyle.h>
@@ -29,7 +29,7 @@ ULong64_t maxNumberEvent = 1000000000;
 int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
-int rawEnergyRange[2] = {  1200,   2500}; // share with e, ring, xf, xn
+int rawEnergyRange[2] = {     0,   4000}; // share with e, ring, xf, xn
 int    energyRange[2] = {     0,     10}; // in the E-Z plot
 int     rdtDERange[2] = {     0,   5000};
 int      rdtERange[2] = {     0,  10000};
@@ -37,17 +37,15 @@ int      elumRange[2] = {   200,   6000};
 int       TACRange[3] = { 300,    700,  1500};  // #bin, min, max
 int      TAC2Range[3] = { 20,    480,    500};
 
-double     exRange[3] = {  20, -1, 3.5}; // bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -400, 400};
-
-int    elumRateTimeRange[2] = {13000, 16000};
+int    elumRateTimeRange[2] = {10100, 11000};
 
 //---Gate
 int timeGate[2] = {-5, 6}; // min, max, 1 ch = 10 ns
-int tacGate[2]  = {-8000, -2000};
+int tacGate[2]  = { 500,  525};
 int dEgate[2]   = {500,  1500};
 int Eresgate[2] = {1000,4000};
-double thetaCMGate = 10; // deg
 
 TString rdtCutFile = "";//"rdtCuts.root";
 TString ezCutFile = "";// "ezCut.root";
@@ -143,10 +141,12 @@ TH2F* hecalVzRow[numRow];
 //====== Ex data
 TH1F* hEx;
 TH1F* hExi[numDet];
-TH2F* hExVxCal[numDet];
 TH1F* hExc[numDet/numRow];
 
 TH2F* hExThetaCM;
+TH2F* hExVxCal[numDet];
+
+TH2F* heSVeRaw[numDet]; // raw energy to e(Ex,z)
 
 //====== TAC
 TH1F* htac;   // by TAC
@@ -216,6 +216,8 @@ Float_t xnCorr[numDet];
 Float_t xfxneCorr[numDet][2];
 Float_t xScale[numDet];
 Float_t eCorr[numDet][2];
+Float_t eCorrEx[numDet][2];
+Float_t eCorrFlat[numDet][4];
 
 //==== parameters for Ex and thetaCM calcualtion
 
@@ -232,7 +234,7 @@ bool isReaction;
 /***************************
  ***************************/
 
-void Monitors::Begin(TTree *tree)
+void Monitors2::Begin(TTree *tree)
 {
    TString option = GetOption();
    
@@ -241,12 +243,12 @@ void Monitors::Begin(TTree *tree)
    NumEntries = tree->GetEntries();
    
    //canvasTitle.Form("#Events:%lld, Runs: ", NumEntries);
-   canvasTitle.Form("Monitors | Runs: ");
+   canvasTitle.Form("Monitors2 | Runs: ");
    lastRunID = -1;
    contFlag = false;
    
    printf("#################################################\n");
-   printf("##########         Monitors.C           #########\n");
+   printf("##########         Monitors2.C          #########\n");
    printf("#################################################\n");
    
       
@@ -290,9 +292,9 @@ void Monitors::Begin(TTree *tree)
       
       for(int i = 0; i < numCol ; i++){
          if( firstPos > 0 ){
-            printf("\t%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
          }else{
-            printf("\t%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
+            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
          }
       }
       
@@ -303,6 +305,8 @@ void Monitors::Begin(TTree *tree)
          zRange[0] = pos[0] -length - 30;
          zRange[1] = pos[numCol-1] + 30;
       }
+      
+      printf("=======================\n");
       
    }else{
       printf("... fail\n");
@@ -320,9 +324,9 @@ void Monitors::Begin(TTree *tree)
          i = i + 1;
       }
       
-      printf(".......... done.\n");
+      printf("..... done.\n");
    }else{
-      printf(".......... fail.\n");
+      printf("..... fail.\n");
       
       for(int i = 0; i < numDet; i++){
          xnCorr[i] = 1;
@@ -342,9 +346,9 @@ void Monitors::Begin(TTree *tree)
          xfxneCorr[i][1] = b;
          i = i + 1;
       }
-      printf("........ done.\n");
+      printf("... done.\n");
    }else{
-      printf("........ fail.\n");
+      printf("... fail.\n");
       for(int i = 0; i < numDet; i++){
          xfxneCorr[i][0] = 0;
          xfxneCorr[i][1] = 1;
@@ -363,18 +367,17 @@ void Monitors::Begin(TTree *tree)
          xScale[i] = a;  
          i = i + 1;
       }
-      printf("........ done.\n");
+      printf("......... done.\n");
       
    }else{
-      printf("........ fail.\n");
+      printf("......... fail.\n");
       for( int i = 0; i < numDet ; i++){
          xScale[i] = 1.;
       }
    }
    file.close();
-
-   //========================================= e correction
    
+   //========================================= e correction
    printf(" loading e correction.");
    file.open("correction_e.dat");
    if( file.is_open() ){
@@ -387,13 +390,66 @@ void Monitors::Begin(TTree *tree)
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
-      printf(".............. done.\n");
+      printf("......... done.\n");
       
    }else{
-      printf(".............. fail.\n");
+      printf("......... fail.\n");
       for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
+      }
+   }
+   file.close();
+   
+   //========================================= e-flat correction
+   printf(" loading e flat correction.");
+   file.open("correction_e_flat.dat");
+   if( file.is_open() ){
+      double a, b, c, d;
+      int i = 0;
+      while( file >> a >> b >> c >> d){
+         if( i >= numDet) break;
+         eCorrFlat[i][0] = a;  // 1st power
+         eCorrFlat[i][1] = b;  // 2nd power
+         eCorrFlat[i][2] = c;  // 3rd power
+         eCorrFlat[i][3] = d;  // 4th power
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f, e2: %9.4f, e3: %9.4f", i, eCorrFlat[i][0], eCorrFlat[i][1], eCorrFlat[i][2], eCorrFlat[i][3]);
+         i = i + 1;
+      }
+      printf("......... done.\n");
+      
+   }else{
+      printf("......... fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         eCorrFlat[i][0] = 0.;
+         eCorrFlat[i][1] = 0.;
+         eCorrFlat[i][2] = 0.;
+         eCorrFlat[i][3] = 0.;
+      }
+   }
+   file.close();
+
+   //========================================= e-flat to Ex correction
+   
+   printf(" loading e-flat to Ex correction.");
+   file.open("correction_eflat_Ex.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= numDet) break;
+         eCorrEx[i][0] = a;  // 1/a1
+         eCorrEx[i][1] = b;  //  a0 , e' = e * a1 + a0
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorrEx[i][0], eCorrEx[i][1]);
+         i = i + 1;
+      }
+      printf("......... done.\n");
+      
+   }else{
+      printf("......... fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         eCorrEx[i][0] = 1.;
+         eCorrEx[i][1] = 0.;
       }
    }
    file.close();
@@ -433,7 +489,7 @@ void Monitors::Begin(TTree *tree)
          if( i == 4 ) massB = atof(x.c_str()); 
          i = i + 1;
       }
-      printf("........ done.\n");
+      printf("... done.\n");
 
       isReaction = true;
       alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
@@ -451,7 +507,7 @@ void Monitors::Begin(TTree *tree)
       printf("=================================\n");
 
    }else{
-      printf("........ fail.\n");
+      printf("... fail.\n");
       isReaction = false;
    }
    file.close();
@@ -578,11 +634,13 @@ void Monitors::Begin(TTree *tree)
                            Form("Cal PSD E vs. X (ch=%d);X (cm);E (MeV)",i),
                            500,-02.5,52.5,500,energyRange[0], energyRange[1]);
                            
-                                 
       hExVxCal[i] = new TH2F(Form("hExVxCal%d",i), 
                              Form("Ex vs X (ch=%d); X (cm); Ex (MeV)", i),
                              500,-0.1,1.1,(int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
                              
+      heSVeRaw[i] = new TH2F(Form("heSVeRaw%d", i),
+                             Form("e(Ex,z) vs e-Raw (ch=%d)", i),
+                             500,rawEnergyRange[0], rawEnergyRange[1],500,energyRange[0], energyRange[1]);
    }
    
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
@@ -648,11 +706,11 @@ void Monitors::Begin(TTree *tree)
    //===================== energy spectrum
    hEx  = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    for(int i = 0 ; i < numDet; i++){
-      hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+      hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%d) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    }
    
    for(int i = 0 ; i < numCol; i++){
-       hExc[i] = new TH1F(Form("hExc%d", i), Form("Ex (col=%d) w/goodFlag; Ex [MeV]; Count / %4.0f keV", i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+      hExc[i] = new TH1F(Form("hExc%d", i), Form("Ex (col=%d) w/goodFlag; Ex [MeV]; Count / %4.0f keV", i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    }
 
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, 0, 50,  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
@@ -691,7 +749,7 @@ void Monitors::Begin(TTree *tree)
    isTACGate=false;
 }
 
-void Monitors::SlaveBegin(TTree * /*tree*/)
+void Monitors2::SlaveBegin(TTree * /*tree*/)
 {
    TString option = GetOption();
 }
@@ -707,7 +765,7 @@ double solid_angle( double th ) {
 /*###########################################################
  * Process
 ###########################################################*/
-Bool_t Monitors::Process(Long64_t entry)
+Bool_t Monitors2::Process(Long64_t entry)
 {
    if( ProcessedEntries > maxNumberEvent ) return kTRUE;
    ProcessedEntries++;
@@ -784,7 +842,7 @@ Bool_t Monitors::Process(Long64_t entry)
     
     if( tac_t[1]> 0 ) hBIC->Fill(tac_t[1]/1e8/60.);
     
-    if( 830 < elum[0]  && elum[0] < 1000 ) helum4D->Fill(elum_t[0]/1e8/60.); 
+    if( 900 < elum[0]  && elum[0] < 1250 ) helum4D->Fill(elum_t[0]/1e8/60.); 
     if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
 
     /*********** Array ************************************************/ 
@@ -817,14 +875,11 @@ Bool_t Monitors::Process(Long64_t entry)
       //if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
       //if( ring[detID] > 300 ) continue; 
       if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
-      //if( detID > 19 ) continue;
-      if( detID == 5 ) continue;
+      //if( detID > 17 ) continue;
       if( detID ==10 ) continue;
-      if( detID ==16 ) continue;
-      if( detID ==11 ) continue;
       if( detID ==17 ) continue;
-      if( detID ==18 ) continue;
-      if( detID >=20 ) continue;
+      if( detID ==11 ) continue;
+      if( detID == 5 ) continue;
 
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
@@ -851,6 +906,9 @@ Bool_t Monitors::Process(Long64_t entry)
       if  (  TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 1.0 - xncal[detID]/ e[detID];
       //if  (  TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) xcal[detID] = TMath::QuietNaN();
       
+      //======= Scale xcal from (0,1)      
+      //xcal[detID] = (xcal[detID]-0.5)/xScale[detID] + 0.5; // if include this scale, need to also inclused in Cali_littleTree
+      
       /*
       if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) {
         if (xfcal[detID]>0.5*e[detID]) {
@@ -859,12 +917,8 @@ Bool_t Monitors::Process(Long64_t entry)
           xcal[detID] = 1.0 - xncal[detID]/e[detID];
         }
       }*/
-   
       
-      //======= Scale xcal from (0,1)      
-      xcal[detID] = (xcal[detID]-0.5)/xScale[detID] + 0.5; // if include this scale, need to also inclused in Cali_littleTree
-      
-      if( abs(xcal[detID] - 0.5) > 0.45 ) continue; 
+      //if( abs(xcal[detID] - 0.5) > 0.4 ) continue; 
       
       //==================== calculate Z
       if( firstPos > 0 ) {
@@ -872,7 +926,7 @@ Bool_t Monitors::Process(Long64_t entry)
       }else{
         z[detID] = length*(xcal[detID]-1.0) + pos[detID%numCol];
       }
-
+      
       //===================== multiplicity
       arrayMulti++; // multi-hit when both e, xf, xn are not NaN
 
@@ -942,7 +996,7 @@ Bool_t Monitors::Process(Long64_t entry)
       int tac2 = tac_t[2]-e_t[detID];        
       htac2->Fill(tac2);
 
-      if( coinFlag && rdtgate && ezGate ){//&& tac2 > 512 && tac2 < 518) {
+      if( coinFlag && rdtgate && ezGate){// && 484 < tac2 && tac2 < 495) {
         heCalVzGC->Fill( z[detID] , eCal[detID] );
         
         heCalVxCalG[detID]->Fill(xcal[detID]*length,eCal[detID]);
@@ -1008,80 +1062,114 @@ Bool_t Monitors::Process(Long64_t entry)
    if( !isGoodEventFlag ) return kTRUE;
    
    for(Int_t detID = 0; detID < numDet ; detID++){
-     	
+     
      if( TMath::IsNaN(e[detID]) ) continue ; 
      if( TMath::IsNaN(z[detID]) ) continue ; 
-     if( eCal[detID] < 1) continue;
-
+     if( eCal[detID] < 2) continue;
+     
+     /*
      if( isReaction ){
        //======== Ex calculation by Ryan 
        double y = eCal[detID] + mass; // to give the KE + mass of proton;
        double Z = alpha * gamm * beta * z[detID];
        double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
- 
-       if( TMath::Abs(Z) < H ) {
-         //using Newton's method to solve 0 ==	H * sin(phi) - G * tan(phi) - Z = f(phi) 
-         double tolerrence = 0.001;
-         double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
-         double nPhi = 0; // new phi
+			  
+       if( TMath::Abs(Z) < H ) {				 
+			//using Newton's method to solve 0 ==	H * sin(phi) - G * tan(phi) - Z = f(phi) 
+			double tolerrence = 0.001;
+			double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
+			double nPhi = 0; // new phi
 
-         int iter = 0;
-         do{
+			int iter = 0;
+			do{
            phi = nPhi;
            nPhi = phi - (H * TMath::Sin(phi) - G * TMath::Tan(phi) - Z) / (H * TMath::Cos(phi) - G /TMath::Power( TMath::Cos(phi), 2));					 
            iter ++;
            if( iter > 10 || TMath::Abs(nPhi) > TMath::PiOver2()) break;
-         }while( TMath::Abs(phi - nPhi ) > tolerrence);
-         phi = nPhi;
+			}while( TMath::Abs(phi - nPhi ) > tolerrence);
+			phi = nPhi;
 
-         // check f'(phi) > 0
-         double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
-         if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
+			// check f'(phi) > 0
+			double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
+			if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
            double K = H * TMath::Sin(phi);
            double x = TMath::ACos( mass / ( y * gamm - K));
            double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
            double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
            Ex = EB - massB;
-
+				
            double hahaha1 = gamm* TMath::Sqrt(mass * mass + momt * momt) - y;
            double hahaha2 = gamm* beta * momt;
            thetaCM = TMath::ACos(hahaha1/hahaha2) * TMath::RadToDeg();
-
-         }else{
+		 
+			}else{
            Ex = TMath::QuietNaN();
            thetaCM = TMath::QuietNaN();
-         }
+			}	
        }else{
-         Ex = TMath::QuietNaN();
-         thetaCM = TMath::QuietNaN();
+			Ex = TMath::QuietNaN();
+			thetaCM = TMath::QuietNaN();
        }
      }else{
        Ex = TMath::QuietNaN();
        thetaCM = TMath::QuietNaN();
      }
+     */
      //ungated excitation energy
      
-     htacEx->Fill(tac[0], Ex);
-     htac2Ex->Fill(tac_t[2]-e_t[detID], Ex);
+     //Ex = 1.1586 * Ex - 0.0983;// cheated
      
-     if( thetaCM > thetaCMGate ) {
-         hEx->Fill(Ex);
-         hExThetaCM->Fill(thetaCM, Ex);
-         hExi[detID]->Fill(Ex);
-         hExVxCal[detID]->Fill(xcal[detID], Ex);
-         hExc[detID%numCol]->Fill(Ex);
-      }
+      //==================== calculate Ex
+      double xtemp = 2*(xcal[detID] - 0.5);
+
+      double xflat =       xtemp*eCorrFlat[detID][0]+
+                 pow(xtemp,2)*eCorrFlat[detID][1]+
+                 pow(xtemp,3)*eCorrFlat[detID][2]+
+                 pow(xtemp,4)*eCorrFlat[detID][3];
+                 
+      double eflat = e[detID] - xflat;
+
+      Ex = eCorrEx[detID][0] + eflat / eCorrEx[detID][1];
+      
+      if( detID < 18 ) Ex = Ex - 0.7786; // offset for 82Se(d,p)
+
+      //=================== calulate thetaCM
+      double q = (pow(Et,2)+ pow(mass,2) - pow(massB+Ex,2))/2./Et;
+      double haha1 = Et*Et - pow(mass + massB + Ex,2);
+      double haha2 = Et*Et - pow(mass - massB - Ex,2);
+      double momt = sqrt(haha1*haha2)/2./Et;
+
+      double cosThetaCM = beta*q/momt - alpha*z[detID]/gamm/momt ;
+
+      thetaCM = acos(cosThetaCM)*TMath::RadToDeg(); //offset by ~ 5 deg 
+
+      //=================== calulate supposed e
+      double eSpp = - mass + q/gamm  + alpha * beta * z[detID];
+
+      heSVeRaw[detID]->Fill(e[detID], eSpp);
+
+      hExVxCal[detID]->Fill(xcal[detID], Ex);
+           
+      htacEx->Fill(tac[0], Ex);
+      htac2Ex->Fill(tac_t[2]-e_t[detID], Ex);
+     
+      hEx->Fill(Ex);
+      hExThetaCM->Fill(thetaCM, Ex);
+      hExi[detID]->Fill(Ex);
+      
+      hExc[detID%numCol]->Fill(Ex); 
+
    }
   
    return kTRUE;
 }
 
-void Monitors::SlaveTerminate()
+void Monitors2::SlaveTerminate()
 {
   
 }
 
-void Monitors::Draw2DHist(TH2F * hist){
+void Monitors2::Draw2DHist(TH2F * hist){
    
    if( hist->Integral() < 1000 ){
       hist->SetMarkerStyle(20);
@@ -1092,7 +1180,7 @@ void Monitors::Draw2DHist(TH2F * hist){
    }
 }
 
-void Monitors::Terminate()
+void Monitors2::Terminate()
 {
    printf("============ finishing.\n");
 
@@ -1146,7 +1234,7 @@ void Monitors::Terminate()
    text.SetTextFont(82);
    text.SetTextSize(0.04);
    text.SetTextColor(2);
-   ///text.DrawLatex(0.15, 0.8, "with Recoil");
+   text.DrawLatex(0.15, 0.8, "with Recoil");
    
    /**
    TBox * box = new TBox (timeGate[0], 0, timeGate[1], yMax);
@@ -1159,9 +1247,9 @@ void Monitors::Terminate()
    cCanvas->cd(3);
    Draw2DHist(heCalVzGC);
 
-   ///text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1]));
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1]));
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   ///text.DrawLatex(0.15, 0.6, "with Recoil");
+   text.DrawLatex(0.15, 0.6, "with Recoil");
    
    //the constant thetaCM line
    if( transfer->IsOpen() ) gList->At(0)->Draw("same");

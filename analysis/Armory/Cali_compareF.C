@@ -23,18 +23,23 @@
 
 //use the fx in refTree, use fx->Eval(x) as e
 
-void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400){
+void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400, TString drawOpt = "colz"){
 /**///======================================================== User Input
 
-   double a1Range[2] = {600, 800};
-   double a0Range[2] = {-0.7, 2.0};
+   double a1Range[2] = {220, 320};
+   double a0Range[2] = {-1.0, 1.0};
+   
+   double eRawRange[2] = {500, 3000};
+   double eRange[2] = {2, 10};
    
    double SSR = 150; // sum of square of residual of the fitting
 
    double distThreshold   = 0.01;
    bool isXFXN = false; // only use event for both XF and XN valid
    
-   int nTrial = 1000;
+   int nTrial = 800;
+   
+   int skipEveryNEvent = 1;
    
    double coinTimeCentral = 19;
    double coinTimeGate = 30.; // TMath::Abs(coinTime - coinTimeCentral) < coinTimeGate
@@ -270,26 +275,28 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       
       TString name;
       name.Form("exPlot%d[%d]", idet, idet%rDet);
-      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, 0, 9000);
+      exPlot[idet]  = new TH2F(name , "exPlot" , 200, zRange[0], zRange[1], 200, eRawRange[0], eRawRange[1]);
       exPlot[idet]->Reset();
+      exPlot[idet]->SetMarkerStyle(7);
       exPlot[idet]->SetTitle(title + "(exp)");
 
       name.Form("exPlotC%d", idet);
-      exPlotC[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, 0, 13);
+      exPlotC[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, eRange[0], eRange[1]);
       exPlotC[idet]->Reset();
+      exPlotC[idet]->SetMarkerStyle(7);
       exPlotC[idet]->SetTitle(title + "(corr)");
       
       name.Form("dummy%d", idet);
-      dummy[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, 0, 13);
+      dummy[idet] = new TH2F(name, "exPlotC", 200, zRange[0], zRange[1], 200, eRange[0], eRange[1]);
       dummy[idet]->Reset();
-      dummy[idet]->SetTitle(title + "(sim)");
+      dummy[idet]->SetTitle(title + "(kinematic)");
       
       /**///========================================================  plot when single detector calibration
       
       if( option >= 0 ){
          
          cScript->cd(1);
-         for( int i = 0; i < expTree->GetEntries() ; i++){
+         for( int i = 0; i < expTree->GetEntries() ; i+= skipEveryNEvent){
             expTree->GetEntry(i);
             if( detIDTemp != idet ) continue;
             if( eTemp < eThreshold) continue;
@@ -301,7 +308,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             
             exPlot[idet]->Fill(zTemp, eTemp);
          }
-         exPlot[idet]->Draw("box");
+         exPlot[idet]->Draw(drawOpt);
          
          cScript->cd(2);
          dummy[idet]->Draw();
@@ -335,7 +342,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       
       //calculate number of event will be used.
       int countEvent = 0;
-      for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE ++ ){
+      for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE += skipEveryNEvent ){
         expTree->GetEntry(eventE);
         if( detIDTemp != idet ) continue;
         if( eTemp < eThreshold) continue;
@@ -353,16 +360,20 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       }
       
       int countMax = 0;
-      printf("========== find fit by Monle Carlo. #Point: %d, #event: %d\n", nTrial, countEvent);
+      if( skipEveryNEvent > 1 ) {
+         printf("========== find fit by Monle Carlo. #Point: %d, #event: %d (skipped every %d event)\n", nTrial, countEvent, skipEveryNEvent);
+      }else{
+         printf("========== find fit by Monle Carlo. #Point: %d, #event: %d \n", nTrial, countEvent);
+      }
       for( int iTrial = 0; iTrial < nTrial; iTrial ++){ 
          
          double a1, a0;
          a1 = a1Range[0] + (a1Range[1] - a1Range[0])*ranGen->Rndm();
-         a0 = a0Range[0] + (a0Range[1] - a0Range[0])*ranGen->Rndm();
+         a0 = a0Range[0] + (a0Range[1] - a0Range[0])*ranGen->Rndm(); // a0 can be a1 depends
          
          double totalMinDist    = 0.;
          int count = 0; 
-         for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE ++ ){
+         for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE += skipEveryNEvent ){
             expTree->GetEntry(eventE);
             if( detIDTemp != idet ) continue;
             if( eTemp < eThreshold) continue;
@@ -420,7 +431,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             
             if( option >= 0 ){
                exPlotC[idet]->Reset();
-               for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE ++ ){
+               for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE += skipEveryNEvent ){
                   expTree->GetEntry(eventE);
                   if( detIDTemp != idet ) continue;
                   if( isXFXN && hitIDTemp != 0 ) continue;
@@ -429,7 +440,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
                   exPlotC[idet]->Fill(zTemp, eTemp/A1 + A0);
                }
                cScript->cd(2);
-               exPlotC[idet]->Draw("colz same");
+               exPlotC[idet]->Draw("same");
                cScript->Update();
                
                gSystem->ProcessEvents();
@@ -442,7 +453,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       //After founded the best fit, plot the result
       //======== time
       clock.Stop("timer");
-      printf("==========> %7.0f sec (A1, A0) : (%f\t%f) \n", clock.GetRealTime("timer"), A1, A0);
+      printf("==========> %7.0f sec (A1, A0) :  %9.6f   %9.6f  \n", clock.GetRealTime("timer"), A1, A0);
       B1[idet] = A1;
       B0[idet] = A0;
 
@@ -460,7 +471,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
             if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
             exPlot[idet]->Fill(zTemp, eTemp);
          }
-         exPlot[idet]->Draw("box");
+         exPlot[idet]->Draw(drawOpt);
          caliResult->cd(); exPlot[idet]->Write(); caliResult->Write("exPlot", TObject::kSingleKey);
          
          cScript->cd(2);
@@ -479,7 +490,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 
       cScript->cd(2);      
       exPlotC[idet]->Reset();
-      for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE ++ ){
+      for( int eventE = 0 ; eventE < expTree->GetEntries(); eventE += skipEveryNEvent ){
          expTree->GetEntry(eventE);
          if( detIDTemp != idet ) continue;
          if( isXFXN && hitIDTemp != 0 ) continue;
@@ -487,7 +498,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
          if( isCoinTimeBranchExist && TMath::Abs(coinTimeTemp) > coinTimeGate ) continue;
          exPlotC[idet]->Fill(zTemp, eTemp/A1 + A0);
       } 
-      exPlotC[idet]->Draw("colz same");
+      exPlotC[idet]->Draw("same");
       if( option == -1 ) {
          caliResult->cd(); 
          exPlotC[idet]->Write(); 
@@ -519,12 +530,12 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    if( option < 0 ){
       FILE * paraOut;
       TString filename;
-      filename.Form("correction_e.dat");
+      filename.Form("correction_e_KE.dat");
       paraOut = fopen (filename.Data(), "w+");
 
       printf("=========== save parameters to %s \n", filename.Data());
       for( int i = 0; i < numDet; i++){
-      fprintf(paraOut, "%9.6f  %9.6f\n", B1[i], B0[i]);
+        fprintf(paraOut, "%9.6f  %9.6f\n", B1[i], B0[i]);
       }
 
       fflush(paraOut);

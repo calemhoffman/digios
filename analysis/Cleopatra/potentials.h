@@ -88,6 +88,17 @@ string potentialRef(string name){
   if( name == "b" ){
     return "Becchetti and Greenlees, (1971) E < 40 | 40 < A | Iso. Dep.";
   }
+  
+  //======= alpha
+  if( name == "s"){
+    return "Su and Han, (2015) E < 398 | 20 < A < 209 | http://dx.doi/org/10.1142/S0218301315500925";
+  }
+  if( name == "a"){
+    return "Avrigeanu et al., (2009) E ??? | A ??? | http://dx.doi/org/10.1016/j.adt.2009.02.001";
+  }
+  if( name == "f"){
+    return "(FIXED) Bassani and Picard, (1969) 24 < E < 31 | A = 90 | https://doi.org/10.1016/0375-9474(69)90601-0";
+  }
    
   return "";
 }
@@ -669,7 +680,7 @@ bool PangPotential(int A, int Z, double E, int Zproj){
   rsoi0 = 0.;
   asoi  = 0.;
 
-  rc0 = A3 / rc;
+  rc0 = rc/ A3;
   
   return true;
 }
@@ -803,6 +814,103 @@ bool BecchettiA3Potential(int A, int Z, double E, int Zproj){
   return true;
 }
 
+//=============================== alpha
+
+bool SuAndHanPotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  double vsiCOND = 27.5816 - 0.0797 * E + 48.0*(N-Z)/A;
+  double  viCOND = -4.0174 + 0.1409 * E ;
+  
+  v  = 175.0881 - 0.6236 * E + 0.0006*E*E + 30.*(N-Z)/A - 0.236 * Z/A3;
+  r0 = 1.3421;
+  a  = 0.6578;
+
+  vi  = viCOND; if( viCOND < 0 ) vi = 0.0;
+  ri0 = 1.4259;
+  ai  = 0.6578;
+
+  vsi  = vsiCOND; if (vsiCOND < 0 ) vsi = 0.0;
+  rsi0 = 1.2928;
+  asi  = 0.6359;
+
+  vso  = 0.0;
+  rso0 = 1.2686;
+  aso  = 0.85;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.350;
+  
+  return true;
+}
+
+bool AvrigeanuPotential(int A, int Z, double E){
+  
+  int N   = A-Z;
+  double A3 = pow(A, 1./3.);
+  
+  double e3 = 23.6 + 0.181 * Z/A3;
+  double e2 = (2.59 + 10.4/A)*Z/(2.66+1.36*A3);
+  double e1 = -3.03 + 0.762 * A3 + 0.24 + e2;
+  
+  v  = 116.5 + 0.337 * Z /A3 + 0.453*E;
+  if( E < e3 ) v = 168 + 0.733 * Z / A3 - 2.64 *E;
+  r0 = 0.00;
+  a  = 0.00;
+
+  vi  = 2.73 - 2.88 * A3 + 1.11*E;
+  ri0 = 0.00;
+  ai  = 0.00;
+
+  vsi  = 0.0;
+  rsi0 = 0.0;
+  asi  = 0.0;
+
+  vso  = 0.0;
+  rso0 = 0.0;
+  aso  = 0.0;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.300;
+  
+  return true;
+}
+
+bool BassaniPicardPotential(int A, int Z, double E){
+  
+  v  = 207;
+  r0 = 1.3;
+  a  = 0.65;
+
+  vi  = 28;
+  ri0 = 1.3;
+  ai  = 0.52;
+
+  vsi  = 0.0;
+  rsi0 = 0.0;
+  asi  = 0.0;
+
+  vso  = 0.0;
+  rso0 = 0.0;
+  aso  = 0.0;
+
+  vsoi  = 0.0;
+  rsoi0 = 0.0;
+  asoi  = 0.0;
+
+  rc0 = 1.400;
+  
+  return true;
+}
+
 bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   bool okFlag = false;
   
@@ -826,6 +934,10 @@ bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   if( potName == "t") okFlag = TrostPotential(A, Z, E);
   if( potName == "h") okFlag = HyakutakePotential(A, Z, E);
   if( potName == "b") okFlag = BecchettiA3Potential(A, Z, E, Zproj);
+  
+  if( potName == "s") okFlag = SuAndHanPotential(A, Z, E);
+  if( potName == "a") okFlag = AvrigeanuPotential(A, Z, E);
+  if( potName == "f") okFlag = BassaniPicardPotential(A, Z, E);
   
   //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
   //PrintPotential();
