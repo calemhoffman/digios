@@ -5,25 +5,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
 
   if( RUNNUM == -1){
 
-    //chain->Add("../root_data/gen_run02[8,9].root"); //14N, 440ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run038.root");     //14N, 440ug/cm2, 700mm, good run
-    
-    //chain->Add("../root_data/gen_run03[1-2].root"); //14N, 140ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run033.root");     //14N, 140ug/cm2, 700mm, good run
-    //chain->Add("../root_data/gen_run03[4-7].root"); //14N, 140ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run04[3,6].root"); //14N, 140ug/cm2, 700mm
-    
-    //chain->Add("../root_data/gen_run047.root"); //14N, gold foil, slit normal
-    //chain->Add("../root_data/gen_run048.root"); //14N, gold foil, slit out
-    
-    chain->Add("../root_data/gen_run049.root");     //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run05[0-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run06[0-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run070.root");     //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run07[7-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run08[0-2].root"); //14N, 140ug/cm2, 600mm
-    
-    //chain->Add("../root_data/gen_run07[1-6].root"); //14N, 400ug/cm2, 600mm
+    chain->Add("../root_data/gen_run00[6-8].root"); //alpha
     
   }else{
     

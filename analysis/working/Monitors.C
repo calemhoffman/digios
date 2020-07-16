@@ -14,6 +14,7 @@
 #include <TMacro.h>
 #include <TLine.h>
 #include <TBox.h>
+#include <TDatime.h>
 #include <TMD5.h>
 #include <TObjArray.h>
 #include <fstream>
@@ -31,9 +32,9 @@ int canvasXY[2] = {1200 , 1600} ;// x, y
 //---histogram setting
 int rawEnergyRange[2] = {  1200,   2500}; // share with e, ring, xf, xn
 int    energyRange[2] = {     0,     10}; // in the E-Z plot
-int     rdtDERange[2] = {     0,   5000};
-int      rdtERange[2] = {     0,  10000};
-int      elumRange[2] = {   200,   6000};
+int     rdtDERange[2] = { -100,   600};
+int      rdtERange[2] = { -100,   600};
+int      elumRange[2] = {  200,   2000};
 int       TACRange[3] = { 300,    700,  1500};  // #bin, min, max
 int      TAC2Range[3] = { 20,    480,    500};
 
@@ -241,7 +242,8 @@ void Monitors::Begin(TTree *tree)
    NumEntries = tree->GetEntries();
    
    //canvasTitle.Form("#Events:%lld, Runs: ", NumEntries);
-   canvasTitle.Form("Monitors | Runs: ");
+   //canvasTitle.Form("Monitors | Runs: ");
+   canvasTitle.Form("Runs: ");
    lastRunID = -1;
    contFlag = false;
    
@@ -659,12 +661,12 @@ void Monitors::Begin(TTree *tree)
 
    //===================== ELUM
    for( int i = 0; i < 16; i++){
-      helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 200, elumRange[0], elumRange[1]);
+      helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 1000, elumRange[0], elumRange[1]);
    }
-   helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 200, elumRange[0], elumRange[1]);
-   helumSUM = new TH1F("helumSUM", "ElumSUM", 200, elumRange[0], elumRange[1]);
+   helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 1000, elumRange[0], elumRange[1]);
+   helumSUM = new TH1F("helumSUM", "ElumSUM", 1000, elumRange[0], elumRange[1]);
    
-   helumTAC = new TH2F("helumTAC", "Elum vs TAC; TAC [a.u.]; Elum ", TACRange[0], TACRange[1], TACRange[2], 200, elumRange[0], elumRange[1]);
+   helumTAC = new TH2F("helumTAC", "Elum vs TAC; TAC [a.u.]; Elum ", TACRange[0], TACRange[1], TACRange[2], 1000, elumRange[0], elumRange[1]);
    
    
    
@@ -776,7 +778,7 @@ Bool_t Monitors::Process(Long64_t entry)
     /*********** ELUM ************************************************/
     for( int i = 0; i < 16; i++){
        helum[i]->Fill(elum[i]);
-    //   helumID->Fill(i, elum[i]);
+       helumID->Fill(i, elum[i]);
     //   helumSUM->Fill(elum[i]);
     }
     
@@ -784,8 +786,8 @@ Bool_t Monitors::Process(Long64_t entry)
     
     if( tac_t[1]> 0 ) hBIC->Fill(tac_t[1]/1e8/60.);
     
-    if( 830 < elum[0]  && elum[0] < 1000 ) helum4D->Fill(elum_t[0]/1e8/60.); 
-    if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
+    ///if( 830 < elum[0]  && elum[0] < 1000 ) helum4D->Fill(elum_t[0]/1e8/60.); 
+    ///if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
 
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
@@ -814,17 +816,9 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //==================== Basic gate
       if( TMath::IsNaN(e[detID]) ) continue ; 
-      //if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
-      //if( ring[detID] > 300 ) continue; 
+      ///if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
+      ///if( ring[detID] > 300 ) continue; 
       if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
-      //if( detID > 19 ) continue;
-      if( detID == 5 ) continue;
-      if( detID ==10 ) continue;
-      if( detID ==16 ) continue;
-      if( detID ==11 ) continue;
-      if( detID ==17 ) continue;
-      if( detID ==18 ) continue;
-      if( detID >=20 ) continue;
 
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
@@ -841,30 +835,30 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //===================== calculate X
       if( (xf[detID] > 0 || !TMath::IsNaN(xf[detID])) && ( xn[detID]>0 || !TMath::IsNaN(xn[detID])) ) {
-        //x[detID] = 0.5*((xf[detID]-xn[detID]) / (xf[detID]+xn[detID]))+0.5;
+        ///x[detID] = 0.5*((xf[detID]-xn[detID]) / (xf[detID]+xn[detID]))+0.5;
         x[detID] = 0.5*((xf[detID]-xn[detID]) / e[detID])+0.5;
       }
       
-      // range of x is (0, 1)
+      /// range of x is (0, 1)
       if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 0.5 + 0.5 * (xfcal[detID] - xncal[detID] ) / e[detID];
       if  ( !TMath::IsNaN(xf[detID]) &&  TMath::IsNaN(xn[detID]) ) xcal[detID] = xfcal[detID]/ e[detID];
       if  (  TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 1.0 - xncal[detID]/ e[detID];
-      //if  (  TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) xcal[detID] = TMath::QuietNaN();
+      ///if  (  TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) xcal[detID] = TMath::QuietNaN();
       
-      /*
+      /**
       if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) {
         if (xfcal[detID]>0.5*e[detID]) {
           xcal[detID] = xfcal[detID]/e[detID];
         }else if {
           xcal[detID] = 1.0 - xncal[detID]/e[detID];
         }
-      }*/
+      }**/
    
       
       //======= Scale xcal from (0,1)      
       xcal[detID] = (xcal[detID]-0.5)/xScale[detID] + 0.5; // if include this scale, need to also inclused in Cali_littleTree
       
-      if( abs(xcal[detID] - 0.5) > 0.45 ) continue; 
+      ///if( abs(xcal[detID] - 0.5) > 0.45 ) continue; 
       
       //==================== calculate Z
       if( firstPos > 0 ) {
@@ -974,7 +968,7 @@ Bool_t Monitors::Process(Long64_t entry)
       
       if( i % 2 == 0  ){        
         if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
-         recoilMulti++; // when both dE and E are hit
+         ///recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
          hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]);
@@ -1124,6 +1118,7 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 1
    cCanvas->cd(1);
+   heCalVz->SetTitle("E vs Z | " + canvasTitle + " | " + rdtCutFile);
    heCalVz->Draw("colz");
 
    ///----------------------------------- Canvas - 2
@@ -1246,11 +1241,23 @@ void Monitors::Terminate()
    /************************* Save histograms to root file*/
    
    gROOT->cd();
-   TString outFileName = canvasTitle;
-   outFileName.ReplaceAll(" - ", "-").ReplaceAll(" ", "_").ReplaceAll(":", "").ReplaceAll(",","");
+   //TString outFileNameTemp = canvasTitle;
+   //outFileNameTemp.ReplaceAll(" - ", "-").ReplaceAll(" ", "_").ReplaceAll(":", "").ReplaceAll(",","");
    //gROOT->GetList()->SaveAs(outFileName + ".root");
    
-   //cCanvas->SaveAs("Canvas_"+outFileName + ".png");
+   TDatime dateTime;
+   
+   TString outFileName;
+   outFileName.Form("Canvas_%d%d%d_%d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
+   
+   cCanvas->SaveAs("Canvas/"+outFileName);
+   
+   /// run puhs_to_websrv.sh
+   TString cmd;
+   cmd.Form(".! ./push_to_websrv.sh %s", outFileName.Data()); 
+   gROOT->ProcessLine(cmd);
+   
+   gROOT->ProcessLine(".q");// need to remove this if not remote
    
    /************************************/
    
@@ -1268,6 +1275,7 @@ void Monitors::Terminate()
    gROOT->ProcessLine("listDraws()");
    
    //gROOT->ProcessLine("recoils()");
+   //gROOT->ProcessLine("elum()");
    //gROOT->ProcessLine("rawID()");
    
    
