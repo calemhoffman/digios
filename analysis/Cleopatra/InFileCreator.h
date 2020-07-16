@@ -132,7 +132,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     Isotope isotopeb(mb);
     
     bool isReactionSupported = false;
-    if( isotopea.A <= 3 && isotopea.Z <= 2 && isotopeb.A <=3 && isotopeb.Z <=2 ) isReactionSupported = true; 
+    if( isotopea.A <= 4 && isotopea.Z <= 2 && isotopeb.A <=4 && isotopeb.Z <=2 ) isReactionSupported = true; 
 
     ///if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" || mb == "n"){
     ///  if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
@@ -194,6 +194,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       if( abs(isotopea.A - isotopeb.A) == 1 ){
         lValue = orbital.substr(1,1);
         jValue = orbital.substr(2);
+        ///printf(" l : %s, j : %s \n", lValue.c_str(), jValue.c_str());
         spdf = GetLValue(lValue);
       }
       
@@ -202,6 +203,10 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         size_t posEq = orbital.find('=');
         lValue = orbital.substr(posEq+1,1);
         spdf=atoi(lValue.c_str());
+      }
+      
+      if( abs(isotopea.A - isotopeb.A) == 0 ){
+        printf(" ===? skipped. p-n exchange reaction does not support. \n");
       }
       
       if( spdf == -1 ){
@@ -252,7 +257,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, "reset\n");
       fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
                isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
-      if( isotopea.A <= 2 && isotopea.Z <= 1){
+      if( isotopea.A <= 2 && isotopea.Z <= 1){ // incoming d or p
         fprintf(file_out, "PARAMETERSET dpsb r0target \n");
         fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
         fprintf(file_out, "\n");
@@ -260,15 +265,20 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         fprintf(file_out, "wavefunction av18 \n");
         fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
       }
-      if( isotopea.A == 3 && abs(isotopea.A-isotopeb.A) == 1){
+      if( 3 <= isotopea.A && isotopea.A <= 4 && abs(isotopea.A-isotopeb.A) == 1){ 
         fprintf(file_out, "PARAMETERSET alpha3 r0target \n");
         fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
         fprintf(file_out, "\n");
         fprintf(file_out, "PROJECTILE \n");
         fprintf(file_out, "wavefunction phiffer \n");
-        fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
+        if( isotopeb.A <= 3 ){ 
+          fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
+        }
+        if( isotopeb.A == 4 ){
+          fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.61 v=202.21 r=.93 a=.66 param1=.81 param2=.87 rc=2.0 $ rc=2 is a quirk\n");
+        } 
       } 
-      if( abs(isotopea.A-isotopeb.A) == 2 ){
+      if( abs(isotopea.A-isotopeb.A) == 2 ){ // 2 neutron transfer
         fprintf(file_out, "PARAMETERSET alpha2 r0target\n");
         fprintf(file_out, "lstep=1 lmin=0 lmax=30 maxlextrap=0 ASYMPTOPIA=40\n");
         fprintf(file_out, "\n");

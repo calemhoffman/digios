@@ -13,74 +13,15 @@
 #include <TLine.h>
 #include <TSpectrum.h>
 
-int nPeaks = 16;
-Double_t fpeaks(Double_t *x, Double_t *par) {
-   Double_t result = 0;
-   for (Int_t p=0;p<nPeaks;p++) {
-      Double_t norm  = par[3*p+0];
-      Double_t mean  = par[3*p+1];
-      Double_t sigma = par[3*p+2];
-      result += norm * TMath::Gaus(x[0],mean,sigma, 1);
-   }
-   return result;
-}
-
-vector<vector<double>> combination(const vector<double> arr, int r){
-  
-  vector<vector<double>> output;
-  
-  int n = arr.size();
-  std::vector<int> v(n);
-  std::fill(v.begin(), v.begin()+r, 1);
-  do {
-    ///printf("%d |", r);
-    ///for( int i = 0; i < n; i++) { printf("%d ", v[i]); }; printf("\n");
-    
-    vector<double> temp;
-    for (int i = 0; i < n; ++i) { 
-      if (v[i]) {
-        ///printf("%.1f, ", arr[i]); 
-        temp.push_back(arr[i]);
-      }
-    }
-    ///printf("\n");
-    
-    output.push_back(temp);
-    
-  } while (std::prev_permutation(v.begin(), v.end()));
-  
-  return output;
-}
-
-double* sumMeanVar(vector<double> data){
-  
-  
-  int n = data.size();
-  //for( int k = 0; k < n ; k++){ printf("%.1f, ", data[k]); }; printf("\n");
-  
-  double sum = 0;
-  for( int k = 0; k < n; k++) sum += data[k];
-  double mean = sum/n;
-  double var = 0;
-  for( int k = 0; k < n; k++) var += pow(data[k] - mean,2);
-  
-  static double output[3];
-  output[0] = sum;
-  output[1] = mean;
-  output[2] = var;
-  
-  return output;
-}
+#include "../Armory/AnalysisLibrary.h"
 
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int rowDet = 6;
-   const int colDet = 5;
+   const int rowDet = 4;
+   const int colDet = 6;
    
-   const int numDet = rowDet * colDet;
-   
-   int energyRange[3] = {200, 3100, 7000}; // bin, min, max
+   int energyRange[3] = {200, 1000, 2500}; // bin, min, max
    
 /**///========================================================  load tree
 
@@ -94,9 +35,10 @@ void Cali_xf_xn(TTree * tree){
    printf("------------------------------------------------------------- \n");
    printf("=========== Total #Entry: %10lld \n", tree->GetEntries());
    
-/**///======================================================== Browser or Canvas
+/**///======================================================== Canvas
 
-   //TBrowser B ;   
+   const int numDet = rowDet * colDet;
+
    Int_t Div[2] = {colDet,rowDet};  //x,y
    Int_t size[2] = {230,230}; //x,y
    TCanvas * cAlpha = new TCanvas("cAlpha", "cAlpha", 0, 0, size[0]*Div[0], size[1]*Div[1]);
@@ -195,17 +137,17 @@ void Cali_xf_xn(TTree * tree){
       
    }
    
-   int nPeaks = 10;
    vector<double> * energy = new vector<double> [numDet]; 
    double a0[numDet];
    double a1[numDet];
    vector<double> refEnergy;
    if( method == 2 ){
       printf("---- finding edge using TSepctrum Class...\n");
+      
       for( int i = 0; i < numDet; i++){
          
-         TSpectrum * spec = new TSpectrum(10);
-         nPeaks = spec->Search(q[i], 1, "", 0.30);
+         TSpectrum * spec = new TSpectrum();
+         int nPeaks = spec->Search(q[i], 1, "", 0.30);
          printf("%2d | found %d peaks | ", i,  nPeaks);
 
          double * xpos = spec->GetPositionX();
@@ -224,40 +166,6 @@ void Cali_xf_xn(TTree * tree){
             printf("%7.2f, ", energy[i][j]);
          }
          printf("\n");
-         
-         
-        /*//========== Fitting 
-        printf("============= Fitting.....\n");
-
-        
-        double xMin = q[i]->GetXaxis()->GetXmin();
-        double xMax = q[i]->GetXaxis()->GetXmax();
-
-        const int  n = 3 * nPeaks;
-        double * para = new double[n]; 
-        for(int j = 0; j < nPeaks ; j++){
-          para[3*j+0] = height[j] * 0.05 * TMath::Sqrt(TMath::TwoPi());
-          para[3*j+1] = energy[i][j];
-          para[3*j+2] = 50;
-        }
-
-        TF1 * fit = new TF1("fit", fpeaks, xMin, xMax, 3* nPeaks );
-        fit->SetLineWidth(1);
-        fit->SetLineColor(2);
-        fit->SetNpx(1000);
-        fit->SetParameters(para);
-        q[i]->Fit("fit", "q");
-        
-        const Double_t* paraA = fit->GetParameters();
-        
-        energy[i].clear();
-        
-        for( int j = 0; j < nPeaks; j++){
-            energy[i].push_back(paraA[3*j+1]);
-            printf("%7.2f, ", energy[i][j]);
-        }
-        printf("\n");
-        */ 
       }
       
       for( int i = 0; i < numDet; i++){
@@ -273,6 +181,7 @@ void Cali_xf_xn(TTree * tree){
       printf(" X =  det-X reference\n");
       printf("-1 =  manual reference\n");
       printf("-2 =  use 228Th, first 5 strongest peaks \n");
+      //printf("-3 =  use 241Am, 5.481 MeV \n");
       printf("-9 =  stop \n");
       printf("your choice = ");
       temp = scanf("%d", &refID);
@@ -309,16 +218,20 @@ void Cali_xf_xn(TTree * tree){
          refEnergy.push_back(8.785);
       }
       
+      if( refID == -3 ){
+         refEnergy.clear();
+         refEnergy.push_back(5.481);
+         refEnergy.push_back(5.685);
+      }
+      
       printf("----- adjusting the energy to det-%d......\n", refID);
-      int n = refEnergy.size();
-      for( int k = 0; k < n; k++) printf("%2d-th peak : %f \n", k,  refEnergy[k]);
+      for( int k = 0; k < refEnergy.size(); k++) printf("%2d-th peak : %f \n", k,  refEnergy[k]);
       
       const vector<double> refEnergy0 = refEnergy; 
       
       for( int i = 0; i < numDet; i ++){
         
-        nPeaks = energy[i].size();
-        printf("------- refID - %d, nPeaks: %d \n", i, nPeaks);
+        printf("------- refID - %d, nPeaks: %lu \n", i, energy[i].size());
         
         refEnergy = refEnergy0;
         
@@ -336,104 +249,14 @@ void Cali_xf_xn(TTree * tree){
           continue;
         }
         
-        vector<double> fitEnergy;
-        
-        //===== when nPeaks != refEnergy.size(), need to matching the two vector size by checking the r-squared.
-        if( nPeaks > n ){
-          
-          vector<vector<double>> output = combination(energy[i], n);
-        
-          double * smvY = sumMeanVar(refEnergy0);
-          double sumY = smvY[0];
-          double meanY = smvY[1];
-          double varY = smvY[2];
-          
-          double optRSquared = 0;
-          double absRSqMinusOne = 1;
-          int maxID = 0;
-          
-          for( int k = 0; k < output.size(); k++){
-            
-            ///for( int t = 0 ; t < nPeaks; t++) printf("%f\t", output[k][t]);
-            
-            double * smvX = sumMeanVar(output[k]);
-            double sumX = smvX[0];
-            double meanX = smvX[1];
-            double varX = smvX[2];
-            
-            double sumXY = 0;
-            for( int j = 0; j < n; j++) sumXY += output[k][j] * refEnergy0[j];
-            
-            double rSq = (sumXY - sumX*sumY/n)/sqrt(varX*varY);
-            
-            //for( int j = 0; j < n ; j++){ printf("%.1f, ", output[k][j]); }; printf("| %.10f\n", rSq);
-            
-            if( abs(rSq-1) < absRSqMinusOne ) {
-              absRSqMinusOne = abs(rSq-1);
-              optRSquared = rSq;
-              maxID = k;
-            }
-          }
-          
-          fitEnergy = output[maxID];
-          
-          printf(" R^2 : %.20f\n", optRSquared);      
-          
-          //calculation fitting coefficient
-          //double * si = fitSlopeIntercept(fitEnergy, refEnergy);
-          //printf( " y = %.4f x + %.4f\n", si[0], si[1]);
-          
-        }else if( nPeaks < n ){
-          
-          vector<vector<double>> output = combination(refEnergy0, energy[i].size());
-          
-          fitEnergy = energy[i];
-          
-          double * smvX = sumMeanVar(fitEnergy);
-          double sumX = smvX[0];
-          double meanX = smvX[1];
-          double varX = smvX[2];
-          
-          double optRSquared = 0;
-          double absRSqMinusOne = 1;
-          int maxID = 0;
-          
-          for( int k = 0; k < output.size(); k++){
-            
-            double * smvY = sumMeanVar(output[k]);
-            double sumY = smvY[0];
-            double meanY = smvY[1];
-            double varY = smvY[2];
-            
-            double sumXY = 0;
-            for( int j = 0; j < nPeaks; j++) sumXY += output[k][j] * fitEnergy[j];
-            
-            double rSq = (sumXY - sumX*sumY/nPeaks)/sqrt(varX*varY);
-            
-            //for( int j = 0; j < n ; j++){ printf("%.1f, ", output[k][j]); }; printf("| %.10f\n", rSq);
-            
-            if( abs(rSq-1) < absRSqMinusOne ) {
-              absRSqMinusOne = abs(rSq-1);
-              optRSquared = rSq;
-              maxID = k;
-            }
-          }
-          
-          refEnergy = output[maxID];
-          printf(" R^2 : %.20f\n", optRSquared);   
-        
-        }else{
-          fitEnergy = energy[i];
-        }
-        
         printf("   Energy : ");
-        for( int k = 0; k < nPeaks; k++){ printf("%.1f, ", energy[i][k]);};printf("\n");
-        printf("fitEnergy : ");
-        for( int k = 0; k < min(n,nPeaks) ; k++){ printf("%.1f, ", fitEnergy[k]); }; printf("\n");
-        printf("refEnergy : ");
-        for( int k = 0; k < min(n,nPeaks) ; k++){ printf("%.1f, ", refEnergy[k]); }; printf("\n");
+        for( int k = 0; k < energy[i].size(); k++){ printf("%.1f, ", energy[i][k]);};printf("\n");
+        vector<vector<double>> output =  FindMatchingPair(energy[i], refEnergy);
+    
+        vector<double> haha1 = output[0];
+        vector<double> haha2 = output[1];
         
-        TGraph * graph = new TGraph(min(n, nPeaks), &fitEnergy[0], &refEnergy[0] );
+        TGraph * graph = new TGraph(haha1.size(), &haha1[0], &haha2[0] );
         cAlpha->cd(i+1);
         graph->Draw("A*");
 

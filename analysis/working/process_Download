@@ -20,19 +20,21 @@ else
 fi
 
 
-#RUN=$(printf '%03d' ${RUN})
+RUN=$(printf '%03d' ${RUN})
+
+#echo "PC Name :" $PCName "|" ${PCName:0:5}"|" 
+
 
 #######################################
 ####################  Download raw data
 echo -e "${RED}######################### Download raw data: run ${RUN}${NC}"
-#f [ ${PCName} == "digios1" ]; then
-#    echo "Already in digios1, no need to get data."
-#elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
-#    echo "in LCRC, no need to get data."
+if [ ${PCName} == "digios1" ]; then
+    echo "Already in digios1, no need to get data."
+elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
+    echo "in LCRC, no need to get data."
 #elif [ ${PCName:0:4} == "phyw" ]; then
 #    echo "in MAC, no need to download"
-#else
-if [ ${PCName:0:5} == "phyw1" ]; then
+elif [ ${PCName:0:5} == "phywl" ]; then
     #============ Get the raw data
     IP=192.168.1.2
     echo "RUN $RUN: Get the raw data `date`"
@@ -45,7 +47,7 @@ if [ ${PCName:0:5} == "phyw1" ]; then
     tail -10 ${AnalysisDir}/data/RunTimeStamp.dat
     echo "============================================="
 else
-  echo "Only in MAC can donwload data. skip."
+  echo "Only in HELIOS MAC can donwload data. skip."
 fi
 
 echo -e "${YELLOW}"
