@@ -4,7 +4,7 @@
 11.5     //det_distance_from_axis_[mm]
 10       //width_of_detector_[mm]
 50       //length_of_detector_[mm]
-1300      //recoil_position_+_for_downstream_[mm]
+1100      //recoil_position_+_for_downstream_[mm]
 50      //radius_of_recoil_detector_[mm]
 false    //is_coincident_with_recoil
 0.00     //Recoil_1_position_[mm]_when_0_disable_tree_branch
