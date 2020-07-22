@@ -74,9 +74,11 @@ fi
 ########################################
 #################### Monitor
 if [ $isMonitor -eq 1 ] ; then
-  root -l "ChainMonitors.C(${RUN})"
+  root -l "ChainMonitors.C(${RUN})" # single run
 elif [ $isMonitor -eq 2 ] ; then
-  root -l ChainMonitors.C
+  root -l ChainMonitors.C  #all runs listed 
+elif [ $isMonitor -eq 20 ] ; then
+  root -l "ChainMonitors.C(-10)"
 fi  
   
 exit 1

@@ -3,7 +3,7 @@
 10             //beam_Z
 2               //target_A
 1               //target_Z
-2               //recoil_light_A
+1               //recoil_light_A
 1               //recoil-light_Z
 11            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
@@ -11,7 +11,7 @@
 0.000           //beam-emittance_in_mrad
 0.00            //x_offset_of_Beam_in_mm
 0.00            //y_offset_of_Beam_in_mm
-10000000         //number_of_Event_being_generated
+10000         //number_of_Event_being_generated
 false           //isTargetScattering
 0.913           //target_density_in_g/cm3
 2.2e-4          //targetThickness_in_cm
