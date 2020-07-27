@@ -79,6 +79,8 @@ elif [ $isMonitor -eq 2 ] ; then
   root -l ChainMonitors.C  #all runs listed 
 elif [ $isMonitor -eq 20 ] ; then
   root -l "ChainMonitors.C(-10)"
+elif [ $isMonitor -eq 10 ] ; then
+  root -l "ChainMonitors.C(${RUN},-10)"  
 fi  
   
 exit 1
