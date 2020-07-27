@@ -717,7 +717,7 @@ void Transfer(
     thetaCM = thetaCM * TMath::RadToDeg();
     
     }else{
-      hit == -11;
+      hit = -11;
     }
 
     if( hit == 1)  count ++;

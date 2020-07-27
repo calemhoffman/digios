@@ -39,7 +39,7 @@ public:
    
    Isotope(int a, int z);
    Isotope(string name);
-   double CalSp(int na, int nz);
+   double CalSp(int np, int nz);
    double CalBeta(double T){
      double Etot = Mass + T;
      double gamma = 1 + T/Mass;
@@ -242,9 +242,9 @@ double Isotope::CalSp(int Np, int Nn){
   Isotope nucleusD(A - Np - Nn, Z - Np);  
 
   if( nucleusD.Mass != -404){
-	return nucleusD.Mass + Nn*mn + Np*mp - this->Mass;
+    return nucleusD.Mass + Nn*mn + Np*mp - this->Mass;
   }else{
-	return -404;
+    return -404;
   }
 }
 

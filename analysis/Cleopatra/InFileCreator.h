@@ -279,7 +279,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         } 
       } 
       if( abs(isotopea.A-isotopeb.A) == 2 ){ // 2 neutron transfer
-        fprintf(file_out, "PARAMETERSET alpha2 r0target\n");
+        fprintf(file_out, "PARAMETERSET alpha3 r0target\n");
         fprintf(file_out, "lstep=1 lmin=0 lmax=30 maxlextrap=0 ASYMPTOPIA=40\n");
         fprintf(file_out, "\n");
         fprintf(file_out, "PROJECTILE\n");
@@ -289,10 +289,23 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       
       //===== TARGET
       fprintf(file_out, "TARGET\n");
+      ///check Ex is above particle threshold
+      double nThreshold = isotopeB.CalSp(0,1);
+      double pThreshold = isotopeB.CalSp(1,0);
+      bool isAboveThreshold = false;
+      double ExEnergy = atof(Ex.c_str());
+      if( ExEnergy > nThreshold || ExEnergy > pThreshold ) {
+        isAboveThreshold = true;
+        printf("         Ex = %.3f MeV is above thresholds; Sp = %.3f MeV, Sn = %.3f MeV\n", ExEnergy, pThreshold, nThreshold);
+      }
       
       if( abs(isotopea.A-isotopeb.A) == 1 ){
         fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-        fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
+        if( isAboveThreshold ) {
+          fprintf(file_out, "nodes=%s l=%d jp=%s E=-.2 $node is n-1, set binding 200 keV \n", node.c_str(), spdf, jValue.c_str());
+        }else{
+          fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
+        }
         fprintf(file_out, "r0=1.25 a=.65 \n");
         fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
         fprintf(file_out, "rc0=1.3 \n");
@@ -300,7 +313,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       
       if( abs(isotopea.A-isotopeb.A) == 2 ){
         fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-        fprintf(file_out, "nodes=%s L=%d  $node is n-1 \n", node.c_str(), spdf);
+        if( isAboveThreshold ){
+          fprintf(file_out, "nodes=%s L=%d E=-.2 $node is n-1, binding by 200 keV \n", node.c_str(), spdf);
+        }else{
+          fprintf(file_out, "nodes=%s L=%d  $node is n-1 \n", node.c_str(), spdf);
+        }
       }
       
       fprintf(file_out, ";\n");
