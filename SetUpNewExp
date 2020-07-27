@@ -88,7 +88,7 @@ if [ ${Arch} == "Linux" ]; then
 
 elif [ ${Arch} == "Darwin" ]; then
 
-    if [ ${PCName} == "helioss-iMac" ]; then #MAC
+    if [ ${PCName} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
         DATAPATH=~/experiments
         expDIR=~/digios
 
