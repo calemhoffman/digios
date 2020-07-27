@@ -6,6 +6,7 @@ import globus_sdk
 CLIENT_ID = '1f2df281-39e0-4f75-b377-f11ae435a7e8'
 
 client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
+
 '''
 client.oauth2_start_flow(refresh_tokens=True)
 
@@ -98,7 +99,7 @@ fexp.close()
 
 ### myEndpoint_id is in dgs, no access right to /home/helios!!!!
 myEndpoint_id='d907d6b0-986e-11e9-bf5e-0e4a062367b8'
-LCRCEndpoint_id='57b72e31-9f22-11e8-96e1-0a6d4e044368'
+LCRCEndpoint_id='61f9954c-a4fa-11ea-8f07-0a21f750d19b'
 
 taskLabel= format("DAQ_Auto_Upload_%s_Run%03d" % (expName, int(runNum)) )
 
@@ -151,4 +152,5 @@ print("My Last 10 Tasks:")
 for task in tc.task_list(num_results=10, filter="type:TRANSFER,DELETE"):
     print(task["request_time"], task["label"], task["status"])
     #print(task["task_id"], task["request_time"], task["completion_time"], task["status"])
+
 
