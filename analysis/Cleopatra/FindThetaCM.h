@@ -176,7 +176,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    printf("==== ThetaCM in degree =================\n");
    printf("========================= x-ratio : %f \n", XRATION);
    printf("=========================      Ex : %6.4f MeV\n", Ex);
-   printf("         %6s - %6s |  %6s, %6s\n", "Min",  "Max", "Mean", "Half");
+   printf("         %6s - %6s |  %6s, %6s, %6s\n", "Min",  "Max", "Mean", "Half", "sin(x)dx * 180/pi");
    printf("-------------------------------------------------\n");
    for( int i = 0; i < iDet; i++){
      double zMin = midPos[i]-length*XRATION/2.;
@@ -193,8 +193,10 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
        
        double tMean = (tMax + tMin)/2.;
        double tHalf = (tMax - tMin)/2.;
+       
+       double sintdt = TMath::Sin(tMean * TMath::DegToRad()) * 2 * tHalf ;
       
-       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f\n", i, j, tMin,  tMax, tMean, tHalf);
+       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f, %6.4f\n", i, j, tMin,  tMax, tMean, tHalf, sintdt);
      }
      if( nDivision > 0 ) printf("--------------\n");
    }
