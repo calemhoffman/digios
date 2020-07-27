@@ -1266,7 +1266,7 @@ void Monitors::Terminate()
       
       /// run puhs_to_websrv.sh
       TString cmd;
-      cmd.Form(".! ./push_to_websrv.sh %s", outFileName.Data()); 
+      cmd.Form(".! ./push_to_websrv.sh %s %s", outFileName.Data(), canvasTitle.ReplaceAll(" ", "").Data()); 
       gROOT->ProcessLine(cmd);
             
       gROOT->ProcessLine(".q");

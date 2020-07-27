@@ -11,24 +11,29 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     //chain->Add("../root_data/gen_run01[3-7].root");
     
     //56 ug
-    chain->Add("../root_data/gen_run01[8-9].root");
-    chain->Add("../root_data/gen_run02[0-9].root");
-    chain->Add("../root_data/gen_run03[0-5].root");
+    //chain->Add("../root_data/gen_run01[8-9].root");
+    //chain->Add("../root_data/gen_run02[0-9].root");
+    //chain->Add("../root_data/gen_run03[0-5].root");
     
     //54 ug
-    chain->Add("../root_data/gen_run03[6-9].root");
-    chain->Add("../root_data/gen_run04[0-9].root");
-    chain->Add("../root_data/gen_run05[0-9].root");
-    chain->Add("../root_data/gen_run06[0-9].root");
+    //chain->Add("../root_data/gen_run03[6-9].root");
+    //chain->Add("../root_data/gen_run04[0-9].root");
+    //chain->Add("../root_data/gen_run05[0-9].root");
+    //chain->Add("../root_data/gen_run06[0-2].root");
+    
+    // 54 ug leakkage current changed
+    chain->Add("../root_data/gen_run06[3-9].root");
     chain->Add("../root_data/gen_run07[0-9].root");
+    chain->Add("../root_data/gen_run08[0-9].root");
+    chain->Add("../root_data/gen_run09[0-9].root");
     
   }else{
     
     TString fileName;
-  
-    if( RUNNUM2 == -1 ) RUNNUM2 = RUNNUM;
+    int endRUNNUM = RUNNUM2;
+    if( RUNNUM2 == -1 || RUNNUM2 == -10 ) endRUNNUM = RUNNUM;
     
-    for( int i = RUNNUM ; i <= RUNNUM2 ; i++){
+    for( int i = RUNNUM ; i <= endRUNNUM ; i++){
       fileName.Form("../root_data/gen_run%03d.root", i);
       chain->Add(fileName);
     }
@@ -45,7 +50,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   //Some input to TSelector
   Monitors * selector = new Monitors();
-  if( RUNNUM == -10 ) selector->printControl(0); //quit after terminated
+  if( RUNNUM == -10 || RUNNUM2 == -10 ) selector->printControl(0); //quit after terminated
   chain->Process(selector, "");
 
 }

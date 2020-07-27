@@ -60,9 +60,7 @@ TString SetRDTGate(TString str){
    return Form("(%scut0 || %scut1 || %scut2 || %scut3)", str.Data(), str.Data(), str.Data(), str.Data());
 }
 
-void script_2(){
-
-   TString fileName = "A_gen_run018-040.root";
+void script_2(TString fileName){
 
    //========================== input file/cut/simulation   
    tree0 = new TChain("tree");
@@ -95,7 +93,7 @@ void script_2(){
    
    ///SetCanvas(1,2, 800, cScript);
    
-   TH1F * h1 = new TH1F("h1", "E_{x}; E_{x}[ MeV]; Count / 20 keV", 700, -1, 13);
+   TH1F * h1 = new TH1F("h1", Form("E_{x} | %s ; E_{x}[ MeV]; Count / 20 keV", fileName.Data()), 700, -1, 13);
    TH1F * h2 = new TH1F("h2", "E_{x}; E_{x}[ MeV]; Count / 20 keV", 700, -1, 13);
    TH1F * h3 = new TH1F("h3", "E_{x}; E_{x}[ MeV]; Count / 20 keV", 700, -1, 13);
    h2->SetLineColor(2);
@@ -175,8 +173,18 @@ void script_2(){
    LoadRDTCut("rdtCuts.root", "BC_");   
    gate_RDT = SetRDTGate("BC_");
    gROOT->cd();
-   TH2F * hExTheta = new TH2F("hExTheta", "#theta_{CM} vs E_{x} ( gate_B+C, -10 < coinTime < 25 ); E_{x} [MeV] ; #theta_{CM}", 700, -1, 13, 400, 5, 45); 
+   TH2F * hExTheta = new TH2F("hExTheta", "#theta_{CM} vs E_{x} ( gate_B+C, -10 < coinTime < 25 ); E_{x} [MeV] ; #theta_{CM} [deg]", 700, -1, 13, 400, 5, 45); 
    tree0->Draw("thetaCM:Ex>>hExTheta",gate_RDT + " && " + "-10<coin_t && coin_t < 25", "colz");
+
+   TDatime dateTime;
+   TString outFileName;
+   outFileName.Form("Script_%d%d%d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
+   cScript->SaveAs("Canvas/"+outFileName);
+
+   TString cmd;
+   cmd.Form(".! ./push_to_websrv.sh %s", outFileName.Data());
+   gROOT->ProcessLine(cmd);
+   gROOT->ProcessLine(".q");
    
 }
 
