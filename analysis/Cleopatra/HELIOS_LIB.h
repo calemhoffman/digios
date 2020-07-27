@@ -253,8 +253,6 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
    output[2] = Pb;
    output[3] = PB;
    
-   this->PA = PA;
-   this->Pa = Pa;
    this->Pb = Pb;
    this->PB = PB;
    
