@@ -253,8 +253,6 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
    output[2] = Pb;
    output[3] = PB;
    
-   this->PA = PA;
-   this->Pa = Pa;
    this->Pb = Pb;
    this->PB = PB;
    
@@ -371,10 +369,14 @@ public:
    double GetVp(){return vp0;}
    // anti-clockwise rotation for positive ion in B-field to z-axis
    double GetXPos(double ZPos){
-      return rho * (TMath::Sin(TMath::Tan(theta) * ZPos / rho + phi) - TMath::Sin(phi)) ;
+      int sign = 1;
+      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
+      return rho * (TMath::Sin(sign*TMath::Tan(theta) * ZPos / rho + phi) - TMath::Sin(phi)) ;
    }
    double GetYPos(double ZPos){
-      return rho * (TMath::Cos(phi) - TMath::Cos(TMath::Tan(theta) * ZPos / rho + phi) );
+      int sign = 1;
+      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
+      return rho * (TMath::Cos(phi) - TMath::Cos(sign*TMath::Tan(theta) * ZPos / rho + phi) );
    }
    
    double GetR(double ZPos){
@@ -390,10 +392,14 @@ public:
    double GetRecoilVp(){return vp0B;}
    // anti-clockwise rotation for positive ion in B-field to z-axis
    double GetRecoilXPos(double ZPos){
-      return rhoB * (TMath::Sin(TMath::Tan(thetaB) * ZPos / rhoB + phiB) - TMath::Sin(phiB));
+      int sign = 1;
+      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
+      return rhoB * (TMath::Sin(sign*TMath::Tan(thetaB) * ZPos / rhoB + phiB) - TMath::Sin(phiB));
    }   
    double GetRecoilYPos(double ZPos){
-      return rhoB * (TMath::Cos(phiB) - TMath::Cos(TMath::Tan(thetaB) * ZPos / rhoB + phiB) );
+      int sign = 1;
+      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
+      return rhoB * (TMath::Cos(phiB) - TMath::Cos(sign*TMath::Tan(thetaB) * ZPos / rhoB + phiB) );
    }
    double GetRecoilR(double ZPos){
       return rhoB * TMath::Sqrt(2 - 2* TMath::Cos( TMath::Tan(thetaB) * ZPos / rhoB));
@@ -629,8 +635,8 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    double azimuDet = TMath::ATan2(width/2., perpDist);
    
    //rotate Pb and PB to B-Field 
-   Pb.RotateX(BfieldTheta);
-   PB.RotateX(BfieldTheta);
+   //Pb.RotateX(BfieldTheta);
+   //PB.RotateX(BfieldTheta);
 
    //====================== X-Y plane, light particle
    rho = Pb.Pt()  / Bfield / Zb / c * 1000; //mm
