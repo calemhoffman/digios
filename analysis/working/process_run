@@ -6,6 +6,7 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "      Merge =   1/0*     "  
   echo "   EventBld = 2/1/0*   || 2 = with Trace"  
   echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo " Monitors.C = 2/1/0*   || 1 = single run, 2 = using the list in ChainMonitors.C"
   echo "        * negative option = force "
   exit 1
 fi;
@@ -73,9 +74,11 @@ fi
 ########################################
 #################### Monitor
 if [ $isMonitor -eq 1 ] ; then
-  root -l "ChainMonitors.C(${RUN})"
+  root -l "ChainMonitors.C(${RUN})" # single run
 elif [ $isMonitor -eq 2 ] ; then
-  root -l ChainMonitors.C
+  root -l ChainMonitors.C  #all runs listed 
+elif [ $isMonitor -eq 20 ] ; then
+  root -l "ChainMonitors.C(-10)"
 fi  
   
 exit 1

@@ -3,27 +3,24 @@
 void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
 
-  if( RUNNUM == -1){
+  if( RUNNUM == -1 || RUNNUM == -10){
 
-    //chain->Add("../root_data/gen_run02[8,9].root"); //14N, 440ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run038.root");     //14N, 440ug/cm2, 700mm, good run
+    //chain->Add("../root_data/gen_run00[6-8].root"); //alpha
     
-    //chain->Add("../root_data/gen_run03[1-2].root"); //14N, 140ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run033.root");     //14N, 140ug/cm2, 700mm, good run
-    //chain->Add("../root_data/gen_run03[4-7].root"); //14N, 140ug/cm2, 700mm
-    //chain->Add("../root_data/gen_run04[3,6].root"); //14N, 140ug/cm2, 700mm
+    //140 ug
+    //chain->Add("../root_data/gen_run01[3-7].root");
     
-    //chain->Add("../root_data/gen_run047.root"); //14N, gold foil, slit normal
-    //chain->Add("../root_data/gen_run048.root"); //14N, gold foil, slit out
+    //56 ug
+    chain->Add("../root_data/gen_run01[8-9].root");
+    chain->Add("../root_data/gen_run02[0-9].root");
+    chain->Add("../root_data/gen_run03[0-5].root");
     
-    chain->Add("../root_data/gen_run049.root");     //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run05[0-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run06[0-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run070.root");     //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run07[7-9].root"); //14N, 140ug/cm2, 600mm
-    chain->Add("../root_data/gen_run08[0-2].root"); //14N, 140ug/cm2, 600mm
-    
-    //chain->Add("../root_data/gen_run07[1-6].root"); //14N, 400ug/cm2, 600mm
+    //54 ug
+    chain->Add("../root_data/gen_run03[6-9].root");
+    chain->Add("../root_data/gen_run04[0-9].root");
+    chain->Add("../root_data/gen_run05[0-9].root");
+    chain->Add("../root_data/gen_run06[0-9].root");
+    chain->Add("../root_data/gen_run07[0-9].root");
     
   }else{
     
@@ -48,7 +45,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   //Some input to TSelector
   Monitors * selector = new Monitors();
-  selector->testingInput(1231441241);
+  if( RUNNUM == -10 ) selector->printControl(0); //quit after terminated
   chain->Process(selector, "");
 
 }

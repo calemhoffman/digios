@@ -299,10 +299,10 @@ void recoils(bool isLogz = false) {
   if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
   
   
-  //TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
-  //if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
-  //crdtID->Clear();
-  //hrdtID->Draw("colz");
+  TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
+  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
+  crdtID->Clear();
+  hrdtID->Draw("colz");
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
   if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500, 500, 1000, 1000);
@@ -311,6 +311,8 @@ void recoils(bool isLogz = false) {
     crdtS->cd(i+1);
     hrdt[i]->Draw("");
   }
+  
+  
   
   //TCanvas *crdtTAC =  (TCanvas *) gROOT->FindObjectAny("crdtTAC");
   //if( crdtTAC == NULL ) crdtTAC = new TCanvas("crdtTAC",Form("raw RDTtac | %s", canvasTitle.Data()),0,0, 1600, 1600);

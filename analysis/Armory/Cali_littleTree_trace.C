@@ -106,17 +106,17 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    //for( int i = 0; i < 4; i ++) printf("%d | %f, %f \n", i, trdt[2*i], trdt[2*i+1]);
    
-   ///bool coinFlag = false;
-   ///for( int i = 0; i < numDet ; i++){
-   ///   for( int j = 0; j < 8 ; j++){
-   ///      if( TMath::IsNaN(rdt[j]) ) continue; 
-   ///      int tdiff = rdt_t[j] - e_t[i];
-   ///      if( -20 < tdiff && tdiff < 20 )  {
-   ///         coinFlag = true;
-   ///      }
-   ///   }
-   ///}
-   ///if( coinFlag == false ) return kTRUE;
+   bool coinFlag = false;
+   for( int i = 0; i < numDet ; i++){
+      for( int j = 0; j < 8 ; j++){
+         if( TMath::IsNaN(rdt[j]) ) continue; 
+         int tdiff = rdt_t[j] - e_t[i];
+         if( -20 < tdiff && tdiff < 20 )  {
+            coinFlag = true;
+         }
+      }
+   }
+   if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    ULong64_t eTime = -2000; //this will be the time for Ex valid
@@ -130,7 +130,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       //if( idet ==17 ) continue;
       //if( idet == 7 ) continue;
       //if( idet ==  5 ) continue;
-      if( e[idet] < 500 ) continue;
+      if( e[idet] < 300 ) continue;
       
       //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
