@@ -15,7 +15,7 @@
 #include <fstream>
 #include <TCutG.h>
 
-void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tree", double eRange = 6000, double deRange = 4000){  
+void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tree", TString gate="", double eRange = 6000, double deRange = 4000){  
    
    //============================= RDT cut
    TFile * fileCut = new TFile(rdtCut);
@@ -48,7 +48,7 @@ void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tre
 
    printf("===================> Total #Entry: %10lld \n",  chain->GetEntries());
    
-   gStyle->SetOptStat(10001);
+   gStyle->SetOptStat("");
    gStyle->SetStatY(0.9);
    gStyle->SetStatX(0.9);
    gStyle->SetStatW(0.4);
@@ -65,13 +65,22 @@ void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tre
    TH2F * h[4];
    TString varX, varY;
    TString expression[4];
+   
+   TLatex text;
+   text.SetNDC();
+   text.SetTextFont(82);
+   text.SetTextSize(0.04);
+   text.SetTextColor(2);
 
    for( int i = 0 ; i < 4; i++){
      
-     varX.Form("trdt[%d]",2*i); 
-     varY.Form("trdt[%d]",2*i+1);
+     varX.Form("rdt[%d]",2*i); 
+     varY.Form("rdt[%d]",2*i+1);
 
      h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 0, eRange, 500, 0, deRange);
+     
+     ///range OverRide
+     ///h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 1500, 3000, 500, 100, 800);
 
      expression[i].Form("%s:%s>>h%d", 
                         varY.Data(),
@@ -79,8 +88,10 @@ void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tre
                         i);
 
      cRDTCut->cd(i+1);
-     chain->Draw(expression[i],"", "colz");
+     chain->Draw(expression[i],gate, "colz");
      cut[i]->Draw("same");
+     
+     text.DrawLatex(0.15, 0.2, gate);
      
 
    }

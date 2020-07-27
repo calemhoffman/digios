@@ -21,7 +21,7 @@ void Cali_xf_xn(TTree * tree){
    const int rowDet = 4;
    const int colDet = 6;
    
-   int energyRange[3] = {200, 1000, 2500}; // bin, min, max
+   int energyRange[3] = {200, 1000, 2700}; // bin, min, max
    
 /**///========================================================  load tree
 
