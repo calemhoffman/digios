@@ -78,6 +78,9 @@ else
 
 fi
 
+#echo "calling Mac to run procee_run"
+#ssh heliosdigios@192.168.1.193 "AutoPrcess ${RUN}"
+
 echo wait 2 seconds before closing the IOCs
 sleep 2
 
