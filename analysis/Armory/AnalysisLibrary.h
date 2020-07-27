@@ -173,6 +173,7 @@ vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
     
     }else{
       fitEnergy = enX;
+      refEnergy = enY;
     }
     
     
