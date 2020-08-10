@@ -20,7 +20,7 @@ else
 fi
 
 
-#RUN=$(printf '%03d' ${RUN})
+RUN=$(printf '%03d' ${RUN})
 
 #######################################
 ####################  Download raw data
