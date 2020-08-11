@@ -659,6 +659,9 @@ void Transfer(
     phiB = PB.Phi() * TMath::RadToDeg();
 
     //==== Helios
+    
+    ///printf(" thetaCM : %f \n", thetaCM * TMath::RadToDeg());
+    
     if( Tb > 0  || TB > 0 ){
       hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
       
