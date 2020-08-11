@@ -107,8 +107,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   printf(" loading detector Geometry.\n");
   TMacro * detGeo = (TMacro *) file->FindObjectAny("detGeo");  
   double field = ExtractNumber(0, detGeo);
-  BfieldTheta = ExtractNumber(1, detGeo);
-  TString fdmsg = BfieldTheta < 90. ? "out of plane" : "into plane";
+  TString fdmsg = field > 0 ? "out of plan" : "into plan";
   msg2.Form("field = %.2f T, %s", field, fdmsg.Data());
   
   length = ExtractNumber(5, detGeo);
@@ -181,7 +180,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
    //========================================= reaction parameters
    
-   printf(" loading reaction parameters");
+   printf(" loading reaction parameters \n");
    TMacro * reactionData = (TMacro *) file->FindObjectAny("reactionData");
    
    double mass  = ExtractNumber(0, reactionData);

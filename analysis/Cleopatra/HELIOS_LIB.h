@@ -264,7 +264,7 @@ int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a){
    double mass = mb;
    double massB = mB;
    double y = e + mass;
-   double slope = 299.792458 * zb * Bfield / TMath::TwoPi() * beta / 1000.; // MeV/mm;
+   double slope = 299.792458 * zb * abs(Bfield) / TMath::TwoPi() * beta / 1000.; // MeV/mm;
    double alpha = slope/beta;
    double G =  alpha * gamma * beta * a ;
    double Z = alpha * gamma * beta * z;
@@ -382,11 +382,9 @@ public:
    
    
    double GetXPos(double ZPos){
-      int sign = BfieldTheta > TMath::PiOver2() ? -1 : 1;
       return XPos( ZPos, theta, phi, rho, sign);
    }
    double GetYPos(double ZPos){
-      int sign = BfieldTheta > TMath::PiOver2() ? -1 : 1;
       return YPos( ZPos, theta, phi, rho, sign);
    }
    double GetR(double ZPos){
@@ -401,11 +399,9 @@ public:
    double GetRecoilVt(){return vt0B;}
    double GetRecoilVp(){return vp0B;}
    double GetRecoilXPos(double ZPos){
-      int sign = BfieldTheta > TMath::PiOver2() ? -1 : 1;
       return XPos( ZPos, thetaB, phiB, rhoB, sign);
    }   
    double GetRecoilYPos(double ZPos){
-      int sign = BfieldTheta > TMath::PiOver2() ? -1 : 1;
       return YPos( ZPos, thetaB, phiB, rhoB, sign);
    }
    double GetRecoilR(double ZPos){
@@ -448,6 +444,7 @@ private:
    
    //detetcor Geometry
    double Bfield; // T
+   int sign ; // sign of B-field
    double BfieldTheta; // rad, 0 = z-axis, pi/2 = y axis, pi = -z axis
    double bore; // bore , mm
    double perpDist; // distance from axis
@@ -503,6 +500,7 @@ HELIOS::HELIOS(){
 
    Bfield = 0;
    BfieldTheta = 0;
+   sign = 1;
    bore = 1000;
    perpDist = 10;
    width = 10;
@@ -548,6 +546,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
          if( x.substr(0,2) == "//" )  continue;
          
          if( i == 0 )                            Bfield = atof(x.c_str());
+         sign = Bfield > 0 ? 1 : -1;
          if( i == 1 )                       BfieldTheta = atof(x.c_str());
          if( i == 2 )                              bore = atof(x.c_str());
          if( i == 3 && !overrideDetDistance )  perpDist = atof(x.c_str());
@@ -647,14 +646,14 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    //PB.RotateX(BfieldTheta);
 
    //====================== X-Y plane, light particle
-   rho = Pb.Pt() / Bfield / Zb / c * 1000; //mm
+   rho = Pb.Pt() / abs(Bfield) / Zb / c * 1000; //mm
    theta = Pb.Theta();
    phi = Pb.Phi();
    
    //======================  recoil detector
    thetaB = PB.Theta();
    phiB = PB.Phi();
-   rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
+   rhoB = PB.Pt() / abs(Bfield) / ZB / c * 1000; //mm
    vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
    vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
    //tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
@@ -710,7 +709,6 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       // loop until reach the detector position covrage.    
       do{
          loop += 1;
-         int sign = BfieldTheta > TMath::PiOver2() ? -1 : 1;
          int n = 2*loop + sign;
          
          if( blocker != 0.0 && abs(firstPos/blocker) < loop ) return -6;
@@ -736,7 +734,6 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             //========== calculate zHit by solving the cycltron orbit and the detector planes. 
             double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet)); 
             double dphi = phi - phiDet;   
-            int sign = BfieldTheta > TMath::PiOver2() ? -1 : 1;
             double z0 = TMath::TwoPi() * rho / TMath::Tan(theta);   // the cycle
             
             zHit = z0 / TMath::TwoPi() * ( sign * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho - sign * TMath::Sin(dphi)) + TMath::Pi() * n );
