@@ -176,7 +176,7 @@ void Transfer(
   double mb = reaction.GetMass_b();
   double pCM = reaction.GetMomentumbCM();
   double q = TMath::Sqrt(mb*mb + pCM*pCM);
-  double slope = 299.792458 * zb * helios.GetBField() / TMath::TwoPi() * beta / 1000.; // MeV/mm
+  double slope = 299.792458 * zb * abs(helios.GetBField()) / TMath::TwoPi() * beta / 1000.; // MeV/mm
   printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
   printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
