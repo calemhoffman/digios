@@ -57,6 +57,7 @@ bool shownKELines = false;
 double * FindRange(TString branch, TString gate, TTree * tree, double output[2]);
 vector<string> SplitStr(string tempLine, string splitter, int shift = 0);
 void Plot(plotID pID);
+double ExtractNumber(int index, TMacro * macro);
 
 TFile * file;
 TTree * tree; 
@@ -87,15 +88,6 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   TMacro * reactionConfig = (TMacro *) file->FindObjectAny("reactionConfig");
   Reaction=reactionConfig->GetName(); ///TODO change to Latex
   
-  TMacro * detGeo = (TMacro *) file->FindObjectAny("detGeo");
-  TString field = detGeo->GetListOfLines()->At(0)->GetName();
-  TString fieldDir = detGeo->GetListOfLines()->At(1)->GetName();
-  
-  field.Remove(field.First('/'));
-  fieldDir.Remove(fieldDir.First('/'));
-  TString fdmsg = fieldDir.Atof() < 90. ? "out of plane" : "into plane";
-  msg2.Form("field = %.2f T, %s", field.Atof(), fdmsg.Data());
-
   fxList = (TObjArray *) file->FindObjectAny("fxList");
   txList = (TObjArray *) file->FindObjectAny("txList");
 
@@ -109,75 +101,60 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    gStyle->SetLabelSize(0.05, "XY");
    gStyle->SetTitleFontSize(0.1);
 
-
 //========================================= detector Geometry
-   string detGeoFileName = "detectorGeo.txt";
-   int numDet;
-   int rDet = 5; /// number of detector at different position, row-Det
-   int cDet = 6; /// number of detector at same position, column-Det
-   vector<double> pos;
+  //================================== detetcor Geometry
+  printf("=================================\n");
+  printf(" loading detector Geometry.\n");
+  TMacro * detGeo = (TMacro *) file->FindObjectAny("detGeo");  
+  double field = ExtractNumber(0, detGeo);
+  BfieldTheta = ExtractNumber(1, detGeo);
+  TString fdmsg = BfieldTheta < 90. ? "out of plane" : "into plane";
+  msg2.Form("field = %.2f T, %s", field, fdmsg.Data());
+  
+  length = ExtractNumber(5, detGeo);
+  
+  posRecoil  = ExtractNumber(6, detGeo);
+  rhoRecoil  = ExtractNumber(7, detGeo);
+  posRecoil1 = ExtractNumber(9, detGeo);
+  posRecoil2 = ExtractNumber(10, detGeo);
+  firstPos   = ExtractNumber(14, detGeo);  
    
-   printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream detFile;
-   detFile.open(detGeoFileName.c_str());
-   int i = 0;
-   if( detFile.is_open() ){
-      string x;
-      while( detFile >> x){
-         ///printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( i == 2 ) BfieldTheta = atof(x.c_str());
-         if( i == 5 ) length   = atof(x.c_str());
-         if( i == 6 ) posRecoil = atof(x.c_str());
-         if( i == 7 ) rhoRecoil = atof(x.c_str());
-         if( i == 9 ) posRecoil1 = atof(x.c_str());
-         if( i == 10 ) posRecoil2 = atof(x.c_str());
-         if( i == 14 ) firstPos = atof(x.c_str());
-         if( i == 17 ) cDet = atoi(x.c_str());
-         if( i >= 18 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
-      
-      rDet = pos.size();
-      detFile.close();
-      printf("... done.\n");
-      
-      vector<double> posTemp = pos;
-      for(int id = 0; id < rDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
-      }
-      
-      for(int i = 0; i < rDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %10.2f mm - %10.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %10.2f mm - %10.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("=======================\n");
+  vector<double> pos;
+  int nLine = detGeo->GetListOfLines()->GetLast() + 1;
+  for( int i = 17; i < nLine; i++){
+    pos.push_back(ExtractNumber(i, detGeo));
+  }
+  int rDet = pos.size(); /// number of detector at different position, row-Det
+  int cDet = (int) ExtractNumber(16, detGeo); /// number of detector at same position, column-Det
 
-          
-   }else{
-       printf("... fail\n");
-       return;
-   }
-   
-   numDet = rDet * cDet;
-   
-   if( firstPos > 0 ){
-      zRange[1] = pos[0]-50;
-      zRange[2] = pos[rDet-1] + length + 50;
-   }else{
-      zRange[1] = pos[0]- length - 50;
-      zRange[2] = pos[rDet-1] + 50;
-   }
-   
-   printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
-   printf("=================================\n");
-   
+  vector<double> posTemp = pos;
+  for(int id = 0; id < rDet; id++){
+    if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+    if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
+  }
+  
+  for(int i = 0; i < rDet ; i++){
+     if( firstPos > 0 ){
+        printf("%d, %10.2f mm - %10.2f mm \n", i, pos[i], pos[i] + length);
+     }else{
+        printf("%d, %10.2f mm - %10.2f mm \n", i, pos[i] - length , pos[i]);
+     }
+  }
+  printf("=================================\n");
+  
+  int numDet = rDet * cDet;
+
+  if( firstPos > 0 ){
+    zRange[1] = pos[0]-50;
+    zRange[2] = pos[rDet-1] + length + 50;
+  }else{
+    zRange[1] = pos[0]- length - 50;
+    zRange[2] = pos[rDet-1] + 50;
+  }
+
+  printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
+  printf("=================================\n");
+  
    //========================================= Ex List;
    printf(" loading Ex list\n");
    
@@ -201,44 +178,28 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    }
    
    printf("=================================\n");
-   
+  
    //========================================= reaction parameters
+   
    printf(" loading reaction parameters");
-   ifstream reactionfile;
-   reactionfile.open("reaction.dat");
-   double mass, q, beta, Et, massB;
-   double alpha, gamm, slope;
+   TMacro * reactionData = (TMacro *) file->FindObjectAny("reactionData");
    
-   if( reactionfile.is_open() ){
-      string x;
-      int i = 0;
-      while( reactionfile >> x ){
-         if( x.substr(0,2) == "//" )  continue;
-         if( i == 0 ) mass = atof(x.c_str());
-         if( i == 1 ) q    = atof(x.c_str());
-         if( i == 2 ) beta = atof(x.c_str()); 
-         if( i == 3 ) Et   = atof(x.c_str()); 
-         if( i == 4 ) massB = atof(x.c_str()); 
-         if( i == 5 ) alpha = atof(x.c_str()); 
-         i = i + 1;
-      }
-      printf("... done.\n");
-
-      gamm = 1./TMath::Sqrt(1-beta*beta);
-      slope = alpha * beta;
-      printf("\tmass-b    : %f MeV/c2 \n", mass);
-      printf("\tcharge-b  : %f \n", q);
-      printf("\tE-total   : %f MeV \n", Et);
-      printf("\tmass-B    : %f MeV/c2 \n", massB);		 
-      printf("\tbeta      : %f \n", beta);
-      printf("\tslope     : %f MeV/mm \n", slope);
-      printf("=================================\n");
-
-   }else{
-      printf("... fail.\n");
-   }
-   reactionfile.close();
+   double mass  = ExtractNumber(0, reactionData);
+   double q     = ExtractNumber(1, reactionData);
+   double beta  = ExtractNumber(2, reactionData);
+   double Et    = ExtractNumber(3, reactionData);
+   double massB = ExtractNumber(4, reactionData);
+   double alpha = ExtractNumber(5, reactionData);
    
+   double gamm = 1./TMath::Sqrt(1-beta*beta);
+   double slope = alpha * beta;
+   printf("\tmass-b    : %f MeV/c2 \n", mass);
+   printf("\tcharge-b  : %f \n", q);
+   printf("\tE-total   : %f MeV \n", Et);
+   printf("\tmass-B    : %f MeV/c2 \n", massB);		 
+   printf("\tbeta      : %f \n", beta);
+   printf("\tslope     : %f MeV/mm \n", slope);
+   printf("=================================\n");
    
    //=================================== calculate Ranges
    
@@ -329,6 +290,16 @@ vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
   }while(pos != string::npos );
 
   return output;
+}
+
+double ExtractNumber(int index, TMacro * macro){
+  
+  TString field = macro->GetListOfLines()->At(index)->GetName();
+  
+  field.Remove(field.First('/'));
+  
+  return field.Atof();
+  
 }
 
 void Plot(plotID pID) {

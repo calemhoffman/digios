@@ -315,12 +315,14 @@ void Transfer(
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
   TMacro exList(excitationFile.c_str());
+  TMacro reactionData(filename.Data());
   TString str;
   str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
   config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
   exList.Write("ExList");
+  reactionData.Write("reactionData");
   
   if( distList != NULL ) distList->Write("DWBA", 1);
   
