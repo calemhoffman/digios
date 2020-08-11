@@ -176,7 +176,7 @@ void Transfer(
   double mb = reaction.GetMass_b();
   double pCM = reaction.GetMomentumbCM();
   double q = TMath::Sqrt(mb*mb + pCM*pCM);
-  double slope = 299.792458 * zb * helios.GetBField() / TMath::TwoPi() * beta / 1000.; // MeV/mm
+  double slope = 299.792458 * zb * abs(helios.GetBField()) / TMath::TwoPi() * beta / 1000.; // MeV/mm
   printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
   printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
@@ -191,7 +191,7 @@ void Transfer(
     fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetMass_b(), "mass_b");
     fprintf(keyParaOut, "%-15d  //%s\n", zb, "charge_b");
     fprintf(keyParaOut, "%-15.8f  //%s\n", reaction.GetReactionBeta(), "betaCM");
-    fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetCMTotalEnergy(), "Etot");
+    fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetCMTotalEnergy(), "Ecm");
     fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetMass_B(), "mass_B");
     fprintf(keyParaOut, "%-15.4f  //%s\n", slope/beta, "alpha=slope/beta");
 
@@ -315,25 +315,28 @@ void Transfer(
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
   TMacro exList(excitationFile.c_str());
+  TMacro reactionData(filename.Data());
   TString str;
   str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
   config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
   exList.Write("ExList");
+  reactionData.Write("reactionData");
   
   if( distList != NULL ) distList->Write("DWBA", 1);
   
   TMacro hitMeaning;
-  str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
-  str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -3 ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
-  str = "hit == -4 ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -5 ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -6 ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
-  str = "hit == -7 ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
-  str = "hit == -8 ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
+  str = "hit ==  1  ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
+  str = "hit == -1  ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -2  ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -3  ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
+  str = "hit == -4  ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -5  ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -6  ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
+  str = "hit == -7  ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
+  str = "hit == -8  ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
+  str = "hit == -11 ; both recoil particles stopped at target"; hitMeaning.AddLine(str.Data());
   hitMeaning.Write("hitMeaning");
 
   int hit; // the output of Helios.CalHit
@@ -355,7 +358,7 @@ void Transfer(
   tree->Branch("e", &e, "e/D");
   tree->Branch("x", &x, "x/D");
   tree->Branch("z", &z, "z/D");
-  //double z0; tree->Branch("z0", &z0, "z0/D");
+  double z0; tree->Branch("z0", &z0, "z0/D");
   tree->Branch("t", &t, "t/D");
   double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
   
@@ -392,9 +395,13 @@ void Transfer(
   
   double TbLoss; // energy loss of particle-b from target scattering
   double KEAnew; //beam energy after target scattering
+  double depth; // reaction depth;
+  double Ecm;
   if( isTargetScattering ){
+    tree->Branch("depth", &depth, "depth/D");
     tree->Branch("TbLoss", &TbLoss, "TbLoss/D");
     tree->Branch("KEAnew", &KEAnew, "KEAnew/D");
+    tree->Branch("Ecm", &Ecm, "Ecm/D");
   }
 
   double decayTheta; // the change of thetaB due to decay
@@ -589,7 +596,7 @@ void Transfer(
       reaction.CalReactionConstant();
       TLorentzVector PA = reaction.GetPA();            
 
-      double depth = 0;
+      //depth = 0;
       if( isTargetScattering ){
         //==== Target scattering, only energy loss
         depth = targetThickness * gRandom->Rndm();
@@ -597,6 +604,8 @@ void Transfer(
         TLorentzVector PAnew = msA.Scattering(PA);
         KEAnew = msA.GetKE()/AA;
         reaction.SetIncidentEnergyAngle(KEAnew, theta, phi);
+        reaction.CalReactionConstant();
+        Ecm = reaction.GetCMTotalKE();
       }
 
       //==== Calculate thetaCM, phiCM
@@ -652,11 +661,15 @@ void Transfer(
     phiB = PB.Phi() * TMath::RadToDeg();
 
     //==== Helios
-    hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
-
+    
+    ///printf(" thetaCM : %f \n", thetaCM * TMath::RadToDeg());
+    
+    if( Tb > 0  || TB > 0 ){
+      hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
+      
     e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
     z = helios.GetZ() ; 
-    //z0 = helios.GetZ0() ; 
+    z0 = helios.GetZ0() ; 
     x = helios.GetX() + gRandom->Gaus(0, zSigma);
     t = helios.GetTime();
     tB = helios.GetRecoilTime();
@@ -707,6 +720,10 @@ void Transfer(
 
     //change thetaCM into deg
     thetaCM = thetaCM * TMath::RadToDeg();
+    
+    }else{
+      hit = -11;
+    }
 
     if( hit == 1)  count ++;
 
