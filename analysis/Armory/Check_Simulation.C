@@ -19,22 +19,25 @@
 
 enum plotID { pEZ,               /// 0
               pRecoilXY,         /// 1
-              pRecoilRZ,         /// 2
-              pRecoilRTR,        /// 3
-              pTDiffZ,           /// 4
-              pThetaCM,          /// 5
-              pThetaCM_Z,        /// 6
-              pExCal,            /// 7
-              pRecoilRThetaCM,   /// 8
-              pInfo,             /// 9
-              pHitID,            /// 10
-              pEmpty };          /// 11
+              pRecoilXY1,        /// 2
+              pRecoilXY2,        /// 3
+              pRecoilRZ,         /// 4
+              pRecoilRTR,        /// 5
+              pTDiffZ,           /// 6
+              pThetaCM,          /// 7
+              pThetaCM_Z,        /// 8
+              pExCal,            /// 9
+              pRecoilRThetaCM,   /// 10
+              pArrayXY,          /// 11
+              pInfo,             /// 12
+              pHitID,            /// 13
+              pEmpty };          /// 14
 
 //======================================== User Setting
 
-const int Div[2] = {3,2}; /// x,y
-plotID canvas[6] = { pEZ, pRecoilXY, pThetaCM,
-                     pThetaCM_Z, pExCal, pInfo};
+const int Div[2] = {4,2}; /// x,y
+plotID canvas[8] = { pEZ, pRecoilXY, pRecoilXY1, pRecoilXY2,
+                     pThetaCM_Z, pExCal, pInfo, pArrayXY};
 
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
 //TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
@@ -62,10 +65,13 @@ TString msg2;
 TObjArray * fxList;
 TObjArray * txList;
 
+double BfieldTheta = 0;
 double length = 50.5;
 double firstPos = -110;
 double rhoRecoil = 50;
 double posRecoil = 400;
+double posRecoil1 = 400;
+double posRecoil2 = 400;
 
 double eRange[2] = {0, 10};
 double recoilERange[2];
@@ -83,9 +89,12 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
   TMacro * detGeo = (TMacro *) file->FindObjectAny("detGeo");
   TString field = detGeo->GetListOfLines()->At(0)->GetName();
-  int pp = field.First('/');
-  field.Remove(pp);
-  msg2.Form("field = %.2f T", field.Atof());
+  TString fieldDir = detGeo->GetListOfLines()->At(1)->GetName();
+  
+  field.Remove(field.First('/'));
+  fieldDir.Remove(fieldDir.First('/'));
+  TString fdmsg = fieldDir.Atof() < 90. ? "out of plane" : "into plane";
+  msg2.Form("field = %.2f T, %s", field.Atof(), fdmsg.Data());
 
   fxList = (TObjArray *) file->FindObjectAny("fxList");
   txList = (TObjArray *) file->FindObjectAny("txList");
@@ -117,9 +126,12 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       while( detFile >> x){
          ///printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( i == 2 ) BfieldTheta = atof(x.c_str());
          if( i == 5 ) length   = atof(x.c_str());
          if( i == 6 ) posRecoil = atof(x.c_str());
          if( i == 7 ) rhoRecoil = atof(x.c_str());
+         if( i == 9 ) posRecoil1 = atof(x.c_str());
+         if( i == 10 ) posRecoil2 = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
          if( i == 17 ) cDet = atoi(x.c_str());
          if( i >= 18 ) {
@@ -334,6 +346,14 @@ void Plot(plotID pID) {
       TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
       tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
    }
+   if( pID == pRecoilXY1       ){
+      TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY-1 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+      tree->Draw("yRecoil1:xRecoil1>>hRecoilXY1", gate, "colz");
+   }
+   if( pID == pRecoilXY2       ){
+      TH2F * hRecoilXY2 = new TH2F("hRecoilXY2", Form("RecoilXY-2 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil2 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+      tree->Draw("yRecoil2:xRecoil2>>hRecoilXY2", gate, "colz");
+   }
    if( pID == pRecoilRZ       ){
       TH2F * hRecoilRZ = new TH2F("hRecoilRZ", "RecoilR - Z [gated]; z [mm]; RecoilR [mm]",  zRange[0], zRange[1], zRange[2], 400,0, rhoRecoil);
       tree->Draw("rhoRecoil:z>>hRecoilRZ", gate, "colz");
@@ -392,6 +412,10 @@ void Plot(plotID pID) {
    if( pID == pRecoilRThetaCM ){
      TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoil);
      tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
+   }
+   if( pID == pArrayXY ){
+     TH2F * hArrayXY = new TH2F("hArrayXY", "Array-XY [gated]; X [mm]; Y [mm]", 400, -20, 20, 400, -20, 20);
+     tree->Draw("yArray:xArray>>hArrayXY", gate, "colz");
    }
    if( pID == pInfo           ){
       TLatex text;
