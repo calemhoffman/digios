@@ -1,7 +1,7 @@
 //---data_path
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
--../root_data/gen_run016.root
++../root_data/gen_run004.root
 
 ///500ug, 15N
 //+../root_data/trace_run00[8-9].root
@@ -40,6 +40,6 @@
 //+../root_data/trace_run16[0-9].root
 //+../root_data/trace_run17[0-9].root
 //+../root_data/trace_run18[0-9].root
-+../root_data/trace_run19[0-9].root
+//+../root_data/trace_run19[0-9].root
 //+../root_data/trace_run20[0-9].root
 //+../root_data/trace_run21[0-9].root
