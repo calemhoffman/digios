@@ -753,7 +753,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             if( sHit > width /2.) continue; // if the sHit is large, it does not hit on detector, go to next mDet 
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
-            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi()   - dphi);
+            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi() - sign * dphi);
             if( dir < 0) {// when dir == 0, no solution
               isHitFromOutside = true;
             }else{

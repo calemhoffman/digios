@@ -40,7 +40,7 @@ enum plotID { pEZ,               /// 0
 //             Remember to exit and reOpen.
 
 const int Div[2] = {3,2}; /// x,y
-plotID canvas[8] = { pEZ, pRecoilXY, pRecoilXY1,
+plotID canvas[8] = { pEZ, pRecoilXY, pThetaCM,
                      pThetaCM_Z, pExCal, pInfo};
 
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
@@ -52,8 +52,6 @@ bool isOverRideEx = false;
 double oExRange[2] = {-2, 6};
    
 int thetaCMRange[2] = {0, 60}; 
-double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
-
 bool shownKELines = false;
 
 //============================================== end of user setting
@@ -78,6 +76,7 @@ double posRecoil1 = 400;
 double posRecoil2 = 400;
 
 double eRange[2] = {0, 10};
+double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
 double recoilERange[2];
 vector<double> exList;
 double ExRange[2];
