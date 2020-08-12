@@ -52,10 +52,13 @@ private:
    TString fileName;
    
    TGLabel * fileLabel;
+   TGLabel * statusLabel;
    
    TGNumberEntry * angMin;
    TGNumberEntry * angMax;
    TGNumberEntry * angStep;
+   
+   TGCheckButton * withDWBA;
    
    TGCheckButton * isInFile;
    TGCheckButton * isRun;
@@ -86,19 +89,45 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
 
    fileName = "reactionConfig.txt";
    
-   fileLabel = new TGLabel(hframe2, "");
-   fileLabel->SetWidth(600);
+   TGHorizontalFrame *hframe00 = new TGHorizontalFrame(hframe2,600,600 );
+   hframe2->AddFrame(hframe00, new TGLayoutHints(kLHintsCenterX, 2,2,2,2));
+   
+   fileLabel = new TGLabel(hframe00, "");
+   fileLabel->SetWidth(370);
    fileLabel->SetHeight(20);
    //fileLabel->SetTextJustify(kTextLeft);
    fileLabel->SetTextColor(kRed);
    fileLabel->ChangeOptions(kFixedSize | kSunkenFrame);
    fileLabel->SetText(fileName);
-   hframe2->AddFrame(fileLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
+   hframe00->AddFrame(fileLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
+   
+   
+   TGTextButton *save = new TGTextButton(hframe00,"Save");
+   save->SetWidth(100);
+   save->SetHeight(20);
+   save->ChangeOptions( save->GetOptions() | kFixedSize );
+   save->Connect("Clicked()","MyMainFrame",this,"Command(=3)");
+   hframe00->AddFrame(save, new TGLayoutHints(kLHintsLeft,5,5,3,4));
+   
+   TGTextButton *help = new TGTextButton(hframe00, "Help");
+   help->SetWidth(100);
+   help->SetHeight(20);
+   help->ChangeOptions( help->GetOptions() | kFixedSize );
+   help->Connect("Clicked()","MyMainFrame",this,"Command(=4)");
+   hframe00->AddFrame(help,new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
    
   
-   editor = new TGTextEdit(hframe2, 600, 700);
+   editor = new TGTextEdit(hframe2, 600, 730);
    editor->LoadFile(fileName);
    hframe2->AddFrame(editor);
+   
+   statusLabel = new TGLabel(hframe2, "");
+   statusLabel->SetWidth(600);
+   statusLabel->SetHeight(20);
+   statusLabel->SetTextJustify(kTextLeft);
+   statusLabel->SetTextColor(1);
+   statusLabel->ChangeOptions(kFixedSize | kSunkenFrame);
+   hframe2->AddFrame(statusLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
    
    
    /**
@@ -178,19 +207,17 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    openDet->Connect("Clicked()","MyMainFrame",this, "OpenFile(=0)");
    simFrame->AddFrame(openDet,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
    
-   TGTextButton *openEx = new TGTextButton(simFrame, "Ex list");
+   TGTextButton *openEx = new TGTextButton(simFrame, "Ex List");
    openEx->SetWidth(150);
    openEx->SetHeight(30);
    openEx->ChangeOptions( openEx->GetOptions() | kFixedSize );
    openEx->Connect("Clicked()","MyMainFrame",this, "OpenFile(=2)");
    simFrame->AddFrame(openEx,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
-   TGTextButton *openSimChk = new TGTextButton(simFrame, "Check_Simulation.C");
-   openSimChk->SetWidth(150);
-   openSimChk->SetHeight(30);
-   openSimChk->ChangeOptions( openSimChk->GetOptions() | kFixedSize );
-   openSimChk->Connect("Clicked()","MyMainFrame",this, "OpenFile(=4)");
-   simFrame->AddFrame(openSimChk,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+   withDWBA = new TGCheckButton(simFrame, "Sim with DWBA\n+example.root\n+example.Ex.txt");
+   withDWBA->SetWidth(140);
+   withDWBA->ChangeOptions(kFixedSize );
+   simFrame->AddFrame(withDWBA, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
    TGTextButton *Sim = new TGTextButton(simFrame,"Simulate");
    Sim->SetWidth(150);
@@ -199,7 +226,14 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    Sim->Connect("Clicked()","MyMainFrame",this,"Command(=1)");
    simFrame->AddFrame(Sim, new TGLayoutHints(kLHintsRight,5,5,3,4));
 
-   TGTextButton *SimChk = new TGTextButton(simFrame,"Check Simulate");
+   TGTextButton *openSimChk = new TGTextButton(simFrame, "Config Simulation Plot");
+   openSimChk->SetWidth(150);
+   openSimChk->SetHeight(30);
+   openSimChk->ChangeOptions( openSimChk->GetOptions() | kFixedSize );
+   openSimChk->Connect("Clicked()","MyMainFrame",this, "OpenFile(=4)");
+   simFrame->AddFrame(openSimChk,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+   TGTextButton *SimChk = new TGTextButton(simFrame,"Plot Simulation");
    SimChk->SetWidth(150);
    SimChk->SetHeight(50);
    SimChk->ChangeOptions( SimChk->GetOptions() | kFixedSize );
@@ -303,12 +337,12 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    DWBA->Connect("Clicked()","MyMainFrame",this,"Command(=0)");
    DWBAFrame->AddFrame(DWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
-
    TGTextButton *exit = new TGTextButton(hframe1,"Exit", "gApplication->Terminate(0)");
    exit->SetWidth(150);
    exit->SetHeight(50);
    exit->ChangeOptions( exit->GetOptions() | kFixedSize );
    hframe1->AddFrame(exit, new TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+
 
 
    // Set a name to the main frame
@@ -339,6 +373,8 @@ void MyMainFrame::OpenFile(int ID){
   fileLabel->SetText(fileName);
   editor->LoadFile(fileName);
   
+  statusLabel->SetText(fileName + "   opened.");
+  
 }
 
 void MyMainFrame::Command(int ID) {
@@ -351,30 +387,41 @@ void MyMainFrame::Command(int ID) {
       double aMin = angMin->GetNumber();
       double aMax = angMax->GetNumber();
       double aStep = angStep->GetNumber();
+      statusLabel->SetText("Creating example.in.....");
       InFileCreator("example", "example.in", aMin, aMax, aStep);
+      statusLabel->SetText("in-file created.");
     }
     
     bool isRunOK = true;
     if( isRun->GetState()) {
-      printf("run ptolemy...........\n");
+      //printf("run ptolemy...........\n");
+      
+      statusLabel->SetText("Running Ptolemy.....");
       string output = exec("../Cleopatra/ptolemy <example.in> example.out");
-      printf("Ptolemy msg : %s\n", output.c_str());
-      printf("..... done.\n");
-      if( output == "" ) {
-         isRunOK = true;
-      }else{
-         isRunOK = false;
-      }
+      statusLabel->SetText("Check terminal, if no massage, Ptolemy run well.");
+      
+      // it seems that Ptolemy msg is something else
+      //printf("Ptolemy msg : %s\n", output.c_str());
+      //printf("..... done.\n");
+      //if( output == "" ) {
+      //   isRunOK = true;
+      //}else{
+      //   isRunOK = false;
+      //}
     }
     
     if( isRunOK && isExtract->GetState()){
        int ElasticFlag = 0; // 1 for ratio to Rutherford, 2 for total Xsec
        if (isElastic->GetState()) ElasticFlag = 1;
+       statusLabel->SetText("Extracting X-sec.....");
        ExtractXSec("example.out", ElasticFlag);
+       statusLabel->SetText("X-sec Extracted.");
     }
     
     if( isRunOK && isPlot->GetState()){
+       statusLabel->SetText("Plot X-sec.....");
        PlotTGraphTObjArray("example.root");
+       statusLabel->SetText("Plotted X-sec.");
     }
   }
   
@@ -382,19 +429,74 @@ void MyMainFrame::Command(int ID) {
     string       basicConfig = "reactionConfig.txt";
     string  heliosDetGeoFile = "detectorGeo.txt";
     string    excitationFile = "Ex.txt"; //when no file, only ground state
-    TString      ptolemyRoot = "example.root"; // when no file, use isotropic distribution of thetaCM
+    TString      ptolemyRoot = ""; // when no file, use isotropic distribution of thetaCM
     TString     saveFileName = "transfer.root";
     TString         filename = "reaction.dat"; //when no file, no output    
     
+    if( withDWBA->GetState() ) {
+       ptolemyRoot = "example.root";
+       excitationFile = "example.Ex.txt";
+    }
+    statusLabel->SetText("Running simulation.......");
     Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
     //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     
+    statusLabel->SetText("Plotting simulation.......");
     Check_Simulation(saveFileName);
-    
+    statusLabel->SetText("Plotted Simulation result");
   }
   if( ID == 2 ){
     //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
+    statusLabel->SetText("Plotting simulation.......");
     Check_Simulation("transfer.root");
+    statusLabel->SetText("Plotted Simulation result");
+  }
+  
+  if( ID == 3 ){
+     statusLabel->SetText(fileName + "   saved.");
+     if( fileName == "../Armory/Check_Simulation.C") {
+        statusLabel->SetText(fileName + "   saved. PLEAE close and reOPEN Simulation_Helper.C for taking effect.");
+     }
+  }
+  
+  if( ID == 4 ){
+     fileName = "";
+     statusLabel->SetText("Help Page.");
+     editor->LoadBuffer("===================== For Simulation");
+     editor->AddLine("1) Make sure you check :");
+     editor->AddLine("      a) reaction Config");
+     editor->AddLine("      b) detector Geo.");
+     editor->AddLine("      c) Ex List");
+     editor->AddLine("");
+     editor->AddLine("2) Not need to save file, fiel save when any button (except the Exit) is pressed.");
+     editor->AddLine("");
+     editor->AddLine("3) There is a checkbox for simulation with DWBA");
+     editor->AddLine("      This requires the existance of example.root and example.Ex.txt");
+     editor->AddLine("      These files can be generated by DWBA calculation.");
+     editor->AddLine("      Please change the angMin = 0 and angMax = 180.");
+     editor->AddLine("");
+     editor->AddLine("4) After simulation, it will plot the result.");
+     editor->AddLine("      To change the plotting, Click on the Config Simulation Plot.");
+     editor->AddLine("      Please save, and exit, reOpen the Simulation_Helper to make the change effective.");
+     editor->AddLine("");
+     editor->AddLine("5) If the transfer.root is already here, simply Plot Simulation.");
+     editor->AddLine("");
+     editor->AddLine("===================== For DWBA (only for linux)");
+     editor->AddLine("1) Only need to change the DWBA setting.");
+     editor->AddLine("");
+     editor->AddLine("2) The GUI offer a view on the infile and outfile.");
+     editor->AddLine("");
+     editor->AddLine("3) For elastics scattering, there is a checkbox for plotting the ratio to RutherFord.");
+     editor->AddLine("");
+     editor->AddLine("4) The flow of the DWBA calculation is like this:");
+     editor->AddLine("      a) read the example file and convert to example.in");
+     editor->AddLine("      b) run Ptolemy from example.in, and the output is example.out");
+     editor->AddLine("      c) extract the cross section from the example.out, and save :");
+     editor->AddLine("              * example.Xsec.txt");
+     editor->AddLine("              * example.Ex.txt");
+     editor->AddLine("              * example.root");
+     editor->AddLine("      d) Plot the cross section from the example.root.");
+     
   }
 }
 
