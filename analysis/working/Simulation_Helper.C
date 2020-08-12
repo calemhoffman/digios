@@ -10,8 +10,32 @@
 
 
 #include "../Cleopatra/Transfer.h"
-//#include "../Cleopatra/InFileCreator.h"
+#include "../Cleopatra/InFileCreator.h"
+#include "../Cleopatra/ExtractXSec.h"
+#include "../Cleopatra/PlotTGraphTObjArray.h"
 #include "../Armory/Check_Simulation.C"
+
+#include <iostream>
+#include <stdexcept>
+#include <stdio.h>
+#include <string>
+
+std::string exec(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    try {
+        while (fgets(buffer, sizeof buffer, pipe) != NULL) {
+            result += buffer;
+        }
+    } catch (...) {
+        pclose(pipe);
+        throw;
+    }
+    pclose(pipe);
+    return result;
+}
 
 
 class MyMainFrame {
@@ -29,6 +53,18 @@ private:
    
    TGLabel * fileLabel;
    
+   TGNumberEntry * angMin;
+   TGNumberEntry * angMax;
+   TGNumberEntry * angStep;
+   
+   TGCheckButton * isInFile;
+   TGCheckButton * isRun;
+   TGCheckButton * isExtract;
+   TGCheckButton * isPlot;
+   
+   TGCheckButton * isElastic;
+   
+   
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
    virtual ~MyMainFrame();
@@ -45,7 +81,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    TGVerticalFrame *hframe1 = new TGVerticalFrame(fMain,600,600 );
    hframe->AddFrame(hframe1);
    
-   TGVerticalFrame *hframe2 = new TGVerticalFrame(fMain,600,600 );
+   TGVerticalFrame *hframe2 = new TGVerticalFrame(fMain,600,800 );
    hframe->AddFrame(hframe2);
 
    fileName = "reactionConfig.txt";
@@ -60,7 +96,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    hframe2->AddFrame(fileLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
    
   
-   editor = new TGTextEdit(hframe2, 600, 600);
+   editor = new TGTextEdit(hframe2, 600, 700);
    editor->LoadFile(fileName);
    hframe2->AddFrame(editor);
    
@@ -155,7 +191,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    openSimChk->ChangeOptions( openSimChk->GetOptions() | kFixedSize );
    openSimChk->Connect("Clicked()","MyMainFrame",this, "OpenFile(=4)");
    simFrame->AddFrame(openSimChk,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
-   
+
    TGTextButton *Sim = new TGTextButton(simFrame,"Simulate");
    Sim->SetWidth(150);
    Sim->SetHeight(50);
@@ -180,30 +216,85 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    openDWBA->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
    openDWBA->Connect("Clicked()","MyMainFrame",this, "OpenFile(=3)");
    DWBAFrame->AddFrame(openDWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+   
+   TGTextButton *openInFile = new TGTextButton(DWBAFrame, "InFile");
+   openInFile->SetWidth(150);
+   openInFile->SetHeight(30);
+   openInFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+   openInFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=5)");
+   DWBAFrame->AddFrame(openInFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
-   TGCheckButton * isInFile = new TGCheckButton(DWBAFrame, "Create inFile");
+   TGTextButton *openOutFile = new TGTextButton(DWBAFrame, "OutFile");
+   openOutFile->SetWidth(150);
+   openOutFile->SetHeight(30);
+   openOutFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+   openOutFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=6)");
+   DWBAFrame->AddFrame(openOutFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+   
+   //-------- angle setting
+   TGHorizontalFrame * hframe000 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
+   DWBAFrame->AddFrame(hframe000);
+   
+   TGLabel * lb1 = new TGLabel(hframe000, "angMin");
+   lb1->SetWidth(50); lb1->ChangeOptions( kFixedSize);
+   hframe000->AddFrame(lb1, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
+
+   TGLabel * lb2 = new TGLabel(hframe000, "angMax");
+   lb2->SetWidth(50); lb2->ChangeOptions( kFixedSize);
+   hframe000->AddFrame(lb2, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
+   
+   TGLabel * lb3 = new TGLabel(hframe000, "angStep");
+   lb3->SetWidth(50); lb3->ChangeOptions( kFixedSize);
+   hframe000->AddFrame(lb3, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
+   
+   TGHorizontalFrame * hframe001 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
+   DWBAFrame->AddFrame(hframe001);
+   
+   angMin = new TGNumberEntry(hframe001, 0, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEANonNegative);
+   angMin->SetWidth(50);
+   angMin->SetLimitValues(0, 180);
+   hframe001->AddFrame(angMin, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
+   
+   angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEANonNegative);
+   angMax->SetWidth(50);
+   angMax->SetLimitValues(0, 180);
+   hframe001->AddFrame(angMax, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
+   
+   angStep = new TGNumberEntry(hframe001, 1, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
+   angStep->SetWidth(50);
+   angStep->SetLimitValues(0, 30);
+   hframe001->AddFrame(angStep, new TGLayoutHints(kLHintsCenterX, 5, 5, 0, 0));
+
+   //------- Check Boxes
+   isInFile = new TGCheckButton(DWBAFrame, "Create inFile");
    isInFile->SetWidth(100);
    isInFile->ChangeOptions(kFixedSize );
    isInFile->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isInFile, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+   DWBAFrame->AddFrame(isInFile, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
    
-   TGCheckButton * isRun = new TGCheckButton(DWBAFrame, "Run Ptolemy");
+   isRun = new TGCheckButton(DWBAFrame, "Run Ptolemy");
    isRun->SetWidth(100);
    isRun->ChangeOptions(kFixedSize );
    isRun->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isRun, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+   DWBAFrame->AddFrame(isRun, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
    
-   TGCheckButton * isExtract = new TGCheckButton(DWBAFrame, "Extract Xsec");
+   isExtract = new TGCheckButton(DWBAFrame, "Extract Xsec");
    isExtract->SetWidth(100);
    isExtract->ChangeOptions(kFixedSize );
    isExtract->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isExtract, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+   DWBAFrame->AddFrame(isExtract, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
-   TGCheckButton * isPlot = new TGCheckButton(DWBAFrame, "Plot");
+   isPlot = new TGCheckButton(DWBAFrame, "Plot");
    isPlot->SetWidth(100);
    isPlot->ChangeOptions(kFixedSize );
    isPlot->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isPlot, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+   DWBAFrame->AddFrame(isPlot, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+
+   isElastic = new TGCheckButton(DWBAFrame, "Ratio to RutherFord");
+   isElastic->SetWidth(130);
+   isElastic->ChangeOptions(kFixedSize );
+   DWBAFrame->AddFrame(isElastic, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+
 
    TGTextButton *DWBA = new TGTextButton(DWBAFrame, "DWBA");
    DWBA->SetWidth(150);
@@ -242,6 +333,8 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 2 ) fileName = "Ex.txt";
   if ( ID == 3 ) fileName = "example";
   if ( ID == 4 ) fileName = "../Armory/Check_Simulation.C";
+  if ( ID == 5 ) fileName = "example.in";
+  if ( ID == 6 ) fileName = "example.out";
   
   fileLabel->SetText(fileName);
   editor->LoadFile(fileName);
@@ -253,8 +346,36 @@ void MyMainFrame::Command(int ID) {
   editor->SaveFile(fileName);
   
   if( ID == 0 ){
-    printf("not implemented.....\n");
-    printf("in terminal, use ./Cleopatra.sh \n");
+    
+    if( isInFile->GetState()) {
+      double aMin = angMin->GetNumber();
+      double aMax = angMax->GetNumber();
+      double aStep = angStep->GetNumber();
+      InFileCreator("example", "example.in", aMin, aMax, aStep);
+    }
+    
+    bool isRunOK = true;
+    if( isRun->GetState()) {
+      printf("run ptolemy...........\n");
+      string output = exec("../Cleopatra/ptolemy <example.in> example.out");
+      printf("Ptolemy msg : %s\n", output.c_str());
+      printf("..... done.\n");
+      if( output == "" ) {
+         isRunOK = true;
+      }else{
+         isRunOK = false;
+      }
+    }
+    
+    if( isRunOK && isExtract->GetState()){
+       int ElasticFlag = 0; // 1 for ratio to Rutherford, 2 for total Xsec
+       if (isElastic->GetState()) ElasticFlag = 1;
+       ExtractXSec("example.out", ElasticFlag);
+    }
+    
+    if( isRunOK && isPlot->GetState()){
+       PlotTGraphTObjArray("example.root");
+    }
   }
   
   if( ID == 1 ){
@@ -264,10 +385,15 @@ void MyMainFrame::Command(int ID) {
     TString      ptolemyRoot = "example.root"; // when no file, use isotropic distribution of thetaCM
     TString     saveFileName = "transfer.root";
     TString         filename = "reaction.dat"; //when no file, no output    
+    
     Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
+    //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
+    
     Check_Simulation(saveFileName);
+    
   }
   if( ID == 2 ){
+    //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     Check_Simulation("transfer.root");
   }
 }
