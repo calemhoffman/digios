@@ -20,24 +20,6 @@
 #include <stdio.h>
 #include <string>
 
-std::string exec(const char* cmd) {
-    char buffer[128];
-    std::string result = "";
-    FILE* pipe = popen(cmd, "r");
-    if (!pipe) throw std::runtime_error("popen() failed!");
-    try {
-        while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-            result += buffer;
-        }
-    } catch (...) {
-        pclose(pipe);
-        throw;
-    }
-    pclose(pipe);
-    return result;
-}
-
-
 class MyMainFrame {
    RQ_OBJECT("MyMainFrame")
 private:
@@ -414,17 +396,16 @@ void MyMainFrame::Command(int ID) {
       //printf("run ptolemy...........\n");
       
       statusLabel->SetText("Running Ptolemy.....");
-      string output = exec("../Cleopatra/ptolemy <example.in> example.out");
+      int output = system("../Cleopatra/ptolemy <example.in> example.out");
       statusLabel->SetText("Check terminal, if no massage, Ptolemy run well.");
       
-      // it seems that Ptolemy msg is something else
-      //printf("Ptolemy msg : %s\n", output.c_str());
-      //printf("..... done.\n");
-      //if( output == "" ) {
-      //   isRunOK = true;
-      //}else{
-      //   isRunOK = false;
-      //}
+      printf("Ptolemy exist code : %d\n", output);
+      if( output == 0 ) {
+         isRunOK = true;
+      }else{
+         isRunOK = false;
+         statusLabel->SetText("Ptolemy exist with problems.");
+      }
     }
     
     if( isRunOK && isExtract->GetState() && IsFileExist("example.out")){
@@ -466,7 +447,7 @@ void MyMainFrame::Command(int ID) {
     //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     statusLabel->SetText("Plotting simulation.......");
     Check_Simulation("transfer.root");
-    statusLabel->SetText("Plotted Simulation result");
+    statusLabel->SetText(" Plotted Simulation result");
   }
   
   if( ID == 3 ){

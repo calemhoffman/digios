@@ -159,16 +159,16 @@ if [ ${RunPtolemy} -eq 1 ] ; then
   echo "================================================================="
   echo "=====   Ptolemy Calcualtion   ==================================="
   echo "================================================================="
-  ptolemyOUTPUT="$(../Cleopatra/ptolemy <${infile}> ${outfile})"
+  ../Cleopatra/ptolemy <${infile}> ${outfile}
+  ptolemyOUTPUT=$?
   
-  #somehow not work
-  #echo "ptolmey output : " $ptolemyOUTPUT
-  #if [ "${ptolemyOUTPUT}" = "" ] ; then
-  #    echo "Ptolmey finished without problem. "
-  #else
-  #    echo "Ptolemy has error, check ${infile} or ${outfile}"
-  #    exit 1;
-  #fi
+  echo "ptolmey exit code : " $ptolemyOUTPUT
+  if [ ${ptolemyOUTPUT} -eq 0 ] ; then
+      echo "Ptolmey finished without problem. "
+  else
+      echo "Ptolemy has error, check ${infile} or ${outfile}"
+      exit 1;
+  fi
 
 fi;
 
