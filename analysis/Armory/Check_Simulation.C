@@ -244,6 +244,9 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       Plot(canvas[i-1]);
    }
    
+   cCheck->Modified();
+   cCheck->Update();
+   
 }
 
 ///============================================================

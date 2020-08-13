@@ -73,6 +73,7 @@ public:
    virtual ~MyMainFrame();
    void Command(int);
    void OpenFile(int);
+   bool IsFileExist(TString filename);
 };
 MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    // Create a main frame
@@ -358,10 +359,17 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fMain->MapWindow();
 }
 
+bool MyMainFrame::IsFileExist(TString filename){
+  ifstream file (filename.Data());  
+  return file.is_open();
+}
+
 void MyMainFrame::OpenFile(int ID){
   
   editor->SaveFile(fileName);
   
+  TString oldFileName = fileName;
+    
   if ( ID == 0 ) fileName = "detectorGeo.txt";
   if ( ID == 1 ) fileName = "reactionConfig.txt";
   if ( ID == 2 ) fileName = "Ex.txt";
@@ -370,10 +378,19 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 5 ) fileName = "example.in";
   if ( ID == 6 ) fileName = "example.out";
   
-  fileLabel->SetText(fileName);
-  editor->LoadFile(fileName);
+  //test if file exist
+  if ( IsFileExist(fileName) ){
+    
+    fileLabel->SetText(fileName);
+    editor->LoadFile(fileName);
+    statusLabel->SetText(fileName + "   opened.");
+    
+  }else{
   
-  statusLabel->SetText(fileName + "   opened.");
+    statusLabel->SetText(fileName + "   not exist.");    
+    fileName = oldFileName;
+
+  }
   
 }
 
@@ -393,7 +410,7 @@ void MyMainFrame::Command(int ID) {
     }
     
     bool isRunOK = true;
-    if( isRun->GetState()) {
+    if( isRun->GetState() && IsFileExist("example.in") ) {
       //printf("run ptolemy...........\n");
       
       statusLabel->SetText("Running Ptolemy.....");
@@ -410,7 +427,7 @@ void MyMainFrame::Command(int ID) {
       //}
     }
     
-    if( isRunOK && isExtract->GetState()){
+    if( isRunOK && isExtract->GetState() && IsFileExist("example.out")){
        int ElasticFlag = 0; // 1 for ratio to Rutherford, 2 for total Xsec
        if (isElastic->GetState()) ElasticFlag = 1;
        statusLabel->SetText("Extracting X-sec.....");
@@ -418,7 +435,7 @@ void MyMainFrame::Command(int ID) {
        statusLabel->SetText("X-sec Extracted.");
     }
     
-    if( isRunOK && isPlot->GetState()){
+    if( isRunOK && isPlot->GetState() && IsFileExist("example.root")){
        statusLabel->SetText("Plot X-sec.....");
        PlotTGraphTObjArray("example.root");
        statusLabel->SetText("Plotted X-sec.");
