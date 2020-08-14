@@ -30,10 +30,10 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
    0.0000,  0.0000,  0.0400,  0.0000, -0.0100,
    0.0000,  0.1485,  0.1900,  0.0000,  0.0000};
 
+//16N(d,3He)
 vector<int> listOfBadDet = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
-
-
 TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
+double coinTimeGate[2] = {17, 9}; // mean, half-width
 
 //######################################## End of User Input
 
@@ -254,11 +254,12 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( e[i] < 3.5 ) continue;
      
       ///======== cut-coinTime;
-      if( abs(coinTime-17) > 9 ) continue;
+      if( abs(coinTime-coinTimeGate[0]) > coinTimeGate[1] ) continue;
      
-      ///======== cut-x
-      ///if( !(TMath::Abs(x[i]) < 0.95) ) continue;
+      ///======== cut-x, = (-1,1)
+      ///if( !(TMath::Abs(x[i]) < 0.95) ) continue;      
       
+
       ///======== cut-hitID
       ///if( hitID[i] != 0 ) continue;
       
@@ -271,7 +272,6 @@ Bool_t Analyzer::Process(Long64_t entry)
         if( i == listOfBadDet[p] ) badDetFlag = true;
       }
       if( badDetFlag ) continue;
-      ///if( i == 2 || i == 10 || i == 18 || i == 19 || i == 25) continue;  ///for ground state
       
       double scaling = 1;
       ///TODO auto calculate from a list-of-bad-det
@@ -286,23 +286,37 @@ Bool_t Analyzer::Process(Long64_t entry)
 
       //################################################## 
       
-      //if( Ex > 0.4 ) {
-      //   Ex = ExCal( e[i] , z[i] );
-      //}
-      
-      Ex = ExCal( e[i] , z[i] );
-      
-      //##################################################
-      //if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
-      //if( i == 10 ) Ex = 1.10 * Ex - 0.078;
-      //if( i == 15 ) Ex = 1.00 * Ex + 0.035;
-      //if( i == 20 ) Ex = 1.07 * Ex - 0.107;
-      //if( i == 21 ) Ex = 0.89 * Ex - 0.054;
-      //if( i == 25 ) Ex = 1.07 * Ex - 0.062;
-      //
+      //Ex = ExCal( e[i] , z[i] );
       //if( isExOffset) Ex = Ex - ExOffset[i];
       
-      //Ex = Ex - 0.15;
+      //============ 16N(d,3He)
+      if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
+      if( i == 10 ) Ex = 1.10 * Ex - 0.078;
+      if( i == 15 ) Ex = 1.00 * Ex + 0.035;
+      if( i == 20 ) Ex = 1.07 * Ex - 0.107;
+      if( i == 21 ) Ex = 0.89 * Ex - 0.054;
+      if( i == 25 ) Ex = 1.07 * Ex - 0.062;
+      if( i == 26 ) Ex = Ex - 0.22;
+      if( i == 12 ) Ex = Ex - 0.64;
+      if( i ==  8 ) Ex = Ex - 0.14;
+      if( i == 13 ) Ex = Ex - 0.24;
+      if( i == 22 ) Ex = Ex - 0.10;
+      if( i == 27 ) Ex = Ex - 0.30;
+      
+      
+      //for 16N g.s. -> 15C(0.74)
+      //if ( !( 2 > Ex && Ex > 0.4 ) ) continue;
+      //if( i%5 == 0 && !(x[i] < 0 )) continue; //16N g.s. -> 15C(0.74), only the 2nd half is used.
+
+      if ( !( Ex < 0.4 ) ) continue;//16N iso -> 15C(0.00)
+      
+      //for total spectrum
+      //if( 2 > Ex && Ex > 0.4 && i%5 == 0 && !(x[i] < 0 )) continue; //16N g.s. -> 15C(0.74), only the 2nd half is used.
+      
+      // compare the yield for thetaCM from 15.63 deg to 17.30 deg
+      if( i%5 != 0 ) continue;
+      if( 2 > Ex && Ex > 0.4 && !( x[i] < -0.4545 )) continue;
+      if( Ex < 0.4 && !( x[i] > 0.4545 )) continue;
       
       multiHit ++;
       
@@ -466,7 +480,7 @@ void Analyzer::Terminate()
                100,
                TMath::Floor(time/60.), time - TMath::Floor(time/60.)*60.);
   
-   gStyle->SetOptStat("");
+   gStyle->SetOptStat("neiou");
    
    //=========== load transfer.root
    TFile * ft = new TFile("transfer.root");
@@ -477,8 +491,8 @@ void Analyzer::Terminate()
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");
   
    //=========== Plot
-   int nX = 5, nY = 5;
-   int sizeX = 250, sizeY = 250;
+   int nX = 3, nY = 2;
+   int sizeX = 300, sizeY = 300;
    cAna = new TCanvas("cAna", "Analyzer", nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
    for( int i = 1; i <= nX * nY ; i++) cAna->cd(i)->SetGrid();
@@ -487,42 +501,50 @@ void Analyzer::Terminate()
    ///double max = findXMax(hei)
    double max = findXMax(hExi);
    
+   //cAna->cd(1); hExT->Draw("colz");
    //hEx->Draw();
    
+   cAna->cd(1); hEx->Draw();
+   cAna->cd(2); hxExi[5]->Draw();
+   cAna->cd(3); hxExi[10]->Draw();
+   cAna->cd(4); hxExi[15]->Draw();
+   cAna->cd(5); hxExi[20]->Draw();
+   cAna->cd(6); hxExi[25]->Draw();
    
+   /*
    //for( int i = 5; i < numDet; i++){
    for( int r = 1; r < 6; r++){
       for( int c = 0; c < 5; c++){
       int iDet = 5*r + c ;
-     cAna->cd( 5*c + r );
-     //cAna->cd(i+1)->SetGrid();
-     //cAna->cd(i+1)->SetLogy();
-     //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
-     //hei[i]->Draw();
-     
-     //hxi[i]->Draw();
-     
-     //hEBISi[i]->Draw();
-     //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     if( iDet == 9 ) {
-        hEx->Draw();
-     }else{
-        hExi[iDet]->Draw();
-     }
-     //fitAuto(hExi[i]);
-     //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
-   
-     //hExPi[i]->SetLineColor(2);
-     //hExPi[i]->Draw("same");
-   
-     //2-D 
-     //hexi[i]->Draw(); 
-     //hxExi[i]->SetMarkerStyle(7);
-     //hxExi[i]->SetMarkerColor(4);
-     //hxExi[i]->Draw("scat");
-     //hxExi[i]->Draw("colz");
-   } 
-}
+         cAna->cd( 5*c + r );
+         //cAna->cd(i+1)->SetGrid();
+         //cAna->cd(i+1)->SetLogy();
+         //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
+         //hei[i]->Draw();
+
+         //hxi[i]->Draw();
+
+         //hEBISi[i]->Draw();
+         //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
+         if( iDet == 9 ) {
+           hEx->Draw();
+         }else{
+           hExi[iDet]->Draw();
+         }
+         //fitAuto(hExi[i]);
+         //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
+
+         //hExPi[i]->SetLineColor(2);
+         //hExPi[i]->Draw("same");
+
+         //2-D 
+         //hexi[i]->Draw(); 
+         //hxExi[i]->SetMarkerStyle(7);
+         //hxExi[i]->SetMarkerColor(4);
+         //hxExi[i]->Draw("scat");
+         //hxExi[i]->Draw("colz");
+      } 
+   }*/
    
    ///for( int i = 0; i < numDet; i++){
    ///  //hei[i]->GetYaxis()->SetRangeUser(0, max);
@@ -548,7 +570,7 @@ void Analyzer::Terminate()
    ///  }
    ///} 
    
-   ///for( int i = 0; i < 4; i++){
+   ///for( int i = 0; i < 6; i++){
    ///  cAna->cd(i+1);
    ///  //cAna->cd(i+1)->SetGrid();
    ///  //hezr[i]->Draw("colz");

@@ -16,6 +16,7 @@
 #include <TObjArray.h>
 #include <fstream>
 #include <TCutG.h>
+#include "AnalysisLibrary.h"
 
 enum plotID { pEZ,               /// 0
               pRecoilXY,         /// 1
@@ -35,9 +36,12 @@ enum plotID { pEZ,               /// 0
 
 //======================================== User Setting
 
-const int Div[2] = {4,2}; /// x,y
-plotID canvas[8] = { pEZ, pRecoilXY, pRecoilXY1, pRecoilXY2,
-                     pThetaCM_Z, pExCal, pInfo, pArrayXY};
+//   if you are using Simulation_Helper.C for editing
+//             Remember to exit and reOpen.
+
+const int Div[2] = {3,2}; /// x,y
+plotID canvas[8] = { pEZ, pRecoilXY, pThetaCM,
+                     pThetaCM_Z, pExCal, pInfo};
 
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
 //TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
@@ -48,14 +52,11 @@ bool isOverRideEx = false;
 double oExRange[2] = {-2, 6};
    
 int thetaCMRange[2] = {0, 60}; 
-double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
-
 bool shownKELines = false;
 
 //============================================== end of user setting
 
 double * FindRange(TString branch, TString gate, TTree * tree, double output[2]);
-vector<string> SplitStr(string tempLine, string splitter, int shift = 0);
 void Plot(plotID pID);
 double ExtractNumber(int index, TMacro * macro);
 
@@ -75,6 +76,7 @@ double posRecoil1 = 400;
 double posRecoil2 = 400;
 
 double eRange[2] = {0, 10};
+double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
 double recoilERange[2];
 vector<double> exList;
 double ExRange[2];
@@ -256,39 +258,6 @@ double * FindRange(TString branch, TString gate, TTree * tree, double output[2])
 
    delete temp1;
    return output;
-}
-
-vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
-
-  vector<string> output;
-
-  size_t pos;
-  do{
-    pos = tempLine.find(splitter); // fine splitter
-    if( pos == 0 ){ //check if it is splitter again
-      tempLine = tempLine.substr(pos+1);
-      continue;
-    }
-
-    string secStr;
-    if( pos == string::npos ){
-      secStr = tempLine;
-    }else{
-      secStr = tempLine.substr(0, pos+shift);
-      tempLine = tempLine.substr(pos+shift);
-    }
-
-    //check if secStr is begin with space
-    if( secStr.substr(0, 1) == " "){
-      secStr = secStr.substr(1);
-    }
-
-    output.push_back(secStr);
-    //printf(" |%s---\n", secStr.c_str());
-    
-  }while(pos != string::npos );
-
-  return output;
 }
 
 double ExtractNumber(int index, TMacro * macro){

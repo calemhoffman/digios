@@ -91,10 +91,10 @@ public:
    int GetAtomicNumber_b(){return Ab;}
    int GetAtomicNumber_B(){return AB;}
    
-   double GetMass_A(){return mA;}
+   double GetMass_A(){return mA + ExA;}
    double GetMass_a(){return ma;}
    double GetMass_b(){return mb;}
-   double GetMass_B(){return mB;}
+   double GetMass_B(){return mB + ExB;}
    
    int GetCharge_A(){return zA;}
    int GetCharge_a(){return za;}
@@ -262,7 +262,7 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
 
 int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a){
    double mass = mb;
-   double massB = mB;
+   double massB = mB + ExB;
    double y = e + mass;
    double slope = 299.792458 * zb * abs(Bfield) / TMath::TwoPi() * beta / 1000.; // MeV/mm;
    double alpha = slope/beta;
@@ -753,7 +753,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             if( sHit > width /2.) continue; // if the sHit is large, it does not hit on detector, go to next mDet 
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
-            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi()   - dphi);
+            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi() - sign * dphi);
             if( dir < 0) {// when dir == 0, no solution
               isHitFromOutside = true;
             }else{
