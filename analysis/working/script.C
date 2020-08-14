@@ -89,9 +89,21 @@ void script(){
    
    //########################################### Plot
    
-   ///tree0->Process("Analyzer.C+");
+   tree0->Process("Analyzer.C+");
    
-   tree0->Process("Tree4NN.C+");
+   ///tree0->Process("Tree4NN.C+");
+   
+   //SetCanvas(2,1, 400, cScript);
+   //
+   //cScript->cd(1); tree0->Draw("e:detID>>h1(30, 0, 30, 400, 8, 12)",  "11>e && e>9", "colz");
+   //cScript->cd(2); tree0->Draw("det>>h2(30, 0, 30)", "11>e && e>9 && detID%5==0", "colz");
+   
+   //cScript->cd(2); tree0->Draw("e:z>>h2(400, 700, 1000, 400, 8, 12)", "11>e && e>9 && 10 > detID && detID >=  5", "colz");
+   //cScript->cd(3); tree0->Draw("e:z>>h3(400, 700, 1000, 400, 8, 12)", "11>e && e>9 && 15 > detID && detID >= 10", "colz");
+   //cScript->cd(4); tree0->Draw("e:z>>h4(400, 700, 1000, 400, 8, 12)", "11>e && e>9 && 20 > detID && detID >= 15", "colz");
+   //cScript->cd(5); tree0->Draw("e:z>>h5(400, 700, 1000, 400, 8, 12)", "11>e && e>9 && 25 > detID && detID >= 20", "colz");
+   //cScript->cd(6); tree0->Draw("e:z>>h6(400, 700, 1000, 400, 8, 12)", "11>e && e>9 && 30 > detID && detID >= 25", "colz");
+   
    
    //======================= recoi-ID vs det-ID
    
