@@ -40,18 +40,19 @@ enum plotID { pEZ,               /// 0
 //             Remember to exit and reOpen.
 
 const int Div[2] = {3,2}; /// x,y
-plotID canvas[8] = { pEZ, pRecoilXY, pThetaCM,
-                     pThetaCM_Z, pExCal, pInfo};
+plotID canvas[8] = { pEZ, pExCal, pThetaCM,
+                     pThetaCM_Z, pRecoilXY, pInfo};
 
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
 //TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
-TString gate = "hit == 1 && loop <= 1 && thetaCM > 10";
+//TString gate = "hit == 1 && loop <= 1 && thetaCM > 10";
+TString gate = "hit == 1 && loop <= 1";
 
 //override ExRange;
-bool isOverRideEx = false;
-double oExRange[2] = {-2, 6};
+bool isOverRideEx = true;
+double oExRange[2] = {-0.5, 3.0};
    
-int thetaCMRange[2] = {0, 60}; 
+int thetaCMRange[2] = {0, 45}; 
 bool shownKELines = false;
 
 //============================================== end of user setting
@@ -348,7 +349,7 @@ void Plot(plotID pID) {
 
    }
    if( pID == pExCal          ){
-      TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  200, ExRange[0], ExRange[1]);
+      TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  400, ExRange[0], ExRange[1]);
       tree->Draw("ExCal>>hExCal", gate, "");
    }
    if( pID == pRecoilRThetaCM ){

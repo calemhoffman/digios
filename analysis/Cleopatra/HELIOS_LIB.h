@@ -262,7 +262,7 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
 
 int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a){
    double mass = mb;
-   double massB = mB + ExB;
+   double massB = mB;
    double y = e + mass;
    double slope = 299.792458 * zb * abs(Bfield) / TMath::TwoPi() * beta / 1000.; // MeV/mm;
    double alpha = slope/beta;
