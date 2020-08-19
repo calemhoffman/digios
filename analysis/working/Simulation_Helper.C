@@ -14,6 +14,7 @@
 #include "../Cleopatra/ExtractXSec.h"
 #include "../Cleopatra/PlotTGraphTObjArray.h"
 #include "../Armory/Check_Simulation.C"
+#include "../Armory/AutoFit.C"
 
 #include <iostream>
 #include <stdexcept>
@@ -100,7 +101,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    hframe00->AddFrame(help,new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
    
   
-   editor = new TGTextEdit(hframe2, 600, 730);
+   editor = new TGTextEdit(hframe2, 600, 700);
    editor->LoadFile(fileName);
    hframe2->AddFrame(editor);
    
@@ -178,21 +179,21 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    
    TGTextButton *openRec = new TGTextButton(simFrame, "reaction Config");
    openRec->SetWidth(150);
-   openRec->SetHeight(30);
+   openRec->SetHeight(20);
    openRec->ChangeOptions( openRec->GetOptions() | kFixedSize );
    openRec->Connect("Clicked()","MyMainFrame",this, "OpenFile(=1)");
    simFrame->AddFrame(openRec,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
    TGTextButton *openDet = new TGTextButton(simFrame, "detector Geo.");
    openDet->SetWidth(150);
-   openDet->SetHeight(30);
+   openDet->SetHeight(20);
    openDet->ChangeOptions( openDet->GetOptions() | kFixedSize );
    openDet->Connect("Clicked()","MyMainFrame",this, "OpenFile(=0)");
    simFrame->AddFrame(openDet,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
    
    TGTextButton *openEx = new TGTextButton(simFrame, "Ex List");
    openEx->SetWidth(150);
-   openEx->SetHeight(30);
+   openEx->SetHeight(20);
    openEx->ChangeOptions( openEx->GetOptions() | kFixedSize );
    openEx->Connect("Clicked()","MyMainFrame",this, "OpenFile(=2)");
    simFrame->AddFrame(openEx,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
@@ -204,24 +205,31 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
 
    TGTextButton *Sim = new TGTextButton(simFrame,"Simulate");
    Sim->SetWidth(150);
-   Sim->SetHeight(50);
+   Sim->SetHeight(40);
    Sim->ChangeOptions( Sim->GetOptions() | kFixedSize );
    Sim->Connect("Clicked()","MyMainFrame",this,"Command(=1)");
    simFrame->AddFrame(Sim, new TGLayoutHints(kLHintsRight,5,5,3,4));
 
    TGTextButton *openSimChk = new TGTextButton(simFrame, "Config Simulation Plot");
    openSimChk->SetWidth(150);
-   openSimChk->SetHeight(30);
+   openSimChk->SetHeight(20);
    openSimChk->ChangeOptions( openSimChk->GetOptions() | kFixedSize );
    openSimChk->Connect("Clicked()","MyMainFrame",this, "OpenFile(=4)");
    simFrame->AddFrame(openSimChk,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
    TGTextButton *SimChk = new TGTextButton(simFrame,"Plot Simulation");
    SimChk->SetWidth(150);
-   SimChk->SetHeight(50);
+   SimChk->SetHeight(40);
    SimChk->ChangeOptions( SimChk->GetOptions() | kFixedSize );
    SimChk->Connect("Clicked()","MyMainFrame",this,"Command(=2)");
    simFrame->AddFrame(SimChk, new TGLayoutHints(kLHintsRight,5,5,3,4));
+
+   TGTextButton *autoFit = new TGTextButton(simFrame,"AutoFit ExCal");
+   autoFit->SetWidth(150);
+   autoFit->SetHeight(40);
+   autoFit->ChangeOptions( autoFit->GetOptions() | kFixedSize );
+   autoFit->Connect("Clicked()","MyMainFrame",this,"Command(=5)");
+   simFrame->AddFrame(autoFit, new TGLayoutHints(kLHintsRight,5,5,3,4));
 
    //================= DWBA group
    TGGroupFrame * DWBAFrame = new TGGroupFrame(fMain, "DWBA calculation", kVerticalFrame);
@@ -229,24 +237,31 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
 
    TGTextButton *openDWBA = new TGTextButton(DWBAFrame, "DWBA setting");
    openDWBA->SetWidth(150);
-   openDWBA->SetHeight(30);
+   openDWBA->SetHeight(20);
    openDWBA->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
    openDWBA->Connect("Clicked()","MyMainFrame",this, "OpenFile(=3)");
    DWBAFrame->AddFrame(openDWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
    
    TGTextButton *openInFile = new TGTextButton(DWBAFrame, "InFile");
    openInFile->SetWidth(150);
-   openInFile->SetHeight(30);
+   openInFile->SetHeight(20);
    openInFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
    openInFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=5)");
    DWBAFrame->AddFrame(openInFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
    TGTextButton *openOutFile = new TGTextButton(DWBAFrame, "OutFile");
    openOutFile->SetWidth(150);
-   openOutFile->SetHeight(30);
+   openOutFile->SetHeight(20);
    openOutFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
    openOutFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=6)");
    DWBAFrame->AddFrame(openOutFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+   TGTextButton *xsecFile = new TGTextButton(DWBAFrame, "X-Sec");
+   xsecFile->SetWidth(150);
+   xsecFile->SetHeight(20);
+   xsecFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+   xsecFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=7)");
+   DWBAFrame->AddFrame(xsecFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
    
    //-------- angle setting
    TGHorizontalFrame * hframe000 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
@@ -315,14 +330,14 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
 
    TGTextButton *DWBA = new TGTextButton(DWBAFrame, "DWBA");
    DWBA->SetWidth(150);
-   DWBA->SetHeight(50);
+   DWBA->SetHeight(40);
    DWBA->ChangeOptions( DWBA->GetOptions() | kFixedSize );
    DWBA->Connect("Clicked()","MyMainFrame",this,"Command(=0)");
    DWBAFrame->AddFrame(DWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
 
    TGTextButton *exit = new TGTextButton(hframe1,"Exit", "gApplication->Terminate(0)");
    exit->SetWidth(150);
-   exit->SetHeight(50);
+   exit->SetHeight(40);
    exit->ChangeOptions( exit->GetOptions() | kFixedSize );
    hframe1->AddFrame(exit, new TGLayoutHints(kLHintsCenterX, 5,5,3,4));
 
@@ -359,6 +374,7 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 4 ) fileName = "../Armory/Check_Simulation.C";
   if ( ID == 5 ) fileName = "example.in";
   if ( ID == 6 ) fileName = "example.out";
+  if ( ID == 7 ) fileName = "example.Xsec.txt";
   
   //test if file exist
   if ( IsFileExist(fileName) ){
@@ -451,10 +467,14 @@ void MyMainFrame::Command(int ID) {
   }
   
   if( ID == 3 ){
-     statusLabel->SetText(fileName + "   saved.");
-     if( fileName == "../Armory/Check_Simulation.C") {
-        statusLabel->SetText(fileName + "   saved. PLEAE close and reOPEN Simulation_Helper.C for taking effect.");
-     }
+     if( fileName != "" ){
+        statusLabel->SetText(fileName + "   saved.");
+        if( fileName == "../Armory/Check_Simulation.C") {
+           statusLabel->SetText(fileName + "   saved. PLEAE close and reOPEN Simulation_Helper.C for taking effect.");
+        }
+      }else{
+         statusLabel->SetText("cannot save HELP page.");
+      }
   }
   
   if( ID == 4 ){
@@ -496,6 +516,22 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("      d) Plot the cross section from the example.root.");
      
   }
+  
+  if( ID == 5) {
+     
+     TH1F * temp = (TH1F*) gROOT->FindObjectAny("hExCal");
+     
+     if( temp != NULL ){
+        fitAuto(temp, -1);
+        statusLabel->SetText("Auto Fit hExCal");
+     }else{
+        statusLabel->SetText("Cannot find historgram hExCal. Please Run Plot Simulation first.");        
+     }
+      
+     //gROOT->ProcessLine("fitAuto(hExCal, -1)");
+     
+  }
+  
 }
 
 MyMainFrame::~MyMainFrame() {

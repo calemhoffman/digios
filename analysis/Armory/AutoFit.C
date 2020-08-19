@@ -380,7 +380,10 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
     energy.push_back(xpos[inX[j]]);
     height.push_back(ypos[inX[j]]);
   }
-
+  for( int j = 0; j < nPeaks; j++){
+    printf(" energy : %f , %f \n", energy[j], height[j]);
+  }
+  
   const int  n = 3 * nPeaks;
   double * para = new double[n]; 
   for(int i = 0; i < nPeaks ; i++){
