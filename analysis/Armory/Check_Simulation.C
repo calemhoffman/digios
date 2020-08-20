@@ -40,7 +40,7 @@ enum plotID { pEZ,               /// 0
 //             Remember to exit and reOpen.
 
 const int Div[2] = {3,2}; /// x,y
-plotID canvas[8] = { pEZ, pExCal, pThetaCM,
+plotID canvas[8] = { pEZ, pExCal, pArrayXY,
                      pThetaCM_Z, pRecoilXY, pInfo};
 
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
@@ -123,17 +123,21 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    
   vector<double> pos;
   int nLine = detGeo->GetListOfLines()->GetLast() + 1;
-  for( int i = 17; i < nLine; i++){
+  for( int i = 18; i < nLine; i++){
     pos.push_back(ExtractNumber(i, detGeo));
   }
+
   int rDet = pos.size(); /// number of detector at different position, row-Det
-  int cDet = (int) ExtractNumber(16, detGeo); /// number of detector at same position, column-Det
+  int cDet = (int) ExtractNumber(17, detGeo); /// number of detector at same position, column-Det
 
   vector<double> posTemp = pos;
   for(int id = 0; id < rDet; id++){
     if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
     if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
-  }
+  }  
+  
+  printf("number of row-Det : %d \n", rDet);
+  printf("number of col-Det : %d \n", cDet);
   
   for(int i = 0; i < rDet ; i++){
      if( firstPos > 0 ){
