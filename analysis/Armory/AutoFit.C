@@ -31,6 +31,61 @@ Double_t nGauss(Double_t *x, Double_t *par) {
    return result;
 }
 
+void GoodnessofFit(TH1F * hist, TF1 * fit){
+  
+   int nBin = hist->GetNbinsX();
+   int effBin = 0;   
+   double mean = 0;
+   double ysq = 0;
+   double SSR = 0;
+   double chisq = 0; //with estimated error be sqrt(y)
+   double Xsq = 0; // for Pearson's chi-sq test
+   for( int i = 1; i < nBin; i++){
+      double y = hist->GetBinContent(i);
+      if( y > 0 ) {effBin ++;
+         double x = hist->GetBinCenter(i);
+         double e = hist->GetBinError(i);
+         double ybar = fit->Eval(x);
+         ysq += y*y;
+         mean + y;
+         SSR += (y - ybar)*(y-ybar);
+         chisq += (y - ybar)*(y-ybar)/e/e;
+         Xsq += (y - ybar)*(y-ybar)/ybar;
+      }
+      //printf(" %d | x : %f, y : %f, ybar : %f \n", i, x, y, ybar);
+   }
+   mean = mean / nBin;
+   double SSTotal = ysq + mean*mean;
+   
+   int npar = fit->GetNpar();
+   int ndf = effBin - npar;
+   printf("#################################################\n");
+   printf("##               Goodness of Fit.              ##\n");
+   printf("#################################################\n");
+   printf(" eff. Bin(%d) - numPar(%d) = ndf = %d \n", effBin, npar, ndf);
+
+   printf("============== Regression analysis\n");
+   printf("----------------- R-sq \n");
+   printf("    SSTotal = %f \n", SSTotal);
+   printf("        SSR = %f \n", SSR);
+   double Rsq = 1 - SSR/SSTotal;
+   printf("       R-sq = %f \n", Rsq );
+   
+   printf("----------------- Chi-sq \n");
+   printf("     Chi-sq = %f \n", chisq);
+   printf(" rd. Chi-sq = %f \n", chisq/ndf);
+   printf("ROOT Chi-Sq = %f , NDF = %d \n", fit->GetChisquare(), fit->GetNDF());
+   //================ chi-sq test
+   printf("============== Hypothesis testing\n");
+   printf(" Null Hypothesis : the fitting model is truth. \n");
+   printf("  p-value = prob. that Null Hypo. is truth. \n");
+   printf("       X-sq = %.2f \n", Xsq);
+   double p = TMath::Prob(Xsq, ndf);
+   printf("Pearson's p-value = %.2f %s 0.05 | %s\n", p, p < 0.05 ? "<": ">", p < 0.05 ? "reject" : "cannot reject");
+   double pchi = TMath::Prob(chisq, ndf);
+   printf("   Chi-sq p-value = %.2f %s 0.05 | %s\n", pchi, pchi < 0.05 ? "<": ">", pchi < 0.05 ? "reject" : "cannot reject");
+   printf("################################################\n");  
+}
 
 Double_t nGaussP1(Double_t *x, Double_t *par) {
    Double_t result = 0;
@@ -114,7 +169,7 @@ bool loadFitParameters(TString fitParaFile){
 //########################################
 //########################################
 //########################################
-void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
+void fitGauss(TH1F * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
   
   
   if( gROOT->FindObjectAny("cFitGauss") == NULL ){
@@ -166,12 +221,15 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
    
    
    text.DrawLatex(0.15, 0.40, Form("#chi^2/ndf : %5.3f", chisquare/ndf));
+   
+   GoodnessofFit(hist, fit);
+   
 }
 
 //########################################
 //########################################
 //########################################
-void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
+void fitGaussP1(TH1F * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
   
   
   if( gROOT->FindObjectAny("cFitGaussP1") == NULL ){
@@ -224,15 +282,14 @@ void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax,
   text.DrawLatex(0.15, 0.7, Form("Line: %4.2f(%3.2f) + %4.2f(%3.2f)x  ", 
                                     paraA[3],   paraE[3],
                                     paraA[4], paraE[4]));
-                                    
-
+  GoodnessofFit(hist, fit);
   
 }
 
 //########################################
 //########################################
 //########################################
-vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1, 
+vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1, 
                                        double mean2, double sigma2, 
                            double xMin, double xMax, TString optStat = "", bool newCanvas = false){
   
@@ -318,6 +375,7 @@ vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1,
                                     paraA[6], paraE[6],
                                     paraA[7], paraE[7]));
                                     
+  GoodnessofFit(hist, fit);
   return output;
 }
 
@@ -350,7 +408,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   //=================== find peak and fit
   gStyle->SetOptFit(0);
   TSpectrum * peak = new TSpectrum(50);
-  nPeaks = peak->Search(hist, 1, "", peakThreshold); 
+  nPeaks = peak->Search(hist, 2, "", peakThreshold); 
   
   if( bgEst > 0 ) {
     printf("============= estimating background...\n");
@@ -404,6 +462,9 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   const Double_t* paraA = fit->GetParameters();
   
   //======== calculate reduce chi-squared
+  GoodnessofFit(specS, fit);
+  
+  /**
   double chisquare = 0;
   for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
       double x = specS->GetBinCenter(iBin);
@@ -426,7 +487,8 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   
   printf("==== Chi-Sq : %f , NDF : %d, Sigma2 : %f \n", chisquare, ndf, sigma2);
   printf("============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
-
+  */
+  
   double bw = specS->GetBinWidth(1);
 
   double * ExPos = new double[nPeaks];
@@ -549,6 +611,8 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   const Double_t* paraA = fit->GetParameters();
   
   //======== calculate reduce chi-squared
+  
+  /**
   double chisquare = 0;
   for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
       double x = specS->GetBinCenter(iBin);
@@ -571,6 +635,8 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   printf("\n ==== Historgam : %s, FitMethod: fitNGauss, BG = %2d \n", hist->GetName(), bgEst);
   printf(" ==== Chi-Sq : %f , NDF : %d, BG-Sigma2 : %f \n", chisquare, ndf, sigma2);
   printf(" ============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
+  */ 
+  GoodnessofFit(specS, fit);
   
   double bw = specS->GetBinWidth(1);
 
@@ -724,29 +790,7 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   const Double_t* paraE = fit->GetParErrors();
   const Double_t* paraA = fit->GetParameters();
   
-  //======== calculate reduce chi-squared
-  double chisquare = 0;
-  for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
-      double x = specS->GetBinCenter(iBin);
-      double yf = fit->Eval(x);
-      double y  = specS->GetBinContent(iBin);
-      chisquare += TMath::Power( y - yf , 2);
-  }
-  
-  int ndf = fit->GetNDF();
-  
-  int bin1 = specS->FindBin(paraA[1] - 3 * paraA[2]);
-  //int bin2 = specS->FindBin(paraA[3*(nPeaks-1)+1] + 3 * paraA[3*(nPeaks-1)+2]);
-  int bin2 = specS->GetNbinsX();
-  TGraph * gSigmaEst = new TGraph( specS);
-  
-  for( int iBin = bin2; iBin >= bin1; iBin--){
-    gSigmaEst->RemovePoint(iBin);
-  }
-  double sigma2 = TMath::Power(gSigmaEst->GetRMS(2),2);
-  printf("\n ==== Historgam : %s, FitMethod: fitNGauss2, BG = %2d \n", hist->GetName(), bgEst);
-  printf(" ==== Chi-Sq : %f , NDF : %d, Sigma2 : %f \n", chisquare, ndf, sigma2);
-  printf(" ============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
+  GoodnessofFit(specS, fit);  
   
   double bw = specS->GetBinWidth(1);
 
@@ -918,30 +962,7 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   const Double_t* paraE = fita->GetParErrors();
   const Double_t* paraA = fita->GetParameters();
   
-  
-  //======== calculate reduce chi-squared
-  double chisquare = 0;
-  for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
-      double x = specS->GetBinCenter(iBin);
-      double yf = fita->Eval(x);
-      double y  = specS->GetBinContent(iBin);
-      chisquare += TMath::Power( y - yf , 2);
-  }
-  
-  int ndf = fita->GetNDF();
-  
-  int bin1 = specS->FindBin(paraA[1] - 3 * paraA[2]);
-  //int bin2 = specS->FindBin(paraA[3*(nPeaks-1)+1] + 3 * paraA[3*(nPeaks-1)+2]);
-  int bin2 = specS->GetNbinsX();
-  TGraph * gSigmaEst = new TGraph( specS);
-  
-  for( int iBin = bin2; iBin >= bin1; iBin--){
-    gSigmaEst->RemovePoint(iBin);
-  }
-  double sigma2 = TMath::Power(gSigmaEst->GetRMS(2),2);
-  printf("\n ==== Historgam : %s, FitMethod: fitNGaussP1\n", hist->GetName());
-  printf(" ==== Chi-Sq : %f , NDF : %d, Sigma2 : %f \n", chisquare, ndf, sigma2);
-  printf(" ============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
+  GoodnessofFit(specS, fit); 
   
   double bw = specS->GetBinWidth(1);
 
