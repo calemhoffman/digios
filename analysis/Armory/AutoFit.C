@@ -41,16 +41,18 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    double chisq = 0; //with estimated error be sqrt(y)
    double Xsq = 0; // for Pearson's chi-sq test
    for( int i = 1; i < nBin; i++){
-      double y = hist->GetBinContent(i);
-      if( y > 0 ) {effBin ++;
+
+      double e = hist->GetBinError(i);
+      if( e > 0  ) {
+         effBin ++;
+         double y = hist->GetBinContent(i);
          double x = hist->GetBinCenter(i);
-         double e = hist->GetBinError(i);
          double ybar = fit->Eval(x);
          ysq += y*y;
          mean + y;
          SSR += (y - ybar)*(y-ybar);
          chisq += (y - ybar)*(y-ybar)/e/e;
-         Xsq += (y - ybar)*(y-ybar)/ybar;
+         if( ybar > 0 )Xsq += (y - ybar)*(y-ybar)/ybar;
       }
       //printf(" %d | x : %f, y : %f, ybar : %f \n", i, x, y, ybar);
    }
@@ -78,12 +80,15 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    //================ chi-sq test
    printf("============== Hypothesis testing\n");
    printf(" Null Hypothesis : the fitting model is truth. \n");
-   printf("  p-value = prob. that Null Hypo. is truth. \n");
-   printf("       X-sq = %.2f \n", Xsq);
+   printf(" * p-value = prob. that Null Hypo. is truth. \n");
+   printf(" * Pearson's test only for background free data \n");
+   //printf("       X-sq = %.2f \n", Xsq);
    double p = TMath::Prob(Xsq, ndf);
-   printf("Pearson's p-value = %.2f %s 0.05 | %s\n", p, p < 0.05 ? "<": ">", p < 0.05 ? "reject" : "cannot reject");
+   printf("  Pearson's p-value = %.2f %s 0.05 | %s\n", p, p < 0.05 ? "<": ">", p < 0.05 ? "reject" : "cannot reject");
    double pchi = TMath::Prob(chisq, ndf);
-   printf("   Chi-sq p-value = %.2f %s 0.05 | %s\n", pchi, pchi < 0.05 ? "<": ">", pchi < 0.05 ? "reject" : "cannot reject");
+   printf("     Chi-sq p-value = %.2f %s 0.05 | %s\n", pchi, pchi < 0.05 ? "<": ">", pchi < 0.05 ? "reject" : "cannot reject");
+   double pRoot = fit->GetProb();
+   printf("ROOT Chi-sq p-value = %.2f %s 0.05 | %s\n", pRoot, pRoot < 0.05 ? "<": ">", pRoot < 0.05 ? "reject" : "cannot reject");
    printf("################################################\n");  
 }
 
@@ -415,8 +420,9 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
     TH1 * h1 = peak->Background(hist, bgEst);
     h1->Draw("same");
     printf("============= substracting the linear background...\n");
-    specS->Add(h1, -1.);
     specS->Sumw2();
+    specS->Add(h1, -1.);
+    
   }
   
   cFitAuto->cd(2)->SetGrid();
@@ -545,6 +551,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   hist->Draw();
   
   TH1F * specS = (TH1F*) hist->Clone();
+  specS->Sumw2();
   double xMin = hist->GetXaxis()->GetXmin();
   double xMax = hist->GetXaxis()->GetXmax();
   int xBin = hist->GetXaxis()->GetNbins();
@@ -560,7 +567,6 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   gStyle->SetOptFit(0);
   cFitNGauss->cd(2)->SetGrid();
   cFitNGauss->cd(2);
-  specS->Sumw2();
   
   if( bgEst > 0 ) {
     printf("============= estimating background...\n");
@@ -570,8 +576,8 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
     h1->Draw("same");
     cFitNGauss->cd(2);
     printf("============= substracting the linear background...\n");
-    specS->Add(h1, -1.);
     specS->Sumw2();
+    specS->Add(h1, -1.);
   }
   
   specS->Draw("hist");
@@ -736,7 +742,7 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   TH1 * h1 = peak->Background(hist, bgEst);
   
   printf("============= fit the est-background with a linear function...\n");
-  TF1 * bg = new TF1 ("bg", "pol1", -2, 4);
+  TF1 * bg = new TF1 ("bg", "pol1", xMin, xMax);
   bg->SetParameter(0, 50);
   bg->SetParameter(0, 0);
   bg->SetLineColor(2);
@@ -752,8 +758,8 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   cFitNGauss2->cd(2);
 
   printf("============= substracting the linear background...\n");
-  specS->Add(bg, -1.);
   specS->Sumw2();
+  specS->Add(bg, -1.);
   specS->Draw("hist");
 
   //========== Fitting 
@@ -900,7 +906,7 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   //=========== get the linear part and substract
   const Double_t* paraAt = fit->GetParameters();
   
-  TF1 * bg = new TF1("bg", "pol1", -2, 4);
+  TF1 * bg = new TF1("bg", "pol1", xMin, xMax);
   bg->SetParameter(0, paraAt[3*nPeaks+0]);
   bg->SetParameter(1, paraAt[3*nPeaks+1]);
   bg->SetNpx(1000);
@@ -931,8 +937,8 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   cFitNGaussP1->cd(2);
   
   printf("============= substracting the linear background...\n");
-  specS->Add(bg, -1.);
   specS->Sumw2();
+  specS->Add(bg, -1.);
   specS->Draw("hist");
 
   //======= fit again

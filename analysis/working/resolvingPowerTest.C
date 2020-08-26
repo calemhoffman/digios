@@ -2,7 +2,7 @@
 
    TCanvas * c1 = new TCanvas("c1", "c1", 100, 1500, 600, 400);
 
-   TH1F* h1 = new TH1F("h1", "h1", 100, -1, 9);
+   TH1F* h1 = new TH1F("h1", "h1", 150, -5, 10);
    
    //TF1 * g1 = new TF1("g1", "gaus");
    //g1->SetParameter(0, 10);
@@ -25,6 +25,21 @@
       h1->Fill(gRandom->Gaus(5.7, 0.3));
    }
 
-   h1->Draw();   
+  
+   TH1F* h2 = new TH1F("h2", "h2", 150,-5, 10);
+   h2->FillRandom("pol0", 2000);
+   h2->SetLineColor(2);
+
+   TH1F* h0 = (TH1F*)h1->Clone();
+   h0->SetLineColor(4);
+   
+   h1->Add(h2);
+   
+   h1->Draw();
+   h2->Draw("same");
+   
+   h0->Draw("same");
+   
+   
 
 }
