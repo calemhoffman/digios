@@ -40,6 +40,6 @@
    
    h0->Draw("same");
    
-   
+   //gROOT->ProcessLine(".L ../Armory/AutFit.C"); 
 
 }

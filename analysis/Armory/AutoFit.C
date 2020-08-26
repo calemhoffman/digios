@@ -40,7 +40,7 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    double SSR = 0;
    double chisq = 0; //with estimated error be sqrt(y)
    double Xsq = 0; // for Pearson's chi-sq test
-   for( int i = 1; i < nBin; i++){
+   for( int i = 1; i <= nBin; i++){
 
       double e = hist->GetBinError(i);
       if( e > 0  ) {
@@ -52,9 +52,15 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
          mean + y;
          SSR += (y - ybar)*(y-ybar);
          chisq += (y - ybar)*(y-ybar)/e/e;
-         if( ybar > 0 )Xsq += (y - ybar)*(y-ybar)/ybar;
+         
+         
+         if( ybar > e ) {
+           Xsq += (y - ybar)*(y-ybar)/ybar;
+         }else{
+           Xsq += (y - ybar)*(y-ybar)/e;
+         }
+         //printf(" %d | x : %f, y : %f, ybar : %f , X-sq : %f\n", i, x, y, ybar, Xsq);
       }
-      //printf(" %d | x : %f, y : %f, ybar : %f \n", i, x, y, ybar);
    }
    mean = mean / nBin;
    double SSTotal = ysq + mean*mean;
@@ -70,6 +76,7 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    printf("----------------- R-sq \n");
    printf("    SSTotal = %f \n", SSTotal);
    printf("        SSR = %f \n", SSR);
+   printf("        MSR = %f  <-- is it similar to sample variance?\n", SSR/ndf);
    double Rsq = 1 - SSR/SSTotal;
    printf("       R-sq = %f \n", Rsq );
    
@@ -81,8 +88,8 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    printf("============== Hypothesis testing\n");
    printf(" Null Hypothesis : the fitting model is truth. \n");
    printf(" * p-value = prob. that Null Hypo. is truth. \n");
-   printf(" * Pearson's test only for background free data \n");
-   //printf("       X-sq = %.2f \n", Xsq);
+   printf(" * the Pearson's test in here only for background free data \n");
+   printf("     Pearson's X-sq = %.2f \n", Xsq);
    double p = TMath::Prob(Xsq, ndf);
    printf("  Pearson's p-value = %.2f %s 0.05 | %s\n", p, p < 0.05 ? "<": ">", p < 0.05 ? "reject" : "cannot reject");
    double pchi = TMath::Prob(chisq, ndf);
