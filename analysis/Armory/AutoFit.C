@@ -90,11 +90,11 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    printf(" * p-value = prob. that Null Hypo. is truth. \n");
    printf(" * the Pearson's test in here only for background free data \n");
    printf("     Pearson's X-sq = %.2f \n", Xsq);
-   double p = TMath::Prob(Xsq, ndf);
+   double p = 1 - TMath::Prob(Xsq, ndf);
    printf("  Pearson's p-value = %.2f %s 0.05 | %s\n", p, p < 0.05 ? "<": ">", p < 0.05 ? "reject" : "cannot reject");
-   double pchi = TMath::Prob(chisq, ndf);
+   double pchi = 1 - TMath::Prob(chisq, ndf);
    printf("     Chi-sq p-value = %.2f %s 0.05 | %s\n", pchi, pchi < 0.05 ? "<": ">", pchi < 0.05 ? "reject" : "cannot reject");
-   double pRoot = fit->GetProb();
+   double pRoot = 1- fit->GetProb();
    printf("ROOT Chi-sq p-value = %.2f %s 0.05 | %s\n", pRoot, pRoot < 0.05 ? "<": ">", pRoot < 0.05 ? "reject" : "cannot reject");
    printf("################################################\n");  
 }
@@ -749,7 +749,7 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   TH1 * h1 = peak->Background(hist, bgEst);
   
   printf("============= fit the est-background with a linear function...\n");
-  TF1 * bg = new TF1 ("bg", "pol1", xMin, xMax);
+  TF1 * bg = new TF1 ("bg", "pol2", xMin, xMax);
   bg->SetParameter(0, 50);
   bg->SetParameter(0, 0);
   bg->SetLineColor(2);
