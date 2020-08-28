@@ -20,6 +20,7 @@ const int numDet = numRow * numCol ;
 
 double rangeEx[3] = { 100, -2, 4}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; ///resol. [deg], low deg, high deg
+double rangeZ[2] = { 700, 1000};
 
 bool isExOffset = true;
 double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
@@ -31,9 +32,14 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
    0.0000,  0.1485,  0.1900,  0.0000,  0.0000};
 
 //16N(d,3He)
-vector<int> listOfBadDet = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
-TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
-double coinTimeGate[2] = {17, 9}; // mean, half-width
+//vector<int> listOfBadDet = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
+//TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
+//double coinTimeGate[2] = {17, 9}; // mean, half-width
+
+//16N(d,t)
+vector<int> listOfBadDet = {0, 1, 2, 3, 4,  7, 8, 9,  11, 14, 18, 19, 23, 24, 28, 29};
+TString rdtCutFile = "rdtCuts_15N_2.root"; 
+double coinTimeGate[2] = {65, 15}; // mean, half-width
 
 //######################################## End of User Input
 
@@ -105,15 +111,15 @@ void Analyzer::Begin(TTree *tree)
    hTa = new TH1F("hTa", Form("thetaCM (|x|<0.9); thetaCM [deg]; count / %2.0f deg", rangeCM[0]), (rangeCM[2]-rangeCM[1])/rangeCM[0], rangeCM[1], rangeCM[2]);
 
    ///E vs Z
-   hez  = new TH2F("hez" , "e - z; z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
-   heza = new TH2F("heza", "e - z (|x|<0.9); z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
+   hez  = new TH2F("hez" , "e - z; z [mm]; e [MeV]", 450, rangeZ[0], rangeZ[1], 400, 0, 10);
+   heza = new TH2F("heza", "e - z (|x|<0.9); z [mm]; e [MeV]", 450, rangeZ[0], rangeZ[1], 400, 0, 10);
    
    ///Ex vs thetaCM
    hExT  = new TH2F("hExT" , "Ex - thetaCM; thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
    hExTa = new TH2F("hExTa", "Ex - thetaCM (|x|<0.9); thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
 
 
-   hTz = new TH2F("hTz", "thetaCM vs z; z [mm]; thetaCM [deg]", 450, -450, 0, 500, rangeCM[1], rangeCM[2]);
+   hTz = new TH2F("hTz", "thetaCM vs z; z [mm]; thetaCM [deg]", 450, rangeZ[0], rangeZ[1], 500, rangeCM[1], rangeCM[2]);
 
    hEBISi = new TH1F *[numDet];
    hei = new TH1F *[numDet];
@@ -138,8 +144,8 @@ void Analyzer::Begin(TTree *tree)
    
    for( int i = 0; i < numRow; i++){
       hExTr[i] = new TH2F(Form("hExTr%d", i), Form("Ex - thetaCM (row-%d); thetaCM [deg]; Ex [MeV]", i) , 400, 0, 50, 400, -1, 5);
-      hExzr[i] = new TH2F(Form("hExzr%d", i), Form("Ex - z (row-%d); z [mm]; Ex [MeV]", i) , 400, -450, 0, 400, -1, 5);
-      hezr[i]  = new TH2F(Form("hezr%d", i) , Form("e - z (row-%d); z [mm]; e [MeV]", i) , 400, -450, 0, 400, 0, 13);
+      hExzr[i] = new TH2F(Form("hExzr%d", i), Form("Ex - z (row-%d); z [mm]; Ex [MeV]", i) , 400, rangeZ[0], rangeZ[1], 400, -1, 5);
+      hezr[i]  = new TH2F(Form("hezr%d", i) , Form("e - z (row-%d); z [mm]; e [MeV]", i) , 400, rangeZ[0], rangeZ[1], 400, 0, 13);
       hExr[i]  = new TH1F(Form("hExr%d", i) , Form("Ex (row-%d); e [MeV] ; count / %2.0f keV", i, rangeEx[0]) , (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
    }
 
@@ -227,6 +233,8 @@ Bool_t Analyzer::Process(Long64_t entry)
    }
    if( !rdtgate ) return kTRUE; 
    
+   rdtgate = true;
+   
    hRun->Fill(run);
    
    int multiHit = 0;
@@ -251,7 +259,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( TMath::IsNaN(e[i]) ) continue;
       if( TMath::IsNaN(z[i]) ) continue;
      
-      if( e[i] < 3.5 ) continue;
+      if( e[i] < 1 ) continue;
      
       ///======== cut-coinTime;
       if( abs(coinTime-coinTimeGate[0]) > coinTimeGate[1] ) continue;
@@ -286,37 +294,37 @@ Bool_t Analyzer::Process(Long64_t entry)
 
       //################################################## 
       
-      //Ex = ExCal( e[i] , z[i] );
+      Ex = ExCal( e[i] , z[i] );
       //if( isExOffset) Ex = Ex - ExOffset[i];
       
       //============ 16N(d,3He)
-      if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
-      if( i == 10 ) Ex = 1.10 * Ex - 0.078;
-      if( i == 15 ) Ex = 1.00 * Ex + 0.035;
-      if( i == 20 ) Ex = 1.07 * Ex - 0.107;
-      if( i == 21 ) Ex = 0.89 * Ex - 0.054;
-      if( i == 25 ) Ex = 1.07 * Ex - 0.062;
-      if( i == 26 ) Ex = Ex - 0.22;
-      if( i == 12 ) Ex = Ex - 0.64;
-      if( i ==  8 ) Ex = Ex - 0.14;
-      if( i == 13 ) Ex = Ex - 0.24;
-      if( i == 22 ) Ex = Ex - 0.10;
-      if( i == 27 ) Ex = Ex - 0.30;
+      //if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
+      //if( i == 10 ) Ex = 1.10 * Ex - 0.078;
+      //if( i == 15 ) Ex = 1.00 * Ex + 0.035;
+      //if( i == 20 ) Ex = 1.07 * Ex - 0.107;
+      //if( i == 21 ) Ex = 0.89 * Ex - 0.054;
+      //if( i == 25 ) Ex = 1.07 * Ex - 0.062;
+      //if( i == 26 ) Ex = Ex - 0.22;
+      //if( i == 12 ) Ex = Ex - 0.64;
+      //if( i ==  8 ) Ex = Ex - 0.14;
+      //if( i == 13 ) Ex = Ex - 0.24;
+      //if( i == 22 ) Ex = Ex - 0.10;
+      //if( i == 27 ) Ex = Ex - 0.30;
       
       
       //for 16N g.s. -> 15C(0.74)
       //if ( !( 2 > Ex && Ex > 0.4 ) ) continue;
       //if( i%5 == 0 && !(x[i] < 0 )) continue; //16N g.s. -> 15C(0.74), only the 2nd half is used.
 
-      if ( !( Ex < 0.4 ) ) continue;//16N iso -> 15C(0.00)
+      //if ( !( Ex < 0.4 ) ) continue;//16N iso -> 15C(0.00)
       
       //for total spectrum
       //if( 2 > Ex && Ex > 0.4 && i%5 == 0 && !(x[i] < 0 )) continue; //16N g.s. -> 15C(0.74), only the 2nd half is used.
       
       // compare the yield for thetaCM from 15.63 deg to 17.30 deg
-      if( i%5 != 0 ) continue;
-      if( 2 > Ex && Ex > 0.4 && !( x[i] < -0.4545 )) continue;
-      if( Ex < 0.4 && !( x[i] > 0.4545 )) continue;
+      //if( i%5 != 0 ) continue;
+      //if( 2 > Ex && Ex > 0.4 && !( x[i] < -0.4545 )) continue;
+      //if( Ex < 0.4 && !( x[i] > 0.4545 )) continue;
       
       multiHit ++;
       
@@ -394,11 +402,11 @@ void Analyzer::SlaveTerminate()
 double Analyzer::ExCal(double e, double z){
    
    double mass = 2808.3914;
-   double q = 2;
-   double beta = 0.13906620;
+   double q = 1;
+   double beta = 0.140241;
    
-   double Et = 16802.3556;
-   double massB = 13979.2181;
+   double Et = 16802.7129;
+   double massB = 13968.9353;
    
    double Bfield = 2.0;
    double a = 11.5;

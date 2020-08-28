@@ -117,7 +117,15 @@ void script(){
    
    //======================= Trace of recoil
    
-   ///SetCanvas(4, 1, 400, cScript);
+   ///SetCanvas(4, 2, 400, cScript);
+   ///
+   ///cScript->cd(1);  tree0->Draw("rdt[1]:rdt[0]>>rdt1(300, 0, 4000, 300, 0, 6000)", "abs(coinTime-17)<9 && thetaCM > 10", "colz"); if( fileCut->IsOpen()){cut_in[0]->Draw("same");}
+   ///cScript->cd(2);  tree0->Draw("rdt[3]:rdt[2]>>rdt2(300, 0, 4000, 300, 0, 6000)", "abs(coinTime-17)<9 && thetaCM > 10", "colz"); if( fileCut->IsOpen()){cut_in[1]->Draw("same");}
+   ///cScript->cd(3);  tree0->Draw("rdt[5]:rdt[4]>>rdt3(300, 0, 4000, 300, 0, 6000)", "abs(coinTime-17)<9 && thetaCM > 10", "colz"); if( fileCut->IsOpen()){cut_in[2]->Draw("same");}
+   ///cScript->cd(4);  tree0->Draw("rdt[7]:rdt[6]>>rdt4(300, 0, 4000, 300, 0, 6000)", "abs(coinTime-17)<9 && thetaCM > 10", "colz"); if( fileCut->IsOpen()){cut_in[3]->Draw("same");}
+   ///
+   ///cScript->cd(5); tree0->Draw("Ex>>h1(400, -1,2)", "abs(coinTime-17)<9 && thetaCM>10");
+   
    
    ///cScript->cd(1);  tree0->Draw("rdt[1]:rdt[0]>>rdt1(300, 0, 4000, 300, 0, 6000)", "", "colz"); if( fileCut->IsOpen()){cut_in[0]->Draw("same");}
    ///cScript->cd(2);  tree0->Draw("rdt[3]:rdt[2]>>rdt2(300, 0, 4000, 300, 0, 6000)", "", "colz"); if( fileCut->IsOpen()){cut_in[1]->Draw("same");}
