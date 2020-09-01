@@ -234,7 +234,7 @@ GEBMerge.c:	GTMerge.h GTMerge_readnew.h pbuf.h
 GEBMerge:	GEBMerge.c spe_fun.o \
 		get_a_seed.o time_stamp.o\
 		spe_fun.o 
-		$(cc) $(ccFLAG) -o $@ -lm -lz $^
+		$(cc) $(ccFLAG) -o $@ -lm $^ -lz
 
 #-------------------
 
