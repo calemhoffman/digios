@@ -19,6 +19,7 @@
 #include <fstream>
 #include <TObjArray.h>
 #include <TCutG.h>
+#include "TMacro.h"
 #include "TClonesArray.h"
 
 // Headers needed by this particular selector
@@ -457,6 +458,9 @@ void Cali_e_trace::Init(TTree *tree)
          }
       }
       printf("==================================\n");
+
+      TMacro detGeo("detectorGeo.txt");
+      detGeo.Write("detGeo");
       
    }else{
        printf("... fail\n");
@@ -489,6 +493,8 @@ void Cali_e_trace::Init(TTree *tree)
       }
       
       printf("................... done.\n");
+      TMacro cali_xf_xn("correction_xf_xn.dat");
+      cali_xf_xn.Write("correction_xf_xn");
    }else{
       printf("................... fail.\n");
       
@@ -511,6 +517,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("................. done.\n");
+      TMacro cali_xfxn_e("correction_xfxn_e.dat");
+      cali_xfxn_e.Write("correction_xfxn_e");
    }else{
       printf("................. fail.\n");
       for(int i = 0; i < numDet; i++){
@@ -534,7 +542,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("....................... done.\n");
-      
+      TMacro cali_e("correction_e.dat");
+      cali_e.Write("correction_e");      
    }else{
       printf("....................... fail.\n");
       for( int i = 0; i < numDet ; i++){
@@ -558,7 +567,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("....................... done.\n");
-      
+      TMacro cali_scaleX("correction_scaleX.dat");
+      cali_scaleX.Write("correction_scaleX");
    }else{
       printf("....................... fail.\n");
       for( int i = 0; i < numDet ; i++){
@@ -581,7 +591,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("..................... done.\n");
-      
+      TMacro cali_rdt("correction_rdt.dat");
+      cali_rdt.Write("correction_rdt");
    }else{
       printf("..................... fail.\n");
       for( int i = 0; i < numDet ; i++){
@@ -617,6 +628,8 @@ void Cali_e_trace::Init(TTree *tree)
             i = i + 1;
          }
          printf(".... done.\n");
+         TMacro cali_coinTime("correction_coinTime.dat");
+         cali_coinTime.Write("correction_coinTime");
          
       }else{
          printf(".... fail.\n");
@@ -676,8 +689,9 @@ void Cali_e_trace::Init(TTree *tree)
       printf("alpha    : %f MeV/mm \n", alpha);
       printf("perpDist : %f mm \n", perpDist);
       printf("G        : %f MeV \n", G);
-
-
+      
+      TMacro reactionData("reaction.dat");
+      reactionData.Write("reactionPara");
    }else{
       printf("................. fail.\n");
       isReaction = false;
@@ -701,6 +715,8 @@ void Cali_e_trace::Init(TTree *tree)
             printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
          }
       }
+
+      cutList->Write("rdtCutList");
    }
 
    printf("================================== numDet : %d \n", numDet);
