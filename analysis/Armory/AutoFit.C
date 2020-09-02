@@ -1,3 +1,6 @@
+#ifndef AutoFit_C
+#define AutoFit_C
+
 #include <TF1.h>
 #include <TGraph.h>
 #include <TSpectrum.h>
@@ -394,14 +397,17 @@ vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1,
 //########################################
 //########################################
 //########################################
-void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString optStat = ""){
+vector<double> fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString optStat = "", bool newPlot = true, double sigmaGuess = 0.08){
 
-  TCanvas *cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
-  cFitAuto->Divide(1,2);
-  
-  gStyle->SetOptStat(optStat);
-  cFitAuto->cd(1);
-  hist->Draw();
+  TCanvas *cFitAuto = NULL;
+  if( newPlot ){
+    cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
+    cFitAuto->Divide(1,2);
+    
+    gStyle->SetOptStat(optStat);
+    cFitAuto->cd(1);
+    hist->Draw();
+  }
   
   TH1F * specS = (TH1F*) hist->Clone();
   double xMin = hist->GetXaxis()->GetXmin();
@@ -429,18 +435,20 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
     printf("============= substracting the linear background...\n");
     specS->Sumw2();
     specS->Add(h1, -1.);
-    
   }
   
-  cFitAuto->cd(2)->SetGrid();
-  cFitAuto->cd(2);
+  if( newPlot ){
+    cFitAuto->cd(2)->SetGrid();
+    cFitAuto->cd(2);
+  }
   specS->Draw("hist");
   
 
   //========== Fitting 
-  printf("============= Fitting.....");
-  printf(" found %d peaks \n", nPeaks);
-
+  if( newPlot ){
+    printf("============= Fitting.....");
+    printf(" found %d peaks \n", nPeaks);
+  }
   double * xpos = peak->GetPositionX();
   double * ypos = peak->GetPositionY();
 
@@ -451,8 +459,10 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
     energy.push_back(xpos[inX[j]]);
     height.push_back(ypos[inX[j]]);
   }
-  for( int j = 0; j < nPeaks; j++){
-    printf(" energy : %f , %f \n", energy[j], height[j]);
+  if( newPlot ){
+    for( int j = 0; j < nPeaks; j++){
+      printf(" energy : %f , %f \n", energy[j], height[j]);
+    }
   }
   
   const int  n = 3 * nPeaks;
@@ -460,7 +470,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   for(int i = 0; i < nPeaks ; i++){
     para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
     para[3*i+1] = energy[i];
-    para[3*i+2] = 0.08;
+    para[3*i+2] = sigmaGuess;
   }
 
   TF1 * fit = new TF1("fit", nGauss, xMin, xMax, 3* nPeaks );
@@ -475,7 +485,7 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   const Double_t* paraA = fit->GetParameters();
   
   //======== calculate reduce chi-squared
-  GoodnessofFit(specS, fit);
+  if( newPlot ) GoodnessofFit(specS, fit);
   
   /**
   double chisquare = 0;
@@ -506,16 +516,20 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
 
   double * ExPos = new double[nPeaks];
   double * ExSigma = new double[nPeaks];   
+  vector<double> exPos;
   for(int i = 0; i < nPeaks ; i++){
+    exPos.push_back(paraA[3*i+1]);
     ExPos[i] = paraA[3*i+1];
     ExSigma[i] = paraA[3*i+2];
+    if( newPlot){
     printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]);
+    }
   }
-  cFitAuto->Update();
+  if( newPlot ) cFitAuto->Update();
 
   //draw the indivual fit
   fit->Draw("same");
@@ -534,6 +548,8 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   }
   
   specS->Draw("hist same");
+  
+  return exPos;
   
 }
 
@@ -1020,3 +1036,4 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
 
 
 
+#endif 

@@ -10,15 +10,18 @@
 #include <TSpectrum.h>
 #include <TMath.h>
 
+#include "../Armory/AutoFit.C"
+
 //######################################################
 //   To get the coincident Time correction parameter
 //   require processed by Cali_e_trace.C
 //######################################################
 
-int numPeaks = 16;
+/*
+int nPeaks = 16;
 Double_t nGauss(Double_t *x, Double_t *par) {
    Double_t result = 0;
-   for (Int_t p=0;p<numPeaks;p++) {
+   for (Int_t p=0;p<nPeaks;p++) {
       Double_t norm  = par[3*p+0];
       Double_t mean  = par[3*p+1];
       Double_t sigma = par[3*p+2];
@@ -26,7 +29,7 @@ Double_t nGauss(Double_t *x, Double_t *par) {
    }
    return result;
 }
-
+*/
 
 void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
 
@@ -215,8 +218,8 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    
-   numPeaks = spec->Search(hT);
-   printf("find %d peaks\n", numPeaks);
+   nPeaks = spec->Search(hT);
+   printf("find %d peaks\n", nPeaks);
 
    // ROOT 5
    //Float_t * xpos =  spec->GetPositionX();
@@ -225,23 +228,23 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    Double_t * xpos =  spec->GetPositionX();
    Double_t * ypos =  spec->GetPositionY();
    
-   int * inX = new int[numPeaks];
-   TMath::Sort(numPeaks, xpos, inX, 0 );
+   int * inX = new int[nPeaks];
+   TMath::Sort(nPeaks, xpos, inX, 0 );
    vector<double> energy, height;
-   for( int j = 0; j < numPeaks; j++){
+   for( int j = 0; j < nPeaks; j++){
       energy.push_back(xpos[inX[j]]);
       height.push_back(ypos[inX[j]]);
    }
    
-   const int  n = 3 * numPeaks;
+   const int  n = 3 * nPeaks;
    double * para = new double[n]; 
-   for(int i = 0; i < numPeaks ; i++){
+   for(int i = 0; i < nPeaks ; i++){
       para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
       para[3*i+1] = energy[i];
       para[3*i+2] = 5;
    }
    
-   TF1 * fit = new TF1("fit", nGauss, timeRange[0], timeRange[1], 3* numPeaks );
+   TF1 * fit = new TF1("fit", nGauss, timeRange[0], timeRange[1], 3* nPeaks );
    fit->SetLineWidth(2);
    fit->SetLineColor(2);
    fit->SetNpx(1000);
@@ -255,9 +258,9 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
 
    double bw = hT->GetBinWidth(1);
 
-   double * ExPos = new double[numPeaks];
-   double * ExSigma = new double[numPeaks];   
-   for(int i = 0; i < numPeaks ; i++){
+   double * ExPos = new double[nPeaks];
+   double * ExSigma = new double[nPeaks];   
+   for(int i = 0; i < nPeaks ; i++){
       ExPos[i] = paraA[3*i+1];
       ExSigma[i] = paraA[3*i+2];
       printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
