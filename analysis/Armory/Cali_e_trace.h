@@ -295,6 +295,30 @@ void Cali_e_trace::Init(TTree *tree)
       fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
    }
    
+   //================================ load expName
+   string expNameFile = "../../expName.sh";
+   printf("======================= loading expName files : %s.", expNameFile.c_str());
+   ifstream file;
+   file.open(expNameFile.c_str());
+   TString expName = "";
+   int i = 0;
+   if( file.is_open()){
+      string x;
+      while( file >> x){
+         if( x.substr(0,1) == "#" )  continue;
+         if( i == 1  )  expName = x;
+         i = i + 1;
+      }
+      printf("... done.\n");
+      
+      expName.Remove(0,8);
+      printf("expName = %s \n", expName.Data());
+      
+   }else{
+      printf("... fail.\n");
+   }
+   
+   file.close();
 
    //================= Formation of file name
    int numFile = fChain->GetListOfFiles()->GetLast() + 1;   
@@ -310,7 +334,7 @@ void Cali_e_trace::Init(TTree *tree)
          saveFileName = name;
          int kk = saveFileName.Sizeof();
          saveFileName.Remove(kk-4); // this should give "XXX_run"
-         saveFileName = "A_" + saveFileName;
+         saveFileName = expName + "_" + saveFileName;
       }
       found = name.Last('_');
       int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
@@ -415,10 +439,9 @@ void Cali_e_trace::Init(TTree *tree)
    printf("======================= loading parameters files .... \n");
    string detGeoFileName = "detectorGeo.txt";
    printf("loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
    file.open(detGeoFileName.c_str());
-   int i = 0;
    if( file.is_open() ){
+      i = 0;
       string x;
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
