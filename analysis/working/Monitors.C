@@ -31,8 +31,8 @@ ULong64_t maxNumberEvent = 1000000000;
 int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
-int rawEnergyRange[2] = {  1200,   2500};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,     11};       /// in the E-Z plot
+int rawEnergyRange[2] = {  1000,   3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     0,     12};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,    800};
 int      rdtERange[2] = {  1000,   3000};
 int      elumRange[2] = { -1000,   6000};
@@ -1269,7 +1269,7 @@ void Monitors::Terminate()
    if( printControlID == 0 ) {
       TDatime dateTime;
       TString outFileName;
-      outFileName.Form("Canvas_%d%d%d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
+      outFileName.Form("Canvas_%d%02d%02d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
       
       cCanvas->SaveAs("Canvas/"+outFileName);
       

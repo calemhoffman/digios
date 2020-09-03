@@ -46,10 +46,10 @@ plotID canvas[8] = { pEZ, pExCal, pArrayXY,
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
 //TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
 //TString gate = "hit == 1 && loop <= 1 && thetaCM > 10";
-TString gate = "hit == 1 && loop <= 1";
+TString gate = "hit == 1 && loop <= 5";
 
 //override ExRange;
-bool isOverRideEx = true;
+bool isOverRideEx = false;
 double oExRange[2] = {-0.5, 3.0};
    
 int thetaCMRange[2] = {0, 45}; 
