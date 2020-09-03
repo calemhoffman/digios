@@ -282,12 +282,12 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    TGHorizontalFrame * hframe001 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
    DWBAFrame->AddFrame(hframe001);
    
-   angMin = new TGNumberEntry(hframe001, 0, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEANonNegative);
+   angMin = new TGNumberEntry(hframe001, 0, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
    angMin->SetWidth(50);
    angMin->SetLimitValues(0, 180);
    hframe001->AddFrame(angMin, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
    
-   angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEANonNegative);
+   angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
    angMax->SetWidth(50);
    angMax->SetLimitValues(0, 180);
    hframe001->AddFrame(angMax, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
