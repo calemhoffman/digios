@@ -32,11 +32,11 @@ TString gate = "rhoElum1 < 11.28";
 
 double elumRange = 12;
 
-double thetaCMRange[2] = {27.3, 28}; 
+double thetaCMRange[2] = {27.6, 28.4}; 
 bool shownKELines = false;
 
 //override ExRange;
-bool isOverRideEx = true;
+bool isOverRideEx = false;
 double oExRange[2] = {-0.5, 3.0};
 
 Int_t padSize = 300;
@@ -61,6 +61,8 @@ double rhoRecoil = 50;
 double posRecoil = 400;
 double posRecoil1 = 400;
 double posRecoil2 = 400;
+double posElum1 = 200;
+double posElum2 = 200;
 
 double eRange[2] = {0, 10};
 double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
@@ -109,6 +111,8 @@ void CheckSim::Begin(TTree * /* tree*/)
   rhoRecoil  = ExtractNumber(7, detGeo);
   posRecoil1 = ExtractNumber(9, detGeo);
   posRecoil2 = ExtractNumber(10, detGeo);
+  posElum1   = ExtractNumber(11, detGeo);
+  posElum2   = ExtractNumber(12, detGeo);
   firstPos   = ExtractNumber(14, detGeo);  
    
   vector<double> pos;
@@ -399,7 +403,7 @@ void Plot(plotID pID) {
    }
    
    if( pID == pElum1RThetaCM){
-      TH2F * hElum1RThetaCM = new TH2F("hElum1RThetaCM", "Elum-1 rho vs ThetaCM [gated]; thatCM [deg]; Elum- rho [mm]", 400, thetaCMRange[0], thetaCMRange[1],  400, 0, elumRange);
+      TH2F * hElum1RThetaCM = new TH2F("hElum1RThetaCM", Form("Elum-1 @ %.0f mm [gated]; thatCM [deg]; Elum- rho [mm]", posElum1), 400, thetaCMRange[0], thetaCMRange[1],  400, 0, elumRange);
       tree->Draw("rhoElum1:thetaCM>>hElum1RThetaCM", gate, "colz");   
       
       TH1F * htemp = (TH1F *) hElum1RThetaCM->ProjectionX("htemp");  
