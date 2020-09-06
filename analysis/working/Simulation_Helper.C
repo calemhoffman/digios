@@ -458,9 +458,12 @@ void MyMainFrame::Command(int ID) {
     statusLabel->SetText("Plotting simulation.......");
     //Check_Simulation(saveFileName);
     
-    TFile *file = new TFile("transfer.root", "read");
-    TTree * tree = (TTree*) file->Get("tree"); 
+    TFile file("transfer.root", "read");
+    TTree * tree = (TTree*) file.Get("tree"); 
     tree->Process("../Armory/CheckSim.C");
+    
+    delete tree;
+    file.Close();
     
     statusLabel->SetText("Plotted Simulation result");
   }
@@ -469,9 +472,12 @@ void MyMainFrame::Command(int ID) {
     statusLabel->SetText("Plotting simulation.......");
     //Check_Simulation("transfer.root");
     
-    TFile *file = new TFile("transfer.root", "read");
-    TTree * tree = (TTree*) file->Get("tree"); 
+    TFile file("transfer.root", "read");
+    TTree * tree = (TTree*) file.Get("tree"); 
     tree->Process("../Armory/CheckSim.C");
+    
+    delete tree;
+    file.Close();
     
     statusLabel->SetText(" Plotted Simulation result");
   }

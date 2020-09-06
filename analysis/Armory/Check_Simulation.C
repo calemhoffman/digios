@@ -33,15 +33,12 @@ enum plotID { pEZ,               /// 0
               pInfo,             /// 12
               pHitID,            /// 13
               pElum1XY,          /// 14
-              pElum1RThetaCM,     /// 15
+              pElum1RThetaCM,    /// 15
               pEmpty };          /// 16
 
 //======================================== User Setting
 
-//   if you are using Simulation_Helper.C for editing
-//             Remember to exit and reOpen.
-
-const int Div[2] = {3,2}; /// x,y
+int Div[2] = {3,2}; /// x,y
 plotID canvas[8] = { pEZ, pExCal, pElum1XY,
                      pThetaCM_Z, pThetaCM, pElum1RThetaCM};
 
