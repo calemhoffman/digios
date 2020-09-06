@@ -13,7 +13,7 @@
 #include "../Cleopatra/InFileCreator.h"
 #include "../Cleopatra/ExtractXSec.h"
 #include "../Cleopatra/PlotTGraphTObjArray.h"
-#include "../Armory/Check_Simulation.C"
+//#include "../Armory/Check_Simulation.C"
 #include "../Armory/AutoFit.C"
 
 #include <iostream>
@@ -371,7 +371,7 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 1 ) fileName = "reactionConfig.txt";
   if ( ID == 2 ) fileName = "Ex.txt";
   if ( ID == 3 ) fileName = "example";
-  if ( ID == 4 ) fileName = "../Armory/Check_Simulation.C";
+  if ( ID == 4 ) fileName = "../Armory/CheckSim.C";
   if ( ID == 5 ) fileName = "example.in";
   if ( ID == 6 ) fileName = "example.out";
   if ( ID == 7 ) fileName = "example.Xsec.txt";
@@ -456,22 +456,32 @@ void MyMainFrame::Command(int ID) {
     //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     
     statusLabel->SetText("Plotting simulation.......");
-    Check_Simulation(saveFileName);
+    //Check_Simulation(saveFileName);
+    
+    TFile *file = new TFile("transfer.root", "read");
+    TTree * tree = (TTree*) file->Get("tree"); 
+    tree->Process("../Armory/CheckSim.C");
+    
     statusLabel->SetText("Plotted Simulation result");
   }
   if( ID == 2 ){
     //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     statusLabel->SetText("Plotting simulation.......");
-    Check_Simulation("transfer.root");
+    //Check_Simulation("transfer.root");
+    
+    TFile *file = new TFile("transfer.root", "read");
+    TTree * tree = (TTree*) file->Get("tree"); 
+    tree->Process("../Armory/CheckSim.C");
+    
     statusLabel->SetText(" Plotted Simulation result");
   }
   
   if( ID == 3 ){
      if( fileName != "" ){
         statusLabel->SetText(fileName + "   saved.");
-        if( fileName == "../Armory/Check_Simulation.C") {
-           statusLabel->SetText(fileName + "   saved. PLEAE close and reOPEN Simulation_Helper.C for taking effect.");
-        }
+        ///if( fileName == "../Armory/Check_Simulation.C") {
+        ///   statusLabel->SetText(fileName + "   saved. PLEAE close and reOPEN Simulation_Helper.C for taking effect.");
+        ///}
       }else{
          statusLabel->SetText("cannot save HELP page.");
       }
@@ -495,7 +505,7 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("");
      editor->AddLine("4) After simulation, it will plot the result.");
      editor->AddLine("      To change the plotting, Click on the Config Simulation Plot.");
-     editor->AddLine("      Please save, and exit, reOpen the Simulation_Helper to make the change effective.");
+     //editor->AddLine("      Please save, and exit, reOpen the Simulation_Helper to make the change effective.");
      editor->AddLine("");
      editor->AddLine("5) If the transfer.root is already here, simply Plot Simulation.");
      editor->AddLine("");
