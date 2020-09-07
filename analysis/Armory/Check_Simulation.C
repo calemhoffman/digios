@@ -16,7 +16,7 @@
 #include <TObjArray.h>
 #include <fstream>
 #include <TCutG.h>
-#include "AnalysisLibrary.h"
+#include "../Armory/AnalysisLibrary.h"
 
 enum plotID { pEZ,               /// 0
               pRecoilXY,         /// 1
@@ -39,8 +39,8 @@ enum plotID { pEZ,               /// 0
 //======================================== User Setting
 
 int Div[2] = {3,2}; /// x,y
-plotID canvas[8] = { pEZ, pExCal, pElum1XY,
-                     pThetaCM_Z, pThetaCM, pElum1RThetaCM};
+plotID canvas[8] = { pEZ, pExCal, pElum1RThetaCM,
+                     pThetaCM_Z, pThetaCM, pInfo};
 
 //TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
 //TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
@@ -405,8 +405,17 @@ void Plot(plotID pID) {
       double xMin = 0 , xMax = 0;
       for( int i = 1; i <= 400; i++){
         double y = htemp->GetBinContent(i);
-        if( y > 0 && xMin == 0 ) xMin = htemp->GetBinCenter(i);
-        if( y == 0 && xMin != 0 && xMax == 0 ) xMax = htemp->GetBinCenter(i-1);
+        if( y > 0 && xMin == 0 ) {
+           xMin = htemp->GetBinCenter(i);
+           break;
+        }
+      }
+      for( int i = 400; i >= 0; i--){
+        double y = htemp->GetBinContent(i);
+        if( y > 0 && xMax == 0 ) {
+          xMax = htemp->GetBinCenter(i);
+          break;
+        }
       }
       
       printf("xMin : %f deg \n", xMin);
