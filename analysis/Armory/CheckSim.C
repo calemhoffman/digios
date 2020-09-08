@@ -32,7 +32,7 @@ TString gate = "rhoElum1 < 11.28";
 
 double elumRange = 12;
 
-double thetaCMRange[2] = {27.6, 28.4}; 
+double thetaCMRange[2] = {27, 27.5}; 
 bool shownKELines = false;
 
 //override ExRange;
@@ -427,6 +427,11 @@ void Plot(plotID pID) {
       
       printf("xMin : %f deg \n", xMin);
       printf("xMax : %f deg \n", xMax);
+      
+      TF1 f1("f1", "sin(x)");
+      double acceptance = f1.Integral(xMin * TMath::DegToRad(), xMax * TMath::DegToRad() ) * TMath::TwoPi();
+      
+      printf("acceptance = %f sr \n", acceptance);
       
       TLatex text;
       text.SetTextFont(82);

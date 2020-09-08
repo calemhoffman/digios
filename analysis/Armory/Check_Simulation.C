@@ -406,11 +406,20 @@ void Plot(plotID pID) {
       for( int i = 1; i <= 400; i++){
         double y = htemp->GetBinContent(i);
         if( y > 0 && xMin == 0 ) xMin = htemp->GetBinCenter(i);
-        if( y == 0 && xMin != 0 && xMax == 0 ) xMax = htemp->GetBinCenter(i-1);
+      }
+      
+      for( int i = 400; i >= 0; i--){
+        double y = htemp->GetBinContent(i);
+        if( y > 0 && xMax == 0 ) xMax = htemp->GetBinCenter(i);
       }
       
       printf("xMin : %f deg \n", xMin);
       printf("xMax : %f deg \n", xMax);
+      
+      TF1 f1("f1", "sin(x)");
+      double acceptance = f1.Integral(xMin * TMath::DegToRad(), xMax * TMath::DegToRad() ) * TMath::TwoPi();
+      
+      printf("acceptance = %f sr \n", acceptance);
       
       TLatex text;
       text.SetTextFont(82);
