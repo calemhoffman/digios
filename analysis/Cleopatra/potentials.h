@@ -24,6 +24,8 @@ void PrintPotential(){
   printf("vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
 }
 
+/// A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+/// 1 1 1 1 0 0 1 1 0 0 1 1 1 0 0 1 1 0 0 0 0 1 0 0 1 1
 string potentialRef(string name){
   
   //======== Deuteron 
@@ -66,6 +68,8 @@ string potentialRef(string name){
     return "Perey (1963) E < 20 | 30 < A < 100 | http://dx/doi.org/10.1016/0092-640X(76)90007-3";
   }
 
+/// a b c d e f g h i j k l m n o p q r s t u v w x y z
+/// 1 1 1 0 0 1 0 1 0 0 0 1 0 0 0 1 0 0 1 1 0 0 0 1 0 0
   //====== A = 3
   if( name == "x" ){
     return "XU, GUO, HAN, SHEN (2011) E < 250 | 20 < A < 209 | http://dx.doi.org/10.1007/s11433-011-4488-5";
@@ -99,8 +103,64 @@ string potentialRef(string name){
   if( name == "f"){
     return "(FIXED) Bassani and Picard, (1969) 24 < E < 31 | A = 90 | https://doi.org/10.1016/0375-9474(69)90601-0";
   }
+  
+  //====== custom
+  if( name == "Y"){
+    return "Bardayan Parameters PRC 78 052801(R) (2008)";
+  }
+  if( name == "Z"){
+    return "Bardayan Parameters PRC 78 052801(R) (2008)";
+  }
    
   return "";
+}
+
+bool CustomYPotential(int A, int Z, double E){
+
+  v = 85.31;
+  r0 = 1.15;
+  a = 0.81;
+  
+  vi = 0.0;
+  ri0 = 1.15;
+  ai = 0.81;
+  
+  vsi = 16.0;
+  rsi0 = 1.34;
+  asi = 0.68;
+  
+  vso = 0.0;
+  rso0 = 1.0;
+  aso = 1.0;
+
+  vsoi = 0.0;
+  rsoi0 = 1.0;
+  asoi = 1.0;
+   
+  rc0 = 1.15;
+
+  return true;
+}
+bool CustomZPotential(int A, int Z, double E){
+
+v = 54.19    ;
+r0 = 1.25    ;
+a = 0.65     ;
+vi = 0.0     ;
+ri0 = 1.25   ;
+ai = 0.65    ;
+vsi = 13.5   ;
+rsi0 = 1.25  ;
+asi = 0.47   ;
+vso = 7.5    ;
+rso0 = 1.25  ;
+aso = 0.47   ;
+vsoi = 0.0   ;
+rsoi0 = 1.25 ;
+asoi = 0.47 ;
+rc0 = 1.25  ;
+
+  return true;
 }
 
 //======================== deuteron 
@@ -938,6 +998,9 @@ bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   if( potName == "s") okFlag = SuAndHanPotential(A, Z, E);
   if( potName == "a") okFlag = AvrigeanuPotential(A, Z, E);
   if( potName == "f") okFlag = BassaniPicardPotential(A, Z, E);
+  
+  if( potName == "Y") okFlag = CustomYPotential(A, Z, E);
+  if( potName == "Z") okFlag = CustomZPotential(A, Z, E);
   
   //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
   //PrintPotential();
