@@ -45,13 +45,6 @@ enum plotID { pEZ,               /// 0
 plotID StringToPlotID(TString str);
 void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
-  //======================================== User Setting
-
-   //vector<int> Div = {3,2}; /// x,y
-   //vector<plotID> canvas = { pEZ, pExCal, pElum1XY,
-   //          pThetaCM_Z, pRecoilXY, pThetaCM};
-
-   //============================================== end of user setting
   TMacro * config = new TMacro("../Armory/Check_Simulation_Config.txt");
   TString gate = ExtractString(19, config);
   double elumRange = ExtractNumber(20, config);

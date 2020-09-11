@@ -14,6 +14,7 @@
 #include "../Cleopatra/ExtractXSec.h"
 #include "../Cleopatra/PlotTGraphTObjArray.h"
 #include "../Armory/AutoFit.C"
+#include "../Armory/Check_Simulation.C"
 
 #include <iostream>
 #include <stdexcept>
@@ -49,8 +50,6 @@ private:
    
    TGCheckButton * isElastic;
    
-   TMacro * checkSim;
-   
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
    virtual ~MyMainFrame();
@@ -59,9 +58,6 @@ public:
    bool IsFileExist(TString filename);
 };
 MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
-   
-   checkSim = new TMacro("../Armory/Check_Simulation.C");
-  
    // Create a main frame
    fMain = new TGMainFrame(p,w,h);
   
@@ -398,16 +394,13 @@ void MyMainFrame::Command(int ID) {
     
     Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
     
-    isSimulated = true;
-    
     statusLabel->SetText("Plotting simulation.......");
-    
-    checkSim->Exec();
+    Check_Simulation();
     
     statusLabel->SetText("Plotted Simulation result");
   }
   if( ID == 2 ){
-     checkSim->Exec();
+     Check_Simulation();
      statusLabel->SetText(" Run Simulation first.");
   }
   
