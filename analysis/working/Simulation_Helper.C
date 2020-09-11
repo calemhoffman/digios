@@ -13,7 +13,6 @@
 #include "../Cleopatra/InFileCreator.h"
 #include "../Cleopatra/ExtractXSec.h"
 #include "../Cleopatra/PlotTGraphTObjArray.h"
-//#include "../Armory/Check_Simulation.C"
 #include "../Armory/AutoFit.C"
 
 #include <iostream>
@@ -50,7 +49,7 @@ private:
    
    TGCheckButton * isElastic;
    
-   bool isSimulated;
+   TMacro * checkSim;
    
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
@@ -61,7 +60,7 @@ public:
 };
 MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    
-   isSimulated = false;
+   checkSim = new TMacro("../Armory/Check_Simulation.C");
   
    // Create a main frame
    fMain = new TGMainFrame(p,w,h);
@@ -315,7 +314,7 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 1 ) fileName = "reactionConfig.txt";
   if ( ID == 2 ) fileName = "Ex.txt";
   if ( ID == 3 ) fileName = "example";
-  if ( ID == 4 ) fileName = "../Armory/CheckSim.C";
+  if ( ID == 4 ) fileName = "../Armory/Check_Simulation_Config.txt";
   if ( ID == 5 ) fileName = "example.in";
   if ( ID == 6 ) fileName = "example.out";
   if ( ID == 7 ) fileName = "example.Xsec.txt";
@@ -398,45 +397,18 @@ void MyMainFrame::Command(int ID) {
     statusLabel->SetText("Running simulation.......");
     
     Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
-    //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     
     isSimulated = true;
     
     statusLabel->SetText("Plotting simulation.......");
-    //Check_Simulation(saveFileName);
     
-    TFile file1("transfer.root", "read");
-    TTree * tree1 = (TTree*) file1.Get("tree"); 
-    tree1->Process("../Armory/CheckSim.C");
-    file1.Close();
+    checkSim->Exec();
     
     statusLabel->SetText("Plotted Simulation result");
   }
   if( ID == 2 ){
-    
-    /* run Transfer(), then process("CheckSim.C") is OK
-     * process("CheckSim.C"), then Transfer(), OK, but then process("CheckSim.C") is not OK.
-     * have no idea why
-     */ 
-     
-    if( isSimulated ){
-    
-      //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
-      statusLabel->SetText("Plotting simulation.......");
-      //Check_Simulation("transfer.root");
-      
-      TFile file2("transfer.root", "read");
-      TTree * tree2 = (TTree*) file2.Get("tree"); 
-      tree2->Process("../Armory/CheckSim.C");
-      file2.Close();
-      
-      statusLabel->SetText(" Plotted Simulation result");
-      
-    }else{
-      
-      statusLabel->SetText(" Run Simulation first.");
-      
-    }
+     checkSim->Exec();
+     statusLabel->SetText(" Run Simulation first.");
   }
   
   if( ID == 3 ){
