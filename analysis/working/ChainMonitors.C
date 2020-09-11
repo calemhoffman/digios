@@ -6,7 +6,29 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   if( RUNNUM == -1 || RUNNUM == -10){
     
     //alphs
-    chain->Add("../root_data/gen_run00[0-9].root"); 
+    //chain->Add("../root_data/gen_run00[1-2].root"); 
+    
+    //CD2 227 ug
+    //chain->Add("../root_data/gen_run00[4-7].root"); 
+    
+    //CD2 147 ug
+    //chain->Add("../root_data/gen_run010.root"); 
+    
+    //CH2 360
+    //chain->Add("../root_data/gen_run011.root"); 
+    
+    //tritium-2 att = 1e3
+    chain->Add("../root_data/gen_run012.root"); 
+    chain->Add("../root_data/gen_run01[5-8].root"); 
+
+    
+    //tritium-2 att = 1e4
+    chain->Add("../root_data/gen_run019.root"); 
+    chain->Add("../root_data/gen_run02[0-6].root"); 
+    
+    //tritium-2 
+    chain->Add("../root_data/gen_run02[7-9].root"); 
+    
     
   }else{
     

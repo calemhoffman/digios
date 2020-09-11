@@ -174,6 +174,11 @@ void ecal(void) {
     cEC->cd(i+1)->SetGrid();
     heCal[i]->Draw("");
   }
+  
+  TCanvas *cEC2 = (TCanvas *) gROOT->FindObjectAny("cEC2");
+  if(cEC2 == NULL) cEC2 = new TCanvas("cEC2",Form("E corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
+  cEC2->Clear();
+  heCalID->Draw("colz");
 }
 
 void ecal2(void) {

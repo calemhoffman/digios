@@ -13,7 +13,7 @@
 #include "../Cleopatra/InFileCreator.h"
 #include "../Cleopatra/ExtractXSec.h"
 #include "../Cleopatra/PlotTGraphTObjArray.h"
-#include "../Armory/Check_Simulation.C"
+//#include "../Armory/Check_Simulation.C"
 #include "../Armory/AutoFit.C"
 
 #include <iostream>
@@ -50,6 +50,7 @@ private:
    
    TGCheckButton * isElastic;
    
+   bool isSimulated;
    
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
@@ -59,6 +60,9 @@ public:
    bool IsFileExist(TString filename);
 };
 MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
+   
+   isSimulated = false;
+  
    // Create a main frame
    fMain = new TGMainFrame(p,w,h);
   
@@ -112,66 +116,6 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    statusLabel->SetTextColor(1);
    statusLabel->ChangeOptions(kFixedSize | kSunkenFrame);
    hframe2->AddFrame(statusLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
-   
-   
-   /**
-   //============ Reaction setting
-   TGGroupFrame * reactionframe = new TGGroupFrame(fMain, "Reaction Setting A(a,b)B", kVerticalFrame);
-   hframe->AddFrame(reactionframe, new TGLayoutHints(kLHintsLeft, 2, 2, 2, 2));
-   
-   
-   TGHorizontalFrame * fF[5];
-   fF[0] = new TGHorizontalFrame(reactionframe, 170, 30, kFixedSize);
-   reactionframe->AddFrame(fF[0]);
-   
-   TGLabel * lb = new TGLabel(fF[0], "");
-   lb->SetWidth(50); lb->ChangeOptions( kFixedSize);
-   fF[0]->AddFrame(lb, new TGLayoutHints(kLHintsCenterY, 10, 2, 0, 0));
-
-   TGLabel * lbA = new TGLabel(fF[0], "A");
-   lbA->SetWidth(50); lbA->ChangeOptions( kFixedSize);
-   fF[0]->AddFrame(lbA, new TGLayoutHints(kLHintsCenterY, 10, 2, 0, 0));
-   
-   TGLabel * lbZ = new TGLabel(fF[0], "Z");
-   lbZ->SetWidth(50); lbZ->ChangeOptions( kFixedSize);
-   fF[0]->AddFrame(lbZ, new TGLayoutHints(kLHintsCenterY, 10, 2, 0, 0));
-   
-   
-   for( int pID = 0; pID < 3 ; pID ++){
-     
-      TString name;
-      int defaultA, defaultZ;
-      if ( pID == 0 ) {name = "A"; defaultA = 12; defaultZ = 6;}
-      if ( pID == 1 ) {name = "a"; defaultA =  2; defaultZ = 1;}
-      if ( pID == 2 ) {name = "b"; defaultA =  1; defaultZ = 1;}
-       
-      fF[pID+1] = new TGHorizontalFrame(reactionframe, 170, 30, kFixedSize);
-      reactionframe->AddFrame(fF[pID+1]);
-
-      TGLabel * lb = new TGLabel(fF[pID+1], name + " : ");
-      lb->SetWidth(50); lb->ChangeOptions( kFixedSize);
-      fF[pID+1]->AddFrame(lb, new TGLayoutHints(kLHintsCenterY, 10, 2, 0, 0));
-      
-      nb[pID][0] = new TGNumberEntry(fF[pID+1], defaultA, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
-      nb[pID][0]->SetWidth(50);
-      fF[pID+1]->AddFrame(nb[pID][0]);
-      nb[pID][1] = new TGNumberEntry(fF[pID+1], defaultZ, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
-      nb[pID][1]->SetWidth(50);
-      fF[pID+1]->AddFrame(nb[pID][1]);
-
-   }
-   
-   fF[4] = new TGHorizontalFrame(reactionframe, 170, 30, kFixedSize);
-   reactionframe->AddFrame(fF[4]);
-
-   TGLabel * lbE = new TGLabel(fF[4], "Energy [MeV/u]");
-   lbE->SetWidth(100); lbE->ChangeOptions( kFixedSize);
-   fF[4]->AddFrame(lbE, new TGLayoutHints(kLHintsCenterY, 0, 0, 0, 0));
-
-   reactionEnergy = new TGNumberEntry(fF[4], 10, 0, 0, TGNumberFormat::kNESRealTwo, TGNumberFormat::kNEAPositive);
-   reactionEnergy->SetWidth(70);
-   fF[4]->AddFrame(reactionEnergy);
-   **/
    
    //================= Simulation group
    TGGroupFrame * simFrame = new TGGroupFrame(fMain, "Kinematics Simulation", kVerticalFrame);
@@ -371,7 +315,7 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 1 ) fileName = "reactionConfig.txt";
   if ( ID == 2 ) fileName = "Ex.txt";
   if ( ID == 3 ) fileName = "example";
-  if ( ID == 4 ) fileName = "../Armory/Check_Simulation.C";
+  if ( ID == 4 ) fileName = "../Armory/CheckSim.C";
   if ( ID == 5 ) fileName = "example.in";
   if ( ID == 6 ) fileName = "example.out";
   if ( ID == 7 ) fileName = "example.Xsec.txt";
@@ -452,26 +396,52 @@ void MyMainFrame::Command(int ID) {
        excitationFile = "example.Ex.txt";
     }
     statusLabel->SetText("Running simulation.......");
+    
     Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
     //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
     
+    isSimulated = true;
+    
     statusLabel->SetText("Plotting simulation.......");
-    Check_Simulation(saveFileName);
+    //Check_Simulation(saveFileName);
+    
+    TFile file1("transfer.root", "read");
+    TTree * tree1 = (TTree*) file1.Get("tree"); 
+    tree1->Process("../Armory/CheckSim.C");
+    file1.Close();
+    
     statusLabel->SetText("Plotted Simulation result");
   }
   if( ID == 2 ){
-    //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
-    statusLabel->SetText("Plotting simulation.......");
-    Check_Simulation("transfer.root");
-    statusLabel->SetText(" Plotted Simulation result");
+    
+    /* run Transfer(), then process("CheckSim.C") is OK
+     * process("CheckSim.C"), then Transfer(), OK, but then process("CheckSim.C") is not OK.
+     * have no idea why
+     */ 
+     
+    if( isSimulated ){
+    
+      //gROOT->ProcessLine(".x ../Armory/Check_Simulation('transfer.root')");
+      statusLabel->SetText("Plotting simulation.......");
+      //Check_Simulation("transfer.root");
+      
+      TFile file2("transfer.root", "read");
+      TTree * tree2 = (TTree*) file2.Get("tree"); 
+      tree2->Process("../Armory/CheckSim.C");
+      file2.Close();
+      
+      statusLabel->SetText(" Plotted Simulation result");
+      
+    }else{
+      
+      statusLabel->SetText(" Run Simulation first.");
+      
+    }
   }
   
   if( ID == 3 ){
      if( fileName != "" ){
         statusLabel->SetText(fileName + "   saved.");
-        if( fileName == "../Armory/Check_Simulation.C") {
-           statusLabel->SetText(fileName + "   saved. PLEAE close and reOPEN Simulation_Helper.C for taking effect.");
-        }
       }else{
          statusLabel->SetText("cannot save HELP page.");
       }
@@ -495,7 +465,7 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("");
      editor->AddLine("4) After simulation, it will plot the result.");
      editor->AddLine("      To change the plotting, Click on the Config Simulation Plot.");
-     editor->AddLine("      Please save, and exit, reOpen the Simulation_Helper to make the change effective.");
+     //editor->AddLine("      Please save, and exit, reOpen the Simulation_Helper to make the change effective.");
      editor->AddLine("");
      editor->AddLine("5) If the transfer.root is already here, simply Plot Simulation.");
      editor->AddLine("");

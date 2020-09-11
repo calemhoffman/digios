@@ -31,27 +31,29 @@ ULong64_t maxNumberEvent = 1000000000;
 int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
-int rawEnergyRange[2] = {  1000,   3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {   0,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,     12};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,    800};
 int      rdtERange[2] = {  1000,   3000};
-int      elumRange[2] = { -1000,   6000};
-int       TACRange[3] = { 300,    700,  1500};  /// #bin, min, max
-int      TAC2Range[3] = { 20,    480,    500};
+int      elumRange[2] = {  20,   600};
+int       TACRange[3] = { 300,    300, 1800};  /// #bin, min, max
+int      TAC2Range[3] = { 100,    400,    500};
 
-double     exRange[3] = {  20, -1, 12}; /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  20, -1, 6}; /// bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -100, 100};
 
-int    elumRateTimeRange[2] = {13000, 16000};
+int    elumRateTimeRange[2] = {730, 730 + 12*60}; /// min
 
 //---Gate
-double eCalCut = 0.4;                   /// lower limit for eCal
-int timeGate[2] = {-20, 5};             /// min, max, 1 ch = 10 ns
-int tacGate[2]  = {-8000, -2000};
-int dEgate[2]   = {500,  1500};
-int Eresgate[2] = {1000,4000};
+bool isTimeGateOn  = false;
+int timeGate[2]    = {-20, 5};             /// min, max, 1 ch = 10 ns
+double eCalCut     = 2.1;                   /// lower limit for eCal
+bool  isTACGate    = false;
+int tacGate[2]     = {-8000, -2000};
+int dEgate[2]      = {500,  1500};
+int Eresgate[2]    = {1000,4000};
 double thetaCMGate = 10;               /// deg
-double xGate = 0.95;                   ///cut out the edge
+double xGate       = 0.95;                   ///cut out the edge
 vector<int> skipDetID = { 11 };
 
 TString rdtCutFile = "rdtCuts.root";
@@ -188,7 +190,7 @@ TH1F* helum4C; // elum rate for (12C, 12C)
 TH1F* hBIC; // BIC, beam integrated current
 TH1F* helumDBIC; //elum (d,d)/ BIC
 
-//======= EZero, or IonChamber
+//======= EZero, or IonChamber when recoil also use
 TH1F* hic0; //ionChamber ch0
 TH1F* hic1;
 TH1F* hic2;
@@ -206,8 +208,6 @@ TH2I *hID2;
 TH2I *hID2g;
 
 int count1, count2;
-
-bool isTACGate;
 
 /***************************
  ***************************/
@@ -275,7 +275,7 @@ void Monitors::Begin(TTree *tree)
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 0 ) Bfield  = atof(x.c_str());
+         if( i == 0 ) Bfield  = abs(atof(x.c_str()));
          if( i == 3 )     a   = atof(x.c_str());
          if( i == 5 ) length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
@@ -465,7 +465,10 @@ void Monitors::Begin(TTree *tree)
    //================  Get Recoil cuts;
    TFile * fCut = new TFile(rdtCutFile);	
    isCutFileOpen = fCut->IsOpen();
-   if(!isCutFileOpen) printf( "Failed to open cutfile : %s\n" , rdtCutFile.Data());
+   if(!isCutFileOpen) {
+      printf( "Failed to open cutfile : %s\n" , rdtCutFile.Data());
+      rdtCutFile = "";
+   }
    numCut = 0 ;
    if( isCutFileOpen ){
       cutList = (TObjArray *) fCut->FindObjectAny("cutList");
@@ -590,7 +593,7 @@ void Monitors::Begin(TTree *tree)
                              
    }
    
-   heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 500, energyRange[0], energyRange[1]);
+   heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 2000, energyRange[0], energyRange[1]);
    
    //====================== E-Z plot
    heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
@@ -671,9 +674,7 @@ void Monitors::Begin(TTree *tree)
    
    helumTAC = new TH2F("helumTAC", "Elum vs TAC; TAC [a.u.]; Elum ", TACRange[0], TACRange[1], TACRange[2], 500, elumRange[0], elumRange[1]);
    
-   
-   
-   helum4D = new TH1F("helum4d", "Elum rate for deuteron; time [min]; count / min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]); // elum rate for (d,d)
+   helum4D = new TH1F("helum4d", "Elum rate for Z = 1; time [min]; count / min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]); // elum rate for (d,d)
    helum4C = new TH1F("helum4C", "Elum rate for carbon; time [min]; count / min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]); // elum rate for (12C, 12C)
    
    hBIC = new TH1F("hBIC", "BIC rate ; time [min]; count / min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]); // elum rate for (d,d)
@@ -692,8 +693,6 @@ void Monitors::Begin(TTree *tree)
    
    count1 = 0;
    count2 = 0;
-
-   isTACGate=false;
 }
 
 void Monitors::SlaveBegin(TTree * /*tree*/)
@@ -783,13 +782,17 @@ Bool_t Monitors::Process(Long64_t entry)
        helum[i]->Fill(elum[i]);
        helumID->Fill(i, elum[i]);
     //   helumSUM->Fill(elum[i]);
+
+       helumTAC->Fill(tac[0], elum[i]);
     }
     
-    helumTAC->Fill(tac[0], elum[0]);
     
-    if( tac_t[1]> 0 ) hBIC->Fill(tac_t[1]/1e8/60.);
+    if( tac_t[3]> 0 ) hBIC->Fill(tac_t[3]/1e8/60.);
     
-    ///if( 830 < elum[0]  && elum[0] < 1000 ) helum4D->Fill(elum_t[0]/1e8/60.); 
+    int tac2 = tac_t[2]-elum_t[0];        
+    htac2->Fill(tac2);
+    
+    if( 40 < elum[0]  && elum[0] < 60 ) helum4D->Fill(elum_t[0]/1e8/60.); 
     ///if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
 
     /*********** Array ************************************************/ 
@@ -922,7 +925,7 @@ Bool_t Monitors::Process(Long64_t entry)
 
           hID2->Fill(detID, j); 
    
-          if( timeGate[0] < tdiff && tdiff < timeGate[1] ) {
+          if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
             if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
             hID2g->Fill(detID, j); 
@@ -933,7 +936,7 @@ Bool_t Monitors::Process(Long64_t entry)
         }
       }
       
-      //coinFlag = true;
+      if( !isTimeGateOn ) coinFlag = true;
       
       //================ E-Z gate
       if( isEZCutFileOpen ) {
@@ -945,9 +948,6 @@ Bool_t Monitors::Process(Long64_t entry)
       }else{
          ezGate = true;
       }
-      
-      int tac2 = tac_t[2]-e_t[detID];        
-      htac2->Fill(tac2);
 
       if( coinFlag && rdtgate && ezGate ){//&& tac2 > 512 && tac2 < 518) {
         heCalVzGC->Fill( z[detID] , eCal[detID] );
@@ -1069,7 +1069,7 @@ Bool_t Monitors::Process(Long64_t entry)
      //ungated excitation energy
      
      htacEx->Fill(tac[0], Ex);
-     htac2Ex->Fill(tac_t[2]-e_t[detID], Ex);
+     htac2Ex->Fill(tac_t[1]-e_t[detID], Ex);
      
      if( thetaCM > thetaCMGate ) {
          hEx->Fill(Ex);
@@ -1184,6 +1184,8 @@ void Monitors::Terminate()
    if( isCutFileOpen ) text.DrawLatex(0.15, 0.8, "with Recoil gate");
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
    
+   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   
    ///----------------------------------- Canvas - 4
    //cCanvas->cd(4); hmult->Draw("colz");
    //cCanvas->cd(4); hID2->Draw("colz");
@@ -1215,8 +1217,9 @@ void Monitors::Terminate()
    
    //hBIC->Draw();
    
+   
    Draw2DHist(hrdt2Dg[0]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 0 ) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
    
@@ -1228,10 +1231,13 @@ void Monitors::Terminate()
    
    //hExi[14]->Draw();
    
-   Draw2DHist(hrdt2Dg[1]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   if( isCutFileOpen && numCut > 1) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   helum4D->Draw();
+   text.DrawLatex(0.15, 0.8, Form("%d < elum0 < %d", 40, 60)); 
+   
+   ///Draw2DHist(hrdt2Dg[1]);
+   ///if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   ///if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   ///if( isCutFileOpen && numCut > 1) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 7
    cCanvas->cd(7); 
@@ -1240,24 +1246,28 @@ void Monitors::Terminate()
    
    //helum4D->Draw();
    
-   Draw2DHist(hrdt2Dg[2]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   if( isCutFileOpen && numCut > 2) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   helumTAC->Draw("colz");
+   
+   ///Draw2DHist(hrdt2Dg[2]);
+   ///text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   ///if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   ///if( isCutFileOpen && numCut > 2) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 8
    cCanvas->cd(8); 
    
    //helum4C->Draw();
    
-   //helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]);
-   //helumDBIC->Divide(helum4D, hBIC);
-   //helumDBIC->Draw();
+   helum[0]->Draw(); // H076_136Xe
    
-   Draw2DHist(hrdt2Dg[3]);
-   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   if( isCutFileOpen && numCut > 3) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   ///helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]);
+   ///helumDBIC->Divide(helum4D, hBIC);
+   ///helumDBIC->Draw();
+   
+   ///Draw2DHist(hrdt2Dg[3]);
+   ///if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   ///if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   ///if( isCutFileOpen && numCut > 3) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /************************* Save histograms to root file*/
    
