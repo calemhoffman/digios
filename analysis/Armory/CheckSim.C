@@ -1,22 +1,6 @@
-#include <TFile.h>
-#include <TTree.h>
-#include <TCanvas.h>
-#include <TROOT.h>
-#include <TObjArray.h>
-#include <TStyle.h>
-#include <TH2F.h>
-#include <TH1F.h>
-#include <TF1.h>
-#include <TMath.h>
-#include <TSpectrum.h>
-#include <TGraph.h>
-#include <TLegend.h>
-#include <TLatex.h>
-#include <TMacro.h>
-#include <TObjArray.h>
-#include <fstream>
-#include <TCutG.h>
-#include "AnalysisLibrary.h"
+#define CheckSim_cxx
+
+#include "CheckSim.h"
 
 enum plotID { pEZ,               /// 0
               pRecoilXY,         /// 1
@@ -32,28 +16,30 @@ enum plotID { pEZ,               /// 0
               pArrayXY,          /// 11
               pInfo,             /// 12
               pHitID,            /// 13
-              pEmpty };          /// 14
-
+              pElum1XY,          /// 14
+              pElum1RThetaCM,     /// 15
+              pEmpty };          /// 16
+              
 //======================================== User Setting
 
-//   if you are using Simulation_Helper.C for editing
-//             Remember to exit and reOpen.
-
 const int Div[2] = {3,2}; /// x,y
-plotID canvas[8] = { pEZ, pExCal, pArrayXY,
+plotID canvas[8] = { pEZ, pExCal, pElum1RThetaCM,
                      pThetaCM_Z, pRecoilXY, pInfo};
 
-//TString gate = "hit == 1 && rhoRecoil > 10 && rhoElum1 > 72.6 && loop == 1";
-//TString gate = "hit == 1 && loop <= 1 && rhoRecoil > 10 ";
 //TString gate = "hit == 1 && loop <= 1 && thetaCM > 10";
-TString gate = "hit == 1 && loop <= 2";
+//TString gate = "hit == 1 && loop <= 1";
+TString gate = "rhoElum1 < 11.28";
+
+double elumRange = 12;
+
+double thetaCMRange[2] = {20, 23.5}; 
+bool shownKELines = false;
 
 //override ExRange;
 bool isOverRideEx = false;
-double oExRange[2] = {0, 12.0};
-   
-int thetaCMRange[2] = {0, 45}; 
-bool shownKELines = false;
+double oExRange[2] = {-0.5, 3.0};
+
+Int_t padSize = 300;
 
 //============================================== end of user setting
 
@@ -75,19 +61,25 @@ double rhoRecoil = 50;
 double posRecoil = 400;
 double posRecoil1 = 400;
 double posRecoil2 = 400;
+double posElum1 = 200;
+double posElum2 = 200;
 
-double eRange[2] = {0, 12};
+double eRange[2] = {0, 10};
 double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
 double recoilERange[2];
 vector<double> exList;
 double ExRange[2];
 static int nExID;
 
-void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
-  
-  file = new TFile(filename, "read");
-  tree = (TTree*) file->Get("tree");
-  
+
+void CheckSim::Begin(TTree * /* tree*/)
+{
+
+   TString option = GetOption();
+   
+  file = new TFile("transfer.root", "read");
+  tree = (TTree*) file->Get("tree"); 
+   
   TMacro * reactionConfig = (TMacro *) file->FindObjectAny("reactionConfig");
   Reaction=reactionConfig->GetName(); ///TODO change to Latex
   
@@ -119,6 +111,8 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   rhoRecoil  = ExtractNumber(7, detGeo);
   posRecoil1 = ExtractNumber(9, detGeo);
   posRecoil2 = ExtractNumber(10, detGeo);
+  posElum1   = ExtractNumber(11, detGeo);
+  posElum2   = ExtractNumber(12, detGeo);
   firstPos   = ExtractNumber(14, detGeo);  
    
   vector<double> pos;
@@ -212,24 +206,41 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    //eRange by zRange and exList
    double QQ = (Et*Et + mass*mass - (massB-exList[0])*(massB-exList[0]))/2/Et;
    double intercept = QQ/gamm - mass;   
-   //eRange[1] = intercept + zRange[2] * slope;
-   ///printf("intercept of 0 MeV : %f MeV \n", intercept); 
-   ///printf("eRange 0 MeV : %f MeV \n", eRange[1]); 
+   eRange[1] = intercept + zRange[2] * slope;
    
-   //thetaCMRange
-   ///double momentum = sqrt(( Et*Et - pow(mass + massB - exList[0],2)) * ( Et*Et - pow(mass - massB + exList[0],2)))/2/Et;
-   ///double thetaMax = acos( (beta * QQ- alpha / gamm * zRange[2])/momentum) * TMath::RadToDeg();
-   ///thetaCMRange[1] = (int) TMath::Ceil(thetaMax/10.)*10;
-   ///printf(" momentum    : %f \n", momentum);
-   ///printf(" thetaCM Max : %f \n", thetaMax);
-   ///printf(" thetaCM Range : %d \n", thetaCMRange[1]);
    
    //===================================================
    printf("============================== Gate\n");
    printf("gate : %s\n", gate.Data());
    printf("====================================\n");
+   
+  
 
-      
+}
+
+void CheckSim::SlaveBegin(TTree * /*tree*/)
+{
+
+   TString option = GetOption();
+
+}
+
+Bool_t CheckSim::Process(Long64_t entry)
+{
+
+   //should the filling be here? how to handle th gate?
+
+   return kTRUE;
+}
+
+void CheckSim::SlaveTerminate()
+{
+
+}
+
+void CheckSim::Terminate()
+{
+
    Int_t size[2] = {padSize,padSize}; ///x,y, single Canvas size
    TCanvas * cCheck = new TCanvas("cCheck", "Check For Simulation", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
@@ -251,11 +262,8 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    
    cCheck->Modified();
    cCheck->Update();
-   
-}
 
-///============================================================
-///============================================================
+}
 
 double * FindRange(TString branch, TString gate, TTree * tree, double output[2]){
    tree->Draw(Form("%s>>temp1", branch.Data()), gate);
@@ -381,12 +389,58 @@ void Plot(plotID pID) {
       int ll = gate.Length();
       if( ll > 30 ) {
         vector<string> strList = SplitStr( (string) gate.Data(), "&&");
-        for( int i = 0; i < strList.size(); i++){
+        for( int i = 0; i < (int) strList.size(); i++){
            text.DrawLatex(0., 0.6 - 0.05*i, (TString) strList[i]);
         }
       }else{
          text.DrawLatex(0., 0.6, gate);
       }
+   }
+   
+   if( pID == pElum1XY ){
+      TH2F * hElum1XY = new TH2F("hElum1XY", "Elum-1 XY [gated]; X [mm]; Y [mm]",  400, -elumRange, elumRange, 400, -elumRange, elumRange);
+      tree->Draw("yElum1:xElum1>>hElum1XY", gate, "colz");
+   }
+   
+   if( pID == pElum1RThetaCM){
+      TH2F * hElum1RThetaCM = new TH2F("hElum1RThetaCM", Form("Elum-1 @ %.0f mm [gated]; thatCM [deg]; Elum- rho [mm]", posElum1), 400, thetaCMRange[0], thetaCMRange[1],  400, 0, elumRange);
+      tree->Draw("rhoElum1:thetaCM>>hElum1RThetaCM", gate, "colz");   
+      
+      TH1F * htemp = (TH1F *) hElum1RThetaCM->ProjectionX("htemp");  
+      
+      double xMin = 0 , xMax = 0;
+      for( int i = 1; i <= 400; i++){
+        double y = htemp->GetBinContent(i);
+        if( y > 0 && xMin == 0 ) {
+          xMin = htemp->GetBinCenter(i);
+          break;
+        }
+        //if( y == 0 && xMin != 0 && xMax == 0 ) xMax = htemp->GetBinCenter(i-1);
+      }
+      for( int i = 400; i >= 0; i--){
+        double y = htemp->GetBinContent(i);
+        if( y > 0 && xMax == 0 ) {
+          xMax = htemp->GetBinCenter(i);
+          break;
+        }
+      }
+      
+      printf("xMin : %f deg \n", xMin);
+      printf("xMax : %f deg \n", xMax);
+      
+      TF1 f1("f1", "sin(x)");
+      double acceptance = f1.Integral(xMin * TMath::DegToRad(), xMax * TMath::DegToRad() ) * TMath::TwoPi();
+      
+      printf("acceptance = %f sr \n", acceptance);
+      
+      TLatex text;
+      text.SetTextFont(82);
+      text.SetTextSize(0.06);
+      text.SetTextColor(2);
+      text.SetTextAngle(90);
+
+      text.DrawLatex(xMin, elumRange/2, Form("%.2f", xMin));
+      text.DrawLatex(xMax, elumRange/2, Form("%.2f", xMax));
    }
    
    if( pID == pHitID ){
@@ -412,3 +466,4 @@ void Plot(plotID pID) {
    
    
 }
+

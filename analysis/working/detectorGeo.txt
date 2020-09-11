@@ -9,16 +9,16 @@
 false    //is_coincident_with_recoil
 700      //Recoil_1_position_[mm]_when_0_disable_tree_branch
 900      //Recoil_2_position_[mm]
-0.00     //Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
+200.00     //Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
 0.00     //Elum_2_position_[mm]_when_Elum=0_disable_tree_branch
 12.4     //blocker_length_from_1st_detector_[mm]
--300      //nearest_position_to_target_-_for_upstream_[mm]
+-314      //nearest_position_to_target_-_for_upstream_[mm]
 0.04     //energy_resolution_of_PSD_array_[MeV]
 0.50     //position_resolution_of_PSD_array_[mm]
 4        //number_of_detector_as_same_side
-0.00      //1st_detector_relative_position_to_the_nearest_position_to_target[mm]
-60.87     //2nd_det
-120.93    //3rd
-180.01    //4th
-240.00
-300.00
+0.00     //1st_detector_near_position_in_reference_to_det6_[mm]
+58.6     //2nd_det
+117.9 
+176.8
+235.8
+294.8    //6th_det

@@ -113,7 +113,7 @@ void Cali_xf_xn(TTree * tree){
       for( int i = 0; i < numDet; i++){
          
          TSpectrum * spec = new TSpectrum();
-         int nPeaks = spec->Search(q[i], 3, "", 0.30);
+         int nPeaks = spec->Search(q[i], 3, "", 0.20);
          printf("%2d | found %d peaks | ", i,  nPeaks);
 
          double * xpos = spec->GetPositionX();
