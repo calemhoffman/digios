@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 858
-y 110
+x 954
+y 96
 w 1340
 h 800
 font "helvetica-bold-r-10.0"
@@ -4296,7 +4296,7 @@ buttonLabel "Threshold"
 numPvs 4
 numDsps 1
 displayFileName {
-  0 "HELIOSArraySettings.edl"
+  0 "HELIOSArraySettings_4sidesArray.edl"
 }
 menuLabel {
   0 "Threshold"
