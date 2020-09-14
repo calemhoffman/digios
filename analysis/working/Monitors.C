@@ -39,25 +39,25 @@ int      elumRange[2] = { 100,   6000};
 int       TACRange[3] = { 300,    300, 1800};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 
-double     exRange[3] = {  20, -1, 6}; /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  20, -3, 6}; /// bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -100, 100};
 
 int    elumRateTimeRange[2] = {140, 10*60}; /// min
 
 //---Gate
 bool isTimeGateOn  = false;
-int timeGate[2]    = {-20, 5};             /// min, max, 1 ch = 10 ns
-double eCalCut     = 2.1;                   /// lower limit for eCal
+int timeGate[2]    = {-5, 10};             /// min, max, 1 ch = 10 ns
+double eCalCut     = 2;                   /// lower limit for eCal
 bool  isTACGate    = false;
 int tacGate[2]     = {-8000, -2000};
 int dEgate[2]      = {500,  1500};
 int Eresgate[2]    = {1000,4000};
 double thetaCMGate = 10;               /// deg
-double xGate       = 2.0;                   ///cut out the edge
+double xGate       = 0.95;                   ///cut out the edge
 vector<int> skipDetID = { 11 };
 
 TString rdtCutFile = "rdtCuts.root";
-TString ezCutFile = "";/// "ezCut.root";
+TString ezCutFile = "ezCut.root";
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -1219,7 +1219,7 @@ void Monitors::Terminate()
    //hBIC->Draw();
    
    
-   Draw2DHist(hrdt2D[0]);
+   Draw2DHist(hrdt2Dg[0]);
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 0 ) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
