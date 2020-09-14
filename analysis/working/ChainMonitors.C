@@ -18,24 +18,21 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     //chain->Add("../root_data/gen_run011.root"); 
     
     //tritium-2 att = 1e3
-    //chain->Add("../root_data/gen_run012.root"); 
-    //chain->Add("../root_data/gen_run01[5-8].root"); 
+    chain->Add("../root_data/gen_run012.root"); 
+    chain->Add("../root_data/gen_run01[5-8].root"); 
 
     
     //tritium-2 att = 1e4
-    //chain->Add("../root_data/gen_run019.root"); 
-    //chain->Add("../root_data/gen_run02[0-6].root"); 
-    
-    //tritium-2 
-    //chain->Add("../root_data/gen_run02[7-9].root"); 
-    
+    chain->Add("../root_data/gen_run019.root"); 
+    chain->Add("../root_data/gen_run02[0-6].root"); 
+        
     //CD2 227
     //chain->Add("../root_data/gen_run033.root"); 
     
     
-    //tritium-2
+    //tritium-2 with IC
     chain->Add("../root_data/gen_run03[4-9].root"); 
-    chain->Add("../root_data/gen_run04[0-9].root"); 
+    chain->Add("../root_data/gen_run04[0-2].root"); 
     
     
     
