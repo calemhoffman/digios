@@ -1,0 +1,29 @@
+/////enum plotID { pEZ,               /// 0
+/////              pRecoilXY,         /// 1
+/////              pRecoilXY1,        /// 2
+/////              pRecoilXY2,        /// 3
+/////              pRecoilRZ,         /// 4
+/////              pRecoilRTR,        /// 5
+/////              pTDiffZ,           /// 6
+/////              pThetaCM,          /// 7
+/////              pThetaCM_Z,        /// 8
+/////              pExCal,            /// 9
+/////              pRecoilRThetaCM,   /// 10
+/////              pArrayXY,          /// 11
+/////              pInfo,             /// 12
+/////              pHitID,            /// 13
+/////              pElum1XY,          /// 14
+/////              pElum1RThetaCM,    /// 15
+/////              pEmpty };          /// 16
+/////=============================================== User Config
+{ pEZ, pExCal, pElum1RThetaCM, break, pThetaCM_Z, pRecoilXY, pInfo}   //Canvas config
+rhoElum1 < 11.28   //gate
+12              //elum range
+{22,23}        //thetaCM range
+false          //shownKELines
+false          //isOverRideEx
+{-0.5, 3.0}    // over-rdied Ex range
+
+///============================== example of gate
+hit == 1 && loop <= 1 && thetaCM > 10;
+hit == 1 && loop <= 1;

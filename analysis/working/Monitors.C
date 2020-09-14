@@ -33,16 +33,16 @@ int canvasXY[2] = {1200 , 1600} ;// x, y
 //---histogram setting
 int rawEnergyRange[2] = {   0,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,     12};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,    800};
-int      rdtERange[2] = {  1000,   3000};
-int      elumRange[2] = {  20,   600};
+int     rdtDERange[2] = {     0,   500};
+int      rdtERange[2] = {     0,   700};
+int      elumRange[2] = { 100,   6000};
 int       TACRange[3] = { 300,    300, 1800};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 
 double     exRange[3] = {  20, -1, 6}; /// bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -100, 100};
 
-int    elumRateTimeRange[2] = {730, 730 + 12*60}; /// min
+int    elumRateTimeRange[2] = {140, 10*60}; /// min
 
 //---Gate
 bool isTimeGateOn  = false;
@@ -53,7 +53,7 @@ int tacGate[2]     = {-8000, -2000};
 int dEgate[2]      = {500,  1500};
 int Eresgate[2]    = {1000,4000};
 double thetaCMGate = 10;               /// deg
-double xGate       = 0.95;                   ///cut out the edge
+double xGate       = 2.0;                   ///cut out the edge
 vector<int> skipDetID = { 11 };
 
 TString rdtCutFile = "rdtCuts.root";
@@ -781,9 +781,11 @@ Bool_t Monitors::Process(Long64_t entry)
     for( int i = 0; i < 16; i++){
        helum[i]->Fill(elum[i]);
        helumID->Fill(i, elum[i]);
-    //   helumSUM->Fill(elum[i]);
+       helumSUM->Fill(elum[i]);
 
        helumTAC->Fill(tac[0], elum[i]);
+       if( 300 < elum[0]  && elum[0] < 600 ) helum4D->Fill(elum_t[0]/1e8/60.); 
+
     }
     
     
@@ -792,7 +794,6 @@ Bool_t Monitors::Process(Long64_t entry)
     int tac2 = tac_t[2]-elum_t[0];        
     htac2->Fill(tac2);
     
-    if( 40 < elum[0]  && elum[0] < 60 ) helum4D->Fill(elum_t[0]/1e8/60.); 
     ///if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
 
     /*********** Array ************************************************/ 
@@ -1218,7 +1219,7 @@ void Monitors::Terminate()
    //hBIC->Draw();
    
    
-   Draw2DHist(hrdt2Dg[0]);
+   Draw2DHist(hrdt2D[0]);
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
    if( isCutFileOpen && numCut > 0 ) {cutG = (TCutG *)cutList->At(0) ; cutG->Draw("same");}
@@ -1232,7 +1233,7 @@ void Monitors::Terminate()
    //hExi[14]->Draw();
    
    helum4D->Draw();
-   text.DrawLatex(0.15, 0.8, Form("%d < elum0 < %d", 40, 60)); 
+   text.DrawLatex(0.15, 0.8, Form("%d < elum < %d", 400, 600)); 
    
    ///Draw2DHist(hrdt2Dg[1]);
    ///if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
@@ -1258,7 +1259,8 @@ void Monitors::Terminate()
    
    //helum4C->Draw();
    
-   helum[0]->Draw(); // H076_136Xe
+   helumSUM->Draw(); // H076_136Xe
+   
    
    ///helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]);
    ///helumDBIC->Divide(helum4D, hBIC);
