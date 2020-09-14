@@ -446,7 +446,7 @@ void Cali_e_trace::Init(TTree *tree)
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 0  )          Bfield = atof(x.c_str());
+         if( i == 0  )          Bfield = abs(atof(x.c_str()));
          if( i == 3  )        perpDist = atof(x.c_str());
          if( i == 5  )          length = atof(x.c_str());
          if( i == 14 )        firstPos = atof(x.c_str());
