@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 38
-y 55
+x 102
+y 314
 w 1400
 h 816
 font "helvetica-bold-r-10.0"
@@ -5288,7 +5288,7 @@ commandLabel {
   0 "Stop Run"
 }
 command {
-  0 "$EDMSCRIPTS/stop_run.sh"
+  0 "$EDMSCRIPTS/close_r.sh"
 }
 endObjectProperties
 

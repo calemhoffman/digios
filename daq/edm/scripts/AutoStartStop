@@ -70,7 +70,13 @@ count=0
 isStarted=$(caget Online_CS_StartStop | awk '{print $2}')
 if [ $isStarted == "Stop" ]; then
     cd ${datalocation}
-    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each."
+    
+    echo "===================== Auto-Start-Stop script"
+    echo "Crtl+C to cancel with no harm"
+    echo "Please type Single-line comment:"
+    read -p '>>' COMMENT
+
+    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each."${COMMENT}
     stopFlag=0
     cd ${currentLocation}
     source ~/digios/expName.sh
