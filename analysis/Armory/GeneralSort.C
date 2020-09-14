@@ -282,7 +282,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== ELUM
       if ( idDet >= 200 && idDet <= 240 ) {
         Int_t elumID = idDet - 200;
-        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
+        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (1);
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
