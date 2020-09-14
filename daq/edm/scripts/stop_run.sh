@@ -66,6 +66,10 @@ else
     sed -i "1,${cutLineNum}d" ${elogContext}
     #fill stop time
     echo "         stop at ${currentDate} <br />" >> ${elogContext}
+    #check run size
+    size=$(du -hsc ~/digios/analysis/data/${expName}_run_*${LastRunNum}* | tail -1 | awk '{print $1}')
+    echo "files size : ${size} <br />" >> ${elogContext}
+
     echo "grafana screenshot is attached. <br />" >> ${elogContext}
     echo "-----------------------------------------------</p>" >> ${elogContext}
     echo "$COMMENT <br />" >> ${elogContext}
