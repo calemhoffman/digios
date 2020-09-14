@@ -120,7 +120,7 @@ while [  $stopFlag -eq 0 ]; do
 	    source ~/digios/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 
 	    echo "tell Mac to run ./process_run"
-	    xterm -T  ~/digios/daq/edm/scripts/AutoMonitor -e "ssh heliosdigios@192.168.1.193 AutoProcess "${RUN}"" &
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.193 AutoProcess "${RUN}" 1" &
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
@@ -147,7 +147,7 @@ while [  $stopFlag -eq 0 ]; do
 	mod=$(( $count % 21 ))
 	if [ $mod -eq 0 ]; then
 	    echo "tell Mac to run ./process_run"
-	    xterm -T  ~/digios/daq/edm/scripts/AutoMonitor -e "ssh heliosdigios@192.168.1.193 AutoProcess "${RUN}"" &
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.193 AutoProcess "${RUN}" 0" &
 	fi
 
     fi

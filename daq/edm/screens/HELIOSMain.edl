@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 48
-y 38
+x 858
+y 110
 w 1340
 h 800
 font "helvetica-bold-r-10.0"
@@ -3122,7 +3122,7 @@ commandLabel {
   0 "Stop Run"
 }
 command {
-  0 "$EDMSCRIPTS/stop_run.sh"
+  0 "$EDMSCRIPTS/close_r.sh"
 }
 endObjectProperties
 
@@ -6853,7 +6853,7 @@ x 798
 y 715
 w 59
 h 15
-controlPv "VME01:MDIG1:ahit_count0_RBV"
+controlPv "VME01:MDIG2:ahit_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -6874,7 +6874,7 @@ x 738
 y 715
 w 60
 h 15
-controlPv "VME01:MDIG1:disc_count0_RBV"
+controlPv "VME01:MDIG2:disc_count0_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
@@ -6939,7 +6939,7 @@ x 796
 y 763
 w 59
 h 15
-controlPv "VME01:MDIG2:ahit_count0_RBV"
+controlPv "VME01:MDIG2:ahit_count2_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
@@ -6960,7 +6960,7 @@ x 736
 y 763
 w 60
 h 15
-controlPv "VME01:MDIG2:disc_count0_RBV"
+controlPv "VME01:MDIG2:disc_count2_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 81
