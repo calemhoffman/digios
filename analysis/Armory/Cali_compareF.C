@@ -118,6 +118,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,1) == "#" )  break;
          if( i == 5 ) length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
          if( i == 17 ) cDet = atoi(x.c_str());

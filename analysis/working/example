@@ -38,24 +38,13 @@
 #20F(d,t)19F       2        0d5/2    5/2+         0.197   10MeV/u     Vl
 #16N(d,3He)15C     2        0p1/2    5/2+         0.74    12MeV/u     Ax
 #10Be(t,p)12Be     0        1L=0     0+           0.000   5MeV/u      lA                #two-nucleon_transfer   
-#32Si(t,p)34Si     0        0L=0       0+           0.000   8MeV/u      lA                #two-nucleon_transfer
-#133Sb(t,3He)133Sn  7/2      0g7/2    0+          0.000    8.5MeV/u     Ax .... cannot cal
+#32Si(t,p)34Si     0        0L=0     0+           0.000   8MeV/u      lA                #two-nucleon_transfer
+#133Sb(t,3He)133Sn 7/2      0g7/2    0+           0.000   8.5MeV/u    Ax .... cannot cal
 
-133Sb(d,p)134Sb    7/2      1f7/2    0-          0.000    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    1-          0.013    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    7-          0.279    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    2-          0.331    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    3-          0.384    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    5-          0.441    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    4-          0.555    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f7/2    6-          0.617    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      0h9/2    1-          0.885    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      0h9/2    2-          0.935    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      2p3/2    2-          1.331    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      0h9/2    8-          1.352    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      2p3/2    5-          1.385    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f5/2    1-          1.900    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f5/2    1-          2.170    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      0i13/2   9+          2.405    10.0MeV/u     AK
-133Sb(d,p)134Sb    7/2      1f5/2    1-          2.429    10.0MeV/u     AK
+9Li(t,p)11Li      3/2        1L=0     3/2-        0.000   10MeV/u      lA                #two-nucleon_transfer   
+9Li(t,p)11Li      3/2        1L=0     3/2-        1.000   10MeV/u      lA                #two-nucleon_transfer   
+9Li(t,p)11Li      3/2        1L=0     3/2-        2.000   10MeV/u      lA                #two-nucleon_transfer   
+9Li(t,p)11Li      3/2        1L=0     3/2-        3.000   10MeV/u      lA                #two-nucleon_transfer   
+9Li(t,p)11Li      3/2        1L=0     3/2-        4.000   10MeV/u      lA                #two-nucleon_transfer   
+9Li(t,p)11Li      3/2        1L=0     3/2-        5.000   10MeV/u      lA                #two-nucleon_transfer   
 

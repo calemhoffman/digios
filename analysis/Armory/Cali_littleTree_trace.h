@@ -196,6 +196,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,1) == "#" )  break;
          if( i == 0 ) Bfield   = atof(x.c_str());
          if( i == 3 ) a        = atof(x.c_str());         
          if( i == 5 ) length   = atof(x.c_str());

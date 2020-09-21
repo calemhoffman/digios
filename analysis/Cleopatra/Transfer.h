@@ -237,9 +237,9 @@ void Transfer(
     while( file >> line){
       //printf("%d, %s \n", i,  line.c_str());
       if( line.substr(0,2) == "//" ) continue;
-      if( i == 0 ) isotopeName = line; 
-      if ( i >= 1 ){
-        if( i%2 == 1 ) {
+      if( line.substr(0,1) == "#" ) break;
+      if ( i >= 0 ){
+        if( i%2 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
         }else{
           ExStrength.push_back(atof(line.c_str()));
@@ -249,7 +249,6 @@ void Transfer(
     }
     file.close();
     printf("... done.\n");
-    printf("========== %s\n", isotopeName.c_str());
     int n = ExKnown.size();
     for(int i = 0; i < n ; i++){
       reaction.SetExB(ExKnown[i]);
