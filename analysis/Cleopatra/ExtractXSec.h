@@ -288,12 +288,12 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   FILE * file_Ex;
   file_Ex = fopen(saveExName.c_str(), "w+");
   
-  fprintf(file_Ex, "recoil\n");
+  fprintf(file_Ex, "//generated_by_ExtractXSec.h\n");
 
   for( int i = 0; i < numCal ; i++){
       fprintf(file_Ex, "%9.5f     %9.5f\n", Ex[i], partialXsec[i]);
   }
-  
+  fprintf(file_Ex, "#=====End_of_File\n");
   fclose(file_Ex);
   
   //================================== save file.Xsec.txt
@@ -479,11 +479,11 @@ int ExtractXSecFromText(string readFile){
   printf("Output : %s \n", saveExName.c_str());
   FILE * file_Ex;
   file_Ex = fopen(saveExName.c_str(), "w+");
-  fprintf(file_Ex, "recoil\n");
+  fprintf(file_Ex, "#Generated_by_ExtractXsec.h\n");
   for( int i = 0; i < Ex.size() ; i++){
       fprintf(file_Ex, "%9.5f     %9.5f\n", Ex[i], partialXsec[i]);
   }
-  
+  fprintf(file_Ex, "#=====End_of_File\n");
   fclose(file_Ex);
   
   

@@ -99,11 +99,12 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 0 ) BField   = atof(x.c_str());
-         if( i == 3 )  a       = atof(x.c_str());
-         if( i == 5 ) length   = atof(x.c_str());
+         if( x.substr(0,1) == "#" )  continue;
+         if( i == 0 )  BField   = atof(x.c_str());
+         if( i == 3 )   a       = atof(x.c_str());
+         if( i == 5 )  length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
-         if( i == 17 ) jDet = atoi(x.c_str());
+         if( i == 17 )     jDet = atoi(x.c_str());
          if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
