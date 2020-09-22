@@ -159,8 +159,18 @@ if [ ${RunPtolemy} -eq 1 ] ; then
   echo "================================================================="
   echo "=====   Ptolemy Calcualtion   ==================================="
   echo "================================================================="
-  ../Cleopatra/ptolemy <${infile}> ${outfile}
-  ptolemyOUTPUT=$?
+  
+  #check is linux or Mac
+  
+  arch=$(uname)
+  
+  if [ ${arch} == "Darwin" ] ; then
+    ../Cleopatra/ptolemy_mac <${infile}> ${outfile}
+    ptolemyOUTPUT=$?
+  else  
+    ../Cleopatra/ptolemy <${infile}> ${outfile}
+    ptolemyOUTPUT=$?
+  fi
   
   echo "ptolmey exit code : " $ptolemyOUTPUT
   if [ ${ptolemyOUTPUT} -eq 0 ] ; then

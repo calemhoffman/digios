@@ -20,8 +20,8 @@
 hit == 1 && loop <=1 && thetaCM
 20              //elum range
 {0,40}        //thetaCM range
-false          //shownKELines
-false          //isOverRideEx
+true          //shownKELines
+true          //isOverRideEx
 {-0.5, 3.0}    // over-rdied Ex range
 
 ///============================== example of gate

@@ -49,12 +49,12 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   TString gate = ExtractString(19, config);
   double elumRange = ExtractNumber(20, config);
   vector<double> thetaCMRange = doubleConvertor( StringToVector( ExtractString(21,config) ));
-  bool shownKELines = (ExtractString(22, config) == "true" ? true : false);
-  bool isOverRideEx = (ExtractString(23, config) == "true" ? true : false);
+  bool shownKELines = (ExtractString(22, config).Remove(4) == "true" ? true : false);
+  bool isOverRideEx = (ExtractString(23, config).Remove(4) == "true" ? true : false);
   vector<double> oExRange = doubleConvertor( StringToVector ( ExtractString(24, config ))); 
   
   vector<TString> plotConfig = StringToVector( ExtractString(18, config));
-  
+
   vector<plotID> canvas;
   int colCount = 0;
   int colCount_new = 0;

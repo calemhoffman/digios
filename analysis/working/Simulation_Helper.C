@@ -21,6 +21,13 @@
 #include <stdio.h>
 #include <string>
 
+#ifdef __linux__
+  #define OS_Type 1
+#elif __APPLE__
+  #define OS_Type 0
+#endif
+
+
 class MyMainFrame {
    RQ_OBJECT("MyMainFrame")
 private:
@@ -351,7 +358,13 @@ void MyMainFrame::Command(int ID) {
       //printf("run ptolemy...........\n");
       
       statusLabel->SetText("Running Ptolemy.....");
-      int output = system("../Cleopatra/ptolemy <example.in> example.out");
+      int output = 1; 
+      if( OS_Type == 1 ){
+        output = system("../Cleopatra/ptolemy <example.in> example.out");
+      }else{
+        output = system("../Cleopatra/ptolemy_mac <example.in> example.out");
+      }
+      
       statusLabel->SetText("Check terminal, if no massage, Ptolemy run well.");
       
       printf("Ptolemy exist code : %d\n", output);
@@ -449,7 +462,12 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("              * example.Ex.txt");
      editor->AddLine("              * example.root");
      editor->AddLine("      d) Plot the cross section from the example.root.");
-     
+     editor->AddLine("=================================================== eof");
+
+     TString osTypeStr;
+     osTypeStr.Form("OS type is %s", (OS_Type == 0 ? "Mac" : "Linux"));
+
+     editor->AddLine(osTypeStr);
   }
   
   if( ID == 5) {
@@ -476,6 +494,6 @@ MyMainFrame::~MyMainFrame() {
 }
 
 void Simulation_Helper() {
-
+  
    new MyMainFrame(gClient->GetRoot(),800,600);
 }
