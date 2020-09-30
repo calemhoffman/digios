@@ -1,4 +1,5 @@
-#include "Monitors.C+" // the plus sign mean compilation
+//#include "Monitors.C+" // the plus sign mean compilation
+#include "../Armory/Cali_gamma.C+"
 
 void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
@@ -59,8 +60,12 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   
   //Some input to TSelector
-  Monitors * selector = new Monitors();
-  selector->testingInput(1231441241);
-  chain->Process(selector, "");
+  
+  Cali_gamma(chain, RUNNUM);
+  
+  //Monitors * selector = new Monitors();
+  //if( RUNNUM == -10 || RUNNUM2 == -10 ) selector->printControl(0); //quit after terminated
+  //chain->Process(selector, "");
 
 }
+
