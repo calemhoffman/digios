@@ -112,3 +112,6 @@ sleep 5
 
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
+
+echo "this window close in 5 sec."
+sleep 5
