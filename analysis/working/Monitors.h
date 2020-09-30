@@ -65,8 +65,8 @@ public :
    TBranch        *b_EZERO;   //!
    TBranch        *b_EZEROTimestamp;   //!
    
-   int A;
-   void testingInput(int n){this->A = n;}
+   int printControlID;
+   void printControl(int n){this->printControlID = n;}
    
    double z[100];
 
@@ -127,6 +127,8 @@ void Monitors::Init(TTree *tree)
    fChain->SetBranchAddress("elum_t", elum_t, &b_ELUMTimestamp);
    fChain->SetBranchAddress("ezero", ezero, &b_EZERO);
    fChain->SetBranchAddress("ezero_t", ezero_t, &b_EZEROTimestamp);
+   
+   //printControlID = 1; // don't quite
 }
 
 Bool_t Monitors::Notify()
