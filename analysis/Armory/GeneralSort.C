@@ -8,7 +8,7 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 200 //Highest multiplicity
-#define M -100 //M value for energy filter from digi setting, number of channel
+#define M 100 //M value for energy filter from digi setting, number of channel
 
 ULong64_t MaxProcessedEntries=100000000;
 ULong64_t NumEntries = 0;
@@ -128,17 +128,26 @@ void GeneralSort::Begin(TTree * tree)
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
-    if( 120 > idDetMap[i] && idDetMap[i] >= 100){
-      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Cyan
-    }else{   
+    if( 110 >= idDetMap[i] && idDetMap[i] >= 100){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
+    }else if( 240 >= idDetMap[i] && idDetMap[i] >= 200){
+      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
+    }else if( 310 >= idDetMap[i] && idDetMap[i] >= 300){
+      printf("\033[92m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if( 450 >= idDetMap[i] && idDetMap[i] >= 400){
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if(  99 >= idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
-         case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-         case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
-         case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
-         case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
-         case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
+         case -1: printf("%7s|", ""); break;
+         case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+         case  1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
+         case  2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
+         case  3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
+         case  4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
          default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
        }
+     }else{
+       printf("%7s|", "");
      }
   }
   printf("\n");
@@ -266,7 +275,9 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 110 ) {
         Int_t rdtID = idDet-100;
-        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        float polarity = -1;
+        if( rdtID == 6 ) polarity = +7.0;
+        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M *(polarity);
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 
@@ -278,7 +289,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       }
       
       ///=============================== EZERO
-      if ( idDet >= 300 && idDet < 310 ) {
+      if ( idDet >= 300 && idDet <= 310 ) {
         Int_t ezeroID = idDet - 300;
         psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M * (-1);
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];

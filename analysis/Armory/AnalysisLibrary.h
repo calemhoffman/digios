@@ -137,7 +137,7 @@ std::vector<std::vector<double>> FindMatchingPair(std::vector<double> enX, std::
       double absRSqMinusOne = 1;
       int maxID = 0;
       
-      for( int k = 0; k < output.size(); k++){
+      for( int k = 0; k < (int) output.size(); k++){
         
         double * smvX = sumMeanVar(output[k]);
         double sumX = smvX[0];
@@ -181,7 +181,7 @@ std::vector<std::vector<double>> FindMatchingPair(std::vector<double> enX, std::
       double absRSqMinusOne = 1;
       int maxID = 0;
       
-      for( int k = 0; k < output.size(); k++){
+      for( int k = 0; k < (int) output.size(); k++){
         
         double * smvY = sumMeanVar(output[k]);
         double sumY = smvY[0];
@@ -212,8 +212,8 @@ std::vector<std::vector<double>> FindMatchingPair(std::vector<double> enX, std::
     }
     
     
-    printf("fitEnergy = ");for( int k = 0; k < fitEnergy.size() ; k++){ printf("%7.2f, ", fitEnergy[k]); }; printf("\n");
-    printf("refEnergy = ");for( int k = 0; k < refEnergy.size() ; k++){ printf("%7.2f, ", refEnergy[k]); }; printf("\n");
+    printf("fitEnergy = ");for( int k = 0; k < (int) fitEnergy.size() ; k++){ printf("%7.2f, ", fitEnergy[k]); }; printf("\n");
+    printf("refEnergy = ");for( int k = 0; k < (int) refEnergy.size() ; k++){ printf("%7.2f, ", refEnergy[k]); }; printf("\n");
     
     std::vector<std::vector<double>> haha;
     haha.push_back(fitEnergy);
