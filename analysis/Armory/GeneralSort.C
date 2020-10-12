@@ -4,6 +4,7 @@
 #include <TH2.h>
 #include <TMath.h>
 #include <TStyle.h>
+#include <TRandom.h>
 #include <TBenchmark.h>
 
 #define NUMPRINT 20 //>0
@@ -276,7 +277,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       if ( idDet >= 100 && idDet <= 110 ) {
         Int_t rdtID = idDet-100;
         float polarity = -1;
-        if( rdtID == 6 ) polarity = +7.0;
+        if( rdtID == 6 ) polarity = +2.0;
         psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M *(polarity);
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
