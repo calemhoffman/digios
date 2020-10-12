@@ -14,11 +14,14 @@
 
 ///only work in single thread run
 
-void runsCheck(TString prefix = "*"){
+void runsCheck(TString prefix = "*", int runID = -1){
    
   TString folderPath;
-  folderPath.Form("../root_data/%s_run*.root", prefix.Data());
-   
+  if( runID == -1 ){
+    folderPath.Form("../root_data/%s_run*.root", prefix.Data());
+  }else{
+    folderPath.Form("../root_data/%s_run%03d.root", prefix.Data(), runID);
+  }
   const char* treeName="gen_tree";
    
   //==============================================
@@ -63,16 +66,19 @@ void runsCheck(TString prefix = "*"){
    
   FILE * paraOut;
   TString filename;
-  filename.Form("run_Summary.txt");
-  paraOut = fopen(filename.Data(), "w+");
-   
+  
+  if( runID == -1 ){
+    filename.Form("run_Summary.txt");
+    paraOut = fopen(filename.Data(), "w+");
+  }
   int numFile = rootFileName.size();
    
   printf("%30s, %10s, %8s, %16s, %16s, %11s, %11s, %7s\n", "file",  "#event", "size[MB]", "start", "end", "duration[s]", "[min]", "[hour]");   
    
   for( int i = 0; i < numFile ; i++){
       
-    f = new TFile (rootFileName[i], "read");
+    if( runID == -1 ) f = new TFile (rootFileName[i], "read");
+    if( runID > 0  ) f = new TFile (Form("../root_data/%s_run%03d.root", prefix.Data(), runID), "read");
       
     if( !f->IsOpen()) continue; 
       
@@ -217,16 +223,20 @@ void runsCheck(TString prefix = "*"){
     double size = f->GetSize(); // in byte
     printf("%30s, %10d, %8.2f, %16llu, %16llu, %11.3f, %11.3f, %7.3f\n", rootFileName[i].Data(),  totalEvent, size/1024/1024, firstTime, lastTime, dTime, dTime/60., dTime/60./60.); 
       
-    if( i == 0 ) fprintf(paraOut, "%50s, %10s, %8s, %10s, %16s, %10s, %16s, %11s, %11s, %7s\n", "file",  "#event", "size[MB]", "start#", "start-TS", "stop#", "stop-TS", "duration[s]", "[min]", "[hour]");    
-    fprintf(paraOut, "%50s, %10d, %8.2f, %10d, %16llu, %10d, %16llu, %11.3f, %11.3f, %11.3f\n", rootFileName[i].Data(),  totalEvent, size/1024/1024, firstEvent, firstTime, lastEvent, lastTime, dTime, dTime/60., dTime/60./60.);   
-    fflush(paraOut);   
+    if( runID == -1 ){  
+      if( i == 0 ) fprintf(paraOut, "%50s, %10s, %8s, %10s, %16s, %10s, %16s, %11s, %11s, %7s\n", "file",  "#event", "size[MB]", "start#", "start-TS", "stop#", "stop-TS", "duration[s]", "[min]", "[hour]");    
+      fprintf(paraOut, "%50s, %10d, %8.2f, %10d, %16llu, %10d, %16llu, %11.3f, %11.3f, %11.3f\n", rootFileName[i].Data(),  totalEvent, size/1024/1024, firstEvent, firstTime, lastEvent, lastTime, dTime, dTime/60., dTime/60./60.);   
+      fflush(paraOut);  
+    } 
     
   }
-      
-  fclose(paraOut);
+    
    
-  printf("=========== saved summery to %s.\n", filename.Data());
-   
+  if ( runID == -1 ) {
+    fclose(paraOut);
+    printf("=========== saved summery to %s.\n", filename.Data());
+  }
+  
   gROOT->ProcessLine(".q");
    
 }
