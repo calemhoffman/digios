@@ -1,6 +1,7 @@
 #!/usr/local/bin/python2.7
 
 import globus_sdk
+import sys
 
 #this is how to get the token.
 CLIENT_ID = '1f2df281-39e0-4f75-b377-f11ae435a7e8'
@@ -32,6 +33,9 @@ daqDataPath=line[12:-1]
 line=fexp.readline() #this line is LastRunNum
 runNum=line[11:-1]
 fexp.close()
+
+if len(sys.argv) >= 2 :
+    runNum=sys.argv[1]
 
 ### myEndpoint_id is in dgs, no access right to /home/helios!!!!
 myEndpoint_id='d907d6b0-986e-11e9-bf5e-0e4a062367b8'

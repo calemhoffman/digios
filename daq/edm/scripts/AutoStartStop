@@ -70,11 +70,20 @@ count=0
 isStarted=$(caget Online_CS_StartStop | awk '{print $2}')
 if [ $isStarted == "Stop" ]; then
     cd ${datalocation}
-    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times."
+    
+    echo "===================== Auto-Start-Stop script"
+    echo "Crtl+C to cancel with no harm"
+    echo "Please type Single-line comment:"
+    read -p '>>' COMMENT
+
+    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each. ${COMMENT}"
     stopFlag=0
     cd ${currentLocation}
     source ~/digios/expName.sh
     RUN=${LastRunNum}
+else
+    echo "======= Please stop the ACQ, or stop the run, and start again ========"
+    exit
 fi
 
 while [  $stopFlag -eq 0 ]; do  
@@ -115,10 +124,13 @@ while [  $stopFlag -eq 0 ]; do
 	    stopFlag=1
 	    echo $(date) " | Run" ${RUN} " | time:" $count " min >= " $stopCount " min ====> Stop!!!"	
 	    source ~/digios/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
-	    
+
+	    echo "tell Mac to run ./process_run"
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.193 /Users/heliosdigios/digios/AutoProcess "${RUN}" 1" &
+
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
-		echo -e "######## ${RED}CHANCE TO STOP the auto!!!!${NC}"
+		echo -e "######## ${RED}CHANCE TO STOP the auto!!!! Ctrl+C to stop.${NC}"
 		echo "========== number of repeat : ${repeat}"
 		sleep 10
 		cd ${datalocation}
@@ -137,6 +149,12 @@ while [  $stopFlag -eq 0 ]; do
 	 
 	echo $(date) " | Run" ${RUN} " | time:" $count " min < " $stopCount " min"	
 	count=$((count+1))
+
+	mod=$(( $count % 21 ))
+	if [ $mod -eq 0 ]; then
+	    echo "tell Mac to run ./process_run"
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.193 /Users/heliosdigios/digios/AutoProcess "${RUN}" 0" &
+	fi
 
     fi
 
