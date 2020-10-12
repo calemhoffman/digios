@@ -21,16 +21,17 @@ const int numDet = 4;
 int detID[numDet] = {0,1,2,6}; 
 TString detName[numDet] = {"HPGe-1","HPGe-2","HPGe-3", "NaI"} ;
 
-float energyRange[3] = {4000-10, 10, 4000}; // bin, min, max
+float energyRange[3] = {4000, -4000, 8000}; // bin, min, max
 
 //-------------
 bool isCalibrated = true;
-int eRange[2] = { 50, 3000 }; // keV
-double cali[numDet][2]= { { -0.44862490, 0.62456335},
-                          { -3.20496468, 0.64990118},
-                          { -1.86186218, 0.67175540},
-                          {-17.00628161, 0.70740610}};
-
+int eRange[2] = { 20, 7200 }; // keV
+double cali[numDet][2]= { {  -0.70173408, 0.62460567},
+                          {  -3.26102072, 0.64988671},
+                          {  -1.86186218, 0.67175540},
+                          { -15.31935350, 0.69013302}};
+                          
+ 
 //================ prototype
 
 void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
@@ -59,7 +60,7 @@ void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
     //cAlpha->cd(i)->SetLogy();
   }
 
-  gStyle->SetOptStat("");
+  gStyle->SetOptStat("neiou");
   gStyle->SetStatY(1.0);
   gStyle->SetStatX(0.99);
   gStyle->SetStatW(0.2);
@@ -143,7 +144,7 @@ void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
 
       TSpectrum * spec = new TSpectrum(20);
       if( i == numDet - 1) {
-        nPeaks = spec->Search(q[i], 40, "", 0.05); // NaI
+        nPeaks = spec->Search(q[i], 40, "", 0.02); // NaI
       }else{
         nPeaks = spec->Search(q[i], 1, "", threshold);
       }
@@ -304,7 +305,7 @@ void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
   }
   
   //====== Plot adjusted spectrum
-  TCanvas * cAux = new TCanvas ("cAux", Form("RUN:%03d", runID), 200, 200, 1200, 600);
+  TCanvas * cAux = new TCanvas ("cAux", Form("Aux RUN:%03d", runID), 200, 200, 1200, 600);
   cAux->cd(1)->SetLogy();
 
   if( !isCalibrated ) {
@@ -336,7 +337,7 @@ void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
     
     if( !isCalibrated ) {
 
-      p[i] = new TH1F(Form("p%d", detID[i]), detName[i],  energyRange[0]/2, energyRange[1], energyRange[2]);
+      p[i] = new TH1F(Form("p%d", detID[i]), detName[i],  energyRange[0], energyRange[1], energyRange[2]);
       p[i]->SetXTitle("keV");
       p[i]->SetYTitle("count / keV");
       p[i]->SetLineColor(i+1);
@@ -367,9 +368,6 @@ void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
   }
   
   cAux->cd(1);
-  p[0]->SetMaximum( yMax * 1.1);
-  p[0]->Draw();
-  gSystem->ProcessEvents();
   for( int  i = 0; i < numDet; i++){
     p[i]->SetMaximum( yMax * 1.1);
     p[i]->Draw("same");
@@ -377,6 +375,8 @@ void Cali_gamma(TTree * tree, int runID = 0 , float threshold = 0.05){
   }
   
   legend->Draw();
+
+  //gROOT->ProcessLine(".q");
 
   /*
   //----------- 4, pause for saving correction parameters

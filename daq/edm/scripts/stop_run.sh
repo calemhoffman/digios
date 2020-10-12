@@ -66,24 +66,17 @@ else
     sed -i "1,${cutLineNum}d" ${elogContext}
     #fill stop time
     echo "         stop at ${currentDate} <br />" >> ${elogContext}
-    #check run size
-    size=$(du -hsc ~/digios/analysis/data/${expName}_run_*${LastRunNum}* | tail -1 | awk '{print $1}')
-    echo "files size : ${size} <br />" >> ${elogContext}
-
     echo "grafana screenshot is attached. <br />" >> ${elogContext}
     echo "-----------------------------------------------</p>" >> ${elogContext}
     echo "$COMMENT <br />" >> ${elogContext}
     elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
 
     source ~/Slack_Elog_Notification.sh
-    slackMsg="elogID=${elogID} is updated.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+    slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
     auxMsg="stop at ${currentDate} \n$COMMENT"
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 
 fi
-
-#echo "calling Mac to run procee_run"
-#ssh heliosdigios@192.168.1.193 "AutoPrcess ${RUN}"
 
 echo wait 2 seconds before closing the IOCs
 sleep 2
@@ -119,3 +112,6 @@ sleep 5
 
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
+
+echo "this window close in 5 sec."
+sleep 5

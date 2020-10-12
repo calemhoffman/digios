@@ -45,8 +45,9 @@ echo "RUN-${RUN} start at ${currentDate}| $COMMENT" >> ${daqDataPath}/${expName}
 
 
 elogFile=~/digios/analysis/working/elog.txt
-echo "<p>RUN-${RUN} start at ${currentDate}.<br />" > ${elogFile}
-echo "comment: $COMMENT <br />" >> ${elogFile}
+echo "************************************************<br />" > ${elogFile}
+echo "RUN-${RUN} start at ${currentDate}.<br />" >> ${elogFile}
+echo "$COMMENT <br />" >> ${elogFile}
 trigger=$(caget GLBL:DIG:trigger_mux_select | awk '{print$2}')
 echo "trigger : $trigger <br />" >> ${elogFile}
 haha=$(caget VME32:MTRG:SUM_X)
@@ -67,6 +68,8 @@ else
     elogName="H"${expName:1}
 fi
 
+#IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt)
+
 IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ~/digios/analysis/working/elog.txt)
 
 echo ${IDStr}
@@ -83,7 +86,7 @@ if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
     echo ${elogIDStr} >> ${constFile}
 
     source ~/Slack_Elog_Notification.sh
-    slackMsg="new ${elogIDStr} for RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
+    slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
     elogMsg=`cat ~/digios/analysis/working/elog.txt`
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
 

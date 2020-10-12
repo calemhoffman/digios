@@ -76,7 +76,7 @@ if [ $isStarted == "Stop" ]; then
     echo "Please type Single-line comment:"
     read -p '>>' COMMENT
 
-    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each."${COMMENT}
+    source ~/digios/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each. ${COMMENT}"
     stopFlag=0
     cd ${currentLocation}
     source ~/digios/expName.sh
