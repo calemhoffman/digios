@@ -1,0 +1,69 @@
+#!/bin/bash -l
+echo -e "\e[92m#############################################"
+echo -e "#     Make data link for LCRC"
+echo -e "#############################################\e[0m"
+
+DATAPATH=/lcrc/project/HELIOS/experimentsData/
+expDIR=$(pwd)
+
+echo " This bash script do only 2 things: "
+echo "  1) change the expName.sh"
+echo "  2)  setup symbolic link to the exp data."
+echo "--------------------------------------------"
+
+if [ $# -eq 0 ]; then
+    git branch -a
+    read -p 'Eneter the experiment name: ' expName
+else
+    expName=$1
+fi
+
+isBranchExist=`git branch -a | grep ${expName} | wc -l`
+if [ ${isBranchExist} -eq 0 ]; then
+   echo "Experimental name (${expName}) does not exist. Abrot."
+   exit
+fi
+
+echo -e "\e[93m=================== Overwrite the expName.sh \e[0m"
+echo "!!!!!!!!!! restore the expName.sh by > git checkout expName.sh"
+echo "#!/bin/bash -l" > ${expDIR}/expName.sh
+echo "expName=${expName}" >> ${expDIR}/expName.sh 
+
+echo -e "\e[93m=================== Exp Name : ${expName} \e[0m"
+
+Data=${DATAPATH}/${expName}/data
+mergedData=${DATAPATH}/${expName}/merged_data
+rootData=${DATAPATH}/${expName}/root_data
+
+#===== Check folder exist
+echo -e "\e[93m=================== create folders \e[0m"
+if [ -d ${Data} ]; then 
+  echo " ${Data} ....... already exist."
+else
+    mkdir -pv ${Data}
+fi
+
+if [ -d ${mergedData} ]; then
+    echo " ${mergedData} ... already exist."
+else
+    mkdir -pv ${mergedData}
+fi
+
+if [ -d ${rootData} ]; then
+    echo " ${rootData} .. already exist."
+else
+    mkdir -pv ${rootData}
+fi
+
+#===== create symbolic links
+echo -e "\e[93m=================== creating symbolic links \e[0m"
+rm -f ${expDIR}/analysis/data
+rm -f ${expDIR}/analysis/merged_data
+rm -f ${expDIR}/analysis/root_data
+
+ln -sfv ${Data} ${expDIR}/analysis/data
+ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
+ln -sfv ${rootData} ${expDIR}/analysis/root_data
+
+echo -e "\e[93m=================== done. \e[0m"
+echo -e "\e[91m to restore origin expName.sh, type > git checkout expName.sh \e[0m"
