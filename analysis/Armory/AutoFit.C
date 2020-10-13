@@ -7,6 +7,11 @@
 #include <TMath.h>
 #include <vector>
 
+//TODO
+//1) fitGaussPN()
+//2) fitSkewGauss()
+//3) More flexible way? say fitAuto(hist, pre-set-func)
+
 
 void ShowFitMethod(){
   printf("----------------- Method of Fitting ---------------\n");
@@ -46,9 +51,62 @@ Double_t nSkewGauss(Double_t *x, Double_t *par){
     
     result += norm * TMath::Gaus(x[0], mean, sigma, 1) * ( 1 + TMath::Erf( alpha*(x[0] - mean)/sqrt(2)/sigma ) );
     
-  }
-  
+  }  
   return result;
+}
+
+Double_t nGaussSkewGauss(Double_t *x, Double_t *par){
+  Double_t result = 0;
+  for( Int_t p = 0; p < nPeaks; p++){
+
+    //---- Gauss
+    Double_t norm  = par[3*p+0];
+    Double_t mean  = par[3*p+1];
+    Double_t sigma = par[3*p+2];  
+    result += norm * TMath::Gaus(x[0], mean, sigma, 1);
+        
+    //---- skew Gauss
+    norm  = par[3*p+3];
+    sigma = par[3*p+4];
+    Double_t alpha = par[3*p+5]; // skewness  
+    result += norm * TMath::Gaus(x[0], mean, sigma, 1) * ( 1 + TMath::Erf( alpha*(x[0] - mean)/sqrt(2)/sigma ) );
+
+  }  
+  return result;
+}
+
+
+Double_t nGaussP1(Double_t *x, Double_t *par) {
+   Double_t result = 0;
+   for (Int_t p=0;p<nPeaks;p++) {
+      Double_t norm  = par[3*p+0];
+      Double_t mean  = par[3*p+1];
+      Double_t sigma = par[3*p+2];
+      result += norm * TMath::Gaus(x[0],mean,sigma, 1); // normalized Gaussian
+   }
+   
+   result += par[3* nPeaks] + par[3*nPeaks+1] * x[0];
+   
+   return result;
+}
+
+void PrintPar(TF1 * fit, int numParPerPeak){
+   int totPar = fit->GetNpar();
+   int count = totPar/numParPerPeak;
+   printf("ID  ");
+   for( int i = 0; i < numParPerPeak; i++){
+     printf("par%d       ", i);
+   }
+   printf("\n");
+   
+   for( int i = 0; i < count ; i++){
+     printf("%3d ", i);
+     for( int j = 0; j < numParPerPeak; j++){
+       int parID = numParPerPeak * i + j;
+       printf("%.3f(%.3f) ", fit->GetParameter(parID), fit->GetParError(parID));
+     }
+     printf("\n");
+   }
 }
 
 void GoodnessofFit(TH1F * hist, TF1 * fit){
@@ -118,21 +176,6 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    printf("ROOT Chi-sq p-value = %.2f %s 0.05 | %s\n", pRoot, pRoot < 0.05 ? "<": ">", pRoot < 0.05 ? "reject" : "cannot reject");
    printf("################################################\n");  
 }
-
-Double_t nGaussP1(Double_t *x, Double_t *par) {
-   Double_t result = 0;
-   for (Int_t p=0;p<nPeaks;p++) {
-      Double_t norm  = par[3*p+0];
-      Double_t mean  = par[3*p+1];
-      Double_t sigma = par[3*p+2];
-      result += norm * TMath::Gaus(x[0],mean,sigma, 1); // normalized Gaussian
-   }
-   
-   result += par[3* nPeaks] + par[3*nPeaks+1] * x[0];
-   
-   return result;
-}
-
 
 vector<double> energy, height, sigma, lowE, highE ;
 vector<int> energyFlag, sigmaFlag;
@@ -501,10 +544,10 @@ vector<double> fitAuto(TH1 * hist, int bgEst = 10,
   titleH.Form("fitted spectrum (BG=%d); Ex [MeV]; Count / %4.0f keV", bgEst, (xMax-xMin)*1000./xBin );
   specS->SetTitle(titleH);   
   specS->SetName("specS");
-  //specS->GetXaxis()->SetTitleSize(0.06);
-  //specS->GetYaxis()->SetTitleSize(0.06);
-  //specS->GetXaxis()->SetTitleOffset(0.7);
-  //specS->GetYaxis()->SetTitleOffset(0.6);
+  ///specS->GetXaxis()->SetTitleSize(0.06);
+  ///specS->GetYaxis()->SetTitleSize(0.06);
+  ///specS->GetXaxis()->SetTitleOffset(0.7);
+  ///specS->GetYaxis()->SetTitleOffset(0.6);
   
   //=================== find peak and fit
   gStyle->SetOptFit(0);
@@ -563,23 +606,28 @@ vector<double> fitAuto(TH1 * hist, int bgEst = 10,
   fit->SetNpx(1000);
   fit->SetParameters(para);
   
-  for( int i = 0; i < nPeaks; i++){
-    fit->SetParLimits(numParPerPeak*i+0, 0, 1e+9);
-    double de1 = 1, de2 = 1;
-    if( i == 0 ){ 
-      de2 = (energy[i+1] - energy[i])/2.;
-      de1 = de2;
-    }else if( i < nPeaks -1 ){
-      de1 = (energy[i] - energy[i-1])/2.;
-      de2 = (energy[i+1] - energy[i])/2.;
-    }else{
-      de1 = (energy[i] - energy[i-1])/2.;
-      de2 = de1;
+  if( nPeaks > 1 ){
+    for( int i = 0; i < nPeaks; i++){
+      fit->SetParLimits(numParPerPeak*i+0, 0, 1e+9);
+      double de1 = 1, de2 = 1;
+      if( i == 0 ){ 
+        de2 = (energy[i+1] - energy[i])/2.;
+        de1 = de2;
+      }else if( i < nPeaks -1 ){
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = (energy[i+1] - energy[i])/2.;
+      }else{
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = de1;
+      }
+      
+      fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2); 
+      fit->SetParLimits(numParPerPeak*i+2, 0, sigmaGauss * 5); 
     }
-    
-    fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2); 
-    fit->SetParLimits(numParPerPeak*i+2, 0, sigmaGauss * 5); 
-  }
+  }else{
+    fit->SetParLimits(0, 0, 1e+9);
+    fit->SetParLimits(2, 0, sigmaGauss * 5); 
+  } 
   
   specS->Fit("fit", "q");
   
@@ -592,21 +640,15 @@ vector<double> fitAuto(TH1 * hist, int bgEst = 10,
   
   double bw = specS->GetBinWidth(1);
 
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
-  double * ExAlpha = new double[nPeaks];
   vector<double> exPos;
   for(int i = 0; i < nPeaks ; i++){
     exPos.push_back(paraA[numParPerPeak*i+1]);
-    ExPos[i] = paraA[numParPerPeak*i+1];
-    ExSigma[i] = paraA[numParPerPeak*i+2];
-    if( newPlot){
-      printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
+    printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[numParPerPeak*i] / bw,   paraE[numParPerPeak*i] /bw, 
             paraA[numParPerPeak*i+1], paraE[numParPerPeak*i+1],
             paraA[numParPerPeak*i+2], paraE[numParPerPeak*i+2]);
-    }
+    
   }
   if( newPlot ) cFitAuto->Update();
 
@@ -624,6 +666,206 @@ vector<double> fitAuto(TH1 * hist, int bgEst = 10,
       gFit[i]->SetNpx(1000);
       gFit[i]->SetLineWidth(1);
       gFit[i]->Draw("same");
+  }
+  
+  specS->Draw("hist same");
+  
+  return exPos;
+  
+}
+
+
+//########################################
+//########################################
+//########################################
+vector<double> fitGaussSkewGauss(TH1 * hist, int bgEst = 10, 
+                       double peakThreshold = 0.1, 
+                       double sigmaGauss = 20, 
+                       int peakSeparation = 4, 
+                       TString optStat = "", bool newPlot = true){
+
+  TCanvas *cFitAuto = NULL;
+  if( newPlot ){
+    cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
+    cFitAuto->Divide(1,2);
+    
+    gStyle->SetOptStat(optStat);
+    cFitAuto->cd(1);
+    hist->Draw();
+  }
+  
+  TH1F * specS = (TH1F*) hist->Clone();
+  double xMin = hist->GetXaxis()->GetXmin();
+  double xMax = hist->GetXaxis()->GetXmax();
+  int xBin = hist->GetXaxis()->GetNbins();
+  
+  TString titleH;
+  titleH.Form("fitted spectrum (BG=%d); Ex [MeV]; Count / %4.0f keV", bgEst, (xMax-xMin)*1000./xBin );
+  specS->SetTitle(titleH);   
+  specS->SetName("specS");
+  ///specS->GetXaxis()->SetTitleSize(0.06);
+  ///specS->GetYaxis()->SetTitleSize(0.06);
+  ///specS->GetXaxis()->SetTitleOffset(0.7);
+  ///specS->GetYaxis()->SetTitleOffset(0.6);
+  
+  //=================== find peak and fit
+  gStyle->SetOptFit(0);
+  TSpectrum * peak = new TSpectrum(50);
+  nPeaks = peak->Search(hist, peakSeparation, "", peakThreshold); 
+  
+  if( bgEst > 0 ) {
+    printf("============= estimating background...\n");
+    TH1 * h1 = peak->Background(hist, bgEst);
+    h1->Draw("same");
+    printf("============= substracting the linear background...\n");
+    specS->Sumw2();
+    specS->Add(h1, -1.);
+  }
+  
+  if( newPlot ){
+    cFitAuto->cd(2)->SetGrid();
+    cFitAuto->cd(2);
+  }
+  specS->Draw("hist");
+  
+
+  //========== Fitting 
+  if( newPlot ){
+    printf("============= Fitting.....");
+    printf(" found %d peaks \n", nPeaks);
+  }
+  double * xpos = peak->GetPositionX();
+  double * ypos = peak->GetPositionY();
+
+  int * inX = new int[nPeaks];
+  TMath::Sort(nPeaks, xpos, inX, 0 );
+  vector<double> energy, height;
+  for( int j = 0; j < nPeaks; j++){
+    energy.push_back(xpos[inX[j]]);
+    height.push_back(ypos[inX[j]]);
+  }
+  if( newPlot ){
+    for( int j = 0; j < nPeaks; j++){
+      printf(" energy : %f , %f \n", energy[j], height[j]);
+    }
+  }
+  
+  int numParPerPeak = 6;  
+  const int  n = numParPerPeak * nPeaks;
+  double * para = new double[n]; 
+  for(int i = 0; i < nPeaks ; i++){
+    para[numParPerPeak*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
+    para[numParPerPeak*i+1] = energy[i];
+    para[numParPerPeak*i+2] = sigmaGauss;
+    para[numParPerPeak*i+3] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi()) * 0.1;
+    para[numParPerPeak*i+4] = sigmaGauss;
+    para[numParPerPeak*i+5] = -4;
+  }
+
+  TF1 * fit = new TF1("fit", nGaussSkewGauss, xMin, xMax, numParPerPeak * nPeaks );
+  fit->SetLineWidth(2);
+  fit->SetLineColor(2);
+  fit->SetNpx(1000);
+  fit->SetParameters(para);
+  
+  if( nPeaks > 1 ){
+    for( int i = 0; i < nPeaks; i++){
+      fit->SetParLimits(numParPerPeak*i+0, 0, 1e+9);
+      double de1 = 1, de2 = 1;
+      if( i == 0 ){ 
+        de2 = (energy[i+1] - energy[i])/2.;
+        de1 = de2;
+      }else if( i < nPeaks -1 ){
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = (energy[i+1] - energy[i])/2.;
+      }else{
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = de1;
+      }
+      
+      fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2); 
+      fit->SetParLimits(numParPerPeak*i+2, 0, sigmaGauss * 5); 
+      
+      fit->SetParLimits(numParPerPeak*i+3, 0, 1e+9);
+      fit->SetParLimits(numParPerPeak*i+4, 0, sigmaGauss * 10); 
+      fit->SetParLimits(numParPerPeak*i+5, -10, -2); 
+          
+    }
+  }else{
+    fit->SetParLimits(0, 0, 1e+9);
+    fit->SetParLimits(2, 0, sigmaGauss * 5); 
+    fit->SetParLimits(3, 0, 1e+9);
+    fit->SetParLimits(4, 0, sigmaGauss * 10); 
+    fit->SetParLimits(5, -10, -2);
+  }
+  specS->Fit("fit", "q");
+  
+  
+  const Double_t* paraE = fit->GetParErrors();
+  const Double_t* paraA = fit->GetParameters();
+  
+  //======== calculate reduce chi-squared
+  if( newPlot ) GoodnessofFit(specS, fit);
+  
+  double bw = specS->GetBinWidth(1);
+
+  vector<double> exPos;
+  for(int i = 0; i < nPeaks ; i++){
+    exPos.push_back(paraA[numParPerPeak*i+1]);
+    double totCount = paraA[numParPerPeak*i] + paraA[numParPerPeak*i+3];
+    double totCountErr = sqrt(paraE[numParPerPeak*i]*paraE[numParPerPeak*i] + paraE[numParPerPeak*i+3]*paraE[numParPerPeak*i+3]);
+    printf("%2d , count: %8.0f(%3.0f)+%8.0f(%3.0f)=%8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f), skewneww: %4.1f(%4.1f) \n", 
+            i,
+            paraA[numParPerPeak*i] / bw,   paraE[numParPerPeak*i] /bw, 
+            paraA[numParPerPeak*i+3] / bw,   paraE[numParPerPeak*i+3] /bw, 
+            totCount / bw,   totCountErr /bw, 
+            paraA[numParPerPeak*i+1], paraE[numParPerPeak*i+1],
+            paraA[numParPerPeak*i+2], paraE[numParPerPeak*i+2],
+            paraA[numParPerPeak*i+5], paraE[numParPerPeak*i+5]);
+    
+    //PrintPar(fit, numParPerPeak);
+  }
+  if( newPlot ) cFitAuto->Update();
+
+  //draw the indivual fit
+  fit->Draw("same");
+  
+  const int nn = nPeaks;
+  TF1 ** gFit = new TF1 *[nn];
+  TF1 ** kFit = new TF1 *[nn];
+  TF1 ** zFit = new TF1 *[nn];
+  for( int i = 0; i < nPeaks; i++){
+      gFit[i] = new TF1(Form("gFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1) + [3] * TMath::Gaus(x,[1],[4], 1) * ( 1 + TMath::Erf( [5]*(x-[1])/sqrt(2)/[4] ))", xMin, xMax);
+      gFit[i]->SetParameter(0, paraA[numParPerPeak*i]);
+      gFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      gFit[i]->SetParameter(2, paraA[numParPerPeak*i+2]);
+      gFit[i]->SetParameter(3, paraA[numParPerPeak*i+3]);
+      gFit[i]->SetParameter(4, paraA[numParPerPeak*i+4]);
+      gFit[i]->SetParameter(5, paraA[numParPerPeak*i+5]);
+      gFit[i]->SetLineColor(i+1);
+      gFit[i]->SetNpx(1000);
+      gFit[i]->SetLineWidth(1);
+      gFit[i]->Draw("same");
+      
+      kFit[i] = new TF1(Form("kFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1) * ( 1 + TMath::Erf( [3]*(x-[1])/sqrt(2)/[2] ))", xMin, xMax);
+      kFit[i]->SetParameter(0, paraA[numParPerPeak*i+3]);
+      kFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      kFit[i]->SetParameter(2, paraA[numParPerPeak*i+4]);
+      kFit[i]->SetParameter(3, paraA[numParPerPeak*i+5]);
+      kFit[i]->SetLineColor(i+1);
+      kFit[i]->SetNpx(1000);
+      kFit[i]->SetLineWidth(1);
+      kFit[i]->Draw("same");
+      
+      zFit[i] = new TF1(Form("zFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1)", xMin, xMax);
+      zFit[i]->SetParameter(0, paraA[numParPerPeak*i]);
+      zFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      zFit[i]->SetParameter(2, paraA[numParPerPeak*i+2]);
+      zFit[i]->SetLineColor(i+1);
+      zFit[i]->SetNpx(1000);
+      zFit[i]->SetLineWidth(1);
+      zFit[i]->Draw("same");
+      
   }
   
   specS->Draw("hist same");
@@ -748,11 +990,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   
   double bw = specS->GetBinWidth(1);
 
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
     printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
@@ -901,12 +1139,8 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   GoodnessofFit(specS, fit);  
   
   double bw = specS->GetBinWidth(1);
-
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
+   
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
     printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
@@ -1074,11 +1308,7 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   
   double bw = specS->GetBinWidth(1);
 
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
     printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
