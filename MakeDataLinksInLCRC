@@ -8,7 +8,10 @@ expDIR=$(pwd)
 
 echo " This bash script do only 2 things: "
 echo "  1) change the expName.sh"
-echo "  2)  setup symbolic link to the exp data."
+echo "  2) setup symbolic link to the exp data."
+echo ""
+echo " This script is assume you will work at the master branch."
+echo " If not, please use SetUpNewExp "
 echo "--------------------------------------------"
 
 if [ $# -eq 0 ]; then
