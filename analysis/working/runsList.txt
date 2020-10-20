@@ -25,17 +25,18 @@
 //+../root_data/gen_run11[0-9].root
 //+../root_data/gen_run11[0-9].root
 //+../root_data/gen_run12[0-5].root
-//+../root_data/gen_run14[1-9].root
-//+../root_data/gen_run15[0-8].root 
+
++../root_data/gen_run14[1-9].root
++../root_data/gen_run15[0-8].root 
 
 ///83Se smaller BG
 //+../root_data/gen_run16[4-9].root
 //+../root_data/gen_run17[0-9].root
-+../root_data/gen_run18[0-9].root
-+../root_data/gen_run19[0-9].root
-+../root_data/gen_run20[0-9].root
-+../root_data/gen_run21[0-9].root
-+../root_data/gen_run220.root
+//+../root_data/gen_run18[0-9].root
+//+../root_data/gen_run19[0-9].root
+//+../root_data/gen_run20[0-9].root
+//+../root_data/gen_run21[0-9].root
+//+../root_data/gen_run220.root
 
 ///carbon BG
 //+../root_data/gen_run12[6-9].root
