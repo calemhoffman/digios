@@ -330,14 +330,16 @@ void Cali_e_trace::Init(TTree *tree)
       name.Remove(0, found + 1 ); // this should give "XXX_run0XX.root"
       found = name.Last('.');
       name.Remove(found); // this should give "XXX_run0XX"
-      if( i == 0 ) {
-         saveFileName = name;
-         int kk = saveFileName.Sizeof();
-         saveFileName.Remove(kk-4); // this should give "XXX_run"
-         saveFileName = expName + "_" + saveFileName;
-      }
       found = name.Last('_');
       int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
+
+      if( i == 0 ) {
+         ///saveFileName = name;
+         ///int kk = saveFileName.Sizeof();
+         ///saveFileName.Remove(kk-4); // this should give "XXX_run" 
+         ///saveFileName = expName + "_" + saveFileName;
+         saveFileName = expName + "_run";
+      }
 
       if( runNum == oldRunNum + 1 ){
          int kk = saveFileName.Sizeof();
