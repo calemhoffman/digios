@@ -12,22 +12,20 @@
 #include <TH1.h>
 
 //============= User setting
-const int numDet = 4;
-int detID[numDet] = {0,1,2,6}; 
-TString detName[numDet] = {"HPGe-1","HPGe-2","HPGe-3", "NaI"} ;
+const int numDet = 3;
+int detID[numDet] = {0,1,2}; 
+TString detName[numDet] = {"HPGe-1","HPGe-2","HPGe-3"} ;
 
-double resol = 1; // keV
-int eRange1[2] = { 40, 2000 }; // keV
-int eRange2[2] = { 1300, 2000 }; // keV
+double resol = 0.2; // keV
+int eRange1[2] = { 20, 1000 }; // keV
+int eRange2[2] = { 1000, 2000 }; // keV
 int eRange3[2] = { 20, 200 }; // keV
 
 int tRange[2] = {-1, 600}; //min, relative to start time
-
-
-double cali[numDet][2]= { {  -0.70173408, 0.62460567},
-                          {  -3.26102072, 0.64988671},
-                          {  -1.86186218, 0.67175540},
-                          { -15.31935350, 0.69013302}};
+                          
+double cali[numDet][2]= { { -0.926213, 0.624203},
+                          { -1.916483, 0.648377},
+                          { -1.445283, 0.670994}};
                           
 //===========================
 
@@ -36,8 +34,6 @@ TH1F ** hgamma2 = new TH1F* [numDet];
 TH1F ** hgamma3 = new TH1F* [numDet];
 
 TH2F * hTime;
-
-
 
 ULong64_t ProcessedEntries = 0;
 ULong64_t NumEntries = 0;
@@ -161,21 +157,25 @@ void MonGamma::Terminate()
    TCanvas * cCanvas  = new TCanvas("cCanvas","RUN : " + canvasTitle , 1600 , 1200 );
    cCanvas->Modified(); cCanvas->Update();
    
-   cCanvas->Divide(4,3);
+   cCanvas->Divide(1,3);
+   
+   gStyle->SetOptStat("");
    
    double yMax = FindMaxY(hgamma1, numDet);
    for( int i = 0 ; i < numDet; i++){
-      cCanvas->cd(i+1);
-      hgamma1[i]->GetYaxis()->SetRangeUser(0, yMax);
-      hgamma1[i]->Draw();
+      cCanvas->cd(1);
+      hgamma1[i]->GetYaxis()->SetRangeUser(10, yMax);
+      hgamma1[i]->SetLineColor(i+1);
+      hgamma1[i]->Draw("same");
    }
    
    yMax = FindMaxY(hgamma2, numDet);
    for( int i = 0 ; i < numDet; i++){
-      cCanvas->cd(i+5);
+      cCanvas->cd(2);
       //cCanvas->cd(i+5)->SetLogy();
-      hgamma2[i]->GetYaxis()->SetRangeUser(0, yMax);
-      hgamma2[i]->Draw("hist");
+      hgamma2[i]->GetYaxis()->SetRangeUser(1, yMax);
+      hgamma2[i]->SetLineColor(i+1);
+      hgamma2[i]->Draw("same");
    }
    
    
@@ -200,11 +200,12 @@ void MonGamma::Terminate()
    //   hgamma2[i]->SetLineColor(2);
    //}
    
-   
+   yMax = FindMaxY(hgamma3, numDet);
    for( int i = 0 ; i < numDet; i++){
-      cCanvas->cd(i+9);
-      
-      hgamma3[i]->Draw();
+      cCanvas->cd(3);
+      hgamma3[i]->GetYaxis()->SetRangeUser(1, yMax);
+      hgamma3[i]->SetLineColor(i+1);
+      hgamma3[i]->Draw("same");
       //hgamma1[i]->Draw("same");
       //hgamma2[i]->Draw("same hist");
    }
