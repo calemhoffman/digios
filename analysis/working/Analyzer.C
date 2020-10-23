@@ -9,16 +9,22 @@
 #include <TMath.h>
 #include <TCutG.h>
 #include <TObjArray.h>
-///#include "../AutoCali/AutoFit.C"
+#include "../Armory/AutoFit.C"
 
 
 int numRow = 4;
 int numCol = 6;
 const int numDet = numRow * numCol ;
 
+//enum plotID =
+
 //######################################## User Inputs
 
-double rangeEx[3] = { 10, -1, 4}; ///resol. [keV], low Ex, high Ex
+
+
+vector<int> listOfBadDet = {5, 7,8, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
+
+double rangeEx[3] = { 20, -1, 5}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {1, 0, 45}; ///resol. [deg], low deg, high deg
 
 bool isExOffset = false;
@@ -32,34 +38,32 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
    
 bool isExScale = true;
 double ExScale[24][2]={
-{	1.00481232	,	0.031865255	},
-{	1.033506736	,	-0.062278968	},
-{	1.027668062	,	-0.017346632	},
-{	1.031903862	,	-0.030702943	},
-{	1.025426573	,	-0.041904606	},
-{	0	,	0	},
-{	0.992281038	,	0.038637905	},
-{	1.032112683	,	0.038505229	},
-{	1.021366726	,	0.008205996	},
-{	1.025546461	,	0.033888946	},
-{	0	,	0	},
-{	0	,	0	},
-{	1.007425814	,	0.019266133	},
-{	1.014058773	,	0.065134244	},
-{	1.015066405	,	0.072397502	},
-{	1.032686891	,	-0.04168907	},
-{	1.024961406	,	-0.062399128	},
-{	1.048161865	,	-0.162006102	},
-{	0	,	0	},
-{	1.036123377	,	0.011784783	},
-{	1.027751637	,	-0.045094669	},
-{	1.052132701	,	-0.067481517	},
-{	0	,	0	},
-{	0	,	0	}
-};
+{	1.056	,	0.023	}, // 0
+{1.0, 0.0}, //{	1.018	, -0.128},
+{	1.028 , -0.123},
+{ 1.019 , -0.0047},
+{	1.023 , -0.082},
+{	1., 0.},
+{	1.0524, 0.0280}, //6
+{	1., 0.},
+{	1., 0.},
+{	1., 0.},
+{	1., 0.},
+{	1	,	0	},
+{	1.045	,	0.0081 },  //12
+{1,0},//{	1.021 ,-0.02995},
+{	1.016 , 0.0174},
+{	1.0213, -0.0087},
+{	1.0260, -0.0571},
+{	1	,	0	},
+{	1	,	0	}, // 18
+{	1	,	0	},
+{	1	,	0	},
+{	1	,	0	},
+{	1	,	0	},
+{	1	,	0	}};
   
 
-vector<int> listOfBadDet = {5, 10, 11, 18, 21, 22, 23};
 
 
 TString rdtCutFile = ""; //"rdt_15N_degraded.root";
@@ -206,6 +210,9 @@ void Analyzer::Begin(TTree *tree)
       }
    }
    
+   contFlag = false;
+   lastRunID = -1;
+   
    gClock.Reset();
    gClock.Start("timer");
    shown = 0;
@@ -240,6 +247,32 @@ Bool_t Analyzer::Process(Long64_t entry)
      b_trdt_r->GetEntry(entry,0);
      b_coinTime->GetEntry(entry, 0);
    }
+   
+   //#################### run ID
+   if ( entry == 0 ){
+     canvasTitle += Form("%03d, ", run );
+     lastRunID = run;
+     contFlag = false;
+   }
+   
+   if( run == lastRunID + 1 ){
+      int len = canvasTitle.Sizeof();
+      if( contFlag == false ) {
+        canvasTitle.Remove(len-3);
+        canvasTitle += " - ";
+      }else{
+        canvasTitle.Remove(len-6);
+      }
+      contFlag = true;
+      canvasTitle += Form("%03d, ", run );
+      lastRunID = run;
+   }else if ( run > lastRunID + 1 ){
+      contFlag = false;
+      canvasTitle += Form("%03d, ", run );
+      lastRunID = run;
+   }
+    
+   
    
    //#################### recoil gate
    bool rdtgate = false;
@@ -430,23 +463,23 @@ void Analyzer::Terminate()
   
    //=========== Plot
    int nX = numCol, nY = numRow;
-   nX = 2;
+   nX = 1;
    nY = 1;
-   int sizeX = 250, sizeY = 150;
-   cAna = new TCanvas("cAna", "Analyzer", nX * sizeX, nY * sizeY);
+   int sizeX = 650, sizeY = 400;
+   cAna = new TCanvas("cAna", "Analyzer | " + canvasTitle, nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
    
    ///double max = findXMax(hei)
    double max = findXMax(hExi);
    
-   cAna->cd(1);
-   hEx->Draw();
+   ///cAna->cd(1);
+   ///hEx->Draw();
+   ///
+   ///cAna->cd(2);
+   ///hExT->Draw("colz");
    
-   cAna->cd(2);
-   hExT->Draw("colz");
    
-   /**
    for( int i = 0; i < numDet; i++){
      cAna->cd(i+1);
      //cAna->cd(i+1)->SetGrid();
@@ -457,8 +490,9 @@ void Analyzer::Terminate()
      //hxi[i]->Draw();
      
      //hEBISi[i]->Draw();
-     //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     //hExi[i]->Draw();
+     hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
+     hExi[i]->SetLineColor(i+1);
+     hExi[i]->Draw("same");
    
      //fitAuto(hExi[i]);
      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
@@ -469,11 +503,10 @@ void Analyzer::Terminate()
      //2-D 
      //hexi[i]->Draw(); 
      //hxExi[i]->SetMarkerStyle(7);
-     hxExi[i]->SetMarkerColorAlpha(1,0.2);
-     hxExi[i]->Draw("");
+     //hxExi[i]->SetMarkerColorAlpha(1,0.2);
+     //hxExi[i]->Draw("");
      //hxExi[i]->Draw("colz");
    }
-   */
    
    ///for( int i = 0; i < numDet; i++){
    ///  //hei[i]->GetYaxis()->SetRangeUser(0, max);
@@ -516,11 +549,18 @@ void Analyzer::Terminate()
    ///  //hExPzr[i]->Draw("colz");
    ///}
    
-   ///for( int i = 0; i < numCol; i++){
-   ///  cAna->cd(i+1);
-   ///  cAna->cd(i+1)->SetGrid();
-   ///  hExc[i]->Draw();
-   ///}
+   //for( int i = 0; i < numCol; i++){
+   //  cAna->cd(i+1);
+   //  cAna->cd(i+1)->SetGrid();
+   //  
+   //  for( int j = 0; j < numRow; j++){
+   //    int id = 6*j + i ;
+   //    hExi[id]->SetLineColor(j+1);
+   //    hExi[id]->Draw("same");
+   //    
+   //  }
+   //  //hExc[i]->Draw();
+   //}
    
    /**/
 }

@@ -83,6 +83,11 @@ public :
    TBranch        *b_coinTime;   //!
 
    bool isTraceDataExist;
+   
+   TString canvasTitle;
+   int lastRunID;
+   bool contFlag;
+   
 
    Analyzer(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Analyzer() { }
@@ -146,10 +151,10 @@ void Analyzer::Init(TTree *tree)
 
    TBranch * br = (TBranch*) fChain->GetListOfBranches()->FindObject("te");
    if( br == NULL ){
-     printf("+++++++++++++++++++ no trace date");
+     printf("+++++++++++++++++++ no trace date \n");
      isTraceDataExist = false;
    }else{
-     printf("+++++++++++++++++++ has trace date");
+     printf("+++++++++++++++++++ has trace date \n");
      isTraceDataExist = true;
      fChain->SetBranchAddress("te",     te,     &b_te);
      fChain->SetBranchAddress("te_t",   te_t,   &b_te_t);
