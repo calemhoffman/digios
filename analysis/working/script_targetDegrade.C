@@ -3,17 +3,21 @@
 #include "TStyle.h"
 #include "TSystem.h"
 #include "TH1F.h"
+#include "TProfile.h"
+#include "TH2F.h"
 #include "TString.h"
 
 TChain * tree;
+TH2F * hRun[200];
 TH1F * hElum[200];   
+TH1F * hBG[200];   
 TH1F * hBIC[200];   
 TH1F * hTD[200];   
 TH1F * hTDAll;
 
 int tRange[2] = {5000, 8000};
 
-void script_targetDegrade(int fileID = 0){
+void script_targetDegrade(int fileID = 4){
 
    tree = new TChain("tree");
    if( fileID == 0 ) tree->Add("h073_82Kr_gen_run019-080.root");
@@ -24,8 +28,8 @@ void script_targetDegrade(int fileID = 0){
    
    gStyle->SetOptStat("");
    
-   TCanvas * canvas = new TCanvas("can", "c", 1200, 1200);
-   canvas->Divide(1,3);
+   TCanvas * canvas = new TCanvas("can", "c", 1800, 800);
+   canvas->Divide(1,4);
 
    ///========================= event by event
 
@@ -41,23 +45,32 @@ void script_targetDegrade(int fileID = 0){
 
    int totEntry = tree->GetEntries();
 
+   hRun[0]  = new TH2F("hRun",  "Run",  14000, 100, 14100, 250, 0, 250);
    hElum[0] = new TH1F("hElum", "Elum", 14000, 100, 14100);
+   hBG[0]   = new TH1F("hElum", "BG", 14000, 100, 14100);
    hBIC[0]  = new TH1F("hBIC",  "BIC" , 14000, 100, 14100);
 
    for( int ev = 0; ev < totEntry; ev++){
 
     tree->GetEntry(ev,0);
-
+    
     if( run <= 80 ){
-      if( 960 < elum && elum < 1100 ) {
+      if( 980 < elum && elum < 1080 ) {
         hElum[0]->Fill(elum_t/1e8/60.);
       }
+      if( ( 900 < elum && elum < 950 ) || ( 1100 < elum && elum < 1150) ) {
+         hBG[0]->Fill(elum_t/1e8/60.);
+      }
     }else{
-      if( 860 < elum && elum < 960 ) {
+      if( 860 < elum && elum < 970 ) {
         hElum[0]->Fill(elum_t/1e8/60.);
+      }
+      if( 1000 < elum && elum < 1136.9 ){
+         hBG[0]->Fill(elum_t/1e8/60.);
       }
     }
 
+    hRun[0]->Fill(elum_t/1e8/60., run);
     hBIC[0]->Fill(tac_t[1]/1e8/60.);
 
    }
@@ -65,9 +78,36 @@ void script_targetDegrade(int fileID = 0){
   hTD[0] = new TH1F("hTD", "TD", 14000, 100, 14100);
   hTD[0]->Divide(hElum[0], hBIC[0]);
 
-  canvas->cd(1); hElum[0]->Draw();
-  canvas->cd(2); hBIC[0]->Draw();
-  canvas->cd(3); hTD[0]->Draw();
+   TProfile * hRun_pfx = new TProfile("hRun_pfx", "RUNID; time [min]; FCUP mean", 14000, 100, 14100);
+   hRun[0]->ProfileX("hRun_pfx");
+
+  canvas->cd(1); hRun[0]->Draw("colz");
+  canvas->cd(2); hElum[0]->Draw();
+  canvas->cd(3); hBG[0]->Draw();
+  canvas->cd(4); hBIC[0]->Draw();
+  //canvas->cd(3); hTD[0]->Draw();
+
+   ///=================== Save to txt file
+   int nBin = hElum[0]->GetNbinsX();
+   
+   FILE * paraOut;
+   TString fileName = "TD_82Kr_82Se.txt";
+   paraOut = fopen (fileName.Data(), "w+");
+   printf("=========== save histogram to %s \n", fileName.Data());
+   
+   for( int i = 1; i <= nBin ; i++){
+      
+      double x     = hElum[0]->GetBinCenter(i);
+      double y1    = hElum[0]->GetBinContent(i);
+      double yRun  = hRun_pfx->GetBinContent(i);
+      double yBG   = hBG[0]->GetBinContent(i);
+      double yFCup = hBIC[0]->GetBinContent(i);
+      
+      fprintf(paraOut, "%14.8f\t%9.6f\t%3.0f\t%9.6f\t%9.6f\n", x, y1, yRun, yBG, yFCup);
+   }
+
+   fflush(paraOut);
+   fclose(paraOut);
 
    
    /*
