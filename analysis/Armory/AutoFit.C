@@ -1,8 +1,16 @@
+#ifndef AutoFit_C
+#define AutoFit_C
+
 #include <TF1.h>
 #include <TGraph.h>
 #include <TSpectrum.h>
 #include <TMath.h>
 #include <vector>
+
+//TODO
+//1) fitGaussPN()
+//2) fitSkewGauss()
+//3) More flexible way? say fitAuto(hist, pre-set-func)
 
 
 void ShowFitMethod(){
@@ -32,6 +40,42 @@ Double_t nGauss(Double_t *x, Double_t *par) {
 }
 
 
+Double_t nSkewGauss(Double_t *x, Double_t *par){
+  Double_t result = 0;
+  for( Int_t p = 0; p < nPeaks; p++){
+    
+    Double_t norm  = par[3*p+0];
+    Double_t mean  = par[3*p+1];
+    Double_t sigma = par[3*p+2];
+    Double_t alpha = par[3*p+3]; // skewness
+    
+    result += norm * TMath::Gaus(x[0], mean, sigma, 1) * ( 1 + TMath::Erf( alpha*(x[0] - mean)/sqrt(2)/sigma ) );
+    
+  }  
+  return result;
+}
+
+Double_t nGaussSkewGauss(Double_t *x, Double_t *par){
+  Double_t result = 0;
+  for( Int_t p = 0; p < nPeaks; p++){
+
+    //---- Gauss
+    Double_t norm  = par[3*p+0];
+    Double_t mean  = par[3*p+1];
+    Double_t sigma = par[3*p+2];  
+    result += norm * TMath::Gaus(x[0], mean, sigma, 1);
+        
+    //---- skew Gauss
+    norm  = par[3*p+3];
+    sigma = par[3*p+4];
+    Double_t alpha = par[3*p+5]; // skewness  
+    result += norm * TMath::Gaus(x[0], mean, sigma, 1) * ( 1 + TMath::Erf( alpha*(x[0] - mean)/sqrt(2)/sigma ) );
+
+  }  
+  return result;
+}
+
+
 Double_t nGaussP1(Double_t *x, Double_t *par) {
    Double_t result = 0;
    for (Int_t p=0;p<nPeaks;p++) {
@@ -46,6 +90,92 @@ Double_t nGaussP1(Double_t *x, Double_t *par) {
    return result;
 }
 
+void PrintPar(TF1 * fit, int numParPerPeak){
+   int totPar = fit->GetNpar();
+   int count = totPar/numParPerPeak;
+   printf("ID  ");
+   for( int i = 0; i < numParPerPeak; i++){
+     printf("par%d       ", i);
+   }
+   printf("\n");
+   
+   for( int i = 0; i < count ; i++){
+     printf("%3d ", i);
+     for( int j = 0; j < numParPerPeak; j++){
+       int parID = numParPerPeak * i + j;
+       printf("%.3f(%.3f) ", fit->GetParameter(parID), fit->GetParError(parID));
+     }
+     printf("\n");
+   }
+}
+
+void GoodnessofFit(TH1F * hist, TF1 * fit){
+  
+   int nBin = hist->GetNbinsX();
+   int effBin = 0;   
+   double mean = 0;
+   double ysq = 0;
+   double SSR = 0;
+   double chisq = 0; //with estimated error be sqrt(y)
+   double Xsq = 0; // for Pearson's chi-sq test
+   for( int i = 1; i <= nBin; i++){
+
+      double e = hist->GetBinError(i);
+      if( e > 0  ) {
+         effBin ++;
+         double y = hist->GetBinContent(i);
+         double x = hist->GetBinCenter(i);
+         double ybar = fit->Eval(x);
+         ysq += y*y;
+         mean + y;
+         SSR += (y - ybar)*(y-ybar);
+         chisq += (y - ybar)*(y-ybar)/e/e;
+         
+         
+         if( ybar > e ) {
+           Xsq += (y - ybar)*(y-ybar)/ybar;
+         }else{
+           Xsq += (y - ybar)*(y-ybar)/e;
+         }
+         //printf(" %d | x : %f, y : %f, ybar : %f , X-sq : %f\n", i, x, y, ybar, Xsq);
+      }
+   }
+   mean = mean / nBin;
+   double SSTotal = ysq + mean*mean;
+   
+   int npar = fit->GetNpar();
+   int ndf = effBin - npar;
+   printf("#################################################\n");
+   printf("##               Goodness of Fit.              ##\n");
+   printf("#################################################\n");
+   printf(" eff. Bin(%d) - numPar(%d) = ndf = %d \n", effBin, npar, ndf);
+
+   printf("============== Regression analysis\n");
+   printf("----------------- R-sq \n");
+   printf("    SSTotal = %f \n", SSTotal);
+   printf("        SSR = %f \n", SSR);
+   printf("        MSR = %f  <-- is it similar to sample variance?\n", SSR/ndf);
+   double Rsq = 1 - SSR/SSTotal;
+   printf("       R-sq = %f \n", Rsq );
+   
+   printf("----------------- Chi-sq \n");
+   printf("     Chi-sq = %f \n", chisq);
+   printf(" rd. Chi-sq = %f \n", chisq/ndf);
+   printf("ROOT Chi-Sq = %f , NDF = %d \n", fit->GetChisquare(), fit->GetNDF());
+   //================ chi-sq test
+   printf("============== Hypothesis testing\n");
+   printf(" Null Hypothesis : the fitting model is truth. \n");
+   printf(" * p-value = prob. that Null Hypo. is truth. \n");
+   printf(" * the Pearson's test in here only for background free data \n");
+   printf("     Pearson's X-sq = %.2f \n", Xsq);
+   double p = 1 - TMath::Prob(Xsq, ndf);
+   printf("  Pearson's p-value = %.2f %s 0.05 | %s\n", p, p < 0.05 ? "<": ">", p < 0.05 ? "reject" : "cannot reject");
+   double pchi = 1 - TMath::Prob(chisq, ndf);
+   printf("     Chi-sq p-value = %.2f %s 0.05 | %s\n", pchi, pchi < 0.05 ? "<": ">", pchi < 0.05 ? "reject" : "cannot reject");
+   double pRoot = 1- fit->GetProb();
+   printf("ROOT Chi-sq p-value = %.2f %s 0.05 | %s\n", pRoot, pRoot < 0.05 ? "<": ">", pRoot < 0.05 ? "reject" : "cannot reject");
+   printf("################################################\n");  
+}
 
 vector<double> energy, height, sigma, lowE, highE ;
 vector<int> energyFlag, sigmaFlag;
@@ -72,6 +202,8 @@ bool loadFitParameters(TString fitParaFile){
       //printf("%d, %s \n", i,  x.c_str());
       
       if( x.substr(0,2) == "//" )  continue;
+      
+      if( x.substr(0,2) == "##" ) break;
       
       if( i%7 == 0 ) energy.push_back(atof(x.c_str()));
       if( i%7 == 1 ) lowE.push_back(atof(x.c_str()));
@@ -112,7 +244,7 @@ bool loadFitParameters(TString fitParaFile){
 //########################################
 //########################################
 //########################################
-void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
+void fitGauss(TH1F * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
   
   
   if( gROOT->FindObjectAny("cFitGauss") == NULL ){
@@ -140,7 +272,8 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
   const Double_t* paraE = fit->GetParErrors();
   const Double_t* paraA = fit->GetParameters();
   
-  
+  double chisquare = fit->GetChisquare();
+  int ndf = fit->GetNDF();
   double bw = hist->GetBinWidth(1);
 
   printf("%s ====== count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
@@ -148,13 +281,30 @@ void fitGauss(TH1 * hist, double mean, double sigma, double xMin, double xMax, T
             paraA[0] / bw,   paraE[0] /bw, 
             paraA[1], paraE[1],
             paraA[2], paraE[2]);
+            
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.04);
+  text.SetTextColor(2);
   
+    
+   text.DrawLatex(0.15, 0.65, Form("count : %5.0f(%5.0f)", paraA[0]/bw, paraE[0]/bw));
+   text.DrawLatex(0.15, 0.60, Form(" mean : %5.3f(%5.3f) MeV", paraA[1], paraE[1]));
+   text.DrawLatex(0.15, 0.55, Form("sigma : %5.3f(%5.3f) MeV", paraA[2], paraE[2]));
+   text.DrawLatex(0.15, 0.50, Form(" FWHM : %5.3f(%5.3f) MeV", paraA[2] *2.355, paraE[2]*2.355));
+   
+   
+   text.DrawLatex(0.15, 0.40, Form("#chi^2/ndf : %5.3f", chisquare/ndf));
+   
+   GoodnessofFit(hist, fit);
+   
 }
 
 //########################################
 //########################################
 //########################################
-void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
+void fitGaussP1(TH1F * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
   
   
   if( gROOT->FindObjectAny("cFitGaussP1") == NULL ){
@@ -207,15 +357,76 @@ void fitGaussP1(TH1 * hist, double mean, double sigma, double xMin, double xMax,
   text.DrawLatex(0.15, 0.7, Form("Line: %4.2f(%3.2f) + %4.2f(%3.2f)x  ", 
                                     paraA[3],   paraE[3],
                                     paraA[4], paraE[4]));
-                                    
-
+  GoodnessofFit(hist, fit);
   
 }
 
 //########################################
 //########################################
 //########################################
-vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1, 
+void fitGaussP2(TH1F * hist, double mean, double sigma, double xMin, double xMax, TString optStat = ""){
+  
+  
+  if( gROOT->FindObjectAny("cFitGaussP2") == NULL ){
+    TCanvas * cFitGaussP2 = new TCanvas("cFitGaussP2", "fit Gauss & P2", 800, 400);
+  }
+  gStyle->SetOptStat(optStat);
+  
+  hist->Draw();
+  
+  TF1 * fit = new TF1("fit", "[0] * TMath::Gaus(x, [1], [2], 1) + [3] + [4]*x + [5]*x*x", xMin, xMax);
+  
+  double * para = new double[6]; 
+  para[0] = 100 * 0.05 * TMath::Sqrt(TMath::TwoPi());
+  para[1] = mean;
+  para[2] = sigma;
+  para[3] = 1;
+  para[4] = 0;
+  para[4] = 0;
+
+  fit->SetLineWidth(2);
+  fit->SetLineColor(2);
+  fit->SetNpx(1000);
+  fit->SetParameters(para);
+  
+  hist->Fit("fit", "R");
+  
+  const Double_t* paraE = fit->GetParErrors();
+  const Double_t* paraA = fit->GetParameters();
+  
+  double bw = hist->GetBinWidth(1);
+
+  printf("%s ====== count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
+            hist->GetName(),
+            paraA[0] / bw,   paraE[0] /bw, 
+            paraA[1], paraE[1],
+            paraA[2], paraE[2]);
+            
+            
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.04);
+  
+  double chi2 = fit->GetChisquare();
+  int ndf = fit->GetNDF();
+  text.DrawLatex(0.15, 0.8, Form("#bar{#chi^{2}} : %5.3f", chi2/ndf));
+  text.DrawLatex(0.15, 0.75,Form("count: %4.0f(%3.0f), E_{x}: %6.3f(%5.3f) MeV, #sigma: %3.0f(%3.0f) keV ", 
+                                    paraA[0] / bw,   paraE[0] /bw,
+                                    paraA[1], paraE[1],
+                                    paraA[2] * 1000., paraE[2] * 1000.));
+  text.DrawLatex(0.15, 0.7, Form("P2: %4.2f(%3.2f) + %4.2f(%3.2f)x + %4.2f(%3.2f)x^{2}", 
+                                    paraA[3],   paraE[3],
+                                    paraA[4], paraE[4],
+                                    paraA[5], paraE[5]));
+  GoodnessofFit(hist, fit);
+  
+}
+
+//########################################
+//########################################
+//########################################
+vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1, 
                                        double mean2, double sigma2, 
                            double xMin, double xMax, TString optStat = "", bool newCanvas = false){
   
@@ -301,20 +512,28 @@ vector<double> fit2GaussP1(TH1 * hist, double mean1, double sigma1,
                                     paraA[6], paraE[6],
                                     paraA[7], paraE[7]));
                                     
+  GoodnessofFit(hist, fit);
   return output;
 }
 
 //########################################
 //########################################
 //########################################
-void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString optStat = ""){
+vector<double> fitAuto(TH1 * hist, int bgEst = 10, 
+                       double peakThreshold = 0.1, 
+                       double sigmaGauss = 20, 
+                       int peakSeparation = 4, 
+                       TString optStat = "", bool newPlot = true){
 
-  TCanvas *cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
-  cFitAuto->Divide(1,2);
-  
-  gStyle->SetOptStat(optStat);
-  cFitAuto->cd(1);
-  hist->Draw();
+  TCanvas *cFitAuto = NULL;
+  if( newPlot ){
+    cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
+    cFitAuto->Divide(1,2);
+    
+    gStyle->SetOptStat(optStat);
+    cFitAuto->cd(1);
+    hist->Draw();
+  }
   
   TH1F * specS = (TH1F*) hist->Clone();
   double xMin = hist->GetXaxis()->GetXmin();
@@ -325,34 +544,37 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   titleH.Form("fitted spectrum (BG=%d); Ex [MeV]; Count / %4.0f keV", bgEst, (xMax-xMin)*1000./xBin );
   specS->SetTitle(titleH);   
   specS->SetName("specS");
-  //specS->GetXaxis()->SetTitleSize(0.06);
-  //specS->GetYaxis()->SetTitleSize(0.06);
-  //specS->GetXaxis()->SetTitleOffset(0.7);
-  //specS->GetYaxis()->SetTitleOffset(0.6);
+  ///specS->GetXaxis()->SetTitleSize(0.06);
+  ///specS->GetYaxis()->SetTitleSize(0.06);
+  ///specS->GetXaxis()->SetTitleOffset(0.7);
+  ///specS->GetYaxis()->SetTitleOffset(0.6);
   
   //=================== find peak and fit
   gStyle->SetOptFit(0);
   TSpectrum * peak = new TSpectrum(50);
-  nPeaks = peak->Search(hist, 1, "", peakThreshold); 
+  nPeaks = peak->Search(hist, peakSeparation, "", peakThreshold); 
   
   if( bgEst > 0 ) {
     printf("============= estimating background...\n");
     TH1 * h1 = peak->Background(hist, bgEst);
     h1->Draw("same");
     printf("============= substracting the linear background...\n");
-    specS->Add(h1, -1.);
     specS->Sumw2();
+    specS->Add(h1, -1.);
   }
   
-  cFitAuto->cd(2)->SetGrid();
-  cFitAuto->cd(2);
+  if( newPlot ){
+    cFitAuto->cd(2)->SetGrid();
+    cFitAuto->cd(2);
+  }
   specS->Draw("hist");
   
 
   //========== Fitting 
-  printf("============= Fitting.....");
-  printf(" found %d peaks \n", nPeaks);
-
+  if( newPlot ){
+    printf("============= Fitting.....");
+    printf(" found %d peaks \n", nPeaks);
+  }
   double * xpos = peak->GetPositionX();
   double * ypos = peak->GetPositionY();
 
@@ -363,20 +585,50 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
     energy.push_back(xpos[inX[j]]);
     height.push_back(ypos[inX[j]]);
   }
-
-  const int  n = 3 * nPeaks;
+  if( newPlot ){
+    for( int j = 0; j < nPeaks; j++){
+      printf(" energy : %f , %f \n", energy[j], height[j]);
+    }
+  }
+  
+  int numParPerPeak = 3;  
+  const int  n = numParPerPeak * nPeaks;
   double * para = new double[n]; 
   for(int i = 0; i < nPeaks ; i++){
-    para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
-    para[3*i+1] = energy[i];
-    para[3*i+2] = 0.08;
+    para[numParPerPeak*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
+    para[numParPerPeak*i+1] = energy[i];
+    para[numParPerPeak*i+2] = sigmaGauss;
   }
 
-  TF1 * fit = new TF1("fit", nGauss, xMin, xMax, 3* nPeaks );
+  TF1 * fit = new TF1("fit", nGauss, xMin, xMax, 3 * nPeaks );
   fit->SetLineWidth(2);
   fit->SetLineColor(2);
   fit->SetNpx(1000);
   fit->SetParameters(para);
+  
+  if( nPeaks > 1 ){
+    for( int i = 0; i < nPeaks; i++){
+      fit->SetParLimits(numParPerPeak*i+0, 0, 1e+9);
+      double de1 = 1, de2 = 1;
+      if( i == 0 ){ 
+        de2 = (energy[i+1] - energy[i])/2.;
+        de1 = de2;
+      }else if( i < nPeaks -1 ){
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = (energy[i+1] - energy[i])/2.;
+      }else{
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = de1;
+      }
+      
+      fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2); 
+      fit->SetParLimits(numParPerPeak*i+2, 0, sigmaGauss * 5); 
+    }
+  }else{
+    fit->SetParLimits(0, 0, 1e+9);
+    fit->SetParLimits(2, 0, sigmaGauss * 5); 
+  } 
+  
   specS->Fit("fit", "q");
   
   
@@ -384,43 +636,21 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   const Double_t* paraA = fit->GetParameters();
   
   //======== calculate reduce chi-squared
-  double chisquare = 0;
-  for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
-      double x = specS->GetBinCenter(iBin);
-      double yf = fit->Eval(x);
-      double y  = specS->GetBinContent(iBin);
-      chisquare += TMath::Power( y - yf , 2);
-  }
+  if( newPlot ) GoodnessofFit(specS, fit);
   
-  int ndf = fit->GetNDF();
-  
-  int bin1 = specS->FindBin(paraA[1] - 3 * paraA[2]);
-  //int bin2 = specS->FindBin(paraA[3*(nPeaks-1)+1] + 3 * paraA[3*(nPeaks-1)+2]);
-  int bin2 = specS->GetNbinsX();
-  TGraph * gSigmaEst = new TGraph( specS);
-  
-  for( int iBin = bin2; iBin >= bin1; iBin--){
-    gSigmaEst->RemovePoint(iBin);
-  }
-  double sigma2 = TMath::Power(gSigmaEst->GetRMS(2),2);
-  
-  printf("==== Chi-Sq : %f , NDF : %d, Sigma2 : %f \n", chisquare, ndf, sigma2);
-  printf("============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
-
   double bw = specS->GetBinWidth(1);
 
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
+  vector<double> exPos;
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
+    exPos.push_back(paraA[numParPerPeak*i+1]);
     printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
-            paraA[3*i] / bw,   paraE[3*i] /bw, 
-            paraA[3*i+1], paraE[3*i+1],
-            paraA[3*i+2], paraE[3*i+2]);
+            paraA[numParPerPeak*i] / bw,   paraE[numParPerPeak*i] /bw, 
+            paraA[numParPerPeak*i+1], paraE[numParPerPeak*i+1],
+            paraA[numParPerPeak*i+2], paraE[numParPerPeak*i+2]);
+    
   }
-  cFitAuto->Update();
+  if( newPlot ) cFitAuto->Update();
 
   //draw the indivual fit
   fit->Draw("same");
@@ -429,9 +659,9 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   TF1 ** gFit = new TF1 *[nn];
   for( int i = 0; i < nPeaks; i++){
       gFit[i] = new TF1(Form("gFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1)", xMin, xMax);
-      gFit[i]->SetParameter(0, paraA[3*i]);
-      gFit[i]->SetParameter(1, paraA[3*i+1]);
-      gFit[i]->SetParameter(2, paraA[3*i+2]);
+      gFit[i]->SetParameter(0, paraA[numParPerPeak*i]);
+      gFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      gFit[i]->SetParameter(2, paraA[numParPerPeak*i+2]);
       gFit[i]->SetLineColor(i+1);
       gFit[i]->SetNpx(1000);
       gFit[i]->SetLineWidth(1);
@@ -440,17 +670,214 @@ void fitAuto(TH1 * hist, int bgEst = 10, double peakThreshold = 0.1, TString opt
   
   specS->Draw("hist same");
   
+  return exPos;
+  
+}
+
+
+//########################################
+//########################################
+//########################################
+vector<double> fitGaussSkewGauss(TH1 * hist, int bgEst = 10, 
+                       double peakThreshold = 0.1, 
+                       double sigmaGauss = 20, 
+                       int peakSeparation = 4, 
+                       TString optStat = "", bool newPlot = true){
+
+  TCanvas *cFitAuto = NULL;
+  if( newPlot ){
+    cFitAuto = new TCanvas("cFitAuto","Auto Fitting", 100, 100, 800,800);
+    cFitAuto->Divide(1,2);
+    
+    gStyle->SetOptStat(optStat);
+    cFitAuto->cd(1);
+    hist->Draw();
+  }
+  
+  TH1F * specS = (TH1F*) hist->Clone();
+  double xMin = hist->GetXaxis()->GetXmin();
+  double xMax = hist->GetXaxis()->GetXmax();
+  int xBin = hist->GetXaxis()->GetNbins();
+  
+  TString titleH;
+  titleH.Form("fitted spectrum (BG=%d); Ex [MeV]; Count / %4.0f keV", bgEst, (xMax-xMin)*1000./xBin );
+  specS->SetTitle(titleH);   
+  specS->SetName("specS");
+  ///specS->GetXaxis()->SetTitleSize(0.06);
+  ///specS->GetYaxis()->SetTitleSize(0.06);
+  ///specS->GetXaxis()->SetTitleOffset(0.7);
+  ///specS->GetYaxis()->SetTitleOffset(0.6);
+  
+  //=================== find peak and fit
+  gStyle->SetOptFit(0);
+  TSpectrum * peak = new TSpectrum(50);
+  nPeaks = peak->Search(hist, peakSeparation, "", peakThreshold); 
+  
+  if( bgEst > 0 ) {
+    printf("============= estimating background...\n");
+    TH1 * h1 = peak->Background(hist, bgEst);
+    h1->Draw("same");
+    printf("============= substracting the linear background...\n");
+    specS->Sumw2();
+    specS->Add(h1, -1.);
+  }
+  
+  if( newPlot ){
+    cFitAuto->cd(2)->SetGrid();
+    cFitAuto->cd(2);
+  }
+  specS->Draw("hist");
+  
+
+  //========== Fitting 
+  if( newPlot ){
+    printf("============= Fitting.....");
+    printf(" found %d peaks \n", nPeaks);
+  }
+  double * xpos = peak->GetPositionX();
+  double * ypos = peak->GetPositionY();
+
+  int * inX = new int[nPeaks];
+  TMath::Sort(nPeaks, xpos, inX, 0 );
+  vector<double> energy, height;
+  for( int j = 0; j < nPeaks; j++){
+    energy.push_back(xpos[inX[j]]);
+    height.push_back(ypos[inX[j]]);
+  }
+  if( newPlot ){
+    for( int j = 0; j < nPeaks; j++){
+      printf(" energy : %f , %f \n", energy[j], height[j]);
+    }
+  }
+  
+  int numParPerPeak = 6;  
+  const int  n = numParPerPeak * nPeaks;
+  double * para = new double[n]; 
+  for(int i = 0; i < nPeaks ; i++){
+    para[numParPerPeak*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
+    para[numParPerPeak*i+1] = energy[i];
+    para[numParPerPeak*i+2] = sigmaGauss;
+    para[numParPerPeak*i+3] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi()) * 0.1;
+    para[numParPerPeak*i+4] = sigmaGauss;
+    para[numParPerPeak*i+5] = -4;
+  }
+
+  TF1 * fit = new TF1("fit", nGaussSkewGauss, xMin, xMax, numParPerPeak * nPeaks );
+  fit->SetLineWidth(2);
+  fit->SetLineColor(2);
+  fit->SetNpx(1000);
+  fit->SetParameters(para);
+  
+  if( nPeaks > 1 ){
+    for( int i = 0; i < nPeaks; i++){
+      fit->SetParLimits(numParPerPeak*i+0, 0, 1e+9);
+      double de1 = 1, de2 = 1;
+      if( i == 0 ){ 
+        de2 = (energy[i+1] - energy[i])/2.;
+        de1 = de2;
+      }else if( i < nPeaks -1 ){
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = (energy[i+1] - energy[i])/2.;
+      }else{
+        de1 = (energy[i] - energy[i-1])/2.;
+        de2 = de1;
+      }
+      
+      fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2); 
+      fit->SetParLimits(numParPerPeak*i+2, 0, sigmaGauss * 5); 
+      
+      fit->SetParLimits(numParPerPeak*i+3, 0, 1e+9);
+      fit->SetParLimits(numParPerPeak*i+4, 0, sigmaGauss * 10); 
+      fit->SetParLimits(numParPerPeak*i+5, -10, -2); 
+          
+    }
+  }else{
+    fit->SetParLimits(0, 0, 1e+9);
+    fit->SetParLimits(2, 0, sigmaGauss * 5); 
+    fit->SetParLimits(3, 0, 1e+9);
+    fit->SetParLimits(4, 0, sigmaGauss * 10); 
+    fit->SetParLimits(5, -10, -2);
+  }
+  specS->Fit("fit", "q");
+  
+  
+  const Double_t* paraE = fit->GetParErrors();
+  const Double_t* paraA = fit->GetParameters();
+  
+  //======== calculate reduce chi-squared
+  if( newPlot ) GoodnessofFit(specS, fit);
+  
+  double bw = specS->GetBinWidth(1);
+
+  vector<double> exPos;
+  for(int i = 0; i < nPeaks ; i++){
+    exPos.push_back(paraA[numParPerPeak*i+1]);
+    double totCount = paraA[numParPerPeak*i] + paraA[numParPerPeak*i+3];
+    double totCountErr = sqrt(paraE[numParPerPeak*i]*paraE[numParPerPeak*i] + paraE[numParPerPeak*i+3]*paraE[numParPerPeak*i+3]);
+    printf("%2d , count: %8.0f(%3.0f)+%8.0f(%3.0f)=%8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f), skewneww: %4.1f(%4.1f) \n", 
+            i,
+            paraA[numParPerPeak*i] / bw,   paraE[numParPerPeak*i] /bw, 
+            paraA[numParPerPeak*i+3] / bw,   paraE[numParPerPeak*i+3] /bw, 
+            totCount / bw,   totCountErr /bw, 
+            paraA[numParPerPeak*i+1], paraE[numParPerPeak*i+1],
+            paraA[numParPerPeak*i+2], paraE[numParPerPeak*i+2],
+            paraA[numParPerPeak*i+5], paraE[numParPerPeak*i+5]);
+    
+    //PrintPar(fit, numParPerPeak);
+  }
+  if( newPlot ) cFitAuto->Update();
+
+  //draw the indivual fit
+  fit->Draw("same");
+  
+  const int nn = nPeaks;
+  TF1 ** gFit = new TF1 *[nn];
+  TF1 ** kFit = new TF1 *[nn];
+  TF1 ** zFit = new TF1 *[nn];
+  for( int i = 0; i < nPeaks; i++){
+      gFit[i] = new TF1(Form("gFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1) + [3] * TMath::Gaus(x,[1],[4], 1) * ( 1 + TMath::Erf( [5]*(x-[1])/sqrt(2)/[4] ))", xMin, xMax);
+      gFit[i]->SetParameter(0, paraA[numParPerPeak*i]);
+      gFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      gFit[i]->SetParameter(2, paraA[numParPerPeak*i+2]);
+      gFit[i]->SetParameter(3, paraA[numParPerPeak*i+3]);
+      gFit[i]->SetParameter(4, paraA[numParPerPeak*i+4]);
+      gFit[i]->SetParameter(5, paraA[numParPerPeak*i+5]);
+      gFit[i]->SetLineColor(i+1);
+      gFit[i]->SetNpx(1000);
+      gFit[i]->SetLineWidth(1);
+      gFit[i]->Draw("same");
+      
+      kFit[i] = new TF1(Form("kFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1) * ( 1 + TMath::Erf( [3]*(x-[1])/sqrt(2)/[2] ))", xMin, xMax);
+      kFit[i]->SetParameter(0, paraA[numParPerPeak*i+3]);
+      kFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      kFit[i]->SetParameter(2, paraA[numParPerPeak*i+4]);
+      kFit[i]->SetParameter(3, paraA[numParPerPeak*i+5]);
+      kFit[i]->SetLineColor(i+1);
+      kFit[i]->SetNpx(1000);
+      kFit[i]->SetLineWidth(1);
+      kFit[i]->Draw("same");
+      
+      zFit[i] = new TF1(Form("zFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1)", xMin, xMax);
+      zFit[i]->SetParameter(0, paraA[numParPerPeak*i]);
+      zFit[i]->SetParameter(1, paraA[numParPerPeak*i+1]);
+      zFit[i]->SetParameter(2, paraA[numParPerPeak*i+2]);
+      zFit[i]->SetLineColor(i+1);
+      zFit[i]->SetNpx(1000);
+      zFit[i]->SetLineWidth(1);
+      zFit[i]->Draw("same");
+      
+  }
+  
+  specS->Draw("hist same");
+  
+  return exPos;
+  
 }
 
 //########################################
 //########################################
 //########################################
 void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile = "AutoFit_para.txt"){
-   
-  //============ 131Xe
-  //energy.push_back(-2.8);  height.push_back(100); lowE.push_back(-3.0); highE.push_back(-2.4);
-  //energy.push_back(-1.4);  height.push_back(100); lowE.push_back(-2.0); highE.push_back(-1.0);
-  //energy.push_back( 0.2);  height.push_back(100); lowE.push_back(-0.5); highE.push_back( 0.5);
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -459,8 +886,8 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   }
   nPeaks = energy.size();
 
-  TCanvas *cFitNGauss = new TCanvas("cFitNGauss","Fitting on Ex (fixed width)", 600,600);
-  cFitNGauss->Divide(1,2);
+  TCanvas *cFitNGauss = new TCanvas("cFitNGauss","Fitting on Ex", 600,600);
+  cFitNGauss->Divide(1,3);
   if(! cFitNGauss->GetShowEventStatus() ) cFitNGauss->ToggleEventStatus();
   
   gStyle->SetOptStat(optStat);
@@ -468,6 +895,7 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   hist->Draw();
   
   TH1F * specS = (TH1F*) hist->Clone();
+  specS->Sumw2();
   double xMin = hist->GetXaxis()->GetXmin();
   double xMax = hist->GetXaxis()->GetXmax();
   int xBin = hist->GetXaxis()->GetNbins();
@@ -483,16 +911,17 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   gStyle->SetOptFit(0);
   cFitNGauss->cd(2)->SetGrid();
   cFitNGauss->cd(2);
-  specS->Sumw2();
   
   if( bgEst > 0 ) {
     printf("============= estimating background...\n");
     TSpectrum * peak = new TSpectrum(50);
     TH1 * h1 = peak->Background(hist, bgEst);
+    cFitNGauss->cd(1);
     h1->Draw("same");
+    cFitNGauss->cd(2);
     printf("============= substracting the linear background...\n");
-    specS->Add(h1, -1.);
     specS->Sumw2();
+    specS->Add(h1, -1.);
   }
   
   specS->Draw("hist");
@@ -532,6 +961,8 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   const Double_t* paraA = fit->GetParameters();
   
   //======== calculate reduce chi-squared
+  
+  /**
   double chisquare = 0;
   for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
       double x = specS->GetBinCenter(iBin);
@@ -554,14 +985,12 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   printf("\n ==== Historgam : %s, FitMethod: fitNGauss, BG = %2d \n", hist->GetName(), bgEst);
   printf(" ==== Chi-Sq : %f , NDF : %d, BG-Sigma2 : %f \n", chisquare, ndf, sigma2);
   printf(" ============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
+  */ 
+  GoodnessofFit(specS, fit);
   
   double bw = specS->GetBinWidth(1);
 
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
     printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
@@ -590,6 +1019,26 @@ void fitNGauss(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFile
   
   specS->Draw("hist same");
   //specS->Draw("E same");
+  
+  cFitNGauss->cd(3);
+  
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.06);
+  text.SetTextColor(2);
+  
+  text.DrawLatex(0.1, 0.9, Form("     %13s, %18s, %18s", "count", "mean", "sigma"));
+  
+  for( int i = 0; i < nPeaks; i++){
+  text.DrawLatex(0.1, 0.8-0.1*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]));
+  }
+  
+  
   
   cFitNGauss->Update();
 }
@@ -633,7 +1082,7 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   TH1 * h1 = peak->Background(hist, bgEst);
   
   printf("============= fit the est-background with a linear function...\n");
-  TF1 * bg = new TF1 ("bg", "pol1", -2, 4);
+  TF1 * bg = new TF1 ("bg", "pol2", xMin, xMax);
   bg->SetParameter(0, 50);
   bg->SetParameter(0, 0);
   bg->SetLineColor(2);
@@ -649,8 +1098,8 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   cFitNGauss2->cd(2);
 
   printf("============= substracting the linear background...\n");
-  specS->Add(bg, -1.);
   specS->Sumw2();
+  specS->Add(bg, -1.);
   specS->Draw("hist");
 
   //========== Fitting 
@@ -687,37 +1136,11 @@ void fitNGauss2(TH1 * hist, int bgEst = 10, TString optStat = "", TString fitFil
   const Double_t* paraE = fit->GetParErrors();
   const Double_t* paraA = fit->GetParameters();
   
-  //======== calculate reduce chi-squared
-  double chisquare = 0;
-  for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
-      double x = specS->GetBinCenter(iBin);
-      double yf = fit->Eval(x);
-      double y  = specS->GetBinContent(iBin);
-      chisquare += TMath::Power( y - yf , 2);
-  }
-  
-  int ndf = fit->GetNDF();
-  
-  int bin1 = specS->FindBin(paraA[1] - 3 * paraA[2]);
-  //int bin2 = specS->FindBin(paraA[3*(nPeaks-1)+1] + 3 * paraA[3*(nPeaks-1)+2]);
-  int bin2 = specS->GetNbinsX();
-  TGraph * gSigmaEst = new TGraph( specS);
-  
-  for( int iBin = bin2; iBin >= bin1; iBin--){
-    gSigmaEst->RemovePoint(iBin);
-  }
-  double sigma2 = TMath::Power(gSigmaEst->GetRMS(2),2);
-  printf("\n ==== Historgam : %s, FitMethod: fitNGauss2, BG = %2d \n", hist->GetName(), bgEst);
-  printf(" ==== Chi-Sq : %f , NDF : %d, Sigma2 : %f \n", chisquare, ndf, sigma2);
-  printf(" ============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
+  GoodnessofFit(specS, fit);  
   
   double bw = specS->GetBinWidth(1);
-
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
+   
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
     printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
@@ -819,7 +1242,7 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   //=========== get the linear part and substract
   const Double_t* paraAt = fit->GetParameters();
   
-  TF1 * bg = new TF1("bg", "pol1", -2, 4);
+  TF1 * bg = new TF1("bg", "pol1", xMin, xMax);
   bg->SetParameter(0, paraAt[3*nPeaks+0]);
   bg->SetParameter(1, paraAt[3*nPeaks+1]);
   bg->SetNpx(1000);
@@ -850,8 +1273,8 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   cFitNGaussP1->cd(2);
   
   printf("============= substracting the linear background...\n");
-  specS->Add(bg, -1.);
   specS->Sumw2();
+  specS->Add(bg, -1.);
   specS->Draw("hist");
 
   //======= fit again
@@ -881,38 +1304,11 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
   const Double_t* paraE = fita->GetParErrors();
   const Double_t* paraA = fita->GetParameters();
   
-  
-  //======== calculate reduce chi-squared
-  double chisquare = 0;
-  for( int iBin = 1; iBin <= specS->GetNbinsX(); iBin ++){
-      double x = specS->GetBinCenter(iBin);
-      double yf = fita->Eval(x);
-      double y  = specS->GetBinContent(iBin);
-      chisquare += TMath::Power( y - yf , 2);
-  }
-  
-  int ndf = fita->GetNDF();
-  
-  int bin1 = specS->FindBin(paraA[1] - 3 * paraA[2]);
-  //int bin2 = specS->FindBin(paraA[3*(nPeaks-1)+1] + 3 * paraA[3*(nPeaks-1)+2]);
-  int bin2 = specS->GetNbinsX();
-  TGraph * gSigmaEst = new TGraph( specS);
-  
-  for( int iBin = bin2; iBin >= bin1; iBin--){
-    gSigmaEst->RemovePoint(iBin);
-  }
-  double sigma2 = TMath::Power(gSigmaEst->GetRMS(2),2);
-  printf("\n ==== Historgam : %s, FitMethod: fitNGaussP1\n", hist->GetName());
-  printf(" ==== Chi-Sq : %f , NDF : %d, Sigma2 : %f \n", chisquare, ndf, sigma2);
-  printf(" ============= Fit Result: reduced Chi-squared = %f\n", chisquare/ndf/sigma2);  
+  GoodnessofFit(specS, fit); 
   
   double bw = specS->GetBinWidth(1);
 
-  double * ExPos = new double[nPeaks];
-  double * ExSigma = new double[nPeaks];   
   for(int i = 0; i < nPeaks ; i++){
-    ExPos[i] = paraA[3*i+1];
-    ExSigma[i] = paraA[3*i+2];
     printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
@@ -949,3 +1345,4 @@ void fitNGaussP1(TH1 * hist, TString optStat = "", TString fitFile = "AutoFit_pa
 
 
 
+#endif 

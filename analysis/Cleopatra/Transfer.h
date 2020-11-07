@@ -26,7 +26,7 @@ void Transfer(
         TString     saveFileName = "transfer.root",
         TString         filename = "reaction.dat"){ // when no file, no output.
 
-  //================================================= User Setting //TODO move to reactionConfig
+  //================================================= User Setting
   //---- reaction
   int AA, zA; //beam
   int Aa, za; //target
@@ -126,11 +126,11 @@ void Transfer(
   reaction.SetIncidentEnergyAngle(KEAmean, 0, 0);
   reaction.CalReactionConstant();
 
-  printf("***************************************************\n");
-  printf("*\e[31m        %27s             \e[0m*\n", reaction.GetReactionName().Data());
-  printf("***************************************************\n");
+  printf("*****************************************************************\n");
+  printf("*\e[1m\e[33m        %27s                            \e[0m*\n", reaction.GetReactionName().Data());
+  printf("*****************************************************************\n");
   printf("----- loading reaction setting from %s. \n", basicConfig.c_str());
-  printf("#################################### Beam \n");
+  printf("\e[32m#################################### Beam \e[0m\n");
   if( ExAList[0] != 0 ) printf("    Beam Ex: %7.4f MeV\n", ExAList[0]);
   printf("         KE: %7.4f +- %5.4f MeV/u, dp/p = %5.2f %% \n", KEAmean, KEAsigma, KEAsigma/KEAmean * 50.);
   printf("      theta: %7.4f +- %5.4f MeV/u \n", thetaMean, thetaSigma);
@@ -139,7 +139,7 @@ void Transfer(
   printf("     Max Ex: %7.4f MeV \n", reaction.GetMaxExB() );
 
   //======== Set HELIOS
-  printf("#################################### HELIOS configuration\n");   
+  printf("\e[32m#################################### HELIOS configuration\e[0m\n");   
   HELIOS helios;
   bool sethelios = helios.SetDetectorGeometry(heliosDetGeoFile);
   if( !sethelios){
@@ -176,7 +176,7 @@ void Transfer(
   double mb = reaction.GetMass_b();
   double pCM = reaction.GetMomentumbCM();
   double q = TMath::Sqrt(mb*mb + pCM*pCM);
-  double slope = 299.792458 * zb * helios.GetBField() / TMath::TwoPi() * beta / 1000.; // MeV/mm
+  double slope = 299.792458 * zb * abs(helios.GetBField()) / TMath::TwoPi() * beta / 1000.; // MeV/mm
   printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
   printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
@@ -191,7 +191,7 @@ void Transfer(
     fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetMass_b(), "mass_b");
     fprintf(keyParaOut, "%-15d  //%s\n", zb, "charge_b");
     fprintf(keyParaOut, "%-15.8f  //%s\n", reaction.GetReactionBeta(), "betaCM");
-    fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetCMTotalEnergy(), "Etot");
+    fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetCMTotalEnergy(), "Ecm");
     fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetMass_B(), "mass_B");
     fprintf(keyParaOut, "%-15.4f  //%s\n", slope/beta, "alpha=slope/beta");
 
@@ -199,7 +199,7 @@ void Transfer(
     fclose(keyParaOut);
   }
   //==== Target scattering, only energy loss
-  if(isTargetScattering) printf("#################################### Target Scattering\n");
+  if(isTargetScattering) printf("\e[32m#################################### Target Scattering\e[0m\n");
   TargetScattering msA;
   TargetScattering msB;
   TargetScattering msb;
@@ -218,11 +218,11 @@ void Transfer(
   //======= Decay of particle-B
   Decay decay;
   if(isDecay) {
-    printf("#################################### Decay\n");
+    printf("\e[32m#################################### Decay\e[0m\n");
     decay.SetMotherDaugther(AB, zB, AB-decayA,zB-decayZ); //decay
   }
   //======= loading excitation energy
-  printf("#################################### excitation energies\n");
+  printf("\e[32m#################################### excitation energies\e[0m\n");
   vector<double> ExKnown;
   vector<double> ExStrength;
   vector<double> y0; // intercept of e-z plot
@@ -237,9 +237,9 @@ void Transfer(
     while( file >> line){
       //printf("%d, %s \n", i,  line.c_str());
       if( line.substr(0,2) == "//" ) continue;
-      if( i == 0 ) isotopeName = line; 
-      if ( i >= 1 ){
-        if( i%2 == 1 ) {
+      if( line.substr(0,1) == "#" ) break;
+      if ( i >= 0 ){
+        if( i%2 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
         }else{
           ExStrength.push_back(atof(line.c_str()));
@@ -249,7 +249,6 @@ void Transfer(
     }
     file.close();
     printf("... done.\n");
-    printf("========== %s\n", isotopeName.c_str());
     int n = ExKnown.size();
     for(int i = 0; i < n ; i++){
       reaction.SetExB(ExKnown[i]);
@@ -290,7 +289,7 @@ void Transfer(
   }
   
   //======== Load DWBAroot for thetaCM distribution
-  printf("#################################### Load DWBA input : %s  \n", ptolemyRoot.Data());
+  printf("\e[32m#################################### Load DWBA input : %s  \e[0m\n", ptolemyRoot.Data());
   TF1 * dist = NULL;
   TFile * distFile = new TFile(ptolemyRoot, "read");
   TObjArray * distList = NULL;
@@ -308,26 +307,35 @@ void Transfer(
   }
 
   //====================== build tree
-  printf("#################################### building Tree in %s\n", saveFileName.Data());
+  printf("\e[32m#################################### building Tree in %s\e[0m\n", saveFileName.Data());
   TFile * saveFile = new TFile(saveFileName, "recreate");
   TTree * tree = new TTree("tree", "tree");
 
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
+  TMacro exList(excitationFile.c_str());
+  TMacro reactionData(filename.Data());
+  TString str;
+  str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
+  config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
+  exList.Write("ExList");
+  reactionData.Write("reactionData");
+  
+  if( distList != NULL ) distList->Write("DWBA", 1);
   
   TMacro hitMeaning;
-  TString str;
-  str = "hit ==  1 ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
-  str = "hit == -1 ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -2 ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -3 ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
-  str = "hit == -4 ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -5 ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -6 ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
-  str = "hit == -7 ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
-  str = "hit == -8 ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
+  str = "hit ==  1  ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
+  str = "hit == -1  ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -2  ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
+  str = "hit == -3  ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
+  str = "hit == -4  ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -5  ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
+  str = "hit == -6  ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
+  str = "hit == -7  ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
+  str = "hit == -8  ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
+  str = "hit == -11 ; both recoil particles stopped at target"; hitMeaning.AddLine(str.Data());
   hitMeaning.Write("hitMeaning");
 
   int hit; // the output of Helios.CalHit
@@ -349,7 +357,9 @@ void Transfer(
   tree->Branch("e", &e, "e/D");
   tree->Branch("x", &x, "x/D");
   tree->Branch("z", &z, "z/D");
+  double z0; tree->Branch("z0", &z0, "z0/D");
   tree->Branch("t", &t, "t/D");
+  double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
   
   double recoilT; // particle-B hit time
   tree->Branch("recoilT", &recoilT, "recoilT/D");
@@ -378,15 +388,19 @@ void Transfer(
   tree->Branch("thetaCMCal", &thetaCMCal, "thetaCMCal/D");
 
   double KEA, theta, phi;
-  tree->Branch("theta", &theta, "theta/D");
-  tree->Branch("phi", &phi, "phi/D");
-  tree->Branch("KEA", &KEA, "KEA/D");
+  tree->Branch("beamTheta", &theta, "beamTheta/D");
+  tree->Branch("beamPhi", &phi, "beamPhi/D");
+  tree->Branch("beamKEA", &KEA, "beamKEA/D");
   
   double TbLoss; // energy loss of particle-b from target scattering
   double KEAnew; //beam energy after target scattering
+  double depth; // reaction depth;
+  double Ecm;
   if( isTargetScattering ){
+    tree->Branch("depth", &depth, "depth/D");
     tree->Branch("TbLoss", &TbLoss, "TbLoss/D");
     tree->Branch("KEAnew", &KEAnew, "KEAnew/D");
+    tree->Branch("Ecm", &Ecm, "Ecm/D");
   }
 
   double decayTheta; // the change of thetaB due to decay
@@ -394,43 +408,43 @@ void Transfer(
     tree->Branch("decayTheta", &decayTheta, "decayTheta/D");
   }
   
-  double xHit, yHit, rhoHit; //x, y, rho positon of particle-b on PSD
-  tree->Branch("xHit", &xHit, "xHit/D");
-  tree->Branch("yHit", &yHit, "yHit/D");
-  tree->Branch("rhoHit", &rhoHit, "rhoHit/D");
+  double xArray, yArray, rhoArray; //x, y, rho positon of particle-b on PSD
+  tree->Branch("xArray", &xArray, "xArray/D");
+  tree->Branch("yArray", &yArray, "yArray/D");
+  tree->Branch("rhoArray", &rhoArray, "rhoArray/D");
   
-  double rxHit, ryHit, rhoBHit; // x, y, rho position of particle-B on recoil-detector
-  tree->Branch("rxHit", &rxHit, "rxHit/D");
-  tree->Branch("ryHit", &ryHit, "ryHit/D");
-  tree->Branch("rhoBHit", &rhoBHit, "rhoBHit/D");
+  double xRecoil, yRecoil, rhoRecoil; // x, y, rho position of particle-B on recoil-detector
+  tree->Branch("xRecoil", &xRecoil, "xRecoil/D");
+  tree->Branch("yRecoil", &yRecoil, "yRecoil/D");
+  tree->Branch("rhoRecoil", &rhoRecoil, "rhoRecoil/D");
   
   //in case need ELUM
-  double xHit1, yHit1, rhoHit1;
+  double xElum1, yElum1, rhoElum1;
   if( zElum1 != 0 ) {
-    tree->Branch("xHit1", &xHit1, "xHit1/D");
-    tree->Branch("yHit1", &yHit1, "yHit1/D");
-    tree->Branch("rhoHit1", &rhoHit1, "rhoHit1/D");
+    tree->Branch("xElum1", &xElum1, "xElum1/D");
+    tree->Branch("yElum1", &yElum1, "yElum1/D");
+    tree->Branch("rhoElum1", &rhoElum1, "rhoElum1/D");
   }
   
-  double xHit2, yHit2, rhoHit2;
+  double xElum2, yElum2, rhoElum2;
   if( zElum2 != 0 ) {
-    tree->Branch("xHit2", &xHit2, "xHit2/D");
-    tree->Branch("yHit2", &yHit2, "yHit2/D");
-    tree->Branch("rhoHit2", &rhoHit2, "rhoHit2/D");
+    tree->Branch("xElum2", &xElum2, "xElum2/D");
+    tree->Branch("yElum2", &yElum2, "yElum2/D");
+    tree->Branch("rhoElum2", &rhoElum2, "rhoElum2/D");
   }
   
   //in case need other recoil detector. 
-  double rxHit1, ryHit1, rhoBHit1;
+  double xRecoil1, yRecoil1, rhoRecoil1;
   if( zRecoil1 != 0 ){
-    tree->Branch("rxHit1", &rxHit1, "rxHit1/D");
-    tree->Branch("ryHit1", &ryHit1, "ryHit1/D");
-    tree->Branch("rhoBHit1", &rhoBHit1, "rhoBHit1/D");
+    tree->Branch("xRecoil1", &xRecoil1, "xRecoil1/D");
+    tree->Branch("yRecoil1", &yRecoil1, "yRecoil1/D");
+    tree->Branch("rhoRecoil1", &rhoRecoil1, "rhoRecoil1/D");
   }
-  double rxHit2, ryHit2, rhoBHit2;
+  double xRecoil2, yRecoil2, rhoRecoil2;
   if( zRecoil2 != 0 ){
-    tree->Branch("rxHit2", &rxHit2, "rxHit2/D");
-    tree->Branch("ryHit2", &ryHit2, "ryHit2/D");
-    tree->Branch("rhoBHit2", &rhoBHit2, "rhoBHit2/D");
+    tree->Branch("xRecoil2", &xRecoil2, "xRecoil2/D");
+    tree->Branch("yRecoil2", &yRecoil2, "yRecoil2/D");
+    tree->Branch("rhoRecoil2", &rhoRecoil2, "rhoRecoil2/D");
   }
   //======= function for e-z plot for ideal case
   printf("++++ generate functions\n");
@@ -529,7 +543,18 @@ void Transfer(
   clock.Reset();
   clock.Start("timer");
   shown = false;
-  printf("#################################### generating %d events \n", numEvent);
+  
+  //change the number of event into human easy-to-read form
+  int digitLen = TMath::Floor(TMath::Log10(numEvent));
+  TString numEventStr;
+  if( 3 <= digitLen && digitLen < 6 ){
+    numEventStr.Form("%5.1f kilo", numEvent/1000.);
+  }else if ( 6<= digitLen && digitLen < 9 ){
+    numEventStr.Form("%6.2f million", numEvent/1e6);    
+  }else if ( 9<= digitLen ){
+    numEventStr.Form("%6.2f billion", numEvent/1e9);    
+  }
+  printf("\e[32m#################################### generating %s events \e[0m\n", numEventStr.Data());
 
   //====================================================== calculate event
   int count = 0;
@@ -570,7 +595,7 @@ void Transfer(
       reaction.CalReactionConstant();
       TLorentzVector PA = reaction.GetPA();            
 
-      double depth = 0;
+      //depth = 0;
       if( isTargetScattering ){
         //==== Target scattering, only energy loss
         depth = targetThickness * gRandom->Rndm();
@@ -578,6 +603,8 @@ void Transfer(
         TLorentzVector PAnew = msA.Scattering(PA);
         KEAnew = msA.GetKE()/AA;
         reaction.SetIncidentEnergyAngle(KEAnew, theta, phi);
+        reaction.CalReactionConstant();
+        Ecm = reaction.GetCMTotalKE();
       }
 
       //==== Calculate thetaCM, phiCM
@@ -633,53 +660,57 @@ void Transfer(
     phiB = PB.Phi() * TMath::RadToDeg();
 
     //==== Helios
-    hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
-
+    
+    ///printf(" thetaCM : %f \n", thetaCM * TMath::RadToDeg());
+    
+    if( Tb > 0  || TB > 0 ){
+      hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
+      
     e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
     z = helios.GetZ() ; 
+    z0 = helios.GetZ0() ; 
     x = helios.GetX() + gRandom->Gaus(0, zSigma);
     t = helios.GetTime();
+    tB = helios.GetRecoilTime();
     loop = helios.GetLoop();
     detID = helios.GetDetID();
     detRowID = helios.GetDetRowID();
     dphi = helios.GetdPhi();
     rho = helios.GetRho();
-    rhoHit = helios.GetRhoHit();
+    rhoArray = helios.GetRhoHit();
 
-    rhoBHit = helios.GetRecoilRhoHit();
-    //rhoBHit = helios.GetR(134.8);
-    xHit = helios.GetXPos(z);
-    yHit = helios.GetYPos(z);
+    rhoRecoil = helios.GetRecoilRhoHit();
+    xArray = helios.GetXPos(z);
+    yArray = helios.GetYPos(z);
     z += gRandom->Gaus(0, zSigma);
 
     //ELUM
     if( zElum1 != 0 ){
-      xHit1 = helios.GetXPos(zElum1);
-      yHit1 = helios.GetYPos(zElum1);
-      rhoHit1 = helios.GetR(zElum1);
+      xElum1 = helios.GetXPos(zElum1);
+      yElum1 = helios.GetYPos(zElum1);
+      rhoElum1 = helios.GetR(zElum1);
     }
     if( zElum2 != 0 ){
-      xHit2 = helios.GetXPos(zElum2);
-      yHit2 = helios.GetYPos(zElum2);
-      rhoHit2 = helios.GetR(zElum2);
+      xElum2 = helios.GetXPos(zElum2);
+      yElum2 = helios.GetYPos(zElum2);
+      rhoElum2 = helios.GetR(zElum2);
     }
 
     //Recoil
     recoilT = helios.GetRecoilTime();
-    rxHit = helios.GetRecoilXHit();
-    ryHit = helios.GetRecoilYHit();
+    xRecoil = helios.GetRecoilXHit();
+    yRecoil = helios.GetRecoilYHit();
 
-    //TODO put this into detectorGeo.txt
     //other recoil detectors
     if ( zRecoil1 != 0 ){
-      rxHit1 = helios.GetRecoilXPos(zRecoil1);
-      ryHit1 = helios.GetRecoilYPos(zRecoil1);
-      rhoBHit1 = helios.GetRecoilR(zRecoil1);
+      xRecoil1 = helios.GetRecoilXPos(zRecoil1);
+      yRecoil1 = helios.GetRecoilYPos(zRecoil1);
+      rhoRecoil1 = helios.GetRecoilR(zRecoil1);
     }
     if ( zRecoil2 != 0 ){
-      rxHit2 = helios.GetRecoilXPos(zRecoil2);
-      ryHit2 = helios.GetRecoilYPos(zRecoil2);
-      rhoBHit2 = helios.GetRecoilR(zRecoil2);
+      xRecoil2 = helios.GetRecoilXPos(zRecoil2);
+      yRecoil2 = helios.GetRecoilYPos(zRecoil2);
+      rhoRecoil2 = helios.GetRecoilR(zRecoil2);
     }
     
     reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());
@@ -688,6 +719,10 @@ void Transfer(
 
     //change thetaCM into deg
     thetaCM = thetaCM * TMath::RadToDeg();
+    
+    }else{
+      hit = -11;
+    }
 
     if( hit == 1)  count ++;
 

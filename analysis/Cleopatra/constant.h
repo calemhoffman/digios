@@ -29,8 +29,9 @@ const double rad2deg = 180/pi ;
 
 //======================================================================
 const double amu  = 931.494; // MeV/c^2
-const double hbarc = 197.272; // MeV fm;
+const double hbarc = 197.326979; // MeV fm;
 const double c = 299.792458; // mm/ns; 
+const double ee = 1.439964454; // MeV.fm
 
 //======================================================================
 double kg2MeV(double m){
@@ -65,6 +66,6 @@ double ev2nm(double eV){
 //======================================================================
 const double mp = kg2MeV(mp_SI);
 const double mn = kg2MeV(mn_SI);
-
+const double hbar = 197.326979;
 
 #endif

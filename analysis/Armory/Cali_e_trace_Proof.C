@@ -78,6 +78,7 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,1) == "#" )  break;
          if( i == 0 ) Bfield   = atof(x.c_str());
          if( i == 3 ) a        = atof(x.c_str());         
          if( i == 5 ) length   = atof(x.c_str());
@@ -92,9 +93,11 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
       iDet = pos.size();
       file.close();
       printf("... done.\n");
-      
+     
+      vector<double> posTemp = pos;
       for(int id = 0; id < iDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet -1 - id];
       }
       
       for(int i = 0; i < iDet ; i++){
