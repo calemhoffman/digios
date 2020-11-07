@@ -176,7 +176,7 @@ void Transfer(
   double mb = reaction.GetMass_b();
   double pCM = reaction.GetMomentumbCM();
   double q = TMath::Sqrt(mb*mb + pCM*pCM);
-  double slope = 299.792458 * zb * helios.GetBField() / TMath::TwoPi() * beta / 1000.; // MeV/mm
+  double slope = 299.792458 * zb * abs(helios.GetBField()) / TMath::TwoPi() * beta / 1000.; // MeV/mm
   printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
   printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
@@ -237,9 +237,9 @@ void Transfer(
     while( file >> line){
       //printf("%d, %s \n", i,  line.c_str());
       if( line.substr(0,2) == "//" ) continue;
-      if( i == 0 ) isotopeName = line; 
-      if ( i >= 1 ){
-        if( i%2 == 1 ) {
+      if( line.substr(0,1) == "#" ) break;
+      if ( i >= 0 ){
+        if( i%2 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
         }else{
           ExStrength.push_back(atof(line.c_str()));
@@ -249,7 +249,6 @@ void Transfer(
     }
     file.close();
     printf("... done.\n");
-    printf("========== %s\n", isotopeName.c_str());
     int n = ExKnown.size();
     for(int i = 0; i < n ; i++){
       reaction.SetExB(ExKnown[i]);
@@ -315,12 +314,14 @@ void Transfer(
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
   TMacro exList(excitationFile.c_str());
+  TMacro reactionData(filename.Data());
   TString str;
   str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
   config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
   exList.Write("ExList");
+  reactionData.Write("reactionData");
   
   if( distList != NULL ) distList->Write("DWBA", 1);
   
@@ -659,6 +660,9 @@ void Transfer(
     phiB = PB.Phi() * TMath::RadToDeg();
 
     //==== Helios
+    
+    ///printf(" thetaCM : %f \n", thetaCM * TMath::RadToDeg());
+    
     if( Tb > 0  || TB > 0 ){
       hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
       
