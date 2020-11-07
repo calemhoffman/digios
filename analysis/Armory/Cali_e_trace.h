@@ -42,8 +42,8 @@ public :
    ULong64_t       ring_t[100];
    Float_t         rdt[8];
    ULong64_t       rdt_t[8];
-   Float_t         tac[100];
-   ULong64_t       tac_t[100];
+   Float_t         tac[10];
+   ULong64_t       tac_t[10];
    Float_t         elum[32];
    ULong64_t       elum_t[32];
    Float_t         ezero[10];
@@ -330,14 +330,16 @@ void Cali_e_trace::Init(TTree *tree)
       name.Remove(0, found + 1 ); // this should give "XXX_run0XX.root"
       found = name.Last('.');
       name.Remove(found); // this should give "XXX_run0XX"
-      if( i == 0 ) {
-         saveFileName = name;
-         int kk = saveFileName.Sizeof();
-         saveFileName.Remove(kk-4); // this should give "XXX_run"
-         saveFileName = expName + "_" + saveFileName;
-      }
       found = name.Last('_');
       int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
+
+      if( i == 0 ) {
+         ///saveFileName = name;
+         ///int kk = saveFileName.Sizeof();
+         ///saveFileName.Remove(kk-4); // this should give "XXX_run" 
+         ///saveFileName = expName + "_" + saveFileName;
+         saveFileName = expName + "_run";
+      }
 
       if( runNum == oldRunNum + 1 ){
          int kk = saveFileName.Sizeof();
@@ -403,8 +405,8 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
    if( isTACExist ){
-      newTree->Branch("tac", tac, "tac[100]/F");
-      newTree->Branch("tac_t", tac_t, "tac_t[100]/l");
+      newTree->Branch("tac", tac, "tac[10]/F");
+      newTree->Branch("tac_t", tac_t, "tac_t[10]/l");
    }
    
    newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
