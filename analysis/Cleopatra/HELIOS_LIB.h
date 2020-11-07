@@ -91,10 +91,10 @@ public:
    int GetAtomicNumber_b(){return Ab;}
    int GetAtomicNumber_B(){return AB;}
    
-   double GetMass_A(){return mA;}
+   double GetMass_A(){return mA + ExA;}
    double GetMass_a(){return ma;}
    double GetMass_b(){return mb;}
-   double GetMass_B(){return mB;}
+   double GetMass_B(){return mB + ExB;}
    
    int GetCharge_A(){return zA;}
    int GetCharge_a(){return za;}
@@ -264,7 +264,7 @@ int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a){
    double mass = mb;
    double massB = mB;
    double y = e + mass;
-   double slope = 299.792458 * zb * Bfield / TMath::TwoPi() * beta / 1000.; // MeV/mm;
+   double slope = 299.792458 * zb * abs(Bfield) / TMath::TwoPi() * beta / 1000.; // MeV/mm;
    double alpha = slope/beta;
    double G =  alpha * gamma * beta * a ;
    double Z = alpha * gamma * beta * z;
@@ -340,7 +340,7 @@ public:
    bool SetDetectorGeometry(string filename);
    
    void OverrideMagneticField(double BField){ this->Bfield = BField;}
-   void OverrideMagneticFieldDirection(double BfieldTheta){ this->BfieldTheta = BfieldTheta * TMath::DegToRad();} // TODO move to detectorGeo.txt
+   void OverrideMagneticFieldDirection(double BfieldThetaInDeg){ this->BfieldTheta = BfieldThetaInDeg;}
    void OverrideFirstPos(double firstPos){
       overrideFirstPos = true;
       printf("------ Overriding FirstPosition to : %8.2f mm \n", firstPos);
@@ -367,20 +367,28 @@ public:
    int GetLoop(){return loop;}
    double GetVt(){return vt0;}
    double GetVp(){return vp0;}
-   // anti-clockwise rotation for positive ion in B-field to z-axis
-   double GetXPos(double ZPos){
-      int sign = 1;
-      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
-      return rho * (TMath::Sin(sign*TMath::Tan(theta) * ZPos / rho + phi) - TMath::Sin(phi)) ;
+   
+   // clockwise rotation for B-field along the z-axis, sign = 1.
+   double XPos(double Zpos, double theta, double phi, double rho, int sign){
+     return rho * ( TMath::Sin( TMath::Tan(theta) * Zpos / rho - sign * phi ) + sign * TMath::Sin(phi) );
    }
-   double GetYPos(double ZPos){
-      int sign = 1;
-      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
-      return rho * (TMath::Cos(phi) - TMath::Cos(sign*TMath::Tan(theta) * ZPos / rho + phi) );
+   double YPos(double Zpos, double theta, double phi, double rho, int sign){
+     return rho * sign * (TMath::Cos( TMath::Tan(theta) * Zpos / rho - sign * phi ) - TMath::Cos(phi));
+   }
+   double RPos(double Zpos, double theta, double phi, double rho){
+     return rho * TMath::Sqrt(2 - 2 * TMath::Cos( TMath::Tan(theta) * Zpos / rho));
    }
    
+   
+   
+   double GetXPos(double ZPos){
+      return XPos( ZPos, theta, phi, rho, sign);
+   }
+   double GetYPos(double ZPos){
+      return YPos( ZPos, theta, phi, rho, sign);
+   }
    double GetR(double ZPos){
-      return rho * TMath::Sqrt(2 - 2* TMath::Cos( TMath::Tan(theta) * ZPos / rho));
+      return RPos( ZPos, theta, phi, rho);
    }
    
    double GetRecoilEnergy(){return eB;}
@@ -390,19 +398,14 @@ public:
    double GetRecoilRhoHit(){return rhoBHit;}
    double GetRecoilVt(){return vt0B;}
    double GetRecoilVp(){return vp0B;}
-   // anti-clockwise rotation for positive ion in B-field to z-axis
    double GetRecoilXPos(double ZPos){
-      int sign = 1;
-      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
-      return rhoB * (TMath::Sin(sign*TMath::Tan(thetaB) * ZPos / rhoB + phiB) - TMath::Sin(phiB));
+      return XPos( ZPos, thetaB, phiB, rhoB, sign);
    }   
    double GetRecoilYPos(double ZPos){
-      int sign = 1;
-      if( BfieldTheta > TMath::PiOver2() ) sign = -1;
-      return rhoB * (TMath::Cos(phiB) - TMath::Cos(sign*TMath::Tan(thetaB) * ZPos / rhoB + phiB) );
+      return YPos( ZPos, thetaB, phiB, rhoB, sign);
    }
    double GetRecoilR(double ZPos){
-      return rhoB * TMath::Sqrt(2 - 2* TMath::Cos( TMath::Tan(thetaB) * ZPos / rhoB));
+      return RPos( ZPos, thetaB, phiB, rhoB);
    }
    
    double GetRecoilXHit(){return rxHit;}
@@ -441,6 +444,7 @@ private:
    
    //detetcor Geometry
    double Bfield; // T
+   int sign ; // sign of B-field
    double BfieldTheta; // rad, 0 = z-axis, pi/2 = y axis, pi = -z axis
    double bore; // bore , mm
    double perpDist; // distance from axis
@@ -496,6 +500,7 @@ HELIOS::HELIOS(){
 
    Bfield = 0;
    BfieldTheta = 0;
+   sign = 1;
    bore = 1000;
    perpDist = 10;
    width = 10;
@@ -539,8 +544,10 @@ bool HELIOS::SetDetectorGeometry(string filename){
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,1) == "#" )  break;
          
          if( i == 0 )                            Bfield = atof(x.c_str());
+         sign = Bfield > 0 ? 1 : -1;
          if( i == 1 )                       BfieldTheta = atof(x.c_str());
          if( i == 2 )                              bore = atof(x.c_str());
          if( i == 3 && !overrideDetDistance )  perpDist = atof(x.c_str());
@@ -582,7 +589,8 @@ bool HELIOS::SetDetectorGeometry(string filename){
       }
       
       printf("=====================================================\n");
-      printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta * TMath::RadToDeg());
+      printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta);
+      BfieldTheta = BfieldTheta * TMath::DegToRad();
       printf("     Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
       printf("        Blocker Position: %8.2f mm \n", firstPos > 0 ? firstPos - blocker : firstPos + blocker );
       printf("          First Position: %8.2f mm \n", firstPos);
@@ -639,14 +647,14 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    //PB.RotateX(BfieldTheta);
 
    //====================== X-Y plane, light particle
-   rho = Pb.Pt()  / Bfield / Zb / c * 1000; //mm
+   rho = Pb.Pt() / abs(Bfield) / Zb / c * 1000; //mm
    theta = Pb.Theta();
    phi = Pb.Phi();
    
    //======================  recoil detector
    thetaB = PB.Theta();
    phiB = PB.Phi();
-   rhoB = PB.Pt() / Bfield / ZB / c * 1000; //mm
+   rhoB = PB.Pt() / abs(Bfield) / ZB / c * 1000; //mm
    vt0B = PB.Beta() * TMath::Sin(thetaB) * c ; // mm / nano-second  
    vp0B = PB.Beta() * TMath::Cos(thetaB) * c ; // mm / nano-second  
    //tB   = TMath::TwoPi() * rhoB / vt0B; // nano-second
@@ -702,7 +710,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       // loop until reach the detector position covrage.    
       do{
          loop += 1;
-         int n = 2*loop -1;
+         int n = 2*loop + sign;
          
          if( blocker != 0.0 && abs(firstPos/blocker) < loop ) return -6;
          
@@ -725,8 +733,11 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             isHitFromOutside = false;
             
             //========== calculate zHit by solving the cycltron orbit and the detector planes. 
-            double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet));                            
-            zHit = rho / TMath::Tan(theta) * ( phiDet - phi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(phi-phiDet)) + TMath::Pi() * n );
+            double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet)); 
+            double dphi = phi - phiDet;   
+            double z0 = TMath::TwoPi() * rho / TMath::Tan(theta);   // the cycle
+            
+            zHit = z0 / TMath::TwoPi() * ( sign * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho - sign * TMath::Sin(dphi)) + TMath::Pi() * n );
             e = Pb.E() - Pb.M();
             z = zHit;
             
@@ -734,10 +745,16 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double xHit = GetXPos(zHit) + xOff;  // resotre the beam to be at the center
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist); // is it hit on the detector
+            
+            ///if( zHit > z0 * 10 ) continue;
+            ///printf("%7.2f, %7.2f | n : %d, row : %2d, phiD : %4.0f, rho : %9.4f, z0 : %9.4f, zHit : %9.4f, xHit : %9.4f, yHit : %9.4f \n",
+            /// theta*TMath::RadToDeg(), phi*TMath::RadToDeg(), n, j, phiDet*TMath::RadToDeg(), rho,  z0, zHit, xHit, yHit);
+            
+            
             if( sHit > width /2.) continue; // if the sHit is large, it does not hit on detector, go to next mDet 
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
-            double dir = TMath::Cos( TMath::Tan(theta) * zHit/ rho + phi - phiDet);
+            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi() - sign * dphi);
             if( dir < 0) {// when dir == 0, no solution
               isHitFromOutside = true;
             }else{
