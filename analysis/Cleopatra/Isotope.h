@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "constant.h" // amu
 #include <stdlib.h>  //atoi
+#include <algorithm>
 using namespace std;
 
 string dataPath="../Cleopatra/mass16.txt";
@@ -38,12 +39,17 @@ public:
    
    Isotope(int a, int z);
    Isotope(string name);
-   double CalSp(int na, int nz);
+   double CalSp(int np, int nz);
+   double CalBeta(double T){
+     double Etot = Mass + T;
+     double gamma = 1 + T/Mass;
+     double beta = sqrt(1 - 1 / gamma / gamma ) ;
+     return beta;
+   }
    
 private:
    void FindMassByAZ(int a, int z); // give mass, massError, BEA, Name, Symbol;
    void FindMassByName(string name); // give Z, mass, massError, BEA;
-   
 };
 
 Isotope::Isotope(int a, int z){
@@ -91,11 +97,14 @@ void Isotope::FindMassByAZ(int A, int Z){
             this->BEA       = atof((line.substr(54,11)).c_str());
       		this->Mass      = list_Z*mp + (list_A-list_Z)*mn - this->BEA/1000*list_A;
             this->MassError = atof((line.substr(65,7)).c_str());
-            this->Symbol    = line.substr(20,2);
+            string str = line.substr(20,2);
+            str.erase(remove(str.begin(), str.end(), ' '), str.end());
+            this->Symbol    = str;
+            
             ostringstream ss;
             ss << A << this->Symbol;
             this->Name      = ss.str();
-     		flag = 1;
+     		   flag = 1;
       	}else if ( list_A > A) {
           this->BEA  = -404;
           this->Mass = -404;
@@ -107,6 +116,12 @@ void Isotope::FindMassByAZ(int A, int Z){
 
       }
     }
+    
+    if( this->Name == "1H" ) this->Name = "p";
+    if( this->Name == "2H" ) this->Name = "d";
+    if( this->Name == "3H" ) this->Name = "t";
+    if( this->Name == "4He" ) this->Name = "a";
+    
     myfile.close();
   }else {
     printf("Unable to open %s\n", dataPath.c_str());
@@ -197,10 +212,15 @@ void Isotope::FindMassByName(string name){
             this->BEA       = atof((line.substr(54,11)).c_str());
       		this->Mass      = this->Z*mp + (list_A-this->Z)*mn - this->BEA/1000*list_A;
             this->MassError = atof((line.substr(65,7)).c_str());
+            
+            string str = line.substr(20,2);
+            str.erase(remove(str.begin(), str.end(), ' '), str.end());
+            this->Symbol    = str;
+            
             ostringstream ss;
             ss << this->A << this->Symbol;
             this->Name      = ss.str();
-     		flag = 1;
+            flag = 1;
           }else if ( list_A > this->A) {
             this->BEA  = -404;
             this->Mass = -404;
@@ -222,9 +242,9 @@ double Isotope::CalSp(int Np, int Nn){
   Isotope nucleusD(A - Np - Nn, Z - Np);  
 
   if( nucleusD.Mass != -404){
-	return nucleusD.Mass + Nn*mn + Np*mp - this->Mass;
+    return nucleusD.Mass + Nn*mn + Np*mp - this->Mass;
   }else{
-	return -404;
+    return -404;
   }
 }
 

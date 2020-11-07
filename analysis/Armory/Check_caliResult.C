@@ -36,17 +36,21 @@ void Check_caliResult(){
      TString name;
      name.Form("gDist%d", i);
      gDist = (TGraph2D*) caliResult->FindObjectAny(name);
-     
-     double zMax = gDist->GetZmax();
-     double zMin = gDist->GetZmin();
-      
-     gDist->SetMaximum(zMax);
-     gDist->SetMinimum(zMin);
-   
-     gDist->Draw("tri2");
+     if( gDist != NULL ){
+          double zMax = gDist->GetZmax();
+          double zMin = gDist->GetZmin();
+           
+          gDist->SetMaximum(zMax);
+          gDist->SetMinimum(zMin);
+        
+          gDist->Draw("tri2");
 
-     cCheck1->cd(i+1)->SetTheta(90);
-     cCheck1->cd(i+1)->SetPhi(0);
+          cCheck1->cd(i+1)->SetTheta(90);
+          cCheck1->cd(i+1)->SetPhi(0);
+          cCheck1->Update();
+     }
+     
      cCheck1->Update();
+     gSystem->ProcessEvents();
    }
 }

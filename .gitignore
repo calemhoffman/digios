@@ -4,7 +4,8 @@ root_data
 merged_data
 analysis/GEBSort/GEBMerge
 analysis/GEBSort/GEBSort_nogeb
-
+analysis/GEBSort/GEBSort_nogeb_trace
+analysis/working/slurm.sh
 *.Ex.txt
 *.Xsec.txt
 *.in
@@ -22,6 +23,8 @@ core.*
 .DS_Store
 tempDB.txt
 elog.txt
+elog_context.txt
+grafanaElog.jpg
 run_Summary.dat
 MakeDataLinks
 reaction.dat
@@ -29,6 +32,7 @@ reaction.dat
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
 analysis/Cleopatra/ExtractXSec
+analysis/Cleopatra/ExtractXSecFromText
 analysis/Cleopatra/FindThetaCM
 analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray
@@ -36,5 +40,10 @@ analysis/Cleopatra/Transfer
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
 analysis/Woods-Saxon/WSSearch
+analysis/Woods-Saxon/WSSearch2
 analysis/Woods-Saxon/WSMakeTree
+analysis/Woods-Saxon/WSRange
+analysis/Woods-Saxon/range.txt
+analysis/Woods-Saxon/test
+
 slurm-*.out

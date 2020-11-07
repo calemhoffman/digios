@@ -19,6 +19,7 @@
 #include <fstream>
 #include <TObjArray.h>
 #include <TCutG.h>
+#include "TMacro.h"
 #include "TClonesArray.h"
 
 // Headers needed by this particular selector
@@ -26,7 +27,7 @@
 
 class Cali_e_trace : public TSelector {
 public :
-   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+   TChain          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
    Int_t           runID;
@@ -41,8 +42,8 @@ public :
    ULong64_t       ring_t[100];
    Float_t         rdt[8];
    ULong64_t       rdt_t[8];
-   Float_t         tac[100];
-   ULong64_t       tac_t[100];
+   Float_t         tac[10];
+   ULong64_t       tac_t[10];
    Float_t         elum[32];
    ULong64_t       elum_t[32];
    Float_t         ezero[10];
@@ -124,7 +125,7 @@ public :
    ULong64_t eC_t[30];
    Float_t x[30]; // unadjusted position, range (-1,1)
    Float_t z[30]; 
-   int det;    //TODO, when multiHit, which is detID?
+   int det;    //
    int hitID[30]; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
    
@@ -135,13 +136,8 @@ public :
    Float_t rdtC[8];
    ULong64_t rdtC_t[8];
    int rdtID[8]; // rdt hit ID
-   int rdtMultiHit;
-   
-   int arrayRDT; // det(0-5)  | 0 = rdt(3,7), 1 = rdt(0,4), 2 = rdt(1,5), 3 = rdt(2,6) 
-                 // det(6-11) | 3 = rdt(3,7), 0 = rdt(0,4), 1 = rdt(1,5), 2 = rdt(2,6) 
-                 // det(12-17)| 2 = rdt(3,7), 3 = rdt(0,4), 0 = rdt(1,5), 1 = rdt(2,6) 
-                 // det(18-23)| 1 = rdt(3,7), 2 = rdt(0,4), 3 = rdt(1,5), 0 = rdt(2,6) 
-   
+   int rdtdEMultiHit;
+
    Int_t   coin_t;
    Float_t tcoin_t;
    Float_t coinTimeUC; 
@@ -159,7 +155,7 @@ public :
    //clock   
    TBenchmark clock;
    Bool_t shown;
-   Int_t count;
+   Int_t validEventCount;
    
    //========correction parameters
    int numDet;
@@ -217,7 +213,7 @@ void Cali_e_trace::Init(TTree *tree)
    printf( "=========================================================================== \n");
 
    
-   fChain = tree;
+   fChain = (TChain *)tree;
    //printf("========== number of tree loaded : %d \n", fChain->GetNTree());
    fChain->SetMakeClass(1);
 
@@ -299,29 +295,85 @@ void Cali_e_trace::Init(TTree *tree)
       fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
    }
    
+   //================================ load expName
+   string expNameFile = "../../expName.sh";
+   printf("======================= loading expName files : %s.", expNameFile.c_str());
+   ifstream file;
+   file.open(expNameFile.c_str());
+   TString expName = "";
+   int i = 0;
+   if( file.is_open()){
+      string x;
+      while( file >> x){
+         if( x.substr(0,1) == "#" )  continue;
+         if( i == 1  )  expName = x;
+         i = i + 1;
+      }
+      printf("... done.\n");
+      
+      expName.Remove(0,8);
+      printf("expName = %s \n", expName.Data());
+      
+   }else{
+      printf("... fail.\n");
+   }
+   
+   file.close();
 
-   //=================
-   saveFileName = fChain->GetDirectory()->GetName();
-   //remove any folder path to get the name;
-   int found;
-   do{
-      found = saveFileName.First("/");
-      saveFileName.Remove(0,found+1);
-   }while( found >= 0 );
-   saveFileName = "A_" + saveFileName; 
+   //================= Formation of file name
+   int numFile = fChain->GetListOfFiles()->GetLast() + 1;   
+   int oldRunNum = -100;
+   bool contFlag = false; // is runNumber continue;
+   for( int i = 0; i < numFile ; i++){
+      TString name = fChain->GetListOfFiles()->At(i)->GetTitle();
+      int found = name.Last('/');
+      name.Remove(0, found + 1 ); // this should give "XXX_run0XX.root"
+      found = name.Last('.');
+      name.Remove(found); // this should give "XXX_run0XX"
+      found = name.Last('_');
+      int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
+
+      if( i == 0 ) {
+         ///saveFileName = name;
+         ///int kk = saveFileName.Sizeof();
+         ///saveFileName.Remove(kk-4); // this should give "XXX_run" 
+         ///saveFileName = expName + "_" + saveFileName;
+         saveFileName = expName + "_run";
+      }
+
+      if( runNum == oldRunNum + 1 ){
+         int kk = saveFileName.Sizeof();
+         if( contFlag == false ){
+            saveFileName.Remove(kk-2); //remove the "-"
+            saveFileName += "-";
+         }else{
+            saveFileName.Remove(kk-5); //remove the runNum and "-"
+         }
+         contFlag = true;
+      }
+      if( runNum > oldRunNum + 1) contFlag = false;
+      
+      saveFileName += Form("%03d_", runNum);
+      oldRunNum = runNum;
+   }
+   int kk = saveFileName.Sizeof();
+   saveFileName.Remove(kk-2); // remove the last "-"
+   saveFileName += ".root";
+   
+   //printf("Output File  %s \n", saveFileName.Data());
    
    saveFile = new TFile( saveFileName,"recreate");
    newTree =  new TTree("tree","tree");
    
-   eventID = 0;
+   eventID = -1;
    run = 0;
    
    newTree->Branch("eventID",&eventID,"eventID/I"); 
    if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
    
    newTree->Branch("e" ,   eC, "e[30]/F");
-   //newTree->Branch("xf",  xfC, "xf[30]/F");
-   //newTree->Branch("xn",  xnC, "xn[30]/F");
+   newTree->Branch("xf",  xfC, "xf[30]/F");
+   newTree->Branch("xn",  xnC, "xn[30]/F");
    newTree->Branch("ring",  ring, "xn[30]/F");
    newTree->Branch("x" ,    x, "x[30]/F");
    newTree->Branch("z" ,    z, "z[30]/F");
@@ -338,48 +390,50 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("rdt", rdtC, "rdtC[8]/F");
    newTree->Branch("rdt_t", rdtC_t, "rdtC_t[8]/l");
    newTree->Branch("rdtID", rdtID, "rdtID[8]/I");
-   newTree->Branch("rdtMultiHit", &rdtMultiHit, "rdtMultiHit/I");
-   
-   newTree->Branch("arrayRDT", &arrayRDT, "arrayRDT/I");
+   newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
    
    if( isEBISExist ) newTree->Branch("ebis_t", &EBIS_t, "EBIS_t/l");
+   
    if( isELUMExist ) {
      newTree->Branch("elum", elum, "elum[32]/F");
      newTree->Branch("elum_t", elum_t, "elum_t[32]/l");
    }
-   if( isEZEROExist ) newTree->Branch("ezero", ezero, "ezero[10]/F");
    
-   newTree->Branch("coin_t", &coin_t, "coin_t/I");
+   if( isEZEROExist ) {
+      newTree->Branch("ezero", ezero, "ezero[10]/F");
+      newTree->Branch("ezero_t", ezero_t, "ezero_t[10]/l");
+   }
+   
+   if( isTACExist ){
+      newTree->Branch("tac", tac, "tac[10]/F");
+      newTree->Branch("tac_t", tac_t, "tac_t[10]/l");
+   }
+   
+   newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
    
    if( isTraceDataExist ){
       newTree->Branch("tcoin_t", &tcoin_t, "tcoin_t/F");
-      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUC/F");
-      newTree->Branch("coinTime", &coinTime, "coinTime/F");
-       
-//      newTree->Branch("te",     &teS,     "teS/F");
-//      newTree->Branch("te_t",   &te_tS,   "te_tS/F");
-//      newTree->Branch("te_r",   &te_rS,   "te_rS/F");
-//      newTree->Branch("trdt",   &trdtS,   "trdtS/F");
-//      newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
-//      newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
-
-         newTree->Branch("te",             te,  "Trace_Energy[30]/F");
-         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
-         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
-         newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
-         newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
-         newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUnCalibrated_ns/F");
+      newTree->Branch("coinTime", &coinTime, "coinTime_ns/F");
+   
+      newTree->Branch("te",             te,  "Trace_Energy[30]/F");
+      newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
+      newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
+      newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
+      newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
+      newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
    }
 
    printf("Is EBIS  exist : %d\n", isEBISExist);
    printf("Is ELUM  exist : %d\n", isELUMExist);
    printf("Is EZero exist : %d\n", isEZEROExist);
+   printf("Is TAC   exist : %d\n", isTACExist);
    printf("Is Trace exist : %d\n", isTraceDataExist);
    //=== clock
    clock.Reset();
    clock.Start("timer");
    shown = 0;
-   count = 0;
+   validEventCount = 0;
    
    //===================================================== loading parameter
    
@@ -387,15 +441,15 @@ void Cali_e_trace::Init(TTree *tree)
    printf("======================= loading parameters files .... \n");
    string detGeoFileName = "detectorGeo.txt";
    printf("loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
    file.open(detGeoFileName.c_str());
-   int i = 0;
    if( file.is_open() ){
+      i = 0;
       string x;
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 0  )          Bfield = atof(x.c_str());
+         if( x.substr(0,1) == "#" )  break;
+         if( i == 0  )          Bfield = abs(atof(x.c_str()));
          if( i == 3  )        perpDist = atof(x.c_str());
          if( i == 5  )          length = atof(x.c_str());
          if( i == 14 )        firstPos = atof(x.c_str());
@@ -410,8 +464,10 @@ void Cali_e_trace::Init(TTree *tree)
       file.close();
       printf("... done.\n");
       
+      vector<double> posTemp = pos;
       for(int id = 0; id < iDet; id++){
-         pos[id] = firstPos + pos[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet-1-id];
       }
       
       printf(" Bfield       : %6.2f T\n", Bfield);
@@ -428,6 +484,9 @@ void Cali_e_trace::Init(TTree *tree)
          }
       }
       printf("==================================\n");
+
+      TMacro detGeo("detectorGeo.txt");
+      detGeo.Write("detGeo");
       
    }else{
        printf("... fail\n");
@@ -460,6 +519,8 @@ void Cali_e_trace::Init(TTree *tree)
       }
       
       printf("................... done.\n");
+      TMacro cali_xf_xn("correction_xf_xn.dat");
+      cali_xf_xn.Write("correction_xf_xn");
    }else{
       printf("................... fail.\n");
       
@@ -482,6 +543,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("................. done.\n");
+      TMacro cali_xfxn_e("correction_xfxn_e.dat");
+      cali_xfxn_e.Write("correction_xfxn_e");
    }else{
       printf("................. fail.\n");
       for(int i = 0; i < numDet; i++){
@@ -505,7 +568,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("....................... done.\n");
-      
+      TMacro cali_e("correction_e.dat");
+      cali_e.Write("correction_e");      
    }else{
       printf("....................... fail.\n");
       for( int i = 0; i < numDet ; i++){
@@ -517,7 +581,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
    
    
-   //========================================= e correction
+   //========================================= x-scale correction
    printf("loading x correction.");
    file.open("correction_scaleX.dat");
    if( file.is_open() ){
@@ -529,7 +593,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("....................... done.\n");
-      
+      TMacro cali_scaleX("correction_scaleX.dat");
+      cali_scaleX.Write("correction_scaleX");
    }else{
       printf("....................... fail.\n");
       for( int i = 0; i < numDet ; i++){
@@ -552,7 +617,8 @@ void Cali_e_trace::Init(TTree *tree)
          i = i + 1;
       }
       printf("..................... done.\n");
-      
+      TMacro cali_rdt("correction_rdt.dat");
+      cali_rdt.Write("correction_rdt");
    }else{
       printf("..................... fail.\n");
       for( int i = 0; i < numDet ; i++){
@@ -570,9 +636,10 @@ void Cali_e_trace::Init(TTree *tree)
       fList = new TObjArray();
       
       if( file.is_open() ){
-         double d, a0, a1, a2, a3, a4, a5, a6, a7, a8;
+         int d;
+         double a0, a1, a2, a3, a4, a5, a6, a7, a8;
          int i = 0;
-         while( file >> d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 >> a7 >> a8){
+         while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 >> a7 >> a8){
             if( i >= numDet) break;
             cTCorr[i][0] = a0;
             cTCorr[i][1] = a1;
@@ -582,18 +649,18 @@ void Cali_e_trace::Init(TTree *tree)
             cTCorr[i][5] = a5;
             cTCorr[i][6] = a6;
             cTCorr[i][7] = a7;
-            cTCorr[i][8] = a8;
-            printf("\n%2d, a0: %f, a1: %f .... a7: %f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
+            cTCorr[i][8] = a8; // this is the offset find by fitting the 1-D plot
+            //printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
          printf(".... done.\n");
+         TMacro cali_coinTime("correction_coinTime.dat");
+         cali_coinTime.Write("correction_coinTime");
          
       }else{
          printf(".... fail.\n");
          for( int i = 0; i < numDet; i++){
-            for( int j = 0 ; j < 9; j++){
-               cTCorr[i][j] = 0.;
-            } 
+            for( int j = 0 ; j < 9; j++) cTCorr[i][j] = 0.;
          }
       }
 
@@ -606,14 +673,13 @@ void Cali_e_trace::Init(TTree *tree)
             f7[i]->SetParameter(j, cTCorr[i][j]);
          }
 
-	 if(file.is_open()) fList->Add(f7[i]);
+         if(file.is_open()) fList->Add(f7[i]);
       }
 
       if( file.is_open()){
-	 fList->Write("fList", TObject::kSingleKey);
+         fList->Write("fList", TObject::kSingleKey);
       }
 
-      
       file.close();
    }
    
@@ -649,8 +715,9 @@ void Cali_e_trace::Init(TTree *tree)
       printf("alpha    : %f MeV/mm \n", alpha);
       printf("perpDist : %f mm \n", perpDist);
       printf("G        : %f MeV \n", G);
-
-
+      
+      TMacro reactionData("reaction.dat");
+      reactionData.Write("reactionPara");
    }else{
       printf("................. fail.\n");
       isReaction = false;
@@ -658,7 +725,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //====================================== load RDT cut
-   TFile * fileCut = new TFile("rdtCuts.root");   
+   TFile * fileCut = new TFile(""); //"rdtCuts.root");   
    TObjArray * cutList = NULL;
    isRDTCutExist = false;
    if( fileCut->IsOpen() ){
@@ -674,6 +741,8 @@ void Cali_e_trace::Init(TTree *tree)
             printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
          }
       }
+
+      cutList->Write("rdtCutList");
    }
 
    printf("================================== numDet : %d \n", numDet);

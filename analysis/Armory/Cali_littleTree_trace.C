@@ -83,42 +83,40 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    if( isTraceDataExist ){
       b_Trace_Energy_Time->GetEntry(entry,0);
       b_Trace_RDT_Time->GetEntry(entry,0);
+      b_Trace_RDT->GetEntry(entry,0);
    }
    
    //=========== gate
-   //bool rdt_energy = false;
-   //for( int rID = 0; rID < 4; rID ++){
-   //   if( rdt[ 2 * rID+1] > rdtGate ) rdt_energy = true; 
-   //}
-   //if( !rdt_energy ) return kTRUE;
-   
-   //int rdtMultiHit = 0;
-   //for( int i = 0; i < 8; i++){
-   //   if( !TMath::IsNaN(rdt[i]) ) rdtMultiHit ++;
-   //}
-   //
-   //if( rdtMultiHit != 2 ) return kTRUE; //######### multiHit gate   
    
    bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
    bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
    bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
    bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
-   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
-   
-   
-   bool coinFlag = false;
-   for( int i = 0; i < numDet ; i++){
-      for( int j = 0; j < 8 ; j++){
-         if( TMath::IsNaN(rdt[j]) ) continue; 
-         int tdiff = rdt_t[j] - e_t[i];
-         if( -20 < tdiff && tdiff < 20 )  {
-            coinFlag = true;
-         }
-      }
+   if( !isRDTCutExist ){
+      rejRDT1 = false;
+      rejRDT2 = false;
+      rejRDT3 = false;
+      rejRDT4 = false;
    }
    
-   if( coinFlag == false ) return kTRUE;
+   //printf("%d, %d, %d, %d \n", rejRDT1, rejRDT2, rejRDT3, rejRDT4 ); 
+
+   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
+   
+   //for( int i = 0; i < 4; i ++) printf("%d | %f, %f \n", i, trdt[2*i], trdt[2*i+1]);
+   
+   ///bool coinFlag = false;
+   ///for( int i = 0; i < numDet ; i++){
+   ///   for( int j = 0; j < 8 ; j++){
+   ///      if( TMath::IsNaN(rdt[j]) ) continue; 
+   ///      int tdiff = rdt_t[j] - e_t[i];
+   ///      if( -20 < tdiff && tdiff < 20 )  {
+   ///         coinFlag = true;
+   ///      }
+   ///   }
+   ///}
+   ///if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    ULong64_t eTime = -2000; //this will be the time for Ex valid
@@ -126,55 +124,45 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    for(int idet = 0 ; idet < numDet; idet++){
       
+      //if( idet > 17 ) continue;
+      //if( idet == 4 ) continue;
+      //if( idet ==10 ) continue;
+      //if( idet ==17 ) continue;
+      //if( idet == 7 ) continue;
+      //if( idet ==  5 ) continue;
+      if( e[idet] < 500 ) continue;
+      
       //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
       if( TMath::IsNaN(xf[idet]) && TMath::IsNaN(xn[idet])  ) continue;
       
       if( e[idet] == 0 ) continue;
       if( xf[idet] == 0 && xn[idet] == 0 ) continue;
-      
-      detIDTemp = idet;
-      eTemp = e[idet];
-            
+   
       double xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
       double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-      //========= calculate x
-      //if(xf[idet] > 0  && xn[idet] > 0 ) {
-      //   xTemp = (xfC-xnC)/(xfC+xnC);
-      //   multiHit++;
-      //   hitID = 0;
-      //}else if(xf[idet] == 0 && xn[idet] > 0 ){
-      //   xTemp = (1-2*xnC/e[idet]);
-      //   multiHit++;
-      //   hitID = 1;
-      //}else if(xf[idet] > 0 && xn[idet] == 0 ){
-      //   xTemp = (2*xfC/e[idet]-1);
-      //   multiHit++;
-      //   hitID = 2;
-      //}else{
-      //   xTemp = TMath::QuietNaN();
-      //}
+      eTemp = e[idet];
       
-      //if( xf[idet] > 0 && xn[idet] > 0 ){
-      //   xTemp = (xfC-xnC)/eTemp;
-      //   multiHit++;
-      //   hitID = 0;
-      //}
+      // range (-1,1)      
+      if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
+      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2* xfC/ eTemp - 1;
+      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
       
+      xTemp = xTemp/xScale[idet];
       
+      /*
       if(xfC > eTemp/2.){
          xTemp = 2*xfC/eTemp - 1. ;
-         multiHit++;
          hitID = 1;
       }else if(xnC > eTemp/2.){
          xTemp = 1. - 2* xnC/eTemp;
-         multiHit++;
          hitID = 2;
       }else{
          xTemp = TMath::QuietNaN();
-      }
-         
+      }*/
+      
+      if( abs(xTemp) > 0.9 ) continue;
          
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
       //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
@@ -185,39 +173,70 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       if( pos[detID] < 0 ){
          zTemp = pos[detID] - (-xTemp + 1.)*length/2 ; 
       }else{
-         zTemp = pos[detID] + (xTemp + 1.)*length/2 ; 
+         zTemp = pos[detID] + (-xTemp + 1.)*length/2 ; 
+      }
+      
+      if( !TMath::IsNaN(zTemp) ) {
+         multiHit++;
+         detIDTemp = idet;
+         eTime  = e_t[idet];
+         if( isTraceDataExist ) teTime = te_t[idet];         
       }
    
-      if( isTraceDataExist ) {
-         eTime  = e_t[idet];
-         teTime = te_t[idet];         
-      }
+
    }//end of idet-loop
    
-   if( multiHit == 0 ) return kTRUE;
+   
+   //printf(" ----%d \n", multiHit);
+   
+   //if( multiHit != 1 ) return kTRUE;
+   
+   
+   //========= for recoil
+   ULong64_t rdtTime = 0;
+   Float_t trdtTime = 0.;
+   int rdtIDtemp = -1;
+   rdtdEMultiHit = 0;
+   for( int i = 0; i< 4 ; i++){
+      if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
+         rdtdEMultiHit ++;
+         rdtTime = rdt_t[2*i+1];
+         rdtIDtemp = i;
+         if( isTraceDataExist ) trdtTime = trdt_t[2*i+1];
+      }
+   }
+   
+   //printf("===== %d \n", rdtdEMultiHit);
+   
+   //if ( rdtdEMultiHit != 1 ) return kTRUE;
    
    //for coincident time bewteen array and rdt
-   if( multiHit == 1 && isTraceDataExist ) {
-      ULong64_t rdtTime = 0;
-      Float_t rdtQ = 0;
-      Float_t trdtTime = 0.;
-      for(int i = 0; i < 8 ; i++){
-         if( rdt[i] > rdtQ ) {
-            rdtQ    = rdt[i];
-            
-            rdtTime = rdt_t[i];
-            trdtTime = trdt_t[i];
-         }
-      }
-     
+   if( multiHit == 1 && rdtdEMultiHit == 1 ){
       int coin_t = (int) eTime - rdtTime;
       float tcoin_t = teTime - trdtTime;
       
-      coinTimeUC = coin_t + tcoin_t;
+      coinTimeUC = 10.0 * (coin_t + tcoin_t) ; // in nano-sec
       
-      double f7corr = f7[detIDTemp]->Eval(xTemp) + cTCorr[detIDTemp][8];
-      coinTime = (coinTimeUC - f7corr)*10.;
+      if( isTraceDataExist ){
+         double f7corr = f7[detIDTemp]->Eval(xTemp) + cTCorr[detIDTemp][8];
+         
+         //Ad-hoc solution 
+         double rdtCorr = 0;
+         switch(rdtIDtemp){
+            case 0: rdtCorr = 23.0 ; break;
+            case 1: rdtCorr = 0.0 ; break;
+            case 2: rdtCorr = 4.3 ; break;
+            case 3: rdtCorr = 15.3 ; break;
+         }
+         
+         coinTime = (coinTimeUC - f7corr) - rdtCorr;
+      }
    }
+   //printf("%f \n", coinTime);
+   
+   if ( abs(coinTime - 19 ) > 30 ) return kTRUE;
+   
+   //printf("==========================\n");
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file

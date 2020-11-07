@@ -79,19 +79,19 @@ caput GLBL:DIG:load_delays 0
 # Globals finished now individual boards / channels
 #
 ###################################################################
-#echo "Setting deactivated boards / channels"
+echo "Setting deactivated boards / channels"
 #caput DAQB2_4_CS_Ena Disable
 #caput DAQB3_4_CS_Ena Disable
 #caput DAQB4_4_CS_Ena Disable
-#caput VME01:MDIG1:channel_enable1 Reset
-#caput VME01:MDIG1:channel_enable2 Reset
-#caput VME01:MDIG1:channel_enable3 Reset
-#caput VME01:MDIG1:channel_enable4 Reset
-#caput VME01:MDIG1:channel_enable5 Reset
-#caput VME01:MDIG1:channel_enable6 Reset
-#caput VME01:MDIG1:channel_enable7 Reset
-#caput VME01:MDIG1:channel_enable8 Reset
-#caput VME01:MDIG1:channel_enable9 Reset
+caput VME01:MDIG1:channel_enable1 Reset
+caput VME01:MDIG1:channel_enable2 Reset
+caput VME01:MDIG1:channel_enable3 Reset
+caput VME01:MDIG1:channel_enable4 Reset
+caput VME01:MDIG1:channel_enable5 Reset
+caput VME01:MDIG1:channel_enable6 Reset
+caput VME01:MDIG1:channel_enable7 Reset
+caput VME01:MDIG1:channel_enable8 Reset
+caput VME01:MDIG1:channel_enable9 Run  #for TAC
 #caput VME01:MDIG2:channel_enable0 Reset
 #caput VME01:MDIG2:channel_enable1 Reset
 #caput VME01:MDIG2:channel_enable2 Reset
@@ -109,7 +109,26 @@ caput GLBL:DIG:load_delays 0
 #caput VME01:MDIG4:channel_enable8 Reset
 #caput VME01:MDIG4:channel_enable9 Reset
 
-caput VME02:MDIG4:trigger_mux_select IntAcptAll #for tac
+caput VME01:MDIG1:trigger_mux_select IntAcptAll #for TAC
+
+#trace for recoil
+caput VME01:MDIG2:raw_data_window2 8.32
+caput VME01:MDIG2:raw_data_window3 8.32
+caput VME01:MDIG2:raw_data_window4 8.32
+caput VME01:MDIG2:raw_data_window5 8.32
+caput VME01:MDIG2:raw_data_window6 8.32
+caput VME01:MDIG2:raw_data_window7 8.32
+
+caput VME01:MDIG3:raw_data_window2 8.32
+caput VME01:MDIG3:raw_data_window3 8.32
+caput VME01:MDIG3:raw_data_window4 8.32
+caput VME01:MDIG3:raw_data_window5 8.32
+caput VME01:MDIG3:raw_data_window6 8.32
+caput VME01:MDIG3:raw_data_window7 8.32
+
+#trace for ion chamber
+caput VME01:MDIG1:raw_data_window0 0.32
+caput VME01:MDIG1:raw_data_window1 0.32
 
 #echo "Setting internal trigger boards / channels"
 #caput VME01:MDIG1:trigger_mux_select IntAcptAll #EBIS Clock
@@ -123,14 +142,14 @@ caput VME02:MDIG4:trigger_mux_select IntAcptAll #for tac
 #  
 ##################################################################
 echo "Setting X-plane"
-caput VME32:RTR1:reg_X_PLANE_MAP_A 31 
+caput VME32:RTR1:reg_X_PLANE_MAP_A 0 
 caput VME32:RTR1:reg_X_PLANE_MAP_B 0
-caput VME32:RTR1:reg_X_PLANE_MAP_C 31
+caput VME32:RTR1:reg_X_PLANE_MAP_C 0
 caput VME32:RTR1:reg_X_PLANE_MAP_D 0
 
-caput VME32:RTR1:reg_X_PLANE_MAP_E 0
-caput VME32:RTR1:reg_X_PLANE_MAP_F 31
-caput VME32:RTR1:reg_X_PLANE_MAP_G 0
+caput VME32:RTR1:reg_X_PLANE_MAP_E 31
+caput VME32:RTR1:reg_X_PLANE_MAP_F 0
+caput VME32:RTR1:reg_X_PLANE_MAP_G 31
 caput VME32:RTR1:reg_X_PLANE_MAP_H 0
 
 caput VME32:RTR2:reg_X_PLANE_MAP_A 31
@@ -138,15 +157,15 @@ caput VME32:RTR2:reg_X_PLANE_MAP_B 0
 caput VME32:RTR2:reg_X_PLANE_MAP_C 31
 caput VME32:RTR2:reg_X_PLANE_MAP_D 0
 
-caput VME32:RTR2:reg_X_PLANE_MAP_E 0
-caput VME32:RTR2:reg_X_PLANE_MAP_F 31
-caput VME32:RTR2:reg_X_PLANE_MAP_G 0
+caput VME32:RTR2:reg_X_PLANE_MAP_E 31
+caput VME32:RTR2:reg_X_PLANE_MAP_F 0
+caput VME32:RTR2:reg_X_PLANE_MAP_G 31
 caput VME32:RTR2:reg_X_PLANE_MAP_H 0
 
 echo "Setting Y-plane"
 caput VME32:RTR1:reg_Y_PLANE_MAP_A 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_B 0
-caput VME32:RTR1:reg_Y_PLANE_MAP_C 0
+caput VME32:RTR1:reg_Y_PLANE_MAP_B 255
+caput VME32:RTR1:reg_Y_PLANE_MAP_C 255
 caput VME32:RTR1:reg_Y_PLANE_MAP_D 255
 
 caput VME32:RTR1:reg_Y_PLANE_MAP_E 0
@@ -157,12 +176,12 @@ caput VME32:RTR1:reg_Y_PLANE_MAP_H 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_A 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_B 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_C 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_D 255
+caput VME32:RTR2:reg_Y_PLANE_MAP_D 0
 
 caput VME32:RTR2:reg_Y_PLANE_MAP_E 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_F 0
 caput VME32:RTR2:reg_Y_PLANE_MAP_G 0
-caput VME32:RTR2:reg_Y_PLANE_MAP_H 255
+caput VME32:RTR2:reg_Y_PLANE_MAP_H 0
 
 echo "End of Trigger Mapping ###"
 

@@ -8,7 +8,7 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 200 //Highest multiplicity
-#define M -100 //M value for energy filter from digi setting, number of channel
+#define M 100 //M value for energy filter from digi setting, number of channel
 
 ULong64_t MaxProcessedEntries=100000000;
 ULong64_t NumEntries = 0;
@@ -68,11 +68,18 @@ void GeneralSort::Begin(TTree * tree)
   TString option = GetOption();
   NumEntries = tree->GetEntries();
   EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
-  
+
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
   saveFileName.Remove(0, findslat+1);
   saveFileName = "../root_data/gen_" + saveFileName;
+
+  printf("=============================================================\n");
+  printf("=====================  GeneralSort.C  =======================\n");
+  printf("=============================================================\n");
+  printf("                    file : %s \n", tree->GetDirectory()->GetName());
+  printf("          Number of Event: %llu\n", NumEntries);
+  printf("Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
 
   hEvents = new TH1F("hEvents","Number of events; Events;",NumEntries*1.2,0,NumEntries*1.2);
 
@@ -121,14 +128,26 @@ void GeneralSort::Begin(TTree * tree)
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
-    switch (idKindMap[i]) {
-       case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 5: printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+    if( 110 >= idDetMap[i] && idDetMap[i] >= 100){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
+    }else if( 240 >= idDetMap[i] && idDetMap[i] >= 200){
+      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
+    }else if( 310 >= idDetMap[i] && idDetMap[i] >= 300){
+      printf("\033[92m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if( 450 >= idDetMap[i] && idDetMap[i] >= 400){
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if(  99 >= idDetMap[i] && idDetMap[i] >= 0){    
+      switch (idKindMap[i]) {
+         case -1: printf("%7s|", ""); break;
+         case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+         case  1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
+         case  2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
+         case  3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
+         case  4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
+         default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+       }
+     }else{
+       printf("%7s|", "");
      }
   }
   printf("\n");
@@ -152,7 +171,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
   if( entry == 0 ) {
       fileNum = fChain->GetDirectory()->GetName();
       
-      printf("----------------------- openning  %s \n", fileNum.Data());
+      //printf("----------------------- openning  %s \n", fileNum.Data());
       
       int findslat = fileNum.Last('/');
       fileNum.Remove(0, findslat+1);
@@ -187,14 +206,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
       if (i<32) psd.ELUM[i]=TMath::QuietNaN();
       if (i<10) psd.EZERO[i]=TMath::QuietNaN();
     
-      psd.EnergyTimestamp[i]=TMath::QuietNaN();
-      psd.XFTimestamp[i]=TMath::QuietNaN();
-      psd.XNTimestamp[i]=TMath::QuietNaN();
-      psd.RingTimestamp[i]=TMath::QuietNaN();
-      psd.RDTTimestamp[i]=TMath::QuietNaN();
-      psd.TACTimestamp[i]=TMath::QuietNaN();
-      if (i<32) psd.ELUMTimestamp[i]=TMath::QuietNaN();
-      if (i<10) psd.EZEROTimestamp[i]=TMath::QuietNaN();	    
+      psd.EnergyTimestamp[i]= 0;
+      psd.XFTimestamp[i]    = 0; 
+		psd.XNTimestamp[i]	 = 0; 
+		psd.RingTimestamp[i]	 = 0; 
+		psd.RDTTimestamp[i]	 = 0; 
+		psd.TACTimestamp[i]	 = 0; 
+      if (i<32) psd.ELUMTimestamp[i] = 0;
+		if (i<10) psd.EZEROTimestamp[i]= 0;		 
     }
 
     
@@ -210,7 +229,6 @@ Bool_t GeneralSort::Process(Long64_t entry)
     //ID PSD Channels
     Int_t idKind = -1;
     Int_t idDet=-1; // Detector number
-    Int_t idConst=1010; //Temp value to get idDet
     
     //==============================================================
     /* --------------------- Loop over NumHits ------------------ */
@@ -221,7 +239,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       idKind = idKindMap[idTemp];
       
       
-      //=============================== PSD
+      ///=============================== PSD
       if ( 0 <= idDet && idDet < 100 && 0 <= idKind && idKind <= 3 ) {         
         switch(idKind)
           {
@@ -247,44 +265,40 @@ Bool_t GeneralSort::Process(Long64_t entry)
           }
       }
 
-      //=============================== TAC & RF TIMING
-      //if ((id[i]>1000&&id[i]<2000)&&(idDet>=400&&idDet<=450)) {
+      ///=============================== TAC & RF TIMING
       if ( idDet >= 400 && idDet <= 450 ) {   
         Int_t tacID = idDet - 400;
         psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
         psd.TACTimestamp[tacID] = event_timestamp[i];
       }
        
-      //=============================== RECOIL
-      //if ((id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) {
+      ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 110 ) {
         Int_t rdtID = idDet-100;
         psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 
-      //=============================== ELUM
-      //if ((id[i]>=1000 && id[i]<1130)&&(idDet>=200&&idDet<=240)) {
+      ///=============================== ELUM
       if ( idDet >= 200 && idDet <= 240 ) {
         Int_t elumID = idDet - 200;
         psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
-      //=============================== EZERO
-      //if ((id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
-      if ( idDet >= 300 && idDet < 310 ) {
+      ///=============================== EZERO
+      if ( idDet >= 300 && idDet <= 310 ) {
         Int_t ezeroID = idDet - 300;
-        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M;
+        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M * (-1);
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
       }
       
-      //=============================== EBIS 
+      ///=============================== EBIS 
       if (id[i]==1010) {
         psd.EBISTimestamp = event_timestamp[i];
       }
          
-      //=============================== T1 proton pulse
+      ///=============================== T1 proton pulse
       if (id[i]==1013) {
         psd.T1Timestamp = event_timestamp[i];
       }

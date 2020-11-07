@@ -1,4 +1,3 @@
-
 #define GeneralSortTraceProof_cxx
 
 #include "GeneralSortTraceProof.h"
@@ -7,34 +6,36 @@
 #define MAXNUMHITS 20 //Highest multiplicity
 #define M -100 //M value for energy filter from digi setting
 
-//must be absolute path
-//Mac
-//#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-//LCRC
-#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
-//by copy the GeneralSortMapping.h in to Armory, is not working
-//#include "GeneralSortMapping.h"
+//by copy the GeneralSortMapping.h in to Armory does not work
+//relative path does not work
+#ifdef __linux__
+   //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"   
+#elif __APPLE__
+   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+  //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
+#endif
 
-//===================== setting
+//=================================== setting
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit;
-int traceLength = 200;
-float delayChannel = 100.; //initial guess of the time
+float delayChannel = 150.; //initial guess of the time
 
-bool isTACRF = true;
+bool isTACRF = false;
 bool isRecoil = true;
-bool isElum = true;
+bool isElum = false;
 bool isEZero = true;
+//=================================== end of setting
 
-void GeneralSortTraceProof::Begin(TTree * /*tree*/)
+void GeneralSortTraceProof::Begin(TTree */*tree*/)
 {
 
    TString option = GetOption();
 
    printf( "=====================================================\n");
-   printf( "==========  GeneralSortTraceProof.C ================= \n");
+   printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
    printf( "  TAC/RF : %s \n", isTACRF ?  "On" : "Off");
@@ -46,20 +47,47 @@ void GeneralSortTraceProof::Begin(TTree * /*tree*/)
    case 0: traceMethodName = "copy"; break;
    case 1: traceMethodName = "fit"; break;
    }
-   printf( "  Trace  : %s , Method: %s, Save: %s \n", isTraceON ?  "On" : "Off", traceMethodName.Data(), isSaveTrace? "Yes": "No:");
+   printf( "  Trace  : %s , Method: %s, Save: %s \n", 
+               isTraceON ?  "On" : "Off", 
+               traceMethodName.Data(), 
+               isSaveTrace? "Yes": "No:");
+   printf( "=====================================================\n");   
+   //printf("                    file : %s \n", tree->GetDirectory()->GetName());
+   //printf("          Number of Event: %llu \n", tree->GetEntries());
    
-   printf("===================== ID-MAP: \n");
+   printf("======= ID-MAP: \n");
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
    printf("\n");
    for(int i = 0 ; i < 96; i++ ) printf("-");
    for(int i = 0 ; i < 160; i ++){
-     if( (i) % 10 == 0 ) {
+    if( (i) % 10 == 0 ) {
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
+    }
+    if( 110 >= idDetMap[i] && idDetMap[i] >= 100){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
+    }else if( 240 >= idDetMap[i] && idDetMap[i] >= 200){
+      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
+    }else if( 310 >= idDetMap[i] && idDetMap[i] >= 300){
+      printf("\033[92m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if( 450 >= idDetMap[i] && idDetMap[i] >= 400){
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if(  99 >= idDetMap[i] && idDetMap[i] >= 0){    
+      switch (idKindMap[i]) {
+         case -1: printf("%7s|", ""); break;
+         case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+         case  1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
+         case  2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
+         case  3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
+         case  4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
+         default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+       }
+     }else{
+       printf("%7s|", "");
      }
-     printf("%3d(%2d)|", idDetMap[i], idKindMap[i]);
    }
+   printf("\n");
    printf("\n==================== \n");
    
    saveFileName = option;
@@ -138,9 +166,17 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          newTree->Branch("te",             te,  "Trace_Energy[30]/F");
          newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
          newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
-         newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
-         newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
-         newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+         
+         if( isRecoil ){
+            newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
+            newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
+            newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+         }
+         if ( isEZero ) {
+            newTree->Branch("tezero",       tezero,    "Trace_ezero[8]/F");
+            newTree->Branch("tezero_t",     tezero_t,  "Trace_ezero_Time[8]/F");
+            newTree->Branch("tezero_r",     tezero_r,  "Trace_ezero_RiseTime[8]/F");         
+         }
       }
    }
   
@@ -155,24 +191,24 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i<30; i++) {//num dets
+   for (Int_t i=0 ; i< 100; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
       psd.Ring[i]    = 0.0;
       psd.RDT[i]     = TMath::QuietNaN();
       psd.TAC[i]     = TMath::QuietNaN();
-      if (i<32) psd.ELUM[i] = TMath::QuietNaN();
-      if (i<4) psd.EZERO[i] = TMath::QuietNaN();
+      if ( i < 32 ) psd.ELUM[i] = TMath::QuietNaN();
+      if ( i < 10 ) psd.EZERO[i] = TMath::QuietNaN();
 
-      psd.EnergyTimestamp[i] = TMath::QuietNaN();
-      psd.XFTimestamp[i]     = TMath::QuietNaN();
-      psd.XNTimestamp[i]     = TMath::QuietNaN();
-      psd.RingTimestamp[i]   = TMath::QuietNaN();
-      psd.RDTTimestamp[i]    = TMath::QuietNaN();
-      psd.TACTimestamp[i]    = TMath::QuietNaN();
-      if (i<32) psd.ELUMTimestamp[i] = TMath::QuietNaN();
-      if (i<4) psd.EZEROTimestamp[i] = TMath::QuietNaN();	
+      psd.EnergyTimestamp[i] = 0;
+      psd.XFTimestamp[i]     = 0;
+      psd.XNTimestamp[i]     = 0;
+      psd.RingTimestamp[i]   = 0;
+      psd.RDTTimestamp[i]    = 0;
+      psd.TACTimestamp[i]    = 0;
+      if (i < 32) psd.ELUMTimestamp[i]   = 0;
+      if (i < 10) psd.EZEROTimestamp[i]  = 0;	
       
       psd.x[i]       = TMath::QuietNaN();    
    }
@@ -183,10 +219,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
          
-         if( i < 8 ) {
+         if( isRecoil &&  i < 8 ) {
             trdt[i]   = TMath::QuietNaN();
             trdt_t[i] = TMath::QuietNaN();
             trdt_r[i] = TMath::QuietNaN();
+         }
+         
+         if( isEZero &&  i < 8 ) {
+            tezero[i]   = TMath::QuietNaN();
+            tezero_t[i] = TMath::QuietNaN();
+            tezero_r[i] = TMath::QuietNaN();
          }
       }
       
@@ -199,7 +241,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    b_pre_rise_energy->GetEntry(entry);
    b_post_rise_energy->GetEntry(entry);
    b_event_timestamp->GetEntry(entry);
-   if( isTraceON ) b_trace->GetEntry(entry);
+   if( isTraceON ) {
+      b_trace->GetEntry(entry);
+      b_trace_length->GetEntry(entry);
+   }
 
    //ID PSD Channels
    Int_t idKind  = -1;
@@ -213,7 +258,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       //PSD
       /***********************************************************************/
-      if( (id[i] > 1000 && id[i] < 2000) &&  30> idDet && idDet>-1 ) {
+      if( 100 > idDet && idDet >= 0 && 3 >= idKind && idKind >= 0 ) {
          
          switch(idKind){
             case 0: /* Energy signal */
@@ -237,36 +282,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       //TAC & RF TIMING
       /***********************************************************************/
-      if( isTACRF && id[i] > 1160 && id[i] < 1171) { //RF TIMING SWITCH
-         switch(id[i]){
-            case 1163: //
-               psd.TAC[0] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[0] = event_timestamp[i];
-               break;
-            case 1164: // 
-               psd.TAC[1] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[1] = event_timestamp[i];
-               break;
-            case 1165: // 
-               psd.TAC[2] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[2] = event_timestamp[i];
-            case 1167: // 
-               psd.TAC[3] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[3] = event_timestamp[i];
-            case 1168: //
-               psd.TAC[4] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[4] = event_timestamp[i];
-            case 1169: //
-               psd.TAC[5] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-               psd.TACTimestamp[5] = event_timestamp[i];
-            break;
-         }
+      if( isTACRF && idDet >= 400 && idDet <= 450 ) {   
+        Int_t tacID = idDet - 400;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.TACTimestamp[tacID] = event_timestamp[i];
       }
 
       //RECOIL
       /************************************************************************/
-      if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { //recOILS
-         Int_t rdtTemp = idDet-101;
+      if( isRecoil && idDet >= 100 && idDet <= 110 ) { 
+         Int_t rdtTemp = idDet-100;
          psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
@@ -287,7 +312,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
       //EZERO
       /************************************************************************/
-      if( isEZero && (id[i]>1000&&id[i]<2000)&&(idDet>=300&&idDet<310)) {
+      if( isEZero && ( 300 <= idDet && idDet < 310 )) {
          Int_t ezeroTemp = idDet - 300;
          if (ezeroTemp<4) {
             psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
@@ -310,18 +335,24 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          idDet  = idDetMap[idTemp];
          idKind = idKindMap[idTemp];
          
-         bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
+         //bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
+         bool isPSD = (30 > idDet && idDet >= 0);
          bool isRDT  = (130 > idDet && idDet >= 100 );
-         if( !isPSDe && !isRDT ) continue;
+         bool isezero  = (310 > idDet && idDet >= 300 );
+         //if( !isPSD && !isRDT && !isezero) continue;
+         
+         //if( !isRDT) continue;
+         
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();
          countTrace ++;
          
-         //Set gTrace
+         int traceLength = trace_length[i];
          
+         //Set gTrace
          if( traceMethod == 0 ){
-            for ( int j = 0 ; j < traceLength; j++){
+            for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
             continue;
@@ -346,7 +377,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                case  0: lineColor = 3; break;
                case  1: lineColor = 1; break;
                case  2: lineColor = 2; break;
-               case -1: lineColor = 4; break;
+               case  3: lineColor = 4; break;
+               case -1: lineColor = 6; break;
             }
             
             gFit->SetLineColor(lineColor);
@@ -376,10 +408,17 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             if( 200 > idDet && idDet >= 100 ) {
-               int rdtTemp = idDet-101;
+               int rdtTemp = idDet-100;
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);
+            }
+            
+            if( 310 > idDet && idDet >= 300 ) {
+               int ezeroTemp = idDet-300;
+               tezero[ezeroTemp]   = TMath::Abs(gFit->GetParameter(0));
+               tezero_t[ezeroTemp] = gFit->GetParameter(1);
+               tezero_r[ezeroTemp] = gFit->GetParameter(2);
             }
             
          }

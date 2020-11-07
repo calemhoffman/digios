@@ -19,7 +19,7 @@ void Proof_onGeneralSortTrace(TString file){
    TProof * p = TProof::Open("", "workers=4");
    
    chain->SetProof();
-   chain->Process("~/digios/analysis/Armory/GeneralSortTraceProof.C+", file);
+   chain->Process("../Armory/GeneralSortTraceProof.C+", file);
    
    delete chain;
    delete p;
