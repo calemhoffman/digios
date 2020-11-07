@@ -3,7 +3,7 @@ echo "#############################################"
 echo "#     Set-up for new Experiment"
 echo "#############################################"
 
-daqDataPath=/media/DIGIOSDATA4
+daqDataPath=/media/DIGIOSDATA5
 
 echo " The bach script do following things "
 echo " 1) git-fetch  "
