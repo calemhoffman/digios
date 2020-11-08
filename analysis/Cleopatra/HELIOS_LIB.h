@@ -380,7 +380,6 @@ public:
    }
    
    
-   
    double GetXPos(double ZPos){
       return XPos( ZPos, theta, phi, rho, sign);
    }
@@ -710,7 +709,8 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       // loop until reach the detector position covrage.    
       do{
          loop += 1;
-         int n = 2*loop + sign;
+         //int n = 2*loop + sign;
+         int n = 2*loop -1;
          
          if( blocker != 0.0 && abs(firstPos/blocker) < loop ) return -6;
          
@@ -736,8 +736,10 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double aEff = perpDist - (xOff * TMath::Cos(phiDet) + yOff * TMath::Sin(phiDet)); 
             double dphi = phi - phiDet;   
             double z0 = TMath::TwoPi() * rho / TMath::Tan(theta);   // the cycle
-            
-            zHit = z0 / TMath::TwoPi() * ( sign * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho - sign * TMath::Sin(dphi)) + TMath::Pi() * n );
+
+            //with sign is the correct formula, but somehow, probably the ASin? give incorrect result for sign = 1;
+            //zHit = z0 / TMath::TwoPi() * ( sign * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho - sign * TMath::Sin(dphi)) + TMath::Pi() * n );
+            zHit = z0 / TMath::TwoPi() * ( -1 * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(dphi)) + TMath::Pi() * n );
             e = Pb.E() - Pb.M();
             z = zHit;
             
@@ -746,15 +748,16 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double yHit = GetYPos(zHit) + yOff;
             double sHit = TMath::Sqrt(xHit*xHit + yHit*yHit - perpDist*perpDist); // is it hit on the detector
             
-            ///if( zHit > z0 * 10 ) continue;
-            ///printf("%7.2f, %7.2f | n : %d, row : %2d, phiD : %4.0f, rho : %9.4f, z0 : %9.4f, zHit : %9.4f, xHit : %9.4f, yHit : %9.4f \n",
+            ///if( zHit > z0  ) continue;
+            ///printf("==== %7.2f, %7.2f | n : %d, row : %2d, phiD : %4.0f, rho : %9.4f, z0 : %9.4f, zHit : %9.4f, xHit : %9.4f, yHit : %9.4f \n",
             /// theta*TMath::RadToDeg(), phi*TMath::RadToDeg(), n, j, phiDet*TMath::RadToDeg(), rho,  z0, zHit, xHit, yHit);
             
             
             if( sHit > width /2.) continue; // if the sHit is large, it does not hit on detector, go to next mDet 
             
             //======== this is the particel direction (normalized) dot normal vector of the detector plane
-            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi() - sign * dphi);
+            //double dir = TMath::Cos(zHit/z0 * TMath::TwoPi() - sign * dphi);
+            double dir = TMath::Cos(zHit/z0 * TMath::TwoPi() + dphi);
             if( dir < 0) {// when dir == 0, no solution
               isHitFromOutside = true;
             }else{
