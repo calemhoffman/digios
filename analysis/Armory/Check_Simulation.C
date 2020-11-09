@@ -40,21 +40,38 @@ enum plotID { pEZ,               /// 0
               pInfo,             /// 12
               pHitID,            /// 13
               pElum1XY,          /// 14
-              pElum1RThetaCM,    /// 15
-              pEmpty };          /// 16
+              pEElum1R,          /// 15
+              pElum1RThetaCM,    /// 16
+              pEmpty };          /// 17
 plotID StringToPlotID(TString str);
 void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
+
+  printf("=========================== Check_Simulation.C\n");
   
   TMacro * config = new TMacro("../Armory/Check_Simulation_Config.txt");
-  TString gate = ExtractString(19, config);
-  double elumRange = ExtractNumber(20, config);
-  vector<double> thetaCMRange = doubleConvertor( StringToVector( ExtractString(21,config) ));
-  bool shownKELines = (ExtractString(22, config).Remove(4) == "true" ? true : false);
-  bool isOverRideEx = (ExtractString(23, config).Remove(4) == "true" ? true : false);
-  vector<double> oExRange = doubleConvertor( StringToVector ( ExtractString(24, config ))); 
+  int numLine = config->GetListOfLines()->GetSize();
+  int startLineNum = 0;
+  for( int i = 0; i < numLine ; i++){
+      TString haha = config->GetListOfLines()->At(i)->GetName();
+      haha.Remove(4);
+      if( haha != "////" ) {
+         startLineNum = i;
+         break;
+      }
+  }
   
-  vector<TString> plotConfig = StringToVector( ExtractString(18, config));
+  TString gate = ExtractString(startLineNum+1, config);
+  double elumRange = ExtractNumber(startLineNum+2, config);
+  vector<double> thetaCMRange = doubleConvertor( StringToVector( ExtractString(startLineNum+3,config) ));
+  bool shownKELines = (ExtractString(startLineNum+4, config).Remove(4) == "true" ? true : false);
+  bool isOverRideEx = (ExtractString(startLineNum+5, config).Remove(4) == "true" ? true : false);
+  vector<double> oExRange = doubleConvertor( StringToVector ( ExtractString(startLineNum+6, config ))); 
 
+   printf("%s \n", gate.Data());
+
+
+  ///==== config Canvas
+  vector<TString> plotConfig = StringToVector( ExtractString(startLineNum, config));
   vector<plotID> canvas;
   int colCount = 0;
   int colCount_new = 0;
@@ -69,6 +86,9 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
      canvas.push_back( StringToPlotID(plotConfig[i]));
      colCount_new ++;
   }
+
+  if( colCount == 0 ) colCount = colCount_new;
+  ///printf("plot row: %d, col: %d \n", rowCount, colCount);
   
   vector<int> Div = {colCount, rowCount};
   
@@ -360,6 +380,11 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
          TH2F * hElum1XY = new TH2F("hElum1XY", "Elum-1 XY [gated]; X [mm]; Y [mm]",  400, -elumRange, elumRange, 400, -elumRange, elumRange);
          tree->Draw("yElum1:xElum1>>hElum1XY", gate, "colz");
       }
+
+      if( pID == pEElum1R ){
+         TH2F * hEElum1Rho = new TH2F("hEElum1Rho", "Elum-1 E-R [gated]; R[mm]; Energy[MeV]",  400, 0, elumRange, 400, 0, 12);
+         tree->Draw("Tb:rhoElum1>>hEElum1Rho", gate, "colz");
+      }
       
       if( pID == pElum1RThetaCM){
          TH2F * hElum1RThetaCM = new TH2F("hElum1RThetaCM", "Elum-1 rho vs ThetaCM [gated]; thatCM [deg]; Elum- rho [mm]", 400, thetaCMRange[0], thetaCMRange[1],  400, 0, elumRange);
@@ -442,8 +467,8 @@ double * FindRange(TString branch, TString gate, TTree * tree, double output[2])
 double ExtractNumber(int index, TMacro * macro){
   
   TString field = macro->GetListOfLines()->At(index)->GetName();
-  
-  field.Remove(field.First('/'));
+  int pos = field.First('/');
+  if( pos >= 0 ) field.Remove(pos);
   
   return field.Atof();
   
@@ -451,8 +476,9 @@ double ExtractNumber(int index, TMacro * macro){
 TString ExtractString(int index, TMacro * macro){
   
   TString field = macro->GetListOfLines()->At(index)->GetName();
-  
-  field.Remove(field.First('/'));
+
+  int pos = field.First('/');
+  if( pos >= 0 ) field.Remove(pos);
   
   return field;
   
@@ -526,6 +552,7 @@ plotID StringToPlotID(TString str){
    if( str == "pInfo" ) return plotID::pInfo;                 /// 12
    if( str == "pHitID" ) return plotID::pHitID;               /// 13
    if( str == "pElum1XY" ) return plotID::pElum1XY;           /// 14
+   if( str == "pEElum1R" ) return plotID::pEElum1R;           /// 14
    if( str == "pElum1RThetaCM" ) return plotID::pElum1RThetaCM;    /// 15
    if( str == "pEmpty" ) return plotID::pEmpty ;              /// 16
    
