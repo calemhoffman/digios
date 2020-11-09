@@ -443,7 +443,9 @@ double ExtractNumber(int index, TMacro * macro){
   
   TString field = macro->GetListOfLines()->At(index)->GetName();
   
-  field.Remove(field.First('/'));
+  int pos = field.First('/');
+  
+  if( pos > -1 ) field.Remove(pos);
   
   return field.Atof();
   
@@ -452,7 +454,9 @@ TString ExtractString(int index, TMacro * macro){
   
   TString field = macro->GetListOfLines()->At(index)->GetName();
   
-  field.Remove(field.First('/'));
+  int pos = field.First('/');
+  
+  if( pos > -1 ) field.Remove(pos);
   
   return field;
   
