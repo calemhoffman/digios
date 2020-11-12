@@ -3,6 +3,7 @@
 #include "Monitors.h"
 #include <TH2.h>
 #include <TH1.h>
+#include <TF1.h>
 #include <TStyle.h>
 #include <TCutG.h>
 #include <TGraph.h>
@@ -31,7 +32,7 @@ ULong64_t maxNumberEvent = 1000000000;
 int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
-int rawEnergyRange[2] = {   0,     3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,     12};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,   500};
 int      rdtERange[2] = {     0,   700};
@@ -47,13 +48,13 @@ int    elumRateTimeRange[2] = {140, 10*60}; /// min
 //---Gate
 bool isTimeGateOn  = false;
 int timeGate[2]    = {-5, 10};             /// min, max, 1 ch = 10 ns
-double eCalCut     = 2;                   /// lower limit for eCal
+double eCalCut     = 0.1;                   /// lower limit for eCal
 bool  isTACGate    = false;
 int tacGate[2]     = {-8000, -2000};
 int dEgate[2]      = {500,  1500};
 int Eresgate[2]    = {1000,4000};
 double thetaCMGate = 10;               /// deg
-double xGate       = 0.95;                   ///cut out the edge
+double xGate       = 1.2;                   ///cut out the edge
 vector<int> skipDetID = { 11 };
 
 TString rdtCutFile = "rdtCuts.root";
