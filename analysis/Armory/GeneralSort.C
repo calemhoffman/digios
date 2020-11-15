@@ -35,7 +35,7 @@ typedef struct {
   Float_t XN[100];
   Float_t Ring[100];
   Float_t RDT[100];
-  Float_t TAC[100];
+  Float_t TAC[10];
   Float_t ELUM[32];
   Float_t EZERO[10];//0,1 - DE-E exit, 2,3 - DE-E atscat, 4 - ETOT
 // 2,3 - DEX,EX
@@ -47,7 +47,7 @@ typedef struct {
   ULong64_t XNTimestamp[100];
   ULong64_t RingTimestamp[100];
   ULong64_t RDTTimestamp[100];
-  ULong64_t TACTimestamp[100];
+  ULong64_t TACTimestamp[10];
   ULong64_t ELUMTimestamp[32];
   ULong64_t EZEROTimestamp[10];
   
@@ -109,8 +109,8 @@ void GeneralSort::Begin(TTree * tree)
   gen_tree->Branch("rdt",psd.RDT,"RDT[100]/F");
   gen_tree->Branch("rdt_t",psd.RDTTimestamp,"RDTTimestamp[100]/l"); 
 
-  gen_tree->Branch("tac",psd.TAC,"TAC[100]/F");
-  gen_tree->Branch("tac_t",psd.TACTimestamp,"TACTimestamp[100]/l"); 
+  gen_tree->Branch("tac",psd.TAC,"TAC[10]/F");
+  gen_tree->Branch("tac_t",psd.TACTimestamp,"TACTimestamp[10]/l"); 
   
   gen_tree->Branch("elum",psd.ELUM,"ELUM[32]/F");
   gen_tree->Branch("elum_t",psd.ELUMTimestamp,"ELUMTimestamp[32]/l"); 
@@ -202,7 +202,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       psd.x[i]=TMath::QuietNaN();
       psd.Ring[i]=0.;
       psd.RDT[i]=TMath::QuietNaN();
-      psd.TAC[i]=TMath::QuietNaN();
+      if (i<10) psd.TAC[i]=TMath::QuietNaN();
       if (i<32) psd.ELUM[i]=TMath::QuietNaN();
       if (i<10) psd.EZERO[i]=TMath::QuietNaN();
     
@@ -211,7 +211,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
 		psd.XNTimestamp[i]	 = 0; 
 		psd.RingTimestamp[i]	 = 0; 
 		psd.RDTTimestamp[i]	 = 0; 
-		psd.TACTimestamp[i]	 = 0; 
+		if (i<10) psd.TACTimestamp[i]	 = 0; 
       if (i<32) psd.ELUMTimestamp[i] = 0;
 		if (i<10) psd.EZEROTimestamp[i]= 0;		 
     }
@@ -266,7 +266,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       }
 
       ///=============================== TAC & RF TIMING
-      if ( idDet >= 400 && idDet <= 450 ) {   
+      if ( idDet >= 400 && idDet <= 410 ) {   
         Int_t tacID = idDet - 400;
         psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
         psd.TACTimestamp[tacID] = event_timestamp[i];
