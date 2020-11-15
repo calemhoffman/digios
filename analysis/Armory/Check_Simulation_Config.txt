@@ -24,7 +24,6 @@ hit == 1 && loop <= 1 && thetaCM > 10
 false          //shownKELines
 false          //isOverRideEx
 {-0.5, 3.0}    // over-rdied Ex range
-
 ///============================== example of gate
 hit == 1 && loop <= 1 && thetaCM > 10
 hit == 1 && loop <= 1

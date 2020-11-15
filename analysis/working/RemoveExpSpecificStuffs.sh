@@ -8,13 +8,19 @@ echo "REMOVE these files: "
 echo "   reaction.dat  "
 echo "   run_Summary.dat"
 echo "   example.*"
+ls -l example.*
 echo "   RunTimeStamp.dat"
-echo "   *.root  "
+#echo "   *.root  "
 echo "   *.pdf  "
+ls -l *.pdf
 echo "   *.png  "
+ls -l *.png
 echo "   *.d  "
+ls -l *.d 
 echo "   *.so  "
+ls -l *.so
 echo "   *.pcm  "
+ls -l *.pcm
 echo "==================================================="
 echo " Remove above files? (Yes/No)"
 read conti
@@ -25,7 +31,7 @@ if [ ${conti} == "Yes" ] ; then
   rm -fv run_Summary.dat
   rm -fv example.*
   rm -fv RunTimeStamp.dat
-  rm -fv *.root
+#  rm -fv *.root
   rm -fv *.pdf
   rm -fv *.png
   rm -fv *.d
