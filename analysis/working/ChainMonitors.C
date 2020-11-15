@@ -4,11 +4,15 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
 
   if( RUNNUM == -1 || RUNNUM == -10){
+    ///********** start Marker for AutoCalibration.
 
-    
-    //chain->Add("../root_data/gen_run004.root"); //alpha
 
+    //chain->Add("../root_data/gen_run00[4-6].root"); //alpha
     
+    chain->Add("../root_data/gen_run008.root"); //30Si(d,p)
+
+
+    ///********** end Marker for AutoCalibration.
   }else{
     
     TString fileName;
