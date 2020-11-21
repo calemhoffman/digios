@@ -275,14 +275,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 110 ) {
         Int_t rdtID = idDet-100;
-        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 
       ///=============================== ELUM
       if ( idDet >= 200 && idDet <= 240 ) {
         Int_t elumID = idDet - 200;
-        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * (-1);
+        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M ;
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       

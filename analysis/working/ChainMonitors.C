@@ -9,7 +9,15 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
 
     //chain->Add("../root_data/gen_run00[4-6].root"); //alpha
     
-    chain->Add("../root_data/gen_run008.root"); //30Si(d,p)
+    //chain->Add("../root_data/gen_run008.root"); //30Si(d,p)
+    
+    chain->Add("../root_data/gen_run010.root"); //29Al(d,p), overnight tune
+    
+    chain->Add("../root_data/gen_run01[1-8].root"); //29Al(d,p)
+    chain->Add("../root_data/gen_run019.root"); //29Al(d,p), new tune, recoil file no open
+    chain->Add("../root_data/gen_run02[0-9].root"); //29Al(d,p), new tune
+
+//    chain->Add("../root_data/gen_run03[0-9].root"); //29Al(d,p), new tune
 
 
     ///********** end Marker for AutoCalibration.
@@ -32,7 +40,6 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   //Simple call TSelector
   //chain->Process("Monitors.C+");
-  
   
   //Some input to TSelector
   Monitors * selector = new Monitors();

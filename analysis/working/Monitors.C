@@ -34,8 +34,8 @@ int canvasXY[2] = {1200 , 1600} ;// x, y
 //---histogram setting
 int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,     12};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,  3000};
-int      rdtERange[2] = {     0,  6000};
+int     rdtDERange[2] = {   200,  2000};
+int      rdtERange[2] = {  1000,  4000};
 int      elumRange[2] = { -1000,   6000};
 int       TACRange[3] = { 300,    300, 1800};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
@@ -987,8 +987,8 @@ Bool_t Monitors::Process(Long64_t entry)
          ///recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
-         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]);
-         hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);
+         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //dE-E
+         hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
 
          htacRecoil[i]->Fill(tac[0],rdt[i]);
          htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
@@ -1095,7 +1095,7 @@ void Monitors::Draw2DHist(TH2F * hist){
    
    if( hist->Integral() < 1000 ){
       hist->SetMarkerStyle(20);
-      hist->SetMarkerSize(0.1);
+      hist->SetMarkerSize(0.3);
       hist->Draw("");
    }else{
       hist->Draw("colz"); 
@@ -1187,7 +1187,7 @@ void Monitors::Terminate()
    if( isCutFileOpen ) text.DrawLatex(0.15, 0.8, "with Recoil gate");
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
    
-   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if(isTimeGateOn)text.DrawLatex(0.15, 0.7, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    
    ///----------------------------------- Canvas - 4
    //cCanvas->cd(4); hmult->Draw("colz");
@@ -1199,10 +1199,11 @@ void Monitors::Terminate()
    
    hEx->Draw();
    
-   double hExYMax = hEx->GetMaximum();
-   TLine line(6.76, 0, 6.76, hExYMax);
-   line.SetLineColor(2);
-   line.Draw("same");
+   //Separation energy line
+   //double hExYMax = hEx->GetMaximum();
+   //TLine line(6.76, 0, 6.76, hExYMax);
+   //line.SetLineColor(2);
+   //line.Draw("same");
    
    //htacEx->Draw("colz");
 
