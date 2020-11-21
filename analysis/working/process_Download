@@ -21,7 +21,7 @@ if [ ${RUN} == "all" ]; then
         fi
         rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_*" ${DATADIR}/.
         rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
-        scp  "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
+        cp  ${DATADIR}"/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
         rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
 
         echo "============================================="
@@ -67,7 +67,7 @@ elif [ ${PCName:0:5} == "phywl" ] || [ ${PCName} == "heliosdb" ] || [ ${PCName} 
     echo "RUN $RUN: Get the raw data `date`"
     rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
     rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
-    scp  "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
+    cp  ${DATADIR}"/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
     rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
 
     echo "============================================="

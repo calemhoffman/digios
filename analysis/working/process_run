@@ -3,12 +3,13 @@
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "$./process_run [RunNum] [Merge] [EventBuild] [GeneralSort] [Monitor]"
   echo "     RunNum = run number"
-  echo "      Merge =   1/0*     "  
-  echo "   EventBld = 2/1/0*   || 2 = with Trace"  
-  echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
-  echo " Monitors.C = 2/1/0*   || 1 = single run, 2 = using the list in ChainMonitors.C"
-  echo "                          10 = single run and post to websrv, 20 = list runs and post to websrv"
-  echo "        * negative option = force "
+  echo "      Merge =   1/0/-1      || 1 = merge, 0 = not merge, -1 = force merge "  
+  echo "   EventBld = 2/1/0/-1/-2   || 2 = with Trace"  
+  echo " GenralSort = n/1/0/-1/-n   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "   Monitors = 2/1/0         || 1 = single run,  2 = using the list in ChainMonitors.C"
+  echo "                              10 = single run and post to websrv, 20 = list runs and post to websrv"
+  echo ""
+  echo ""
   exit 1
 fi;
 
