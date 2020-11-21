@@ -22,7 +22,7 @@ void Cali_xf_xn(TTree * tree){
    const int rowDet = 4;
    const int colDet = 6;
    
-   int energyRange[3] = {500, 1000, 3000}; // bin, min, max
+   int energyRange[3] = {400, 1000, 2400}; // bin, min, max
    
 /**///========================================================  load tree
 
@@ -140,7 +140,7 @@ void Cali_xf_xn(TTree * tree){
       printf("---- find and fit peak with Gaussian using AutoFit.C \n");
       for( int i = 0; i < numDet; i++){
          cAlpha->cd(i+1);
-         energy[i] = fitAuto(q[i], -1, 0.3, "", false, 10);
+         energy[i] = fitAuto(q[i], -1, 0.3, 20, 4, "", false);
          int nPeaks = energy[i].size(); 
          printf("%2d | found %d peaks | ", i,  nPeaks);
          for( int j = 0; j < nPeaks; j++){

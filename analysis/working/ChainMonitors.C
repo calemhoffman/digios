@@ -4,29 +4,15 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
 
   if( RUNNUM == -1 || RUNNUM == -10){
+    ///********** start Marker for AutoCalibration.
 
-    //chain->Add("../root_data/gen_run00[6-8].root"); //alpha
+
+    //chain->Add("../root_data/gen_run00[4-6].root"); //alpha
     
-    //140 ug
-    //chain->Add("../root_data/gen_run01[3-7].root");
-    
-    //56 ug
-    //chain->Add("../root_data/gen_run01[8-9].root");
-    //chain->Add("../root_data/gen_run02[0-9].root");
-    //chain->Add("../root_data/gen_run03[0-5].root");
-    
-    //54 ug
-    //chain->Add("../root_data/gen_run03[6-9].root");
-    //chain->Add("../root_data/gen_run04[0-9].root");
-    //chain->Add("../root_data/gen_run05[0-9].root");
-    //chain->Add("../root_data/gen_run06[0-2].root");
-    
-    // 54 ug leakkage current changed
-    chain->Add("../root_data/gen_run06[3-9].root");
-    chain->Add("../root_data/gen_run07[0-9].root");
-    chain->Add("../root_data/gen_run08[0-9].root");
-    chain->Add("../root_data/gen_run09[0-9].root");
-    
+    chain->Add("../root_data/gen_run008.root"); //30Si(d,p)
+
+
+    ///********** end Marker for AutoCalibration.
   }else{
     
     TString fileName;
