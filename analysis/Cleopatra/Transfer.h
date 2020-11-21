@@ -21,7 +21,7 @@ double exDistFunc(Double_t *x, Double_t * par){
 void Transfer(
               string basicConfig = "reactionConfig.txt", 
          string heliosDetGeoFile = "detectorGeo.txt", 
-        string    excitationFile = "excitation_energies.txt", //when no file, only ground state
+        string    excitationFile = "Ex.txt", //when no file, only ground state
         TString      ptolemyRoot = "DWBA.root", // when no file, use isotropic distribution of thetaCM
         TString     saveFileName = "transfer.root",
         TString         filename = "reaction.dat"){ // when no file, no output.
@@ -225,6 +225,7 @@ void Transfer(
   printf("\e[32m#################################### excitation energies\e[0m\n");
   vector<double> ExKnown;
   vector<double> ExStrength;
+  vector<double> ExWidth;
   vector<double> y0; // intercept of e-z plot
   vector<double> kCM; // momentum of b in CM frame
   printf("----- loading excitation energy levels.");
@@ -239,10 +240,12 @@ void Transfer(
       if( line.substr(0,2) == "//" ) continue;
       if( line.substr(0,1) == "#" ) break;
       if ( i >= 0 ){
-        if( i%2 == 0 ) {
+        if( i%3 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
-        }else{
+        }else if (i%3 == 1) {
           ExStrength.push_back(atof(line.c_str()));
+        }else{
+          ExWidth.push_back(atof(line.c_str()));
         }
       }
       i = i + 1;
@@ -259,18 +262,19 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
       }
     }
   }else{
     printf("... fail ------> only ground state.\n");
     ExKnown.push_back(0.0);
     ExStrength.push_back(1.0);
+    ExWidth.push_back(0.0);
     reaction.SetExB(ExKnown[0]);
     reaction.CalReactionConstant();
     kCM.push_back(reaction.GetMomentumbCM());
@@ -571,10 +575,10 @@ void Transfer(
       //==== Set Ex of B
       if( ExKnown.size() == 1 ) {
         ExID = 0;
-        Ex = ExKnown[0];
+        Ex = ExKnown[0] + gRandom->Gaus(0, ExWidth[0]);
       }else{
         ExID = exDist->GetRandom();
-        Ex = ExKnown[ExID]; 
+        Ex = ExKnown[ExID]+ gRandom->Gaus(0, ExWidth[ExID]);
       }
       reaction.SetExB(Ex);
   
