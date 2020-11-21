@@ -5,6 +5,10 @@ echo "#############################################"
 
 daqDataPath=/media/DIGIOSDATA5
 
+echo ""
+echo -e "daqDataPath : \e[91m"${daqDataPath}"\e[0m"
+echo    "Don't change the expName.sh, change the SetUpNewExp."
+echo ""
 echo " The bach script do following things "
 echo " 1) git-fetch  "
 echo " 2) check repository is clean"
