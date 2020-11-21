@@ -6,9 +6,10 @@ echo "#############################################"
 daqDataPath=/media/DIGIOSDATA5
 
 echo ""
-echo -e "daqDataPath : \e[91m"${daqDataPath}"\e[0m"
+echo -e "daqDataPath : \033[0;91m"${daqDataPath}"\033[0m"
 echo    "Don't change the expName.sh, change the SetUpNewExp."
 echo ""
+echo "============================================="
 echo " The bach script do following things "
 echo " 1) git-fetch  "
 echo " 2) check repository is clean"
@@ -19,8 +20,7 @@ echo "    branch not exist --> create expName.sh"
 echo " 5) making directories for data, merged_data, root_data"
 echo " 6) create symbolic links to data, merged_data, root_data"
 echo " 7) if branch not exist --> clean up files, and git push"
-
-echo "#############################################"
+echo "============================================="
 
 #set git merge driver
 git config --global merge.ours.driver true
@@ -43,7 +43,7 @@ if [ ${gitCheck} -eq 0 ]; then
     echo "---- clean."
 else
     git status
-    echo -e "\e[93m=============== Please fix the git status \e[0m"
+    echo -e "\033[0;93m=============== Please fix the git status \033[0m"
     exit
 fi
 
