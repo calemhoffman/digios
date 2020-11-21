@@ -1,0 +1,58 @@
+#!/bin/bash
+
+echo "===================================================="
+echo " Show Trigger"
+echo "===================================================="
+
+D2B=({0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1}{0..1})
+
+ROUTER="1 2"
+PLANE="X Y"
+SYM="A B C D E F G H"
+
+
+for b in $PLANE
+do
+
+   echo "------------------------------------- $b Plane"
+
+   haha=0
+
+   for a in $ROUTER
+   do
+
+       ID=0
+
+       for c in $SYM
+       do
+
+       trigger=$(caget VME32:RTR${a}:reg_${b}_PLANE_MAP_${c}| awk '{print $2}')
+
+       VME=$((ID/4+$a+$haha))
+       DIG=$((ID%4+1))
+       ID=$((ID+1))
+
+       echo "VME:${VME} DIG:${DIG}, $b$a$c = bx${D2B[${trigger}]} = ${trigger}"
+
+       done
+
+       haha=$((haha+1))
+   done
+  
+done
+
+echo "############################### copy folowing into helios_setup_digitizer"
+
+for b in $PLANE
+do
+   echo "#------------------------------------- $b Plane"
+   echo "echo \"Setting "${b}"-plane\"" 
+   for a in $ROUTER
+   do
+       for c in $SYM
+       do
+       caget VME32:RTR${a}:reg_${b}_PLANE_MAP_${c}
+       done
+   done
+done
+echo "========= done."

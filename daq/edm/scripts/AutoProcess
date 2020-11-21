@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ $# -ne 1 ] && [ $# -ne 2 ] ; then
+    echo "AutoProcess  [min_int] "
+    echo "****** stop by control+C"
+    exit
+fi
+
+stopCount=$1
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+source ~/digios/expName.sh
+RUN=${LastRunNum}
+
+echo "###################################"
+echo -e "    ExpName = ${YELLOW} ${expName} ${NC}"
+echo "###################################"
+
+stopFlag=0
+sleepTime=60 #sec
+count=0
+
+while [  $stopFlag -eq 0 ]; do  
+
+    source ~/digios/expName.sh
+    RUN=${LastRunNum}
+
+    if [ $count -eq $stopCount ]; then 
+	echo "tell Mac to run ./process_run"
+	xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${RUN}" 1" &
+	count=0 
+    fi
+    
+    echo $(date) " | Run" ${RUN} " | time:" $count " min < " $stopCount " min| AutoProcess, stop by Crtl+C"	
+    count=$((count+1))
+
+    sleep $sleepTime
+    
+done
+
