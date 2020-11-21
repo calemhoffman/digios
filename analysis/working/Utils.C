@@ -302,15 +302,24 @@ void recoils(bool isLogz = false) {
   if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
   if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  
   if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
-  
+
+
+  TCanvas *crdtSum =  (TCanvas *) gROOT->FindObjectAny("crdtSum");
+  if( crdtSum == NULL ) crdtSum = new TCanvas("crdtSum",Form("raw RDT dE-Esum | %s", canvasTitle.Data()),100, 0, 1000,1000);
+  crdtSum->Clear();crdtSum->Divide(2,2);
+
+  if( isLogz ) crdtSum->cd(1)->SetLogz(); crdtSum->cd(1); hrdt2Dsum[0]->Draw("col");  
+  if( isLogz ) crdtSum->cd(2)->SetLogz(); crdtSum->cd(2); hrdt2Dsum[1]->Draw("col");  
+  if( isLogz ) crdtSum->cd(3)->SetLogz(); crdtSum->cd(3); hrdt2Dsum[3]->Draw("col");  
+  if( isLogz ) crdtSum->cd(4)->SetLogz(); crdtSum->cd(4); hrdt2Dsum[2]->Draw("col");    
   
   TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
-  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),1000,0, 500, 500);
+  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),0,0, 500, 500);
   crdtID->Clear();
   hrdtID->Draw("colz");
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
-  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),1500, 500, 1000, 1000);
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),700, 500, 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
   for( int i = 0; i < 8; i ++){
     crdtS->cd(i+1);

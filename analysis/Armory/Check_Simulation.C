@@ -188,7 +188,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
      string temp = exListMacro->GetListOfLines()->At(i)->GetName();
      if( temp[0] == '#' ) break;
      vector<string> tempStr = SplitStr(temp, " ");
-     printf("%s\n", temp.c_str());
+     printf("%d | %s \n", i, tempStr[0].c_str());
      exList.push_back(atof(tempStr[0].c_str()));
    }
   
