@@ -97,8 +97,8 @@ elif [ ${Arch} == "Darwin" ]; then
         expDIR=~/digios
 
         space=`df -ml | grep "/dev/disk1s2" | awk '{print $4}'` #in mb
-        spacePrecent=`df -ml | grep "/dev/disk2" | awk '{print $5}'`
-        spacePrecent="${spacePrecent:0:2}"
+        spacePrecent=`df -ml | grep "/dev/disk1s2" | awk '{print $5}'`
+        spacePrecent="${spacePrecent//%/}"
         spacePrecent=$((100-spacePrecent))
         echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
