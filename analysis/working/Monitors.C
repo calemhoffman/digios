@@ -3,6 +3,7 @@
 #include "Monitors.h"
 #include <TH2.h>
 #include <TH1.h>
+#include <TF1.h>
 #include <TStyle.h>
 #include <TCutG.h>
 #include <TGraph.h>
@@ -31,29 +32,29 @@ ULong64_t maxNumberEvent = 1000000000;
 int canvasXY[2] = {1200 , 1600} ;// x, y
 
 //---histogram setting
-int rawEnergyRange[2] = {   0,     3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,     12};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,   500};
-int      rdtERange[2] = {     0,   700};
-int      elumRange[2] = { 100,   6000};
+int     rdtDERange[2] = {   200,  2000};
+int      rdtERange[2] = {  1000,  4000};
+int      elumRange[2] = { -1000,   6000};
 int       TACRange[3] = { 300,    300, 1800};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 
-double     exRange[3] = {  20, -3, 6}; /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  40, -2, 8}; /// bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -100, 100};
 
 int    elumRateTimeRange[2] = {140, 10*60}; /// min
 
 //---Gate
-bool isTimeGateOn  = false;
-int timeGate[2]    = {-5, 10};             /// min, max, 1 ch = 10 ns
-double eCalCut     = 2;                   /// lower limit for eCal
+bool isTimeGateOn  = true;
+int timeGate[2]    = {-20, 10};             /// min, max, 1 ch = 10 ns
+double eCalCut     = 0.1;                   /// lower limit for eCal
 bool  isTACGate    = false;
 int tacGate[2]     = {-8000, -2000};
 int dEgate[2]      = {500,  1500};
 int Eresgate[2]    = {1000,4000};
 double thetaCMGate = 10;               /// deg
-double xGate       = 0.95;                   ///cut out the edge
+double xGate       = 1.2;                   ///cut out the edge
 vector<int> skipDetID = { 11 };
 
 TString rdtCutFile = "rdtCuts.root";
@@ -986,8 +987,8 @@ Bool_t Monitors::Process(Long64_t entry)
          ///recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
-         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]);
-         hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);
+         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //dE-E
+         hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
 
          htacRecoil[i]->Fill(tac[0],rdt[i]);
          htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
@@ -1094,7 +1095,7 @@ void Monitors::Draw2DHist(TH2F * hist){
    
    if( hist->Integral() < 1000 ){
       hist->SetMarkerStyle(20);
-      hist->SetMarkerSize(0.1);
+      hist->SetMarkerSize(0.3);
       hist->Draw("");
    }else{
       hist->Draw("colz"); 
@@ -1186,7 +1187,7 @@ void Monitors::Terminate()
    if( isCutFileOpen ) text.DrawLatex(0.15, 0.8, "with Recoil gate");
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
    
-   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if(isTimeGateOn)text.DrawLatex(0.15, 0.7, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    
    ///----------------------------------- Canvas - 4
    //cCanvas->cd(4); hmult->Draw("colz");
@@ -1198,10 +1199,11 @@ void Monitors::Terminate()
    
    hEx->Draw();
    
-   double hExYMax = hEx->GetMaximum();
-   TLine line(6.76, 0, 6.76, hExYMax);
-   line.SetLineColor(2);
-   line.Draw("same");
+   //Separation energy line
+   //double hExYMax = hEx->GetMaximum();
+   //TLine line(6.76, 0, 6.76, hExYMax);
+   //line.SetLineColor(2);
+   //line.Draw("same");
    
    //htacEx->Draw("colz");
 
@@ -1233,13 +1235,13 @@ void Monitors::Terminate()
    
    //hExi[14]->Draw();
    
-   helum4D->Draw();
-   text.DrawLatex(0.15, 0.8, Form("%d < elum < %d", 400, 600)); 
+   //helum4D->Draw();
+   //text.DrawLatex(0.15, 0.8, Form("%d < elum < %d", 400, 600)); 
    
-   ///Draw2DHist(hrdt2Dg[1]);
-   ///if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   ///if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   ///if( isCutFileOpen && numCut > 1) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[1]);
+   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 1) {cutG = (TCutG *)cutList->At(1) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 7
    cCanvas->cd(7); 
@@ -1248,29 +1250,29 @@ void Monitors::Terminate()
    
    //helum4D->Draw();
    
-   helumTAC->Draw("colz");
+   //helumTAC->Draw("colz");
    
-   ///Draw2DHist(hrdt2Dg[2]);
-   ///text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   ///if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   ///if( isCutFileOpen && numCut > 2) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[2]);
+   text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 2) {cutG = (TCutG *)cutList->At(2) ; cutG->Draw("same");}
    
    ///----------------------------------- Canvas - 8
    cCanvas->cd(8); 
    
    //helum4C->Draw();
    
-   helumSUM->Draw(); // H076_136Xe
+   //helumSUM->Draw(); // H076_136Xe
    
    
    ///helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", elumRateTimeRange[1]-elumRateTimeRange[0], elumRateTimeRange[0], elumRateTimeRange[1]);
    ///helumDBIC->Divide(helum4D, hBIC);
    ///helumDBIC->Draw();
    
-   ///Draw2DHist(hrdt2Dg[3]);
-   ///if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   ///if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   ///if( isCutFileOpen && numCut > 3) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
+   Draw2DHist(hrdt2Dg[3]);
+   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
+   if( isCutFileOpen && numCut > 3) {cutG = (TCutG *)cutList->At(3) ; cutG->Draw("same");}
    
    /************************* Save histograms to root file*/
    
@@ -1288,7 +1290,9 @@ void Monitors::Terminate()
       
       /// run puhs_to_websrv.sh
       TString cmd;
-      cmd.Form(".! ./push_to_websrv.sh %s %s", outFileName.Data(), canvasTitle.ReplaceAll(" ", "").Data()); 
+      printf("|%s|\n", canvasTitle.Data());
+
+      cmd.Form(".! ../Armory/push_to_websrv.sh %s %s", outFileName.Data(), canvasTitle.ReplaceAll(" ", "").Data()); 
       gROOT->ProcessLine(cmd);
             
       gROOT->ProcessLine(".q");

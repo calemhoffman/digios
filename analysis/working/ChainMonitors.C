@@ -4,29 +4,23 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   TChain * chain = new TChain("gen_tree");
 
   if( RUNNUM == -1 || RUNNUM == -10){
+    ///********** start Marker for AutoCalibration.
 
-    //chain->Add("../root_data/gen_run00[6-8].root"); //alpha
+
+    //chain->Add("../root_data/gen_run00[4-6].root"); //alpha
     
-    //140 ug
-    //chain->Add("../root_data/gen_run01[3-7].root");
+    //chain->Add("../root_data/gen_run008.root"); //30Si(d,p)
     
-    //56 ug
-    //chain->Add("../root_data/gen_run01[8-9].root");
-    //chain->Add("../root_data/gen_run02[0-9].root");
-    //chain->Add("../root_data/gen_run03[0-5].root");
+    chain->Add("../root_data/gen_run010.root"); //29Al(d,p), overnight tune
     
-    //54 ug
-    //chain->Add("../root_data/gen_run03[6-9].root");
-    //chain->Add("../root_data/gen_run04[0-9].root");
-    //chain->Add("../root_data/gen_run05[0-9].root");
-    //chain->Add("../root_data/gen_run06[0-2].root");
-    
-    // 54 ug leakkage current changed
-    chain->Add("../root_data/gen_run06[3-9].root");
-    chain->Add("../root_data/gen_run07[0-9].root");
-    chain->Add("../root_data/gen_run08[0-9].root");
-    chain->Add("../root_data/gen_run09[0-9].root");
-    
+    chain->Add("../root_data/gen_run01[1-8].root"); //29Al(d,p)
+    chain->Add("../root_data/gen_run019.root"); //29Al(d,p), new tune, recoil file no open
+    chain->Add("../root_data/gen_run02[0-9].root"); //29Al(d,p), new tune
+
+//    chain->Add("../root_data/gen_run03[0-9].root"); //29Al(d,p), new tune
+
+
+    ///********** end Marker for AutoCalibration.
   }else{
     
     TString fileName;
@@ -46,7 +40,6 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   //Simple call TSelector
   //chain->Process("Monitors.C+");
-  
   
   //Some input to TSelector
   Monitors * selector = new Monitors();
