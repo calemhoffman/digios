@@ -16,6 +16,8 @@ int detRowID, detID;
 
 double loop;
 
+vector<double> absPos;
+
 //double c = 299.792458; // mm/ns
 
 double kcm(double Ex) {
@@ -73,14 +75,19 @@ double yHit(double thetaCM, double phi, int Q, double Ex, double prepdist, doubl
    int s = (Bfield > 0 ? 1 : -1);
    double rho0 = rho(thetaCM, Q, Bfield, Ex);
    
-   return rho0 * ( cos(z/z00 * TMath::TwoPi() - s * phi)  - s * cos(phi));
+   return rho0 * s * ( cos(z/z00 * TMath::TwoPi() - s * phi)  -  cos(phi));
 }
 
-void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prepdist, double Bfield, int nLoop, bool inOut,  bool debug){
+void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prepdist, double Bfield, int nLoop, int inOut,  bool debug){
 
    double z00 = z0(thetaCM, Q, Ex);
    
    zPos0 = z00;
+   
+   int s = (Bfield > 0 ? 1 : -1);
+   
+   //inOut = 1 from outside
+   //inOut = 0 from inside
    
    double rho0 = rho(thetaCM, Q, Bfield, Ex);
    
@@ -94,11 +101,14 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
    vector<double> zCan;
    vector<int> dID; //detRowID
    
-   for( int i = 0; i < nSide *2 ; i++){
+   int iStart = ( s == 1 ? 0 : -nSide );
+   int iEnd = ( s == 1 ? 2* nSide : nSide );
+   
+   for( int i = iStart; i < iEnd ; i++){
       
       double phiD = TMath::TwoPi()/nSide * i ;
       
-      double zP = zHit(thetaCM, Q, Ex, 2*nLoop+1, prepdist, Bfield, phi - phiD);
+      double zP = zHit(thetaCM, Q, Ex, 2*nLoop+inOut, prepdist, Bfield, phi - phiD);
       double xP = xHit(thetaCM, phi, Q, Ex, prepdist, Bfield, zP);
       double yP = yHit(thetaCM, phi, Q, Ex, prepdist, Bfield, zP);
       
@@ -110,7 +120,7 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
       }
       
       ///Selection
-      if( !TMath::IsNaN(zP) && 0< zP/z00 && nLoop-1 < zP/z00 && zP/z00 < nLoop ) {
+      if( !TMath::IsNaN(zP) && 0< zP/z00 && TMath::Max(0, nLoop-1) < zP/z00 && zP/z00 < nLoop ) {
          zCan.push_back(zP);
          dID.push_back(i);
       }
@@ -122,6 +132,7 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
       yPos = TMath::QuietNaN();
       loop = TMath::QuietNaN();
       detRowID = -1;
+      return;
    }
    
    //find the 
@@ -129,7 +140,7 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
    double dMin = 1;   
    for( int i = 0; i < (int) zCan.size(); i++){
       
-      double dd = abs(zCan[i]/z00 - nLoop);
+      double dd = abs(zCan[i]/z00 - (nLoop - (1-inOut)));
       
       if( debug) printf(" %d | zP : %8.3f mm; loop : %9.5f ", i, zCan[i], zCan[i]/z00); 
       
@@ -143,11 +154,25 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
          
          double phiD = TMath::TwoPi()/nSide * dID[i] ;
          
+         // Check is in or out 
+         double dphi = phi - phiD ;
+         double hitDir = cos( zPos/z00 * TMath::TwoPi() - s * dphi );
+         if( debug ) printf(" hitDir : %4.1f ", hitDir);
+         if( ( inOut == 1 && hitDir > 0 ) || (inOut == 0 && hitDir < 0 ) ) {
+             printf(" != %f ", prepdist);
+             zPos = TMath::QuietNaN();
+             xPos = TMath::QuietNaN();
+             yPos = TMath::QuietNaN();
+             loop = TMath::QuietNaN();
+             detRowID = -1;
+             return;
+         }
+         
+         
+         // this must be false, otherwise, calculation error
          double a = xPos * cos(phiD) + yPos * sin(phiD);
-         
          if( debug ) printf(" a : %f ", a);
-         
-         if( abs(a - prepdist) > 0.01) { // this must be false, otherwise, calculation error
+         if( abs(a - prepdist) > 0.01) { 
              printf(" != %f ", prepdist);
              zPos = TMath::QuietNaN();
              xPos = TMath::QuietNaN();
@@ -155,6 +180,7 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
              loop = TMath::QuietNaN();
              detRowID = -1;
          }
+         
          if( debug) printf(" <--- pick");
       }
       
@@ -165,32 +191,28 @@ void HitCal(double thetaCM, double phi, int nSide, int Q, double Ex, double prep
 
 }
 
-int DetAcceptance(int nSide, double prepdist){
-   
+void DetGeo(vector<double> arrayPos, int nSide, double prepdist, double length, double dist){
+  
+  absPos.clear();
+  
+  int n = (int) arrayPos.size();
+  for( int i = 0; i < n ; i++){
+    
+    if( dist < 0 ) {
+       absPos.push_back( - arrayPos[n-1 -i] + dist );
+       printf("%d | %8.2f - %8.2f \n", i, absPos.back() - length , absPos.back());
+    }else{
+       absPos.push_back( arrayPos[i] + dist );
+       printf("%d | %8.2f - %8.2f \n", i, absPos.back() , absPos.back()+ length );
+    }
+  }
+  
+}
 
-   vector<double> arrayPos = {0, 60, 120, 180};
-   double dist = -100;
-   double length = 50;
-   double width = 10;
-   
-      
-   //======= detector absolute position
-
-   vector<double> absPos;
-   int n = (int) arrayPos.size();
-   for( int i = 0; i < n ; i++){
-      
-      if( dist < 0 ) {
-         absPos.push_back( - arrayPos[n-1 -i] + dist );
-         printf("%d | %8.2f - %8.2f \n", i, absPos.back() - length , absPos.back());
-      }else{
-         absPos.push_back( arrayPos[i] + dist );
-         printf("%d | %8.2f - %8.2f \n", i, absPos.back() , absPos.back()+ length );
-      }
-   }
+int DetAcceptance(double length, double width, double prepdist, double dist){
    
    //===== check zPos, 
-
+   int n = (int) absPos.size();
    double sDist = sqrt(xPos*xPos + yPos*yPos - prepdist * prepdist);
    if( sDist > width/2 ) return -1; // when outside the detector width
    
@@ -222,12 +244,20 @@ void transfer(){
    int bA =  1; int bZ = 1;
 
    double KEA = 10; // MeV/u of A
-   double Bfield = 2.5; //T
-   double prepdist = 11.5; // mm
+   double Bfield = -2.5; //T
+
    
    int arrayNSide = 4; //num of array sides
+   vector<double> arrayPos = {0, 60, 120, 180};
+   double dist = -100;
+   double length = 50;
+   double perpdist = 11.5; // mm
+   double width = 10;
    
    //============== end of user input
+   
+   DetGeo(arrayPos, arrayNSide, perpdist, length, dist);
+   
    
    int BA = AA + aA - bA;
    int BZ = AZ + aZ - bZ;
@@ -248,7 +278,7 @@ void transfer(){
    gamm = 1/sqrt(1-beta*beta);
    
    Mc = sqrt(2*massa*T + pow(massa + massA,2));
-   alpha = Bfield * bZ * c / TMath::TwoPi() / 1000; // MeV/mm / beta
+   alpha = abs(Bfield) * bZ * c / TMath::TwoPi() / 1000; // MeV/mm / beta
    
    printf("===================================\n");
    printf("Mass A  :   %8.2f MeV/c2\n", massA);
@@ -262,12 +292,13 @@ void transfer(){
 
 
    int targetLoop = 1;
+   int inOut = 0; // 0 = out,  1 = in
    double thetaCM = 40 * TMath::DegToRad();
    double phi = 20 * TMath::DegToRad();
 
-   HitCal(thetaCM, phi, arrayNSide, bZ, 0, prepdist, Bfield, targetLoop, true);
+   HitCal(thetaCM, phi, arrayNSide, bZ, 0, perpdist, Bfield, targetLoop, inOut, true);
    
-   int hitID = DetAcceptance(arrayNSide, prepdist);
+   int hitID = DetAcceptance(length, width, perpdist, dist);
 
    printf("(z,x,y) = (%8.3f, %8.3f, %8.3f) , loop : %9.6f, Row : %d , hitID : %d \n", 
        zPos, xPos, yPos, loop, detRowID, hitID);
@@ -276,12 +307,14 @@ void transfer(){
       zPos = zPos + zPos0;
       loop += 1;
       targetLoop += 1;
-      hitID = DetAcceptance(arrayNSide, prepdist);
+      hitID = DetAcceptance(length, width, perpdist, dist);
       printf("(z,x,y) = (%8.3f, %8.3f, %8.3f) , loop : %9.6f, Row : %d , hitID : %d \n",  zPos, xPos, yPos, loop, detRowID, hitID);
    }
    
-   HitCal(thetaCM, phi, arrayNSide, bZ, 0, prepdist, Bfield, targetLoop, true);
+   //HitCal(thetaCM, phi, arrayNSide, bZ, 0, prepdist, Bfield, targetLoop, inOut, true);
    
-   printf("(z,x,y) = (%8.3f, %8.3f, %8.3f) , loop : %9.6f, Row : %d , hitID : %d \n", 
-       zPos, xPos, yPos, loop, detRowID, hitID);
+   //printf("(z,x,y) = (%8.3f, %8.3f, %8.3f) , loop : %9.6f, Row : %d , hitID : %d \n", 
+   //    zPos, xPos, yPos, loop, detRowID, hitID);
+   
+   
 }
