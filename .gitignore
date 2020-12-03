@@ -3,8 +3,8 @@ data
 root_data
 merged_data
 analysis/GEBSort/GEBMerge
-analysis/GEBSort/GEBSort_nogeb
-analysis/GEBSort/GEBSort_nogeb_trace
+analysis/GEBSort/EventBuilder
+analysis/GEBSort/EventBuilder_trace
 analysis/working/slurm.sh
 *.Ex.txt
 *.Xsec.txt

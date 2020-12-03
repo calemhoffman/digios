@@ -14,8 +14,6 @@ nevents           1000000000
 # number of event in a block to be printed out
 printevents       1
 
-# v/c , gammasphere stuff
-beta              0.0
 # number of event to be written in Log
 modwrite          100000
 
@@ -26,64 +24,4 @@ tsnumwrites       100000
 timewin           1000
 
 #-------------------------------------------
-# mode2 calibration pars. 
-# Please note: This only affects
-# mode2 data. Mode1 data is calibrated in the
-# tracking code if necessary;
-
-;CCcal CCenergy.cal
-;SEGcal SEGenergy.cal
-
-#---------------------------------
-# specify beam direction in GT cord system
-
-;-- normal setup
-beamdir 0 0 1
-
-;-- for BGS setup
-;beamdir 0.2764 0.8507 -0.4472
-
-
-#----------------------------
-# mode 1 data sort parameters 
-#----------------------------
-
-#---------------------------------
-# number of interactions range we allow
-# 1: single interaction
-# 2: double interaction
-# etc
-
-ndetlimits 1 8
-
-#---------------------------------
-# mode1 and mode2 multiplicity limits
-# does not affct all spectra. This condition
-# is applied to the mode1 data. It is also applied
-# to the CC gg matrix, event though it not really
-# the same thing...
-
-multlims 1 20
-
-#---------------------------------
-# Figure of Merit limits for some spectra
-# and the gg gamma-gamm matrix
-#
-#         +-- for this ndet value (number of sectors that fired)
-#         |  +-- lower FOM limit
-#         |  |   +-- upper FOM limit
-#         |  |   |
-fomlimits 1 0.0 0.8
-fomlimits 2 0.0 0.8
-fomlimits 3 0.0 0.8
-fomlimits 4 0.0 0.8
-fomlimits 5 0.0 0.8
-fomlimits 6 0.0 0.8
-fomlimits 7 0.0 0.8
-
-#---------------------------------------------------
-# special for data that already has world coordinates
-
-;nocrystaltoworldrot
-
 exit
