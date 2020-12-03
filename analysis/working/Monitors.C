@@ -1302,9 +1302,9 @@ void Monitors::Terminate()
    
    StpWatch.Start(kFALSE);
    
-   gROOT->ProcessLine(".L Utils.C");
+   gROOT->ProcessLine(".L ../Armory/Monitors_Util.C");
    //gROOT->ProcessLine(Form("FindBesCanvasDivision(%d)", numDet));
-   printf("=============== loaded Utils.C\n");
+   printf("=============== loaded Monitors_Utils.C\n");
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");
    printf("=============== loaded Armory/AutoFit.C\n");
    gROOT->ProcessLine(".L ../Armory/RDTCutCreator.C");

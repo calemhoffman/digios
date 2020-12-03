@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ./process_PathSetting
+source ../Armory/process_PathSetting
 
 RUN1=$1
 RUN2=$2
@@ -84,15 +84,15 @@ for iRUN in $(seq ${RUN1} ${RUN2}); do
 
     #######################################
     ####################  Download raw data
-    ./process_Download $iRUN
+    ../Armory/process_Download $iRUN
 
     #######################################
     #################### Merge
-    ./process_Merge $iRUN $isMerge
+    ../Armory/process_Merge $iRUN $isMerge
 
     #######################################
     #################### Sort and GeneralSort
-    ./process_Sort $iRUN $isSort $isGeneralSort
+    ../Armory/process_Sort $iRUN $isSort $isGeneralSort
 
 done
 
