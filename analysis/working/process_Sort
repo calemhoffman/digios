@@ -17,13 +17,13 @@ runID=$1
 isSort=$2
 isGeneralSort=$3
 
-GEBSort=GEBSort_nogeb
+GEBSort=EventBuilder
 GEBSortMsg="using GEBSort_nogeb"
 GeneralSortMsg="no trace"
 
 if [ ${isGeneralSort} -ge 2 ] || [  $isSort -eq 2 ] || [ $isSort -eq -2 ] ; then
   isTrace=1
-  GEBSort=GEBSort_nogeb_trace
+  GEBSort=EventBuilder_trace
 fi
 
 #just in case people put %03d as RUN
@@ -77,7 +77,7 @@ elif [ $isSort -gt 0 ]; then
 
     if [ ${mergedDataTime} -ge ${rootDataTime} ]; then
         echo -e "${RED}=================== RUN $RUN: ${GEBSort} started at `date`${NC}"
-        ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
+        ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root  -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
         echo -e "${RED}====================== RUN $RUN: ${GEBSort} DONE at `date`${NC}"
         echo -e "saved root file >>>>>>  ${YELLOW} ${ROOTDIR}/run${RUN}.root ${NC} "
         echo "=================================================================="
@@ -91,7 +91,7 @@ elif [ $isSort -lt 0 ]; then # force Sort
     echo -e "${RED}=================== RUN $RUN: ${GEBSort} started at `date`${NC}"
     ls -lh  ${MERGDIR}/GEBMerged_run${RUN}*
     echo -e "${YELLOW} >>>>>>>>>>>>> force sort by user ${NC}"
-    ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root RECREATE -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
+    ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root  -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
     echo -e "${RED}====================== RUN $RUN: ${GEBSort} DONE at `date`${NC}"
     echo -e "saved root file >>>>>>  ${YELLOW} ${ROOTDIR}/run${RUN}.root ${NC} "
     echo "=================================================================="

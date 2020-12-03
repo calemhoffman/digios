@@ -34,5 +34,5 @@ NC='\033[0m'
 
 dir=$(pwd)
 cd $GEBDIR
-make offline
+make all
 cd $dir
