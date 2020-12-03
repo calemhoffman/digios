@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
-  echo "$./process_Slurm [RunNum1] [RunNum2] [time] [Merge] [EventBuild] [GeneralSort]"
+  echo "$process_Slurm [RunNum1] [RunNum2] [time] [Merge] [EventBuild] [GeneralSort]"
   echo "    RunNum1  = start run number"
   echo "    RunNum2  = stop run number"
   echo "       time  = Allocate time, e.g. 01:00:00"
@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ./process_PathSetting
+source ../Armory/process_PathSetting
 
 RUN1=$1
 RUN2=$2
@@ -101,7 +101,7 @@ if [ $isBuild -ne 0 ]; then
 fi
 echo 'echo "==================================="' >> $slurmFile
 
-echo "./process_MultiRuns $RUN1 $RUN2 $isMerge $isBuild $isGeneralSort" >> $slurmFile
+echo "process_MultiRuns $RUN1 $RUN2 $isMerge $isBuild $isGeneralSort" >> $slurmFile
 
 sbatch $slurmFile
 

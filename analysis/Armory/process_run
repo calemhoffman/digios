@@ -63,15 +63,15 @@ echo "============================================="
 #######################################
 ####################  Download raw data
 if [ $isMerge -ne 0 ]; then
-  ./process_Download $RUN
+  ../Armory/process_Download $RUN
 fi
 #######################################
 #################### Merge
-./process_Merge $RUN $isMerge 
+../Armory/process_Merge $RUN $isMerge 
 
 #######################################
 #################### Sort and GeneralSort
-./process_Sort $RUN $isSort $isGeneralSort 
+../Armory/process_Sort $RUN $isSort $isGeneralSort 
 
 ########################################
 #################### Monitor

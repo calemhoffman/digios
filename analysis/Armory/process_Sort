@@ -10,7 +10,7 @@ if [ $# -lt 3 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ./process_PathSetting
+source ../Armory/process_PathSetting
 
 RUN=$1
 runID=$1
@@ -146,7 +146,7 @@ elif [ $isGeneralSort -gt 0 ]; then
             elif [ $isGeneralSort -gt 1 ]; then
                 echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
             fi
-            root -l -q -b "process_run.C(${runID}, ${isGeneralSort})"
+            root -l -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
 
         else
             echo -e "${BLUE}gen_run${RUN}.root are newer than run${RUN}.root. No need to sort again.${NC}"
@@ -165,6 +165,6 @@ elif [ ${isGeneralSort} -lt 0 ]; then
     elif [ $isGeneralSort -lt -1 ]; then
         echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
     fi
-    root -l -q -b "process_run.C(${runID}, ${isGeneralSort})"
+    root -l -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
 fi
 
