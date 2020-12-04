@@ -2,7 +2,7 @@
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "$./process_run [RunNum] [Merge] [EventBuild] [GeneralSort] [Monitor]"
-  echo "     RunNum = run number"
+  echo "     RunNum = run number / \"lastRun\" "
   echo "      Merge =   1/0/-1      || 1 = merge, 0 = not merge, -1 = force merge "  
   echo "   EventBld = 2/1/0/-1/-2   || 2 = with Trace"  
   echo " GenralSort = n/1/0/-1/-n   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
@@ -36,6 +36,13 @@ if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 
   GEBSort=GEBSort_nogeb_trace
   if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then GeneralSortMsg="trace with ${isGeneralSort} core"; fi
   OverRideMonitor="overrided by GeneralSortTrace."
+fi
+
+if [ ${RUN} == "lastRun" ]; then 
+  source ../Armory/process_PathSetting
+  IP=192.168.1.2
+  rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
+  RUN=${LastRunNum}
 fi
 
 #remove any zero
