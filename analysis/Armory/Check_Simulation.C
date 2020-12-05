@@ -423,19 +423,19 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       
       if( pID == pHitID ){
          printf("=======================meaning of Hit ID\n");
-         printf("  1 = light recoil hit array & heavy recoil hit recoil\n");
-         printf("  0 = when no detector\n");
-         printf(" -1 = light recoil blocked by recoil detector\n");
-         printf(" -2 = heavy recoil missed recoil detector\n");
-         printf(" -3 = light recoil looped over 10 loops\n");
-         printf(" -4 = light recoil over shoot array \n");
-         printf(" -5 = light recoil hit array from inside, becasue of math\n");
-         printf(" -6 = light recoil blocked by the structure between target and array detector\n");
-         printf(" -7 = light recoil hit the gap between array detectors (along z)\n");
-         printf(" -8 = light recoil hit the gap between array detectors (along xy)\n");
-         printf(" -9 = light recoil don't hit any array detectors (exclude above hit-ID)\n");
-         printf("-10 = light recoil hit HELIOS wall or go to opposite direction.\n");
-         printf("            (e.g. upstream array, light particle go downstream)\n");
+         printf("   1 = light recoil hit array & heavy recoil hit recoil\n");
+         printf("   0 = no detector\n");
+         printf("  -1 = light recoil go opposite side of array\n");
+         printf("  -2 = light recoil hit > det width\n");
+         printf("  -3 = light recoil hit > array \n");
+         printf("  -4 = light recoil hit blocker \n");
+         printf(" -10 = light recoil orbit radius too big  \n");
+         printf(" -11 = light recoil orbit radius too small\n");
+         printf(" -12 = when reocol at the same side of array, light recoil blocked by recoil detector\n");
+         printf(" -13 = more than 3 loops\n");
+         printf(" -14 = heavy recoil did not hit recoil  \n");
+         printf(" -15 = cannot find hit on array\n");
+         printf(" -20 = unknown\n");
          printf("===========================================\n");
          
          TH1F * hHit = new TH1F("hHit", "hit; hit-ID; count", 13, -11, 2);

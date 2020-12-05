@@ -112,7 +112,6 @@ void Transfer(
     }
     cFile.close();
   }
-
   //=============================================================
   //=============================================================
   //=============================================================
@@ -152,6 +151,8 @@ void Transfer(
 
   bool coinRecoil = helios.GetCoincidentWithRecoil();
   printf(" is Coincident with Recoil and Array ? %s\n", coinRecoil ? "Yes" : "No");
+
+  helios.SetBeamPosition(xBeam, yBeam);
   
   eSigma = helios.GetDetEnergyResol();
   zSigma = helios.GetDetPositionResol();
@@ -357,25 +358,21 @@ void Transfer(
   double thetaCM;
   tree->Branch("thetaCM", &thetaCM, "thetaCM/D");
   
-  double e, z, x, t;
-  tree->Branch("e", &e, "e/D");
-  tree->Branch("x", &x, "x/D");
-  tree->Branch("z", &z, "z/D");
-  double z0; tree->Branch("z0", &z0, "z0/D");
-  tree->Branch("t", &t, "t/D");
-  double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
-  
-  double recoilT; // particle-B hit time
-  tree->Branch("recoilT", &recoilT, "recoilT/D");
+  double e, z, detX, t;
+  tree->Branch("e", &e, "energy_light/D");
+  tree->Branch("x", &detX, "detector_x/D");
+  tree->Branch("z", &z, "array_hit_z/D");
+  double z0; tree->Branch("z0", &z0, "z-cycle/D");
+  tree->Branch("t", &t, "cycle_time_light/D");
+  double tB; tree->Branch("tB", &tB, "recoil_hit_time/D");   /// hit time for recoil on the recoil detector
   
   int loop, detID, detRowID;
   tree->Branch("detID", &detID, "detID/I");
   tree->Branch("detRowID", &detRowID, "detRowID/I");
   tree->Branch("loop", &loop, "loop/I");
   
-  double dphi, rho; //rad of rotation, and radius
-  tree->Branch("dphi", &dphi, "dphi/D");
-  tree->Branch("rho", &rho, "rho/D");
+  double rho; //orbit radius
+  tree->Branch("rho", &rho, "orbit_radius_light/D");
   
   int ExAID;
   double ExA;
@@ -497,7 +494,7 @@ void Transfer(
   for( int j = 0 ; j < n; j++){
     double px[100];
     double py[100];
-    double a = helios.GetDetectorA();
+    double a = helios.GetDetRadius();
     double q = TMath::Sqrt(mb*mb + kCM[j] * kCM[j] );
     for(int i = 0; i < 100; i++){
       double thetacm = TMath::Pi()/TMath::Log(100) * (TMath::Log(100) - TMath::Log(100-i)) ;//using log scale, for more point in small angle.
@@ -522,7 +519,7 @@ void Transfer(
   for( int j = 0 ; j < n; j++){
     double px[100];
     double py[100];
-    double a = helios.GetDetectorA();
+    double a = helios.GetDetRadius();
     double q = TMath::Sqrt(mb*mb + kCM[j] * kCM[j] );
     for(int i = 0; i < 100; i++){
       double thetacm = (i + 8.) * TMath::DegToRad();
@@ -668,64 +665,71 @@ void Transfer(
     ///printf(" thetaCM : %f \n", thetaCM * TMath::RadToDeg());
     
     if( Tb > 0  || TB > 0 ){
-      hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
+      helios.CalArrayHit(Pb, zb);
+      helios.CalRecoilHit(PB, zB);
+      hit = 2;
+      while( hit > 1 ){ hit = helios.DetAcceptance(); }
       
-    e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
-    z = helios.GetZ() ; 
-    z0 = helios.GetZ0() ; 
-    x = helios.GetX() + gRandom->Gaus(0, zSigma);
-    t = helios.GetTime();
-    tB = helios.GetRecoilTime();
-    loop = helios.GetLoop();
-    detID = helios.GetDetID();
-    detRowID = helios.GetDetRowID();
-    dphi = helios.GetdPhi();
-    rho = helios.GetRho();
-    rhoArray = helios.GetRhoHit();
+      trajectory orb_b = helios.GetTrajectory_b();
+      trajectory orb_B = helios.GetTrajectory_B();
+      
+      e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
 
-    rhoRecoil = helios.GetRecoilRhoHit();
-    xArray = helios.GetXPos(z);
-    yArray = helios.GetYPos(z);
-    z += gRandom->Gaus(0, zSigma);
+      double ranX = gRandom->Gaus(0, zSigma);
+      z = orb_b.z + ranX;
+      detX = helios.GetDetX() + ranX;
+ 
+      z0 = orb_b.z0;
+      t = orb_b.t;
+      loop = orb_b.loop;
+      detID = orb_b.detID;
+      detRowID = orb_b.detRowID;
+      rho = orb_b.rho;
+      rhoArray = orb_b.R;
+      
+      xArray = orb_b.x;
+      yArray = orb_b.y;
+      
 
-    //ELUM
-    if( zElum1 != 0 ){
-      xElum1 = helios.GetXPos(zElum1);
-      yElum1 = helios.GetYPos(zElum1);
-      rhoElum1 = helios.GetR(zElum1);
-    }
-    if( zElum2 != 0 ){
-      xElum2 = helios.GetXPos(zElum2);
-      yElum2 = helios.GetYPos(zElum2);
-      rhoElum2 = helios.GetR(zElum2);
-    }
+      //ELUM
+      if( zElum1 != 0 ){
+        xElum1 = helios.GetXPos(zElum1);
+        yElum1 = helios.GetYPos(zElum1);
+        rhoElum1 = helios.GetR(zElum1);
+      }
+      if( zElum2 != 0 ){
+        xElum2 = helios.GetXPos(zElum2);
+        yElum2 = helios.GetYPos(zElum2);
+        rhoElum2 = helios.GetR(zElum2);
+      }
 
-    //Recoil
-    recoilT = helios.GetRecoilTime();
-    xRecoil = helios.GetRecoilXHit();
-    yRecoil = helios.GetRecoilYHit();
+      //Recoil
+      rhoRecoil = orb_B.R;
+      tB = orb_B.t;
+      xRecoil = orb_B.x;
+      yRecoil = orb_B.y;
 
-    //other recoil detectors
-    if ( zRecoil1 != 0 ){
-      xRecoil1 = helios.GetRecoilXPos(zRecoil1);
-      yRecoil1 = helios.GetRecoilYPos(zRecoil1);
-      rhoRecoil1 = helios.GetRecoilR(zRecoil1);
-    }
-    if ( zRecoil2 != 0 ){
-      xRecoil2 = helios.GetRecoilXPos(zRecoil2);
-      yRecoil2 = helios.GetRecoilYPos(zRecoil2);
-      rhoRecoil2 = helios.GetRecoilR(zRecoil2);
-    }
-    
-    reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());
-    ExCal = reaction.GetEx();
-    thetaCMCal = reaction.GetThetaCM();
+      //other recoil detectors
+      if ( zRecoil1 != 0 ){
+        xRecoil1 = helios.GetRecoilXPos(zRecoil1);
+        yRecoil1 = helios.GetRecoilYPos(zRecoil1);
+        rhoRecoil1 = helios.GetRecoilR(zRecoil1);
+      }
+      if ( zRecoil2 != 0 ){
+        xRecoil2 = helios.GetRecoilXPos(zRecoil2);
+        yRecoil2 = helios.GetRecoilYPos(zRecoil2);
+        rhoRecoil2 = helios.GetRecoilR(zRecoil2);
+      }
+      
+      reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius());
+      ExCal = reaction.GetEx();
+      thetaCMCal = reaction.GetThetaCM();
 
-    //change thetaCM into deg
-    thetaCM = thetaCM * TMath::RadToDeg();
+      //change thetaCM into deg
+      thetaCM = thetaCM * TMath::RadToDeg();
     
     }else{
-      hit = -11;
+      hit = -404;
     }
 
     if( hit == 1)  count ++;
