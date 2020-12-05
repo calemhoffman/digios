@@ -230,6 +230,7 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
      TVector3 ub = vb.Orthogonal();
      vb.Rotate(thetaCM, ub);
      vb.Rotate(phiCM + TMath::PiOver2(), va); // somehow, the calculation turn the vector 90 degree.
+     //vb.Rotate(phiCM , va); // somehow, the calculation turn the vector 90 degree.
    }
    
    //--- from Pb
@@ -255,6 +256,7 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
    
    this->Pb = Pb;
    this->PB = PB;
+   
    
    return output;   
 }
@@ -327,19 +329,54 @@ int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a){
 //input Lorentz vector, detector configuration
 //output e, z, Ex, thetaCM, etc
 //======================================================= 
+
+struct trajectory{
+   double theta, phi;
+   double vt, vp; // tranvser and perpendicular velocity
+   double rho;    // orbit radius
+   double z0, t0; // position cycle
+   double x, y, z; // hit position
+   double t; //actual orbit time;
+   double R; //hit radius = sqrt(x^2+y^2);
+   int detID, detRowID; 
+   int loop;
+   double effLoop;
+};
+
+void PrintTrajectory(trajectory a){
+   printf("=====================\n");
+   printf("    theta : %f deg\n", a.theta*TMath::RadToDeg());
+   printf("      phi : %f deg\n", a.phi*TMath::RadToDeg());
+   printf("       vt : %f mm/ns\n", a.vt);
+   printf("       vp : %f mm/ns\n", a.vp);
+   printf("      rho : %f mm\n", a.rho);
+   printf("       z0 : %f mm\n", a.z0);
+   printf("       t0 : %f ns\n", a.t0);
+   printf("(x, y, z) : (%f, %f. %f) mm\n", a.x, a.y, a.z);
+   printf("        R : %f mm\n", a.R);
+   printf("        t : %f ns\n", a.t);
+   printf("  effLoop : %f cycle\n", a.effLoop);
+   printf("     Loop : %d cycle\n", a.loop);
+   printf(" detRowID : %d \n", a.detRowID);
+   printf("    detID : %d \n", a.detID);
+   
+}
+
 class HELIOS{
 public:
 
    HELIOS();
    ~HELIOS();
    
-   void SetCoincidentWithRecoil(bool TorF){
-      this->isCoincidentWithRecoil = TorF;
-   }
+   void SetCoincidentWithRecoil(bool TorF){ this->isCoincidentWithRecoil = TorF;}
    bool GetCoincidentWithRecoil(){return this->isCoincidentWithRecoil;}
    bool SetDetectorGeometry(string filename);
+   void SetBeamPosition(double x, double y) { xOff = x; yOff = y;}
    
-   void OverrideMagneticField(double BField){ this->Bfield = BField;}
+   void OverrideMagneticField(double BField){ 
+      this->Bfield = BField;
+      this->sign = BField > 0 ? 1: -1;
+   }
    void OverrideMagneticFieldDirection(double BfieldThetaInDeg){ this->BfieldTheta = BfieldThetaInDeg;}
    void OverrideFirstPos(double firstPos){
       overrideFirstPos = true;
@@ -352,68 +389,57 @@ public:
       this->perpDist = perpDist;
    }
    
+   void SetDetectorOutside(bool isOutside){ isFromOutSide = isOutside;}
+   
+   int DetAcceptance();
+   int CalArrayHit(TLorentzVector Pb, int Zb);
+   int CalRecoilHit(TLorentzVector PB, int ZB);
    int CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double xOff = 0, double yOff = 0 ); // return 0 for no hit, 1 for hit
    
    int GetNumberOfDetectorsInSamePos(){return mDet;}
    double GetEnergy(){return e;}
-   double GetZ(){return z;}
-   double GetX(){return x;} // position in each detector, range from -1, 1
-   int GetDetID(){return detID;}
-   int GetDetRowID(){return detRowID;}
-   double GetTime(){return t;}
-   double GetRho(){return rho;}
-   double GetRhoHit(){return rhoHit;} // radius of particle-b hit recoil detector 
-   double GetdPhi(){return dphi;}
-   int GetLoop(){return loop;}
-   double GetVt(){return vt0;}
-   double GetVp(){return vp0;}
+   double GetDetX(){return detX;} // position in each detector, range from -1, 1
    
    // clockwise rotation for B-field along the z-axis, sign = 1.
    double XPos(double Zpos, double theta, double phi, double rho, int sign){
-     return rho * ( TMath::Sin( TMath::Tan(theta) * Zpos / rho - sign * phi ) + sign * TMath::Sin(phi) );
+     return rho * ( TMath::Sin( TMath::Tan(theta) * Zpos / rho - sign * phi ) + sign * TMath::Sin(phi) ) + xOff;
    }
    double YPos(double Zpos, double theta, double phi, double rho, int sign){
-     return rho * sign * (TMath::Cos( TMath::Tan(theta) * Zpos / rho - sign * phi ) - TMath::Cos(phi));
+     return rho * sign * (TMath::Cos( TMath::Tan(theta) * Zpos / rho - sign * phi ) - TMath::Cos(phi)) + yOff;
    }
-   double RPos(double Zpos, double theta, double phi, double rho){
-     return rho * TMath::Sqrt(2 - 2 * TMath::Cos( TMath::Tan(theta) * Zpos / rho));
+   //double RPos(double Zpos, double theta, double phi, double rho){
+   //  return rho * TMath::Sqrt(2 - 2 * TMath::Cos( TMath::Tan(theta) * Zpos / rho));
+   //}
+   double RPos(double Zpos, double theta, double phi, double rho, int sign){
+      double x =  XPos(Zpos, theta, phi, rho, sign) ;
+      double y =  YPos(Zpos, theta, phi, rho, sign) ;
+      return sqrt(x*x+y*y);
    }
    
    
    double GetXPos(double ZPos){
-      return XPos( ZPos, theta, phi, rho, sign);
+      return XPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
    }
    double GetYPos(double ZPos){
-      return YPos( ZPos, theta, phi, rho, sign);
+      return YPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
    }
    double GetR(double ZPos){
-      return RPos( ZPos, theta, phi, rho);
+      return RPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
    }
    
    double GetRecoilEnergy(){return eB;}
-   double GetRecoilZ(){return zB;}
-   double GetRecoilTime(){return tB;}
-   double GetRecoilRho(){return rhoB;}
-   double GetRecoilRhoHit(){return rhoBHit;}
-   double GetRecoilVt(){return vt0B;}
-   double GetRecoilVp(){return vp0B;}
    double GetRecoilXPos(double ZPos){
-      return XPos( ZPos, thetaB, phiB, rhoB, sign);
+      return XPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign);
    }   
    double GetRecoilYPos(double ZPos){
-      return YPos( ZPos, thetaB, phiB, rhoB, sign);
+      return YPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign);
    }
    double GetRecoilR(double ZPos){
-      return RPos( ZPos, thetaB, phiB, rhoB);
+      return RPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign);
    }
    
-   double GetRecoilXHit(){return rxHit;}
-   double GetRecoilYHit(){return ryHit;}
-   
-   double GetZ0(){return z0;}  // infinite detector
-   double GetTime0(){return t0;}
    double GetBField() {return Bfield;}
-   double GetDetectorA() {return perpDist;}
+   double GetDetRadius() {return perpDist;}
    
    double GetDetEnergyResol(){return eSigma;}
    double GetDetPositionResol(){return zSigma;}
@@ -424,22 +450,40 @@ public:
    double GetElum1Pos(){return zElum1;}
    double GetElum2Pos(){return zElum2;}
    
+   trajectory GetTrajectory_b() {return orbitb;}
+   trajectory GetTrajectory_B() {return orbitB;}
+
    
-private:
-   double theta, phi; // polar angle of particle 
-   double e, z, x, rho, dphi, t;
-   double vt0, vp0;
+private:   
+      
+   void ClearTrajectory(trajectory t){
+      t.theta = TMath::QuietNaN();
+      t.phi = TMath::QuietNaN();
+      t.vt = TMath::QuietNaN();
+      t.vp = TMath::QuietNaN();
+      t.rho = TMath::QuietNaN();
+      t.z0 = TMath::QuietNaN();
+      t.t0 = TMath::QuietNaN();
+      t.x = TMath::QuietNaN();
+      t.y = TMath::QuietNaN();
+      t.z = TMath::QuietNaN();
+      t.effLoop = TMath::QuietNaN();
+      t.detID = -1;
+      t.detRowID = -1;
+      t.loop = -1;
+   }
+   
+   
+   trajectory orbitb, orbitB;
+   
+   double e,detX ;
    double rhoHit; // radius of particle-b hit on recoil detector
-   int detID, loop, detRowID;   // multiloop
    
-   double thetaB, phiB;
-   double eB, zB, rhoB, tB;
-   double vt0B, vp0B;
-   double rhoBHit; // particle-B hit radius
-   double rxHit, ryHit; // particle-B hit position
+   double eB;
+   
    bool isDetReady;
    
-   double z0, t0; // infinite detector 
+   double xOff, yOff; // beam position
    
    //detetcor Geometry
    double Bfield; // T
@@ -455,11 +499,12 @@ private:
    double firstPos; // m 
    vector<double> pos; // near position in m
    int nDet, mDet; // nDet = number of different pos, mDet, number of same pos
+   
+   bool isFromOutSide;
 
    bool overrideDetDistance;
    bool overrideFirstPos;
    bool isCoincidentWithRecoil;
-   
    
    double eSigma;
    double zSigma;
@@ -467,35 +512,24 @@ private:
    double posRecoil2;
    double zElum1;
    double zElum2;
+   
+   const double c = 299.792458; //mm/ns
 };
 
 HELIOS::HELIOS(){
-   theta = TMath::QuietNaN();
-   phi = TMath::QuietNaN();
-   e = TMath::QuietNaN();
-   z = TMath::QuietNaN();
-   x = TMath::QuietNaN();
-   t = TMath::QuietNaN();
-   rho = TMath::QuietNaN();
-   rhoHit = TMath::QuietNaN();
-   dphi = TMath::QuietNaN();
-   detID = -1;
-   detRowID = -1;
-   loop = -1;
    
-   thetaB = TMath::QuietNaN();
-   phiB = TMath::QuietNaN();
+   ClearTrajectory(orbitb);
+   ClearTrajectory(orbitB);
+   
+   e = TMath::QuietNaN();
    eB = TMath::QuietNaN();
-   zB = TMath::QuietNaN();
-   rhoB = TMath::QuietNaN();
-   rhoBHit = TMath::QuietNaN();
-   rxHit = TMath::QuietNaN();
-   ryHit = TMath::QuietNaN();
-   tB = TMath::QuietNaN();
+   detX = TMath::QuietNaN();
+   rhoHit = TMath::QuietNaN();
+   
+   xOff = 0.0;
+   yOff = 0.0;
+   
    isDetReady = false;
-
-   z0 = TMath::QuietNaN();
-   t0 = TMath::QuietNaN();
 
    Bfield = 0;
    BfieldTheta = 0;
@@ -512,6 +546,8 @@ HELIOS::HELIOS(){
    nDet = 0;
    mDet = 0;
    
+   isFromOutSide = true; 
+
    overrideDetDistance = false;
    overrideFirstPos = false;
    isCoincidentWithRecoil = false;
@@ -613,6 +649,251 @@ bool HELIOS::SetDetectorGeometry(string filename){
    return isDetReady;  
 }
 
+int HELIOS::DetAcceptance(){
+   
+   //CalArrayHit and CalRecoilHit must be done before.
+   
+   if( isDetReady == false ) return 0;
+
+   // -1 ========= when recoil direction is not same side of array
+   if( firstPos < 0 && orbitb.z > 0 ) return -1;
+   if( firstPos > 0 && orbitb.z < 0 ) return -1;
+
+   // -11 ======== rho is too small
+   if(  2 * orbitb.rho < perpDist ) return -11; 
+   
+   // -15 ========= if detRowID == -1, should be (2 * orbitb.rho < perpDist)
+   if( orbitb.detRowID == -1 ) return -15;
+   
+   // -10 =========== when rho is too big . 
+   if( bore < 2 * orbitb.rho) return -10; 
+   
+   // -14 ========== check particle-B hit radius on recoil dectector
+   if( isCoincidentWithRecoil && orbitB.R > rhoRecoil ) return -14;
+   
+   // -12 ========= check is particle-b was blocked by recoil detector
+   rhoHit = GetR(posRecoil);
+   if( orbitb.z > 0 && posRecoil > 0 && orbitb.z > posRecoil && rhoHit < rhoRecoil ) return -12;
+   if( orbitb.z < 0 && posRecoil < 0 && orbitb.z < posRecoil && rhoHit < rhoRecoil ) return -12;
+   
+   // -13 ========= not more than 3 loops
+   if( orbitb.loop > 3 ) return -13;
+   
+   // -2 ========= calculate the "y"-distance from detector center
+   if( sqrt(orbitb.R*orbitb.R - perpDist*perpDist)> width/2 ) return -2; 
+   
+   // -3 ==== when zPos further the range of whole array, more loop would not save
+   if( firstPos < 0 && orbitb.z < pos[0] - length ) return -3; 
+   if( firstPos > 0 && orbitb.z > pos[nDet-1]  ) return -3; 
+
+   // -4 ======== Hit on blacker
+   if( blocker != 0 && firstPos > 0 && pos[0] - blocker  < orbitb.z && orbitb.z < pos[0] ) return -4; 
+   if( blocker != 0 && firstPos < 0 && pos[nDet-1]  < orbitb.z && orbitb.z < pos[nDet-1] + blocker ) return -4; 
+
+   // 2 ======  when zPos less then the nearest position, more loop may hit
+   int increaseLoopFlag = 0;
+   if( firstPos < 0 && pos[nDet-1] < orbitb.z ) increaseLoopFlag = 2; 
+   if( firstPos > 0 && pos[0] > orbitb.z ) increaseLoopFlag = 2; 
+   if (increaseLoopFlag == 2 ) {
+      orbitb.z += orbitb.z0;
+      orbitb.effLoop += 1.0;
+      orbitb.loop += 1;
+      orbitb.t = orbitb.t0 * orbitb.effLoop;
+      return 2;
+   }
+   
+   // 1 ======= check hit array z- position
+   if( firstPos < 0 ){
+      for( int i = 0; i < nDet; i++){
+         if( pos[i]-length <= orbitb.z && orbitb.z <= pos[i]) {
+            orbitb.detID = i;
+            detX = ( orbitb.z - (pos[i] + length/2 ))/ length*2 ;// range from -1 , 1 
+            return 1;
+         }
+      }      
+   }else{
+      for( int i = 0; i < nDet ; i++){
+         if( pos[i] < orbitb.z && orbitb.z < pos[i] + length)  {
+            orbitb.detID = i;
+            detX = ( orbitb.z - (pos[i] - length/2 ))/ length*2 ;// range from -1 , 1 
+            return 1;
+         }
+      }
+   }
+   
+   // 3 ======== check hit array gap
+   if( firstPos < 0 ){
+      for( int i = 0; i < nDet-1 ; i++){
+         if( pos[i] < orbitb.z && orbitb.z < pos[i+1] - length ) increaseLoopFlag = 3; 
+      }      
+   }else{
+      for( int i = 0; i < nDet-1 ; i++){
+         if( pos[i] + length < orbitb.z && orbitb.z < pos[i+1]  ) increaseLoopFlag = 3;
+      }
+   }
+   if (increaseLoopFlag == 3 ) {
+      orbitb.z += orbitb.z0;
+      orbitb.effLoop += 1.0;
+      orbitb.loop += 1;
+      orbitb.t = orbitb.t0 * orbitb.effLoop;
+      return 3;
+   }
+   
+   
+   return -20; // for unknown reason
+}
+
+int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
+   
+   e = Pb.E() - Pb.M();
+   detX = TMath::QuietNaN();
+   rhoHit = TMath::QuietNaN();
+   
+   orbitb.theta = Pb.Theta();
+   orbitb.phi = Pb.Phi();
+   orbitb.rho = Pb.Pt() / abs(Bfield) / Zb / c * 1000; //mm
+   orbitb.vt = Pb.Beta() * TMath::Sin(Pb.Theta()) * c ; // mm / nano-second  
+   orbitb.vp = Pb.Beta() * TMath::Cos(Pb.Theta()) * c ; // mm / nano-second  
+   orbitb.t0 = TMath::TwoPi() * orbitb.rho / orbitb.vt; // nano-second  
+   orbitb.z0 = orbitb.vp * orbitb.t0;
+   
+   orbitb.detID = -1;
+   orbitb.detRowID = -1;
+   
+   int targetLoop = 1;
+   int inOut = isFromOutSide == true ? 1: 0; //1 = from Outside, 0 = from inside
+   
+   bool debug = false;
+   
+   if( debug ) {
+      printf("===================================\n");
+      printf("theta : %f deg, phi : %f deg \n", orbitb.theta * TMath::RadToDeg(), orbitb.phi * TMath::RadToDeg());
+      printf("z0: %f mm, rho : %f mm \n", orbitb.z0, orbitb.rho);
+      printf("target loop : %d \n", targetLoop);
+      printf("      inOut : %d = %s \n", inOut, inOut == 1 ? "Out" : "in");
+      printf("-----------------------------------\n");
+   }
+
+   vector<double> zCan;
+   vector<int> dID; //detRowID
+   
+   int iStart = ( sign == 1 ? 0 : -mDet );
+   int iEnd = ( sign == 1 ? 2*mDet : mDet );   
+   for( int i = iStart; i < iEnd ; i++){
+      
+      double phiD = TMath::TwoPi()/mDet * i ;
+      double dphi = orbitb.phi - phiD;
+      double aEff = perpDist - (xOff * TMath::Cos(phiD) + yOff * TMath::Sin(phiD)); 
+      double hahaha = asin( aEff/ orbitb.rho - sign * sin(dphi));
+      
+      int n = 2*targetLoop + inOut; 
+      
+      double zP = orbitb.z0 /TMath::TwoPi() * ( sign * dphi + n * TMath::Pi() + pow(-1, n) * hahaha );
+      
+      if( debug) {
+         double xP = GetXPos(zP) ;
+         double yP = GetYPos(zP) ;
+         printf("phiD: %4.0f, dphi: %6.1f, mod(pi): %6.1f, Loop : %9.5f, zHit : %8.3f mm, (x,y) = (%7.2f, %7.2f) \n",
+                  phiD * TMath::RadToDeg(), 
+                  (orbitb.phi-phiD) * TMath::RadToDeg(), 
+                  fmod(orbitb.phi-phiD, TMath::Pi())*TMath::RadToDeg(),
+                  zP/orbitb.z0, zP, xP, yP );
+      }
+      
+      ///Selection
+      if( !TMath::IsNaN(zP) && 0< zP/orbitb.z0 && TMath::Max(0, targetLoop-1) < zP/orbitb.z0 && zP/orbitb.z0 < targetLoop ) {
+         zCan.push_back(zP);
+         dID.push_back(i);
+      }
+   }
+   /*
+   if( zCan.size() == 0 ){ // will not happen
+      zHit = TMath::QuietNaN();
+      xPos = TMath::QuietNaN();
+      yPos = TMath::QuietNaN();
+      loop = -1;
+      detID = -1;
+      detRowID = -1;
+      return -1 ;
+   }*/
+   
+   if( debug ) printf("-----------------------------------\n");
+   double dMin = 1;   
+   for( int i = 0; i < (int) zCan.size(); i++){
+      
+      double dd = abs(zCan[i]/orbitb.z0 - (targetLoop - (1-inOut)));
+      
+      if( debug) printf(" %d | zP : %8.3f mm; loop : %9.5f ", i, zCan[i], zCan[i]/orbitb.z0);
+      
+      if( dd < dMin) {
+         orbitb.z    = zCan[i];
+         dMin = dd;
+         orbitb.effLoop = zCan[i]/orbitb.z0;
+         orbitb.loop = TMath::Ceil(orbitb.effLoop);
+         orbitb.detRowID = (12+dID[i])%4;
+         orbitb.t = orbitb.t0 * orbitb.effLoop;
+         
+         double phiD = TMath::TwoPi()/mDet * dID[i] ;
+         double dphi = orbitb.phi - phiD ;
+         
+         if( debug ) {
+            // Check is in or out 
+            double hitDir = cos( orbitb.z/orbitb.z0 * TMath::TwoPi() - sign * dphi );
+            printf(" hitDir : %4.1f ", hitDir);
+            if( ( inOut == 1 && hitDir > 0 ) || (inOut == 0 && hitDir < 0 ) ) {
+                printf(" != %f ", perpDist);
+                orbitb.z = TMath::QuietNaN();
+                orbitb.loop = -1;
+                orbitb.detRowID = -1;
+                return - 2;
+            }
+         
+            // this must be false, otherwise, calculation error
+            double xPos = GetXPos(orbitb.z ) ;
+            double yPos = GetYPos(orbitb.z ) ;
+            double a = xPos * cos(phiD) + yPos * sin(phiD);
+            printf(" a : %f ", a);
+            if( abs(a - perpDist) > 0.01) { 
+                printf(" != %f ", perpDist);
+                orbitb.z = TMath::QuietNaN();
+                orbitb.loop = -1;
+                orbitb.detRowID = -1;
+                return -3;
+            }
+         }
+      }
+      if(debug) printf("\n");
+   }
+   
+   // calculate x, y, R
+   orbitb.x = GetXPos(orbitb.z) ;
+   orbitb.y = GetYPos(orbitb.z) ;
+   orbitb.R = GetR(orbitb.z);
+   
+   return 1; // return 1 when OK
+}
+
+int HELIOS::CalRecoilHit(TLorentzVector PB, int ZB){
+   
+   orbitB.theta = PB.Theta();
+   orbitB.phi = PB.Phi();
+   orbitB.rho = PB.Pt() / abs(Bfield) / ZB / c * 1000; //mm
+   orbitB.vt = PB.Beta() * TMath::Sin(PB.Theta()) * c ; // mm / nano-second  
+   orbitB.vp = PB.Beta() * TMath::Cos(PB.Theta()) * c ; // mm / nano-second  
+   orbitB.t0 = TMath::TwoPi() * orbitB.rho / orbitB.vt; // nano-second  
+   orbitB.z0 = orbitB.vp * orbitB.t0;
+   
+   orbitB.z = posRecoil;
+   orbitB.x = GetRecoilXPos(posRecoil)  ;
+   orbitB.y = GetRecoilYPos(posRecoil)  ;
+   orbitB.R = GetRecoilR(posRecoil);
+   orbitB.effLoop = orbitB.z/orbitB.z0;
+   orbitB.t  = orbitB.t0 * orbitB.effLoop ;
+   
+   return 1;
+}
+
+/*
 int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double xOff, double yOff){
    
    //initialization
@@ -621,7 +902,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
    theta = TMath::QuietNaN();
    e = TMath::QuietNaN();
    z = TMath::QuietNaN();
-   x = TMath::QuietNaN();
+   detX = TMath::QuietNaN();
    t = TMath::QuietNaN();
    rho = TMath::QuietNaN();
    dphi = TMath::QuietNaN();
@@ -818,12 +1099,12 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
          if( firstPos > 0 ){
             if( pos[i] < z  && z < pos[i] + length ){
                detID = i;
-               x = ( z - (pos[i] + length/2 ))/ length*2 ;// range from -1 , 1 
+               detX = ( z - (pos[i] + length/2 ))/ length*2 ;// range from -1 , 1 
             }
          }else{
             if( pos[i] - length < z  && z < pos[i] ){
                detID = i;
-               x = ( z - (pos[i] - length/2 ))/ length*2 ;// range from -1 , 1 
+               detX = ( z - (pos[i] - length/2 ))/ length*2 ;// range from -1 , 1 
             }
          }
       }
@@ -839,7 +1120,7 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
 
    return hit;
 }
-
+*/
 //=======================================================
 //#######################################################
 // Class for multi-scattering of the beam inside target
