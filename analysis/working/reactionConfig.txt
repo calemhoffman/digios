@@ -1,7 +1,7 @@
 //-------for_comment
-9             //beam_A
-3             //beam_Z
-3               //target_A
+14             //beam_A
+6             //beam_Z
+2               //target_A
 1               //target_Z
 1               //recoil_light_A
 1               //recoil-light_Z
@@ -9,7 +9,7 @@
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
-0.00            //x_offset_of_Beam_in_mm
+3.00            //x_offset_of_Beam_in_mm
 0.00            //y_offset_of_Beam_in_mm
 100000         //number_of_Event_being_generated
 false           //isTargetScattering
@@ -23,3 +23,4 @@ false           //isDacay
 0               //decayNucleus_Z
 false           //isReDo
 0.0           //excitation_energy_of_A[MeV]
+Out           //detector_facing_Out_or_In

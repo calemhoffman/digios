@@ -7,8 +7,8 @@ echo "REMOVE these files: "
 #echo "   correction_*.dat  "
 echo "   reaction.dat  "
 echo "   run_Summary.dat"
-echo "   example.*"
-ls -l example.*
+echo "   DWBA.*"
+ls -l DWBA.*
 echo "   RunTimeStamp.dat"
 #echo "   *.root  "
 echo "   *.pdf  "
@@ -29,7 +29,7 @@ if [ ${conti} == "Yes" ] ; then
 #  rm -fv correction_*.dat
   rm -fv reaction.dat
   rm -fv run_Summary.dat
-  rm -fv example.*
+  rm -fv DWBA.*
   rm -fv RunTimeStamp.dat
 #  rm -fv *.root
   rm -fv *.pdf

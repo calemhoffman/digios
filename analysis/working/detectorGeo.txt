@@ -1,4 +1,4 @@
--2.5     //Bfield_[T]
+-2.0     //Bfield_[T]
 0.00     //Bfield_direction_to_z-axis_[deg]
 462.5    //bore_[mm]
 11.5     //distance_from_axis_[mm]
