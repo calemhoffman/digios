@@ -85,6 +85,26 @@ public:
       rName.Form("%s(%s,%s)%s", nameA.c_str(), namea.c_str(), nameb.c_str(), nameB.c_str()); 
       return rName;
    }
+
+   TString format(TString name){
+      if( name.IsAlpha() ) return name;
+      int len = name.Length();
+      TString temp = name;
+      TString temp2 = name;
+      if( temp.Remove(0, len-2).IsAlpha()){
+         temp2.Remove(len-2);
+      }else{
+         temp = name;
+         temp.Remove(0, len-1);
+         temp2.Remove(len-1);
+      }
+      return "^{"+temp2+"}"+temp;
+   }
+   TString GetReactionName_Latex(){
+      TString rName;
+      rName.Form("%s(%s,%s)%s", format(nameA).Data(), format(namea).Data(), format(nameb).Data(), format(nameB).Data()); 
+      return rName;
+   }
    
    int GetAtomicNumber_A(){return AA;}
    int GetAtomicNumber_a(){return Aa;}
@@ -389,7 +409,10 @@ public:
       this->perpDist = perpDist;
    }
    
-   void SetDetectorOutside(bool isOutside){ isFromOutSide = isOutside;}
+   void SetDetectorOutside(bool isOutside){
+      this->isFromOutSide = isOutside;
+      printf(" Detectors are facing %s\n", isFromOutSide ? "outside": "inside" );
+   }
    
    int DetAcceptance();
    int CalArrayHit(TLorentzVector Pb, int Zb);
@@ -546,7 +569,7 @@ HELIOS::HELIOS(){
    nDet = 0;
    mDet = 0;
    
-   isFromOutSide = true; 
+   isFromOutSide = true; //default is facing outside
 
    overrideDetDistance = false;
    overrideFirstPos = false;
@@ -626,6 +649,9 @@ bool HELIOS::SetDetectorGeometry(string filename){
       printf("=====================================================\n");
       printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta);
       BfieldTheta = BfieldTheta * TMath::DegToRad();
+      if( BfieldTheta != 0.0 ) {
+      printf("                                      +---- field angle != 0 is not supported!!! \n");
+      }
       printf("     Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
       printf("        Blocker Position: %8.2f mm \n", firstPos > 0 ? firstPos - blocker : firstPos + blocker );
       printf("          First Position: %8.2f mm \n", firstPos);

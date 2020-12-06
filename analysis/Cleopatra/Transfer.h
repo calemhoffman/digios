@@ -48,7 +48,8 @@ void Transfer(
   int nExA = 1;
   double ExAList[nExA];
   ExAList[0] = 0.000; // MeV
-  //ExAList[1] = 1.567;
+
+  bool isFromOutSide = true; //detector facing outside
 
   //---- target
   bool isTargetScattering = false;
@@ -107,7 +108,9 @@ void Transfer(
       }
 
       if( i == 23) ExAList[0] = atof(line.c_str());
-      
+      if( i == 24) {
+         isFromOutSide = line.compare("Out") == 0 ? true : false;
+      }
       i = i + 1;
     }
     cFile.close();
@@ -146,6 +149,7 @@ void Transfer(
     helios.OverrideMagneticFieldDirection(BFieldTheta);
     printf("======== B-field : %5.2f T, Theta : %6.2f deg\n", BField, BFieldTheta);
   }
+  helios.SetDetectorOutside(isFromOutSide);
   //helios.SetCoincidentWithRecoil(isCoincidentWithRecoil);
   int mDet = helios.GetNumberOfDetectorsInSamePos();
 
@@ -229,7 +233,7 @@ void Transfer(
   vector<double> ExWidth;
   vector<double> y0; // intercept of e-z plot
   vector<double> kCM; // momentum of b in CM frame
-  printf("----- loading excitation energy levels.");
+  printf("----- loading excitation energy levels (%s).", excitationFile.c_str());
   ifstream file;
   file.open(excitationFile.c_str());
   string isotopeName;
@@ -321,7 +325,7 @@ void Transfer(
   TMacro exList(excitationFile.c_str());
   TMacro reactionData(filename.Data());
   TString str;
-  str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
+  str.Form("%s @ %.2f MeV/u", reaction.GetReactionName_Latex().Data(), KEAmean);
   config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
@@ -331,16 +335,22 @@ void Transfer(
   if( distList != NULL ) distList->Write("DWBA", 1);
   
   TMacro hitMeaning;
-  str = "hit ==  1  ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
-  str = "hit == -1  ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -2  ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -3  ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
-  str = "hit == -4  ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -5  ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -6  ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
-  str = "hit == -7  ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
-  str = "hit == -8  ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
-  str = "hit == -11 ; both recoil particles stopped at target"; hitMeaning.AddLine(str.Data());
+  str = "=======================meaning of Hit ID\n"; hitMeaning.AddLine(str.Data());
+  str = "   1 = light recoil hit array & heavy recoil hit recoil\n"; hitMeaning.AddLine(str.Data());
+  str = "   0 = no detector\n"; hitMeaning.AddLine(str.Data());
+  str = "  -1 = light recoil go opposite side of array\n"; hitMeaning.AddLine(str.Data());
+  str = "  -2 = light recoil hit > det width\n"; hitMeaning.AddLine(str.Data());
+  str = "  -3 = light recoil hit > array \n"; hitMeaning.AddLine(str.Data());
+  str = "  -4 = light recoil hit blocker \n"; hitMeaning.AddLine(str.Data());
+  str = " -10 = light recoil orbit radius too big  \n"; hitMeaning.AddLine(str.Data());
+  str = " -11 = light recoil orbit radius too small\n"; hitMeaning.AddLine(str.Data());
+  str = " -12 = when reocol at the same side of array, light recoil blocked by recoil detector\n"; hitMeaning.AddLine(str.Data());
+  str = " -13 = more than 3 loops\n"; hitMeaning.AddLine(str.Data());
+  str = " -14 = heavy recoil did not hit recoil  \n"; hitMeaning.AddLine(str.Data());
+  str = " -15 = cannot find hit on array\n"; hitMeaning.AddLine(str.Data());
+  str = " -20 = unknown\n"; hitMeaning.AddLine(str.Data());
+  str = "===========================================\n"; hitMeaning.AddLine(str.Data());
+  
   hitMeaning.Write("hitMeaning");
 
   int hit; // the output of Helios.CalHit

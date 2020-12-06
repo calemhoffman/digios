@@ -7,6 +7,7 @@
 #include <TH2F.h>
 #include <TH1F.h>
 #include <TF1.h>
+#include <TArc.h>
 #include <TMath.h>
 #include <TSpectrum.h>
 #include <TGraph.h>
@@ -101,8 +102,16 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
 
   static int nExID = fxList->GetLast()+1;
 
+  //================== reactionConfig
   TMacro * reactionConfig = (TMacro *) file->FindObjectAny("reactionConfig");
   TString Reaction=reactionConfig->GetName(); ///TODO change to Latex
+
+  int nEvent = (int) ExtractNumber(13, reactionConfig);
+   printf("number of events generated : %d \n", nEvent);
+
+   double xBeam = ExtractNumber(11, reactionConfig); 
+   double yBeam = ExtractNumber(12, reactionConfig); 
+   printf("             beam position : (%5.2f, %5.2f) mm \n", xBeam, yBeam); 
 
    gStyle->SetOptStat("");
    gStyle->SetStatY(0.9);
@@ -112,14 +121,12 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    gStyle->SetLabelSize(0.05, "XY");
    gStyle->SetTitleFontSize(0.1);
    
-
    double eRange[2] = {0, 10};
    double zRange[3] = {400, -1000, 1000}; /// zRange[0] = nBin
    double recoilERange[2];
    vector<double> exList;
    double ExRange[2];
 
-//========================================= detector Geometry
   //================================== detetcor Geometry
   printf("=================================\n");
   printf(" loading detector Geometry.\n");
@@ -279,6 +286,16 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       if( pID == pRecoilXY       ){
          TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
          tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
+         TArc * detArc = new TArc(0,0, rhoRecoil);
+         detArc->SetLineColor(kBlue-8);
+         detArc->SetFillStyle(0);
+         detArc->Draw("same");  
+         if( xBeam != 0. || yBeam != 0. ){
+            TArc * arc = new TArc(xBeam, yBeam, 1);
+            arc->SetLineColor(2);
+            detArc->SetFillStyle(0);
+            arc->Draw("same");
+         }
       }
       if( pID == pRecoilXY1       ){
          TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY-1 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
@@ -373,6 +390,10 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
            }
          }else{
             text.DrawLatex(0., 0.6, gate);
+         }
+
+         if( xBeam != 0.0 || yBeam != 0.0 ){
+            text.DrawLatex(0.0, 0.1, Form("Bema pos: (%4.1f, %4.1f) mm", xBeam, yBeam));
          }
       }
       
