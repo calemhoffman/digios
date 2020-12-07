@@ -23,3 +23,4 @@ false           //isDacay
 0               //decayNucleus_Z
 false           //isReDo
 0.000           //excitation_energy_of_A[MeV]
+Out             //detector_facing
