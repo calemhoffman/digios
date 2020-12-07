@@ -22,10 +22,21 @@
 
 #define CLK_TCK sysconf(_SC_CLK_TCK)
 
-
 #include "gdecomp.h"
-#include "ctk.h"
+//#include "ctk.h"
 #include "GTMerge.h"
+
+#define MAXBIGBUFSIZ 50000
+#define STRLEN 512
+
+typedef struct PAYLOAD {
+  char p[MAXDATASIZE];
+} PAYLOAD;
+
+typedef struct EVENT {
+  GEBDATA *gd;
+  PAYLOAD *payload;
+} EVENT;
 
 #define MAXNFIX 10000
 #define MAXPAYLOADSIZE 10000
@@ -219,7 +230,7 @@ GTGetDiskEv (int FileNo, int storeNo)
 #endif
   if (siz != sizeof (GEBDATA))
     {
-      printf ("failed to read %i bytes for header, got %i\n", sizeof (GEBDATA), siz);
+      printf ("failed to read %lu bytes for header, got %i\n", sizeof (GEBDATA), siz);
 
       return (1);
     };
@@ -438,10 +449,10 @@ main (int argc, char **argv)
 
   /* prototypes */
 
-  int wr_spe (char *, int *, float *);
+//  int wr_spe (char *, int *, float *);
   int printDgsHeader (DGSHEADER);
   int GTPrintHeader (FILE *, GTEVENT *);
-  int get_a_seed (unsigned int *);
+//  int get_a_seed (unsigned int *);
   int time_stamp (void);
   int GTGetDiskEv (int, int);
 
@@ -457,8 +468,8 @@ main (int argc, char **argv)
 
   /* initialize random number generator etc */
 
-  get_a_seed (&seed);
-  srand (seed);
+//  get_a_seed (&seed);
+//  srand (seed);
   nstat = (MSTAT *) calloc (1, sizeof (MSTAT));
   bzero ((char *) &control, sizeof (CONTROL));
   bzero ((char *) nstat, sizeof (MSTAT));
@@ -547,7 +558,7 @@ main (int argc, char **argv)
           CheckNoArgs (nret, 2, str);
           assert (size <= MAXBIGBUFSIZ);
           r1 = (size * sizeof (EVENT) + (size + 1) * sizeof (int)) / 1024.0 / 1024.0;
-          printf ("sizeof(EVENT)= %i\n", sizeof (EVENT));
+          printf ("sizeof(EVENT)= %lu\n", sizeof (EVENT));
           printf ("will use a bigbuffer size of %i, or %7.3f MBytes\n", size, r1);
         }
       else if ((p = strstr (str, "nprint")) != NULL)
@@ -600,12 +611,12 @@ main (int argc, char **argv)
         }
       else if ((p = strstr (str, "dtsfabort")) != NULL)
         {
-          nret = sscanf (str, "%s %lli", str1, &control.dtsfabort);
+          nret = sscanf (str, "%s %i", str1, &control.dtsfabort);
           CheckNoArgs (nret, 2, str);
         }
       else if ((p = strstr (str, "dtsbabort")) != NULL)
         {
-          nret = sscanf (str, "%s %lli", str1, &control.dtsbabort);
+          nret = sscanf (str, "%s %i", str1, &control.dtsbabort);
           CheckNoArgs (nret, 2, str);
         }
       else
@@ -759,28 +770,28 @@ main (int argc, char **argv)
       tid[i] = NOTHING;
     };
 
-  fp = fopen ("map.dat", "r");
-  if (fp == NULL)
-    {
-      printf ("need a \"map.dat\" file to run\n");
-      system("./mkMap > map.dat");
-      printf("just made you one...\n");
-      fp = fopen ("map.dat", "r");
-      assert(fp != NULL);
-    };
-
-  printf ("\nmapping\n");
-
-  i2 = fscanf (fp, "\n%i %i %i %s", &i1, &i7, &i8, str);
-  printf ("%i %i %i %s\n", i1, i7, i8, str);
-  while (i2 == 4)
-    {
-      tlkup[i1] = i7;
-      tid[i1] = i8;
-      i2 = fscanf (fp, "\n%i %i %i %s", &i1, &i7, &i8, str);
-//      printf ("%i %i %i %s\n", i1, i7, i8, str);
-    };
-  fclose (fp);
+//  fp = fopen ("map.dat", "r");
+//  if (fp == NULL)
+//    {
+//      printf ("need a \"map.dat\" file to run\n");
+//      system("./mkMap > map.dat");
+//      printf("just made you one...\n");
+//      fp = fopen ("map.dat", "r");
+//      assert(fp != NULL);
+//    };
+//
+//  printf ("\nmapping\n");
+//
+//  i2 = fscanf (fp, "\n%i %i %i %s", &i1, &i7, &i8, str);
+//  printf ("%i %i %i %s\n", i1, i7, i8, str);
+//  while (i2 == 4)
+//    {
+//      tlkup[i1] = i7;
+//      tid[i1] = i8;
+//      i2 = fscanf (fp, "\n%i %i %i %s", &i1, &i7, &i8, str);
+////      printf ("%i %i %i %s\n", i1, i7, i8, str);
+//    };
+//  fclose (fp);
 
 
   /* start timer */
@@ -906,7 +917,7 @@ main (int argc, char **argv)
                     printf ("2: GTGetDiskEv returned %i\n", st);
                   }
               }
-            printf ("[2]Event[%i].gd->type=%lli\n", i, Event[i].gd->type);
+            printf ("[2]Event[%i].gd->type=%i\n", i, Event[i].gd->type);
             oldFileTS[i] = Event[i].gd->timestamp;
           };
 
@@ -1286,18 +1297,10 @@ main (int argc, char **argv)
 
       truesize = size - nused;
 
-#if(0)
-      printf ("ready to refil buffer\n");
-      printf ("truesize=%i\n", truesize);
-      printf ("nused=%i\n", nused);
-      printf ("size=%i\n", size);
-      fflush (stdout);
-#endif
-
 
       i1 = size - nused;
       i2 = size;
-      truesize == i1;
+      truesize = i1;
 //      printf ("refill into %i...%i\n", i1, i2 - 1);
 
       for (nfe = i1; nfe < i2; nfe++)

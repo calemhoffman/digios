@@ -1,0 +1,37 @@
+Installation instructions
+
+- Install Docker Desktop for Mac.
+
+    https://download.docker.com/mac/stable/Docker.dmg
+
+  Start the app.  If it is running, the docker icon (a whale stacked with
+  container boxes) should be present on the top menu bar on the right hand
+  side.
+
+- Open a terminal window and type the following at the command prompt ::
+
+    Kens-MBP:~ $ docker pull tehatanlgov/ptolemy:latest
+
+  This downloads the ptolemy container from docker hub.  You need do this only
+  once. List downloaded containers with ::
+
+    Kens-MBP:~ $ docker images
+
+- Make the ptolemy script executable by typing ::
+
+    Kens-MBP:~ $ chmod 755 /path/to/ptolemy
+
+  where /path/to/ptolemy is the full path to where you saved the file.  Eg, if
+  you saved it to your home directory, then it would be ~/ptolemy.  To run
+  ptolemy, type ::
+
+    Kens-MBP:~ $ /path/to/ptolemy < something.in > something.out
+
+  Tip: I suggest you save the ptolemy script to your home bin directory. Make
+  one if you don't have one and add the bin directory path to your PATH
+  environment variable. Ask if you need instructions on how to do this. After
+  you do this, then all you need to say is ::
+
+    Kens-MBP:~ $ ptolemy < another.in  > another.out
+
+

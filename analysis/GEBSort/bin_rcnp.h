@@ -58,6 +58,7 @@ class EvtList {
   
   //Reset Function
   void Reset() {
+    RunNumber = -1;
     for (int i=0;(i<NumHits&&i<MaxHits);i++) {
       id[i]=-1;
       tpe[i]=0;
@@ -95,8 +96,7 @@ class EvtList {
       base_sample[i]=0;
       baseline[i]=0;
       trace_length[i]=0;
-      for (Int_t j=0;j<1024;j++)
-	trace[i][j]=-1000;
+      for (Int_t j=0;j<1024;j++) trace[i][j]=-1000;
     }
     NumHits=0;
     return;

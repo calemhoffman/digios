@@ -21,7 +21,7 @@ double exDistFunc(Double_t *x, Double_t * par){
 void Transfer(
               string basicConfig = "reactionConfig.txt", 
          string heliosDetGeoFile = "detectorGeo.txt", 
-        string    excitationFile = "excitation_energies.txt", //when no file, only ground state
+        string    excitationFile = "Ex.txt", //when no file, only ground state
         TString      ptolemyRoot = "DWBA.root", // when no file, use isotropic distribution of thetaCM
         TString     saveFileName = "transfer.root",
         TString         filename = "reaction.dat"){ // when no file, no output.
@@ -48,7 +48,8 @@ void Transfer(
   int nExA = 1;
   double ExAList[nExA];
   ExAList[0] = 0.000; // MeV
-  //ExAList[1] = 1.567;
+
+  bool isFromOutSide = true; //detector facing outside
 
   //---- target
   bool isTargetScattering = false;
@@ -107,12 +108,13 @@ void Transfer(
       }
 
       if( i == 23) ExAList[0] = atof(line.c_str());
-      
+      if( i == 24) {
+         isFromOutSide = line.compare("Out") == 0 ? true : false;
+      }
       i = i + 1;
     }
     cFile.close();
   }
-
   //=============================================================
   //=============================================================
   //=============================================================
@@ -147,11 +149,14 @@ void Transfer(
     helios.OverrideMagneticFieldDirection(BFieldTheta);
     printf("======== B-field : %5.2f T, Theta : %6.2f deg\n", BField, BFieldTheta);
   }
+  helios.SetDetectorOutside(isFromOutSide);
   //helios.SetCoincidentWithRecoil(isCoincidentWithRecoil);
   int mDet = helios.GetNumberOfDetectorsInSamePos();
 
   bool coinRecoil = helios.GetCoincidentWithRecoil();
   printf(" is Coincident with Recoil and Array ? %s\n", coinRecoil ? "Yes" : "No");
+
+  helios.SetBeamPosition(xBeam, yBeam);
   
   eSigma = helios.GetDetEnergyResol();
   zSigma = helios.GetDetPositionResol();
@@ -176,7 +181,7 @@ void Transfer(
   double mb = reaction.GetMass_b();
   double pCM = reaction.GetMomentumbCM();
   double q = TMath::Sqrt(mb*mb + pCM*pCM);
-  double slope = 299.792458 * zb * helios.GetBField() / TMath::TwoPi() * beta / 1000.; // MeV/mm
+  double slope = 299.792458 * zb * abs(helios.GetBField()) / TMath::TwoPi() * beta / 1000.; // MeV/mm
   printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
   printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
@@ -225,9 +230,10 @@ void Transfer(
   printf("\e[32m#################################### excitation energies\e[0m\n");
   vector<double> ExKnown;
   vector<double> ExStrength;
+  vector<double> ExWidth;
   vector<double> y0; // intercept of e-z plot
   vector<double> kCM; // momentum of b in CM frame
-  printf("----- loading excitation energy levels.");
+  printf("----- loading excitation energy levels (%s).", excitationFile.c_str());
   ifstream file;
   file.open(excitationFile.c_str());
   string isotopeName;
@@ -237,19 +243,20 @@ void Transfer(
     while( file >> line){
       //printf("%d, %s \n", i,  line.c_str());
       if( line.substr(0,2) == "//" ) continue;
-      if( i == 0 ) isotopeName = line; 
-      if ( i >= 1 ){
-        if( i%2 == 1 ) {
+      if( line.substr(0,1) == "#" ) break;
+      if ( i >= 0 ){
+        if( i%3 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
-        }else{
+        }else if (i%3 == 1) {
           ExStrength.push_back(atof(line.c_str()));
+        }else{
+          ExWidth.push_back(atof(line.c_str()));
         }
       }
       i = i + 1;
     }
     file.close();
     printf("... done.\n");
-    printf("========== %s\n", isotopeName.c_str());
     int n = ExKnown.size();
     for(int i = 0; i < n ; i++){
       reaction.SetExB(ExKnown[i]);
@@ -260,18 +267,19 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
       }
     }
   }else{
     printf("... fail ------> only ground state.\n");
     ExKnown.push_back(0.0);
     ExStrength.push_back(1.0);
+    ExWidth.push_back(0.0);
     reaction.SetExB(ExKnown[0]);
     reaction.CalReactionConstant();
     kCM.push_back(reaction.GetMomentumbCM());
@@ -315,26 +323,34 @@ void Transfer(
   TMacro config(basicConfig.c_str());
   TMacro detGeo(heliosDetGeoFile.c_str());
   TMacro exList(excitationFile.c_str());
+  TMacro reactionData(filename.Data());
   TString str;
-  str.Form("%s @ %.2f MeV/u", reaction.GetReactionName().Data(), KEAmean);
+  str.Form("%s @ %.2f MeV/u", reaction.GetReactionName_Latex().Data(), KEAmean);
   config.SetName(str.Data());
   config.Write("reactionConfig");
   detGeo.Write("detGeo");
   exList.Write("ExList");
+  reactionData.Write("reactionData");
   
   if( distList != NULL ) distList->Write("DWBA", 1);
   
   TMacro hitMeaning;
-  str = "hit ==  1  ; light particle hit on the array"; hitMeaning.AddLine(str.Data());
-  str = "hit == -1  ; light particle blocked by the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -2  ; heavy particle miss the recoil detector"; hitMeaning.AddLine(str.Data());
-  str = "hit == -3  ; light particle loop more than 10 "; hitMeaning.AddLine(str.Data());
-  str = "hit == -4  ; light particle over-shoot the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -5  ; light particle hit from inside of the array "; hitMeaning.AddLine(str.Data());
-  str = "hit == -6  ; light particle blocked by the support "; hitMeaning.AddLine(str.Data());
-  str = "hit == -7  ; light particle hit in the detector gap (along z) "; hitMeaning.AddLine(str.Data());
-  str = "hit == -8  ; light particle hit in the detector gap (on the xy-plane)"; hitMeaning.AddLine(str.Data());
-  str = "hit == -11 ; both recoil particles stopped at target"; hitMeaning.AddLine(str.Data());
+  str = "=======================meaning of Hit ID\n"; hitMeaning.AddLine(str.Data());
+  str = "   1 = light recoil hit array & heavy recoil hit recoil\n"; hitMeaning.AddLine(str.Data());
+  str = "   0 = no detector\n"; hitMeaning.AddLine(str.Data());
+  str = "  -1 = light recoil go opposite side of array\n"; hitMeaning.AddLine(str.Data());
+  str = "  -2 = light recoil hit > det width\n"; hitMeaning.AddLine(str.Data());
+  str = "  -3 = light recoil hit > array \n"; hitMeaning.AddLine(str.Data());
+  str = "  -4 = light recoil hit blocker \n"; hitMeaning.AddLine(str.Data());
+  str = " -10 = light recoil orbit radius too big  \n"; hitMeaning.AddLine(str.Data());
+  str = " -11 = light recoil orbit radius too small\n"; hitMeaning.AddLine(str.Data());
+  str = " -12 = when reocol at the same side of array, light recoil blocked by recoil detector\n"; hitMeaning.AddLine(str.Data());
+  str = " -13 = more than 3 loops\n"; hitMeaning.AddLine(str.Data());
+  str = " -14 = heavy recoil did not hit recoil  \n"; hitMeaning.AddLine(str.Data());
+  str = " -15 = cannot find hit on array\n"; hitMeaning.AddLine(str.Data());
+  str = " -20 = unknown\n"; hitMeaning.AddLine(str.Data());
+  str = "===========================================\n"; hitMeaning.AddLine(str.Data());
+  
   hitMeaning.Write("hitMeaning");
 
   int hit; // the output of Helios.CalHit
@@ -352,25 +368,21 @@ void Transfer(
   double thetaCM;
   tree->Branch("thetaCM", &thetaCM, "thetaCM/D");
   
-  double e, z, x, t;
-  tree->Branch("e", &e, "e/D");
-  tree->Branch("x", &x, "x/D");
-  tree->Branch("z", &z, "z/D");
-  double z0; tree->Branch("z0", &z0, "z0/D");
-  tree->Branch("t", &t, "t/D");
-  double tB; tree->Branch("tB", &tB, "tB/D");   /// hit time for recoil on the recoil detector
-  
-  double recoilT; // particle-B hit time
-  tree->Branch("recoilT", &recoilT, "recoilT/D");
+  double e, z, detX, t;
+  tree->Branch("e", &e, "energy_light/D");
+  tree->Branch("x", &detX, "detector_x/D");
+  tree->Branch("z", &z, "array_hit_z/D");
+  double z0; tree->Branch("z0", &z0, "z-cycle/D");
+  tree->Branch("t", &t, "cycle_time_light/D");
+  double tB; tree->Branch("tB", &tB, "recoil_hit_time/D");   /// hit time for recoil on the recoil detector
   
   int loop, detID, detRowID;
   tree->Branch("detID", &detID, "detID/I");
   tree->Branch("detRowID", &detRowID, "detRowID/I");
   tree->Branch("loop", &loop, "loop/I");
   
-  double dphi, rho; //rad of rotation, and radius
-  tree->Branch("dphi", &dphi, "dphi/D");
-  tree->Branch("rho", &rho, "rho/D");
+  double rho; //orbit radius
+  tree->Branch("rho", &rho, "orbit_radius_light/D");
   
   int ExAID;
   double ExA;
@@ -492,7 +504,7 @@ void Transfer(
   for( int j = 0 ; j < n; j++){
     double px[100];
     double py[100];
-    double a = helios.GetDetectorA();
+    double a = helios.GetDetRadius();
     double q = TMath::Sqrt(mb*mb + kCM[j] * kCM[j] );
     for(int i = 0; i < 100; i++){
       double thetacm = TMath::Pi()/TMath::Log(100) * (TMath::Log(100) - TMath::Log(100-i)) ;//using log scale, for more point in small angle.
@@ -517,7 +529,7 @@ void Transfer(
   for( int j = 0 ; j < n; j++){
     double px[100];
     double py[100];
-    double a = helios.GetDetectorA();
+    double a = helios.GetDetRadius();
     double q = TMath::Sqrt(mb*mb + kCM[j] * kCM[j] );
     for(int i = 0; i < 100; i++){
       double thetacm = (i + 8.) * TMath::DegToRad();
@@ -570,10 +582,10 @@ void Transfer(
       //==== Set Ex of B
       if( ExKnown.size() == 1 ) {
         ExID = 0;
-        Ex = ExKnown[0];
+        Ex = ExKnown[0] + gRandom->Gaus(0, ExWidth[0]);
       }else{
         ExID = exDist->GetRandom();
-        Ex = ExKnown[ExID]; 
+        Ex = ExKnown[ExID]+ gRandom->Gaus(0, ExWidth[ExID]);
       }
       reaction.SetExB(Ex);
   
@@ -659,65 +671,75 @@ void Transfer(
     phiB = PB.Phi() * TMath::RadToDeg();
 
     //==== Helios
-    if( Tb > 0  || TB > 0 ){
-      hit = helios.CalHit(Pb, zb, PB, zB, xBeam, yBeam);
-      
-    e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
-    z = helios.GetZ() ; 
-    z0 = helios.GetZ0() ; 
-    x = helios.GetX() + gRandom->Gaus(0, zSigma);
-    t = helios.GetTime();
-    tB = helios.GetRecoilTime();
-    loop = helios.GetLoop();
-    detID = helios.GetDetID();
-    detRowID = helios.GetDetRowID();
-    dphi = helios.GetdPhi();
-    rho = helios.GetRho();
-    rhoArray = helios.GetRhoHit();
-
-    rhoRecoil = helios.GetRecoilRhoHit();
-    xArray = helios.GetXPos(z);
-    yArray = helios.GetYPos(z);
-    z += gRandom->Gaus(0, zSigma);
-
-    //ELUM
-    if( zElum1 != 0 ){
-      xElum1 = helios.GetXPos(zElum1);
-      yElum1 = helios.GetYPos(zElum1);
-      rhoElum1 = helios.GetR(zElum1);
-    }
-    if( zElum2 != 0 ){
-      xElum2 = helios.GetXPos(zElum2);
-      yElum2 = helios.GetYPos(zElum2);
-      rhoElum2 = helios.GetR(zElum2);
-    }
-
-    //Recoil
-    recoilT = helios.GetRecoilTime();
-    xRecoil = helios.GetRecoilXHit();
-    yRecoil = helios.GetRecoilYHit();
-
-    //other recoil detectors
-    if ( zRecoil1 != 0 ){
-      xRecoil1 = helios.GetRecoilXPos(zRecoil1);
-      yRecoil1 = helios.GetRecoilYPos(zRecoil1);
-      rhoRecoil1 = helios.GetRecoilR(zRecoil1);
-    }
-    if ( zRecoil2 != 0 ){
-      xRecoil2 = helios.GetRecoilXPos(zRecoil2);
-      yRecoil2 = helios.GetRecoilYPos(zRecoil2);
-      rhoRecoil2 = helios.GetRecoilR(zRecoil2);
-    }
     
-    reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetectorA());
-    ExCal = reaction.GetEx();
-    thetaCMCal = reaction.GetThetaCM();
+    ///printf(" thetaCM : %f \n", thetaCM * TMath::RadToDeg());
+    
+    if( Tb > 0  || TB > 0 ){
+      helios.CalArrayHit(Pb, zb);
+      helios.CalRecoilHit(PB, zB);
+      hit = 2;
+      while( hit > 1 ){ hit = helios.DetAcceptance(); }
+      
+      trajectory orb_b = helios.GetTrajectory_b();
+      trajectory orb_B = helios.GetTrajectory_B();
+      
+      e = helios.GetEnergy() + gRandom->Gaus(0, eSigma);
 
-    //change thetaCM into deg
-    thetaCM = thetaCM * TMath::RadToDeg();
+      double ranX = gRandom->Gaus(0, zSigma);
+      z = orb_b.z + ranX;
+      detX = helios.GetDetX() + ranX;
+ 
+      z0 = orb_b.z0;
+      t = orb_b.t;
+      loop = orb_b.loop;
+      detID = orb_b.detID;
+      detRowID = orb_b.detRowID;
+      rho = orb_b.rho;
+      rhoArray = orb_b.R;
+      
+      xArray = orb_b.x;
+      yArray = orb_b.y;
+      
+
+      //ELUM
+      if( zElum1 != 0 ){
+        xElum1 = helios.GetXPos(zElum1);
+        yElum1 = helios.GetYPos(zElum1);
+        rhoElum1 = helios.GetR(zElum1);
+      }
+      if( zElum2 != 0 ){
+        xElum2 = helios.GetXPos(zElum2);
+        yElum2 = helios.GetYPos(zElum2);
+        rhoElum2 = helios.GetR(zElum2);
+      }
+
+      //Recoil
+      rhoRecoil = orb_B.R;
+      tB = orb_B.t;
+      xRecoil = orb_B.x;
+      yRecoil = orb_B.y;
+
+      //other recoil detectors
+      if ( zRecoil1 != 0 ){
+        xRecoil1 = helios.GetRecoilXPos(zRecoil1);
+        yRecoil1 = helios.GetRecoilYPos(zRecoil1);
+        rhoRecoil1 = helios.GetRecoilR(zRecoil1);
+      }
+      if ( zRecoil2 != 0 ){
+        xRecoil2 = helios.GetRecoilXPos(zRecoil2);
+        yRecoil2 = helios.GetRecoilYPos(zRecoil2);
+        rhoRecoil2 = helios.GetRecoilR(zRecoil2);
+      }
+      
+      reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius());
+      ExCal = reaction.GetEx();
+      thetaCMCal = reaction.GetThetaCM();
+
+      //change thetaCM into deg
+      thetaCM = thetaCM * TMath::RadToDeg();
     
     }else{
-      hit = -11;
+      hit = -404;
     }
 
     if( hit == 1)  count ++;

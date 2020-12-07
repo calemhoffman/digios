@@ -5,11 +5,46 @@
 #include <TGraph.h>
 #include <TSpectrum.h>
 #include <TMath.h>
+#include <iostream>
 #include <vector>
+#include <string>
 
-vector<vector<double>> combination(vector<double> arr, int r){
+std::vector<std::string> SplitStr(std::string tempLine, std::string splitter, int shift = 0){
+
+  std::vector<std::string> output;
+
+  size_t pos;
+  do{
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
+      tempLine = tempLine.substr(pos+1);
+      continue;
+    }
+
+    std::string secStr;
+    if( pos == std::string::npos ){
+      secStr = tempLine;
+    }else{
+      secStr = tempLine.substr(0, pos+shift);
+      tempLine = tempLine.substr(pos+shift);
+    }
+
+    //check if secStr is begin with space
+    if( secStr.substr(0, 1) == " "){
+      secStr = secStr.substr(1);
+    }
+
+    output.push_back(secStr);
+    //printf(" |%s---\n", secStr.c_str());
+    
+  }while(pos != std::string::npos );
+
+  return output;
+}
+
+std::vector<std::vector<double>> combination(std::vector<double> arr, int r){
   
-  vector<vector<double>> output;
+  std::vector<std::vector<double>> output;
   
   int n = arr.size();
   std::vector<int> v(n);
@@ -17,7 +52,7 @@ vector<vector<double>> combination(vector<double> arr, int r){
   do {
     //for( int i = 0; i < n; i++) { printf("%d ", v[i]); }; printf("\n");
     
-    vector<double> temp;
+    std::vector<double> temp;
     for (int i = 0; i < n; ++i) { 
       if (v[i]) {
         //printf("%.1f, ", arr[i]); 
@@ -33,7 +68,7 @@ vector<vector<double>> combination(vector<double> arr, int r){
   return output;
 }
 
-double* sumMeanVar(vector<double> data){
+double* sumMeanVar(std::vector<double> data){
   
   int n = data.size();
   double sum = 0;
@@ -50,7 +85,7 @@ double* sumMeanVar(vector<double> data){
   return output;
 }
 
-double*  fitSlopeIntercept(vector<double> dataX, vector<double> dataY){
+double*  fitSlopeIntercept(std::vector<double> dataX, std::vector<double> dataY){
   
   double * smvY = sumMeanVar(dataY);
   double sumY = smvY[0];
@@ -78,7 +113,7 @@ double*  fitSlopeIntercept(vector<double> dataX, vector<double> dataY){
 
 
 
-vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
+std::vector<std::vector<double>> FindMatchingPair(std::vector<double> enX, std::vector<double> enY){
 
    //output[0] = fitEnergy;
    //output[1] = refEnergy;
@@ -86,12 +121,12 @@ vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
    int nX = enX.size();
    int nY = enY.size();
    
-   vector<double> fitEnergy;
-   vector<double> refEnergy;
+   std::vector<double> fitEnergy;
+   std::vector<double> refEnergy;
    
    if( nX > nY ){
       
-      vector<vector<double>> output = combination(enX, nY);
+      std::vector<std::vector<double>> output = combination(enX, nY);
       
       double * smvY = sumMeanVar(enY);
       double sumY = smvY[0];
@@ -102,7 +137,7 @@ vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
       double absRSqMinusOne = 1;
       int maxID = 0;
       
-      for( int k = 0; k < output.size(); k++){
+      for( int k = 0; k < (int) output.size(); k++){
         
         double * smvX = sumMeanVar(output[k]);
         double sumX = smvX[0];
@@ -134,7 +169,7 @@ vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
       
     }else if( nX < nY ){
     
-      vector<vector<double>> output = combination(enY, nX);
+      std::vector<std::vector<double>> output = combination(enY, nX);
       
       
       double * smvX = sumMeanVar(enX);
@@ -146,7 +181,7 @@ vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
       double absRSqMinusOne = 1;
       int maxID = 0;
       
-      for( int k = 0; k < output.size(); k++){
+      for( int k = 0; k < (int) output.size(); k++){
         
         double * smvY = sumMeanVar(output[k]);
         double sumY = smvY[0];
@@ -173,13 +208,14 @@ vector<vector<double>> FindMatchingPair(vector<double> enX, vector<double> enY){
     
     }else{
       fitEnergy = enX;
+      refEnergy = enY;
     }
     
     
-    printf("fitEnergy = ");for( int k = 0; k < fitEnergy.size() ; k++){ printf("%7.2f, ", fitEnergy[k]); }; printf("\n");
-    printf("refEnergy = ");for( int k = 0; k < refEnergy.size() ; k++){ printf("%7.2f, ", refEnergy[k]); }; printf("\n");
+    printf("fitEnergy = ");for( int k = 0; k < (int) fitEnergy.size() ; k++){ printf("%7.2f, ", fitEnergy[k]); }; printf("\n");
+    printf("refEnergy = ");for( int k = 0; k < (int) refEnergy.size() ; k++){ printf("%7.2f, ", refEnergy[k]); }; printf("\n");
     
-    vector<vector<double>> haha;
+    std::vector<std::vector<double>> haha;
     haha.push_back(fitEnergy);
     haha.push_back(refEnergy);
     

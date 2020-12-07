@@ -1,0 +1,108 @@
+#!/bin/bash
+
+if [ $# -lt 2 ] || [ $1 == "-help"  ]; then
+  echo "$./process_Merge [RunNum] [control]"
+  echo "    RunNum = run number"
+  echo "   control = 1/0/-1     || -1 is force merge"  
+  exit 1
+fi;
+
+source ../Armory/process_PathSetting
+
+RUN=$1
+isMerge=$2
+
+#just in case people put %03d as RUN
+if [ "${RUN:0:1}" == "0" ]; then
+    RUN=${RUN:1:2}
+else
+    RUN=$(printf '%d' $RUN)
+fi
+
+RUN=$(printf '%03d' ${RUN})
+
+#######################################
+#################### Merge
+echo -e "${RED}######################### Merge raw data: run $RUN${NC}"
+
+if [ $isMerge -eq  0 ]; then 
+    echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
+fi  
+
+if [ $isMerge -eq 1 ]; then
+
+    #==== check Merged_data timeStamp, if newer then raw data, no Merge
+    if [ ${Arch} == "Linux" ]; then
+        if [ ${PCName} == "digios1" ]; then
+            echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
+        fi
+        rawDataTime=`stat -c "%Z"  ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
+    else
+        rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
+    fi
+
+    #==== check if merged data exist
+    isMergedDataExist=`ls -1 ${MERGDIR}/GEBMerged_run${RUN}* 2>/dev/null | wc -l`
+
+    #==== if merged data exist, check timeStamp
+    if [ ${isMergedDataExist} -gt 0 ]; then
+        if [ ${Arch} == "Linux" ]; then
+            mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+        else
+            mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+        fi
+    else
+        mergedDataTime=0
+    fi
+    
+    if [ ${rawDataTime} -ge ${mergedDataTime} ]; then
+        
+        if [ ${expName} == "h072_16N" ]; then 
+            echo -e "${GREEN}"
+            ## mv the vme 101 data to temp
+            mv -v $DATADIR/${expName}_run_$RUN.gtd01_000_0101  temp
+            echo -e "${NC}"
+        fi
+        echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
+        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+        echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
+
+        if [ ${expName} == "h072_16N" ]; then
+            ## mv the temp back to vme 101
+            echo -e "${GREEN}"
+            mv -v temp $DATADIR/${expName}_run_$RUN.gtd01_000_0101
+            echo -e "${NC}"
+        fi
+        echo "=================================================================="
+        tail -n 30 ${MERGDIR}/GEBMerge_run${RUN}.log
+        echo "=================================================================="
+    else
+        echo -e "${BLUE}Merged data are newer than raw data. No need to merged again.${NC}"
+        echo -e "${GREEN}You can Force merging using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
+    fi
+
+fi
+
+if [ $isMerge -eq -1 ]; then # force merge
+    if [ ${expName} == "h072_16N" ]; then 
+        echo -e "${GREEN}"
+        ## mv the vme 101 data to temp
+        mv -v $DATADIR/${expName}_run_$RUN.gtd01_000_0101  temp
+        echo -e "${NC}"
+    fi
+
+    echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
+    echo -e "${YELLOW} >>>>>>>>>>>>> force merge by user ${NC}"
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+    echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
+
+    if [ ${expName} == "h072_16N" ]; then
+        ## mv the temp back to vme 101
+        echo -e "${GREEN}"
+        mv -v temp $DATADIR/${expName}_run_$RUN.gtd01_000_0101
+        echo -e "${NC}"
+    fi
+    echo "=================================================================="
+    tail -n 30 ${MERGDIR}/GEBMerge_run${RUN}.log
+    echo "=================================================================="
+fi

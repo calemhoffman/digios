@@ -328,21 +328,12 @@ void Cali_ex(int detID = -1){
          fprintf(paraOut1, "%11.6f\t", paraFlat[iDet][i]);
       }
       fprintf(paraOut1, "\n");
-      fflush(paraOut1);
-
       
       fprintf(paraOut2, "%d\t", iDet);
       fprintf(paraOut2, "%11.6f\t%11.6f", parae2Ex[iDet][0], 1./parae2Ex[iDet][1]);
       fprintf(paraOut2, "\n");
-      fflush(paraOut2);
-
+      
    }
-   
-   fclose(paraOut1);
-   fclose(paraOut2);
-  
-   printf("saved as %s.\n", filename1.Data());
-   printf("saved as %s.\n", filename2.Data());
   
    //fitAuto(heC);
    

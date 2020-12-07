@@ -1,0 +1,101 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
+  echo "$./process_MultiRuns [RunNum1] [RunNum2] [Merge] [EventBuild] [GeneralSort]"
+  echo "    RunNum1 = start run number"
+  echo "    RunNum2 = stop run number"
+  echo "      Merge =   1/0*     "  
+  echo "   EventBld = 2/1/0*   || 2 = with Trace"  
+  echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "        * negative option = force "
+  exit 1
+fi;
+
+source ../Armory/process_PathSetting
+
+RUN1=$1
+RUN2=$2
+
+isMerge=1
+isSort=1
+isGeneralSort=1
+
+if [ $# -ge 3 ]; then isMerge=$3; fi
+if [ $# -ge 4 ]; then isSort=$4; fi
+if [ $# -ge 5 ]; then isGeneralSort=$5; fi
+
+GEBSort=GEBSort_nogeb
+GEBSortMsg="using GEBSort_nogeb"
+GeneralSortMsg="no trace"
+
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
+  isTrace=1
+  GEBSortMsg="using GEBSort_nogeb_trace"
+  GEBSort=GEBSort_nogeb_trace
+  GeneralSortMsg="trace with ${isGeneralSort} core"
+fi
+
+if [ "${RUN1:0:1}" == "0" ]; then
+    RUN1=${RUN1:1:2}
+elif [ "${RUN1:0:2}" == "00" ]; then
+    RUN1=${RUN1:2:1}
+else
+    RUN1=$(printf '%d' $RUN1)
+fi
+
+#if RUN2 == -1, find the last runID from daq.
+if [ ${RUN2} -eq -1 ]; then
+  IP=192.168.1.2
+  rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
+  source ../../expName.sh #load expName and last RUN
+  RUN2=$LastRunNum
+  echo "---- Last run is $RUN2"
+fi
+
+if [ "${RUN2:0:1}" == "0" ]; then
+    RUN2=${RUN2:1:2}
+elif [ "${RUN2:0:2}" == "00" ]; then
+    RUN2=${RUN2:2:1}
+else
+    RUN2=$(printf '%d' $RUN2)
+fi
+
+runID1=$(printf '%03d' $RUN1)
+runID2=$(printf '%03d' $RUN2)
+
+echo "============================================="
+echo "============= RUN $runID1 to $runID2 ================"
+echo "============================================="
+echo "Merge       : ${isMerge}"
+echo "Sort        : ${isSort}  ${GEBSortMsg}"  
+echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
+echo "============================================="
+
+
+for iRUN in $(seq ${RUN1} ${RUN2}); do
+
+    runID=$(printf '%03d' $iRUN)
+
+    echo -e "${Cyan}"
+    echo "========================================================="
+    echo "============ RUN $runID ===================================="
+    echo "========================================================="
+    echo -e "${NC}"
+
+    #######################################
+    ####################  Download raw data
+    ../Armory/process_Download $iRUN
+
+    #######################################
+    #################### Merge
+    ../Armory/process_Merge $iRUN $isMerge
+
+    #######################################
+    #################### Sort and GeneralSort
+    ../Armory/process_Sort $iRUN $isSort $isGeneralSort
+
+done
+
+#root -l ../Armory/runsCheck.C  #check the run Entries, and duration
+
+exit 1

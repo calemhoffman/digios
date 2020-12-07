@@ -10,9 +10,33 @@
 
 ## Major Branches
 - master : should be the latest branch with latest code
-- 4SideArray : the branch for the 4-side array, the main diff is the daq
 - ISS631 : the analysis code on 2018-Oct.
 - h072_16N : the analysis code for (d,3He)
+
+## Obsolte Branches
+- 4SideArray : the branch for the 4-side array, the main diff is the edm panels
+
+## Update on July 27, 2020, Ryan
+- Latest version update from H075_20Ne.
+- with auto-analysis that can push Monitors.C canvas to web server.
+- H075_20Ne use 4-side array, can update edm panels.
+- the auto-elog contains more informations.
+- with Slack
+- with Grafana
+- many bugs fix and improvements
+- various new tools in Armory, e.g. Check_Simulation, Check_rdtGate, Cali_hamma
+- renew the alpha-calibration code, so that it will find the most possible peaks to fit (AnalysisLibrary.h)
+- with slurm for LCRC parllel computing
+- better trace analysis
+- GEBSort and GEBSort_trace, so that no need to change the bin_rcnp.c
+- more Woods-Saxon tools
+- separated process_run into many sub-process. so that the code is more managible, and can run sub-process separately.
+- Cleopatra include potentials for A=3 and alpha
+- improved the edm panels for indivial VME, can change threshold directly. 
+- added AutoStartSop 
+- added read vacuum gauage
+- Set VME Trigger by bash command
+- added globus_in.py and globus_out.py using globus cli. 
 
 ## Update on June 11, 2019, Ryan
 - the code was updated and improved base on h064_15N (d,p) run 013.
