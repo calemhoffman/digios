@@ -72,7 +72,7 @@ else
     elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
 
     source ~/Slack_Elog_Notification.sh
-    slackMsg="elogID=${elogID} is updated.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+    slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
     auxMsg="stop at ${currentDate} \n$COMMENT"
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 
@@ -112,3 +112,6 @@ sleep 5
 
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
+
+echo "this window close in 5 sec."
+sleep 5

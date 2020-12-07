@@ -225,19 +225,19 @@ It do following things:
 
 The input files:
 
-      example : for simple Ptolemy setting, the file name can be changed.
+      DWBA : for simple Ptolemy setting, the file name can be changed.
 
 The output files are:
 
-    1) example.in  (in file for Ptolemy)
-    2) example.out (out file for Ptolemy)
-    3) example.Ex.txt (excitation energies with Xsec)
-    4) example.Xsec.txt (Xsec distributions in txt format)
-    5) example.root ( Xsec distributions in TObjArray)
+    1) DWBA.in  (in file for Ptolemy)
+    2) DWBA.out (out file for Ptolemy)
+    3) DWBA.Ex.txt (excitation energies with Xsec)
+    4) DWBA.Xsec.txt (Xsec distributions in txt format)
+    5) DWBA.root ( Xsec distributions in TObjArray)
 
 For simulating transfer reaction with thetaCM distribution. 
 need the reactionConfig.txt and detectorGeo.txt. same as part 7).
-But instead of using the Ex.txt, use example.Ex.txt. 
+But instead of using the Ex.txt, use DWBA.Ex.txt. 
 
 
 =================================================

@@ -24,6 +24,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
   int AA, zA; //beam
   int Aa, za; //target
   int Ab, zb; //recoil-1
+  double ExA; 
 
   //---- beam
   double KEAmean, KEAsigma; // MeV/u , assume Guassian
@@ -47,6 +48,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
          if( i == 6 ) KEAmean = atof(line.c_str());
          if( i == 10 ) xBeam = atof(line.c_str());
          if( i == 11 ) yBeam = atof(line.c_str());
+         if( i == 23 ) ExA = atof(line.c_str());
          i = i + 1;
       }
       cFile.close();
@@ -54,7 +56,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    
    /**///========================================================= load files
    vector<double> pos;
-   double a = 10.5;
+   double a = 11.5;
    double length = 50.5;
    double firstPos = 0;
    int iDet = 6;
@@ -73,16 +75,18 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    reaction.SetB(AB,zB);
    reaction.SetIncidentEnergyAngle(KEAmean, 0, 0);
    reaction.SetExB(Ex);
+   reaction.SetExA(ExA);
    reaction.CalReactionConstant();
    
    printf("===================================================\n");
    printf("=========== %27s ===========\n", reaction.GetReactionName().Data());
    printf("===================================================\n");
    printf("----- loading reaction from : %s. \n", basicConfig.c_str());
+   printf("       Ex A: %7.3f MeV\n", ExA);
    printf("         KE: %7.4f \n", KEAmean);
    printf("      theta: %7.4f \n", thetaMean);
    printf("offset(x,y): %7.4f, %7.4f mm \n", xBeam, yBeam);
-   printf("   Q-value : %7.4f MeV \n", reaction.GetQValue() );
+   printf("    Q-value: %7.4f MeV \n", reaction.GetQValue() );
    printf("     Max Ex: %7.4f MeV \n", reaction.GetMaxExB() );
    printf("===================================================\n");
    
@@ -95,11 +99,12 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
-         if( i == 0 ) BField   = atof(x.c_str());
-         if( i == 3 )  a       = atof(x.c_str());
-         if( i == 5 ) length   = atof(x.c_str());
+         if( x.substr(0,1) == "#" )  continue;
+         if( i == 0 )  BField   = atof(x.c_str());
+         if( i == 3 )   a       = atof(x.c_str());
+         if( i == 5 )  length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
-         if( i == 17 ) jDet = atoi(x.c_str());
+         if( i == 17 )     jDet = atoi(x.c_str());
          if( i >= 18 ) {
             pos.push_back(atof(x.c_str()));
          }
@@ -149,7 +154,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    double kCM = reaction.GetMomentumbCM();
    double q = TMath::Sqrt(mb*mb + kCM * kCM );
    double beta = reaction.GetReactionBeta() ;
-   double slope = 299.792458 * zb * BField / TMath::TwoPi() * beta / 1000.; // MeV/mm
+   double slope = 299.792458 * zb * abs(BField) / TMath::TwoPi() * beta / 1000.; // MeV/mm
    double gamma = reaction.GetReactionGamma();
    for(int i = 0; i < 100; i++){
       double thetacm = (i + 8.) * TMath::DegToRad();
@@ -176,7 +181,7 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    printf("==== ThetaCM in degree =================\n");
    printf("========================= x-ratio : %f \n", XRATION);
    printf("=========================      Ex : %6.4f MeV\n", Ex);
-   printf("         %6s - %6s |  %6s, %6s\n", "Min",  "Max", "Mean", "Half");
+   printf("         %6s - %6s |  %6s, %6s, %6s\n", "Min",  "Max", "Mean", "Half", "sin(x)dx * 180/pi");
    printf("-------------------------------------------------\n");
    for( int i = 0; i < iDet; i++){
      double zMin = midPos[i]-length*XRATION/2.;
@@ -193,8 +198,10 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
        
        double tMean = (tMax + tMin)/2.;
        double tHalf = (tMax - tMin)/2.;
+       
+       double sintdt = TMath::Sin(tMean * TMath::DegToRad()) * 2 * tHalf ;
       
-       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f\n", i, j, tMin,  tMax, tMean, tHalf);
+       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f, %6.4f\n", i, j, tMin,  tMax, tMean, tHalf, sintdt);
      }
      if( nDivision > 0 ) printf("--------------\n");
    }

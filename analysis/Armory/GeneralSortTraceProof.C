@@ -12,8 +12,8 @@
    //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
    //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"   
 #elif __APPLE__
-   //#include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-  #include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
+   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+  //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
 #endif
 
 //=================================== setting
@@ -24,7 +24,7 @@ int traceMethod = 1; //0 = no process; 1 = fit;
 float delayChannel = 150.; //initial guess of the time
 
 bool isTACRF = false;
-bool isRecoil = false;
+bool isRecoil = true;
 bool isElum = false;
 bool isEZero = true;
 //=================================== end of setting
@@ -61,24 +61,33 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    printf("\n");
    for(int i = 0 ; i < 96; i++ ) printf("-");
    for(int i = 0 ; i < 160; i ++){
-     if( (i) % 10 == 0 ) {
+    if( (i) % 10 == 0 ) {
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
-     }
-     if( 110 > idDetMap[i] && idDetMap[i] >= 100 ){
-       printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]);; // Cyan
-     }else{ 
-       switch (idKindMap[i]) {
-       case 0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       case 5: printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-       default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+    }
+    if( 110 >= idDetMap[i] && idDetMap[i] >= 100){
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
+    }else if( 240 >= idDetMap[i] && idDetMap[i] >= 200){
+      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
+    }else if( 310 >= idDetMap[i] && idDetMap[i] >= 300){
+      printf("\033[92m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if( 450 >= idDetMap[i] && idDetMap[i] >= 400){
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if(  99 >= idDetMap[i] && idDetMap[i] >= 0){    
+      switch (idKindMap[i]) {
+         case -1: printf("%7s|", ""); break;
+         case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
+         case  1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
+         case  2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
+         case  3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
+         case  4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
+         default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
        }
+     }else{
+       printf("%7s|", "");
      }
    }
+   printf("\n");
    printf("\n==================== \n");
    
    saveFileName = option;
@@ -330,7 +339,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          bool isPSD = (30 > idDet && idDet >= 0);
          bool isRDT  = (130 > idDet && idDet >= 100 );
          bool isezero  = (310 > idDet && idDet >= 300 );
-         if( !isPSD && !isRDT && !isezero) continue;
+         //if( !isPSD && !isRDT && !isezero) continue;
+         
+         //if( !isRDT) continue;
+         
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();

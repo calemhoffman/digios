@@ -1,0 +1,170 @@
+#!/bin/bash
+
+if [ $# -lt 3 ] || [ $1 == "-help"  ]; then
+  echo "$./process_Sort [RunNum] [Build] [GeneralSort]"
+  echo "    RunNum  = run number"
+  echo "     Build  = 2/1/0/-1/-2 ||  2 is with trace, 1 is no tarce, negative == force"  
+  echo " GenralSort = n/2/1/0/neg ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "                       |"
+  echo "                       +---- negative for force"
+  exit 1
+fi;
+
+source ../Armory/process_PathSetting
+
+RUN=$1
+runID=$1
+isSort=$2
+isGeneralSort=$3
+
+GEBSort=EventBuilder
+GEBSortMsg="using GEBSort_nogeb"
+GeneralSortMsg="no trace"
+
+if [ ${isGeneralSort} -ge 2 ] || [  $isSort -eq 2 ] || [ $isSort -eq -2 ] ; then
+  isTrace=1
+  GEBSort=EventBuilder_trace
+fi
+
+#just in case people put %03d as RUN
+if [ "${RUN:0:2}" == "00" ]; then
+    RUN=${RUN:2:1}
+elif [ "${RUN:0:1}" == "0" ]; then
+    RUN=${RUN:1:2}
+else
+    RUN=$(printf '%d' $RUN)
+fi
+
+RUN=$(printf '%03d' ${RUN})
+
+if [ $# -eq 1 ]; then
+    echo -e "${Cyan}============================================="
+    echo "============ RUN $RUN ========================"
+    echo -e "=============================================${NC}"
+fi
+
+source $ROOTSYS/bin/thisroot.sh
+
+#######################################
+#################### Sort
+echo -e "${RED}######################### GEBSort started sorting run $RUN${NC}"
+
+if [ $isSort -eq 0 ]; then 
+    echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
+elif [ $isSort -gt 0 ]; then
+    echo -e "${YELLOW} using ${GEBSort} ${NC}"
+
+    #==== check Merged_data timeStamp, if newer then raw data, no Merge
+    if [ ${Arch} == "Linux" ]; then
+        mergedDataTime=`stat -c "%Z" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+    else
+        mergedDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${MERGDIR}/GEBMerged_run${RUN}* | sort -rn | head -1`
+    fi
+
+    ls -lh  ${MERGDIR}/GEBMerged_run${RUN}*
+
+    #==== check if root data exist
+    isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`    
+    if [ ${isRootDataExist} -gt 0 ]; then
+        if [ ${Arch} == "Linux" ]; then
+            rootDataTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root`
+        else
+            rootDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root`
+        fi
+    else
+        rootDataTime=0
+    fi
+
+    if [ ${mergedDataTime} -ge ${rootDataTime} ]; then
+        echo -e "${RED}=================== RUN $RUN: ${GEBSort} started at `date`${NC}"
+        ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root  -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
+        echo -e "${RED}====================== RUN $RUN: ${GEBSort} DONE at `date`${NC}"
+        echo -e "saved root file >>>>>>  ${YELLOW} ${ROOTDIR}/run${RUN}.root ${NC} "
+        echo "=================================================================="
+        tail -n 30  $ROOTDIR/${GEBSort}_run$RUN.log
+        echo "=================================================================="
+    else
+        echo -e "${BLUE}Root data are newer than merged data. No need to do again.${NC}"
+        echo -e "${GREEN}You can Force event buidling using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
+    fi
+elif [ $isSort -lt 0 ]; then # force Sort
+    echo -e "${RED}=================== RUN $RUN: ${GEBSort} started at `date`${NC}"
+    ls -lh  ${MERGDIR}/GEBMerged_run${RUN}*
+    echo -e "${YELLOW} >>>>>>>>>>>>> force sort by user ${NC}"
+    ${GEBDIR}/${GEBSort} -input disk ${MERGDIR}/GEBMerged_run${RUN}.gtd_000 -rootfile ${ROOTDIR}/run${RUN}.root  -chat ${SORTCHAT} > $ROOTDIR/${GEBSort}_run$RUN.log
+    echo -e "${RED}====================== RUN $RUN: ${GEBSort} DONE at `date`${NC}"
+    echo -e "saved root file >>>>>>  ${YELLOW} ${ROOTDIR}/run${RUN}.root ${NC} "
+    echo "=================================================================="
+    tail -n 30  $ROOTDIR/${GEBSort}_run$RUN.log
+    echo "=================================================================="
+fi
+
+########################################
+#################### Process_run.C, GeneralSort
+
+#---------- check gen_run date
+echo -e "${RED}######################### GeneralSort started for run $RUN${NC}"
+
+if [ $isGeneralSort -eq 0 ]; then 
+    echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
+
+elif [ $isGeneralSort -gt 0 ]; then
+    
+    isRootDataExist=`ls -1 ${ROOTDIR}/run${RUN}.root 2>/dev/null | wc -l`
+
+    if [ $isRootDataExist -eq 0 ]; then
+        
+        echo "====== ${ROOTDIR}/run${RUN}.root does not exist."
+        
+    else
+        #==== check run###.root timeStamp
+        if [ ${Arch} == "Linux" ]; then
+            rootTime=`stat -c "%Z" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
+        else
+            rootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/run${RUN}.root | sort -rn | head -1`
+        fi
+
+        ls -lh  ${ROOTDIR}/run${RUN}.root
+
+        #==== check gen_run###.root timeStamp
+        isGenRootDataExist=`ls -1 ${ROOTDIR}/gen_run${RUN}.root 2>/dev/null | wc -l`
+
+        if [ $isGenRootDataExist -gt 0 ]; then
+            if [ ${Arch} == "Linux" ]; then
+                genRootTime=`stat -c "%Z" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
+            else
+                genRootTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${ROOTDIR}/gen_run${RUN}.root | sort -rn | head -1`
+            fi
+        else
+            genRootTime=0
+        fi 
+
+        if [ $rootTime -ge $genRootTime ]; then
+
+            if [ $isGeneralSort -eq 1 ]; then
+                echo -e "${RED}######################### GeneralSort.C${NC}"
+            elif [ $isGeneralSort -gt 1 ]; then
+                echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
+            fi
+            root -l -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
+
+        else
+            echo -e "${BLUE}gen_run${RUN}.root are newer than run${RUN}.root. No need to sort again.${NC}"
+            echo -e "${GREEN}You can Force sorting using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
+        fi
+
+    fi
+
+elif [ ${isGeneralSort} -lt 0 ]; then 
+
+    ls -lh  ${ROOTDIR}/run${RUN}.root
+
+    echo -e "${YELLOW} >>>>>> forced by user ${NC}"
+    if [ $isGeneralSort -eq -1 ]; then
+        echo -e "${RED}######################### GeneralSort.C${NC}"
+    elif [ $isGeneralSort -lt -1 ]; then
+        echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
+    fi
+    root -l -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
+fi
+

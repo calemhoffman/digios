@@ -10,6 +10,7 @@
 
 void RDTCutCreator(TString dataList, 
                    TString treeName = "gen_tree", 
+                   bool useTrace = false,
                    TString saveFileName = "rdtCuts.root", 
                    int eRange=5000, 
                    int deRange=7000, 
@@ -20,10 +21,7 @@ void RDTCutCreator(TString dataList,
    
    TChain * chain = new TChain(treeName);
    chain->Add(dataList);
-   ///chain->Add("../root_data/gen_run02[3-9].root"); 
-   ///chain->Add("../root_data/gen_run04[1,3].root");
-   ///chain->Add("../root_data/gen_run03[5-6].root");
-   ///chain->Add("../root_data/gen_run04[0-7].root");
+   ///chain->Add("../root_data/gen_run02[3-9].root");
    
    chain->GetListOfFiles()->Print();
    
@@ -42,9 +40,6 @@ void RDTCutCreator(TString dataList,
 
 
    TString expression[10];
-   
-   //Custom gate
-   //if( treeName == "tree") gate = "abs(coinTime-19)< 9 && Ex > -2";
 
    TH2F * h[4];
 
@@ -52,27 +47,24 @@ void RDTCutCreator(TString dataList,
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
-      ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
       
-      if( treeName == "tree"){   
-         varX.Form("trdt[%d]",2*i); 
-         varY.Form("trdt[%d]",2*i+1);
+      if( useTrace ){   
+         varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
-         varX.Form("rdt[%d]",2*i); 
-         varY.Form("rdt[%d]",2*i+1);
+         ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
+         varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 0, eRange, 500, 0, deRange);
+      
+      ///eRange overRide
+      ///h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 1500, 3000, 500, 100, 800);
 
       expression[i].Form("%s:%s>>h%d", 
                          varY.Data(),
                          varX.Data(),
                          i);
       
-      ///printf("\n %s \n", expression[i].Data());
-      
-      //gate.Form("abs(coinTime-19)< 9 && Ex > -2 && trdt_r[%d] < 20", 2*i);
-      //gate.Form("abs(coinTime-19)< 9 && Ex > -2");
 
       chain->Draw(expression[i], gate, "col");
       

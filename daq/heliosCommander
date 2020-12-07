@@ -11,7 +11,8 @@ runEdm() {
   export EDMDATAFILES=$EDMDATAFILES:${location}/edm/screens
   export EDMDATAFILES=$EDMDATAFILES:/global/devel/systems/edm/screens
   export EDMSCRIPTS=${location}/edm/scripts
-  $EDM -x HELIOSMain.edl &
+  #$EDM -x HELIOSMain.edl &
+  $EDM -x HELIOSMain_4sidesArray.edl &
   echo "Edits are possible in this mode."
 }
 runEdm

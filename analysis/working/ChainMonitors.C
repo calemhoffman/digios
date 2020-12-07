@@ -47,10 +47,10 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   }else{
     
     TString fileName;
-  
-    if( RUNNUM2 == -1 ) RUNNUM2 = RUNNUM;
+    int endRUNNUM = RUNNUM2;
+    if( RUNNUM2 == -1 || RUNNUM2 == -10 ) endRUNNUM = RUNNUM;
     
-    for( int i = RUNNUM ; i <= RUNNUM2 ; i++){
+    for( int i = RUNNUM ; i <= endRUNNUM ; i++){
       fileName.Form("../root_data/gen_run%03d.root", i);
       chain->Add(fileName);
     }
@@ -67,7 +67,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   //Some input to TSelector
   Monitors * selector = new Monitors();
-  selector->testingInput(1231441241);
+  if( RUNNUM == -10 || RUNNUM2 == -10 ) selector->printControl(0); //quit after terminated
   chain->Process(selector, "");
 
 }

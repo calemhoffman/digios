@@ -3,8 +3,13 @@ echo "#############################################"
 echo "#     Set-up for new Experiment"
 echo "#############################################"
 
-daqDataPath=/media/DIGIOSDATA4
+#daqDataPath=/media/DIGIOSDATA5
 
+#echo ""
+#echo -e "daqDataPath : \033[0;91m"${daqDataPath}"\033[0m"
+#echo    "Don't change the expName.sh, change the SetUpNewExp."
+#echo ""
+echo "============================================="
 echo " The bach script do following things "
 echo " 1) git-fetch  "
 echo " 2) check repository is clean"
@@ -15,8 +20,7 @@ echo "    branch not exist --> create expName.sh"
 echo " 5) making directories for data, merged_data, root_data"
 echo " 6) create symbolic links to data, merged_data, root_data"
 echo " 7) if branch not exist --> clean up files, and git push"
-
-echo "#############################################"
+echo "============================================="
 
 #set git merge driver
 git config --global merge.ours.driver true
@@ -39,7 +43,7 @@ if [ ${gitCheck} -eq 0 ]; then
     echo "---- clean."
 else
     git status
-    echo -e "\e[93m=============== Please fix the git status \e[0m"
+    echo -e "\033[0;93m=============== Please fix the git status \033[0m"
     exit
 fi
 
@@ -47,7 +51,6 @@ if [ $# -eq 0 ]; then
    git branch -a
    read -p 'Enter the new experiment name: ' expName    
 fi
-
 
 if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
    expName="ARR01"
@@ -67,6 +70,18 @@ echo "Archetech: ${Arch}"
 if [ ${Arch} == "Linux" ]; then 
 
     if [ ${PCName} == "digios1" ]; then  #DAQ
+
+	echo -e "\e[93m================= avalible disk:\033[0m"
+	df -hT |grep "/media\|File"
+	read -p "================= choose disk [e.g. sdb]:" disk
+
+	daqDataPath=`df | grep ${disk} | awk '{print $6}'`
+	if [ -z ${daqDataPath} ]; then
+	    echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
+	    exit
+	fi
+	
+	echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
 
         DATAPATH=${daqDataPath}
         expDIR=~/digios
@@ -88,13 +103,14 @@ if [ ${Arch} == "Linux" ]; then
 
 elif [ ${Arch} == "Darwin" ]; then
 
-    if [ ${PCName:0:5} == "phywl" ]; then #MAC
+    if [ ${PCName} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
         DATAPATH=~/experiments
         expDIR=~/digios
 
-        space=`df -ml | grep "/dev/disk2" | awk '{print $4}'` #in mb
-        spacePrecent=`df -ml | grep "/dev/disk2" | awk '{print $5}'`
-        spacePrecent="${spacePrecent:0:2}"
+        space=`df -ml | grep "/dev/disk1s2" | awk '{print $4}'` #in mb
+        spacePrecent=`df -ml | grep "/dev/disk1s2" | awk '{print $5}'`
+        spacePrecent="${spacePrecent//%/}"
+        spacePrecent=$((100-spacePrecent))
         echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
     else
@@ -104,7 +120,7 @@ elif [ ${Arch} == "Darwin" ]; then
         echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
         echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
         echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
-        exit
+        
     fi
     
 else

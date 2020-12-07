@@ -113,25 +113,25 @@ sup_rcnp ()
       DetIDLookup[i] = NOTHING;
     };
 
-  fp = fopen ("map.dat", "r");
-  if (fp == NULL)
-    {
-      printf ("\n\nneed a \"map.dat\" file to run\n");
-      exit (1);
-     };
-
-  i=0;
-  printf ("\nmapping - started\n"); // new map needs 5 inputs now!!
-  i = fscanf (fp, "\n%i %i %i %s %f", &ChannelID, &TypeID, &DetID, TypeName, &DetAng);
-  printf ("%i %i %i %s %f\n", ChannelID, TypeID, DetID, TypeName, DetAng);
-  while (i == 5) {
-    TypeIDLookup[ChannelID] = TypeID;
-    DetIDLookup[ChannelID] = DetID;
-    AngleDegree[ChannelID] = DetAng;
-    i = fscanf (fp, "\n%i %i %i %s %f", &ChannelID, &TypeID, &DetID, TypeName, &DetAng);
-  };
-  fclose (fp);  
-  printf ("mapping - complete!!\n");
+//  fp = fopen ("map.dat", "r");
+//  if (fp == NULL)
+//    {
+//      printf ("\n\nneed a \"map.dat\" file to run\n");
+//      exit (1);
+//     };
+//
+//  i=0;
+//  printf ("\nmapping - started\n"); // new map needs 5 inputs now!!
+//  i = fscanf (fp, "\n%i %i %i %s %f", &ChannelID, &TypeID, &DetID, TypeName, &DetAng);
+//  printf ("%i %i %i %s %f\n", ChannelID, TypeID, DetID, TypeName, DetAng);
+//  while (i == 5) {
+//    TypeIDLookup[ChannelID] = TypeID;
+//    DetIDLookup[ChannelID] = DetID;
+//    AngleDegree[ChannelID] = DetAng;
+//    i = fscanf (fp, "\n%i %i %i %s %f", &ChannelID, &TypeID, &DetID, TypeName, &DetAng);
+//  };
+//  fclose (fp);  
+//  printf ("mapping - complete!!\n");
   
   return (0);
 };
@@ -179,7 +179,7 @@ DGSEvDecompose_v4 (unsigned int *ev, int len, DGSEVENT * DGSEvent)
 
   if (Pars.CurEvNo <= Pars.NumToPrint)
     {
-      printf ("event len=%i (%i bytes) >\n", len, len * sizeof (unsigned int));
+      printf ("event len=%d (%lu bytes) >\n", len, len * sizeof (unsigned int));
       for (i = 0; i < len; i++)
         {
           printf ("%3i[doc: %3i]: %12u, 0x%8.8x; ", i, i + 1, *(ev + i), *(ev + i));

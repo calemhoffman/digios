@@ -118,6 +118,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,1) == "#" )  break;
          if( i == 5 ) length   = atof(x.c_str());
          if( i == 14 ) firstPos = atof(x.c_str());
          if( i == 17 ) cDet = atoi(x.c_str());
@@ -238,8 +239,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
    }
    
 /**///======================================================== Extract tree entry, create new smaller trees, use that tree to speed up
-   double B1 [numDet]; // best a1 of rDet
-   double B0 [numDet]; // best a0 of rDet
+   double Best1 [numDet]; // best a1 of rDet
+   double Best0 [numDet]; // best a0 of rDet
 
    TBenchmark clock;  
    TGraph2D * gDist = new TGraph2D(); 
@@ -353,8 +354,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       }
       
       if( countEvent < 10 ) {
-         B1[idet] = 1;
-         B0[idet] = 0;
+         Best1[idet] = 1;
+         Best0[idet] = 0;
          printf("======= skip for number of entries < 10 \n");
          continue;
       }
@@ -454,8 +455,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       //======== time
       clock.Stop("timer");
       printf("==========> %7.0f sec (A1, A0) :  %9.6f   %9.6f  \n", clock.GetRealTime("timer"), A1, A0);
-      B1[idet] = A1;
-      B0[idet] = A0;
+      Best1[idet] = A1;
+      Best0[idet] = A0;
 
       if( option == -1 ){
          cScript->cd(1);
@@ -535,7 +536,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
 
       printf("=========== save parameters to %s \n", filename.Data());
       for( int i = 0; i < numDet; i++){
-        fprintf(paraOut, "%9.6f  %9.6f\n", B1[i], B0[i]);
+        fprintf(paraOut, "%9.6f  %9.6f\n", Best1[i], Best0[i]);
       }
 
       fflush(paraOut);

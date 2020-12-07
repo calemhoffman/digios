@@ -54,17 +54,10 @@ typedef struct PARS
   int RunNumber;
   char ROOTFile[STRLEN];
   int nEvents;
-  char ROOTFileOption[STRLEN];
   char GTSortInputFile[STRLEN];
-  int UseShareMemFile;
   unsigned int StartMapAddress;
-  char ShareMemFile[STRLEN];
   int InputSrc;
-  int HaveRootFileName;
   int WeWereSignalled;
-  int UseRootFile, SizeShareMemFile;
-  int UpdateRootFile;
-  char spname[STRLEN];
   int firstEvent;
   int GSudpPort;
   int NumToPrint;
@@ -78,89 +71,28 @@ typedef struct PARS
   char pHost[16];
   int grouping;
   int type;
-  float CCcal_gain[MAXDETNO+1];
-  float CCcal_offset[MAXDETNO+1];
-  float SEGcal_gain[MAXDETPOS + 1][MAXCRYSTALNO + 1];
-  float SEGcal_offset[MAXDETPOS + 1][MAXCRYSTALNO + 1];
   float timeout;
-  float crmat[MAXDETPOS + 1][MAXCRYSTALNO + 1][4][4]; 
-  float detpolang[MAXDETPOS+1];
-  float beta;
-  int GGMAX;
   int modwrite;
   int tsnumwrites;
-  float fomlo[MAXNOSEG];
-  float fomhi[MAXNOSEG];
-  int ndetlimlo;
-  int ndetlimhi;
-  float beamdir[3];
-  int nocrystaltoworldrot;
-  int multlo;
-  int multhi;
+
 } PARS;
 
 
 /* structure for the tracked gamma rays */
 /* written to the output with geb ID GEB_TYPE_TRACK==3 */
 
-typedef struct TRACKED_GAMMA_RAY {
-    float esum;              /* gamma ray energy */
-    int ndet;                /* number of interactions */
-    float fom;               /* figure of merit */
-    int   tracked;           /* 1==if tracked */
-    long long int timestamp; /* timestap of first interaction point */
-    float x0, y0, z0, e0;    /* first interaction point */
-    float x1, y1, z1, e1;    /* second interaction point */
-    } TRACKED_GAMMA_RAY;
-
-typedef struct TRACKED_GAMMA_HIT {
-      int ngam;
-      int pad;
-      TRACKED_GAMMA_RAY gr[MAX_GAMMA_RAYS];
-    } TRACKED_GAMMA_HIT;
-
-
-/* macros */
-
-#define WRITEALLHISTS  \
-  gDirectory->cd("root:/"); \
-  wlist = gDirectory->GetList(); \
-  if(!Pars.UpdateRootFile) f1= new TFile(Pars.RootFile, Pars.ROOTFileOption); \
-  if (ComPressLevel>NOTDEF) f1->SetCompressionLevel(ComPressLevel); \
-  printf("writing all spectra to [%s]\n", Pars.RootFile); \
-  printf("be patient... "); \
-  fflush(stdout); \
-  t1 = time(NULL); \
-  wlist->Write(0,TObject::kOverwrite); \
-  t2 = time(NULL); \
-  printf("DONE! on "); \
-  time_stamp(); \
-  printf("file size: %i, ",f1->GetSize()); \
-  printf("compression level: %i, ",f1->GetCompressionLevel()); \
-  printf("and factor: %f\n",f1->GetCompressionFactor()); \
-  printf("uncompressed root file size: %f\n",f1->GetSize()*f1->GetCompressionFactor()); \
-  printf("writeout time: %i seconds\n", t2 - t1); \
-  printf("at %7.2f Mbytes/sec\n", (float) f1->GetSize() / (t2 - t1) / 1000000.0); \
-  printf("on "); \
-  time_stamp(); \
-  fflush(stdout);
-
-#define UPDSSHMEM \
-  t1 = time(NULL); \
-  mfile->Update(); \
-  t2 = time(NULL); \
-  printf("done! "); \
-  printf("shared memory size: %i\n", mfile->GetSize()); \
-  printf("update time: %i seconds ", t2 - t1); \
-  printf("at %7.2f Mbytes/sec\n", (float) mfile->GetSize() / (t2 - t1) / 1000000.0); \
-  printf("to mapfile [%s] on ",Pars.ShareMemFile); \
-  time_stamp(); \
-  fflush(stdout);
-
-
-  /* prototypes */
-
-//  TH2F *mkTH2F (char *, char *, int , double , double , int , double , double );
-//  TH1D *mkTH1D (char *, char *, int , double , double );
-
-
+//typedef struct TRACKED_GAMMA_RAY {
+//    float esum;              /* gamma ray energy */
+//    int ndet;                /* number of interactions */
+//    float fom;               /* figure of merit */
+//    int   tracked;           /* 1==if tracked */
+//    long long int timestamp; /* timestap of first interaction point */
+//    float x0, y0, z0, e0;    /* first interaction point */
+//    float x1, y1, z1, e1;    /* second interaction point */
+//    } TRACKED_GAMMA_RAY;
+//
+//typedef struct TRACKED_GAMMA_HIT {
+//      int ngam;
+//      int pad;
+//      TRACKED_GAMMA_RAY gr[MAX_GAMMA_RAYS];
+//    } TRACKED_GAMMA_HIT;

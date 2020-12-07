@@ -29,10 +29,10 @@
 //==========================================
 
 int temp ;   
-int option;
 
-void PrintManual(){
-   
+
+int PrintManual(){
+
    printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
@@ -50,8 +50,11 @@ void PrintManual(){
    printf(" 7 = run Cleopatra/transfer.C\n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
+   int option;
    temp = scanf("%d", &option);
    printf(" -------------------------------------------------- \n");
+   
+   return option;
    
 }
 
@@ -81,87 +84,58 @@ void toTransferReaction(){
 //TODO in a while-loop that don't need to run the macro again
 void AutoCalibrationTrace(){
 
-   PrintManual();
+   int option = PrintManual();
    
 //====================================================  Transfer calculation
    if( option == 7 ) {
       toTransferReaction();
    }
    
-   printf(" ..... loading runsList.txt..");
+
 //==================================================== data files
-   
-   //======== alpha data
-   TChain * chainAlpha = new TChain("gen_tree");
-   
+
    //======== experimental sorted data
    TChain * chain = new TChain("gen_tree");
    
-   string dataList="runsList.txt";
+   string dataList="ChainMonitors.C";
+   printf(" ..... loading %s..", dataList.c_str());
    ifstream file;
    file.open(dataList.c_str());
    
-   int nBranchAlpha = 0;
-   int nBranch = 0;
-   
    if( file.is_open() ){
       string line;
-      while( file >> line){
-         //printf("%s \n", line.c_str());
-         int tempNBranchAlpha = 0;
-         int tempNBranch      = 0;
+      bool startFlag = false;
+      while( std::getline(file,line)){
+
+         line.erase(remove(line.begin(), line.end(), ' '), line.end());
+         ///printf("%s\n", line.c_str());
          
-         
+         if( line == "///**********startMarkerforAutoCalibration." ) {
+            startFlag = true;
+            continue;
+         }
+         if( line == "///**********endMarkerforAutoCalibration." ) break;
+         if( !startFlag) continue; 
+         if( line.length() == 0 ) continue;
          if( line.substr(0,2) == "//" ) continue;
-         if( line.substr(0,1) == "-" ) {
-           
-            gErrorIgnoreLevel = kBreak ; //ignore no File Error
-           
-            chainAlpha->Add(line.substr(1).c_str());
+         
+         if( line.substr(0, 11) == "chain->Add(" ) {
             
-            //Check size of Branch, if not consistence with the first, return error.
-            int entry = chainAlpha->GetEntries();
-            chainAlpha->GetEntry(entry);
-            if( nBranchAlpha == 0 ) {
-               nBranchAlpha = chainAlpha->GetNbranches(); 
-            }else{
-               tempNBranchAlpha = chainAlpha->GetNbranches();
-               
-               if( tempNBranchAlpha != nBranchAlpha ){
-                  printf(" tree structure inconistant at %s \n", line.substr(1).c_str());
-                  gROOT->ProcessLine(".q");
-                  return;
-               }
-            }
+            size_t first, last;
+            
+            first = line.find_first_of('"');
+            last = line.find_last_of('"');
+            
+            ///printf("%s\n", line.substr(first+1, last-first-1).c_str());
+            
+            chain->Add(line.substr(first+1, last-first-1).c_str());
          }
          
-         if( line.substr(0,1) == "+" ){
-           
-            gErrorIgnoreLevel = kBreak ; //ignore no File Error
-            
-            chain->Add(line.substr(1).c_str());
-            
-            //Check size of Branch, if not consistence with the first, return error.
-            int entry = chain->GetEntries();
-            chain->GetEntry(entry);
-            if( nBranch == 0 ) {
-               nBranch = chain->GetNbranches(); 
-            }else{
-               tempNBranch = chain->GetNbranches();
-               
-               if( tempNBranch != nBranch ){
-                  printf(" tree structure inconistant at %s \n", line.substr(1).c_str());
-                  gROOT->ProcessLine(".q");
-                  return;
-               }
-            }
-         }
       }
       file.close();
-      
       gErrorIgnoreLevel = kUnset ; //go back to default ignore level
    }else{
-      printf("!!!!! ERRRO!!! Missing runsList.txt\n");
+      printf("!!!!! ERRRO!!! Missing %s\n", dataList.c_str());
       gROOT->ProcessLine(".q");
       return; 
    }
@@ -176,19 +150,14 @@ void AutoCalibrationTrace(){
      return;
    }
    
-   if( option == 0 || option == 4 || option == 5 ){
-      printf(" ============================= alpha source files :  \033[0;31m\n");
-      chainAlpha->GetListOfFiles()->Print();
-      printf("\033[0m\n");
-   }
-   if( 1 <= option && option <= 3){
-      printf(" ================ files :  \033[0;31m\n");
+   if( 0 <= option && option <= 5){
+      printf(" ================ files :  \033[0;33m\n");
       chain->GetListOfFiles()->Print();
       printf("\033[0m\n");
    }    
    
    if( option == 0 ) {
-      Cali_xf_xn(chainAlpha);
+      Cali_xf_xn(chain);
       return ;
    }
    
@@ -305,12 +274,12 @@ void AutoCalibrationTrace(){
       int det = -1; 
       printf(" Choose detID (-1 to exit): ");
       temp = scanf("%d", &det);
-      Cali_e_single(chainAlpha, det);
+      Cali_e_single(chain, det);
       //gROOT->ProcessLine(".q");
    }
    
    if( option == 5 ) {
-      Cali_scale_x(chainAlpha);
+      Cali_scale_x(chain);
       //gROOT->ProcessLine(".q");
    }
    
