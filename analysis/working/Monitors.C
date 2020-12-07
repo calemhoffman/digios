@@ -3,6 +3,7 @@
 #include "Monitors.h"
 #include <TH2.h>
 #include <TH1.h>
+#include <TF1.h>
 #include <TStyle.h>
 #include <TCutG.h>
 #include <TGraph.h>
@@ -37,7 +38,7 @@ int      elumRange[2] = {   200,   6000};
 int       TACRange[3] = { 300,    700,  1500};  // #bin, min, max
 int      TAC2Range[3] = { 20,    480,    500};
 
-double     exRange[3] = {  20, -1, 3.5}; // bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  20, -1, 5}; // bin [keV], low[MeV], high[MeV]
 int  coinTimeRange[2] = { -400, 400};
 
 int    elumRateTimeRange[2] = {13000, 16000};

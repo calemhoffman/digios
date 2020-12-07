@@ -61,14 +61,17 @@ echo "============================================="
 ####################  Download raw data
 if [ $isMerge -ne 0 ]; then
   ./process_Download $RUN
-fi
+
 #######################################
 #################### Merge
-./process_Merge $RUN $isMerge 
+   ./process_Merge $RUN $isMerge 
+fi
 
 #######################################
 #################### Sort and GeneralSort
-./process_Sort $RUN $isSort $isGeneralSort 
+if [ $isSort -ne 0 ]; then
+   ./process_Sort $RUN $isSort $isGeneralSort 
+fi
 
 ########################################
 #################### Monitor
