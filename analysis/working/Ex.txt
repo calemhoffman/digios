@@ -1,7 +1,3 @@
 //===1st_Col_is_Ex_2nd_Col_is_relative_xsec_3rd_col_is_state_sigma_in_MeV
 0.000    1.0    0.100
-1.000    1.0    0.100
-2.000    1.0    0.000
-3.000    1.0    0.100
-4.000    1.0    0.000
 #============_End_of_file
