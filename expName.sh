@@ -1,4 +1,4 @@
 #!/bin/bash -l
-expName=h78_14C14N
-daqDataPath=/media/DIGIOSDATA4
-LastRunNum=2
+expName=h078_14C14N
+daqDataPath=/media/DIGIOSDATA5
+LastRunNum=0
