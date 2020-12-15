@@ -31,7 +31,7 @@ x 138
 y 129
 w 73
 h 21
-controlPv "Cry$(DN)_CV_CSR$(SN)"
+controlPv "VME$(DN):$(DB):CV_CSR$(CH)"
 format "hex"
 font "helvetica-medium-r-18.0"
 fgColor index 14
@@ -83,7 +83,7 @@ bgColor index 3
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "Cry$(DN)_CS_Pol$(SN)"
+controlPv "Cry$(DN)_CS_Pol$(CH)"
 font "helvetica-medium-r-18.0"
 endObjectProperties
 
@@ -123,7 +123,7 @@ bgColor index 3
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "Cry$(DN)_CS_PUE$(SN)"
+controlPv "Cry$(DN)_CS_PUE$(CH)"
 font "helvetica-medium-r-18.0"
 endObjectProperties
 
@@ -163,7 +163,7 @@ bgColor index 3
 inconsistentColor index 14
 topShadowColor index 0
 botShadowColor index 14
-controlPv "Cry$(DN)_CS_Dbg$(SN)"
+controlPv "Cry$(DN)_CS_Dbg$(CH)"
 font "helvetica-medium-r-18.0"
 endObjectProperties
 
@@ -217,7 +217,7 @@ x 138
 y 331
 w 85
 h 25
-controlPv "Cry$(DN)_CS_LEDTh$(SN)"
+controlPv "Cry$(DN)_CS_LEDTh$(CH)"
 format "float"
 font "helvetica-medium-r-18.0"
 fgColor index 25
