@@ -135,7 +135,8 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   double rhoRecoil  = ExtractNumber(7, detGeo);
   double posRecoil1 = ExtractNumber(9, detGeo);
   double posRecoil2 = ExtractNumber(10, detGeo);
-  double firstPos   = ExtractNumber(14, detGeo);  
+  double firstPos   = ExtractNumber(14, detGeo); 
+  double elum1      = ExtractNumber(11, detGeo); 
    
   vector<double> pos;
   int nLine = detGeo->GetListOfLines()->GetLast() + 1;
@@ -377,48 +378,75 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       }
       
       if( pID == pElum1XY ){
-         TH2F * hElum1XY = new TH2F("hElum1XY", "Elum-1 XY [gated]; X [mm]; Y [mm]",  400, -elumRange, elumRange, 400, -elumRange, elumRange);
+         TH2F * hElum1XY = new TH2F("hElum1XY", Form("Elum-1 XY [gated] @ %.0f mm ; X [mm]; Y [mm]", elum1),  400, -elumRange, elumRange, 400, -elumRange, elumRange);
          tree->Draw("yElum1:xElum1>>hElum1XY", gate, "colz");
+         
+         double count = hElum1XY->GetEntries();
+         
+         if( count < 2000. ) {
+            hElum1XY->SetMarkerStyle(7);
+            if( count < 500. ) hElum1XY->SetMarkerStyle(3);
+            hElum1XY->Draw("scat");
+         }
+         
       }
 
       if( pID == pEElum1R ){
-         TH2F * hEElum1Rho = new TH2F("hEElum1Rho", "Elum-1 E-R [gated]; R[mm]; Energy[MeV]",  400, 0, elumRange, 400, 0, 12);
+         TH2F * hEElum1Rho = new TH2F("hEElum1Rho", "Elum-1 E-R [gated]; R[mm]; Energy[MeV]",  400, 0, elumRange, 400, eRange[0], eRange[1]);
          tree->Draw("Tb:rhoElum1>>hEElum1Rho", gate, "colz");
       }
       
       if( pID == pElum1RThetaCM){
-         TH2F * hElum1RThetaCM = new TH2F("hElum1RThetaCM", "Elum-1 rho vs ThetaCM [gated]; thatCM [deg]; Elum- rho [mm]", 400, thetaCMRange[0], thetaCMRange[1],  400, 0, elumRange);
+         
+         int angBin = 400;
+         
+         TH2F * hElum1RThetaCM = new TH2F("hElum1RThetaCM", "Elum-1 rho vs ThetaCM [gated]; thatCM [deg]; Elum- rho [mm]", angBin, thetaCMRange[0], thetaCMRange[1],  400, 0, elumRange);
          tree->Draw("rhoElum1:thetaCM>>hElum1RThetaCM", gate, "colz");   
          
          TH1F * htemp = (TH1F *) hElum1RThetaCM->ProjectionX("htemp");  
          
-         double xMin = 0 , xMax = 0;
-         for( int i = 1; i <= 400; i++){
-           double y = htemp->GetBinContent(i);
-           if( y > 0 && xMin == 0 ) xMin = htemp->GetBinCenter(i);
+         double rel = (thetaCMRange[1] - thetaCMRange[0])*1.0/angBin;
+         printf("angular resolution : %f deg \n", rel);
+         
+         vector<double> xList;
+         double old_y = 0;
+         for( int i = 1; i <= angBin; i++){
+            double y = htemp->GetBinContent(i);
+            if( old_y == 0 && y > 0) xList.push_back(htemp->GetBinCenter(i));
+            if( old_y > 0 && y == 0 ) xList.push_back(htemp->GetBinCenter(i));
+            old_y = y;
          }
          
-         for( int i = 400; i >= 0; i--){
-           double y = htemp->GetBinContent(i);
-           if( y > 0 && xMax == 0 ) xMax = htemp->GetBinCenter(i);
+         printf("list of gaps :\n");
+         for( int i = 0; i < (int) xList.size(); i+=2){
+            printf("%d | %.3f - %.3f deg\n", i, xList[i], xList[i+1]);
          }
-         
-         printf("xMin : %f deg \n", xMin);
-         printf("xMax : %f deg \n", xMax);
          
          TF1 f1("f1", "sin(x)");
-         double acceptance = f1.Integral(xMin * TMath::DegToRad(), xMax * TMath::DegToRad() ) * TMath::TwoPi();
-         
-         printf("acceptance = %f sr \n", acceptance);
+         double acceptance = 0;
+         double err1 = 0;
+         double err2 = 0;
+         for( int i = 0; i < (int) xList.size(); i += 2 ){
+            acceptance += f1.Integral(xList[i] * TMath::DegToRad(), xList[i+1] * TMath::DegToRad() ) * TMath::TwoPi();
+            err1 += f1.Integral((xList[i]-rel) * TMath::DegToRad(), (xList[i+1] + rel) * TMath::DegToRad() ) * TMath::TwoPi();
+            err2 += f1.Integral((xList[i]+rel) * TMath::DegToRad(), (xList[i+1] - rel) * TMath::DegToRad() ) * TMath::TwoPi();
+         }
+         printf("acceptance = %f sr +- %f \n", acceptance, (err1-err2)/2);
          
          TLatex text;
          text.SetTextFont(82);
          text.SetTextSize(0.06);
          text.SetTextColor(2);
          text.SetTextAngle(90);
-
-         text.DrawLatex(xMin, elumRange/2, Form("%.2f", xMin));
-         text.DrawLatex(xMax, elumRange/2, Form("%.2f", xMax));
+         
+         for( int i = 0; i < (int) xList.size(); i++){
+            text.DrawLatex(xList[i], elumRange/2, Form("%.2f", xList[i]));
+         }
+         
+         text.SetNDC();
+         text.SetTextAngle(0);
+         text.DrawLatex(0.15, 0.15, Form("accp. = %.2f(%.2f) msr", acceptance * 1000., (err1-err2)*1000./2));
+         
       }
       
       if( pID == pHitID ){
