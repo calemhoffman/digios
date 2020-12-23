@@ -6,7 +6,10 @@
 #include <TSpectrum.h>
 #include <TMath.h>
 #include <vector>
+#include <algorithm>
+#include <cstdlib>
 
+//#include "../Armory/AnalysisLibrary.h"
 //TODO
 //1) fitGaussPN()
 //2) fitSkewGauss()

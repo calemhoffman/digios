@@ -41,5 +41,9 @@
 #32Si(t,p)34Si     0        0L=0     0+           0.000   8MeV/u      lA                #two-nucleon_transfer
 #133Sb(t,3He)133Sn 7/2      0g7/2    0+           0.000   8.5MeV/u    Ax .... cannot cal
 
-9Li(t,p)11Li      3/2        1L=0     3/2-        0.000   10MeV/u      lA                #two-nucleon_transfer   
-
+82Kr(d,p)83Kr      0        0g9/2    9/2+         0.000   10MeV/u     AK
+82Kr(d,p)83Kr      0        1p1/2    1/2-         0.000   10MeV/u     AK
+82Kr(d,p)83Kr      0        1p3/2    3/2-         0.568   10MeV/u     AK
+82Kr(d,p)83Kr      0        1d5/2    5/2+         0.800   10MeV/u     AK
+82Kr(d,p)83Kr      0        1d3/2    3/2+         1.220   10MeV/u     AK
+82Kr(d,p)83Kr      0        2s1/2    1/2+         1.220   10MeV/u     AK
