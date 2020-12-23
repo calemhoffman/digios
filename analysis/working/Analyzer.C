@@ -8,8 +8,11 @@
 #include <TBenchmark.h>
 #include <TMath.h>
 #include <TCutG.h>
+#include <TF1.h>
+#include <TLatex.h>
+#include <TProfile.h>
 #include <TObjArray.h>
-#include "../Armory/AutoFit.C"
+//#include "../Armory/AutoFit.C"
 
 
 int numRow = 4;
@@ -22,10 +25,10 @@ const int numDet = numRow * numCol ;
 
 
 
-vector<int> listOfBadDet = {5, 7,8, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
+vector<int> listOfBadDet = {4, 5, 7, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
 
-double rangeEx[3] = { 20, -1, 5}; ///resol. [keV], low Ex, high Ex
-double rangeCM[3] = {1, 0, 45}; ///resol. [deg], low deg, high deg
+double rangeEx[3] = { 20, -1, 2}; ///resol. [keV], low Ex, high Ex
+double rangeCM[3] = {0.1, 5, 45}; ///resol. [deg], low deg, high deg
 
 bool isExOffset = false;
 double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
@@ -35,8 +38,9 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
 -0.1202, -0.0240,  0.1119,  0.0535, -0.0004,
  0.0384, -0.0593,  0.0133,  0.0575,  0.0534,
    1000, -0.0122,  0.1052,  0.2028,  0.0410};
+
    
-bool isExScale = true;
+bool isExScale = false;
 double ExScale[24][2]={
 {	1.056	,	0.023	}, // 0
 {1.0, 0.0}, //{	1.018	, -0.128},
@@ -64,8 +68,6 @@ double ExScale[24][2]={
 {	1	,	0	}};
   
 
-
-
 TString rdtCutFile = ""; //"rdt_15N_degraded.root";
 
 //######################################## End of User Input
@@ -86,6 +88,7 @@ TH2F * heza;  ///e vs z, |x| < 0.9
 TH2F ** hezr; ///e vs z for each row
 
 TH2F ** hxExi; ///x vs Ex for each detector
+TH2F ** hExxi; ///x vs Ex for each detector
 
 TH1F * hEx; ///Ex
 TH1F ** hExi; ///Ex for each detector
@@ -138,8 +141,8 @@ void Analyzer::Begin(TTree *tree)
    hTa = new TH1F("hTa", Form("thetaCM (|x|<0.9); thetaCM [deg]; count / %2.0f deg", rangeCM[0]), (rangeCM[2]-rangeCM[1])/rangeCM[0], rangeCM[1], rangeCM[2]);
 
    ///E vs Z
-   hez  = new TH2F("hez" , "e - z; z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
-   heza = new TH2F("heza", "e - z (|x|<0.9); z [mm]; e [MeV]", 450, -450, 0, 400, 0, 10);
+   hez  = new TH2F("hez" , "e - z; z [mm]; e [MeV]", 450, -550, -150, 400, 0, 10);
+   heza = new TH2F("heza", "e - z (|x|<0.9); z [mm]; e [MeV]", 450, -550, -150, 400, 0, 10);
    
    ///Ex vs thetaCM
    hExT  = new TH2F("hExT" , "Ex - thetaCM; thetaCM [deg]; Ex [MeV]", 400, 0, 50, 400, -1, 5);
@@ -153,6 +156,7 @@ void Analyzer::Begin(TTree *tree)
    hexi = new  TH2F *[numDet];
    hxi = new  TH1F *[numDet];
    hxExi = new TH2F *[numDet];
+   hExxi = new TH2F *[numDet];
    hExi = new TH1F *[numDet];
 
    for( int i = 0; i < numDet; i ++){
@@ -161,7 +165,8 @@ void Analyzer::Begin(TTree *tree)
       hEBISi[i]  = new TH1F(Form("hEBISi%d", i) , Form("e_t - EBIS_t (det-%d); time [us]; count/ 1 us", i), 1500, 0, 1500);
       hExi[i]    = new TH1F(Form("hExi%d", i) , Form("Ex (det-%d); Ex[MeV]; count/ %2.0f keV", i,  rangeEx[0]), (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
       hexi[i]    = new TH2F(Form("hexi%d", i) , Form("e - x (det-%d); x [a.u]; e [MeV]", i), 450, -1.2, 1.2, 400, 0, 10);
-      hxExi[i]   = new TH2F(Form("hxExi%d", i), Form("x - Ex (det-%d); Ex [MeV); x [a.u.]", i), 400, -1, 5, 400, -1.2, 1.2);         
+      hxExi[i]   = new TH2F(Form("hxExi%d", i), Form("x - Ex (det-%d); Ex [MeV]; x [a.u.]", i), 400, -1, 5, 400, -1.2, 1.2);         
+      hExxi[i]   = new TH2F(Form("hExxi%d", i), Form("Ex - x (det-%d); x [a.u.]; Ex [MeV]", i), 200, -1.2, 1.2, 200, 0.0, 2.0);         
    }
 
    hezr = new TH2F * [numRow];
@@ -325,7 +330,8 @@ Bool_t Analyzer::Process(Long64_t entry)
       ///if( hitID[i] != 0 ) continue;
       
       ///======== cut-thetaCM
-      if( thetaCM < 8 ) continue;
+      if( thetaCM < 11 ) continue;
+      if( TMath::IsNaN(thetaCM) ) continue;
       
       ///======== cut-det
       bool badDetFlag = false;
@@ -351,8 +357,32 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( isExOffset) Ex = Ex - ExOffset[i];
       if( isExScale ) Ex = Ex * ExScale[i][0] + ExScale[i][1];
       
-      multiHit ++;
+      if( i ==  0 ) Ex = Ex - x[i]* 0.05;
+      if( i ==  1 ) Ex = Ex - x[i]* 0.022 + x[i]*x[i]*0.006;
+      if( i ==  2 ) Ex = Ex - x[i]* 0.015 + x[i]*x[i]*0.016;
+      if( i ==  3 ) Ex = Ex - x[i]* 0.012;
+      if( i ==  6 ) Ex = Ex - x[i]* 0.03;
+      if( i ==  9 ) Ex = Ex + x[i]* 0.013 + x[i]*x[i]*0.020;
+      if( i == 16 ) Ex = Ex + x[i]* 0.030;
+      if( i == 12 ) Ex = Ex - 0.039;
       
+      
+      if( i ==  0 ) Ex = Ex*1.0875 + 0.0084;
+      if( i ==  6 ) Ex = Ex*1.0705 + 0.022;
+      if( i == 12 ) Ex = Ex*1.0517 + 0.0468;
+      if( i ==  1 ) Ex = Ex*0.9968 - 0.005;
+      if( i == 13 ) Ex = Ex*1.0018 - 0.017;
+      if( i ==  2 ) Ex = Ex*1.0049 - 0.112;
+      if( i ==  8 ) Ex = Ex*0.9932 + 0.0393;
+      if( i == 14 ) Ex = Ex*0.9977 + 0.0239;
+      if( i ==  3 ) Ex = Ex*1.0003 + 0.0016;
+      if( i == 15 ) Ex = Ex*1.0028 - 0.0028;
+      if( i == 16 ) Ex = Ex*1.0059 - 0.05;
+
+      if( !(-0.2 < Ex && Ex < 0.2 )) return kTRUE;
+      
+      multiHit ++;
+            
       hei[i]->Fill( e[i] );
       hxi[i]->Fill( x[i] );
       hexi[i]->Fill(x[i], e[i]);
@@ -360,9 +390,15 @@ Bool_t Analyzer::Process(Long64_t entry)
       hExi[i]->Fill(Ex);
       hxExi[i]->Fill(Ex, x[i]);
 
+      hExxi[i]->Fill(x[i], Ex);
+
       hez->Fill(z[i],e[i]);
       hExT->Fill(thetaCM,Ex);
-      hT->Fill(thetaCM);      
+      if( i%6 == 0 ) hT->Fill(thetaCM, 1.0/TMath::Sin(thetaCM*TMath::DegToRad()) );      
+      if( i%6 == 1 ) hT->Fill(thetaCM, 1.5/TMath::Sin(thetaCM*TMath::DegToRad()) );      
+      if( i%6 == 2 ) hT->Fill(thetaCM, 1.0/TMath::Sin(thetaCM*TMath::DegToRad()));      
+      if( i%6 == 3 ) hT->Fill(thetaCM, 1.5/TMath::Sin(thetaCM*TMath::DegToRad()) );      
+      if( i%6 == 4 ) hT->Fill(thetaCM, 3.0/TMath::Sin(thetaCM*TMath::DegToRad()) );      
       
       hTz->Fill(z[i], thetaCM);
       
@@ -383,6 +419,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       
       //======== special gate;
       ///if( i == 1 || i == 5 || i == 17 || i == 6 || i == 7 || i == 8 || i == 12 || i == 18 || i == 19) continue;  ///for beyound ground state
+      
       
       hExc[i%numCol]->Fill(Ex);
       hEx->Fill(Ex, scaling);
@@ -429,7 +466,8 @@ double findXMax(TH1F ** hist){
   double max = 0;
   int maxDetID = -1;
   for( int i = 0; i < numDet; i++){
-    if( i == 11 ) continue;
+//    if( i == 11 ) continue;
+    for( int j = 0; j < (int) listOfBadDet.size(); j++) if( i == listOfBadDet[j] ) continue;
     double temp = hist[i]->GetMaximum();
     if( temp > max) {
       max = temp;
@@ -465,7 +503,7 @@ void Analyzer::Terminate()
    int nX = numCol, nY = numRow;
    nX = 1;
    nY = 1;
-   int sizeX = 650, sizeY = 400;
+   int sizeX = 800, sizeY = 600;
    cAna = new TCanvas("cAna", "Analyzer | " + canvasTitle, nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
@@ -478,34 +516,50 @@ void Analyzer::Terminate()
    ///
    ///cAna->cd(2);
    ///hExT->Draw("colz");
-   
+
    
    for( int i = 0; i < numDet; i++){
-     cAna->cd(i+1);
-     //cAna->cd(i+1)->SetGrid();
-     //cAna->cd(i+1)->SetLogy();
-     //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
-     //hei[i]->Draw();
-     
-     //hxi[i]->Draw();
-     
-     //hEBISi[i]->Draw();
-     hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
-     hExi[i]->SetLineColor(i+1);
-     hExi[i]->Draw("same");
-   
-     //fitAuto(hExi[i]);
-     //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
-   
-     //hExPi[i]->SetLineColor(2);
-     //hExPi[i]->Draw("same");
-   
-     //2-D 
-     //hexi[i]->Draw(); 
-     //hxExi[i]->SetMarkerStyle(7);
-     //hxExi[i]->SetMarkerColorAlpha(1,0.2);
-     //hxExi[i]->Draw("");
-     //hxExi[i]->Draw("colz");
+      cAna->cd(i+1);
+      //cAna->cd(i+1)->SetGrid();
+      //cAna->cd(i+1)->SetLogy();
+      //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
+      //hei[i]->Draw();
+
+      //hxi[i]->Draw();
+
+      if( i >= 18 ) continue;
+
+      //hEBISi[i]->Draw();
+      hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
+      //hExi[i]->SetLineColor((i/6+1 == 3 ? 4 : i/6+1));
+      hExi[i]->SetLineColor(i+1);
+      hExi[i]->Draw("same");
+      
+      //cAna->cd(i%6+19);
+      //hExi[i]->Draw((i/6==0 ? "" :"same"));
+
+
+      //fitAuto(hExi[i]);
+      //fit2GaussP1(hExi[i], 0.0, 0.05, 1.2, 0.05, -1, 1.5, 0);
+
+      //hExPi[i]->SetLineColor(2);
+      //hExPi[i]->Draw("same");
+
+      //2-D 
+      //hexi[i]->Draw(); 
+      //hxExi[i]->SetMarkerStyle(7);
+      //hxExi[i]->SetMarkerColorAlpha(1,0.2);
+      //hxExi[i]->Draw("");
+
+      //hExxi[i]->SetMarkerStyle(7);
+      //hExxi[i]->SetMarkerColorAlpha(1,0.2);
+      //hExxi[i]->Draw("");
+        
+      //if( hExxi[i]->GetEntries() > 0 ) {
+      //   TF1 * f1 = new TF1(Form("f%d",i),"pol1");
+      //   hExxi[i]->Fit(Form("f%d",i), "Q");     
+      //   printf("%2d | %10.6f , %10.3f (%.3f) \n", i, f1->GetParameter(0), f1->GetParameter(1), f1->GetParError(1) );
+      //}
    }
    
    ///for( int i = 0; i < numDet; i++){
@@ -562,5 +616,6 @@ void Analyzer::Terminate()
    //  //hExc[i]->Draw();
    //}
    
+   gROOT->ProcessLine("ShowFitMethod()");
    /**/
 }

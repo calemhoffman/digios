@@ -24,6 +24,7 @@
 
 // Headers needed by this particular selector
 
+#define MAXDET 30 // use in creat new tree branch
 
 class Cali_e_trace : public TSelector {
 public :
@@ -119,14 +120,14 @@ public :
    //tree  
    Int_t eventID;
    Int_t run;
-   Float_t eC[30];
-   Float_t xfC[30];
-   Float_t xnC[30];
-   ULong64_t eC_t[30];
-   Float_t x[30]; // unadjusted position, range (-1,1)
-   Float_t z[30]; 
+   Float_t eC[MAXDET];
+   Float_t xfC[MAXDET];
+   Float_t xnC[MAXDET];
+   ULong64_t eC_t[MAXDET];
+   Float_t x[MAXDET]; // unadjusted position, range (-1,1)
+   Float_t z[MAXDET]; 
    int det;    //
-   int hitID[30]; // is e, xf, xn are all fired.
+   int hitID[MAXDET]; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
    
    Float_t thetaCM;
@@ -166,14 +167,14 @@ public :
    double perpDist;
    double length;
    double firstPos;
-   double xnCorr[30]; // xn correction for xn = xf
-   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
-   double xCorr[30]; // correction of x, scale to (-1,1)
+   double xnCorr[MAXDET]; // xn correction for xn = xf
+   double xfxneCorr[MAXDET][2]; //xf, xn correction for e = xf + xn
+   double xCorr[MAXDET]; // correction of x, scale to (-1,1)
    
-   double eCorr[30][2]; // e-correction
+   double eCorr[MAXDET][2]; // e-correction
    double rdtCorr[8]; //rdt-correction
    
-   double cTCorr[30][9]; // coinTime correction
+   double cTCorr[MAXDET][9]; // coinTime correction
    TF1 ** f7 ; //!
    
    bool isReaction;
@@ -320,7 +321,14 @@ void Cali_e_trace::Init(TTree *tree)
    
    file.close();
 
-   //================= Formation of file name
+   //=== clock
+   clock.Reset();
+   clock.Start("timer");
+   shown = 0;
+   validEventCount = 0;
+   
+   
+   //================= Formation of file name and create Tree
    int numFile = fChain->GetListOfFiles()->GetLast() + 1;   
    int oldRunNum = -100;
    bool contFlag = false; // is runNumber continue;
@@ -364,76 +372,6 @@ void Cali_e_trace::Init(TTree *tree)
    
    saveFile = new TFile( saveFileName,"recreate");
    newTree =  new TTree("tree","tree");
-   
-   eventID = -1;
-   run = 0;
-   
-   newTree->Branch("eventID",&eventID,"eventID/I"); 
-   if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
-   
-   newTree->Branch("e" ,   eC, "e[30]/F");
-   newTree->Branch("xf",  xfC, "xf[30]/F");
-   newTree->Branch("xn",  xnC, "xn[30]/F");
-   newTree->Branch("ring",  ring, "xn[30]/F");
-   newTree->Branch("x" ,    x, "x[30]/F");
-   newTree->Branch("z" ,    z, "z[30]/F");
-   newTree->Branch("detID", &det, "det/I");
-   newTree->Branch("hitID", hitID, "hitID[30]/I");
-   newTree->Branch("multiHit", &multiHit, "multiHit/I");
-   
-   newTree->Branch("Ex", &Ex, "Ex/F");
-   newTree->Branch("thetaCM", &thetaCM, "thetaCM/F");
-   newTree->Branch("thetaLab", &thetaLab, "thetaLab/F");
-   
-   newTree->Branch("e_t", eC_t, "e_t[30]/l");
-   
-   newTree->Branch("rdt", rdtC, "rdtC[8]/F");
-   newTree->Branch("rdt_t", rdtC_t, "rdtC_t[8]/l");
-   newTree->Branch("rdtID", rdtID, "rdtID[8]/I");
-   newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
-   
-   if( isEBISExist ) newTree->Branch("ebis_t", &EBIS_t, "EBIS_t/l");
-   
-   if( isELUMExist ) {
-     newTree->Branch("elum", elum, "elum[32]/F");
-     newTree->Branch("elum_t", elum_t, "elum_t[32]/l");
-   }
-   
-   if( isEZEROExist ) {
-      newTree->Branch("ezero", ezero, "ezero[10]/F");
-      newTree->Branch("ezero_t", ezero_t, "ezero_t[10]/l");
-   }
-   
-   if( isTACExist ){
-      newTree->Branch("tac", tac, "tac[10]/F");
-      newTree->Branch("tac_t", tac_t, "tac_t[10]/l");
-   }
-   
-   newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
-   
-   if( isTraceDataExist ){
-      newTree->Branch("tcoin_t", &tcoin_t, "tcoin_t/F");
-      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUnCalibrated_ns/F");
-      newTree->Branch("coinTime", &coinTime, "coinTime_ns/F");
-   
-      newTree->Branch("te",             te,  "Trace_Energy[30]/F");
-      newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
-      newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
-      newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
-      newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
-      newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
-   }
-
-   printf("Is EBIS  exist : %d\n", isEBISExist);
-   printf("Is ELUM  exist : %d\n", isELUMExist);
-   printf("Is EZero exist : %d\n", isEZEROExist);
-   printf("Is TAC   exist : %d\n", isTACExist);
-   printf("Is Trace exist : %d\n", isTraceDataExist);
-   //=== clock
-   clock.Reset();
-   clock.Start("timer");
-   shown = 0;
-   validEventCount = 0;
    
    //===================================================== loading parameter
    
@@ -744,6 +682,73 @@ void Cali_e_trace::Init(TTree *tree)
 
       cutList->Write("rdtCutList");
    }
+   
+   //================= create Tree branch
+   
+   eventID = -1;
+   run = 0;
+   
+   newTree->Branch("eventID",&eventID,"eventID/I"); 
+   if( isRunIDExist )  newTree->Branch("run",&run,"run/I"); 
+   
+   newTree->Branch("e" ,              eC, Form("e[%d]/F", numDet));
+   newTree->Branch("xf",             xfC, Form("xf[%d]/F", numDet));
+   newTree->Branch("xn",             xnC, Form("xn[%d]/F", numDet));
+   newTree->Branch("ring",          ring, Form("xn[%d]/F", numDet));
+   newTree->Branch("x" ,               x, Form("x[%d]/F", numDet));
+   newTree->Branch("z" ,               z, Form("z[%d]/F", numDet));
+   newTree->Branch("detID",         &det, "det/I");
+   newTree->Branch("hitID",        hitID, Form("hitID[%d]/I", numDet));
+   newTree->Branch("multiHit", &multiHit, "multiHit/I");
+   
+   newTree->Branch("Ex",             &Ex, "Ex/F");
+   newTree->Branch("thetaCM",   &thetaCM, "thetaCM/F");
+   newTree->Branch("thetaLab", &thetaLab, "thetaLab/F");
+   
+   newTree->Branch("e_t",           eC_t, "e_t[30]/l");
+   
+   newTree->Branch("rdt",                     rdtC, "rdtC[8]/F");
+   newTree->Branch("rdt_t",                 rdtC_t, "rdtC_t[8]/l");
+   newTree->Branch("rdtID",                  rdtID, "rdtID[8]/I");
+   newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
+   
+   if( isEBISExist ) newTree->Branch("ebis_t", &EBIS_t, "EBIS_t/l");
+   
+   if( isELUMExist ) {
+     newTree->Branch("elum",     elum, "elum[32]/F");
+     newTree->Branch("elum_t", elum_t, "elum_t[32]/l");
+   }
+   
+   if( isEZEROExist ) {
+      newTree->Branch("ezero",     ezero, "ezero[10]/F");
+      newTree->Branch("ezero_t", ezero_t, "ezero_t[10]/l");
+   }
+   
+   if( isTACExist ){
+      newTree->Branch("tac",     tac, "tac[10]/F");
+      newTree->Branch("tac_t", tac_t, "tac_t[10]/l");
+   }
+   
+   newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
+   
+   if( isTraceDataExist ){
+      newTree->Branch("tcoin_t",       &tcoin_t, "tcoin_t/F");
+      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUnCalibrated_ns/F");
+      newTree->Branch("coinTime",     &coinTime, "coinTime_ns/F");
+   
+      newTree->Branch("te",             te,  "Trace_Energy[30]/F");
+      newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
+      newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
+      newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
+      newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
+      newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+   }
+
+   printf("Is EBIS  exist : %d\n", isEBISExist);
+   printf("Is ELUM  exist : %d\n", isELUMExist);
+   printf("Is EZero exist : %d\n", isEZEROExist);
+   printf("Is TAC   exist : %d\n", isTACExist);
+   printf("Is Trace exist : %d\n", isTraceDataExist);
 
    printf("================================== numDet : %d \n", numDet);
    

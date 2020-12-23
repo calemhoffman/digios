@@ -250,9 +250,6 @@ void Monitors::Begin(TTree *tree)
    printf("##########         Monitors.C           #########\n");
    printf("#################################################\n");
    
-      
-   printf("------------ %d \n", A); //testing code for TSelector input
-   
    //===================================================== loading parameter
    printf("################## loading parameter files\n"); 
 
@@ -1257,7 +1254,7 @@ void Monitors::Terminate()
    
    StpWatch.Start(kFALSE);
    
-   gROOT->ProcessLine(".L Utils.C");
+   gROOT->ProcessLine(".L ../Armory/Monitors_Util.C");
    //gROOT->ProcessLine(Form("FindBesCanvasDivision(%d)", numDet));
    printf("=============== loaded Utils.C\n");
    gROOT->ProcessLine(".L ../Armory/AutoFit.C");

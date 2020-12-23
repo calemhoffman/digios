@@ -38,7 +38,7 @@ public :
    Float_t         rdt[8];
    ULong64_t       rdt_t[8];
    Int_t           rdtID[8];
-   Int_t           rdtMultiHit;
+//   Int_t           rdtMultiHit;
    ULong64_t       ebis_t;
    Float_t         elum[32];
    Float_t         ezero[10];
@@ -69,7 +69,7 @@ public :
    TBranch        *b_rdtC;   //!
    TBranch        *b_rdtC_t;   //!
    TBranch        *b_rdtID;   //!
-   TBranch        *b_rdtMultiHit;   //!
+//   TBranch        *b_rdtMultiHit;   //!
    TBranch        *b_EBIS_t;   //!
    TBranch        *b_elum;   //!
    TBranch        *b_ezero;   //!
@@ -142,7 +142,7 @@ void Analyzer::Init(TTree *tree)
    fChain->SetBranchAddress("rdt", rdt, &b_rdtC);
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_rdtC_t);
    fChain->SetBranchAddress("rdtID", rdtID, &b_rdtID);
-   fChain->SetBranchAddress("rdtMultiHit", &rdtMultiHit, &b_rdtMultiHit);
+   //fChain->SetBranchAddress("rdtMultiHit", &rdtMultiHit, &b_rdtMultiHit);
    //fChain->SetBranchAddress("ebis_t", &ebis_t, &b_EBIS_t);
    fChain->SetBranchAddress("elum", elum, &b_elum);
    fChain->SetBranchAddress("ezero", ezero, &b_ezero);

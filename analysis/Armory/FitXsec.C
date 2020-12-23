@@ -188,13 +188,15 @@ void FitXsec(TString expXsec, int ID, TString ptolemy, int ID2 = -1, int ID3 = -
     TF1 * fit2 = new TF1("fit2", func1, 0, 50, 2);
     fit2->SetParameter(0, 1);
     fit2->SetParameter(1, 1);
-    fit2->SetParLimits(0, 0, 10);
-    fit2->SetParLimits(1, 0, 10);
-    fit2->SetLineColor(1);
+    fit2->SetParLimits(0, 0, 1000);
+    fit2->SetParLimits(1, 0, 3000);
+    fit2->SetLineColor(6);
     
     //printf(" fit2(16 deg) = %f \n", fit2->Eval(16));
     
     gX->Fit("fit2", "Rnq", "", 0, xRange[1] * 1.1);
+    
+    fit2->Draw("same");
     
     const double* paraE = fit2->GetParErrors();
     const double* paraA = fit2->GetParameters();
