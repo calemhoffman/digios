@@ -126,13 +126,16 @@ while [  $stopFlag -eq 0 ]; do
 	    source ~/digios/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 
 	    echo "tell Mac to run ./process_run"
-	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.193 /Users/heliosdigios/digios/AutoProcess "${RUN}" 1" &
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${RUN}" 1" &
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
 		echo -e "######## ${RED}CHANCE TO STOP the auto!!!! Ctrl+C to stop.${NC}"
 		echo "========== number of repeat : ${repeat}"
 		sleep 10
+		#if [ $expname == "h078_14C14N" ]; then
+		#    caput VME01:MDIG1:trigger_mux_select IntAcptAll
+		#fi
 		cd ${datalocation}
 		source ~/digios/daq/edm/scripts/start_run.sh "Auto start! $repeat"
 		cd ${currentLocation}
@@ -153,8 +156,12 @@ while [  $stopFlag -eq 0 ]; do
 	mod=$(( $count % 21 ))
 	if [ $mod -eq 0 ]; then
 	    echo "tell Mac to run ./process_run"
-	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.193 /Users/heliosdigios/digios/AutoProcess "${RUN}" 0" &
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${RUN}" 0" &
 	fi
+
+	#if [ $count -eq 10 ] && [ $expName == "h078_14C14N"  ]; then
+	#    caput VME01:MDIG1:trigger_mux_select ExtTTCL
+	#fi
 
     fi
 

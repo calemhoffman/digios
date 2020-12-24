@@ -22,7 +22,7 @@ cd ${datalocation}
 if [ $# -eq 1 ]; then 
     isAuto=$1
     if [ $isAuto == "Auto" ]; then
-	xterm -T savedata -fa "Monospace" -fs 12 -bg rgb:00/00/00 -fg white -geometry 100x30+500+20 -e "${explocation}/edm/scripts/AutoStartStop time 60 -1"
+	xterm -T savedata -fa "Monospace" -fs 12 -bg rgb:00/00/00 -fg white -geometry 100x30+500+20 -e "${explocation}/edm/scripts/AutoStartStop time 180 -1"
     fi
 else
     caput Online_CS_SaveData No Save
