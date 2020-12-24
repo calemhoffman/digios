@@ -43,4 +43,12 @@
 
 #9Li(t,p)11Li      3/2        1L=0     3/2-        0.000   10MeV/u      lA                #two-nucleon_transfer   
 
-14C(d,d)14C   0        none     0+         0.000   10.0MeV/u   AA
+14C(d,p)15C   0        0d5/2     5/2+       0.744   10.0MeV/u   AK
+#14C(d,p)15C   0        0d5/2     5/2+       0.744   10.0MeV/u   AV
+#14C(d,p)15C   0        0d5/2     5/2+       0.744   10.0MeV/u   QK
+#14C(d,p)15C   0        0d5/2     5/2+       0.744   10.0MeV/u   QV
+
+#14N(d,p)15N   1        0d5/2     5/2+       7.155   10.0MeV/u   AK
+#14N(d,p)15N   1        0d5/2     5/2+       7.155   10.0MeV/u   AV
+#14N(d,p)15N   1        0d5/2     5/2+       7.155   10.0MeV/u   QK
+#14N(d,p)15N   1        0d5/2     5/2+       7.155   10.0MeV/u   QV

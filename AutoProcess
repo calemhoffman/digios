@@ -5,9 +5,9 @@ Run=$1
 isEndRun=$2
 
 cd ~/digios/analysis/working
-./process_run $Run -1 -1 -1 20  #use run list
+Process_RUN $Run -1 -1 -1 20  #use run list
 
 if [ ${isEndRun} -eq 1 ]; then
-   ./process_run $Run 0 0 0 10  #single run
+   Process_RUN $Run 0 0 0 10  #single run
 fi
 

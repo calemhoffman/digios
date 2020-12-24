@@ -69,7 +69,9 @@ public :
    void printControl(int n){this->printControlID = n;}
    
    double z[100];
-
+   
+   ULong64_t startTime ;
+   ULong64_t endTime ;
 
    Monitors(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Monitors() { }

@@ -289,7 +289,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== EZERO
       if ( idDet >= 300 && idDet <= 310 ) {
         Int_t ezeroID = idDet - 300;
-        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M * (-1);
+        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/M ;
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
       }
       

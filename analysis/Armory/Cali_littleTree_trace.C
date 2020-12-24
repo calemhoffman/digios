@@ -130,7 +130,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       //if( idet ==17 ) continue;
       //if( idet == 7 ) continue;
       //if( idet ==  5 ) continue;
-      if( e[idet] < 500 ) continue;
+      if( e[idet] < 100 ) continue;
       
       //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
