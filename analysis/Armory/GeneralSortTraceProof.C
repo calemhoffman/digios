@@ -20,7 +20,7 @@
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 1; //0 = no process; 1 = fit;
+int traceMethod = 2; //0 = no process; 1 = fit; 2 = trapezoid
 float delayChannel = 150.; //initial guess of the time
 
 bool isTACRF = false;
@@ -28,6 +28,99 @@ bool isRecoil = true;
 bool isElum = false;
 bool isEZero = true;
 //=================================== end of setting
+
+/*
+TGraph * TrapezoidFilter(int length, Short_t * wave){
+   ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
+
+   int baseLineEnd = 100;
+   
+   float baseline = 0;
+   int riseTime = 100; //ch
+   int flatTop = 100;
+   float decayTime = 100;
+   
+   TGraph *  trapezoid = new TGraph();
+   trapezoid->Clear();
+   
+   ///find baseline;
+   double baseline = 0;
+   for( int i = 0; i < baseLineEnd; i++){
+      baseline += wave[i];
+   }
+   baseline = baseline*1./baseLineEnd;
+   
+   double pn = 0.;
+   double sn = 0.;
+   for( int i = 0; i < length ; i++){
+   
+      double dlk = wave[i] - baseline;
+      if( i - riseTime >= 0            ) dlk -= wave[i - riseTime] - baseline;
+      if( i - flatTop - riseTime >= 0  ) dlk -= wave[i - flatTop - riseTime] - baseline;
+      if( i - flatTop - 2*riseTime >= 0) dlk += wave[i - flatTop - 2*riseTime] - baseline;
+      
+      if( i == 0 ){
+         pn = dlk;
+         sn = pn + dlk*decayTime;
+      }else{
+         pn = pn + dlk;
+         sn = sn + pn + dlk*decayTime;
+      }    
+      
+      trapezoid->SetPoint(i, i, sn / decayTime / riseTime);
+    
+   }
+   
+   return trapezoid;
+   
+}
+*/
+
+TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
+   ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
+
+   int baseLineEnd = 80;
+   
+   int riseTime = 20; //ch
+   int flatTop = 20;
+   float decayTime = 300;
+   
+   TGraph *  trapezoid = new TGraph();
+   trapezoid->Clear();
+   
+   ///find baseline;
+   double baseline = 0;
+   for( int i = 0; i < baseLineEnd; i++){
+      baseline += trace->Eval(i);
+   }
+   baseline = baseline*1./baseLineEnd;
+   
+   int length = trace->GetN();
+   
+   double pn = 0.;
+   double sn = 0.;
+   for( int i = 0; i < length ; i++){
+   
+      double dlk = trace->Eval(i) - baseline;
+      if( i - riseTime >= 0            ) dlk -= trace->Eval(i - riseTime)             - baseline;
+      if( i - flatTop - riseTime >= 0  ) dlk -= trace->Eval(i - flatTop - riseTime)   - baseline;
+      if( i - flatTop - 2*riseTime >= 0) dlk += trace->Eval(i - flatTop - 2*riseTime) - baseline;
+      
+      if( i == 0 ){
+         pn = dlk;
+         sn = pn + dlk*decayTime;
+      }else{
+         pn = pn + dlk;
+         sn = sn + pn + dlk*decayTime;
+      }    
+      
+      trapezoid->SetPoint(i, i, sn / decayTime / riseTime);
+    
+   }
+   
+   return trapezoid;
+   
+}
 
 void GeneralSortTraceProof::Begin(TTree */*tree*/)
 {
@@ -159,6 +252,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       if( isSaveTrace){
          newTree->Branch("trace", arr, 256000);
          arr->BypassStreamer();
+      }
+      
+      arrTrapezoid = new TClonesArray("TGraph");
+      if( traceMethod  == 2 ) {
+         newTree->Branch("trapezoid", arrTrapezoid, 256000);
+         arrTrapezoid->BypassStreamer();
       }
       
       if( traceMethod > 0 ){
@@ -341,16 +440,17 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          bool isezero  = (310 > idDet && idDet >= 300 );
          //if( !isPSD && !isRDT && !isezero) continue;
          
-         //if( !isRDT) continue;
-         
+         //if( !isRDT) continue;         
                   
          gTrace = (TGraph*) arr->ConstructedAt(countTrace);
          gTrace->Clear();
+         gTrace->SetTitle("");
          countTrace ++;
          
          int traceLength = trace_length[i];
          
-         //Set gTrace
+         //==================  Set gTrace
+
          if( traceMethod == 0 ){
             for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
@@ -358,8 +458,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             continue;
          }
          
-         if( traceMethod == 1){
-            double base = 0;
+         
+         //regulate the trace
+         double base = 0;
+         if( traceMethod > 0 ) {
             for( int j = 0; j < traceLength; j++){ 
                if( trace[i][j] < 16000){
                   base = trace[i][j];
@@ -368,6 +470,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   gTrace->SetPoint(j, j, base);
                }
             }
+         }
+         
+         gTrace->SetTitle(Form("id=%d, nHit=%d, length=%d", idDet, i, traceLength));
+         //gTrace->SetTitle(Form("id=%d, nHit=%d", idDet, i));
+         
+         //===================== fitting , find time
+         if( traceMethod == 1){
             
             //Set gFit
             gFit->SetLineStyle(idDet);
@@ -422,6 +531,18 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
          }
+         
+         //Trapezoid filter
+         if( traceMethod == 2) {
+            
+            gTrapezoid  = (TGraph*) arr->ConstructedAt(countTrace);
+            gTrapezoid->Clear();
+            
+            gTrapezoid = TrapezoidFilter(gTrace);
+            
+            
+         }
+         
          
       } // End NumHits Loop
    }// end of trace

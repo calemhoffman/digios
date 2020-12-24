@@ -15,7 +15,7 @@
 #include <TSpectrum.h>
 
 
-void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEnergyRange = 7000){
+void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 1000, int maxEnergyRange = 3000){
   
   if( detID < 0 ){
     return;
