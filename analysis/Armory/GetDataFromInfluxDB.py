@@ -9,13 +9,13 @@ data = "hitRate"
 startTime = "2020-12-21T17:00:00Z"
 endTime   = "2020-12-23T18:00:00Z"
 
-saveFile="haha.txt"
+saveFile="IC00.txt"
 
 #=========================================== code
 
 print("===========================")
 
-str = 'SELECT "value" FROM \"%s\" WHERE time > \'%s\' AND time < \'%s\' AND "VME" = \'%d\' AND "DIG" = \'%d\' AND "CH" = \'%d\' ' % (data, startTime, endTime, VME, DIG, CH)
+str = 'SELECT "value" FROM \"%s\" WHERE time > \'%s\' AND time < \'%s\' AND "VME" = \'%d\' AND "DIG" = \'%d\' AND "CH" = \'%d\' tz(\'America/Chicago\') ' % (data, startTime, endTime, VME, DIG, CH)
 
 print(str)
 
