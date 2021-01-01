@@ -2,14 +2,15 @@
 
 VME=1
 DIG=2
-CH=8
+CH=9
 
 data = "hitRate"
 
-startTime = "2020-12-21T17:00:00Z"
-endTime   = "2020-12-23T18:00:00Z"
+#need to +6 to standard time
+startTime = "2020-12-21T23:00:00Z"
+endTime   = "2020-12-24T01:00:00Z"
 
-saveFile="IC00.txt"
+saveFile="IC01.txt"
 
 #=========================================== code
 
