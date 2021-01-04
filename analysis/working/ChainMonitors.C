@@ -29,10 +29,10 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   printf("\033[0;31m========================================== Number of Files : %2d\n",chain->GetListOfFiles()->GetEntries());
   chain->GetListOfFiles()->Print();
   printf("========================================== Number of Files : %2d\033[0m\n",chain->GetListOfFiles()->GetEntries());
+  printf(" number of entries : %llu \n", chain->GetEntries());
   
   //Simple call TSelector
   //chain->Process("Monitors.C+");
-  
   
   //Some input to TSelector
   Monitors * selector = new Monitors();
