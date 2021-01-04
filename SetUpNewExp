@@ -205,6 +205,10 @@ ln -sfv ${Data} ${expDIR}/analysis/data
 ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
 ln -sfv ${rootData} ${expDIR}/analysis/root_data
 
+echo "=================== Set the database"
+
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+
 echo "=================== done."
 
 #===== clean up working if it is new

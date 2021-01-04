@@ -3,9 +3,9 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 93
-y 876
-w 750
+x 79
+y 728
+w 850
 h 550
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-medium-r-18.0"
@@ -47,7 +47,7 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 282
+x 281
 y 228
 w 76
 h 281
@@ -60,7 +60,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 488
 w 73
 h 21
@@ -81,7 +81,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 461
 w 73
 h 21
@@ -102,7 +102,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 435
 w 73
 h 21
@@ -123,7 +123,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 408
 w 73
 h 21
@@ -144,7 +144,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 382
 w 73
 h 21
@@ -164,7 +164,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 356
 w 73
 h 21
@@ -184,7 +184,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 329
 w 73
 h 21
@@ -205,7 +205,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 303
 w 73
 h 21
@@ -226,7 +226,7 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 282
+x 281
 y 228
 w 76
 h 16
@@ -246,7 +246,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 251
 w 73
 h 21
@@ -267,7 +267,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 285
+x 284
 y 277
 w 73
 h 21
@@ -292,8 +292,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 362
-y 209
+x 445
+y 210
 w 61
 h 299
 
@@ -305,8 +305,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 365
-y 209
+x 448
+y 210
 w 53
 h 32
 font "helvetica-medium-r-14.0"
@@ -327,8 +327,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 250
+x 446
+y 251
 w 60
 h 21
 fgColor index 14
@@ -352,8 +352,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 276
+x 446
+y 277
 w 60
 h 21
 fgColor index 14
@@ -377,8 +377,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 302
+x 446
+y 303
 w 60
 h 21
 fgColor index 14
@@ -402,8 +402,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 328
+x 446
+y 329
 w 60
 h 21
 fgColor index 14
@@ -427,8 +427,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 355
+x 446
+y 356
 w 60
 h 21
 fgColor index 14
@@ -452,8 +452,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 381
+x 446
+y 382
 w 60
 h 21
 fgColor index 14
@@ -477,8 +477,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 407
+x 446
+y 408
 w 60
 h 21
 fgColor index 14
@@ -502,8 +502,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 434
+x 446
+y 435
 w 60
 h 21
 fgColor index 14
@@ -527,8 +527,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 362
-y 460
+x 445
+y 461
 w 60
 h 21
 fgColor index 14
@@ -552,8 +552,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 363
-y 487
+x 446
+y 488
 w 60
 h 21
 fgColor index 14
@@ -1794,8 +1794,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 509
-y 69
+x 592
+y 67
 w 229
 h 429
 
@@ -1807,8 +1807,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 530
-y 480
+x 613
+y 478
 w 100
 h 16
 font "helvetica-medium-r-14.0"
@@ -1827,8 +1827,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 636
-y 478
+x 719
+y 476
 w 100
 h 20
 controlPv "VME$(DN):$(DB):reg_vme_gp_ctrl_RBV"
@@ -1853,8 +1853,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 637
-y 443
+x 720
+y 441
 w 100
 h 20
 controlPv "VME$(DN):$(DB):reg_sd_config_RBV"
@@ -1879,8 +1879,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 530
-y 444
+x 613
+y 442
 w 100
 h 16
 font "helvetica-medium-r-14.0"
@@ -1899,8 +1899,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 530
-y 410
+x 613
+y 408
 w 100
 h 16
 font "helvetica-medium-r-14.0"
@@ -1919,8 +1919,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 638
-y 407
+x 721
+y 405
 w 100
 h 20
 controlPv "VME$(DN):$(DB):reg_master_logic_status_RBV"
@@ -1945,8 +1945,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 613
-y 382
+x 696
+y 380
 w 65
 h 16
 font "helvetica-bold-r-14.0"
@@ -1965,8 +1965,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 632
-y 353
+x 715
+y 351
 w 100
 h 20
 controlPv "VME$(DN):$(DB):live_timestamp_msb_RBV"
@@ -1991,8 +1991,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 545
-y 352
+x 628
+y 350
 w 80
 h 16
 font "helvetica-medium-r-14.0"
@@ -2011,8 +2011,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 542
-y 327
+x 625
+y 325
 w 80
 h 16
 font "helvetica-medium-r-14.0"
@@ -2031,8 +2031,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 633
-y 323
+x 716
+y 321
 w 100
 h 20
 controlPv "VME$(DN):$(DB):live_timestamp_lsb_RBV"
@@ -2057,8 +2057,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 594
-y 298
+x 677
+y 296
 w 112
 h 16
 font "helvetica-bold-r-14.0"
@@ -2077,8 +2077,8 @@ beginObjectProperties
 major 10
 minor 0
 release 0
-x 629
-y 242
+x 712
+y 240
 w 100
 h 45
 controlPv "VME$(DN):$(DB):win_comp_max"
@@ -2096,8 +2096,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 553
-y 256
+x 636
+y 254
 w 61
 h 16
 font "helvetica-medium-r-14.0"
@@ -2116,8 +2116,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 555
-y 214
+x 638
+y 212
 w 57
 h 16
 font "helvetica-medium-r-14.0"
@@ -2136,8 +2136,8 @@ beginObjectProperties
 major 10
 minor 0
 release 0
-x 629
-y 200
+x 712
+y 198
 w 100
 h 45
 controlPv "VME$(DN):$(DB):win_comp_min"
@@ -2155,8 +2155,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 629
-y 168
+x 712
+y 166
 w 100
 h 23
 fgColor index 0
@@ -2175,8 +2175,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 550
-y 172
+x 633
+y 170
 w 66
 h 16
 font "helvetica-medium-r-14.0"
@@ -2195,8 +2195,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 562
-y 134
+x 645
+y 132
 w 48
 h 32
 font "helvetica-medium-r-14.0"
@@ -2217,8 +2217,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 629
-y 137
+x 712
+y 135
 w 100
 h 25
 fgColor index 14
@@ -2242,8 +2242,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 629
-y 104
+x 712
+y 102
 w 100
 h 23
 fgColor index 0
@@ -2263,8 +2263,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 549
-y 108
+x 632
+y 106
 w 70
 h 16
 font "helvetica-medium-r-14.0"
@@ -2283,8 +2283,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 509
-y 69
+x 592
+y 67
 w 100
 h 25
 fgColor index 87
@@ -2339,8 +2339,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 626
-y 69
+x 709
+y 67
 w 100
 h 25
 fgColor index 87
@@ -2399,8 +2399,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 253
+x 512
+y 250
 w 81
 h 255
 
@@ -2412,8 +2412,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 253
+x 512
+y 250
 w 81
 h 19
 fgColor index 14
@@ -2432,8 +2432,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 279
+x 512
+y 276
 w 81
 h 19
 fgColor index 14
@@ -2452,8 +2452,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 305
+x 512
+y 302
 w 81
 h 19
 fgColor index 14
@@ -2472,8 +2472,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 331
+x 512
+y 328
 w 81
 h 19
 fgColor index 14
@@ -2492,8 +2492,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 357
+x 512
+y 354
 w 81
 h 19
 fgColor index 14
@@ -2512,8 +2512,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 384
+x 512
+y 381
 w 81
 h 19
 fgColor index 14
@@ -2532,8 +2532,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 410
+x 512
+y 407
 w 81
 h 19
 fgColor index 14
@@ -2552,8 +2552,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 436
+x 512
+y 433
 w 81
 h 19
 fgColor index 14
@@ -2572,8 +2572,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 462
+x 512
+y 459
 w 81
 h 19
 fgColor index 14
@@ -2592,8 +2592,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 434
-y 489
+x 512
+y 486
 w 81
 h 19
 fgColor index 14
@@ -3088,6 +3088,251 @@ bgColor index 0
 useDisplayBg
 value {
   "< 0.16 us"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 366
+y 229
+w 73
+h 281
+
+beginGroup
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 489
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count9_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 462
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count8_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 436
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count7_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 409
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count6_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 383
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count5_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 357
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count4_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 330
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count3_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 304
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count2_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 278
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count1_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 366
+y 252
+w 73
+h 21
+controlPv "VME$(DN):$(DB):dropped_event_count0_RBV"
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+autoHeight
+nullColor index 0
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 375
+y 229
+w 55
+h 16
+font "helvetica-medium-r-14.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Dropped"
 }
 autoSize
 endObjectProperties

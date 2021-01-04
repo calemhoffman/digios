@@ -113,7 +113,9 @@ public :
 
    //trace
    TClonesArray * arr ;//!
+   TClonesArray * arrTrapezoid ;//!   
    TGraph * gTrace; //!
+   TGraph * gTrapezoid; //!
    TF1 * gFit; //!
 
    float te[30];    // energy from trace
@@ -180,6 +182,9 @@ public :
    virtual TList  *GetOutputList() const { return fOutput; }
    virtual void    SlaveTerminate();
    virtual void    Terminate();
+   
+   
+   TGraph * TrapezoidFilter(TGraph * trace);
 
    ClassDef(GeneralSortTraceProof,0);
 
