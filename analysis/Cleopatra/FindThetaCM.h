@@ -1,6 +1,6 @@
 /***********************************************************************
  * 
- *  This is FindThetaCM.C, To calculate the thetaCM convrage for each detector
+ *  This is FindThetaCM.h, To calculate the thetaCM convrage for each detector
  *  
  *  This required two inout files: basicReactionConfig.txt
  *                                 detectorGeo.txt
@@ -16,7 +16,7 @@
 #include "TGraph.h"
 #include "../Cleopatra/HELIOS_LIB.h"
 
-void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95, 
+void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95, 
             string basicConfig="reactionConfig.txt",  
             string detGeoFileName = "detectorGeo.txt"){
 
@@ -179,16 +179,23 @@ void FindThetaCM(double Ex, int nDivision=0, double XRATION = 0.95,
    /**///========================================================= result
       
    printf("==== ThetaCM in degree =================\n");
-   printf("========================= x-ratio : %f \n", XRATION);
+   printf("========================= x-ratio : %f, number of division : %d \n", XRATION, nDivision);
+   printf("\n");
+   for( int j = 0; j < nDivision + 1; j++) printf("%5.2f   ", -XRATION + 2*XRATION/nDivision*j);
+   printf(" <<-- in X \n");
+   for( int j = 0; j < nDivision + 1; j++) printf("%5s   ", "  |  ");
+   printf("\n");
+   for( int j = 0; j < nDivision + 1; j++) printf("%5.2f   ", length/2 -length*XRATION/2 + length*XRATION/nDivision*j);
+   printf(" <<-- in cm \n\n");
    printf("=========================      Ex : %6.4f MeV\n", Ex);
-   printf("         %6s - %6s |  %6s, %6s, %6s\n", "Min",  "Max", "Mean", "Half", "sin(x)dx * 180/pi");
+   printf("            %6s - %6s |  %6s, %6s, %6s\n", "Min",  "Max", "Mean", "Half", "sin(x)dx * 180/pi");
    printf("-------------------------------------------------\n");
    for( int i = 0; i < iDet; i++){
      double zMin = midPos[i]-length*XRATION/2.;
      double zMax = midPos[i]+length*XRATION/2.;
      double zLength = zMax - zMin; 
-     double zStep = zLength/(nDivision+1);
-     for( int j = 0 ; j < nDivision+1 ; j++){
+     double zStep = zLength/(nDivision);
+     for( int j = 0 ; j < nDivision ; j++){
        
        double tMin = tx->Eval(zMin + j*zStep);
        //if( tMin < 0 ) tMin = 5;

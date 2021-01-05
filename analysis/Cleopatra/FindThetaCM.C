@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
   
   double Ex = 0;
   double xRatio = 0.95;
-  int nDiv = 0;
+  int nDiv = 1;
   string reactionTxt = "reactionConfig.txt";
   string detGeoTxt = "detectorGeo.txt";
   
