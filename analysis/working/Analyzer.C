@@ -23,12 +23,12 @@ const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-
-
 vector<int> listOfBadDet = {4, 5, 7, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
 
-double rangeEx[3] = { 20, -1, 2}; ///resol. [keV], low Ex, high Ex
+double rangeEx[3] = { 20, -0.5, 2}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {0.1, 5, 45}; ///resol. [deg], low deg, high deg
+
+const int nDiv = 2; // division of detector
 
 bool isExOffset = false;
 double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
@@ -94,9 +94,8 @@ TH1F * hEx; ///Ex
 TH1F ** hExi; ///Ex for each detector
 
 TH1F ** hExc; ///Ex for each column
-TH1F ** hExcA; ///Ex for each column more detectors summed
-TH1F ** hExca; ///Ex gated x<0
-TH1F ** hExcb; ///Ex gated x>0
+TH1F *** hExcd; /// Ex gated for many divisions
+
 
 TH2F ** hExzr; ///Ex vs z
 
@@ -182,15 +181,16 @@ void Analyzer::Begin(TTree *tree)
    }
 
    hExc = new TH1F * [numCol];
-   hExcA = new TH1F * [numCol];
-   hExca = new TH1F * [numCol];
-   hExcb = new TH1F * [numCol];
+   hExcd = new TH1F ** [numCol];
 
    for( int i = 0; i < numCol; i++){
       hExc[i] = new TH1F(Form("hExc%d", i), Form("Ex (col-%d); Ex [MeV]; count / %2.0f keV", i, rangeEx[0]) , (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
-      hExcA[i] = new TH1F(Form("hExcA%d", i), Form("Ex (col-%d) All; Ex [MeV]; count / %2.0f keV", i, rangeEx[0]) , (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
-      hExca[i]  = new TH1F(Form("hExca%d",i) ,  Form("Ex (x<0, col-%d); Ex[MeV]; count / %2.0f keV",i, rangeEx[0]), (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
-      hExcb[i]  = new TH1F(Form("hExcb%d",i) ,  Form("Ex (x>0, col-%d); Ex[MeV]; count / %2.0f keV",i, rangeEx[0]), (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);   
+
+      hExcd[i] = new TH1F * [nDiv];
+      for( int j = 0; j < nDiv; j++){
+         hExcd[i][j] = new TH1F(Form("hExcd%d%d",i,j) ,  Form("Ex (col-%d, div-%d); Ex[MeV]; count / %2.0f keV",i, j, rangeEx[0]), (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
+      }
+   
    }
    
    
@@ -379,7 +379,7 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( i == 15 ) Ex = Ex*1.0028 - 0.0028;
       if( i == 16 ) Ex = Ex*1.0059 - 0.05;
 
-      if( !(-0.2 < Ex && Ex < 0.2 )) return kTRUE;
+      //if( !(-0.2 < Ex && Ex < 0.2 )) return kTRUE;
       
       multiHit ++;
             
@@ -414,7 +414,6 @@ Bool_t Analyzer::Process(Long64_t entry)
       hExTr[row]->Fill(thetaCM, Ex);
       hExzr[row]->Fill(z[i], Ex);
       
-      hExcA[i%numCol]->Fill(Ex);
       hExr[row]->Fill(Ex, scaling);
       
       //======== special gate;
@@ -424,10 +423,11 @@ Bool_t Analyzer::Process(Long64_t entry)
       hExc[i%numCol]->Fill(Ex);
       hEx->Fill(Ex, scaling);
       
-      if( x[i] < 0) {
-         hExca[i%numCol]->Fill(Ex);
-      }else{
-         hExcb[i%numCol]->Fill(Ex);
+      double xMin = -0.95;
+      double xMax = 0.95;
+      double xLength = xMax - xMin;
+      for( int j = 0 ; j < nDiv ; j++){
+         if(  xMin + xLength*j/nDiv < x[i] &&  x[i] <  xMin + xLength*(j+1)/nDiv ) hExcd[i%numCol][j] -> Fill(Ex);
       }
       
    }
@@ -501,9 +501,9 @@ void Analyzer::Terminate()
   
    //=========== Plot
    int nX = numCol, nY = numRow;
-   nX = 1;
-   nY = 1;
-   int sizeX = 800, sizeY = 600;
+   nX = nDiv;
+   nY = 5;
+   int sizeX = 300, sizeY = 200;
    cAna = new TCanvas("cAna", "Analyzer | " + canvasTitle, nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
@@ -516,8 +516,16 @@ void Analyzer::Terminate()
    ///
    ///cAna->cd(2);
    ///hExT->Draw("colz");
-
    
+   
+   for( int i = 0; i < numCol-1; i++){
+      for( int j = 0; j < nDiv ; j++){
+         cAna->cd(i*nDiv+j+1);
+         hExcd[i][j]->Draw();
+      }
+   }
+   
+   /**
    for( int i = 0; i < numDet; i++){
       cAna->cd(i+1);
       //cAna->cd(i+1)->SetGrid();
@@ -526,14 +534,14 @@ void Analyzer::Terminate()
       //hei[i]->Draw();
 
       //hxi[i]->Draw();
-
-      if( i >= 18 ) continue;
+      
+      //if( i >= 18 ) continue;
 
       //hEBISi[i]->Draw();
-      hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
+      //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
       //hExi[i]->SetLineColor((i/6+1 == 3 ? 4 : i/6+1));
-      hExi[i]->SetLineColor(i+1);
-      hExi[i]->Draw("same");
+      //hExi[i]->SetLineColor(i+1);
+      //hExi[i]->Draw("same");
       
       //cAna->cd(i%6+19);
       //hExi[i]->Draw((i/6==0 ? "" :"same"));
