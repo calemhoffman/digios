@@ -12,20 +12,20 @@
 #include <TH1.h>
 
 //============= User setting
-const int numDet = 3;
-int detID[numDet] = {0,1,2}; 
-TString detName[numDet] = {"HPGe-1","HPGe-2","HPGe-3"} ;
+const int numDet = 1;
+int detID[numDet] = {0}; 
+TString detName[numDet] = {"HPGe-1" } ;// ,"HPGe-2","HPGe-3"} ;
 
 double resol = 0.2; // keV
-int eRange1[2] = { 20, 1000 }; // keV
-int eRange2[2] = { 1000, 2000 }; // keV
-int eRange3[2] = { 20, 200 }; // keV
+int eRange1[2] = {   20,  200 }; // keV
+int eRange2[2] = { 2400, 3000 }; // keV
+int eRange3[2] = { 5000, 7500 }; // keV
 
 int tRange[2] = {-1, 600}; //min, relative to start time
                           
-double cali[numDet][2]= { { -0.926213, 0.624203},
-                          { -1.916483, 0.648377},
-                          { -1.445283, 0.670994}};
+double cali[numDet][2]= { { -0.926213, 0.624203} };
+                        //  { -1.916483, 0.648377},
+                        //  { -1.445283, 0.670994}};
                           
 //===========================
 
@@ -164,7 +164,7 @@ void MonGamma::Terminate()
    double yMax = FindMaxY(hgamma1, numDet);
    for( int i = 0 ; i < numDet; i++){
       cCanvas->cd(1);
-      hgamma1[i]->GetYaxis()->SetRangeUser(10, yMax);
+      hgamma1[i]->GetYaxis()->SetRangeUser(0, yMax);
       hgamma1[i]->SetLineColor(i+1);
       hgamma1[i]->Draw("same");
    }
@@ -173,7 +173,7 @@ void MonGamma::Terminate()
    for( int i = 0 ; i < numDet; i++){
       cCanvas->cd(2);
       //cCanvas->cd(i+5)->SetLogy();
-      hgamma2[i]->GetYaxis()->SetRangeUser(1, yMax);
+      hgamma2[i]->GetYaxis()->SetRangeUser(0, yMax);
       hgamma2[i]->SetLineColor(i+1);
       hgamma2[i]->Draw("same");
    }
