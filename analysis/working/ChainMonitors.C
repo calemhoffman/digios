@@ -87,11 +87,11 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     //chain->Add("../root_data/gen_run355.root"); ///137Cs, upstream
     ///chain->Add("../root_data/gen_run356.root"); ///137Cs, downstream
     
-    chain->Add("../root_data/gen_run357.root"); ///133Ba, upstream
+    //chain->Add("../root_data/gen_run357.root"); ///133Ba, upstream
     ///chain->Add("../root_data/gen_run358.root"); ///133Ba, downstream
     
-    //chain->Add("../root_data/gen_run359.root"); ///152Eu, upstream
-    chain->Add("../root_data/gen_run360.root"); ///152Eu, upstream
+    ///chain->Add("../root_data/gen_run359.root"); ///152Eu, upstream
+    //chain->Add("../root_data/gen_run360.root"); ///152Eu, upstream
     ///chain->Add("../root_data/gen_run361.root"); ///152Eu, downstream
     
     ///chain->Add("../root_data/gen_run362.root"); ///226Ra, upstream
@@ -99,26 +99,26 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     ///chain->Add("../root_data/gen_run364.root"); ///226Ra, downstream
     
     ///chain->Add("../root_data/gen_run365.root"); ///207Bi, upstream
-    ///chain->Add("../root_data/gen_run366.root"); ///207Bi, upstream
+    //chain->Add("../root_data/gen_run366.root"); ///207Bi, upstream
     ///chain->Add("../root_data/gen_run367.root"); ///207Bi, downstream
     
     ///chain->Add("../root_data/gen_run368.root"); ///BG
     ///chain->Add("../root_data/gen_run369.root"); ///BG
     
     //====== high energy   
-    //chain->Add("../root_data/gen_run30[2-3].root"); ///16N, 27.5enA
-    //chain->Add("../root_data/gen_run30[7-9].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run31[0-9].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run32[0-9].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run33[0-7].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run338.root"); ///16N, 700enA
+    ///chain->Add("../root_data/gen_run30[2-3].root"); ///16N, 27.5enA
+    chain->Add("../root_data/gen_run30[7-9].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run31[0-9].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run32[0-9].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run33[0-7].root"); ///16N, 140enA
+    ///chain->Add("../root_data/gen_run338.root"); ///16N, 700enA
     
     //====== low energy
-    //chain->Add("../root_data/gen_run339.root");     ///16N, 1.6enA
-    //chain->Add("../root_data/gen_run34[0-1].root"); ///16N, 1.6enA
-    //chain->Add("../root_data/gen_run34[4-5].root"); ///16N, 16enA
-    //chain->Add("../root_data/gen_run34[6-9].root"); ///16N, 50enA
-    //chain->Add("../root_data/gen_run35[0-4].root"); ///16N, 50enA
+    ///chain->Add("../root_data/gen_run339.root");     ///16N, 1.6enA
+    ///chain->Add("../root_data/gen_run34[0-1].root"); ///16N, 1.6enA
+    ///chain->Add("../root_data/gen_run34[4-5].root"); ///16N, 16enA
+    ///chain->Add("../root_data/gen_run34[6-9].root"); ///16N, 50enA
+    ///chain->Add("../root_data/gen_run35[0-4].root"); ///16N, 50enA
     
     
   }else{
