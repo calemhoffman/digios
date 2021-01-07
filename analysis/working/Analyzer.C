@@ -28,7 +28,7 @@ vector<int> listOfBadDet = {4, 5, 7, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
 double rangeEx[3] = { 20, -0.5, 2}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {0.1, 5, 45}; ///resol. [deg], low deg, high deg
 
-const int nDiv = 2; // division of detector
+const int nDiv = 10; // division of detector
 
 bool isExOffset = false;
 double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
@@ -188,7 +188,7 @@ void Analyzer::Begin(TTree *tree)
 
       hExcd[i] = new TH1F * [nDiv];
       for( int j = 0; j < nDiv; j++){
-         hExcd[i][j] = new TH1F(Form("hExcd%d%d",i,j) ,  Form("Ex (col-%d, div-%d); Ex[MeV]; count / %2.0f keV",i, j, rangeEx[0]), (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
+         hExcd[i][j] = new TH1F(Form("hExcd%d%d",i,j) ,  Form("Ex (col-%d, div-%d/%d); Ex[MeV]; count / %2.0f keV",i, j, nDiv, rangeEx[0]), (rangeEx[2]-rangeEx[1])/rangeEx[0]*1000., rangeEx[1], rangeEx[2]);
       }
    
    }
