@@ -199,9 +199,9 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
        
        double tMin = tx->Eval(zMin + j*zStep);
        //if( tMin < 0 ) tMin = 5;
-       if( zMin + j*zStep < zMin0 ) tMin = 10;
+       //if( zMin + j*zStep < zMin0 ) tMin = 10;
        double tMax = tx->Eval(zMin + (j+1)*zStep);
-       if( tMax < 0 ) tMax = 5;
+       //if( tMax < 0 ) tMax = 5;
        
        double tMean = (tMax + tMin)/2.;
        double tHalf = (tMax - tMin)/2.;
