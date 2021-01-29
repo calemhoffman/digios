@@ -10,23 +10,21 @@
 
 #include "../Armory/AnalysisLibrary.h"
 
-//TODO
-//1) fitGaussPN()
-//3) More flexible way? say fitAuto(hist, pre-set-func)
-
-
 void ShowFitMethod(){
   printf("----------------------- Method of Fitting ---------------\n");
   printf("---------------------------------------------------------\n");
-  printf("       fitAuto() - estimate BG, find peak, and fit n-Gauss \n");
-  printf("   fitGaussPol() - fit 1 Gauss + pol-n BG\n");
-  printf("   fit2GaussP1() - fit 2 Gauss + pol-1 BG \n");
-  printf("     fitGF3Pol() - fit GF3 + pol-n BG \n");
-//  printf("       fitNGF3() - fit n-GF3, estimated BG \n");
-  printf("     fitNGauss() - fit n-Gauss, estimated BG, need input\n");
-  printf("    fitNGauss2() - fit n-Guass, fit the estimate BG with Pol\n");
-  printf("  fitNGaussPol() - fit n-Gauss + pol-n BG \n");
-  printf(" fitNGaussPol2() - fit n-Gauss + pol-n BG (method-2) \n");
+  printf("        fitAuto() - estimate BG, find peak, and fit n-Gauss \n");
+  printf("    fitGaussPol() - fit 1 Gauss + pol-n BG\n");
+  printf("    fit2GaussP1() - fit 2 Gauss + pol-1 BG \n");
+  printf("      fitGF3Pol() - fit GF3 + pol-n BG \n");
+  //printf("        fitNGF3() - fit n-GF3, estimated BG \n");
+  printf("      fitNGauss() - fit n-Gauss, estimated BG, need input\n");
+  printf("     fitNGauss2() - fit n-Guass, fit the estimate BG with Pol\n");
+  printf("   fitNGaussPol() - fit n-Gauss + pol-n BG \n");
+  printf("  fitNGaussPol2() - fit n-Gauss + pol-n BG (method-2) \n");
+  printf("\n");
+  printf(" clickFitNGaussPol() - using mouse click to fit n-Gauss + pol-n BG \n");
+  printf("       SaveFitPara() - Save the initial guess parameters.\n");
   printf("---------------------------------------------------------\n");
 }
 
@@ -317,6 +315,7 @@ void PlotResidual(TH1F * hist, TF1 * fit){
   hRes->Draw();
   
 }
+
 
 //########################################
 //### Fit a Gauss + Pol-n
@@ -1848,6 +1847,26 @@ void Clicked() {
 
 }
 
+
+void SaveFitPara(TString fileName = "AutoFit_para.txt"){
+  printf("Save to : %s \n", fileName.Data()); 
+  FILE * file_out;
+  file_out = fopen (fileName.Data(), "w+");
+
+  fprintf(file_out, "# for n-Gauss fit, can use \"#\", or \"//\" to comment out whole line\n");
+  fprintf(file_out, "# peak    low    high   fixed?  sigma_Max    fixed?  hight\n");
+
+  for( int i = 0 ; i < xPeakList.size() ; i++){
+    fprintf(file_out, "%.3f    %.3f    %.3f    0    %.3f     0    %.0f\n",
+                      xPeakList[i],
+                      xPeakList[i] - 5*sigma[i],
+                      xPeakList[i] + 5*sigma[i],
+                      sigma[i],
+                      yPeakList[i]);
+  }
+  fclose(file_out);
+}
+
 void clickFitNGaussPol(TH1F * hist, int degPol){
 
   printf("=========================================================\n");
@@ -1855,7 +1874,8 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   printf("==========================================================\n");
 
   gStyle->SetOptStat("");
-
+  gStyle->SetOptFit(0);
+  
   TCanvas * cClickFitNGaussPol = NULL;
   if( gROOT->FindObjectAny("cClickFitGaussPol") == NULL ){
     cClickFitNGaussPol = new TCanvas("cClickFitNGaussPol", Form("fit Gauss & Pol-%d by mouse click | clickFitGaussPol", degPol), 1400, 1200);
@@ -1864,7 +1884,10 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
     cClickFitNGaussPol = new TCanvas("cClickFitNGaussPol", Form("fit Gauss & Pol-%d by mouse click | clickFitGaussPol", degPol), 1400, 1200);
   }
   cClickFitNGaussPol->Divide(1, 4);
-
+  for(int i = 1; i <= 4 ; i++){
+    cClickFitNGaussPol->cd(i)->SetGrid(0,0);
+  }
+  
   if(! cClickFitNGaussPol->GetShowEventStatus() ) cClickFitNGaussPol->ToggleEventStatus();
   cClickFitNGaussPol->cd(1);
 
@@ -1935,8 +1958,8 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   }
 
   nPeaks = (int) xPeakList.size();
-  printf("------------- Find sigma for each peak \n");
-  double sigma[nPeaks];
+  printf("------------- Estimate sigma for each peak \n");
+  sigma.clear();
   int binMin = hist->FindBin(xMin);
   int binMax = hist->FindBin(xMax);
   for( int i = 0; i < nPeaks ; i++){
@@ -1960,7 +1983,7 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
       }
     }
 
-    sigma[i] = TMath::Min(sMin, sMax);
+    sigma.push_back(TMath::Min(sMin, sMax));
     printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
 
   }
@@ -2004,6 +2027,15 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   double chi2 = fit->GetChisquare();
   int ndf = fit->GetNDF();
   double bw = hspec->GetBinWidth(1);
+
+  for(int i = 0; i < nPeaks ; i++){
+    printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]);
+  }
+  printf("\n");
 
   TLatex text;
   text.SetNDC();
