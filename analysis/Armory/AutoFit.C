@@ -1814,6 +1814,7 @@ vector<double> yBGList;
 TH1F * tempHist;
 int markerStyle = 23;
 int markerColor = 2;
+int markerBGColor = 4;
 
 void Clicked() {
   int event = gPad->GetEvent();
@@ -1901,6 +1902,13 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   cClickFitNGaussPol->Update();
   cClickFitNGaussPol->Draw();
 
+  TLatex helpMsg;
+  helpMsg.SetNDC();
+  helpMsg.SetTextFont(82);
+  helpMsg.SetTextSize(0.06);
+  helpMsg.SetTextColor(kRed);
+  helpMsg.DrawLatex(0.15, 0.8, "Click for peaks: (Double-click / x / Ctrl to end) ");
+
   printf("--------- Click the histogram for peaks: (Double-click / x / Ctrl to end) \n");
   nClick = 0;
   xPeakList.clear();
@@ -1917,20 +1925,36 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
     if( obj == NULL  ) break;
   }while( obj != NULL);
 
-  printf("--------- Click the histogram for Background: (Double-click / x / Ctrl to end) \n");
-  nClick = 0;
-  xBGList.clear();
-  yBGList.clear();
-  markerColor = 6;
-  markerStyle = 33;
-  peakFlag = 0;  
-  do{
-    obj = gPad->WaitPrimitive();
-    if( obj == NULL  ) break;
-  }while( obj != NULL);
+  if( degPol >= 0 ){
+    printf("--------- Click the histogram for Background: (Double-click / x / Ctrl to end) \n");
+    printf("                         * when no input, program will estimate  \n");
+
+    cClickFitNGaussPol->cd(1)->Clear();
+    hist->Draw();
+    helpMsg.SetTextColor(markerBGColor);
+    helpMsg.DrawLatex(0.15, 0.8, "Click for BG: (Double-click / x / Ctrl to end) ");
+    helpMsg.DrawLatex(0.15, 0.75, "* when no input, program will estimate");
+    cClickFitNGaussPol->Update();
+    cClickFitNGaussPol->Draw();
+
+    nClick = 0;
+    xBGList.clear();
+    yBGList.clear();
+    markerColor = markerBGColor;
+    markerStyle = 33;
+    peakFlag = 0;
+    cClickFitNGaussPol->cd(1)->AddExec("ex", "Clicked()");
+    do{
+      obj = gPad->WaitPrimitive();
+      if( obj == NULL  ) break;
+    }while( obj != NULL);
+
+  }
   
   cClickFitNGaussPol->cd(1)->DeleteExec("ex");
   cClickFitNGaussPol->cd(1)->SetCrosshair(0);
+  cClickFitNGaussPol->cd(1)->Clear();
+  hist->Draw();
 
   tempHist = NULL;
 
@@ -1940,21 +1964,19 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   nPols = degPol;
   double xMin = hspec->GetXaxis()->GetXmin();
   double xMax = hspec->GetXaxis()->GetXmax();
+
   TString polExp = "[0]";
   for( int i = 1; i < degPol + 1; i++) polExp += Form("+[%d]*TMath::Power(x,%d)", i, i );
   TF1 *bg = new TF1("bg", polExp.Data(), xMin, xMax);
   bg->SetNpx(1000);
-  bg->SetLineColor(6);
+  bg->SetLineColor(markerBGColor);
+  bg->SetLineWidth(1);
   if( xBGList.size() > 0 ) {
     printf("---------------- fit the BG with Pol-%d \n", nPols);
-    
     TGraph * gBG = new TGraph((int) xBGList.size(), &xBGList[0], &yBGList[0]);
-
     for( int i = 0; i < degPol + 1; i++) bg->SetParameter(i, gRandom->Rndm()/TMath::Power(10, 3*i));
-
     gBG->Fit("bg", "Rq");
     bg->Draw("same");
-
     //printf("--------------- Subtracting the BG \n");
     //hspec->Add(bg, -1);
   }else{
@@ -1989,11 +2011,22 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
       }
     }
 
-    sigma.push_back(TMath::Min(sMin, sMax));
+    double temp = TMath::Min(sMin, sMax);
+    /// When there are multiple peaks closely packed : 
+    if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
+    sigma.push_back(temp);
+    
     printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
 
   }
 
+  //---- use the mean of the sigma
+  double sigma0 = 0;
+  for( int i = 0; i < nPeaks ; i++) sigma0 += sigma[i];
+  sigma0 = sigma0/(nPeaks+1);
+  for( int i = 0; i < nPeaks ; i++) sigma[i] = sigma0;
+  printf("========== use the mean sigma : %f \n", sigma0);
+  
 
   printf("-------------- Fit the spectrum with %d-Gauss + Pol-%d\n", nPeaks, nPols );
   cClickFitNGaussPol->cd(2);
@@ -2004,7 +2037,7 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   for(int i = 0; i < nPeaks ; i++){
     para[3*i+0] = yPeakList[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
     para[3*i+1] = xPeakList[i];
-    para[3*i+2] = sigma[i];
+    para[3*i+2] = sigma[i];  
   }
   for(int i = 0; i < nPols+1 ; i++){
     para[3*nPeaks+i] = bg->GetParameter(i);
@@ -2019,8 +2052,21 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   //limit parameters
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9);
-    fit->SetParLimits(3*i+1, xPeakList[i] - 5*sigma[i] , xPeakList[i] + 5*sigma[i] ); 
-    fit->SetParLimits(3*i+2, 0, 3*sigma[i]);
+    
+    double dE1, dE2;
+    if( i == 0 ){
+      dE2 = xPeakList[i+1] - xPeakList[i];
+      dE1 = dE2;
+    }else if ( i == nPeaks-1 ){
+      dE1 = xPeakList[i] - xPeakList[i-1];
+      dE2 = dE1;
+    }else{
+      dE1 = xPeakList[i] - xPeakList[i-1];
+      dE2 = xPeakList[i+1] - xPeakList[i];
+    }
+    
+    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
+    fit->SetParLimits(3*i+2, 0, 1.2*sigma[i]); // add 20% margin of sigma
   }
   
   hspec->Fit("fit", "Rq");
@@ -2065,13 +2111,16 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
       gFit[i]->Draw("same");
   }
 
-  TF1 *bg2 = new TF1("bg", polExp.Data(), xMin, xMax);
-  bg2->SetNpx(1000);
-  bg2->SetLineColor(6);
-  for( int i = 0; i < nPols + 1; i++){
-    bg2->SetParameter(i, paraA[3*nPeaks+i]);
+  if( degPol >= 0 ){
+    TF1 *bg2 = new TF1("bg", polExp.Data(), xMin, xMax);
+    bg2->SetNpx(1000);
+    bg2->SetLineColor(markerBGColor);
+    bg2->SetLineWidth(1);
+    for( int i = 0; i < nPols + 1; i++){
+      bg2->SetParameter(i, paraA[3*nPeaks+i]);
+    }
+    bg2->Draw("same");
   }
-  bg2->Draw("same");
 
   cClickFitNGaussPol->cd(3);
   PlotResidual(hspec, fit);
@@ -2125,6 +2174,14 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
   cClickFitNGaussPolsub->Update();
   cClickFitNGaussPolsub->Draw();
 
+  TLatex helpMsg;
+  helpMsg.SetNDC();
+  helpMsg.SetTextFont(82);
+  helpMsg.SetTextSize(0.06);
+  helpMsg.SetTextColor(kRed);
+  helpMsg.DrawLatex(0.15, 0.8, "Click for peaks: (Double-click / x / Ctrl to end) ");
+
+
   printf("--------- Click the histogram for peaks: (Double-click / x / Ctrl to end) \n");
   nClick = 0;
   xPeakList.clear();
@@ -2141,22 +2198,35 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
     if( obj == NULL  ) break;
   }while( obj != NULL);
 
-  printf("--------- Click the histogram for Background: (Double-click / x / Ctrl to end) \n");
-  nClick = 0;
-  xBGList.clear();
-  yBGList.clear();
-  markerColor = 6;
-  markerStyle = 33;
-  peakFlag = 0;  
-  do{
-    obj = gPad->WaitPrimitive();
-    if( obj == NULL  ) break;
-  }while( obj != NULL);
-  
+  if( degPol >= 0 ){
+    printf("--------- Click the histogram for Background: (Double-click / x / Ctrl to end) \n");
+
+    cClickFitNGaussPolsub->cd(1)->Clear();
+    hist->Draw();
+    helpMsg.SetTextColor(markerBGColor);
+    helpMsg.DrawLatex(0.15, 0.8, "Click for BG: (Double-click / x / Ctrl to end) ");
+    cClickFitNGaussPolsub->Update();
+    cClickFitNGaussPolsub->Draw();
+
+    nClick = 0;
+    xBGList.clear();
+    yBGList.clear();
+    markerColor = markerBGColor;
+    markerStyle = 33;
+    peakFlag = 0;  
+    do{
+      obj = gPad->WaitPrimitive();
+      if( obj == NULL  ) break;
+    }while( obj != NULL);
+  }
   cClickFitNGaussPolsub->cd(1)->DeleteExec("ex");
   cClickFitNGaussPolsub->cd(1)->SetCrosshair(0);
+  cClickFitNGaussPolsub->cd(1)->Clear();
+  hist->Draw();
 
   tempHist = NULL;
+
+  if( xBGList.size() == 0 ) helpMsg.DrawLatex(0.15, 0.75, " No BG defined ! fitting could be problematics. ");
 
   cClickFitNGaussPolsub->Update();
   cClickFitNGaussPolsub->Draw();
@@ -2164,11 +2234,13 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
   nPols = degPol;
   double xMin = hspec->GetXaxis()->GetXmin();
   double xMax = hspec->GetXaxis()->GetXmax();
+
   TString polExp = "[0]";
   for( int i = 1; i < degPol + 1; i++) polExp += Form("+[%d]*TMath::Power(x,%d)", i, i );
   TF1 *bg = new TF1("bg", polExp.Data(), xMin, xMax);
   bg->SetNpx(1000);
-  bg->SetLineColor(6);
+  bg->SetLineColor(markerBGColor);
+  bg->SetLineWidth(1);
   if( xBGList.size() > 0 ) {
     printf("---------------- fit the BG with Pol-%d \n", nPols);
     
@@ -2196,7 +2268,6 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
   
   text.DrawLatex(0.15, 0.8, Form("#bar{#chi^{2}} : %5.3f", chi2BG/ndfBG));
 
-  
   //=========== get the polynomial BG
   const Double_t* paraAt = bg->GetParameters();
   const Double_t* paraEt = bg->GetParErrors();
@@ -2234,7 +2305,10 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
       }
     }
 
-    sigma.push_back(TMath::Min(sMin, sMax));
+    double temp = TMath::Min(sMin, sMax);
+    /// When there are multiple peaks closely packed : 
+    if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
+    sigma.push_back(temp);
 
     printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
 
@@ -2262,8 +2336,21 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
   //limit parameters
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9);
-    fit->SetParLimits(3*i+1, xPeakList[i] - 5*sigma[i] , xPeakList[i] + 5*sigma[i] ); 
-    fit->SetParLimits(3*i+2, 0, 3*sigma[i]);
+
+    double dE1, dE2;
+    if( i == 0 ){
+      dE2 = xPeakList[i+1] - xPeakList[i];
+      dE1 = dE2;
+    }else if ( i == nPeaks-1 ){
+      dE1 = xPeakList[i] - xPeakList[i-1];
+      dE2 = dE1;
+    }else{
+      dE1 = xPeakList[i] - xPeakList[i-1];
+      dE2 = xPeakList[i+1] - xPeakList[i];
+    }
+    
+    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
+    fit->SetParLimits(3*i+2, 0, 1.2*sigma[i]); // add 20% margin of sigma
   }
   
   hspec->Fit("fit", "Rq");
