@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 961
-y 100
+x 237
+y 490
 w 1340
 h 800
 font "helvetica-bold-r-10.0"
@@ -163,8 +163,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 1161
-y 214
+x 1162
+y 198
 w 100
 h 30
 fgColor index 0
@@ -172,7 +172,7 @@ bgColor index 78
 topShadowColor index 78
 botShadowColor index 78
 font "helvetica-bold-r-12.0"
-buttonLabel "Setup Other"
+buttonLabel "Restore Setting"
 numCmds 1
 commandLabel {
   0 "Setup Other"
@@ -188,8 +188,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 1161
-y 183
+x 1162
+y 158
 w 100
 h 30
 fgColor index 0
@@ -213,8 +213,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 1161
-y 153
+x 1162
+y 128
 w 100
 h 30
 fgColor index 0
@@ -238,8 +238,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 1151
-y 117
+x 1155
+y 103
 w 120
 h 20
 font "helvetica-bold-r-14.0"
@@ -259,7 +259,7 @@ major 4
 minor 2
 release 0
 x 1162
-y 264
+y 266
 w 100
 h 25
 fgColor index 0
@@ -3047,7 +3047,7 @@ major 4
 minor 0
 release 0
 x 897
-y 106
+y 103
 w 100
 h 54
 
@@ -3060,7 +3060,7 @@ major 4
 minor 0
 release 0
 x 897
-y 130
+y 127
 w 100
 h 30
 fgColor index 14
@@ -3084,7 +3084,7 @@ major 4
 minor 1
 release 0
 x 897
-y 106
+y 103
 w 100
 h 20
 font "helvetica-bold-r-14.0"
@@ -3132,9 +3132,9 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 1161
-y 292
-w 102
+x 1162
+y 294
+w 100
 h 25
 fgColor index 0
 bgColor index 86
@@ -3192,12 +3192,18 @@ topShadowColor index 79
 botShadowColor index 79
 font "helvetica-bold-r-18.0"
 buttonLabel "Start AutoRun"
-numCmds 1
+numCmds 4
 commandLabel {
-  0 "Start Run"
+  0 "60 mins"
+  1 "30 mins"
+  2 "120 mins"
+  3 "360 mins"
 }
 command {
-  0 "$EDMSCRIPTS/open_r.sh Auto"
+  0 "$EDMSCRIPTS/open_r.sh 60"
+  1 "$EDMSCRIPTS/open_r.sh 30"
+  2 "$EDMSCRIPTS/open_r.sh 120"
+  3 "$EDMSCRIPTS/open_r.sh 360"
 }
 endObjectProperties
 
@@ -7448,5 +7454,30 @@ nullColor index 0
 newPos
 objType "monitors"
 noExecuteClipMask
+endObjectProperties
+
+# (Shell Command)
+object shellCmdClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 1162
+y 228
+w 100
+h 30
+fgColor index 0
+bgColor index 78
+topShadowColor index 78
+botShadowColor index 78
+font "helvetica-bold-r-12.0"
+buttonLabel "Save Setting"
+numCmds 1
+commandLabel {
+  0 "database"
+}
+command {
+  0 "$EDMSCRIPTS/helios_save_array"
+}
 endObjectProperties
 
