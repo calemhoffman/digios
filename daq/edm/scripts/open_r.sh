@@ -4,6 +4,10 @@ explocation=~/digios/daq
 source ~/digios/expName.sh #load expName
 datalocation=${daqDataPath}/${expName}/data
 
+if [ $# -eq 1 ]; then
+    min=$1
+    echo "Start Auto Run for ${min} min each"
+fi
 
 #=== check AutoStartStop is running?
 IsAuto=$(ps -e | grep "AutoStartStop" | wc -l)
@@ -20,10 +24,8 @@ echo $datalocation
 cd ${datalocation}
 
 if [ $# -eq 1 ]; then 
-    isAuto=$1
-    if [ $isAuto == "Auto" ]; then
-	xterm -T savedata -fa "Monospace" -fs 12 -bg rgb:00/00/00 -fg white -geometry 100x30+500+20 -e "${explocation}/edm/scripts/AutoStartStop time 60 -1"
-    fi
+    min=$1
+    xterm -T savedata -fa "Monospace" -fs 12 -bg rgb:00/00/00 -fg white -geometry 100x30+500+20 -e "${explocation}/edm/scripts/AutoStartStop time ${min} -1"
 else
     caput Online_CS_SaveData No Save
     caput Online_CS_StartStop Stop

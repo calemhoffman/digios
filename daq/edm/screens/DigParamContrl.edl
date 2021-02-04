@@ -4,7 +4,7 @@ major 4
 minor 0
 release 1
 x 1406
-y 93
+y 115
 w 300
 h 450
 font "helvetica-medium-r-18.0"
@@ -29,15 +29,15 @@ minor 1
 release 0
 x 92
 y 29
-w 106
-h 40
+w 103
+h 42
 font "helvetica-medium-r-18.0"
 fontAlign "center"
 fgColor index 0
 bgColor index 0
 useDisplayBg
 value {
-  "$(P)s for"
+  "$(P) for"
   "Board $(DB)"
 }
 autoSize

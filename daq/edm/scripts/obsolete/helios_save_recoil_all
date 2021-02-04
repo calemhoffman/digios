@@ -1,0 +1,41 @@
+#!/bin/bash -l
+sdirname="saves"
+fname="recoil_saved_all"
+fdate=`date +%Y-%m-%d.%H-%M`
+sfile=$sdirname/$fname.$fdate
+
+echo '#!/bin/bash -l' > $sfile
+chmod +x $sfile
+
+echo "########## Saving Recoil Parameters ##########"
+echo "########## Saving Individual Recoil Params ##########"
+echo "#Saving Individual Recoil Params" >> $sfile
+
+VME="01"
+DIG="3"
+CH="0 1 2 3 4 5 6 7"
+
+PVS="led_threshold raw_data_window channel_enable"
+
+for a in $VME
+do
+  for b in $DIG
+  do
+    for c in $PVS
+    do
+      for d in $CH
+      do 
+        pv=VME"$a":MDIG"$b":"$c""$d"
+        chpv=$(caget "$pv"_RBV | awk '{print $2}')
+        echo 'caput' $pv $chpv >> $sfile
+      done
+    done
+  done
+done
+
+date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> $sfile
+rm -rf edm/scripts/recoil_saved
+ln -s ../../$sfile edm/scripts/recoil_saved
+echo "########## Done Saving Recoil Params ###########"
+exit
+

@@ -3,6 +3,7 @@
 if [ $# -eq 0 ] || [ $# -lt 2  ]; then
     echo "Please input VME, DIG and CH"
     echo "         or  array(e.g. BB), Energy/XF/XN/Ring"
+    echo "         * if missing CH, threshold set for all DIG"
     exit 1
 fi
 
@@ -126,3 +127,4 @@ else
 fi
 
 echo "========= done."
+
