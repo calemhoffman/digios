@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 715
-y 22
+x 1029
+y 325
 w 800
 h 330
 font "courier-medium-r-10.0"
@@ -57,7 +57,7 @@ fgColor index 15
 bgColor index 14
 bgAlarm
 value {
-  "HELIOS Main Controller"
+  "HELIOS Old Controller"
 }
 endObjectProperties
 

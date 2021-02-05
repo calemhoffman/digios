@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 237
-y 490
+x 656
+y 326
 w 1340
 h 800
 font "helvetica-bold-r-10.0"
@@ -3257,24 +3257,27 @@ botShadowColor index 83
 font "helvetica-bold-r-14.0"
 buttonLabel "VME1"
 numPvs 4
-numDsps 4
+numDsps 5
 displayFileName {
   0 "genBoard.edl"
   1 "genBoard.edl"
   2 "genBoard.edl"
   3 "genBoard.edl"
+  4 "genVMEstats_4M_0S.edl"
 }
 menuLabel {
   0 "Dig 1"
   1 "Dig 2"
   2 "Dig 3"
   3 "Dig 4"
+  4 "ALL"
 }
 symbols {
   0 "D=HELIOS,DN=01,DB=MDIG1,CR=1,BID=1"
   1 "D=HELIOS,DN=01,DB=MDIG2,CR=1,BID=2"
   2 "D=HELIOS,DN=01,DB=MDIG3,CR=1,BID=3"
   3 "D=HELIOS,DN=01,DB=MDIG4,CR=1,BID=4"
+  4 "D=HELIOS,DN=01,CR=1"
 }
 endObjectProperties
 
@@ -3295,24 +3298,27 @@ botShadowColor index 83
 font "helvetica-bold-r-14.0"
 buttonLabel "VME2"
 numPvs 4
-numDsps 4
+numDsps 5
 displayFileName {
   0 "genBoard.edl"
   1 "genBoard.edl"
   2 "genBoard.edl"
   3 "genBoard.edl"
+  4 "genVMEstats_4M_0S.edl"
 }
 menuLabel {
   0 "Dig 1"
   1 "Dig 2"
   2 "Dig 3"
   3 "Dig 4"
+  4 "ALL"
 }
 symbols {
   0 "D=HELIOS,DN=02,DB=MDIG1,CR=2,BID=1"
   1 "D=HELIOS,DN=02,DB=MDIG2,CR=2,BID=2"
   2 "D=HELIOS,DN=02,DB=MDIG3,CR=2,BID=3"
   3 "D=HELIOS,DN=02,DB=MDIG4,CR=2,BID=4"
+  4 "D=HELIOS,DN=02,CR=2"
 }
 endObjectProperties
 
@@ -3333,24 +3339,27 @@ botShadowColor index 83
 font "helvetica-bold-r-14.0"
 buttonLabel "VME4"
 numPvs 4
-numDsps 4
+numDsps 5
 displayFileName {
   0 "genBoard.edl"
   1 "genBoard.edl"
   2 "genBoard.edl"
   3 "genBoard.edl"
+  4 "genVMEstats_4M_0S.edl"
 }
 menuLabel {
   0 "Dig 1"
   1 "Dig 2"
   2 "Dig 3"
   3 "Dig 4"
+  4 "ALL"
 }
 symbols {
   0 "D=HELIOS,DN=04,DB=MDIG1,CR=4,BID=1"
   1 "D=HELIOS,DN=04,DB=MDIG2,CR=4,BID=2"
   2 "D=HELIOS,DN=04,DB=MDIG3,CR=4,BID=3"
   3 "D=HELIOS,DN=04,DB=MDIG4,CR=4,BID=4"
+  4 "D=HELIOS,DN=04,CR=4"
 }
 endObjectProperties
 
@@ -3371,24 +3380,27 @@ botShadowColor index 83
 font "helvetica-bold-r-14.0"
 buttonLabel "VME3"
 numPvs 4
-numDsps 4
+numDsps 5
 displayFileName {
   0 "genBoard.edl"
   1 "genBoard.edl"
   2 "genBoard.edl"
   3 "genBoard.edl"
+  4 "genVMEstats_4M_0S.edl"
 }
 menuLabel {
   0 "Dig 1"
   1 "Dig 2"
   2 "Dig 3"
   3 "Dig 4"
+  4 "ALL"
 }
 symbols {
   0 "D=HELIOS,DN=03,DB=MDIG1,CR=3,BID=1"
   1 "D=HELIOS,DN=03,DB=MDIG2,CR=3,BID=2"
   2 "D=HELIOS,DN=03,DB=MDIG3,CR=3,BID=3"
   3 "D=HELIOS,DN=03,DB=MDIG4,CR=3,BID=4"
+  4 "D=HELIOS,DN=03,CR=3"
 }
 endObjectProperties
 
@@ -7005,8 +7017,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1176
-y 737
+x 1228
+y 746
 w 59
 h 22
 controlPv "VME01:MDIG2:ahit_count7_RBV"
@@ -7026,8 +7038,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1176
-y 716
+x 1228
+y 725
 w 59
 h 22
 controlPv "VME01:MDIG2:ahit_count6_RBV"
@@ -7047,8 +7059,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1176
-y 695
+x 1228
+y 704
 w 59
 h 22
 controlPv "VME01:MDIG2:ahit_count5_RBV"
@@ -7068,8 +7080,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1176
-y 674
+x 1228
+y 683
 w 59
 h 22
 controlPv "VME01:MDIG4:ahit_count0_RBV"
@@ -7089,8 +7101,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 935
-y 646
+x 987
+y 655
 w 107
 h 21
 font "helvetica-bold-r-18.0"
@@ -7110,8 +7122,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 908
-y 673
+x 960
+y 682
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count0_RBV"
@@ -7132,8 +7144,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 908
-y 694
+x 960
+y 703
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count1_RBV"
@@ -7154,8 +7166,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 908
-y 715
+x 960
+y 724
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count2_RBV"
@@ -7176,8 +7188,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 908
-y 736
+x 960
+y 745
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count3_RBV"
@@ -7198,8 +7210,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 969
-y 736
+x 1021
+y 745
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count7_RBV"
@@ -7220,8 +7232,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 969
-y 715
+x 1021
+y 724
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count6_RBV"
@@ -7242,8 +7254,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 969
-y 694
+x 1021
+y 703
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count5_RBV"
@@ -7264,8 +7276,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 969
-y 673
+x 1021
+y 682
 w 60
 h 22
 controlPv "VME01:MDIG3:disc_count4_RBV"
@@ -7286,8 +7298,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1034
-y 736
+x 1086
+y 745
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count3_RBV"
@@ -7308,8 +7320,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1095
-y 736
+x 1147
+y 745
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count7_RBV"
@@ -7330,8 +7342,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1034
-y 715
+x 1086
+y 724
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count2_RBV"
@@ -7352,8 +7364,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1095
-y 715
+x 1147
+y 724
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count6_RBV"
@@ -7374,8 +7386,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1034
-y 694
+x 1086
+y 703
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count1_RBV"
@@ -7396,8 +7408,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1095
-y 694
+x 1147
+y 703
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count5_RBV"
@@ -7418,8 +7430,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1095
-y 673
+x 1147
+y 682
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count4_RBV"
@@ -7440,8 +7452,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 1034
-y 673
+x 1086
+y 682
 w 60
 h 22
 controlPv "VME01:MDIG4:disc_count0_RBV"
@@ -7478,6 +7490,70 @@ commandLabel {
 }
 command {
   0 "$EDMSCRIPTS/helios_save_array"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 216
+y 342
+w 150
+h 30
+fgColor index 0
+bgColor index 83
+topShadowColor index 83
+botShadowColor index 83
+font "helvetica-bold-r-14.0"
+buttonLabel "Rate Tables"
+numPvs 4
+numDsps 4
+displayFileName {
+  0 "heliosCounterRates.edl"
+  1 "heliosCounterRates.edl"
+  2 "heliosCounterRates.edl"
+  3 "heliosCounterRates.edl"
+}
+menuLabel {
+  0 "LED Rate"
+  1 "Accepted Hits Rate"
+  2 "Accepted Event Rate"
+  3 "Dropped Event Rate"
+}
+symbols {
+  0 "TYPE=LED Disc,RT=disc,MODE=DescCntMode"
+  1 "TYPE=Accepted Hits,RT=ahit,MODE=AcceptEvtHitMode"
+  2 "TYPE=Accepted Events,RT=accepted_event,MODE=AcceptEvtHitMode"
+  3 "TYPE=Dropped Events,RT=dropped_event"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 216
+y 376
+w 150
+h 30
+fgColor index 0
+bgColor index 83
+topShadowColor index 83
+botShadowColor index 83
+font "helvetica-bold-r-14.0"
+buttonLabel "Data Transfer Rate"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "heliosIocStatus.edl"
+}
+symbols {
+  0 "D=HELIOS"
 }
 endObjectProperties
 
