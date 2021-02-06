@@ -1,50 +1,78 @@
 #Start a human-readable list of PV's to add to wiki
-#Replace $$ with numbers
 
-GOLBAL
+in terminal:
+caget  =  read PV value
+caput  =  set PV or command
 
-GLBL:DIG:XXXXX
+#=========================== GOLBAL PV
+GLBL:DIG:<PV>            -- for whole system
+VME$$:MDIG$$:<PV>        -- for whole digitizer
+VME$$:MDIG$$:<PV>$$      -- for write indivual channel
+VME$$:MDIG$$:<PV>$$_RBV  -- for read onlu
 
-trigger_mux_select
+=====================+==========================+=======+========+=====+=====+
+Items                | PV                       |  R/W  | Global | DIG |  CH |
+=====================+==========================+=======+========+=====+=====+
+Disc. Hits           | disc_count               |   R   |   X    |  X  |  O  |
+Acc. Hits            | ahit_count               |   R   |   X    |  X  |  O  |
+Acc. Evts            | accepted_event_count     |   R   |        |     |     | 
+Drop. Evts           | dropped_event_count      |   R   |        |     |     |
+
+Live TS              | CV_LiveTS                |   R   |        |     |     |
+trigger mode         | trigger_mux_select       |  R/W  |        |     |     |
+trig. pol.           | trigger_polarity         |  R/W  |   O    |  O  |  O  |
+channel enable       | channel_enable           |  R/W  |   O    |  O  |  O  |
+
+threshold            | led_threshold            |  R/W  |   O    |  O  |  O  |
+                     | p1_window                |  R/W  |   O    |  O  |  O  |
+                     | p2_window                |  R/W  |   O    |  O  |  X  |
+                     | k_window                 |  R/W  |   O    |  O  |  O  |
+                     | k0_window                |  R/W  |   O    |  O  |  O  |
+                     | d_window                 |  R/W  |   O    |  O  |  O  |
+                     | d2_window                |  R/W  |   O    |  O  |  O  |
+                     | d3_window                |  R/W  |   O    |  O  |  O  |
+                     | m_window                 |  R/W  |   O    |  O  |  O  |
+                     | pileup_mode              |  R/W  |   O    |  O  |  O  |
+Trace lenght  delay  | raw_data_length          |  R/W  |   O    |  O  |  O  |
+Trace lenght         | raw_data_window          |  R/W  |   O    |  O  |  O  |
+
+                     | CFD_fraction             |  R/W  |   O    |  O  |  O  |
+Baseline   Delay     | delay                    |  R/W  |   O    |  O  |  X  |
+Baseline channel     | baseline_start           |  R/W  |   O    |  O  |  O  |
+
+Min overlap window   | win_comp_min             |  R/W  |   O    |  O  |  X  |
+Max overlap window   | win_comp_max             |  R/W  |   O    |  O  |  X  |
+
+Discr. Width         | disc_width               |  R/W  |   O    |  O  |  O  |
+                     | peak_sensitivity         |  R/W  |   O    |  O  |  X  |
+                     | tracking_speed           |  R/W  |   O    |  O  |  X  |
+                     | preamp_reset_delay       |  R/W  |   O    |  O  |  O  |
+                     | holdoff_time             |  R/W  |   O    |  O  |  X  |
+                     | cfd_mode                 |  R/W  |   O    |  O  |  X  |
+
+                     | veto_gate_width          |  R/W  |   O    |  X  |  X  |
+enable preamp reset  | preamp_reset_delay_en    |  R/W  |   O    |  O  |  O  |
+=====================+==========================+=======+========+=====+=====+
+
+#################### Other PV:
+Online_CS_SaveData     | set Save Data register
+Online_CS_StartStop    | set DAQ start stop
+DAQC$_CV_SendRate
+DAQC$_CV_NumSendBuffers
+DAQC$_CV_BufferAvail
+
+VME32:RTR$:TimestampB
+VME32:MTRG:TIMESTAMP_B
 
 
+VME32:RTR$:reg_MISC_STAT_RBV
 
+VME32:MTRG:MAN/AUX.DESC
+VME32:MTRG:SUM_X.DESC
+VME32:MTRG:SUM_Y.DESC
+VME32:MTRG:SUM_XY.DESC
 
-Rates:
-Disc. Hits - VME$$:MDIG$$:disc_count$$_RBV
-Acc. Hits  - VME$$:MDIG$$:ahit_count$$_RBV
-Acc. Evts  - VME$$:MDIG$$:accepted_event_count$$_RBV
-Drop. Evts - VME$$:MDIG$$:dropped_event_count$$_RBV
+VME32:MTRG:RAW_TRIG_RATE_COUNTER_$_RBV
 
-Live TS    - VME$$:MDIG$$:CV_LiveTS
-
-trigger_polarity
-
-channel_enable
-
-dropped_event_count
-
-led_threshold
-
-p1_window
-
-p2_window
-
-k_window
-
-k0_window
-
-d_window
-
-d2_window
-
-d3_window
-
-m_window
-
-pileup_mode
-
-raw_data_length : trace length delay
-
-raw_data_window : trace length
-
+VME32:MTRG:XTHRESH
+VME32:MTRG:YTHRESH
