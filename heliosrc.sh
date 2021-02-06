@@ -1,9 +1,7 @@
 # heliosrc
 # this script for establishing bash enviroment 
 # user should source this script at .bashrc
-
-#force the system use python2. This is for the DAQ, as python scripts use python2
-alias python=/usr/local/bin/python2.7
+# if multiple digios copies exist, source heliosrc.sh at ~/ to change the HELIOSSYS
 
 #=================== git and PS1
 set_GitPS1()
@@ -52,7 +50,6 @@ unset HELIOSANA
 unset HELIOSSYS
 SOURCE=${BASH_ARGV[0]}
 HELIOSSYS=$(dirname ${SOURCE})
-#echo "HELIOSSYS = "$HELIOSSYS
 
 #-------- optional
 set_GitPS1
