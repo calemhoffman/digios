@@ -122,7 +122,7 @@ function ShowRunSize {
     elif [ ${runLen} -eq 2 ]; then
 	RUN="0"${RUN}
     fi
-    du -hsc --time ${HELIOSSYS}/analysis/data/${expName}_run_$RUN*
+    du -hsc ${HELIOSSYS}/analysis/data/${expName}_run_$RUN*
 }
 
 function GlobusUpload {
