@@ -52,7 +52,7 @@ unset HELIOSANA
 unset HELIOSSYS
 SOURCE=${BASH_ARGV[0]}
 HELIOSSYS=$(dirname ${SOURCE})
-echo "HELIOSSYS = "$HELIOSSYS
+#echo "HELIOSSYS = "$HELIOSSYS
 
 #-------- optional
 set_GitPS1
