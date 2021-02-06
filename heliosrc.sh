@@ -104,6 +104,8 @@ function ListHeliosFunctions {
     echo "AutoStartStop"
     echo "GlobusUpload = upload all data to LCRC"
     echo "GlobusDownload = download all data to local from LCRC"
+    echo "DeleteSlackBotMsg, need SLACKTOKEN"
+    echo "DeleteSlackBotFile, need SLACKTOKEN"
 }
 
 function ShowRunSize {
@@ -156,6 +158,39 @@ function GlobusDownload {
     globus transfer -r -s checksum  $fromPath $toPath
 
     globus task list
+
+}
+
+
+#============= Slack
+function DeleteSlackBotMsg {
+
+    if [ $# -ne 1 ]; then
+        echo "please input channel_name"
+        return
+    fi
+
+    CHANNEL=$1
+    
+    slack-cleaner --token ${SLACKTOKEN} --message --bot --rate 1 --channel $CHANNEL
+
+    read -p "Are you want to delete them all? [y/n] " isDelete
+
+    if [ $isDelete = "y" ]; then
+        slack-cleaner --token ${SLACKTOKEN} --message --bot --rate 1 --channel $CHANNEL --perform
+    fi
+
+}
+
+function DeleteSlackBotFile {
+    
+    slack-cleaner --token ${SLACKTOKEN} --file --rate 3 --user grafana_alert_bot
+    
+    read -p "Are you want to delete them all? [y/n] " isDelete
+    
+    if [ $isDelete = "y" ]; then
+        slack-cleaner --token ${SLACKTOKEN} --file --rate 3 --user grafana_alert_bot --perform
+    fi
 
 }
 
