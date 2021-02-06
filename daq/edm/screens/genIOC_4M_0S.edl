@@ -4,7 +4,7 @@ major 4
 minor 0
 release 1
 x 292
-y 280
+y 302
 w 230
 h 230
 font "helvetica-medium-r-18.0"
@@ -61,7 +61,7 @@ buttonLabel "VME $(DN) Trace"
 numPvs 4
 numDsps 1
 displayFileName {
-  0 "Trace.edl"
+  0 "HELIOSTrace.edl"
 }
 endObjectProperties
 

@@ -1,0 +1,81 @@
+#!/bin/bash -l
+sdirname="saves"
+fname="array_saved"
+fdate=`date +%Y-%m-%d.%H-%M`
+sfile=$sdirname/$fname.$fdate
+
+echo '#!/bin/bash -l' > $sfile
+chmod +x $sfile
+
+echo "########## Saving Global Threshold ##########"
+
+GLBL="GLBL:DIG:d_window GLBL:DIG:k_window GLBL:DIG:m_window GLBL:DIG:k0_window GLBL:DIG:d3_window GLBL:DIG:led_threshold GLBL:DIG:CFD_fraction GLBL:DIG:raw_data_length GLBL:DIG:raw_data_window GLBL:DIG:trigger_polarity GLBL:DIG:pileup_mode GLBL:DIG:trigger_mux_select GLBL:DIG:channel_enable GLBL:DIG:win_comp_min GLBL:DIG:win_comp_max GLBL:DIG:peak_sensitivity GLBL:DIG:cfd_mode GLBL:DIG:preamp_reset_delay GLBL:DIG:preamp_reset_delay_en GLBL:DIG:delay GLBL:DIG:baseline_start GLBL:DIG:tracking_speed GLBL:DIG:holdoff_time DigFIFOSpeed GLBL:DIG:veto_enable"
+
+echo "#Saving Globals #1" >> $sfile
+
+caget $GLBL | awk '{print "caput " $1 " " $2}' >> $sfile
+
+
+echo "############### Saving Individual ###############"
+echo "#Saving Channel setting" >> $sfile
+
+VME="01 02 03 04"
+DIG="1 2 3 4"
+CH="0 1 2 3 4 5 6 7 8 9"
+
+PVS="led_threshold channel_enable trigger_polarity raw_data_window"
+
+#PVS="led_threshold channel_enable trigger_polarity raw_data_window k0_window"
+
+#PVS="d_window k_window m_window d3_window led_threshold raw_data_length raw_data_window trigger_polarity pileup_mode channel_enable preamp_reset_delay preamp_reset_delay_en"
+
+for a in $VME
+do
+  for b in $DIG
+  do
+    for c in $PVS
+    do
+      for d in $CH
+      do 
+        pv=VME"$a":MDIG"$b":"$c""$d"
+        chpv=$(caget "$pv"_RBV | awk '{print $2}')
+	echo $pv $chpv
+        echo 'caput' $pv $chpv >> $sfile
+      done
+    done
+  done
+done
+
+echo "################# Save X-Y Trigger Map  ##########"
+echo "#Saving X-Y Trigger Map" >> $sfile
+
+RTR="1 2"
+PLANE="X Y"
+ABC="A B C D E F G H"
+
+
+for a in $RTR
+do 
+  for b in $PLANE
+  do
+    for c in $ABC
+    do
+      pv=VME32:RTR"$a":reg_"$b"_PLANE_MAP_"$c" 
+      chpv=$(caget "$pv"_RBV | awk '{print $2}')
+      echo $pv $chpv
+      echo 'caput' $pv $chpv >> $sfile
+    done
+  done
+done
+
+
+date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> $sfile
+
+echo "echo \"######### Done restore to last save #############\" " >> $sfile
+
+rm -rf edm/scripts/array_saved
+ln -s ../../$sfile edm/scripts/array_saved
+echo "saved in : ${sfile}"
+echo "########## Done Saving Thresholds ###########"
+exit
+

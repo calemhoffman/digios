@@ -1,0 +1,144 @@
+#!/bin/bash -l
+
+cd /global/devel/systems/caribu/edm/scripts
+\mv Global.save1 Global.save2
+\mv Global.save Global.save1
+
+echo '#!/bin/bash -l' > Global.save
+
+# First save globals with CryG prefix
+
+echo "Saving Globals"
+
+CRY="CryG_CS_PZEna CryG_CS_BRE CryG_CS_Pol CryG_CS_PUE CryG_CS_Dbg CryG_CS_PZMult CryG_CS_LEDTh CryG_CS_RDDly CryG_CS_RDLen CryG_CS_CFDDly CryG_CS_CFDThr CryG_CS_CFDFrac"
+
+DIG="DigG_CS_ExtWin DigG_CS_NoiseWin DigG_CS_PileWin DigG_CS_TrigDly DigG_CS_LRCollTime DigG_CS_IntTime DigG_CS_CollTime DigG_CS_LRIntTime DigG_CS_BaseRes DigG_CS_AuxIOMux DigG_CS_DCMReset"
+
+echo "#Saving Globals #1" >> Global.save
+caget $CRY | awk '{print "caput " $1 " " $2}' >> Global.save
+caget $DIG | awk '{print "caput " $1 " " $2}' >> Global.save
+
+# Need to treat CryG_CS_TM and CrG_CS_PZTrace differently
+
+glpv=$(caget CryG_CS_TM | awk '{print $2}') 
+if [[ $glpv = "Internal" ]]   # does not recognize Internal for the caput
+then 
+  caget CryG_CS_TM | awk '{print "caput " $1 " 0"}' >> Global.save
+else 
+  caget CryG_CS_TM | awk '{print "caput " $1 " " $2}' >> Global.save
+fi
+echo "caput CryG_CS_PZTrace 0" >> Global.save    # always set to Raw Data 
+
+echo "Saving Globals 2"
+echo "#Saving Globals #2" >> Global.save
+echo "sleep 2" >> Global.save
+caget $CRY | awk '{print "caput " $1 " " $2}' >> Global.save
+caget $DIG | awk '{print "caput " $1 " " $2}' >> Global.save
+
+# Need to treat CryG_CS_TM and CrG_CS_PZTrace differently
+
+glpv=$(caget CryG_CS_TM | awk '{print $2}') 
+if [[ $glpv = "Internal" ]]   # does not recognize Internal for the caput
+then 
+  caget CryG_CS_TM | awk '{print "caput " $1 " 0"}' >> Global.save
+else 
+  caget CryG_CS_TM | awk '{print "caput " $1 " " $2}' >> Global.save
+fi
+echo "caput CryG_CS_PZTrace 0" >> Global.save   # always set to Raw Data
+
+# Saving IOC Non-Globals
+
+echo "Saving IOC Non-Globals"
+echo "#Saving IOC Non-Globals" >> Global.save
+
+IO="1"
+for a in $IO
+do
+ caget OnMon"$a"_CS_RcvrIP | awk '{print "caput " $1 " " $2}' >> Global.save
+done
+ 
+# Saving Digitizer Non-Globals
+
+echo "Saving Digitizer Non-Globals"
+echo "#Saving Digitizer Non-Globals" >> Global.save
+
+DN1="1"
+
+for a in $DN1
+do 
+  caget Dig"$a"_CS_MuxCon | awk '{print "caput " $1 " " $2}' >> Global.save
+  caget Dig"$a"_CS_MLE | awk '{print "caput " $1 " " $2}' >> Global.save
+  caget Dig"$a"_CS_X55WidthP | awk '{print "caput " $1 " " $2}' >> Global.save
+  caget Dig"$a"_CS_X55WidthN | awk '{print "caput " $1 " " $2}' >> Global.save
+  caget Dig"$a"_CS_CCSel | awk '{print "caput " $1 " " $2}' >> Global.save
+  caget DAQB"$a"_CS_Ena | awk '{print "caput " $1 " " $2}' >> Global.save
+done
+
+# Loop through digitiers and save ones which are diffient than globals
+
+echo "Saving Digitizer PVs different than Global"
+echo "#Saving Digitizer PVs different than Global" >> Global.save
+
+DI="_CS_ExtWin _CS_NoiseWin _CS_PileWin _CS_TrigDly _CS_IntTime _CS_CollTime _CS_BaseRes _CS_AuxIOMux _CS_DCMReset"  # leave out _CS_LRCollTime and _CS_LRIntTIme
+
+for a in $DI
+do
+  glpv=$(caget DigG"$a" | awk '{print $2}')   # using awk to extract PV setting
+  for b in $DN1
+  do 
+    dipv=$(caget Dig"$b""$a" | awk '{print $2}')
+    if [[ $glpv != $dipv ]] 
+    then 
+      echo 'caput Dig'"$b""$a" $dipv >> Global.save
+    fi    
+  done
+done
+
+# Now lets loop through channels and save ones which are different than globals
+
+CR="_CS_BRE _CS_Pol _CS_PUE _CS_Dbg _CS_TM _CS_PZEna _CS_PZMult _CS_LEDTh _CS_RDDly _CS_RDLen _CS_CFDDly _CS_CFDThr _CS_CFDFrac _CS_SWEna"
+
+#CH="a1 a2 a3 a4 a5 a6 b1 b2 b3 s1 b4 b5 b6 c1 c2 c3 c4 c5 c6 s2 d1 d2 d3 d4 d5 d6 e1 e2 e3 CC1 e4 e5 e6 f1 f2 f3 f4 f5 f6 CC2" # this is if all digitizers are present
+
+CH="a1 a2 a3 a4 a5 a6 b1 b2 b3 s1"  # only one digitizer
+
+echo "Saving Channel PVs different than Global"
+echo "#Saving Channel PVs different than Global" >> Global.save
+LIMIT=1
+for ((a=1; a <= LIMIT ; a++))  # Double parentheses, and naked "LIMIT"
+do 
+  echo "Checking IOC" $a
+  echo "#Checking IOC" $a >> Global.save
+  for b in $CR
+  do
+    if [[ $b != "_CS_SWEna" ]]
+    then
+      glpv=$(caget CryG"$b" | awk '{print $2}')   # using awk to extract PV setting
+    else
+      glpv=enable
+    fi
+    for c in $CH
+    do
+      chpv=$(caget Cry"$a""$b""$c" | awk '{print $2}')
+      if [[ $glpv != $chpv ]] 
+      then 
+        if [[ $chpv == "Internal" ]]; then
+          chpv=0
+          echo "chpv = " $chpv
+        fi
+        echo 'caput Cry'"$a""$b""$c" $chpv >> Global.save
+      fi    
+    done
+  done
+done
+
+# Now write time stamp at end of file as a comment
+
+date +%m/%d/%Y-%k:%M | awk '{print "#Save Finished "$1 $2}' >> Global.save
+date +%m/%d/%Y-%k:%M | awk '{print "Save Finished "$1 $2}'
+
+# finally archive Global.save using date and time
+
+a=$(date +%Y.%m.%d.%k%M | awk '{print "Global.save arch/Global.save."$1}')
+cp $a
+chmod +x Global.save

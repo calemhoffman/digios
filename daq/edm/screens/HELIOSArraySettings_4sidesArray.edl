@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 86
-y 129
+x 590
+y 229
 w 1350
 h 850
 font "helvetica-bold-r-10.0"
@@ -50,14 +50,14 @@ minor 2
 release 0
 x 1078
 y 28
-w 150
+w 192
 h 25
 fgColor index 14
 bgColor index 0
 topShadowColor index 0
 botShadowColor index 14
 font "helvetica-bold-r-10.0"
-buttonLabel "Set Values"
+buttonLabel "Restore Setting from last save"
 numCmds 1
 commandLabel {
   0 "Set Values"
@@ -8858,13 +8858,13 @@ bgColor index 0
 topShadowColor index 0
 botShadowColor index 14
 font "helvetica-bold-r-10.0"
-buttonLabel "Save $(PVNAME) Values"
+buttonLabel "Save (almost all) Setting"
 numCmds 1
 commandLabel {
   0 "Save Values"
 }
 command {
-  0 "$EDMSCRIPTS/helios_save_array_$(PVNAME)s"
+  0 "$EDMSCRIPTS/helios_save_array"
 }
 endObjectProperties
 

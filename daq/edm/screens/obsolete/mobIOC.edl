@@ -1,0 +1,232 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1179
+y 184
+w 150
+h 190
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-medium-r-18.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 3
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 23
+y 13
+w 98
+h 21
+font "helvetica-bold-r-18.0"
+fontAlign "center"
+fgColor index 14
+bgColor index 6
+useDisplayBg
+value {
+  "VME $(DN)"
+}
+autoSize
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 15
+y 45
+w 117
+h 127
+
+beginGroup
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 15
+y 45
+w 115
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-bold-r-14.0"
+buttonLabel "Board $(DB1)"
+numPvs 4
+numDsps 11
+displayFileName {
+  0 "mobBoard.edl"
+  1 "mobChannel.edl"
+  2 "mobChannel.edl"
+  3 "mobChannel.edl"
+  4 "mobChannel.edl"
+  5 "mobChannel.edl"
+  6 "mobChannel.edl"
+  7 "mobChannel.edl"
+  8 "mobChannel.edl"
+  9 "mobChannel.edl"
+  10 "mobChannel.edl"
+}
+menuLabel {
+  0 "Board $(DB1)"
+  1 "Channel 0"
+  2 "Channel 1"
+  3 "Channel 2"
+  4 "Channel 3"
+  5 "Channel 4"
+  6 "Channel 5"
+  7 "Channel 6"
+  8 "Channel 7"
+  9 "Channel 8"
+  10 "Channel 9"
+}
+symbols {
+  0 "DB=$(DB1)"
+  1 "CH=0,DB=1,DN=01"
+  2 "CH=1,DB=1"
+  3 "CH=2,DB=1"
+  4 "CH=3,DB=1"
+  5 "CH=4,DB=1"
+  6 "CH=5,DB=1"
+  7 "CH=6,DB=1"
+  8 "CH=7,DB=1"
+  9 "CH=8,DB=1"
+  10 "CH=9,DB=1"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 125
+y 45
+w 115
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-bold-r-14.0"
+buttonLabel "Board $(DB2)"
+numPvs 4
+numDsps 11
+displayFileName {
+  0 "mobBoard.edl"
+  1 "mobChannel.edl"
+  2 "mobChannel.edl"
+  3 "mobChannel.edl"
+  4 "mobChannel.edl"
+  5 "mobChannel.edl"
+  6 "mobChannel.edl"
+  7 "mobChannel.edl"
+  8 "mobChannel.edl"
+  9 "mobChannel.edl"
+  10 "mobChannel.edl"
+}
+menuLabel {
+  0 "Board $(DB2)"
+  1 "Channel 0"
+  2 "Channel 1"
+  3 "Channel 2"
+  4 "Channel 3"
+  5 "Channel 4"
+  6 "Channel 5"
+  7 "Channel 6"
+  8 "Channel 7"
+  9 "Channel 8"
+  10 "Channel 9"
+}
+symbols {
+  0 "DB=$(DB2)"
+  1 "CH=0,DB=1,DN=01"
+  2 "CH=1,DB=1"
+  3 "CH=2,DB=1"
+  4 "CH=3,DB=1"
+  5 "CH=4,DB=1"
+  6 "CH=5,DB=1"
+  7 "CH=6,DB=1"
+  8 "CH=7,DB=1"
+  9 "CH=8,DB=1"
+  10 "CH=9,DB=1"
+}
+endObjectProperties
+
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 17
+y 91
+w 115
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-bold-r-14.0"
+buttonLabel "Dig. Trace"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "Trace.edl"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 16
+y 136
+w 115
+h 36
+fgColor index 25
+bgColor index 40
+topShadowColor index 0
+botShadowColor index 14
+font "helvetica-bold-r-14.0"
+buttonLabel "IOC Status"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "iocStatus1.edl"
+}
+menuLabel {
+  0 "Event Rates"
+}
+symbols {
+  0 "CD=1,DB1=1"
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+

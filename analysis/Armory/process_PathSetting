@@ -9,12 +9,12 @@ Arch=$(uname -s)
 #    source /lcrc/project/HELIOS/digios/expName.sh
 #    AnalysisDir=/lcrc/project/HELIOS/digios/analysis
 
-source ../../expName.sh #load expName
-AnalysisDir=../../analysis
+source ${HELIOSSYS}/expName.sh #load expName
+AnalysisDir=${HELIOSSYS}analysis
 
 #remote data path
 dataloc=${daqDataPath}/${expName}/data
-daqDir=/home/helios/digios
+daqDir=${HELIOSSYS}/
 
 #===== directory and chat files
 GEBDIR=$AnalysisDir/GEBSort

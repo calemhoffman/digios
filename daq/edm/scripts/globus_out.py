@@ -10,6 +10,8 @@ client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
 
 import os
 
+print("===================== this script only for single run")
+
 f = open("/home/helios/Globus-token.dat", "r");
 AUTH_TOKEN = f.readline().strip()
 TRANSFER_TOKEN = f.readline().strip()
@@ -23,8 +25,8 @@ authorizer = globus_sdk.RefreshTokenAuthorizer(
 
 tc = globus_sdk.TransferClient(authorizer=authorizer)
 
-
-fexp=open("/home/helios/digios/expName.sh", 'r')
+heliosPath=os.environ["HELIOSSYS"]
+fexp=open("%s/expName.sh" % heliosPath, 'r')
 line=fexp.readline() #this line is bashscript header
 line=fexp.readline() #this line is expName
 expName=line[8:-1]

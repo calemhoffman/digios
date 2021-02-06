@@ -3,15 +3,15 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 43
-y 49
+x 421
+y 193
 w 350
 h 900
 font "helvetica-medium-r-18.0"
 ctlFont "helvetica-bold-r-18.0"
 btnFont "helvetica-medium-i-18.0"
 fgColor index 14
-bgColor index 55
+bgColor index 79
 textColor index 14
 ctlFgColor1 index 14
 ctlFgColor2 index 0
