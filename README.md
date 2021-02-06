@@ -7,14 +7,49 @@
 - In HELIOS-DAQ, MAC, and DB, things are the same, can switch to other branches.
 - In LCRC, PLEASE only use the master branch at /lcrc/project/HELIOS/digios/
 -- To analysis different experiment, edit digios/expName.sh, and use MakeDataLinks.
+- After clone the repository, edit .bashrc, add:
+-- source ~/path_to_repository/heliosrc.sh
 
 ## Major Branches
-- master : should be the latest branch with latest code
-- ISS631 : the analysis code on 2018-Oct.
-- h072_16N : the analysis code for (d,3He)
+- master    : should be the latest branch with latest code
+- ISS631    : the analysis code on 2018-Oct.
+- h072_16N  : the analysis code for (d,3He)
+- h073_82Kr : the analysis code for 82Kr(d,p), 82Se(d,p)
 
 ## Obsolte Branches
 - 4SideArray : the branch for the 4-side array, the main diff is the edm panels
+
+## Update on Feb 5, 2021, Ryan
+- Latest verison update at the middle of h074_238U
+- Clean up the GEBSort directory
+-- GEBSort simplified to EventBuilder
+-- no more TS.list and map.dat output
+- Clean up daq/edm/scripts
+-- put the not-used scripts into obsolete
+- Clean up daq/edm/screens
+-- put the not-used scripts into obsolete
+- New fitting method using mouse click
+-- clickFitNGaussPol
+-- clickFitNGaussPolSub
+- add heliosrc.sh
+-- user need to add "source path_to_repository/heliosrc.sh" in ~/.bashrc
+- add working/Simulation_Helper.C
+-- GUI interface for Ptlomey and Kinematic simulation
+- add working/generatHistogram.C
+-- a code to simulated any histogram, can be use for resolution estimation
+- add HVMonitor.py
+-- for reading and control Iseg HV module and put to database
+- add HELIOSMain_4sidesArray.edl
+-- this edl also modiflied alot 
+- add HELIOSArraySettings_4sidesArray.edl
+- Remove Simulation
+-- all programs are adapted in Cleopatra
+- move process_XXXX to Armory
+-- in heliosrc.sh, the Armory will be in PATH, can call Process_RUN from anywhere, but should be called in working/
+- added ptolemy_mac
+-- please read install_ptolemy_mac.txt for installation
+- many tiny bugs fix.
+
 
 ## Update on July 27, 2020, Ryan
 - Latest version update from H075_20Ne.
