@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-source ~/digios/expName.sh
+source ${HELIOSSYS}/expName.sh
 
 RUN=${LastRunNum}
 
@@ -35,19 +35,19 @@ echo "==== wait for 2 sec"
 sleep 2
 
 # take screenshot and copy from heliosDB
-screenShot=~/digios/analysis/working/grafanaElog.jpg
+screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
 ssh heliosdatabase@heliosdb '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
 scp heliosdatabase@heliosdb:~/grafanaElog.jpg ${screenShot}
 
 if [ -z ${elogID} ]; then
     # this will create seperated elog entry
-    echo "         stop at ${currentDate}" >> ~/digios/analysis/working/elog.txt
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt -f ${screenShot}
+    echo "         stop at ${currentDate}" >> ${HELIOSSYS}/analysis/working/elog.txt
+    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt -f ${screenShot}
 
 else
     # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
     echo "---- downloading the elog entry elohID=${elogID}"
-    elogContext=~/digios/analysis/working/elog.txt
+    elogContext=${HELIOSSYS}/analysis/working/elog.txt
     #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
     if [ $expName = "ARR01" ]; then
 	elogName=$expName
@@ -99,8 +99,8 @@ rm -rf temp
 echo "=== wait 5 seconds before submit a transfer to LCRC ==="
 sleep 5
 
-/home/helios/digios/daq/edm/scripts/globus_out.py
-#/home/helios/digios/daq/edm/scripts/globus_in.py
+${HELIOSSYS}/daq/edm/scripts/globus_out.py
+#${HELIOSSYS}/daq/edm/scripts/globus_in.py
 
 #===== Get root_data/ from LCRC to MAC
 #MACEndPoint=0910df94-fb59-11e9-9945-0a8c187e8c12

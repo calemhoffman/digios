@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 656
-y 326
+x 131
+y 189
 w 1340
 h 800
 font "helvetica-bold-r-10.0"
@@ -164,13 +164,13 @@ major 4
 minor 2
 release 0
 x 1162
-y 198
+y 229
 w 100
 h 30
 fgColor index 0
-bgColor index 78
-topShadowColor index 78
-botShadowColor index 78
+bgColor index 83
+topShadowColor index 83
+botShadowColor index 83
 font "helvetica-bold-r-12.0"
 buttonLabel "Restore Setting"
 numCmds 1
@@ -7475,7 +7475,7 @@ major 4
 minor 2
 release 0
 x 1162
-y 228
+y 198
 w 100
 h 30
 fgColor index 0

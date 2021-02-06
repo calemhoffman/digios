@@ -1,7 +1,7 @@
 #!/bin/bash -l
 export TERM=vt100
-explocation=~/digios/daq
-source ~/digios/expName.sh #load expName
+explocation=${HELIOSSYS}/daq
+source ${HELIOSSYS}/expName.sh #load expName
 datalocation=${daqDataPath}/${expName}/data
 
 if [ $# -eq 1 ]; then
