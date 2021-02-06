@@ -1,7 +1,7 @@
 #!/bin/bash -l
-source ~/digios/expName.sh #load expName
+source ${HELIOSSYS}/expName.sh #load expName
 export TERM=vt100
-explocation=~/digios/daq
+explocation=${HELIOSSYS}/daq
 datalocation=${daqDataPath}/${expName}/data
 
 echo -e "############################### Closing RUN : RUN\033[0;31m${LastRunNum}\033[0m"

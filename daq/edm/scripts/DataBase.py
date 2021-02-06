@@ -14,20 +14,22 @@ alertLevel= 300
 
 tOld = 0
 
-DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @/home/helios/digios/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
+DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
 
 #route = Edwards_D379_driver.Route()
 #gaude_read = Edwards_D379_driver.EdwardsD397(route)
 
+heliosPath=os.environ["HELIOSSYS"]
+
 while 1:
-    f = open("/home/helios/digios/daq/tempDB.txt", 'w')
+    f = open("%s/daq/tempDB.txt" % heliosPath, 'w')
     t1 = int(round(time.time() * 1000 ))
 
     #VaccuumGauge = gaude_read.vacuum_g1()    
     #string = "VaccuumGauge value=%f\n" % VaccuumGauge
     #print(string)
     
-    fexp=open("/home/helios/digios/expName.sh", 'r')
+    fexp=open("%s/expName.sh" % heliosPath, 'r')
     line=fexp.readline() #this line is bashscript header
     line=fexp.readline() #this line is expName
     expName=line[8:-1]
@@ -40,7 +42,7 @@ while 1:
     f.write(string)
 
 
-    bashCommand="du -c ~/digios/analysis/data/%s_run_%03d* | tail -1 | awk '{print $1}'" % (expName, int(runNum))
+    bashCommand="du -c ${HELIOSSYS}/analysis/data/%s_run_%03d* | tail -1 | awk '{print $1}'" % (expName, int(runNum))
     result=os.popen(bashCommand).read().rstrip()
     print("ExpName : %s, runNum : %03d, file size : %s" % (expName, int(runNum),  result))
     string="fileSize value=%s\n" % (result)
@@ -78,7 +80,7 @@ while 1:
                 print("================= resume")
                 gf.close()
                 #----- reopen file
-                f = open("/home/helios/digios/daq/tempDB.txt", 'w')
+                f = open("%s/daq/tempDB.txt" % heliosPath, 'w')
             
         
             for DIG in range (1,5):

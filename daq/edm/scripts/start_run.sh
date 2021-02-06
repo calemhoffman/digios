@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-constFile=~/digios/expName.sh
+constFile=${HELIOSSYS}/expName.sh
 source ${constFile} #load expName, etc.
 
 #==== next experiment number
@@ -44,7 +44,7 @@ echo "RUN-${RUN} start at ${currentDate}| $COMMENT"
 echo "RUN-${RUN} start at ${currentDate}| $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 
 
-elogFile=~/digios/analysis/working/elog.txt
+elogFile=${HELIOSSYS}/analysis/working/elog.txt
 echo "************************************************<br />" > ${elogFile}
 echo "RUN-${RUN} start at ${currentDate}.<br />" >> ${elogFile}
 echo "$COMMENT <br />" >> ${elogFile}
@@ -68,9 +68,9 @@ else
     elogName="H"${expName:1}
 fi
 
-#IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ~/digios/analysis/working/elog.txt)
+#IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt)
 
-IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ~/digios/analysis/working/elog.txt)
+IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ${HELIOSSYS}/analysis/working/elog.txt)
 
 echo ${IDStr}
 
@@ -87,9 +87,8 @@ if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
 
     source ~/Slack_Elog_Notification.sh
     slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
-    elogMsg=`cat ~/digios/analysis/working/elog.txt`
+    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
-
 fi
 
 curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=1" --max-time 1 --connect-timeout 1
@@ -105,7 +104,7 @@ xterm -T ioc3 -geometry 100x20+0+600  -sb  -sl 1000 -e "gtReceiver4" "ioc3" "${e
 
 xterm -T ioc4 -geometry 100x20+0+900  -sb  -sl 1000 -e "gtReceiver4" "ioc4" "${expName}_run_$DIGIOSRUNNUM.gtd04" "2000000000" "14" &
 
-~/digios/daq/edm/scripts/helios_database start
+${HELIOSSYS}/daq/edm/scripts/helios_database start
 
 sleep 2
 echo Run${RUN} Started...
