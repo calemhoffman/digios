@@ -669,8 +669,8 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
 //##### Auto Fit n-Gauss with estimated BG 
 //##############################################
 vector<double> fitAuto(TH1F * hist, int bgEst = 10, 
-                       double peakThreshold = 0.1, 
-                       double sigmaMax = 20, 
+                       double peakThreshold = 0.05, 
+                       double sigmaMax = -1, 
                        int peakDensity = 4, 
                        TString optStat = ""){
 
@@ -678,7 +678,7 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   printf("========== Auto Fit n-Gauss with estimated BG ==================\n");
   printf(" * bgEst = parameter of BG estimation, larger BG, more linear \n");
   printf(" * peakThreshold = precentage of the highest peak that will count \n");
-  printf(" * sigmaMax  =  maximum sigma \n");
+  printf(" * sigmaMax  =  maximum sigma, if -1, program try to find the sigma \n");
   printf(" * peakDensity = peak will closer when the number is larger ");
   printf(" \n");
   printf(" after peaks found, the i-th peaks will be limited by the mid-point\n");
@@ -686,7 +686,6 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   printf("    i-th peak and (i+1)-th peak \n");
   printf("   i.e. [peak(i-1)+peak(i)]/2  < limit of peak(i) < [peak(i)+peak(i+1)]/2 \n");
   printf("================================================================\n");
-  
 
   gStyle->SetOptStat(optStat);
   TCanvas *cFitAuto = NewCanvas("cFitAuto","Auto Fitting | fitAuto", 1, 4, 800, 300);
@@ -725,7 +724,6 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   cFitAuto->cd(2)->SetGrid();
   cFitAuto->cd(2);
   specS->Draw("hist");
-  
 
   //========== Fitting 
   printf("============= Fitting.....");
@@ -746,13 +744,54 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   }
   
   
+  if( sigmaMax == -1 ){
+    printf("------------- Estimate sigma for each peak \n");
+    sigma.clear();
+    int binMin = hist->FindBin(xMin);
+    int binMax = hist->FindBin(xMax);
+    for( int i = 0; i < nPeaks ; i++){
+      int b0 = hist->FindBin(energy[i]);
+      double sMin = (xMax-xMin)/5., sMax = (xMax-xMin)/5.;
+      //---- backward search, stop when 
+      for( int b = b0-1 ; b > binMin ; b-- ){
+        double y = hist->GetBinContent(b);
+        double x = hist->GetBinCenter(b);
+        if( y  < (height[i])/2. ) {
+          sMin = energy[i] - hist->GetBinCenter(b);
+          break;
+        }
+      }
+      //---- forward search, stop when 
+      for( int b = b0+1 ; b < binMax  ; b++ ){
+        double y = hist->GetBinContent(b);
+        double x = hist->GetBinCenter(b);
+        if( y < (height[i])/2. ) {
+          sMax = hist->GetBinCenter(b) - energy[i];
+          break;
+        }
+      }
+
+      double temp = TMath::Min(sMin, sMax);
+      /// When there are multiple peaks closely packed : 
+      if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
+      sigma.push_back(temp);
+      
+      printf("%2d | x : %8.2f | sigma(est) %f \n", i, energy[i], sigma[i]);
+    }
+  }
+  
+  
   int numParPerPeak = 3;  
   const int  n = numParPerPeak * nPeaks;
   double * para = new double[n]; 
   for(int i = 0; i < nPeaks ; i++){
     para[numParPerPeak*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
     para[numParPerPeak*i+1] = energy[i];
-    para[numParPerPeak*i+2] = sigmaMax/2.;
+    if( sigmaMax == -1 ){
+      para[numParPerPeak*i+2] = sigma[i];
+    }else{
+      para[numParPerPeak*i+2] = sigmaMax/2.;
+    }
   }
 
   TF1 * fit = new TF1("fit", nGauss, xMin, xMax, 3 * nPeaks );
