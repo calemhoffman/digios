@@ -49,7 +49,11 @@ unset HELIOSANA
 
 unset HELIOSSYS
 SOURCE=${BASH_ARGV[0]}
-HELIOSSYS=$(pwd $(dirname ${SOURCE}))
+if [ $(pwd) == $HOME ]; then 
+  HELIOSSYS=$(dirname ${SOURCE})
+else
+  HELIOSSYS=$(pwd)
+fi
 
 #-------- optional
 set_GitPS1
