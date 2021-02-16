@@ -49,7 +49,7 @@ unset HELIOSANA
 
 unset HELIOSSYS
 SOURCE=${BASH_ARGV[0]}
-HELIOSSYS=$(dirname ${SOURCE})
+HELIOSSYS=$(pwd $(dirname ${SOURCE}))
 
 #-------- optional
 set_GitPS1
