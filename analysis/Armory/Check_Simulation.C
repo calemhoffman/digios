@@ -358,7 +358,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
 
       }
       if( pID == pExCal          ){
-         TH1F * hExCal = new TH1F("hExCal", "calculated Ex [gated]; Ex [MeV]; count",  400, ExRange[0], ExRange[1]);
+         TH1F * hExCal = new TH1F("hExCal", Form("calculated Ex [gated]; Ex [MeV]; count / %.2f keV",  (ExRange[1]-ExRange[0])/400.*1000),  400, ExRange[0], ExRange[1]);
          tree->Draw("ExCal>>hExCal", gate, "");
       }
       if( pID == pRecoilRThetaCM ){

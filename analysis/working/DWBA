@@ -55,13 +55,13 @@
 94Ru(d,p)95Ru       0        2s1/2     1/2+        2.246       8.4MeV/u    AK
 94Ru(d,p)95Ru       0        2s1/2     1/2+        3.288       8.4MeV/u    AK
 
-94Ru(d,p)95Ru       0        1d3/2     3/2+        1.414       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        1.740       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        2.220       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        3.288       8.4MeV/u    AK
-
 94Ru(d,p)95Ru       0        0g7/2     7/2+        0.942       8.4MeV/u    AK
 94Ru(d,p)95Ru       0        0g7/2     7/2+        1.331       8.4MeV/u    AK
 
-94Ru(d,p)95Ru       0        0h11/2   11/2+        2.450       8.4MeV/u    AK
+94Ru(d,p)95Ru       0        0h11/2   11/2-        2.450       8.4MeV/u    AK
+
+94Ru(d,p)95Ru       0        1d3/2     3/2+        1.141       8.4MeV/u    AK
+94Ru(d,p)95Ru       0        1d3/2     3/2+        1.740       8.4MeV/u    AK
+94Ru(d,p)95Ru       0        1d3/2     3/2+        2.220       8.4MeV/u    AK
+94Ru(d,p)95Ru       0        1d3/2     3/2+        3.288       8.4MeV/u    AK
 
