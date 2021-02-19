@@ -246,12 +246,13 @@ void Transfer(
       if( line.substr(0,2) == "//" ) continue;
       if( line.substr(0,1) == "#" ) break;
       if ( i >= 0 ){
-        if( i%3 == 0 ) {
+        if( i%4 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
-        }else if (i%3 == 1) {
+        }else if (i%4 == 1) {
           ExStrength.push_back(atof(line.c_str()));
-        }else if (i%3 == 2){
+        }else if (i%4 == 2){
           SF.push_back(atof(line.c_str()));
+          
         }else{
           ExWidth.push_back(atof(line.c_str()));
         }

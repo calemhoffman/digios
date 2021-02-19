@@ -2105,7 +2105,7 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
     }
     
     fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
-    fit->SetParLimits(3*i+2, 0, 1.2*sigma[i]); // add 20% margin of sigma
+    fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
   }
   
   hspec->Fit("fit", "Rq");
