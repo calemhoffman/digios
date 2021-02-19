@@ -231,6 +231,7 @@ void Transfer(
   vector<double> ExKnown;
   vector<double> ExStrength;
   vector<double> ExWidth;
+  vector<double> SF;
   vector<double> y0; // intercept of e-z plot
   vector<double> kCM; // momentum of b in CM frame
   printf("----- loading excitation energy levels (%s).", excitationFile.c_str());
@@ -249,6 +250,8 @@ void Transfer(
           ExKnown.push_back(atof(line.c_str()));
         }else if (i%3 == 1) {
           ExStrength.push_back(atof(line.c_str()));
+        }else if (i%3 == 2){
+          SF.push_back(atof(line.c_str()));
         }else{
           ExWidth.push_back(atof(line.c_str()));
         }
@@ -267,12 +270,12 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
       }
     }
   }else{
@@ -293,7 +296,7 @@ void Transfer(
     int exSize = ExKnown.size();
     exDist = new TF1("exDist", exDistFunc, 0, exSize, exSize);
     for(int i = 0; i < exSize; i++){
-      exDist->SetParameter(i, ExStrength[i]);
+      exDist->SetParameter(i, ExStrength[i]*SF[i]);
     }
   }
   
