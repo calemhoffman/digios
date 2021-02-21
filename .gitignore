@@ -37,6 +37,7 @@ analysis/Cleopatra/FindThetaCM
 analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray
 analysis/Cleopatra/Transfer
+analysis/Cleopatra/Isotope
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
 analysis/Woods-Saxon/WSSearch

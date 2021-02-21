@@ -32,34 +32,73 @@ string dataPath="../Cleopatra/mass16.txt";
 
 class Isotope {
 public:
-   int A, Z;
-   double Mass, MassError, BEA;
-   string Name, Symbol;
-   string dataSource;
-   
-   Isotope(int a, int z);
-   Isotope(string name);
-   double CalSp(int np, int nz);
-   double CalBeta(double T){
-     double Etot = Mass + T;
-     double gamma = 1 + T/Mass;
-     double beta = sqrt(1 - 1 / gamma / gamma ) ;
-     return beta;
-   }
+  int A, Z;
+  double Mass, MassError, BEA;
+  string Name, Symbol;
+  string dataSource;
+  
+  Isotope(){};
+  Isotope(int a, int z){  SetIso(a,z); };
+  Isotope(string name){ SetIsoByName(name); };
+
+  void SetIso(int a, int z);
+  void SetIsoByName(string name);
+
+  double CalSp(int np, int nz);
+
+  double CalBeta(double T){
+    double Etot = Mass + T;
+    double gamma = 1 + T/Mass;
+    double beta = sqrt(1 - 1 / gamma / gamma ) ;
+    return beta;
+  }
+
+  void Print();
+  void ListShell();
    
 private:
-   void FindMassByAZ(int a, int z); // give mass, massError, BEA, Name, Symbol;
-   void FindMassByName(string name); // give Z, mass, massError, BEA;
+  void FindMassByAZ(int a, int z); // give mass, massError, BEA, Name, Symbol;
+  void FindMassByName(string name); // give Z, mass, massError, BEA;
+
+  int TwoJ(int nShell);
+  string Orbital(int nShell);
+  int magic(int i){
+    switch (i){
+      case 0: return   2; break;
+      case 1: return   8; break;
+      case 2: return  20; break;
+      case 3: return  28; break;
+      case 4: return  40; break;
+      case 5: return  50; break;
+      case 6: return  82; break;
+      case 7: return 128; break;
+    }
+    return 0;
+  }
+
+  int magicShellID(int i){
+    switch (i){
+      case 0: return   0; break;
+      case 1: return   2; break;
+      case 2: return   5; break;
+      case 3: return   6; break;
+      case 4: return   9; break;
+      case 5: return  10; break;
+      case 6: return  15; break;
+      case 7: return  21; break;
+    }
+    return 0;
+  }
 };
 
-Isotope::Isotope(int a, int z){
+void Isotope::SetIso(int a, int z){
     this->A = a;
     this->Z = z;
     FindMassByAZ(a,z); 
     this->dataSource = dataPath;
 }
 
-Isotope::Isotope(string name){
+void Isotope::SetIsoByName(string name){
     
     FindMassByName(name); 
     this->dataSource = dataPath;
@@ -246,6 +285,198 @@ double Isotope::CalSp(int Np, int Nn){
   }else{
     return -404;
   }
+}
+
+int Isotope::TwoJ(int nShell){
+
+  switch(nShell){
+    case  0: return  1; break; // 0s1/2
+    case  1: return  3; break; // 0p3/2
+    case  2: return  1; break; // 0p1/2 -- 8
+    case  3: return  5; break; // 0d5/2
+    case  4: return  1; break; // 1s1/2
+    case  5: return  3; break; // 0d3/2 -- 20
+    case  6: return  7; break; // 0f7/2 -- 28
+    case  7: return  3; break; // 1p3/2
+    case  8: return  1; break; // 1p1/2
+    case  9: return  5; break; // 0f5/2 -- 40
+    case 10: return  9; break; // 0g9/2 -- 50
+    case 11: return  7; break; // 0g7/2
+    case 12: return  5; break; // 1d5/2
+    case 13: return 11; break; // 0h11/2
+    case 14: return  3; break; // 1d3/2
+    case 15: return  1; break; // 2s1/2 -- 82
+    case 16: return  9; break; // 0h9/2
+    case 17: return  7; break; // 1f7/2
+    case 18: return 13; break; // 0i13/2
+    case 19: return  3; break; // 2p3/2
+    case 20: return  5; break; // 1f5/2
+    case 21: return  1; break; // 1p1/2 -- 126
+    case 22: return  9; break; // 1g9/2
+    case 23: return 11; break; // 0i11/2
+    case 24: return 15; break; // 0j15/2
+    case 25: return  5; break; // 2d5/2
+    case 26: return  1; break; // 3s1/2
+    case 27: return  3; break; // 2d3/2
+    case 28: return  7; break; // 1g7/2
+  }
+
+  return 0;
+}
+
+string Isotope::Orbital(int nShell){
+
+  switch(nShell){
+    case  0: return  "0s1 "; break;  //
+    case  1: return  "0p3 "; break;  //
+    case  2: return  "0p1 "; break;  //-- 8
+    case  3: return  "0d5 "; break;  //
+    case  4: return  "1s1 "; break;  //
+    case  5: return  "0d3 "; break;  //-- 20
+    case  6: return  "0f7 "; break;  //-- 28
+    case  7: return  "1p3 "; break;  //
+    case  8: return  "1p1 "; break;  //
+    case  9: return  "0f5 "; break;  //-- 40
+    case 10: return  "0g9 "; break;  //-- 50
+    case 11: return  "0g7 "; break;  //
+    case 12: return  "1d5 "; break;  //
+    case 13: return  "0h11"; break;  //
+    case 14: return  "1d3 "; break;  //
+    case 15: return  "2s1 "; break;  //-- 82
+    case 16: return  "0h9 "; break;  //
+    case 17: return  "1f7 "; break;  //
+    case 18: return  "0i13"; break;  //
+    case 19: return  "2p3 "; break;  //
+    case 20: return  "1f5 "; break;  //
+    case 21: return  "1p1 "; break;  //-- 126
+    case 22: return  "1g9 "; break;  //
+    case 23: return  "0i11"; break;  //
+    case 24: return  "0j15"; break;  //
+    case 25: return  "2d5 "; break;  //
+    case 26: return  "3s1 "; break;  //
+    case 27: return  "2d3 "; break;  //
+    case 28: return  "1g7 "; break;  //
+  }
+
+  return "nan";
+}
+
+void Isotope::ListShell(){
+
+  if( Mass < 0 ) return;
+
+  int n = A-Z;
+  int p = Z;
+
+  int k = min(n,p);
+  int nMagic = 0;
+  for( int i = 0; i < 7; i++){
+    if( magic(i) < k && k <= magic(i+1) ){
+      nMagic = i;
+      break;
+    }
+  }
+
+  int coreShell = magicShellID(nMagic-1);
+  int coreZ1 = magic(nMagic-1);
+  int coreZ2 = magic(nMagic);
+
+  Isotope core1( 2*coreZ1, coreZ1);
+  Isotope core2( 2*coreZ2, coreZ2);
+
+  printf("------------------ Core:%3s, inner Core:%3s \n", (core2.Name).c_str(), (core1.Name).c_str());
+  printf("         || ");
+  int t = max(n,p);
+  int nShell = 0;
+  do{
+    int occ = TwoJ(nShell)+1;
+    if( nShell > coreShell) {
+      printf("%4s", Orbital(nShell).c_str());
+         if( nShell == 0 || nShell == 2 || nShell == 5 || nShell ==6 || nShell == 9  || nShell == 10 || nShell == 15 || nShell == 21){
+        printf("|");
+      }else{
+        printf(",");
+      } 
+    }
+    t = t - occ;
+    nShell++;
+  }while( t > 0  && nShell < 29);
+  for( int i = 1; i <= 6; i++){
+    if (nShell < 28) {
+      printf("%4s,", Orbital(nShell).c_str());
+    }else if( nShell == 28 ) {
+      printf("%4s", Orbital(nShell).c_str());
+    }
+    nShell ++;
+  }
+  if (nShell < 29) printf("%4s", Orbital(nShell).c_str());
+  printf("\n");
+
+
+  printf(" Z = %3d || ", p);
+  nShell = 0;
+  do{
+    int occ = TwoJ(nShell)+1;
+    if( nShell > coreShell ){
+      if( p > occ ) {
+         printf("%-4d", occ);
+         if( nShell == 0 || nShell == 2 || nShell == 5 || nShell ==6 || nShell == 9  || nShell == 10 || nShell == 15 || nShell == 21){
+          printf("|");
+        }else{
+          printf(",");
+        } 
+      }else{
+        printf("%-4d", p);
+      }
+    }
+    p = p - occ;
+    nShell++;
+  }while( p > 0  && nShell < 29);
+  printf("\n");
+
+  printf(" N = %3d || ", n);
+  nShell = 0;  
+  do{
+    int occ = TwoJ(nShell)+1;
+    if ( nShell > coreShell ){
+      if( n > occ ) {
+         printf("%-4d", occ);
+         if( nShell == 0 || nShell == 2 || nShell == 5 || nShell ==6 || nShell == 9  || nShell == 10 || nShell == 15 || nShell == 21){
+          printf("|");
+        }else{
+          printf(",");
+        } 
+      }else{
+        printf("%-4d", n);
+      }
+    }
+    n = n - occ;
+    nShell++;
+  }while( n > 0  && nShell < 29);
+  printf("\n");
+
+  printf("------------------ \n");
+}
+
+
+
+void Isotope::Print(){
+
+  if (Mass > 0){
+    printf(" using mass data : %s \n", dataPath.c_str());
+    printf(" mass of \e[47m\e[31m%s\e[m nucleus (Z,A)=(%3d,%3d) is \e[47m\e[31m%12.5f\e[m MeV, BE/A=%7.5f MeV\n", Name.c_str(), Z, A, Mass, BEA/1000.);     
+    printf(" total BE    : %12.5f MeV\n",BEA*A/1000.);
+    printf(" mass in amu : %12.5f u\n",Mass/amu);
+    printf(" S1p: %8.4f| S1n: %8.4f| S(2H ): %8.4f| S1p1n : %8.4f\n", CalSp(1, 0), CalSp(0, 1), CalSp(1, 1), CalSp(1, 1)+2.22456);
+    printf(" S2p: %8.4f| S2n: %8.4f| S(3He): %8.4f| S(3H) : %8.4f\n", CalSp(2, 0), CalSp(0, 2), CalSp(2, 1), CalSp(1, 2));
+    printf(" S3p: %8.4f| S3n: %8.4f| S(4He): %8.4f|\n",               CalSp(3, 0), CalSp(0, 3), CalSp(2, 2));
+    printf(" S4p: %8.4f| S4n: %8.4f| \n",                             CalSp(4, 0), CalSp(0, 4));
+
+  }else{
+    printf("Error %6.0f, no nucleus with (Z,A) = (%3d,%3d). \n", Mass, Z, A);
+  }
+
+
 }
 
 #endif
