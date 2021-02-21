@@ -44,7 +44,8 @@ public:
   void SetIso(int a, int z);
   void SetIsoByName(string name);
 
-  double CalSp(int np, int nz);
+  double CalSp(int Np, int Nn); // this for the Np-proton, Nn-neutron removal 
+  double CalSp2(int a, int z); // this is for (a,z) nucleus removal
 
   double CalBeta(double T){
     double Etot = Mass + T;
@@ -287,6 +288,17 @@ double Isotope::CalSp(int Np, int Nn){
   }
 }
 
+double Isotope::CalSp2(int a, int z){
+  Isotope nucleusD(A - a , Z - z);
+  Isotope nucleusS(a,z);  
+
+  if( nucleusD.Mass != -404 && nucleusS.Mass != -404){
+    return nucleusD.Mass + nucleusS.Mass - this->Mass;
+  }else{
+    return -404;
+  }
+}
+
 int Isotope::TwoJ(int nShell){
 
   switch(nShell){
@@ -467,9 +479,10 @@ void Isotope::Print(){
     printf(" mass of \e[47m\e[31m%s\e[m nucleus (Z,A)=(%3d,%3d) is \e[47m\e[31m%12.5f\e[m MeV, BE/A=%7.5f MeV\n", Name.c_str(), Z, A, Mass, BEA/1000.);     
     printf(" total BE    : %12.5f MeV\n",BEA*A/1000.);
     printf(" mass in amu : %12.5f u\n",Mass/amu);
-    printf(" S1p: %8.4f| S1n: %8.4f| S(2H ): %8.4f| S1p1n : %8.4f\n", CalSp(1, 0), CalSp(0, 1), CalSp(1, 1), CalSp(1, 1)+2.22456);
-    printf(" S2p: %8.4f| S2n: %8.4f| S(3He): %8.4f| S(3H) : %8.4f\n", CalSp(2, 0), CalSp(0, 2), CalSp(2, 1), CalSp(1, 2));
-    printf(" S3p: %8.4f| S3n: %8.4f| S(4He): %8.4f|\n",               CalSp(3, 0), CalSp(0, 3), CalSp(2, 2));
+    printf("-------------- Seperation energy \n");
+    printf(" S1p: %8.4f| S1n: %8.4f| S(2H ): %8.4f| S1p1n : %8.4f\n", CalSp(1, 0), CalSp(0, 1), CalSp2(2, 1), CalSp(1, 1));
+    printf(" S2p: %8.4f| S2n: %8.4f| S(3He): %8.4f| S(3H) : %8.4f\n", CalSp(2, 0), CalSp(0, 2), CalSp2(3, 2), CalSp2(3, 1));
+    printf(" S3p: %8.4f| S3n: %8.4f| S(4He): %8.4f|\n",               CalSp(3, 0), CalSp(0, 3), CalSp2(4, 2));
     printf(" S4p: %8.4f| S4n: %8.4f| \n",                             CalSp(4, 0), CalSp(0, 4));
 
   }else{
