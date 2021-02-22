@@ -273,7 +273,7 @@ void Transfer(
         if( decayID == 1) {
           printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }
       }else{
         printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
@@ -419,8 +419,14 @@ void Transfer(
   }
 
   double decayTheta; // the change of thetaB due to decay
+  double xRecoil_d;
+  double yRecoil_d;
+  double rhoRecoil_d;
   if( isDecay ) {
     tree->Branch("decayTheta", &decayTheta, "decayTheta/D");
+    tree->Branch("xRecoil_d", &xRecoil_d, "xRecoil_d/D");
+    tree->Branch("yRecoil_d", &yRecoil_d, "yRecoil_d/D");
+    tree->Branch("rhoRecoil_d", &rhoRecoil_d, "rhoRecoil_d/D");
   }
   
   double xArray, yArray, rhoArray; //x, y, rho positon of particle-b on PSD
@@ -653,11 +659,14 @@ void Transfer(
     }
 
     //======= Decay of particle-B
+    int decayID = 0;
+    int new_zB  = zB;
     if( isDecay){
-      int decayID = decay.CalDecay(PB, Ex, 0); // decay to ground state
+      decayID = decay.CalDecay(PB, Ex, 0); // decay to ground state
       if( decayID == 1 ){
         PB = decay.GetDaugther_D();
         decayTheta = decay.GetAngleChange();
+        new_zB = zB = decayZ;
       }else{
         decayTheta = TMath::QuietNaN();
       }
@@ -680,7 +689,7 @@ void Transfer(
     
     if( Tb > 0  || TB > 0 ){
       helios.CalArrayHit(Pb, zb);
-      helios.CalRecoilHit(PB, zB);
+      helios.CalRecoilHit(PB, new_zB);
       hit = 2;
       while( hit > 1 ){ hit = helios.DetAcceptance(); }
       
@@ -741,6 +750,24 @@ void Transfer(
 
       //change thetaCM into deg
       thetaCM = thetaCM * TMath::RadToDeg();
+      
+      //if decay, get the light decay particle on the recoil;
+      if( isDecay ){
+        if( decayID == 1 ){
+          TLorentzVector Pd = decay.GetDaugther_d();
+          helios.CalRecoilHit(Pd, decayZ);
+          
+          trajectory orb_d = helios.GetTrajectory_B();
+          rhoRecoil_d = orb_d.R;
+          xRecoil_d = orb_d.x;
+          yRecoil_d = orb_d.y;
+          
+        }else{
+          rhoRecoil_d = TMath::QuietNaN();
+          xRecoil_d = TMath::QuietNaN();
+          yRecoil_d = TMath::QuietNaN();
+        }
+      }
     
     }else{
       hit = -404;
