@@ -16,13 +16,13 @@
 #include <sstream>
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 #include "constant.h" // amu
 #include <stdlib.h>  //atoi
 #include <algorithm>
 using namespace std;
 
-string dataPath="../Cleopatra/mass16.txt";
-
+string data="/Cleopatra/mass16.txt";
 
 // about the mass**.txt
 // Mass Excess = (ATOMIC MASS - A)*amu | e.g. n : (1.088664.91585E-6-1)*amu
@@ -37,9 +37,9 @@ public:
   string Name, Symbol;
   string dataSource;
   
-  Isotope(){};
-  Isotope(int a, int z){  SetIso(a,z); };
-  Isotope(string name){ SetIsoByName(name); };
+  Isotope(){findHeliosPath();};
+  Isotope(int a, int z){ findHeliosPath();SetIso(a,z);  };
+  Isotope(string name){ findHeliosPath(); SetIsoByName(name); };
 
   void SetIso(int a, int z);
   void SetIsoByName(string name);
@@ -90,19 +90,38 @@ private:
     }
     return 0;
   }
+  
+  char * heliosPath;
+  bool isFindOnce;
+
+  void findHeliosPath(){
+    heliosPath = getenv("HELIOSSYS");
+    if( heliosPath ){
+      //printf(" %s \n", heliosPath);
+      dataSource = heliosPath;
+      dataSource += "/analysis" + data;
+    }else{
+      //printf(" no env ${HELIOSSYS} found ");
+      dataSource = ".." + data;
+    }
+    
+    //printf("data Path: %s \n", dataSource.c_str());
+  }
+  
+  
 };
 
 void Isotope::SetIso(int a, int z){
     this->A = a;
     this->Z = z;
     FindMassByAZ(a,z); 
-    this->dataSource = dataPath;
+//    this->dataSource = dataPath;
 }
 
 void Isotope::SetIsoByName(string name){
     
     FindMassByName(name); 
-    this->dataSource = dataPath;
+//    this->dataSource = dataPath;
 }
 
 void Isotope::FindMassByAZ(int A, int Z){
@@ -121,7 +140,7 @@ void Isotope::FindMassByAZ(int A, int Z){
   if ( A >=150 && A < 200) numLineStart = 1833;//1899;
   if ( A >=200 ) numLineStart = 2534;//2622;
 
-  myfile.open(dataPath.c_str());
+  myfile.open(dataSource.c_str());
 
   if (myfile.is_open()) {
     while (/*! myfile.eof() &&*/ flag == 0 && lineNum <numLineEnd){
@@ -164,7 +183,7 @@ void Isotope::FindMassByAZ(int A, int Z){
     
     myfile.close();
   }else {
-    printf("Unable to open %s\n", dataPath.c_str());
+    printf("Unable to open %s\n", dataSource.c_str());
   }
 }
 
@@ -233,7 +252,7 @@ void Isotope::FindMassByName(string name){
     if ( this->A >=150 && this->A < 200) numLineStart = 1833;//1899;
     if ( this->A >=200 ) numLineStart = 2534;//2622;
 
-    myfile.open(dataPath.c_str());
+    myfile.open(dataSource.c_str());
 
     if (myfile.is_open()) {
       while (/*! myfile.eof() &&*/ flag == 0 && lineNum <numLineEnd){
@@ -274,7 +293,7 @@ void Isotope::FindMassByName(string name){
       }
       myfile.close();
     }else {
-      printf("Unable to open %s\n", dataPath.c_str());
+      printf("Unable to open %s\n", dataSource.c_str());
     }
 }
 
@@ -474,8 +493,11 @@ void Isotope::ListShell(){
 
 void Isotope::Print(){
 
-  if (Mass > 0){
-    printf(" using mass data : %s \n", dataPath.c_str());
+  if (Mass > 0){  
+    
+    findHeliosPath();
+      
+    printf(" using mass data : %s \n", dataSource.c_str());
     printf(" mass of \e[47m\e[31m%s\e[m nucleus (Z,A)=(%3d,%3d) is \e[47m\e[31m%12.5f\e[m MeV, BE/A=%7.5f MeV\n", Name.c_str(), Z, A, Mass, BEA/1000.);     
     printf(" total BE    : %12.5f MeV\n",BEA*A/1000.);
     printf(" mass in amu : %12.5f u\n",Mass/amu);
