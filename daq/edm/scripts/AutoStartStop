@@ -25,9 +25,10 @@ fi
 
 if [ $method == "time" ]; then
     stopCount=$2
-    echo "###################################"
-    echo "   Auto $msg1 for ${stopCount} min            "
-    echo "###################################"
+    printTime=$((${stopCount} / 3 + 1)) 
+    echo "##########################################################"
+    echo "   Auto $msg1 for ${stopCount} min, print for ${printTime} min "
+    echo "##########################################################"
 elif [ $method == "size" ]; then
     maxSize=$2
     echo "###################################"
@@ -41,15 +42,15 @@ else
 fi
 
 #=========== Check DAQ is saving
-isDAQSaving=$(caget Online_CS_SaveData | awk '{print $2}')
-if [ $isDAQSaving == "Save" ]; then
-    echo -e "\033[33m !!!!!! it seem that the DAQ is saving. Please fix that or call Ryan!!!! \033[m"
-    exit
-fi
+#isDAQSaving=$(caget Online_CS_SaveData | awk '{print $2}')
+#if [ $isDAQSaving == "Save" ]; then
+#    echo -e "\033[33m !!!!!! it seem that the DAQ is saving. Please fix that or call Ryan!!!! \033[m"
+#    exit
+#fi
 
-if [ $repeat -eq -1 ] ;then
-    echo -e "\033[1;33m !!!!! infinite runs !!!!! \033[m"
-fi
+#if [ $repeat -eq -1 ] ;then
+#    echo -e "\033[1;33m !!!!! infinite runs !!!!! \033[m"
+#fi
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -65,6 +66,11 @@ echo "###################################"
 stopFlag=0
 sleepTime=60
 count=0
+
+firstRunNum=$((${LastRunNum} + 1))
+#firstRunNum=$((${LastRunNum}))
+
+echo "first Run : ${firstRunNum}"
 
 #===== Check is the Run was started, if not, start
 isStarted=$(caget Online_CS_StartStop | awk '{print $2}')
@@ -125,8 +131,8 @@ while [  $stopFlag -eq 0 ]; do
 	    echo $(date) " | Run" ${RUN} " | time:" $count " min >= " $stopCount " min ====> Stop!!!"	
 	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 
-	    echo "tell Mac to run ./process_run"
-	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${RUN}" 1" &
+	    echo "tell Mac to run AutoProcess_run firstRun:${firstRunNum} ${RUN}"
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${firstRunNum}" "${RUN}" 1" &
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
@@ -151,17 +157,13 @@ while [  $stopFlag -eq 0 ]; do
 	fi
 	 
 	echo $(date) " | Run" ${RUN} " | time:" $count " min < " $stopCount " min"	
-	count=$((count+1))
+	count=$((${count}+1))
 
-	mod=$(( $count % 21 ))
+	mod=$(( $count % ${printTime} ))
 	if [ $mod -eq 0 ]; then
-	    echo "tell Mac to run ./process_run"
-	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${RUN}" 0" &
+	    echo "tell Mac to run AutoProcess_run firstRun:${firstRunNum} ${RUN}"
+	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${firstRunNum}" "${RUN}" 0" &
 	fi
-
-	#if [ $count -eq 10 ] && [ $expName == "h078_14C14N"  ]; then
-	#    caput VME01:MDIG1:trigger_mux_select ExtTTCL
-	#fi
 
     fi
 

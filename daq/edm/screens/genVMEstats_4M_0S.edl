@@ -3,15 +3,15 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 467
-y 421
+x 839
+y 729
 w 850
 h 580
 font "courier-medium-r-10.0"
 ctlFont "courier-medium-r-10.0"
 btnFont "courier-medium-r-10.0"
-fgColor index 14
-bgColor index 55
+fgColor index 0
+bgColor index 82
 textColor index 14
 ctlFgColor1 index 14
 ctlFgColor2 index 0
@@ -433,8 +433,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 138
-y 55
+x 103
+y 54
 w 75
 h 18
 controlPv "VME$(DN):MDIG1:CV_LiveTS"
@@ -459,7 +459,7 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 30
+x 17
 y 54
 w 82
 h 21
@@ -1599,7 +1599,7 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 363
+x 345
 y 54
 w 82
 h 21
@@ -2739,7 +2739,7 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 473
+x 431
 y 54
 w 75
 h 18
@@ -2765,7 +2765,7 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 30
+x 13
 y 318
 w 82
 h 21
@@ -3905,7 +3905,7 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 363
+x 345
 y 317
 w 82
 h 21
@@ -5045,8 +5045,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 143
-y 318
+x 98
+y 319
 w 75
 h 18
 controlPv "VME$(DN):MDIG3:CV_LiveTS"
@@ -5071,8 +5071,8 @@ beginObjectProperties
 major 4
 minor 4
 release 0
-x 470
-y 317
+x 431
+y 318
 w 75
 h 18
 controlPv "VME$(DN):MDIG4:CV_LiveTS"
@@ -5097,8 +5097,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 255
-y 53
+x 259
+y 54
 w 60
 h 20
 fgColor index 80
@@ -5123,7 +5123,7 @@ major 4
 minor 0
 release 0
 x 256
-y 317
+y 318
 w 60
 h 20
 fgColor index 80
@@ -5147,8 +5147,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 585
-y 55
+x 587
+y 54
 w 60
 h 20
 fgColor index 80
@@ -5189,5 +5189,81 @@ labelType "literal"
 3d
 font "helvetica-bold-r-12.0"
 objType "controls"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 183
+y 53
+w 71
+h 20
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 83
+botShadowColor index 83
+controlPv "VME$(DN):MDIG1:trigger_mux_select"
+font "helvetica-medium-r-10.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 179
+y 318
+w 71
+h 20
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 83
+botShadowColor index 83
+controlPv "VME$(DN):MDIG3:trigger_mux_select"
+font "helvetica-medium-r-10.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 511
+y 53
+w 71
+h 20
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 83
+botShadowColor index 83
+controlPv "VME$(DN):MDIG2:trigger_mux_select"
+font "helvetica-medium-r-10.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 510
+y 317
+w 71
+h 20
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 83
+botShadowColor index 83
+controlPv "VME$(DN):MDIG4:trigger_mux_select"
+font "helvetica-medium-r-10.0"
 endObjectProperties
 

@@ -4,7 +4,7 @@ major 4
 minor 0
 release 1
 x 1161
-y 546
+y 568
 w 300
 h 450
 font "helvetica-medium-r-18.0"
@@ -788,6 +788,7 @@ controlPv "VME$(DN):$(DB):$(P)"
 font "helvetica-medium-r-14.0"
 fgColor index 83
 bgColor index 0
+editable
 autoHeight
 motifWidget
 limitsFromDb

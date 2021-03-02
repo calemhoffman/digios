@@ -3,10 +3,10 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 131
-y 189
-w 1340
-h 800
+x 1168
+y 569
+w 1403
+h 852
 font "helvetica-bold-r-10.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-bold-r-10.0"
@@ -3213,8 +3213,8 @@ beginObjectProperties
 major 4
 minor 1
 release 0
-x 37
-y 215
+x 39
+y 250
 w 120
 h 20
 font "helvetica-bold-r-14.0"
@@ -3233,8 +3233,8 @@ beginObjectProperties
 major 4
 minor 0
 release 0
-x 47
-y 239
+x 49
+y 274
 w 100
 h 61
 
@@ -3246,8 +3246,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 47
-y 239
+x 49
+y 274
 w 50
 h 30
 fgColor index 0
@@ -3287,8 +3287,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 97
-y 239
+x 99
+y 274
 w 50
 h 30
 fgColor index 0
@@ -3328,8 +3328,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 97
-y 270
+x 99
+y 305
 w 50
 h 30
 fgColor index 0
@@ -3369,8 +3369,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 47
-y 270
+x 49
+y 305
 w 50
 h 30
 fgColor index 0
@@ -4185,8 +4185,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 21
-y 355
+x 23
+y 390
 w 75
 h 30
 fgColor index 0
@@ -4214,8 +4214,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 97
-y 355
+x 99
+y 390
 w 75
 h 30
 fgColor index 0
@@ -4243,8 +4243,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 97
-y 324
+x 99
+y 359
 w 75
 h 30
 fgColor index 0
@@ -4272,8 +4272,8 @@ beginObjectProperties
 major 4
 minor 2
 release 0
-x 21
-y 324
+x 23
+y 359
 w 75
 h 30
 fgColor index 0
@@ -7508,26 +7508,53 @@ bgColor index 83
 topShadowColor index 83
 botShadowColor index 83
 font "helvetica-bold-r-14.0"
-buttonLabel "Rate Tables"
+buttonLabel "Summary Tables"
 numPvs 4
-numDsps 4
+numDsps 13
 displayFileName {
   0 "heliosCounterRates.edl"
   1 "heliosCounterRates.edl"
   2 "heliosCounterRates.edl"
   3 "heliosCounterRates.edl"
+  4 "HELIOSSummary.edl"
+  5 "HELIOSSummary.edl"
+  6 "HELIOSSummary.edl"
+  7 "HELIOSSummary.edl"
+  8 "HELIOSSummary.edl"
+  9 "HELIOSSummary.edl"
+  10 "HELIOSSummary.edl"
+  11 "HELIOSSummary.edl"
+  12 "HELIOSSummary.edl"
 }
 menuLabel {
   0 "LED Rate"
   1 "Accepted Hits Rate"
   2 "Accepted Event Rate"
   3 "Dropped Event Rate"
+  4 "Threshold"
+  5 "Trace Lenght"
+  6 "Trace Delay"
+  7 "P1 window"
+  8 "K window"
+  9 "K0 winodw"
+  10 "D window"
+  11 "d3_window"
+  12 "Channel Enable"
 }
 symbols {
   0 "TYPE=LED Disc,RT=disc,MODE=DescCntMode"
   1 "TYPE=Accepted Hits,RT=ahit,MODE=AcceptEvtHitMode"
   2 "TYPE=Accepted Events,RT=accepted_event,MODE=AcceptEvtHitMode"
   3 "TYPE=Dropped Events,RT=dropped_event"
+  4 "TYPE=THRESHOLD,RT=led_threshold"
+  5 "TYPE=Trace Length,RT=raw_data_window"
+  6 "TYPE=Trace delay,RT=raw_data_length"
+  7 "TYPE=P1 window,RT=p1_window"
+  8 "TYPE=K window,RT=k_window"
+  9 "TYPE=K0 window,RT=k0_window"
+  10 "TYPE=D window,RT=d_window"
+  11 "TYPE=D3 window,RT=d3_window"
+  12 "TYPE=Channel Enable,RT=channel_enable"
 }
 endObjectProperties
 
@@ -7551,6 +7578,32 @@ numPvs 4
 numDsps 1
 displayFileName {
   0 "heliosIocStatus.edl"
+}
+symbols {
+  0 "D=HELIOS"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 27
+y 197
+w 150
+h 30
+fgColor index 0
+bgColor index 83
+topShadowColor index 83
+botShadowColor index 83
+font "helvetica-bold-r-14.0"
+buttonLabel "Dig Trigger Mode"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "heliosDigTrigger.edl"
 }
 symbols {
   0 "D=HELIOS"

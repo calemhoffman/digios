@@ -14,7 +14,10 @@ alertLevel= 300
 
 tOld = 0
 
-DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
+#DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
+
+DB_BashCommand_Mac='curl -sS -i -XPOST "http://192.168.203.34:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
+
 
 #route = Edwards_D379_driver.Route()
 #gaude_read = Edwards_D379_driver.EdwardsD397(route)
@@ -90,7 +93,7 @@ while 1:
                     string="hitRate,VME=%d,DIG=%d,CH=%d value=%s\n" % (VME, DIG, CH, result)
                     f.write(string)
                 
-                    pv="VME0%d:MDIG%d:led_threshold%d" % (VME, DIG, CH)
+                    pv="VME0%d:MDIG%d:led_threshold%d_RBV" % (VME, DIG, CH)
                     result=caget(pv)
                     string="threshold,VME=%d,DIG=%d,CH=%d value=%s\n" % (VME, DIG, CH, result)
                     f.write(string)
@@ -116,6 +119,14 @@ while 1:
     string="router2 value=%s\n" % (result)
     f.write(string)
 
+    RT=[1, 2];
+    DIG=["A", "B", "C", "D", "E", "F", "G", "H"];
+    for rt in RT:
+        for dig in DIG:
+            result=caget("VME32:RTR%d:LOCK_COUNT_%s_RBV" % (rt, dig));
+            string="LockCount,router=%d,DIG=%s value=%s\n" % (rt, dig, result)
+            f.write(string)
+
     f.close()
     #lineNum = len(open("tempDB.txt").readlines())
     #print "=== file Length : ", lineNum
@@ -131,7 +142,8 @@ while 1:
     
     #usually take 4000 msec for all channels
     if( t2-tOld > 2000 ) :
-        os.system(DB_BashCommand)
+        #os.system(DB_BashCommand)
+        os.system(DB_BashCommand_Mac)
         tOld = t2
     
     time.sleep(2.6) #--- to make a cycle is ~ 3.0 sec
