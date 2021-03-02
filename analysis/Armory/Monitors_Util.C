@@ -276,7 +276,7 @@ void eCalVxCalG(void) {
     heCalVxCalG[i]->Draw("");
   } 
 }
-
+/**
 void elum(void) {
   TCanvas *celum = (TCanvas *) gROOT->FindObjectAny("celum");
   if( celum == NULL )  celum = new TCanvas("celum",Form("ELUM | %s", canvasTitle.Data()),1000,1000);
@@ -292,7 +292,7 @@ void elum(void) {
   helumID->Draw("colz");
   
 }
-
+*/
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1500, 0, 1000,1000);
@@ -447,6 +447,7 @@ void tac(void) {
 }
 
 
+/**
 void ic(){
   
   TCanvas *cic =  (TCanvas *) gROOT->FindObjectAny("cic");
@@ -463,7 +464,7 @@ void ic(){
   cic->cd(6); hic12->Draw("colz");
   
 }
-
+*/
 
 
 void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1, double x2, Color_t color){
@@ -502,5 +503,98 @@ void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1
    printf(" %s  : %d \n", name.Data(),  count);
    
 }
+
+
+///======================= H074_238U
+void mwpc(){
+  TCanvas *cMWPC =  (TCanvas *) gROOT->FindObjectAny("cMWPC");
+  if( cMWPC == NULL ) cMWPC = new TCanvas("cMWPC",Form("MWPC | %s", canvasTitle.Data() ),6*300,4*300);
+  cMWPC->Clear();cMWPC->SetGrid(0);cMWPC->Divide(6,4);
+  gStyle->SetOptStat("neiou");
+  for (Int_t i=0;i<4;i++) {
+    for( int j = 0; j < 6; j++){
+      cMWPC->cd(6*i+j+1);
+      
+      if( j == 0 ) {
+        double y0 = hmwpc1D[i][0]->GetMaximum();
+        double y1 = hmwpc1D[i][1]->GetMaximum();
+        
+        double y = TMath::Max(y0,y1)*1.1;
+        
+        hmwpc1D[i][0]->SetMaximum(y);
+        hmwpc1D[i][1]->SetMaximum(y);
+        
+        hmwpc1D[i][0]->Draw();
+        hmwpc1D[i][1]->SetLineColor(kBlue);
+        hmwpc1D[i][1]->Draw("same");
+      }
+      if( j == 1 ) {
+        double y0 = hmwpc1D[i][2]->GetMaximum();
+        double y1 = hmwpc1D[i][3]->GetMaximum();
+        
+        double y = TMath::Max(y0,y1)*1.1;
+        
+        hmwpc1D[i][2]->SetMaximum(y);
+        hmwpc1D[i][3]->SetMaximum(y);
+       
+        hmwpc1D[i][2]->Draw();
+        hmwpc1D[i][3]->SetLineColor(kBlue);
+        hmwpc1D[i][3]->Draw("same");
+      }
+      
+      if( j == 2 ) hmwpcHit[i] ->Draw();
+      if( 4 >= j && j >= 3) hmwpc2D[i][j-3]->Draw("colz");
+      if( j == 5 ) hmwpc[i]->Draw("colz");
+    } 
+  }
+  /*
+  TCanvas *cMWPCg =  (TCanvas *) gROOT->FindObjectAny("cMWPCg");
+  if( cMWPCg == NULL ) cMWPCg = new TCanvas("cMWPCg",Form("MWPC (gated) | %s", canvasTitle.Data() ),4*300,4*300);
+  cMWPCg->Clear();cMWPCg->SetGrid(0);cMWPCg->Divide(4,4);
+  gStyle->SetOptStat("neiou");
+  for (Int_t i=0;i<4;i++) {
+    for( int j = 0; j < 4; j++){
+      cMWPCg->cd(4*i+j+1);
+      hmwpc1Dg[i][j]->Draw();
+    } 
+  }*/
+  
+  
+  TCanvas *cMWPCXY =  (TCanvas *) gROOT->FindObjectAny("cMWPCXY");
+  if( cMWPCXY == NULL ) cMWPCXY = new TCanvas("cMWPCXY",Form("MWPC (gated) | %s", canvasTitle.Data() ),2*600,2*600);
+  cMWPCXY->Clear();cMWPCXY->SetGrid(0);cMWPCXY->Divide(2,2);
+  gStyle->SetOptStat("neiou");
+  for (Int_t i=0;i<4;i++) {
+    cMWPCXY->cd(i+1);
+    hmwpc[i]->Draw("colz");
+  }
+}
+
+///======================= H074_238U
+void bragg(){
+  TCanvas *cBragg =  (TCanvas *) gROOT->FindObjectAny("cBragg");
+  if( cBragg == NULL ) cBragg = new TCanvas("cBragg",Form("Bragg | %s", canvasTitle.Data() ),7*300,4*300);
+  cBragg->Clear();cBragg->SetGrid(0);cBragg->Divide(7,4);
+  gStyle->SetOptStat("neiou");
+  for (Int_t i=0;i<4;i++) {
+    for( int j = 0; j < 7; j++){
+      cBragg->cd(7*i+j+1);
+      cBragg->cd(7*i+j+1)->SetLogy();
+      
+      if( j == 0 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(100, 2000) ;
+      if( j == 1 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(-1500, 500);
+      if( j == 2 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(-1500, 500);
+      if( j == 3 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(-1000, 1000);
+      if( j == 4 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(-500, 1500);
+      if( j == 5 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(-1500, 500);
+      if( j == 6 ) hBragg1D[i][j]->GetXaxis()->SetRangeUser(-500, 3000);
+      
+      hBragg1D[i][j]->Draw();
+      hBragg1Dg[i][j]->SetLineColor(2);
+      hBragg1Dg[i][j]->Draw("same");
+    } 
+  }
+}
+
 
 #endif 

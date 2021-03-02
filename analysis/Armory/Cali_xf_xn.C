@@ -23,6 +23,7 @@ void Cali_xf_xn(TTree * tree){
    const int colDet = 6;
    
    int energyRange[3] = {400, 1000, 2400}; // bin, min, max
+   float threshold = 0.2;
    
 /**///========================================================  load tree
 
@@ -113,7 +114,7 @@ void Cali_xf_xn(TTree * tree){
       for( int i = 0; i < numDet; i++){
          
          TSpectrum * spec = new TSpectrum();
-         int nPeaks = spec->Search(q[i], 3, "", 0.20);
+         int nPeaks = spec->Search(q[i], 3, "", threshold);
          printf("%2d | found %d peaks | ", i,  nPeaks);
 
          double * xpos = spec->GetPositionX();
@@ -140,7 +141,7 @@ void Cali_xf_xn(TTree * tree){
       printf("---- find and fit peak with Gaussian using AutoFit.C \n");
       for( int i = 0; i < numDet; i++){
          cAlpha->cd(i+1);
-         energy[i] = fitAuto(q[i], -1, 0.3, 20, 4, "", false);
+         energy[i] = fitAuto(q[i], -1, 0.3, 20, 4, "");
          int nPeaks = energy[i].size(); 
          printf("%2d | found %d peaks | ", i,  nPeaks);
          for( int j = 0; j < nPeaks; j++){
@@ -164,6 +165,7 @@ void Cali_xf_xn(TTree * tree){
    printf(" X =  det-X reference\n");
    printf("-1 =  manual reference\n");
    printf("-2 =  use 228Th, first 5 strongest peaks \n");
+   printf("-3 =  use 148Gd + 244 Cm, (3.1828, 5.8048 MeV)\n");
    //printf("-3 =  use 241Am, 5.481 MeV \n");
    printf("-9 =  stop \n");
    printf("your choice = ");
@@ -203,8 +205,8 @@ void Cali_xf_xn(TTree * tree){
    
    if( refID == -3 ){
       refEnergy.clear();
-      refEnergy.push_back(5.481);
-      refEnergy.push_back(5.685);
+      refEnergy.push_back(3.1828);
+      refEnergy.push_back(5.8048);
    }
    
    printf("----- adjusting the energy to det-%d......\n", refID);
