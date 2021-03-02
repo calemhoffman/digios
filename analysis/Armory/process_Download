@@ -7,7 +7,7 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ../Armory/process_PathSetting
+source ${HELIOSSYS}/analysis/Armory/process_PathSetting
 
 RUN=$1
 
@@ -20,9 +20,14 @@ if [ ${RUN} == "all" ]; then
             IP=digios1
         fi
         rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_*" ${DATADIR}/.
+        
+        echo "======== rsync RunTimeStamp.dat"
         rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
         cp  ${DATADIR}"/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
-        rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
+        
+        echo "======== rsync expName.sh"
+        echo "remote daqDir = ${daqDir}"
+        rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${HELIOSSYS}/.
 
         echo "============================================="
         tail -10 ${AnalysisDir}/data/RunTimeStamp.dat
@@ -66,9 +71,14 @@ elif [ ${PCName:0:5} == "phywl" ] || [ ${PCName} == "heliosdb" ] || [ ${PCName} 
     fi
     echo "RUN $RUN: Get the raw data `date`"
     rsync -avuht --progress "helios@${IP}:${dataloc}/${expName}_run_$RUN.gtd*" ${DATADIR}/.
+    
+    echo "======== rsync RunTimeStamp.dat"
     rsync -avuht --progress "helios@${IP}:${dataloc}/RunTimeStamp.dat" ${DATADIR}
     cp  ${DATADIR}"/RunTimeStamp.dat" ${DATADIR}"/RunTimeStamp.txt"
-    rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
+    
+    echo "======== rsync expName.sh."
+    echo "remote daqDir = ${daqDir}"
+    rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${HELIOSSYS}/.
 
     echo "============================================="
     tail -10 ${AnalysisDir}/data/RunTimeStamp.dat

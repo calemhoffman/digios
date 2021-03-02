@@ -1,13 +1,25 @@
 #!/bin/bash
 
-Run=$1
+firstRun=$1
 
-isEndRun=$2
+Run=$2
+
+isEndRun=$3
+
+#echo $1 $2 $3 >> ~/digios/test.txt
 
 cd ~/digios/analysis/working
-Process_RUN $Run -1 -1 -1 20  #use run list
+
+../Armory/process_Download $Run
+../Armory/process_Merge $Run -1
+../Armory/process_Sort $Run -1 -1
+root -l "ChainMonitors.C(${firstRun},${Run}, true)"     
+#root -l "ChainMonitors.C(${Run}, -1, true)"     
+
+#root -l "ChainMonitors.C(-1,-1, true)"  # this will use the list for the ChainMonitors.C
 
 if [ ${isEndRun} -eq 1 ]; then
-   Process_RUN $Run 0 0 0 10  #single run
+   root -l "ChainMonitors.C(${Run}, -1, true)"     
+   #root -l "ChainMonitors.C(${firstRun},${Run}, true)"  
 fi
 

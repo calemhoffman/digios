@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ../Armory/process_PathSetting
+source ${HELIOSSYS}/digios/analysis/Armory/process_PathSetting
 
 RUN1=$1
 RUN2=$2

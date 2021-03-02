@@ -20,7 +20,10 @@ void readTrace(TString fileName,bool isGoodOnly = false, int minDetID = 0, int m
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 300);
+   gStyle->SetOptFit(0);
+   gStyle->SetOptStat("");
+   
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 2400, 800);
    cRead->Divide(1,1);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
@@ -47,8 +50,8 @@ void readTrace(TString fileName,bool isGoodOnly = false, int minDetID = 0, int m
          TGraph * g  = (TGraph*) arr->At(j);
          
          TString gTitle;
-         gTitle = g->GetName();
-         g->SetTitle(gTitle);
+         //gTitle = g->GetName();
+         //g->SetTitle(gTitle);
          
          TF1 * gFit = (TF1 *) g->FindObject("gFit");
          if( gFit != NULL ){ 
@@ -64,19 +67,22 @@ void readTrace(TString fileName,bool isGoodOnly = false, int minDetID = 0, int m
             if( !(minDetID <= det && det <= maxDetID ) ) continue;
             
             if( isGoodOnly){
-              if( abs(energy) < 1.5* g->GetRMS(2) ) continue;
-              if( time > gFit->GetXmax() || time < gFit->GetXmin()) continue;
-              if( time > 200 || time < 20) continue;
-              if( riseTime > gFit->GetXmax()/7. || riseTime < 0 ) continue;
+              if( energy > 0 ) continue;
+              //if( abs(energy) < 1.5* g->GetRMS(2) ) continue;
+              //if( time > gFit->GetXmax() || time < gFit->GetXmin()) continue;
+              //if( time > 200 || time < 20) continue;
+              //if( riseTime > gFit->GetXmax()/7. || riseTime < 0 ) continue;
+              //if( riseTime > 10 || riseTime < 0 ) continue;
             }
             
-            if( energy < 400 ) continue;
+            //if( energy < 400 ) continue;
                         
             gTitle.Form("(%3d,%d), base: %8.1f, rise: %6.2f, time: %6.1f, energy: %8.1f | chi2: %8.1f, RMS: %6.1f",
-                     det, kind, base, riseTime, time, energy, chiSq, g->GetRMS(2));
+                     det, kind, base, riseTime, time, energy/4., chiSq, g->GetRMS(2));
+            
             
             printf("%s |(%s for break)", gTitle.Data(), b);
-            g->SetTitle(gTitle);
+            //g->SetTitle(gTitle);
            
            
             timeVLine.SetX1(time);

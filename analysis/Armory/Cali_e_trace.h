@@ -44,10 +44,10 @@ public :
    ULong64_t       rdt_t[8];
    Float_t         tac[10];
    ULong64_t       tac_t[10];
-   Float_t         elum[32];
-   ULong64_t       elum_t[32];
-   Float_t         ezero[10];
-   ULong64_t       ezero_t[10];
+   Float_t         elum[50];
+   ULong64_t       elum_t[50];
+   Float_t         ezero[50];
+   ULong64_t       ezero_t[50];
    
    //Trace
    Float_t         te[30];

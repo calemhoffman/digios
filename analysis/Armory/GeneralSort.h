@@ -106,6 +106,10 @@ public :
    TBranch        *b_base_sample;   //!
    TBranch        *b_baseline;   //!
    TBranch        *b_trace_length;   //!
+   
+   
+   ULong64_t timeBegin;
+   ULong64_t timeEnd;
 
    GeneralSort(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~GeneralSort() { }
@@ -122,6 +126,8 @@ public :
    virtual TList  *GetOutputList() const { return fOutput; }
    virtual void    SlaveTerminate();
    virtual void    Terminate();
+   
+   void CheckTime(ULong64_t timeStamp, Long64_t entry);
 
    ClassDef(GeneralSort,0);
 };
@@ -182,6 +188,7 @@ void GeneralSort::Init(TTree *tree)
    fChain->SetBranchAddress("base_sample", base_sample, &b_base_sample);
    fChain->SetBranchAddress("baseline", baseline, &b_baseline);
    fChain->SetBranchAddress("trace_length", trace_length, &b_trace_length);
+
 }
 
 Bool_t GeneralSort::Notify()

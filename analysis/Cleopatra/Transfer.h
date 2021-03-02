@@ -231,6 +231,7 @@ void Transfer(
   vector<double> ExKnown;
   vector<double> ExStrength;
   vector<double> ExWidth;
+  vector<double> SF;
   vector<double> y0; // intercept of e-z plot
   vector<double> kCM; // momentum of b in CM frame
   printf("----- loading excitation energy levels (%s).", excitationFile.c_str());
@@ -245,10 +246,13 @@ void Transfer(
       if( line.substr(0,2) == "//" ) continue;
       if( line.substr(0,1) == "#" ) break;
       if ( i >= 0 ){
-        if( i%3 == 0 ) {
+        if( i%4 == 0 ) {
           ExKnown.push_back(atof(line.c_str()));
-        }else if (i%3 == 1) {
+        }else if (i%4 == 1) {
           ExStrength.push_back(atof(line.c_str()));
+        }else if (i%4 == 2){
+          SF.push_back(atof(line.c_str()));
+          
         }else{
           ExWidth.push_back(atof(line.c_str()));
         }
@@ -267,12 +271,12 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
+          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }else{
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], ExWidth[i], y0[i]);
+        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
       }
     }
   }else{
@@ -293,7 +297,7 @@ void Transfer(
     int exSize = ExKnown.size();
     exDist = new TF1("exDist", exDistFunc, 0, exSize, exSize);
     for(int i = 0; i < exSize; i++){
-      exDist->SetParameter(i, ExStrength[i]);
+      exDist->SetParameter(i, ExStrength[i]*SF[i]);
     }
   }
   
@@ -415,8 +419,16 @@ void Transfer(
   }
 
   double decayTheta; // the change of thetaB due to decay
+  double xRecoil_d;
+  double yRecoil_d;
+  double rhoRecoil_d;
+  double Td;
   if( isDecay ) {
     tree->Branch("decayTheta", &decayTheta, "decayTheta/D");
+    tree->Branch("xRecoil_d", &xRecoil_d, "xRecoil_d/D");
+    tree->Branch("yRecoil_d", &yRecoil_d, "yRecoil_d/D");
+    tree->Branch("rhoRecoil_d", &rhoRecoil_d, "rhoRecoil_d/D");
+    tree->Branch("Td", &Td, "Td/D");
   }
   
   double xArray, yArray, rhoArray; //x, y, rho positon of particle-b on PSD
@@ -649,11 +661,15 @@ void Transfer(
     }
 
     //======= Decay of particle-B
+    int decayID = 0;
+    int new_zB  = zB;
     if( isDecay){
-      int decayID = decay.CalDecay(PB, Ex, 0); // decay to ground state
+      decayID = decay.CalDecay(PB, Ex, 0); // decay to ground state
       if( decayID == 1 ){
         PB = decay.GetDaugther_D();
         decayTheta = decay.GetAngleChange();
+        new_zB = zB = decayZ;
+        new_zB = 45;
       }else{
         decayTheta = TMath::QuietNaN();
       }
@@ -676,7 +692,7 @@ void Transfer(
     
     if( Tb > 0  || TB > 0 ){
       helios.CalArrayHit(Pb, zb);
-      helios.CalRecoilHit(PB, zB);
+      helios.CalRecoilHit(PB, new_zB);
       hit = 2;
       while( hit > 1 ){ hit = helios.DetAcceptance(); }
       
@@ -737,6 +753,29 @@ void Transfer(
 
       //change thetaCM into deg
       thetaCM = thetaCM * TMath::RadToDeg();
+      
+      //if decay, get the light decay particle on the recoil;
+      if( isDecay ){
+        if( decayID == 1 ){
+          TLorentzVector Pd = decay.GetDaugther_d();
+          
+          Td = Pd.E() - Pd.M();
+          
+          //helios.CalRecoilHit(Pd, decayZ);
+          helios.CalRecoilHit(Pd, 33);
+          
+          
+          trajectory orb_d = helios.GetTrajectory_B();
+          rhoRecoil_d = orb_d.R;
+          xRecoil_d = orb_d.x;
+          yRecoil_d = orb_d.y;
+          
+        }else{
+          rhoRecoil_d = TMath::QuietNaN();
+          xRecoil_d = TMath::QuietNaN();
+          yRecoil_d = TMath::QuietNaN();
+        }
+      }
     
     }else{
       hit = -404;
