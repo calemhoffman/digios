@@ -15,11 +15,11 @@ Items                | PV                       |  R/W  | Global | DIG |  CH |
 =====================+==========================+=======+========+=====+=====+
 Disc. Hits           | disc_count               |   R   |   X    |  X  |  O  |
 Acc. Hits            | ahit_count               |   R   |   X    |  X  |  O  |
-Acc. Evts            | accepted_event_count     |   R   |        |     |     | 
-Drop. Evts           | dropped_event_count      |   R   |        |     |     |
+Acc. Evts            | accepted_event_count     |   R   |   X    |  X  |  O  | 
+Drop. Evts           | dropped_event_count      |   R   |   X    |  X  |  O  |
 
-Live TS              | CV_LiveTS                |   R   |        |     |     |
-trigger mode         | trigger_mux_select       |  R/W  |        |     |     |
+Live TS              | CV_LiveTS                |   R   |   X    |  O  |  X  |
+trigger mode         | trigger_mux_select       |  R/W  |   O    |  O  |  X  |
 trig. pol.           | trigger_polarity         |  R/W  |   O    |  O  |  O  |
 channel enable       | channel_enable           |  R/W  |   O    |  O  |  O  |
 
@@ -29,7 +29,7 @@ threshold            | led_threshold            |  R/W  |   O    |  O  |  O  |
                      | k_window                 |  R/W  |   O    |  O  |  O  |
                      | k0_window                |  R/W  |   O    |  O  |  O  |
                      | d_window                 |  R/W  |   O    |  O  |  O  |
-                     | d2_window                |  R/W  |   O    |  O  |  O  |
+                     | d2_window                |  R/W  |   O    |  O  |  X  |
                      | d3_window                |  R/W  |   O    |  O  |  O  |
                      | m_window                 |  R/W  |   O    |  O  |  O  |
                      | pileup_mode              |  R/W  |   O    |  O  |  O  |
@@ -76,3 +76,12 @@ VME32:MTRG:RAW_TRIG_RATE_COUNTER_$_RBV
 
 VME32:MTRG:XTHRESH
 VME32:MTRG:YTHRESH
+
+VME32:RTR1:reg_MISC_STAT_RBV   | router lock state
+VME32:RTR2:reg_MISC_STAT_RBV
+
+VME32:RTR1:LOCK_COUNT_A_RBV    | lock counter
+VME32:RTR1:LOCK_COUNT_B_RBV    | lock counter
+VME32:RTR1:LOCK_COUNT_C_RBV    | lock counter
+
+VME32:RTR1:CLEAR_DIAG_COUNTERS 1 | reset counter

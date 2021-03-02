@@ -4,7 +4,7 @@ major 4
 minor 0
 release 1
 x 1018
-y 657
+y 679
 w 650
 h 600
 font "helvetica-medium-r-18.0"
@@ -238,6 +238,26 @@ bgColor index 0
 useDisplayBg
 value {
   "Board ID and Channel started from 0"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 44
+y 533
+w 544
+h 21
+font "helvetica-medium-r-18.0"
+fgColor index 14
+bgColor index 0
+useDisplayBg
+value {
+  "Full Range = 0 - 16000 ch. -2V to 2V. 1 mV = 4 ch. 1 ch = 0.25 mV"
 }
 autoSize
 endObjectProperties

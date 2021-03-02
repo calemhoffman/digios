@@ -22,7 +22,7 @@ while 1:
    #print "VacuumGauge = %s mbar." % gaude_read.vacuum_g2()
    #print output4
 
-   DB_command = 'curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "VacuumGauge value=%f" --max-time 1 --connect-timeout 1' % output1
+   DB_command = 'curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "VacuumGauge value=%f" --max-time 1 --connect-timeout 1' % output1
 
    os.system(DB_command)
 

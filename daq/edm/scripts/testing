@@ -1,0 +1,10 @@
+#!/bin/bash
+
+router="1 2"
+DIG="A B C D E F G H"
+
+for a in $router; do
+   for b in $DIG; do
+     caget VME32:RTR${a}:LOCK_COUNT_${b}_RBV
+   done
+done

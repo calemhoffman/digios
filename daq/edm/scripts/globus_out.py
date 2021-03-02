@@ -10,7 +10,7 @@ client = globus_sdk.NativeAppAuthClient(CLIENT_ID)
 
 import os
 
-print("===================== this script only for single run")
+print("== globus_out.py :  this script only for single run")
 
 f = open("/home/helios/Globus-token.dat", "r");
 AUTH_TOKEN = f.readline().strip()
