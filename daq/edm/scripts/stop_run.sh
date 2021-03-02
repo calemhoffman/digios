@@ -29,15 +29,24 @@ echo "         stop at ${currentDate}| ${COMMENT}" >> ${daqDataPath}/${expName}/
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
-curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+
+du -hc ${HELIOSSYS}/analysis/data/${expName}_run_${RUN}*
+
+totalFileSize=$(du -hc ${HELIOSSYS}/analysis/data/${expName}_run_${RUN}* | tail -n1 | awk {'print $1'})
 
 echo "==== wait for 2 sec"
 sleep 2
 
 # take screenshot and copy from heliosDB
+#screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
+#ssh heliosdatabase@heliosdb '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
+#scp heliosdatabase@heliosdb:~/grafanaElog.jpg ${screenShot}
+
+# take screenshot and copy from mac2017
 screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
-ssh heliosdatabase@heliosdb '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
-scp heliosdatabase@heliosdb:~/grafanaElog.jpg ${screenShot}
+ssh heliosdigios@mac2017 '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
+scp heliosdigios@mac2017:~/grafanaElog.jpg ${screenShot}
 
 if [ -z ${elogID} ]; then
     # this will create seperated elog entry
@@ -67,13 +76,14 @@ else
     #fill stop time
     echo "         stop at ${currentDate} <br />" >> ${elogContext}
     echo "grafana screenshot is attached. <br />" >> ${elogContext}
+    echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
     echo "-----------------------------------------------</p>" >> ${elogContext}
     echo "$COMMENT <br />" >> ${elogContext}
     elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
 
     source ~/Slack_Elog_Notification.sh
     slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
-    auxMsg="stop at ${currentDate} \n$COMMENT"
+    auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 
 fi

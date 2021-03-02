@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 84
-y 49
+x 213
+y 820
 w 950
 h 450
 font "courier-medium-r-10.0"
@@ -3755,7 +3755,7 @@ commandLabel {
   0 "Trigger Lock"
 }
 command {
-  0 "$EDMSCRIPTS/trigonly_setupdgs"
+  0 "$EDMSCRIPTS/trigonly_setuphelios"
 }
 endObjectProperties
 
