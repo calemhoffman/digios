@@ -19,7 +19,7 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
     
     TString processCmd;
     if( isTrace == 1 ) {
-        processCmd.Form("../Armory/GeneralSort.C+");
+        processCmd.Form("../Armory/GeneralSort.C++");
         t1->Process(processCmd);
         f.Close();
         //}else if(isTrace == 1){
@@ -33,7 +33,7 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
         TProof * p = TProof::Open("", Form("workers=%d", isTrace));
    
         chain->SetProof();
-        chain->Process("../Armory/GeneralSortTraceProof.C+", name);
+        chain->Process("../Armory/GeneralSortTraceProof.C++", name);
                 
         delete chain;
         delete p;

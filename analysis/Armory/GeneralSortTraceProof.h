@@ -19,6 +19,16 @@
 #include <TMath.h>
 #include <TProofOutputFile.h>
 
+//by copy the GeneralSortMapping.h in to Armory does not work
+//relative path does not work
+#ifdef __linux__
+   //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
+   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"   
+#elif __APPLE__
+   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+   //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
+#endif
+
 class GeneralSortTraceProof : public TSelector {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -117,22 +127,26 @@ public :
    TGraph * gTrace; //!
    TGraph * gTrapezoid; //!
    TF1 * gFit; //!
+   
+   float te[NARRAY];    // energy from trace
+   float te_r[NARRAY];  // rising time from frace
+   float te_t[NARRAY];  // time
+   
+   float ttac[NTAC];
+   float ttac_t[NTAC];
+   float ttac_r[NTAC];
+   
+   float trdt[NRDT];
+   float trdt_t[NRDT];
+   float trdt_r[NRDT];
+   
+   float tezero[NEZERO];
+   float tezero_t[NEZERO];
+   float tezero_r[NEZERO];
 
-   float te[30];    // energy from trace
-   float te_r[30];  // rising time from frace
-   float te_t[30];  // time
-   
-   float ttac[6];
-   float ttac_t[6];
-   float ttac_r[6];
-   
-   float trdt[8];
-   float trdt_t[8];
-   float trdt_r[8];
-   
-   float tezero[8];
-   float tezero_t[8];
-   float tezero_r[8];
+   float telum[NELUM];
+   float telum_t[NELUM];
+   float telum_r[NELUM];
 
    int runIDLast;
    TString fileNameTemp;
@@ -141,32 +155,32 @@ public :
    typedef struct {
       Int_t   eventID;
       Int_t   runID;
-      Float_t Energy[100];
-      Float_t XF[100];
-      Float_t XN[100];
-      Float_t Ring[100];
-      Float_t RDT[100];
-      Float_t TAC[100];
-      Float_t ELUM[32];
-      Float_t EZERO[10];
+      Float_t Energy[NARRAY];
+      Float_t XF[NARRAY];
+      Float_t XN[NARRAY];
+      Float_t Ring[NARRAY];
+      Float_t RDT[NRDT];
+      Float_t TAC[NTAC];
+      Float_t ELUM[NELUM];
+      Float_t EZERO[NEZERO];
 
-      ULong64_t EnergyTimestamp[100];
-      ULong64_t XFTimestamp[100];
-      ULong64_t XNTimestamp[100];
-      ULong64_t RingTimestamp[100];
-      ULong64_t RDTTimestamp[100];
-      ULong64_t TACTimestamp[100];
-      ULong64_t ELUMTimestamp[32];
-      ULong64_t EZEROTimestamp[10];
+      ULong64_t EnergyTimestamp[NARRAY];
+      ULong64_t XFTimestamp[NARRAY];
+      ULong64_t XNTimestamp[NARRAY];
+      ULong64_t RingTimestamp[NARRAY];
+      ULong64_t RDTTimestamp[NRDT];
+      ULong64_t TACTimestamp[NTAC];
+      ULong64_t ELUMTimestamp[NELUM];
+      ULong64_t EZEROTimestamp[NEZERO];
       
-      Float_t x[100];
+      Float_t x[NARRAY];
       
    } PSD;
 
    PSD psd; 
    
    //need to put NULL on pointer
- GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
+   GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gFit(0) { }
    virtual ~GeneralSortTraceProof() { }
    
    virtual Int_t   Version() const { return 2; }

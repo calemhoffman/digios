@@ -422,11 +422,13 @@ void Transfer(
   double xRecoil_d;
   double yRecoil_d;
   double rhoRecoil_d;
+  double Td;
   if( isDecay ) {
     tree->Branch("decayTheta", &decayTheta, "decayTheta/D");
     tree->Branch("xRecoil_d", &xRecoil_d, "xRecoil_d/D");
     tree->Branch("yRecoil_d", &yRecoil_d, "yRecoil_d/D");
     tree->Branch("rhoRecoil_d", &rhoRecoil_d, "rhoRecoil_d/D");
+    tree->Branch("Td", &Td, "Td/D");
   }
   
   double xArray, yArray, rhoArray; //x, y, rho positon of particle-b on PSD
@@ -755,6 +757,9 @@ void Transfer(
       if( isDecay ){
         if( decayID == 1 ){
           TLorentzVector Pd = decay.GetDaugther_d();
+          
+          Td = Pd.E() - Pd.M();
+          
           helios.CalRecoilHit(Pd, decayZ);
           
           trajectory orb_d = helios.GetTrajectory_B();

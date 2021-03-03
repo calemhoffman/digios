@@ -4,77 +4,20 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 20 //Highest multiplicity
-#define M -100 //M value for energy filter from digi setting
-
-//by copy the GeneralSortMapping.h in to Armory does not work
-//relative path does not work
-#ifdef __linux__
-   //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
-   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"   
-#elif __APPLE__
-   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-  //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
-#endif
 
 //=================================== setting
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 2; //0 = no process; 1 = fit; 2 = trapezoid
+int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
 float delayChannel = 150.; //initial guess of the time
 
 bool isTACRF = false;
-bool isRecoil = true;
-bool isElum = false;
+bool isRecoil = false;
+bool isElum = true;
 bool isEZero = true;
 //=================================== end of setting
 
-/*
-TGraph * TrapezoidFilter(int length, Short_t * wave){
-   ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
-
-   int baseLineEnd = 100;
-   
-   float baseline = 0;
-   int riseTime = 100; //ch
-   int flatTop = 100;
-   float decayTime = 100;
-   
-   TGraph *  trapezoid = new TGraph();
-   trapezoid->Clear();
-   
-   ///find baseline;
-   double baseline = 0;
-   for( int i = 0; i < baseLineEnd; i++){
-      baseline += wave[i];
-   }
-   baseline = baseline*1./baseLineEnd;
-   
-   double pn = 0.;
-   double sn = 0.;
-   for( int i = 0; i < length ; i++){
-   
-      double dlk = wave[i] - baseline;
-      if( i - riseTime >= 0            ) dlk -= wave[i - riseTime] - baseline;
-      if( i - flatTop - riseTime >= 0  ) dlk -= wave[i - flatTop - riseTime] - baseline;
-      if( i - flatTop - 2*riseTime >= 0) dlk += wave[i - flatTop - 2*riseTime] - baseline;
-      
-      if( i == 0 ){
-         pn = dlk;
-         sn = pn + dlk*decayTime;
-      }else{
-         pn = pn + dlk;
-         sn = sn + pn + dlk*decayTime;
-      }    
-      
-      trapezoid->SetPoint(i, i, sn / decayTime / riseTime);
-    
-   }
-   
-   return trapezoid;
-   
-}
-*/
 
 TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
    ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
@@ -149,6 +92,7 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    //printf("          Number of Event: %llu \n", tree->GetEntries());
    
    printf("======= ID-MAP: \n");
+   
    printf("%11s|", ""); 
    for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
    printf("\n");
@@ -158,15 +102,15 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
        printf("\n");
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
-    if( 110 >= idDetMap[i] && idDetMap[i] >= 100){
+    if( 100 + NRDT >= idDetMap[i] && idDetMap[i] >= 100){
       printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
-    }else if( 240 >= idDetMap[i] && idDetMap[i] >= 200){
+    }else if( 200+NELUM >= idDetMap[i] && idDetMap[i] >= 200){
       printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
-    }else if( 310 >= idDetMap[i] && idDetMap[i] >= 300){
-      printf("\033[92m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
-    }else if( 450 >= idDetMap[i] && idDetMap[i] >= 400){
-      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
-    }else if(  99 >= idDetMap[i] && idDetMap[i] >= 0){    
+    }else if( 300+NEZERO >= idDetMap[i] && idDetMap[i] >= 300){
+      printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+    }else if( 400+NTAC >= idDetMap[i] && idDetMap[i] >= 400){
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // TAC, 
+    }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
          case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
@@ -217,34 +161,34 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    newTree->Branch("eventID", &psd.eventID, "eventID/I");
    newTree->Branch("runID", &psd.runID, "runID/I");
 
-   newTree->Branch("e",    psd.Energy,          "Energy[30]/F");
-   newTree->Branch("e_t",  psd.EnergyTimestamp, "EnergyTimestamp[30]/l");
-   newTree->Branch("ring",    psd.Ring,          "Ring[30]/F");
-   newTree->Branch("ring_t",  psd.RingTimestamp, "RingTimestamp[30]/l");
-   newTree->Branch("xf",   psd.XF,              "XF[30]/F");
-   newTree->Branch("xf_t", psd.XFTimestamp,     "XFTimestamp[30]/l");
-   newTree->Branch("xn",   psd.XN,              "XN[30]/F");
-   newTree->Branch("xn_t", psd.XNTimestamp,     "XNTimestamp[30]/l");
-   newTree->Branch("x",    psd.x,               "x[30]/F"); 
+   newTree->Branch("e",     psd.Energy,          Form("Energy[%d]/F", NARRAY));
+   newTree->Branch("e_t",   psd.EnergyTimestamp, Form("EnergyTimestamp[%d]/l",NARRAY));
+   newTree->Branch("ring",  psd.Ring,            Form("Ring[%d]/F", NARRAY));
+   newTree->Branch("ring_t",psd.RingTimestamp,   Form("RingTimestamp[%d]/l",NARRAY));
+   newTree->Branch("xf",    psd.XF,              Form("XF[%d]/F", NARRAY));
+   newTree->Branch("xf_t",  psd.XFTimestamp,     Form("XFTimestamp[%d]/l", NARRAY));
+   newTree->Branch("xn",    psd.XN,              Form("XN[%d]/F", NARRAY));
+   newTree->Branch("xn_t",  psd.XNTimestamp,     Form("XNTimestamp[%d]/l", NARRAY)); 
+   newTree->Branch("x",     psd.x,               Form("x[%d]/F", NARRAY));
 
    if( isRecoil){
-      newTree->Branch("rdt",   psd.RDT,          "RDT[8]/F");
-      newTree->Branch("rdt_t", psd.RDTTimestamp, "RDTTimestamp[8]/l"); 
+      newTree->Branch("rdt",psd.RDT,            Form("RDT[%d]/F",NRDT));
+      newTree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT)); 
    }
    
    if( isTACRF ){
-      newTree->Branch("tac",   psd.TAC,          "TAC[24]/F");
-      newTree->Branch("tac_t", psd.TACTimestamp, "TACTimestamp[24]/l"); 
+      newTree->Branch("tac",psd.TAC,           Form("TAC[%d]/F", NTAC));
+      newTree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC)); 
    }
    
    if( isElum ) {
-      newTree->Branch("elum",   psd.ELUM,          "ELUM[32]/F");
-      newTree->Branch("elum_t", psd.ELUMTimestamp, "ELUMTimestamp[32]/l"); 
+      newTree->Branch("elum",  psd.ELUM,         Form("ELUM[%d]/F", NELUM));
+      newTree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM)); 
    }
    
    if( isEZero ){
-      newTree->Branch("ezero",   psd.EZERO,          "EZERO[4]/F");
-      newTree->Branch("ezero_t", psd.EZEROTimestamp, "EZEROTimestamp[4]/l"); 
+      newTree->Branch("ezero",psd.EZERO,           Form("EZERO[%d]/F", NEZERO));
+      newTree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO)); 
    }
    if( isTraceON ){
       arr = new TClonesArray("TGraph");
@@ -262,19 +206,24 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       
       if( traceMethod > 0 ){
 	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
-         newTree->Branch("te",             te,  "Trace_Energy[30]/F");
-         newTree->Branch("te_r",         te_r,  "Trace_Energy_RiseTime[30]/F");
-         newTree->Branch("te_t",         te_t,  "Trace_Energy_Time[30]/F");
+         newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
+         newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
+         newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
          
          if( isRecoil ){
-            newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
-            newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
-            newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+            newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
+            newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F",     NRDT));
+            newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
          }
          if ( isEZero ) {
-            newTree->Branch("tezero",       tezero,    "Trace_ezero[8]/F");
-            newTree->Branch("tezero_t",     tezero_t,  "Trace_ezero_Time[8]/F");
-            newTree->Branch("tezero_r",     tezero_r,  "Trace_ezero_RiseTime[8]/F");         
+            newTree->Branch("tezero",       tezero,    Form("Trace_ezero[%d]/F",         NEZERO));
+            newTree->Branch("tezero_t",     tezero_t,  Form("Trace_ezero_Time[%d]/F",    NEZERO));
+            newTree->Branch("tezero_r",     tezero_r,  Form("Trace_ezero_RiseTime[%d]/F",NEZERO));         
+         }
+         if ( isElum ) {
+            newTree->Branch("telum",       telum,    Form("Trace_elum[%d]/F",         NELUM));
+            newTree->Branch("telum_t",     telum_t,  Form("Trace_elum_Time[%d]/F",    NELUM));
+            newTree->Branch("telum_r",     telum_r,  Form("Trace_elum_RiseTime[%d]/F",NELUM));         
          }
       }
    }
@@ -290,44 +239,60 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
 
 /**///======================================= Zero struct
-   for (Int_t i=0 ; i< 100; i++) {//num dets
+   for (Int_t i=0 ; i< NARRAY; i++) {//num dets
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
       psd.Ring[i]    = 0.0;
-      psd.RDT[i]     = TMath::QuietNaN();
-      psd.TAC[i]     = TMath::QuietNaN();
-      if ( i < 32 ) psd.ELUM[i] = TMath::QuietNaN();
-      if ( i < 10 ) psd.EZERO[i] = TMath::QuietNaN();
-
+      
       psd.EnergyTimestamp[i] = 0;
       psd.XFTimestamp[i]     = 0;
       psd.XNTimestamp[i]     = 0;
       psd.RingTimestamp[i]   = 0;
-      psd.RDTTimestamp[i]    = 0;
-      psd.TACTimestamp[i]    = 0;
-      if (i < 32) psd.ELUMTimestamp[i]   = 0;
-      if (i < 10) psd.EZEROTimestamp[i]  = 0;	
       
       psd.x[i]       = TMath::QuietNaN();    
+   
+      if ( i < NRDT ){
+         psd.RDT[i]     = TMath::QuietNaN();
+         psd.RDTTimestamp[i]    = 0;
+      }
+      if ( i < NTAC ){
+         psd.TAC[i]     = TMath::QuietNaN();
+         psd.TACTimestamp[i]    = 0;
+      }
+      if ( i < NELUM ) {
+         psd.ELUM[i] = TMath::QuietNaN();
+         psd.ELUMTimestamp[i]   = 0;
+      }
+      if ( i < NEZERO ) {
+         psd.EZERO[i] = TMath::QuietNaN();
+         psd.EZEROTimestamp[i]  = 0;
+      }
+      
    }
    
    if( isTraceON ){
-      for(int i = 0; i < 30; i++){
+      for(int i = 0; i < NARRAY; i++){
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
          
-         if( isRecoil &&  i < 8 ) {
+         if( isRecoil &&  i < NRDT ) {
             trdt[i]   = TMath::QuietNaN();
             trdt_t[i] = TMath::QuietNaN();
             trdt_r[i] = TMath::QuietNaN();
          }
          
-         if( isEZero &&  i < 8 ) {
+         if( isEZero &&  i < NEZERO ) {
             tezero[i]   = TMath::QuietNaN();
             tezero_t[i] = TMath::QuietNaN();
             tezero_r[i] = TMath::QuietNaN();
+         }
+         
+         if( isElum &&  i < NELUM ) {
+            telum[i]   = TMath::QuietNaN();
+            telum_t[i] = TMath::QuietNaN();
+            telum_r[i] = TMath::QuietNaN();
          }
       }
       
@@ -357,23 +322,23 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       //PSD
       /***********************************************************************/
-      if( 100 > idDet && idDet >= 0 && 3 >= idKind && idKind >= 0 ) {
+      if( NARRAY > idDet && idDet >= 0 && 3 >= idKind && idKind >= 0 ) {
          
          switch(idKind){
             case 0: /* Energy signal */
-               psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.EnergyTimestamp[idDet] = event_timestamp[i];
                break;
             case 1: // XF
-               psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.XFTimestamp[idDet] = event_timestamp[i];
                break;
             case 2: // XN
-               psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.XNTimestamp[idDet] = event_timestamp[i];
                break;
             case 3: // Ring
-               psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+               psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.RingTimestamp[idDet] = event_timestamp[i];
                break;
          }
@@ -381,43 +346,35 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       //TAC & RF TIMING
       /***********************************************************************/
-      if( isTACRF && idDet >= 400 && idDet <= 450 ) {   
+      if( isTACRF && 400 <= idDet && idDet <= 400 + NTAC ) {   
         Int_t tacID = idDet - 400;
-        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
         psd.TACTimestamp[tacID] = event_timestamp[i];
       }
 
       //RECOIL
       /************************************************************************/
-      if( isRecoil && idDet >= 100 && idDet <= 110 ) { 
+      if( isRecoil && 100 <= idDet && idDet <= 100 + NRDT ) { 
          Int_t rdtTemp = idDet-100;
-         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M * (-1);
+         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/MWIN ;
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
       
       //ELUM
       /************************************************************************/
-      if( isElum && (id[i]>=1090 && id[i]<1130)&&(idDet>=200&&idDet<=240)) {
+      if( isElum && 200 <= idDet && idDet <= 200 + NELUM ) {
          Int_t elumTemp = idDet - 200;
-
-         if (elumTemp<16) {
-            psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-         } else {
-            psd.ELUM[elumTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M;
-         }
-         
+         psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
          psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
-      }//end ELUM
+      }
 
       //EZERO
       /************************************************************************/
-      if( isEZero && ( 300 <= idDet && idDet < 310 )) {
+      if( isEZero &&  300 <= idDet && idDet < 300 + NEZERO ) {
          Int_t ezeroTemp = idDet - 300;
-         if (ezeroTemp<4) {
-            psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M;
-            psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
-         }
-      }//end EZERO
+         psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+         psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
+      }
       
    }//end of NumHits
    
@@ -435,9 +392,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          idKind = idKindMap[idTemp];
          
          //bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
-         bool isPSD = (30 > idDet && idDet >= 0);
-         bool isRDT  = (130 > idDet && idDet >= 100 );
-         bool isezero  = (310 > idDet && idDet >= 300 );
+         bool isPSD = (NARRAY > idDet && idDet >= 0);
+         bool isRDT  = (NRDT + 100 > idDet && idDet >= 100 );
+         bool isezero  = (NEZERO + 300 > idDet && idDet >= 300 );
+         bool iselum  = (NELUM + 200 > idDet && idDet >= 200 );
          //if( !isPSD && !isRDT && !isezero) continue;
          
          //if( !isRDT) continue;         
@@ -472,7 +430,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
          }
          
-         gTrace->SetTitle(Form("id=%d, nHit=%d, length=%d", idDet, i, traceLength));
+         gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength));
          //gTrace->SetTitle(Form("id=%d, nHit=%d", idDet, i));
          
          //===================== fitting , find time
@@ -510,22 +468,29 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                gTrace->Fit("gFit", "qR0");
             }
             
-            if( 30 > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = gFit->GetParameter(0) * (-1);
+            if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
+               te[idDet]   = gFit->GetParameter(0);
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
             }
             
-            if( 200 > idDet && idDet >= 100 ) {
+            if( NTAC + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);
             }
             
-            if( 310 > idDet && idDet >= 300 ) {
+            if( NELUM + 200 > idDet && idDet >= 200 ) {
+               int elumTemp = idDet-200;
+               telum[elumTemp]   = gFit->GetParameter(0);
+               telum_t[elumTemp] = gFit->GetParameter(1);
+               telum_r[elumTemp] = gFit->GetParameter(2);
+            }
+            
+            if( NEZERO + 300 > idDet && idDet >= 300 ) {
                int ezeroTemp = idDet-300;
-               tezero[ezeroTemp]   = TMath::Abs(gFit->GetParameter(0));
+               tezero[ezeroTemp]   = gFit->GetParameter(0);
                tezero_t[ezeroTemp] = gFit->GetParameter(1);
                tezero_r[ezeroTemp] = gFit->GetParameter(2);
             }

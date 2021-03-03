@@ -1,23 +1,27 @@
 #include "Monitors.C+" // the plus sign mean compilation
 
-void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
+void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false) {
+  
+  ///default saveCanvas = false, no save Cavas
+  ///                   = true, save Canvas
+  
   TChain * chain = new TChain("gen_tree");
 
-  if( RUNNUM == -1 || RUNNUM == -10){
+  if( RUNNUM == -1){
+    /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-
-    //chain->Add("../root_data/gen_run00[4-6].root"); //alpha
-    
-    chain->Add("../root_data/gen_run008.root"); //30Si(d,p)
+    // chain->Add("../root_data/gen_run01[1-5].root");
 
 
     ///********** end Marker for AutoCalibration.
+    
+    
   }else{
     
     TString fileName;
     int endRUNNUM = RUNNUM2;
-    if( RUNNUM2 == -1 || RUNNUM2 == -10 ) endRUNNUM = RUNNUM;
+    if( RUNNUM2 == -1) endRUNNUM = RUNNUM;
     
     for( int i = RUNNUM ; i <= endRUNNUM ; i++){
       fileName.Form("../root_data/gen_run%03d.root", i);
@@ -36,7 +40,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
   
   //Some input to TSelector
   Monitors * selector = new Monitors();
-  if( RUNNUM == -10 || RUNNUM2 == -10 ) selector->printControl(0); //quit after terminated
+  if( saveCanvas ) selector->printControl(0); //quit after terminated
   chain->Process(selector, "");
 
 }
