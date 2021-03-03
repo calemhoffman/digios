@@ -26,13 +26,13 @@ if [ $# -ge 4 ]; then isGeneralSort=$4; fi
 if [ $# -ge 5 ]; then isMonitor=$5; OverRideMonitor="" ; fi
 
 GEBSort=GEBSort_nogeb
-GEBSortMsg="using GEBSort_nogeb"
+GEBSortMsg="using EventBuilder"
 GeneralSortMsg="no trace"
 
 if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
   isTrace=1
   isMonitor=0
-  GEBSortMsg="using GEBSort_nogeb_trace"
+  GEBSortMsg="using EventBuilder_trace"
   GEBSort=GEBSort_nogeb_trace
   if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then GeneralSortMsg="trace with ${isGeneralSort} core"; fi
   OverRideMonitor="overrided by GeneralSortTrace."
@@ -87,9 +87,9 @@ if [ $isMonitor -eq 1 ] ; then
 elif [ $isMonitor -eq 2 ] ; then
   root -l ChainMonitors.C  #all runs listed 
 elif [ $isMonitor -eq 20 ] ; then
-  root -l "ChainMonitors.C(-10)"
+  root -l "ChainMonitors.C(-1,-1, true)"
 elif [ $isMonitor -eq 10 ] ; then
-  root -l "ChainMonitors.C(${RUN},-10)"  
+  root -l "ChainMonitors.C(${RUN},-1, true)"  
 fi  
   
 exit 1

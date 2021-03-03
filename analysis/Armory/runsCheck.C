@@ -14,7 +14,7 @@
 
 ///only work in single thread run
 
-void runsCheck(TString prefix = "*", int runID = -1){
+void runsCheck(TString prefix = "gen", int runID = -1){
    
   TString folderPath;
   if( runID == -1 ){
@@ -177,6 +177,31 @@ void runsCheck(TString prefix = "*", int runID = -1){
       }
          
     }
+    
+    //when no timestamp find in array or rdt, change to elum
+    /*
+    if( breakFlag == false ) {
+      tree->SetBranchStatus("*",0);
+      tree->SetBranchStatus("elum_t",1);
+      tree->SetBranchStatus("elum",1);
+      tree->SetBranchAddress("elum_t", e_t, &b_EnergyTimestamp);
+      tree->SetBranchAddress("elum", e, &b_Energy);
+         
+      for(int event = 1; event < totalEvent; event++){
+        if (prefix == "trace" &&   eventID > 10 ) continue; 
+        tree->GetEntry(event, 0);
+        for(int j = 0; j < 3; j++){
+          if( e_t[j] > 0 ) {
+            firstTime = e_t[j];
+            firstEvent = event;
+            //printf("%d ", event);
+            breakFlag = true;
+            break;
+          }
+        }
+        if( breakFlag ) break;      
+      }
+    }*/
       
     //find the last event time_recored
     breakFlag = false;

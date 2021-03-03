@@ -12,7 +12,6 @@
 
 #define NUMPRINT 20 //>0
 #define MAXNUMHITS 20 //Highest multiplicity
-#define M -100 //M value for energy filter from digi setting, number of channel
 
 #include "../working/GeneralSortMapping.h"
 
@@ -65,28 +64,29 @@ TString fileNum = "";
 
 //PSD struct
 typedef struct {
-   Int_t   eventID;
-   Int_t   runID;
-   Float_t Energy[nDet];
-   Float_t XF[nDet];
-   Float_t XN[nDet];
-   Float_t Ring[nDet];
-   Float_t RDT[nDet];
-   Float_t TAC[nDet];
-   Float_t ELUM[32];
-   Float_t EZERO[4];
-   
-   ULong64_t EnergyTimestamp[nDet];
-   ULong64_t XFTimestamp[nDet];
-   ULong64_t XNTimestamp[nDet];
-   ULong64_t RingTimestamp[nDet];
-   ULong64_t RDTTimestamp[nDet];
-   ULong64_t TACTimestamp[nDet];
-   ULong64_t ELUMTimestamp[32];
-   ULong64_t EZEROTimestamp[4];
-   
-   Float_t x[nDet];
-   
+  Int_t   eventID;
+  Int_t runID;
+  Float_t Energy[NARRAY];
+  Float_t XF[NARRAY];
+  Float_t XN[NARRAY];
+  Float_t Ring[NARRAY];
+  Float_t RDT[NRDT];
+  Float_t TAC[NTAC];
+  Float_t ELUM[NELUM];
+  Float_t EZERO[NEZERO];//0,1 - DE-E exit, 2,3 - DE-E atscat, 4 - ETOT
+  // 2,3 - DEX,EX
+
+  ULong64_t EnergyTimestamp[NARRAY];
+  ULong64_t XFTimestamp[NARRAY];
+  ULong64_t XNTimestamp[NARRAY];
+  ULong64_t RingTimestamp[NARRAY];
+  ULong64_t RDTTimestamp[NRDT];
+  ULong64_t TACTimestamp[NTAC];
+  ULong64_t ELUMTimestamp[NELUM];
+  ULong64_t EZEROTimestamp[NEZERO];
+  
+  Float_t x[NARRAY];
+
 } PSD;
 
 PSD psd; 

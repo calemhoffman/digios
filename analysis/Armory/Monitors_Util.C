@@ -276,7 +276,7 @@ void eCalVxCalG(void) {
     heCalVxCalG[i]->Draw("");
   } 
 }
-
+/**
 void elum(void) {
   TCanvas *celum = (TCanvas *) gROOT->FindObjectAny("celum");
   if( celum == NULL )  celum = new TCanvas("celum",Form("ELUM | %s", canvasTitle.Data()),1000,1000);
@@ -292,7 +292,7 @@ void elum(void) {
   helumID->Draw("colz");
   
 }
-
+*/
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1500, 0, 1000,1000);
@@ -447,6 +447,7 @@ void tac(void) {
 }
 
 
+/**
 void ic(){
   
   TCanvas *cic =  (TCanvas *) gROOT->FindObjectAny("cic");
@@ -463,7 +464,7 @@ void ic(){
   cic->cd(6); hic12->Draw("colz");
   
 }
-
+*/
 
 
 void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1, double x2, Color_t color){
@@ -502,5 +503,7 @@ void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1
    printf(" %s  : %d \n", name.Data(),  count);
    
 }
+
+
 
 #endif 

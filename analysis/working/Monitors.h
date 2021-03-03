@@ -19,6 +19,8 @@
 #include <TCanvas.h>
 #include <TCutG.h>
 
+#include "GeneralSortMapping.h"
+
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -29,22 +31,22 @@ public :
 
    // Declaration of leaf types
    Int_t           runID;
-   Float_t         e[100];
-   ULong64_t       e_t[100];
-   Float_t         xf[100];
-   ULong64_t       xf_t[100];
-   Float_t         xn[100];
-   ULong64_t       xn_t[100];
-   Float_t         ring[100];
-   ULong64_t       ring_t[100];
-   Float_t         rdt[100];
-   ULong64_t       rdt_t[100];
-   Float_t         tac[100];
-   ULong64_t       tac_t[100];
-   Float_t         elum[32];
-   ULong64_t       elum_t[32];
-   Float_t         ezero[10];
-   ULong64_t       ezero_t[10];
+   Float_t         e[NARRAY];
+   ULong64_t       e_t[NARRAY];
+   Float_t         xf[NARRAY];
+   ULong64_t       xf_t[NARRAY];
+   Float_t         xn[NARRAY];
+   ULong64_t       xn_t[NARRAY];
+   Float_t         ring[NARRAY];
+   ULong64_t       ring_t[NARRAY];
+   Float_t         rdt[NRDT];
+   ULong64_t       rdt_t[NRDT];
+   Float_t         tac[NTAC];
+   ULong64_t       tac_t[NTAC];
+   Float_t         elum[NELUM];
+   ULong64_t       elum_t[NELUM];
+   Float_t         ezero[NEZERO];
+   ULong64_t       ezero_t[NEZERO];
 
    // List of branches
    TBranch        *b_runID;   //!
@@ -88,7 +90,9 @@ public :
    virtual TList  *GetOutputList() const { return fOutput; }
    virtual void    SlaveTerminate();
    virtual void    Terminate();
-
+   
+   
+   TString FindStartEndTime(TTree * tree,TString BranchName);
    void Draw2DHist(TH2F * hist);
 
    ClassDef(Monitors,0);
@@ -130,7 +134,11 @@ void Monitors::Init(TTree *tree)
    fChain->SetBranchAddress("ezero", ezero, &b_EZERO);
    fChain->SetBranchAddress("ezero_t", ezero_t, &b_EZEROTimestamp);
    
-   //printControlID = 1; // don't quite
+   
+   startTime = 0;
+   endTime = 0;
+   
+   //printControlID = 1; // don't quite, cannot pass to Termination() ?? why??
 }
 
 Bool_t Monitors::Notify()

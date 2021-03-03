@@ -7,7 +7,7 @@ if [ $# -lt 2 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
-source ../Armory/process_PathSetting
+source ${HELIOSSYS}/analysis/Armory/process_PathSetting
 
 RUN=$1
 isMerge=$2
