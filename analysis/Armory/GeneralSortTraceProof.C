@@ -8,14 +8,14 @@
 //=================================== setting
 bool isTraceON = true;
 bool isSaveTrace = true;
-bool isSaveFitTrace = true;
-int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
+bool isSaveFitTrace = false;
+int traceMethod = 0; //0 = no process; 1 = fit; 2 = trapezoid
 float delayChannel = 150.; //initial guess of the time
 
 bool isTACRF = false;
-bool isRecoil = false;
+bool isRecoil = true;
 bool isElum = true;
-bool isEZero = true;
+bool isEZero = false;
 //=================================== end of setting
 
 
@@ -413,13 +413,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
-            continue;
+            //continue;
          }
          
          
          //regulate the trace
          double base = 0;
-         if( traceMethod > 0 ) {
+         if( traceMethod >= 0 ) {
             for( int j = 0; j < traceLength; j++){ 
                if( trace[i][j] < 16000){
                   base = trace[i][j];
@@ -474,7 +474,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                te_r[idDet] = gFit->GetParameter(2);
             }
             
-            if( NTAC + 100 > idDet && idDet >= 100 ) {
+            if( NRDT + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
