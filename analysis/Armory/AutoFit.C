@@ -8,8 +8,6 @@
 #include <TMath.h>
 #include <vector>
 
-#include "../Armory/AnalysisLibrary.h"
-
 void ShowFitMethod(){
   printf("----------------------- Method of Fitting ---------------\n");
   printf("---------------------------------------------------------\n");
@@ -28,6 +26,39 @@ void ShowFitMethod(){
   printf(" clickFitNGaussPolSub() - Fit Pol-n BG, subtract, fit n-Gauss\n");
   printf("          SaveFitPara() - Save the initial guess parameters.\n");
   printf("---------------------------------------------------------\n");
+}
+
+std::vector<std::string> SplitStr(std::string tempLine, std::string splitter, int shift = 0){
+
+  std::vector<std::string> output;
+
+  size_t pos;
+  do{
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
+      tempLine = tempLine.substr(pos+1);
+      continue;
+    }
+
+    std::string secStr;
+    if( pos == std::string::npos ){
+      secStr = tempLine;
+    }else{
+      secStr = tempLine.substr(0, pos+shift);
+      tempLine = tempLine.substr(pos+shift);
+    }
+
+    //check if secStr is begin with space
+    if( secStr.substr(0, 1) == " "){
+      secStr = secStr.substr(1);
+    }
+
+    output.push_back(secStr);
+    //printf(" |%s---\n", secStr.c_str());
+    
+  }while(pos != std::string::npos );
+
+  return output;
 }
 
 TColor RGBWheel(double ang){
@@ -98,7 +129,7 @@ Double_t nGF3(Double_t *x, Double_t *par){
     Double_t step  = par[6*p+5];
     
     result += norm * (1-ratio)* TMath::Gaus(x[0], mean, sigma, 1) ;
-    result += norm * ratio * exp( sigma * sigma/2/beta/beta) / (2* beta )* exp((x[0]-mean)/beta) * TMath::Erfc( (x[0]-mean)/(sigma * sqrt(2)) + sigma/beta/sqrt(2)) ;
+    if( !(beta == 0. || ratio == 0.) ) result += norm * ratio * exp( sigma * sigma/2/beta/beta) / (2* beta )* exp((x[0]-mean)/beta) * TMath::Erfc( (x[0]-mean)/(sigma * sqrt(2)) + sigma/beta/sqrt(2)) ;
     result += norm * step * TMath::Erfc( (x[0]-mean)/(sigma * sqrt(2)) );
   }  
   return result;
@@ -118,7 +149,7 @@ Double_t nGF3Pol(Double_t *x, Double_t *par){
     Double_t step  = par[6*p+5];
 
     result += norm * (1.0-ratio)* TMath::Gaus(x[0], mean, sigma, 1) ;
-    result += norm * ratio * exp( sigma * sigma/2/beta/beta) / (2* beta )* exp((x[0]-mean)/beta) * TMath::Erfc( (x[0]-mean)/(sigma * sqrt(2)) + sigma/beta/sqrt(2)) ;
+    if( !(beta == 0. || ratio == 0.) ) result += norm * ratio * exp( sigma * sigma/2/beta/beta) / (2* beta )* exp((x[0]-mean)/beta) * TMath::Erfc( (x[0]-mean)/(sigma * sqrt(2)) + sigma/beta/sqrt(2)) ;
     result += norm * step * TMath::Erfc( (x[0]-mean)/(sigma * sqrt(2)) );
   }
 
@@ -543,14 +574,14 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
   
   nPeaks = 1;
   nPols = degPol;
-  int nPar = 6 + degPol + 1;
+  int nPar = 6*nPeaks + degPol + 1;
 
   TF1 * fit = new TF1("fit", nGF3Pol, xMin, xMax, nPar);
 
   fit->Print();
-  
+
   double * para = new double[nPar]; 
-  para[0] = 1000000 ;
+  para[0] = hist->GetMaximum() *4;
   para[1] = mean;
   para[2] = sigmaMax/2.;
   para[3] = ratio ;
@@ -567,10 +598,15 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
 
   fit->SetParLimits(0, 0, 1e9);
   fit->SetParLimits(1, xMin, xMax);
-  fit->SetParLimits(2, 0, sigmaMax);
-  fit->SetParLimits(3, 0, 0.2);
-  fit->SetParLimits(4, 0, 20);
+  fit->SetParLimits(2, 0.00000001, sigmaMax);
+  fit->SetParLimits(3, 0., 0.5);
+  fit->SetParLimits(4, 0., 40);
   fit->SetParLimits(5, 0, 0.5);
+
+  if( beta == 0. || ratio == 0. ) {
+    fit->FixParameter(3, 0.);
+    fit->FixParameter(4, 0.);
+  }
   
   hist->Fit("fit", "Rq");
   
@@ -1508,7 +1544,7 @@ void fitNGaussPol(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.txt"
   fit->SetLineColor(1);
   fit->SetNpx(1000);
   fit->SetParameters(para);
-  
+
   //fixing parameters
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9); 
