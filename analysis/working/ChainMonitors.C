@@ -107,18 +107,18 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     
     //====== high energy   
     ///chain->Add("../root_data/gen_run30[2-3].root"); ///16N, 27.5enA
-    chain->Add("../root_data/gen_run30[7-9].root"); ///16N, 140enA
-    chain->Add("../root_data/gen_run31[0-9].root"); ///16N, 140enA
-    chain->Add("../root_data/gen_run32[0-9].root"); ///16N, 140enA
-    chain->Add("../root_data/gen_run33[0-7].root"); ///16N, 140enA
+    //chain->Add("../root_data/gen_run30[7-9].root"); ///16N, 140enA
+    //chain->Add("../root_data/gen_run31[0-9].root"); ///16N, 140enA
+    //chain->Add("../root_data/gen_run32[0-9].root"); ///16N, 140enA
+    //chain->Add("../root_data/gen_run33[0-7].root"); ///16N, 140enA
     ///chain->Add("../root_data/gen_run338.root"); ///16N, 700enA
     
     //====== low energy
     ///chain->Add("../root_data/gen_run339.root");     ///16N, 1.6enA
-    ///chain->Add("../root_data/gen_run34[0-1].root"); ///16N, 1.6enA
-    ///chain->Add("../root_data/gen_run34[4-5].root"); ///16N, 16enA
-    ///chain->Add("../root_data/gen_run34[6-9].root"); ///16N, 50enA
-    ///chain->Add("../root_data/gen_run35[0-4].root"); ///16N, 50enA
+    chain->Add("../root_data/gen_run34[0-1].root"); ///16N, 1.6enA
+    chain->Add("../root_data/gen_run34[4-5].root"); ///16N, 16enA
+    chain->Add("../root_data/gen_run34[6-9].root"); ///16N, 50enA
+    chain->Add("../root_data/gen_run35[0-4].root"); ///16N, 50enA
     
     
   }else{
