@@ -97,15 +97,11 @@ private:
   void findHeliosPath(){
     heliosPath = getenv("HELIOSSYS");
     if( heliosPath ){
-      //printf(" %s \n", heliosPath);
       dataSource = heliosPath;
       dataSource += "/analysis" + data;
     }else{
-      //printf(" no env ${HELIOSSYS} found ");
       dataSource = ".." + data;
     }
-    
-    //printf("data Path: %s \n", dataSource.c_str());
   }
   
   
@@ -115,13 +111,10 @@ void Isotope::SetIso(int a, int z){
     this->A = a;
     this->Z = z;
     FindMassByAZ(a,z); 
-//    this->dataSource = dataPath;
 }
 
 void Isotope::SetIsoByName(string name){
-    
     FindMassByName(name); 
-//    this->dataSource = dataPath;
 }
 
 void Isotope::FindMassByAZ(int A, int Z){
@@ -501,6 +494,7 @@ void Isotope::Print(){
     printf(" mass of \e[47m\e[31m%s\e[m nucleus (Z,A)=(%3d,%3d) is \e[47m\e[31m%12.5f\e[m MeV, BE/A=%7.5f MeV\n", Name.c_str(), Z, A, Mass, BEA/1000.);     
     printf(" total BE    : %12.5f MeV\n",BEA*A/1000.);
     printf(" mass in amu : %12.5f u\n",Mass/amu);
+    printf(" mass excess : %12.5f MeV\n", Mass + Z*0.510998950 - A*amu);
     printf("-------------- Seperation energy \n");
     printf(" S1p: %8.4f| S1n: %8.4f| S(2H ): %8.4f| S1p1n : %8.4f\n", CalSp(1, 0), CalSp(0, 1), CalSp2(2, 1), CalSp(1, 1));
     printf(" S2p: %8.4f| S2n: %8.4f| S(3He): %8.4f| S(3H) : %8.4f\n", CalSp(2, 0), CalSp(0, 2), CalSp2(3, 2), CalSp2(3, 1));
