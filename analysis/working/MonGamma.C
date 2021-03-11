@@ -12,26 +12,29 @@
 #include <TH1.h>
 
 //============= User setting
-const int numDet = 1;
-int detID[numDet] = {0}; 
-TString detName[numDet] = {"HPGe-1" } ;// ,"HPGe-2","HPGe-3"} ;
+const int numDet = 3;
+int detID[numDet] = {0, 1, 2};
+int color[numDet] = {2, 1, 4};
+TString detName[numDet] = {"HPGe-1" ,"HPGe-2","HPGe-3"} ;
 
 double resol = 0.2; // keV
-int eRange1[2] = {   20,  200 }; // keV
-int eRange2[2] = { 2400, 3000 }; // keV
-int eRange3[2] = { 5000, 7500 }; // keV
+int eRange1[2] = {  20,   200 }; // keV
+int eRange2[2] = { 1600, 1800 }; // keV
+int eRange3[2] = { 2500, 3000 }; // keV
+int eRange4[2] = { 5500, 7500 }; // keV
 
 int tRange[2] = {-1, 600}; //min, relative to start time
                           
-double cali[numDet][2]= { { -0.926213, 0.624203} };
-                        //  { -1.916483, 0.648377},
-                        //  { -1.445283, 0.670994}};
+double cali[numDet][2]= { { -0.926213, 0.624203}, 
+                          { -1.916483, 0.648377},
+                          { -1.445283, 0.670994}};
                           
 //===========================
 
 TH1F ** hgamma1 = new TH1F* [numDet];
 TH1F ** hgamma2 = new TH1F* [numDet];
 TH1F ** hgamma3 = new TH1F* [numDet];
+TH1F ** hgamma4 = new TH1F* [numDet];
 
 TH2F * hTime;
 
@@ -71,6 +74,7 @@ void MonGamma::Begin(TTree * tree)
       hgamma1[i] = new TH1F(Form("h1g%d", i), Form("%s; energy [keV]; count/ %.2f keV",detName[i].Data(), resol), (eRange1[1]-eRange1[0])/resol, eRange1[0], eRange1[1]);
       hgamma2[i] = new TH1F(Form("h2g%d", i), Form("%s; energy [keV]; count/ %.2f keV",detName[i].Data(), resol), (eRange2[1]-eRange2[0])/resol, eRange2[0], eRange2[1]);
       hgamma3[i] = new TH1F(Form("h3g%d", i), Form("%s; energy [keV]; count/ %.2f keV",detName[i].Data(), resol), (eRange3[1]-eRange3[0])/resol, eRange3[0], eRange3[1]);
+      hgamma4[i] = new TH1F(Form("h4g%d", i), Form("%s; energy [keV]; count/ %.2f keV",detName[i].Data(), resol), (eRange4[1]-eRange4[0])/resol, eRange4[0], eRange4[1]);
    }
    
    hTime = new TH2F("hTime", "hTime", (tRange[1] - tRange[0]), tRange[0], tRange[1], eRange2[1]-eRange2[0], eRange2[0], eRange2[1]);
@@ -138,6 +142,7 @@ Bool_t MonGamma::Process(Long64_t entry)
       hgamma1[i]->Fill(ex[i]);
       hgamma2[i]->Fill(ex[i]);
       hgamma3[i]->Fill(ex[i]);
+      hgamma4[i]->Fill(ex[i]);
       
       
       //if( id == 0 ) hTime->Fill((rdt_t[0]-initTime)/1e8/60., ex[i]);
@@ -154,10 +159,10 @@ void MonGamma::SlaveTerminate()
 
 void MonGamma::Terminate()
 {
-   TCanvas * cCanvas  = new TCanvas("cCanvas","RUN : " + canvasTitle , 1600 , 1200 );
+   TCanvas * cCanvas  = new TCanvas("cCanvas","RUN : " + canvasTitle , 1600 , 800 );
    cCanvas->Modified(); cCanvas->Update();
    
-   cCanvas->Divide(1,3);
+   cCanvas->Divide(2,2);
    
    gStyle->SetOptStat("");
    
@@ -165,7 +170,7 @@ void MonGamma::Terminate()
    for( int i = 0 ; i < numDet; i++){
       cCanvas->cd(1);
       hgamma1[i]->GetYaxis()->SetRangeUser(0, yMax);
-      hgamma1[i]->SetLineColor(i+1);
+      hgamma1[i]->SetLineColor(color[i]);
       hgamma1[i]->Draw("same");
    }
    
@@ -174,7 +179,7 @@ void MonGamma::Terminate()
       cCanvas->cd(2);
       //cCanvas->cd(i+5)->SetLogy();
       hgamma2[i]->GetYaxis()->SetRangeUser(0, yMax);
-      hgamma2[i]->SetLineColor(i+1);
+      hgamma2[i]->SetLineColor(color[i]);
       hgamma2[i]->Draw("same");
    }
    
@@ -204,8 +209,18 @@ void MonGamma::Terminate()
    for( int i = 0 ; i < numDet; i++){
       cCanvas->cd(3);
       hgamma3[i]->GetYaxis()->SetRangeUser(1, yMax);
-      hgamma3[i]->SetLineColor(i+1);
+      hgamma3[i]->SetLineColor(color[i]);
       hgamma3[i]->Draw("same");
+      //hgamma1[i]->Draw("same");
+      //hgamma2[i]->Draw("same hist");
+   }
+
+   yMax = FindMaxY(hgamma4, numDet);
+   for( int i = 0 ; i < numDet; i++){
+      cCanvas->cd(4);
+      hgamma4[i]->GetYaxis()->SetRangeUser(1, yMax);
+      hgamma4[i]->SetLineColor(color[i]);
+      hgamma4[i]->Draw("same");
       //hgamma1[i]->Draw("same");
       //hgamma2[i]->Draw("same hist");
    }
