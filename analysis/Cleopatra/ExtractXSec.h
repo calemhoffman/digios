@@ -288,12 +288,12 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   FILE * file_Ex;
   file_Ex = fopen(saveExName.c_str(), "w+");
   
-  fprintf(file_Ex, "recoil\n");
+  fprintf(file_Ex, "//generated_by_ExtractXSec.h____Ex____Xsec(4pi)____SF____sigma\n");
 
   for( int i = 0; i < numCal ; i++){
-      fprintf(file_Ex, "%9.5f     %9.5f\n", Ex[i], partialXsec[i]);
+      fprintf(file_Ex, "%9.5f     %9.5f  1.0  0.000\n", Ex[i], partialXsec[i]);
   }
-  
+  fprintf(file_Ex, "#=====End_of_File\n");
   fclose(file_Ex);
   
   //================================== save file.Xsec.txt
@@ -333,10 +333,10 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   printf("Output : %s \n", fileName.Data());
   TFile * fileOut = new TFile(fileName, "RECREATE" );
   
-  gList = new TObjArray();
-  gList->SetName("TGraph of distributions");
+  gList = new TObjArray(); ///no SetTitle() method for TObjArray
+  gList->SetName("TGraph of d.s.c");
   TObjArray * fList = new TObjArray();
-  gList->SetName("TF1 of distributions");
+  fList->SetName("TF1 of distributions = d.s.c. * sin()");
   
   TGraph ** gGraph = new TGraph *[numCal];
   TF1 ** dist = new TF1*[numCal];
@@ -479,11 +479,11 @@ int ExtractXSecFromText(string readFile){
   printf("Output : %s \n", saveExName.c_str());
   FILE * file_Ex;
   file_Ex = fopen(saveExName.c_str(), "w+");
-  fprintf(file_Ex, "recoil\n");
+  fprintf(file_Ex, "#Generated_by_ExtractXsec.h___Ex___Xsec___SF____sigma\n");
   for( int i = 0; i < Ex.size() ; i++){
-      fprintf(file_Ex, "%9.5f     %9.5f\n", Ex[i], partialXsec[i]);
+      fprintf(file_Ex, "%9.5f     %9.5f  1.0   0.000\n", Ex[i], partialXsec[i]);
   }
-  
+  fprintf(file_Ex, "#=====End_of_File\n");
   fclose(file_Ex);
   
   
@@ -497,9 +497,9 @@ int ExtractXSecFromText(string readFile){
   TFile * fileOut = new TFile(fileName, "RECREATE" );
   
   gList = new TObjArray();
-  gList->SetName("TGraph of distributions");
+  gList->SetName("TGraph of d.s.c");
   TObjArray * fList = new TObjArray();
-  gList->SetName("TF1 of distributions");
+  fList->SetName("TF1 of distributions = d.s.c. * sin()");
   
   TGraph ** gGraph = new TGraph *[numCal];
   TF1 ** dist = new TF1*[numCal];
