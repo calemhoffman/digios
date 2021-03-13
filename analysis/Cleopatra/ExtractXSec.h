@@ -333,10 +333,10 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   printf("Output : %s \n", fileName.Data());
   TFile * fileOut = new TFile(fileName, "RECREATE" );
   
-  gList = new TObjArray();
-  gList->SetName("TGraph of distributions");
+  gList = new TObjArray(); ///no SetTitle() method for TObjArray
+  gList->SetName("TGraph of d.s.c");
   TObjArray * fList = new TObjArray();
-  gList->SetName("TF1 of distributions");
+  fList->SetName("TF1 of distributions = d.s.c. * sin()");
   
   TGraph ** gGraph = new TGraph *[numCal];
   TF1 ** dist = new TF1*[numCal];
@@ -497,9 +497,9 @@ int ExtractXSecFromText(string readFile){
   TFile * fileOut = new TFile(fileName, "RECREATE" );
   
   gList = new TObjArray();
-  gList->SetName("TGraph of distributions");
+  gList->SetName("TGraph of d.s.c");
   TObjArray * fList = new TObjArray();
-  gList->SetName("TF1 of distributions");
+  fList->SetName("TF1 of distributions = d.s.c. * sin()");
   
   TGraph ** gGraph = new TGraph *[numCal];
   TF1 ** dist = new TF1*[numCal];
