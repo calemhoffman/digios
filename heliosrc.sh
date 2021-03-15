@@ -49,12 +49,16 @@ unset HELIOSANA
 
 unset HELIOSSYS
 SOURCE=${BASH_ARGV[0]}
-if [ $(pwd) == $HOME ]; then 
-  HELIOSSYS=$(dirname ${SOURCE})
+PCName=$(uname -n)
+if [ $(uname -n) == "digios1" ]; then
+    HELIOSSYS=~/digios
 else
-  HELIOSSYS=$(pwd)
+    if [ $(pwd) == $HOME ]; then 
+	HELIOSSYS=$(dirname ${SOURCE})
+    else
+	HELIOSSYS=$(pwd)
+    fi
 fi
-
 #-------- optional
 set_GitPS1
 set_HistCtrl
