@@ -28,7 +28,7 @@ void ShowFitMethod(){
   printf("---------------------------------------------------------\n");
 }
 
-std::vector<std::string> SplitStr(std::string tempLine, std::string splitter, int shift = 0){
+std::vector<std::string> SplitStrAF(std::string tempLine, std::string splitter, int shift = 0){
 
   std::vector<std::string> output;
 
@@ -281,7 +281,7 @@ bool loadFitParameters(TString fitParaFile){
     
     ///printf("%s\n", tempLine.c_str());
 
-    vector<string> temp = SplitStr(tempLine, " ");
+    vector<string> temp = SplitStrAF(tempLine, " ");
 
     if( temp.size() < 7 ) continue;
 
