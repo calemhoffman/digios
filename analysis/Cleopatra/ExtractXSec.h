@@ -187,30 +187,34 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
       if( line.length() <  20 ) continue;
       
       //printf("%d   |%s \n", line.length(), line.c_str());
-      double num1, num2;
+      double numAngle, numXsec;
       if( reactionFlag == 1 ){ // Elastics (d,d) or (p,p)
-        num1 = atof( line.substr(0, 7).c_str());
+        numAngle = atof( line.substr(0, 7).c_str());
         if( indexForElastic == 1 ){
-          num2 = atof( line.substr(15, 15).c_str());
+          numXsec = atof( line.substr(15, 15).c_str());
         }else{
-          num2 = atof( line.substr(28, 14).c_str());
+          numXsec = atof( line.substr(28, 14).c_str());
         }
       }
       
       if( reactionFlag == 2 ){ // InElastics (d,p) or (p,d)
         if( isFloat( line.substr(0, 7) ) ){
-          num1 = atof( line.substr(0, 7).c_str());
-          num2 = atof( line.substr(7, 19).c_str());
+          numAngle = atof( line.substr(0, 7).c_str());
+          numXsec = atof( line.substr(7, 19).c_str());
         }else{
-          num1 = 0.0;
-          num2 = 0.0;
+          numAngle = -1.0;
+          numXsec = -1.0;
         }
       }
       
-      if( num1 != 0. && num2 != 0. ){
-        if( !angleFilled ) angle.push_back(num1);
-        dataXsec.push_back(num2);
+      if( numAngle != numXsec && numXsec > 0. ){
+        if( !angleFilled ) angle.push_back(numAngle);
+        dataXsec.push_back(numXsec);
+        
+        //printf(" %f , %f \n", angle.back(), dataXsec.back());
       } 
+      
+      
     }
     
     //------ find total Xsec, if found stop extraction
@@ -479,7 +483,7 @@ int ExtractXSecFromText(string readFile){
   printf("Output : %s \n", saveExName.c_str());
   FILE * file_Ex;
   file_Ex = fopen(saveExName.c_str(), "w+");
-  fprintf(file_Ex, "#Generated_by_ExtractXsec.h___Ex___Xsec___SF____sigma\n");
+  fprintf(file_Ex, "//Generated_by_ExtractXsec.h___Ex___Xsec___SF____sigma\n");
   for( int i = 0; i < Ex.size() ; i++){
       fprintf(file_Ex, "%9.5f     %9.5f  1.0   0.000\n", Ex[i], partialXsec[i]);
   }
