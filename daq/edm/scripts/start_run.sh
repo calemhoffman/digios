@@ -94,7 +94,13 @@ else
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}"'"}' ${WebHook}
 fi
 
-curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=1" --max-time 1 --connect-timeout 1
+if [ -z  "$COMMENT" ]; then  
+    comment2="nan"
+else
+    comment2="${COMMENT// /\ }"
+fi
+curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=1" --max-time 1 --connect-timeout 1
+
 
 export TERM=vt100
 echo " terminals" 

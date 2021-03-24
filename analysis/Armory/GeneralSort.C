@@ -1,14 +1,10 @@
 #define GeneralSort_cxx
-
 #include "GeneralSort.h"
 #include <TH2.h>
 #include <TMath.h>
 #include <TStyle.h>
 #include <TMacro.h>
 #include <TBenchmark.h>
-
-#define NUMPRINT 20 //>0
-#define MAXNUMHITS 200 //Highest multiplicity
 
 ULong64_t MaxProcessedEntries=1000000000;
 ULong64_t NumEntries = 0;
@@ -34,11 +30,8 @@ typedef struct {
   Float_t RDT[NRDT];
   Float_t TAC[NTAC];
   Float_t ELUM[NELUM];
-  Float_t EZERO[NEZERO];//0,1 - DE-E exit, 2,3 - DE-E atscat, 4 - ETOT
-  // 2,3 - DEX,EX
+  Float_t EZERO[NEZERO];
 
-  ULong64_t EBISTimestamp; 
-  ULong64_t T1Timestamp;   // proton pulse, not before run 33
   ULong64_t EnergyTimestamp[NARRAY];
   ULong64_t XFTimestamp[NARRAY];
   ULong64_t XNTimestamp[NARRAY];
@@ -87,9 +80,6 @@ void GeneralSort::Begin(TTree * tree)
   gen_tree->Branch("e",psd.Energy,           Form("Energy[%d]/F", NARRAY));
   gen_tree->Branch("e_t",psd.EnergyTimestamp,Form("EnergyTimestamp[%d]/l",NARRAY));
   
-  gen_tree->Branch("EBIS",&psd.EBISTimestamp,"EBISTimestamp/l");
-  gen_tree->Branch("T1",&psd.T1Timestamp,"T1Timestamp/l");
-  
   gen_tree->Branch("ring",psd.Ring,           Form("Ring[%d]/F", NARRAY));
   gen_tree->Branch("ring_t",psd.RingTimestamp,Form("RingTimestamp[%d]/l",NARRAY));
 
@@ -101,18 +91,34 @@ void GeneralSort::Begin(TTree * tree)
   
   gen_tree->Branch("x",psd.x, Form("x[%d]/F", NARRAY));
 
-  gen_tree->Branch("rdt",psd.RDT,            Form("RDT[%d]/F",NRDT));
-  gen_tree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT)); 
-
-  gen_tree->Branch("tac",psd.TAC,           Form("TAC[%d]/F", NTAC));
-  gen_tree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC)); 
+  if( NRDT > 0 ){
+    gen_tree->Branch("rdt",psd.RDT,            Form("RDT[%d]/F",NRDT));
+    gen_tree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT)); 
+  }else{
+    printf(" -----  no recoil.\n"); 
+  }
   
-  gen_tree->Branch("elum",  psd.ELUM,         Form("ELUM[%d]/F", NELUM));
-  gen_tree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM)); 
-
-  gen_tree->Branch("ezero",psd.EZERO,           Form("EZERO[%d]/F", NEZERO));
-  gen_tree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO)); 
-
+  if( NTAC > 0 ){
+    gen_tree->Branch("tac",psd.TAC,           Form("TAC[%d]/F", NTAC));
+    gen_tree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC)); 
+  }else{
+    printf(" -----  no TAC.\n"); 
+  }
+  
+  if( NELUM > 0 ){
+    gen_tree->Branch("elum",  psd.ELUM,         Form("ELUM[%d]/F", NELUM));
+    gen_tree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM)); 
+  }else{
+    printf(" -----  no elum\n"); 
+  }
+  
+  if( NZERO > 0 ){
+    gen_tree->Branch("ezero",psd.EZERO,           Form("EZERO[%d]/F", NEZERO));
+    gen_tree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO)); 
+  }else{
+    printf(" -----  no ezero.\n"); 
+  }
+  
   printf("======= ID-MAP: \n");
   printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
@@ -124,22 +130,22 @@ void GeneralSort::Begin(TTree * tree)
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
     if( 100 + NRDT >= idDetMap[i] && idDetMap[i] >= 100){
-      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Recoil, Cyan
     }else if( 200+NELUM >= idDetMap[i] && idDetMap[i] >= 200){
-      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
+      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Elum, 
     }else if( 300+NEZERO >= idDetMap[i] && idDetMap[i] >= 300){
-      printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+      printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// EZERO, 
     }else if( 400+NTAC >= idDetMap[i] && idDetMap[i] >= 400){
-      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // TAC, 
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// TAC, 
     }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
-         case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // RED
-         case  1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Green
-         case  2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Yellow
-         case  3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Blue
-         case  4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; // Magenta
-         default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; // no color
+         case  0: printf("\033[31m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; /// RED
+         case  1: printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; /// Green
+         case  2: printf("\033[33m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; /// Yellow
+         case  3: printf("\033[34m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; /// Blue
+         case  4: printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); break; /// Magenta
+         default: printf("%3d(%2d)|", idDetMap[i], idKindMap[i]); break; /// no color
        }
      }else{
        printf("%7s|", "");
@@ -196,14 +202,10 @@ Bool_t GeneralSort::Process(Long64_t entry)
       runIDPresent = fileNum.Atoi();
    } 
    psd.runID = runIDPresent; 
-  
-  
+
   
   ProcessedEntries++;
   if (ProcessedEntries<MaxProcessedEntries) {
-    
-    psd.EBISTimestamp=TMath::QuietNaN();
-    psd.T1Timestamp=TMath::QuietNaN();
 
     ///=============================== Zero struct
     for (Int_t i=0;i<NARRAY;i++) {//num dets
@@ -294,7 +296,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 100 + NRDT ) {
         Int_t rdtID = idDet-100;
-        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN ;
+        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN*(-1) ;
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 
@@ -310,16 +312,6 @@ Bool_t GeneralSort::Process(Long64_t entry)
         Int_t ezeroID = idDet - 300;
         psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
-      }
-      
-      ///=============================== EBIS 
-      if (id[i]==1010) {
-        psd.EBISTimestamp = event_timestamp[i];
-      }
-         
-      ///=============================== T1 proton pulse
-      if (id[i]==1013) {
-        psd.T1Timestamp = event_timestamp[i];
       }
       
     } // End NumHits Loop
