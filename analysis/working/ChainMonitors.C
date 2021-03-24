@@ -12,14 +12,14 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     //chain->Add("../root_data/gen_run01[0-8].root"); //82Kr
     
     ///start a stable run
-    chain->Add("../root_data/gen_run019.root"); //82Kr
-    chain->Add("../root_data/gen_run02[0-9].root"); //82Kr
-    chain->Add("../root_data/gen_run03[0-9].root"); //82Kr
-    chain->Add("../root_data/gen_run04[0-9].root"); //82Kr
-    chain->Add("../root_data/gen_run05[0-9].root"); //82Kr
-    chain->Add("../root_data/gen_run06[0-9].root"); //82Kr
-    chain->Add("../root_data/gen_run07[0-9].root"); //82Kr
-    chain->Add("../root_data/gen_run080.root"); //82Kr
+    //chain->Add("../root_data/gen_run019.root"); //82Kr
+    //chain->Add("../root_data/gen_run02[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run03[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run04[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run05[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run06[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run07[0-9].root"); //82Kr
+    //chain->Add("../root_data/gen_run080.root"); //82Kr
     
     
     //chain->Add("../root_data/gen_run08[1-9].root"); //82Se
@@ -42,7 +42,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     //chain->Add("../root_data/gen_run12[6-9].root"); //carbon
     //chain->Add("../root_data/gen_run13[0-4].root"); //carbon
     //chain->Add("../root_data/gen_run15[9].root"); //carbon
-    //chain->Add("../root_data/gen_run22[1-8].root"); // carbon
+    chain->Add("../root_data/gen_run22[1-8].root"); // carbon
     ///********** end Marker for AutoCalibration.
   }else{
     

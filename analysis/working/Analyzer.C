@@ -23,12 +23,16 @@ const int numDet = numRow * numCol ;
 
 //######################################## User Inputs
 
-vector<int> listOfBadDet = {4, 5, 7, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
+//82Kr
+//vector<int> listOfBadDet = {4, 5, 7, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
 
-double rangeEx[3] = { 20, -0.5, 2}; ///resol. [keV], low Ex, high Ex
+//82Se
+vector<int> listOfBadDet = { 4, 5, 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22, 23};
+
+double rangeEx[3] = { 20, -1.0, 2.7}; ///resol. [keV], low Ex, high Ex
 double rangeCM[3] = {0.1, 5, 45}; ///resol. [deg], low deg, high deg
 
-const int nDiv = 10; // division of detector
+const int nDiv = 2; // division of detector
 
 bool isExOffset = false;
 double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
@@ -365,19 +369,32 @@ Bool_t Analyzer::Process(Long64_t entry)
       if( i ==  9 ) Ex = Ex + x[i]* 0.013 + x[i]*x[i]*0.020;
       if( i == 16 ) Ex = Ex + x[i]* 0.030;
       if( i == 12 ) Ex = Ex - 0.039;
+      //if( i ==  4 ) Ex = Ex - x[i]* 0.0096 - x[i]*x[i]* 0.019 + pow(x[i],3)*0.016 - pow(x[i],4)*0.034 - pow(x[i],5)*0.047 + pow(x[i],6)*0.058;
       
-      
-      if( i ==  0 ) Ex = Ex*1.0875 + 0.0084;
-      if( i ==  6 ) Ex = Ex*1.0705 + 0.022;
-      if( i == 12 ) Ex = Ex*1.0517 + 0.0468;
-      if( i ==  1 ) Ex = Ex*0.9968 - 0.005;
-      if( i == 13 ) Ex = Ex*1.0018 - 0.017;
-      if( i ==  2 ) Ex = Ex*1.0049 - 0.112;
-      if( i ==  8 ) Ex = Ex*0.9932 + 0.0393;
-      if( i == 14 ) Ex = Ex*0.9977 + 0.0239;
-      if( i ==  3 ) Ex = Ex*1.0003 + 0.0016;
-      if( i == 15 ) Ex = Ex*1.0028 - 0.0028;
-      if( i == 16 ) Ex = Ex*1.0059 - 0.05;
+      ////==== 82Kr
+      ///if( i ==  0 ) Ex = Ex*1.0875 + 0.0084;
+      ///if( i ==  6 ) Ex = Ex*1.0705 + 0.022;
+      ///if( i == 12 ) Ex = Ex*1.0517 + 0.0468;
+      ///if( i ==  1 ) Ex = Ex*0.9968 - 0.005;
+      ///if( i == 13 ) Ex = Ex*1.0018 - 0.017;
+      ///if( i ==  2 ) Ex = Ex*1.0049 - 0.112;
+      ///if( i ==  8 ) Ex = Ex*0.9932 + 0.0393;
+      ///if( i == 14 ) Ex = Ex*0.9977 + 0.0239;
+      ///if( i ==  3 ) Ex = Ex*1.0003 + 0.0016;
+      ///if( i == 15 ) Ex = Ex*1.0028 - 0.0028;
+      ///if( i == 16 ) Ex = Ex*1.0059 - 0.05;
+
+      ////==== 82Se
+      if( i ==  0 ) Ex = Ex * 1.012 + 0.035;
+      if( i ==  1 ) Ex = Ex * 1.021 - 0.055;
+      if( i ==  2 ) Ex = Ex * 1.004 + 0.008;
+      if( i ==  3 ) Ex = Ex * 1.014 - 0.022;
+      if( i == 12 ) Ex = Ex * 1.005 + 0.064;
+      if( i == 13 ) Ex = Ex * 1.001 + 0.071;
+      if( i == 14 ) Ex = Ex * 1.004 + 0.077;
+      if( i == 15 ) Ex = Ex * 1.020 - 0.033;
+      if( i == 16 ) Ex = Ex * 1.011 - 0.047;
+
 
       //if( !(-0.2 < Ex && Ex < 0.2 )) return kTRUE;
       
@@ -390,7 +407,8 @@ Bool_t Analyzer::Process(Long64_t entry)
       hExi[i]->Fill(Ex);
       hxExi[i]->Fill(Ex, x[i]);
 
-      hExxi[i]->Fill(x[i], Ex);
+      //hExxi[i]->Fill(x[i], Ex); // 82Kr
+      if( 0.4 < Ex && Ex < 0.8 ) hExxi[i]->Fill(x[i], Ex); //82Se
 
       hez->Fill(z[i],e[i]);
       hExT->Fill(thetaCM,Ex);
@@ -501,9 +519,9 @@ void Analyzer::Terminate()
   
    //=========== Plot
    int nX = numCol, nY = numRow;
-   nX = nDiv;
-   nY = 5;
-   int sizeX = 300, sizeY = 200;
+   nX = 5;
+   nY = 1;
+   int sizeX = 800, sizeY = 600;
    cAna = new TCanvas("cAna", "Analyzer | " + canvasTitle, nX * sizeX, nY * sizeY);
    cAna->Divide(nX,nY);
    if( cAna->GetShowEditor() ) cAna->ToggleEditor(); 
@@ -511,23 +529,35 @@ void Analyzer::Terminate()
    ///double max = findXMax(hei)
    double max = findXMax(hExi);
    
-   ///cAna->cd(1);
+   cAna->cd(1);
    ///hEx->Draw();
    ///
    ///cAna->cd(2);
    ///hExT->Draw("colz");
    
    
-   for( int i = 0; i < numCol-1; i++){
-      for( int j = 0; j < nDiv ; j++){
-         cAna->cd(i*nDiv+j+1);
-         hExcd[i][j]->Draw();
-      }
+   //for( int i = 0; i < numCol-1; i++){
+   //   for( int j = 0; j < nDiv ; j++){
+   //      cAna->cd(i*nDiv+j+1);
+   //      hExcd[i][j]->Draw();
+   //   }
+   //}
+   
+   for( int i = 0; i < nX; i++){
+      cAna->cd(i+1);
+      
+      hExi[i]->SetLineColor(2);
+      hExi[i+12]->SetLineColor(4);
+      
+      hExi[i+12]->Draw();
+      hExi[i]->Draw("same");
+      
    }
    
-   /**
+   
+   /*
    for( int i = 0; i < numDet; i++){
-      cAna->cd(i+1);
+      //cAna->cd(i+1);
       //cAna->cd(i+1)->SetGrid();
       //cAna->cd(i+1)->SetLogy();
       //hei[i]->GetYaxis()->SetRangeUser(0.5, max * 1.1);
@@ -538,10 +568,10 @@ void Analyzer::Terminate()
       //if( i >= 18 ) continue;
 
       //hEBISi[i]->Draw();
-      //hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
+      hExi[i]->GetYaxis()->SetRangeUser(0, max*1.2);
       //hExi[i]->SetLineColor((i/6+1 == 3 ? 4 : i/6+1));
-      //hExi[i]->SetLineColor(i+1);
-      //hExi[i]->Draw("same");
+      hExi[i]->SetLineColor(i+1);
+      hExi[i]->Draw("same");
       
       //cAna->cd(i%6+19);
       //hExi[i]->Draw((i/6==0 ? "" :"same"));
@@ -555,7 +585,7 @@ void Analyzer::Terminate()
 
       //2-D 
       //hexi[i]->Draw(); 
-      //hxExi[i]->SetMarkerStyle(7);
+      //hxExi[i]->SetMarkerStyle(6);
       //hxExi[i]->SetMarkerColorAlpha(1,0.2);
       //hxExi[i]->Draw("");
 
