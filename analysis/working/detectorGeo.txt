@@ -12,7 +12,7 @@ false    //is_coincident_with_recoil
 0.00     //Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
 0.00     //Elum_2_position_[mm]_when_Elum=0_disable_tree_branch
 12.4     //blocker_length_from_1st_detector_[mm]
--193      //nearest_position_to_target_-_for_upstream_[mm]
+-145      //nearest_position_to_target_-_for_upstream_[mm]
 0.04     //energy_resolution_of_PSD_array_[MeV]
 0.50     //position_resolution_of_PSD_array_[mm]
 4        //number_of_detector_as_same_side
