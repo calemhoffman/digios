@@ -811,8 +811,12 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
     }
   }else if( sigmaMax < 0 ){
     printf("========== use user input sigma : %f (fixed)\n", abs(sigmaMax));
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(abs(sigmaMax));
   }else if( sigmaMax > 0 ){
     printf("========== use user input sigma : %f/2. \n", sigmaMax/2.);
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(sigmaMax/2.);
   }
     
   
@@ -2108,8 +2112,12 @@ void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
     printf("========== use the mean sigma : %f \n", sigma0);
   }else if( sigmaMax < 0 ){
     printf("========== use user input sigma : %f (fixed)\n", abs(sigmaMax));
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(abs(sigmaMax));
   }else if( sigmaMax > 0 ){
     printf("========== use user input sigma : %f/2. \n", sigmaMax/2.);
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(sigmaMax/2.);
   }
 
   printf("-------------- Fit the spectrum with %d-Gauss + Pol-%d\n", nPeaks, nPols );
@@ -2408,8 +2416,12 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
     }  
   }else if( sigmaMax < 0 ){
     printf("========== use user input sigma : %f (fixed)\n", abs(sigmaMax));
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(abs(sigmaMax));
   }else if( sigmaMax > 0 ){
     printf("========== use user input sigma : %f/2. \n", sigmaMax/2.);
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(sigmaMax/2.);
   }
     
   printf("-------------- Fit the subtracted spectrum with %d-Gauss\n", nPeaks );
@@ -2509,6 +2521,180 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
             paraA[3*i+2], paraE[3*i+2]));
   }
 }
+
+
+//########################################
+//#### fit N-Gauss with pol-1 BG at fixed for < 0
+//########################################
+void fitSpecial(TH1F * hist, TString fitFile = "AutoFit_para.txt"){
+
+  printf("================================================================\n");
+  printf("================ Special fit for h074_82Kr =====================\n");
+  printf(" * need the file input \n");
+  printf("================================================================\n");
+  
+
+  bool isParaRead = loadFitParameters(fitFile);
+  if( !isParaRead ) {
+    printf("Please provide a valid input file\n");
+    return;
+  }
+
+  gStyle->SetOptStat("");
+  gStyle->SetOptFit(0);
+  nPeaks = energy.size();
+  nPols = 1;
+
+  TCanvas * cFitSpecial = NewCanvas("cFitSpecial", "Fitting for h074_82Kr", 1, 3, 800, 300);
+  //if(! cFitSpecial->GetShowEventStatus() ) cFitSpecial->ToggleEventStatus();
+  cFitSpecial->cd(1);
+
+  ScaleAndDrawHist(hist, 0, 0);
+  
+  double  xMin = hist->GetXaxis()->GetXmin();
+  double  xMax = hist->GetXaxis()->GetXmax();
+  int     xBin = hist->GetXaxis()->GetNbins();
+
+  printf("============= find the pol-1 background ..... \n");
+  
+  TF1 * fitpol1 = new TF1("fitpol1", "pol1", xMin, -0.3);
+  fitpol1->SetParameter(0, gRandom->Rndm());
+  fitpol1->SetParameter(1, gRandom->Rndm());
+  
+  hist->Fit("fitpol1", "Rq");
+  
+  double x0 = fitpol1->GetParameter(0);
+  double x1 = fitpol1->GetParameter(1);
+  
+  
+  int  nPar = 3 * nPeaks + nPols + 1;
+  double * para = new double[nPar]; 
+  for(int i = 0; i < nPeaks ; i++){
+    para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
+    para[3*i+1] = energy[i];
+    para[3*i+2] = sigma[i]/2.;
+  }
+
+  para[3*nPeaks+0] = x0;
+  para[3*nPeaks+1] = x1;
+  
+  
+  TF1 * fit = new TF1("fit", nGaussPol, xMin, xMax, nPar );
+  fit->SetLineWidth(3);
+  fit->SetLineColor(1);
+  fit->SetNpx(1000);
+  fit->SetParameters(para);
+
+  //fixing parameters
+  for( int i = 0; i < nPeaks; i++){
+    fit->SetParLimits(3*i  ,       0, 1e9); 
+    if( energyFlag[i] == 1 ) {
+      fit->FixParameter(3*i+1, energy[i]);
+    }else{
+      fit->SetParLimits(3*i+1, lowE[i], highE[i]); 
+    }
+    if( sigmaFlag[i]  == 1 ) {
+      fit->FixParameter(3*i+2, sigma[i]);
+    }else{
+      fit->SetParLimits(3*i+2, 0, sigma[i]);
+    }
+  }
+  
+  fit->FixParameter(3*nPeaks + 0, x0);
+  fit->FixParameter(3*nPeaks + 1, x1);
+  
+  hist->Fit("fit", "Rq");
+  
+  //=========== get the polynomial part 
+  const Double_t* paraA = fit->GetParameters();
+  const Double_t* paraE = fit->GetParErrors();
+
+  TString polExp = "[0]";
+  for( int i = 1; i < nPols + 1; i++){
+    polExp += Form("+[%d]*TMath::Power(x,%d)", i, i );
+  }
+
+  TF1 * bg = new TF1("bg", polExp.Data(), xMin, xMax);
+  for( int i = 0; i < nPols + 1; i++){
+    bg->SetParameter(i, paraA[3*nPeaks+i]);
+  }
+  bg->SetNpx(1000);
+
+  for( int i = 0; i < nPols + 1; i++){
+    printf("%4s : %8.4e(%8.4e)\n", Form("p%d", i), paraA[3*nPeaks+i], paraE[3*nPeaks+i]);
+  }
+  printf("====================================\n");
+  
+  cFitSpecial->cd(1);
+  bg->Draw("same");
+  
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.04);
+  text.SetTextColor(1);
+
+  for( int i = 0; i < nPols + 1; i++){
+    text.DrawLatex(0.6, 0.85 - 0.05*i, Form("%4s : %8.4e(%8.4e)\n", Form("p%d", i), paraA[3*nPeaks+i], paraE[3*nPeaks+i]));
+  }
+
+  double chi2 = fit->GetChisquare();
+  int ndf = fit->GetNDF();
+  text.SetTextSize(0.06);
+  text.DrawLatex(0.15, 0.8, Form("#bar{#chi^{2}} : %5.3f", chi2/ndf));
+
+  
+  //GoodnessofFit(specS, fit); 
+  
+  double bw = hist->GetBinWidth(1);
+
+  for(int i = 0; i < nPeaks ; i++){
+    printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]);
+  }
+  printf("\n");
+  
+  
+  const int nn = nPeaks;
+  TF1 ** gFit = new TF1 *[nn];
+  for( int i = 0; i < nPeaks; i++){
+      gFit[i] = new TF1(Form("gFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1)", xMin, xMax);
+      gFit[i]->SetParameter(0, paraA[3*i]);
+      gFit[i]->SetParameter(1, paraA[3*i+1]);
+      gFit[i]->SetParameter(2, paraA[3*i+2]);
+      gFit[i]->SetLineColor(i+1);
+      gFit[i]->SetNpx(1000);
+      gFit[i]->SetLineWidth(1);
+      gFit[i]->Draw("same");
+  }
+  
+  cFitSpecial->Update();
+
+  cFitSpecial->cd(2);
+  PlotResidual(hist, fit);
+
+  cFitSpecial->cd(3);
+  
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.05);
+  text.SetTextColor(2);
+  
+  text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+  
+  for( int i = 0; i < nPeaks; i++){
+  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]));
+  }
+  
+}
+
 
 
 
