@@ -1,8 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
 // Thu May  7 16:10:02 2015 by ROOT version 5.32/00
-// from TTree tree/tree
-// found on file: run5113.root
 //////////////////////////////////////////////////////////
 
 #ifndef GeneralSort_h
