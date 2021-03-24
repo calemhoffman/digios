@@ -29,12 +29,12 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {  100,     6000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      12};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     600};
+int     rdtDERange[2] = {    50,     600};
 int      rdtERange[2] = {   100,    3000};
 int      elumRange[2] = {     0,    7000};
-int       TACRange[3] = { 300,    300,   1800};  /// #bin, min, max
+int       TACRange[3] = { 300,   1000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 
 double     exRange[3] = {  200,    -3,     12};  /// bin [keV], low[MeV], high[MeV]
@@ -782,15 +782,15 @@ void Monitors::Begin(TTree *tree)
    hBIC = new TH1F("hBIC", "BIC rate ; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
    
    //===================== EZERO
-   ///int icEnergy = 100;
-   ///hic0 = new TH1F("hic0", "IC0; IC-0 [ch]; count", 500, -30, icEnergy);
-   ///hic1 = new TH1F("hic1", "IC1; IC-1 [ch]; count", 500, -30, icEnergy);
-   ///hic2 = new TH1F("hic2", "IC2; IC-2 [ch]; count", 500, 0, icEnergy);
-   ///hic2 = new TH1F("hic2", "0.62*IC1-IC0; [ch]; count", 200, -25, 30);
-   ///
-   ///hic01 = new TH2F("hic01", "IC0 - IC1; IC-1 [ch]; IC-0[ch]", 500, -30, icEnergy, 500, -30, icEnergy);
-   ///hic02 = new TH2F("hic02", "IC0 vs IC0+IC1; IC-2 [ch]; IC-0[ch]", 500, 0, icEnergy, 500, 500, 2000);
-   ///hic12 = new TH2F("hic12", "IC1 - IC2; IC-2 [ch]; IC-1[ch]", 500, 0, icEnergy, 500, 0, icEnergy);
+   int icEnergy = 100;
+   hic0 = new TH1F("hic0", "IC0; IC-0 [ch]; count", 500, -30, icEnergy);
+   hic1 = new TH1F("hic1", "IC1; IC-1 [ch]; count", 500, -30, icEnergy);
+   hic2 = new TH1F("hic2", "IC2; IC-2 [ch]; count", 500, 0, icEnergy);
+   hic2 = new TH1F("hic2", "0.62*IC1-IC0; [ch]; count", 200, -25, 30);
+   
+   hic01 = new TH2F("hic01", "IC0 - IC1; IC-1 [ch]; IC-0[ch]", 500, -30, icEnergy, 500, -30, icEnergy);
+   hic02 = new TH2F("hic02", "IC0 vs IC0+IC1; IC-2 [ch]; IC-0[ch]", 500, 0, icEnergy, 500, 500, 2000);
+   hic12 = new TH2F("hic12", "IC1 - IC2; IC-2 [ch]; IC-1[ch]", 500, 0, icEnergy, 500, 0, icEnergy);
    
    printf("======================================== End of histograms Declaration\n");
    StpWatch.Start();
@@ -874,7 +874,7 @@ Bool_t Monitors::Process(Long64_t entry)
     double rdtot[4] = {TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN()};
     
     /*********** TAC **************************************************/ 
-    htac->Fill(tac[0]);
+    htac->Fill(tac[2]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
     //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
@@ -894,11 +894,11 @@ Bool_t Monitors::Process(Long64_t entry)
     
     if( !TMath::IsNaN(elum[1]) ) hBIC->Fill(elum_t[1]/1e8/60.);
     
-    int tac2 = tac_t[2]-elum_t[0];        
+    int tac2 = tac_t[1]-elum_t[0];        
     htac2->Fill(tac2);
     
     ///if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
-     
+    
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
     Int_t recoilMulti = 0;
@@ -1108,7 +1108,7 @@ Bool_t Monitors::Process(Long64_t entry)
          htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
       }
    }
-   
+
    ///if( rdt_t[4] > 0 ){
    ///   if( abs(rdt[4] - 1658) < 40) hrdt14N->Fill(rdt_t[4]/1e8/60.);
    ///   if( abs(rdt[4] - 1783) < 40) hrdt14C->Fill(rdt_t[4]/1e8/60.);
@@ -1519,6 +1519,8 @@ void Monitors::Terminate()
    
    ///----------------------------------- Canvas - 20
    padID++; cCanvas->cd(padID);
+   
+   htac->Draw();
    
    /************************************/
    
