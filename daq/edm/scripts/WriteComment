@@ -1,0 +1,26 @@
+#!/bin/bash -l
+
+constFile=${HELIOSSYS}/expName.sh
+source ${constFile} #load expName, etc.
+
+#==== read comment
+if [ $# -eq 0 ];then
+    echo 'Ctrl+C to cancel with no harm.'
+    echo 'e.g. Target, beam rate, attenuation, slit, trigger, people on-shift, objective, etc... '
+    read -p 'Singleline comment for this run: ' COMMENT
+else
+    COMMENT=$1
+fi
+
+
+if [ -z  "$COMMENT" ]; then  
+    comment2="nan"
+else
+    comment2="${COMMENT// /\ }"
+fi
+
+echo $comment2
+
+curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=0" --max-time 1 --connect-timeout 1
+
+
