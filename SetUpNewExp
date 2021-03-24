@@ -207,7 +207,7 @@ ln -sfv ${rootData} ${expDIR}/analysis/root_data
 
 echo "=================== Set the database"
 
-curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://heliosDB:8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
 
 echo "=================== done."
 
