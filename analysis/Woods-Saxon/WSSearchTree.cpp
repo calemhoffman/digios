@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
 
   if(argc != 5 ) {
     //TODO put the mass number out of paraFile
-    printf("Usage: ./WSMakeTree  A  Z  paraFile  outRoot\n");
+    printf("Usage: ./WSSearchTree  A  Z  paraFile  outRoot\n");
     printf("             A = mass number\n");
     printf("             Z = proton number [ ZERO for neutron level ]\n");
     printf("      paraFile = search setting\n");

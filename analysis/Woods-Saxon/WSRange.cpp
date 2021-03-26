@@ -128,15 +128,15 @@ int main(int argc, char *argv[]){
       orbitalStr = ws.orbString;
       fprintf(file_out, "%6s, ", "massA");
       for( int i = 0; i < orbitalStr.size(); i++){
-	string temp = orbitalStr[i];
-	temp.insert(2,"_{");
-	temp = temp + "}";
-	fprintf(file_out,"%9s  ", temp.c_str());
+        string temp = orbitalStr[i];
+        temp.insert(2,"_{");
+        temp = temp + "}";
+        fprintf(file_out,"%9s  ", temp.c_str());
       }
       fprintf(file_out,"\n");
       fprintf(file_out, "%6f, ", massA);
       for( int i = 0; i < orbitalStr.size(); i++){
-	fprintf(file_out,"%9.4f, ", ws.energy[i]);
+        fprintf(file_out,"%9.4f, ", ws.energy[i]);
       }
       fprintf(file_out,"\n");
     }else{
@@ -144,18 +144,17 @@ int main(int argc, char *argv[]){
       //matching orbital
       fprintf(file_out, "%6f, ", massA);
       for( int i = 0; i < orbitalStr.size(); i++){
-	bool isMatched = false;
-	for( int j = 0; j < (ws.energy).size(); j++){
-	  if( orbitalStr[i] == ws.orbString[j] ) {
-	    fprintf(file_out,"%9.4f, ", ws.energy[j]);
-	    isMatched = true;
-	  }
-	}
-	if( isMatched == false ) fprintf(file_out,"%9s, " , "");
+        bool isMatched = false;
+        for( int j = 0; j < (ws.energy).size(); j++){
+          if( orbitalStr[i] == ws.orbString[j] ) {
+            fprintf(file_out,"%9.4f, ", ws.energy[j]);
+            isMatched = true;
+          }
+        }
+        if( isMatched == false ) fprintf(file_out,"%9s, " , "");
       }
       fprintf(file_out,"\n");
       
-
     }
     
   }
