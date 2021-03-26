@@ -29,7 +29,7 @@ int main(int argc, char *argv[]){
     printf("       VSO : Spin-orbital depth [MeV]\n");
     printf("       RSO : half-maximum radius (fm) \n");
     printf("       aSO : diffusiveness (fm) \n");
-    printf("         Z : charge number \n");
+    printf("         Z : charge number, if for neutron, Z = 0.\n");
     printf("        Rc : Coulomb radius (fm) \n");
     printf("      nStep: number of Step (300)\n");
     printf("        dr : stepSize [fm] (0.1)\n");

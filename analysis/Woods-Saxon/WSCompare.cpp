@@ -17,41 +17,8 @@
 #include "matrix.h"
 #include "matrix.cpp"
 
+#include "../Armory/AnalysisLibrary.h"
 using namespace std;
-
-
-vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
-
-  vector<string> output;
-
-  size_t pos;
-  do{
-    pos = tempLine.find(splitter); // fine splitter
-    if( pos == 0 ){ //check if it is splitter again
-      tempLine = tempLine.substr(pos+1);
-      continue;
-    }
-
-    string secStr;
-    if( pos == string::npos ){
-      secStr = tempLine;
-    }else{
-      secStr = tempLine.substr(0, pos+shift);
-      tempLine = tempLine.substr(pos+shift);
-    }
-
-    //check if secStr is begin with space
-    if( secStr.substr(0, 1) == " "){
-      secStr = secStr.substr(1);
-    }
-
-    output.push_back(secStr);
-    //printf(" |%s---\n", secStr.c_str());
-    
-  }while(pos != string::npos );
-
-  return output;
-}
 
 int main(int argc, char *argv[]){
 
@@ -65,7 +32,7 @@ int main(int argc, char *argv[]){
     printf("           VSO = inital guess of Spin-Orbital depth [MeV]\n");
     printf("           rso = reduced radius for Spin-Orbital potential [fm]\n");
     printf("           aso = reduced radius for Spin-Orbital potential [fm]\n");
-    printf("             Z = proton number \n");
+    printf("         Z : charge number, if for neutron, Z = 0.\n");
     printf("            rc = reduced radius for Coulomb potential [fm]\n");
     printf("         nStep = number of r-grid\n");
     printf("            dr = grid size [fm]\n");
@@ -125,11 +92,11 @@ int main(int argc, char *argv[]){
     
   }
   
-  //printf("============ Input from %s.\n", readFile.c_str());
-  //for( int i = 0; i < NLJ.size() ; i++){  
-  //printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);  
-  //}
-  //printf("==============================\n");
+  printf("============ Input from %s.\n", readFile.c_str());
+  for( int i = 0; i < NLJ.size() ; i++){  
+    printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);  
+  }
+  printf("==============================\n");
   
   WoodsSaxon ws;
   
@@ -290,7 +257,7 @@ int main(int argc, char *argv[]){
 
   printf("############################## Calculate WS levels and compare\n");
   
-  printf("      Experiment      |      Woods-Saxon      |     diff\n");
+  printf("       Experiment      |      Woods-Saxon      |     diff\n");
   double rms = 0;
   double chisq = 0;
   int numMatch = 0;
@@ -299,9 +266,9 @@ int main(int argc, char *argv[]){
       if( NLJ[i] == ws.orbString[j] ){
         double diff = BE[i] -  ws.energy[j];
         rms += pow(diff,2);
-	if(Error.size() == NLJ.size() )chisq += pow(diff,2)/pow(Error[i],2);
+        if(Error.size() == NLJ.size() )chisq += pow(diff,2)/pow(Error[i],2);
         numMatch ++;
-        printf(" %d %6s (%9.6f) | %d %6s (%9.6f) | %8.2f keV \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff * 1000.);
+        printf(" %2d %6s (%9.6f) | %2d %6s (%9.6f) | %8.2f keV \n",i,  NLJ[i].c_str(), BE[i], j, ws.orbString[j].c_str(), ws.energy[j], diff * 1000.);
         continue;
       }
     }
@@ -309,10 +276,10 @@ int main(int argc, char *argv[]){
   
   if( numMatch != NLJ.size() ){
     rms = TMath::QuietNaN();
-    printf("========================================= RMS = \e[31mfail\e[0m keV \n");
+    printf("=========================================  RMS = \e[31mfail\e[0m keV \n");
   }else{
     rms = sqrt(rms/NLJ.size());
-    printf("========================================= RMS = \e[31m%8.2f\e[0m keV | Chi-sq = %8.2f.\n", rms*1000., chisq);
+    printf("=========================================  RMS = \e[31m%8.2f\e[0m keV | Chi-sq = %8.2f.\n", rms*1000., chisq);
   }
 
   ws.PrintEnergyLevels();

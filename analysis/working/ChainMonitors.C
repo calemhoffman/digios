@@ -101,24 +101,28 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1) {
     ///chain->Add("../root_data/gen_run365.root"); ///207Bi, upstream
     //chain->Add("../root_data/gen_run366.root"); ///207Bi, upstream
     ///chain->Add("../root_data/gen_run367.root"); ///207Bi, downstream
+
     
-    ///chain->Add("../root_data/gen_run368.root"); ///BG
-    ///chain->Add("../root_data/gen_run369.root"); ///BG
+    //chain->Add("../root_data/gen_run368.root"); ///BG
+    //chain->Add("../root_data/gen_run369.root"); ///BG
     
     //====== high energy   
+    //chain->Add("../root_data/gen_run306.root"); ///16N, 140enA, Ta stopper
+    //chain->Add("../root_data/gen_run308.root"); ///16N, 140enA, Al stopper
+
     ///chain->Add("../root_data/gen_run30[2-3].root"); ///16N, 27.5enA
-    //chain->Add("../root_data/gen_run30[7-9].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run31[0-9].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run32[0-9].root"); ///16N, 140enA
-    //chain->Add("../root_data/gen_run33[0-7].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run30[7-9].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run31[0-9].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run32[0-9].root"); ///16N, 140enA
+    chain->Add("../root_data/gen_run33[0-7].root"); ///16N, 140enA
     ///chain->Add("../root_data/gen_run338.root"); ///16N, 700enA
     
     //====== low energy
     ///chain->Add("../root_data/gen_run339.root");     ///16N, 1.6enA
-    chain->Add("../root_data/gen_run34[0-1].root"); ///16N, 1.6enA
-    chain->Add("../root_data/gen_run34[4-5].root"); ///16N, 16enA
-    chain->Add("../root_data/gen_run34[6-9].root"); ///16N, 50enA
-    chain->Add("../root_data/gen_run35[0-4].root"); ///16N, 50enA
+    //chain->Add("../root_data/gen_run34[0-1].root"); ///16N, 1.6enA
+    //chain->Add("../root_data/gen_run34[4-5].root"); ///16N, 16enA
+    //chain->Add("../root_data/gen_run34[6-9].root"); ///16N, 50enA
+    //chain->Add("../root_data/gen_run35[0-4].root"); ///16N, 50enA
     
     
   }else{

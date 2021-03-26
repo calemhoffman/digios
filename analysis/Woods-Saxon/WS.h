@@ -74,7 +74,7 @@ public:
     this->r0 = r0;
     this->rSO = rSO;
     this->rc = rc;
-		
+
     this->R0  = r0  * pow(A, 1./3.);
     this->RSO = rSO * pow(A, 1./3.);
     this->Rc  = rc  * pow(A, 1./3.);
@@ -140,79 +140,79 @@ public:
 
       for( float J = L + 0.5 ;  J >= abs(L - 0.5) ; J = J - 1. ){
 
-	if( VSO == 0. &&  J < L + 0.5 ) continue;
+        if( VSO == 0. &&  J < L + 0.5 ) continue;
 
-	LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
-	//printf(" ----------------  L, J = %d, %3.1f | LS : %f \n", L, J, LS); 
-	int nValue = 0;
-	for( float KE = V0 ; KE < 0 ; KE = KE + dKE ){
-				
-	  vector<double> outputRK = SolveRadialFunction(KE, L); // RKfouth will output the wavefunction at the furtherst distant.
-			  
-	  u = outputRK[0];
+        LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
+        //printf(" ----------------  L, J = %d, %3.1f | LS : %f \n", L, J, LS); 
+        int nValue = 0;
+        for( float KE = V0 ; KE < 0 ; KE = KE + dKE ){
+              
+          vector<double> outputRK = SolveRadialFunction(KE, L); // RKfouth will output the wavefunction at the furtherst distant.
+              
+          u = outputRK[0];
 
-	  //printf(" ====  KE , uOdl,  u : %f , %f,  %f \n", KE, uOld,  u);
+          //printf(" ====  KE , uOdl,  u : %f , %f,  %f \n", KE, uOld,  u);
 
-	  if( KE == V0 ) {
-	    uOld = u;
-	    continue;
-	  }
+          if( KE == V0 ) {
+            uOld = u;
+            continue;
+          }
 
-	  //check crossing point 
-	  if( u * uOld < 0 ) {
-	    //use bi-section method to find zero point 
-	    double e1 = KE - dKE;
-	    double e2 = KE;
-	    double w , wr; 
-	    double e , de;
-	    int loop = 0;
+          //check crossing point 
+          if( u * uOld < 0 ) {
+            //use bi-section method to find zero point 
+            double e1 = KE - dKE;
+            double e2 = KE;
+            double w , wr; 
+            double e , de;
+            int loop = 0;
 
-	    do{
-	      loop ++;
-	      e = (e1 + e2)/2.;
-	      de = abs( e-e1);
-	      vector<double> out = SolveRadialFunction(e, L);
-	      w = out[0];
-	      wr = out[0]/out[1];
-	      if( loop > maxLoop ) break;
+            do{
+              loop ++;
+              e = (e1 + e2)/2.;
+              de = abs( e-e1);
+              vector<double> out = SolveRadialFunction(e, L);
+              w = out[0];
+              wr = out[0]/out[1];
+              if( loop > maxLoop ) break;
 
-	      //printf(" %d|  %f< e = %f< %f |  w : %f\n", loop,  e1, e, e2,  w);
+              //printf(" %d|  %f< e = %f< %f |  w : %f\n", loop,  e1, e, e2,  w);
 
-	      if( uOld * w < 0 ) {
-		e2 = e;
-		continue;
-	      }
+              if( uOld * w < 0 ) {
+                e2 = e;
+                continue;
+              }
 
-	      if( w * u < 0 ){
-		e1 = e;
-		continue;
-	      }
-	    }while( abs(w) > torr || de > eTorr );
+              if( w * u < 0 ){
+                e1 = e;
+                continue;
+              }
+            }while( abs(w) > torr || de > eTorr );
 
-	    char buffer[100];
-	    int nn = sprintf(buffer, "%d%s%d/2", nValue, orbital.c_str(), J > L ? 2*L+1 : 2*L-1);
+            char buffer[100];
+            int nn = sprintf(buffer, "%d%s%d/2", nValue, orbital.c_str(), J > L ? 2*L+1 : 2*L-1);
 
-	    string temp = buffer;
-	    orbString.push_back(temp);
-	    if( useBarrier ) {
-	      double barrier = FindBarrier(L);
-	      //printf(" J=%3.1f, L = %d,  barrier = %f \n", J, L, barrier); 
-	      energy.push_back(e - barrier);
-	    }else{
-	      energy.push_back(e);
-	    }
-	    errorU.push_back(w);
-	    errorE.push_back(de);
-	    errorUratio.push_back(wr); // It seems that wRatio is useless
-				 
-	    if( loop < maxLoop || (abs(w) < torr && de < eTorr && wr < 0.01)) nValue++;
-				 
-	    //printf(" %s : %12.6f (Last u = %f ), loop %d, de %f, wr %f \n", temp.c_str(),  e, w , loop, de, wr);
-	  }
+            string temp = buffer;
+            orbString.push_back(temp);
+            if( useBarrier ) {
+              double barrier = FindBarrier(L);
+              //printf(" J=%3.1f, L = %d,  barrier = %f \n", J, L, barrier); 
+              energy.push_back(e - barrier);
+            }else{
+              energy.push_back(e);
+            }
+            errorU.push_back(w);
+            errorE.push_back(de);
+            errorUratio.push_back(wr); // It seems that wRatio is useless
+               
+            if( loop < maxLoop || (abs(w) < torr && de < eTorr && wr < 0.01)) nValue++;
+               
+            //printf(" %s : %12.6f (Last u = %f ), loop %d, de %f, wr %f \n", temp.c_str(),  e, w , loop, de, wr);
+          }
 
-	  uOld = u;
+          uOld = u;
 
-	} // end of KE-loop
+        } // end of KE-loop
       } // end of J-loop
     } // end of L-loop
 	  
@@ -223,55 +223,50 @@ public:
     for (i = 0; i < size-1; i++) { 
       swapped = false; 
       for (j = 0; j < size-i-1; j++) { 
-	if (energy[j] > energy[j+1]) { 
-	  double temp = energy[j+1];
-	  energy[j+1] = energy[j];
-	  energy[j] = temp;
+        if (energy[j] > energy[j+1]) { 
+          double temp = energy[j+1];
+          energy[j+1] = energy[j];
+          energy[j] = temp;
 
-	  string tempstr = orbString[j+1];
-	  orbString[j+1] = orbString[j];
-	  orbString[j] = tempstr;
+          string tempstr = orbString[j+1];
+          orbString[j+1] = orbString[j];
+          orbString[j] = tempstr;
 
-	  temp = errorU[j+1];
-	  errorU[j+1] = errorU[j];
-	  errorU[j] = temp;
-			  
-	  temp = errorE[j+1];
-	  errorE[j+1] = errorE[j];
-	  errorE[j] = temp;
-			  
-	  temp = errorUratio[j+1];
-	  errorUratio[j+1] = errorUratio[j];
-	  errorUratio[j] = temp;
+          temp = errorU[j+1];
+          errorU[j+1] = errorU[j];
+          errorU[j] = temp;
+              
+          temp = errorE[j+1];
+          errorE[j+1] = errorE[j];
+          errorE[j] = temp;
+              
+          temp = errorUratio[j+1];
+          errorUratio[j+1] = errorUratio[j];
+          errorUratio[j] = temp;
 
-	  swapped = true; 
-	} 
+          swapped = true; 
+        } 
       } 
 
       // IF no two elements were swapped by inner loop, then break 
-      if (swapped == false) 
-	break; 
+      if (swapped == false) break; 
     } 
-	  
-	  
+
     //Erase incorrect energy
     for( int i = energy.size() - 1 ; i >=0  ; i--){
       //printf("%s, energy: %f, errorU : |%f|,  torr :  %f \n", orbString[i].c_str(), energy[i],  errorU[i], torr); 
-			
       //if( errorU[i] > torr || errorU[i] < -torr || errorE[i] > eTorr){
       if( abs(errorU[i]) > torr || errorE[i] > eTorr){
-			 
-	orbString.erase(orbString.begin() + i);
-	energy.erase(energy.begin() + i);
-	errorU.erase(errorU.begin() + i);
-	errorE.erase(errorE.begin() + i);
-	errorUratio.erase(errorUratio.begin() + i);
-			
+
+        orbString.erase(orbString.begin() + i);
+        energy.erase(energy.begin() + i);
+        errorU.erase(errorU.begin() + i);
+        errorE.erase(errorE.begin() + i);
+        errorUratio.erase(errorUratio.begin() + i);
+
       }
     }
-	  
     return 0;
-	  
   }
 
 };
