@@ -39,8 +39,8 @@ analysis/Cleopatra/PlotTGraphTObjArray
 analysis/Cleopatra/Transfer
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSCompare
-analysis/Woods-Saxon/WSSearch
-analysis/Woods-Saxon/WSSearch2
+analysis/Woods-Saxon/WSFit
+analysis/Woods-Saxon/WSFit2
 analysis/Woods-Saxon/WSSearchTree
 analysis/Woods-Saxon/WSRange
 analysis/Woods-Saxon/range.txt

@@ -11,16 +11,16 @@ It only required
 WSCompare is a simple comparison of the WS levels
 It will not do parameter search 
 
-===================== WSSearch 
-WSSearch will search parameters
+===================== WSFit 
+WSSearch will search parameters and find the best fit 
 
 ===================== WSRange 
 WSRange generate range of WS energy. useful fo plotting
 
-===================== WSMakeTree
+===================== WSSearchTree
 WSMakeTree will output result in tree.
 
-===================== WSSearch2
+===================== WSFit2
 This is a special WSSearch for N=127
 
 

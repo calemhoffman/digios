@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     printf("           VSO = inital guess of Spin-Orbital depth [MeV]\n");
     printf("           rso = reduced radius for Spin-Orbital potential [fm]\n");
     printf("           aso = reduced radius for Spin-Orbital potential [fm]\n");
-    printf("         Z : charge number, if for neutron, Z = 0.\n");
+    printf("             Z = charge number, if for neutron, Z = 0.\n");
     printf("            rc = reduced radius for Coulomb potential [fm]\n");
     printf("         nStep = number of r-grid\n");
     printf("            dr = grid size [fm]\n");
