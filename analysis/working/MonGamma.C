@@ -12,22 +12,23 @@
 #include <TH1.h>
 
 //============= User setting
-const int numDet = 3;
-int detID[numDet] = {0, 1, 2};
-int color[numDet] = {2, 1, 4};
-TString detName[numDet] = {"HPGe-1" ,"HPGe-2","HPGe-3"} ;
+const int numDet = 1;
+int detID[numDet] = {6};//,0 1, 2};
+int color[numDet] = {1};//, 1, 4};
+TString detName[numDet] = { "NaI"} ;//"HPGe-1","HPGe-2","HPGe-3"} ;
 
-double resol = 0.2; // keV
-int eRange1[2] = {  20,   200 }; // keV
-int eRange2[2] = { 1600, 1800 }; // keV
-int eRange3[2] = { 2500, 3000 }; // keV
+double resol = 1.0; // keV
+int eRange1[2] = {  10,   200 }; // keV
+int eRange2[2] = { 1600, 2000 }; // keV
+int eRange3[2] = { 2000, 3500 }; // keV
 int eRange4[2] = { 5500, 7500 }; // keV
 
 int tRange[2] = {-1, 600}; //min, relative to start time
                           
-double cali[numDet][2]= { { -0.926213, 0.624203}, 
-                          { -1.916483, 0.648377},
-                          { -1.445283, 0.670994}};
+double cali[numDet][2]= { {-20.981, 0.74397}}; //NaI
+//   { -0.926213, 0.624203}}; // HPGe-1
+//                          { -1.916483, 0.648377}, // HPGe-2
+//                          { -1.445283, 0.670994}}; // HPGe-3
                           
 //===========================
 

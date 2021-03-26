@@ -27,41 +27,9 @@ Bool_t shown = 0;
 #include "RK4.h"
 #include "WS.h"
 
+#include "../Armory/AnalysisLibrary.h"
+
 using namespace std;
-
-vector<string> SplitStr(string tempLine, string splitter, int shift = 0){
-
-  vector<string> output;
-
-  size_t pos;
-  do{
-    pos = tempLine.find(splitter); // fine splitter
-    if( pos == 0 ){ //check if it is splitter again
-      tempLine = tempLine.substr(pos+1);
-      continue;
-    }
-
-    string secStr;
-    if( pos == string::npos ){
-      secStr = tempLine;
-    }else{
-      secStr = tempLine.substr(0, pos+shift);
-      tempLine = tempLine.substr(pos+shift);
-    }
-
-    //check if secStr is begin with space
-    if( secStr.substr(0, 1) == " "){
-      secStr = secStr.substr(1);
-    }
-
-    output.push_back(secStr);
-    //printf(" |%s---\n", secStr.c_str());
-
-  }while(pos != string::npos );
-
-  return output;
-}
-
 
 int main(int argc, char *argv[]){
 

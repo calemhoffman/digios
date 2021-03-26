@@ -42,7 +42,8 @@ void script(){
    TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
    TObjArray * gList = (TObjArray*) file1->FindObjectAny("gList");
    
-   TString rdtCutFile = "rdtCuts_15C_tight.root";
+   //TString rdtCutFile = "rdtCuts_15C_tight.root";
+   TString rdtCutFile = "rdtCuts_14C.root";
    TFile * fileCut = new TFile(rdtCutFile);
    TObjArray * cutList = NULL;
    TCutG ** cut_in = NULL;
@@ -89,7 +90,7 @@ void script(){
    
    //########################################### Plot
    
-   tree0->Process("Analyzer.C+");
+   //tree0->Process("Analyzer.C+");
    
    ///tree0->Process("Tree4NN.C+");
    
@@ -232,12 +233,12 @@ void script(){
    
    //========================================== 
    
-   ///SetCanvas(6,4, 300, cScript);
-   ///
-   ///Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
-   ///Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
-   ///Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
-   ///Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
+   SetCanvas(6,4, 300, cScript);
+   
+   Aux(0, tree0, cut_in, cScript,  1, fxList, gList);
+   Aux(1, tree0, cut_in, cScript,  7, fxList, gList);
+   Aux(2, tree0, cut_in, cScript, 13, fxList, gList);
+   Aux(3, tree0, cut_in, cScript, 19, fxList, gList);
 
    //==========================================  E-Z and Ex
    
