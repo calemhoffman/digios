@@ -28,10 +28,7 @@ void script(){
 
    //========================== input file/cut/simulation   
    tree0 = new TChain("tree");
-   ///tree0->Add("A_trace_run055_noCoinCorr.root");
-   ///tree0->Add("A_trace_run101_noCoinCorr.root");
-   tree0->Add("A_trace_run055-057_059-085_087-099.root");
-   tree0->Add("A_trace_run101-144_147-165_167-214.root");
+   tree0->Add("h079_15C_run040-058.root");
    
    tree0->GetListOfFiles()->Print();
    
