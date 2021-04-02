@@ -17,4 +17,4 @@ screenShot=~/grafanaElog.jpg
 screencapture -D2 ${screenShot}
 
 echo "============ push to anl web"
-scp -rp ${screenShot} ttang@websrv1.phy.anl.gov:/home/ttang/web/helios/. && echo "============ success."
+scp -rp ${screenShot} ttang@websrv1.phy.anl.gov:/home/ttang/web/helios/live/. && echo "============ success."
