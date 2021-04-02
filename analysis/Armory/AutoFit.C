@@ -8,8 +8,6 @@
 #include <TMath.h>
 #include <vector>
 
-#include "../Armory/AnalysisLibrary.h"
-
 void ShowFitMethod(){
   printf("----------------------- Method of Fitting ---------------\n");
   printf("---------------------------------------------------------\n");
@@ -28,6 +26,39 @@ void ShowFitMethod(){
   printf(" clickFitNGaussPolSub() - Fit Pol-n BG, subtract, fit n-Gauss\n");
   printf("          SaveFitPara() - Save the initial guess parameters.\n");
   printf("---------------------------------------------------------\n");
+}
+
+std::vector<std::string> SplitStrAF(std::string tempLine, std::string splitter, int shift = 0){
+
+  std::vector<std::string> output;
+
+  size_t pos;
+  do{
+    pos = tempLine.find(splitter); // fine splitter
+    if( pos == 0 ){ //check if it is splitter again
+      tempLine = tempLine.substr(pos+1);
+      continue;
+    }
+
+    std::string secStr;
+    if( pos == std::string::npos ){
+      secStr = tempLine;
+    }else{
+      secStr = tempLine.substr(0, pos+shift);
+      tempLine = tempLine.substr(pos+shift);
+    }
+
+    //check if secStr is begin with space
+    if( secStr.substr(0, 1) == " "){
+      secStr = secStr.substr(1);
+    }
+
+    output.push_back(secStr);
+    //printf(" |%s---\n", secStr.c_str());
+    
+  }while(pos != std::string::npos );
+
+  return output;
 }
 
 TColor RGBWheel(double ang){
@@ -250,7 +281,7 @@ bool loadFitParameters(TString fitParaFile){
     
     ///printf("%s\n", tempLine.c_str());
 
-    vector<string> temp = SplitStr(tempLine, " ");
+    vector<string> temp = SplitStrAF(tempLine, " ");
 
     if( temp.size() < 7 ) continue;
 
@@ -543,14 +574,14 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
   
   nPeaks = 1;
   nPols = degPol;
-  int nPar = 6 + degPol + 1;
+  int nPar = 6*nPeaks + degPol + 1;
 
   TF1 * fit = new TF1("fit", nGF3Pol, xMin, xMax, nPar);
 
   fit->Print();
-  
+
   double * para = new double[nPar]; 
-  para[0] = 1000000 ;
+  para[0] = hist->GetMaximum() *4;
   para[1] = mean;
   para[2] = sigmaMax/2.;
   para[3] = ratio ;
@@ -567,9 +598,9 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
 
   fit->SetParLimits(0, 0, 1e9);
   fit->SetParLimits(1, xMin, xMax);
-  fit->SetParLimits(2, 0, sigmaMax);
-  fit->SetParLimits(3, 0, 0.2);
-  fit->SetParLimits(4, 0, 20);
+  fit->SetParLimits(2, 0.00000001, sigmaMax);
+  fit->SetParLimits(3, 0, 0.5);
+  fit->SetParLimits(4, 1, 400);
   fit->SetParLimits(5, 0, 0.5);
   
   hist->Fit("fit", "Rq");
@@ -670,7 +701,7 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
 //##############################################
 vector<double> fitAuto(TH1F * hist, int bgEst = 10, 
                        double peakThreshold = 0.05, 
-                       double sigmaMax = -1, 
+                       double sigmaMax = 0, 
                        int peakDensity = 4, 
                        TString optStat = ""){
 
@@ -744,7 +775,7 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   }
   
   
-  if( sigmaMax == -1 ){
+  if( sigmaMax == 0 ){
     printf("------------- Estimate sigma for each peak \n");
     sigma.clear();
     int binMin = hist->FindBin(xMin);
@@ -778,7 +809,16 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
       
       printf("%2d | x : %8.2f | sigma(est) %f \n", i, energy[i], sigma[i]);
     }
+  }else if( sigmaMax < 0 ){
+    printf("========== use user input sigma : %f (fixed)\n", abs(sigmaMax));
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(abs(sigmaMax));
+  }else if( sigmaMax > 0 ){
+    printf("========== use user input sigma : %f/2. \n", sigmaMax/2.);
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(sigmaMax/2.);
   }
+    
   
   
   int numParPerPeak = 3;  
@@ -787,9 +827,11 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   for(int i = 0; i < nPeaks ; i++){
     para[numParPerPeak*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
     para[numParPerPeak*i+1] = energy[i];
-    if( sigmaMax == -1 ){
+    if( sigmaMax == 0 ){
       para[numParPerPeak*i+2] = sigma[i];
-    }else{
+    }else if(sigmaMax < 0 ){
+      para[numParPerPeak*i+2] = abs(sigmaMax);
+    }else if(sigmaMax > 0 ){
       para[numParPerPeak*i+2] = sigmaMax/2.;
     }
   }
@@ -815,8 +857,10 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
         de2 = de1;
       }
       
-      fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2); 
-      fit->SetParLimits(numParPerPeak*i+2, 0, sigmaMax ); 
+      fit->SetParLimits(numParPerPeak*i+1, energy[i] - de1 , energy[i] + de2);
+      if( sigmaMax== 0 ) fit->SetParLimits(numParPerPeak*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
+      if( sigmaMax < 0 ) fit->FixParameter(numParPerPeak*i+2, abs(sigmaMax));
+      if( sigmaMax > 0 ) fit->SetParLimits(numParPerPeak*i+2, 0, sigmaMax);
     }
   }else{
     fit->SetParLimits(0, 0, 1e+9);
@@ -1508,7 +1552,7 @@ void fitNGaussPol(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.txt"
   fit->SetLineColor(1);
   fit->SetNpx(1000);
   fit->SetParameters(para);
-  
+
   //fixing parameters
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9); 
@@ -1909,7 +1953,7 @@ void SaveFitPara(TString fileName = "AutoFit_para.txt"){
   fclose(file_out);
 }
 
-void clickFitNGaussPol(TH1F * hist, int degPol){
+void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
 
   printf("=========================================================\n");
   printf("======== fit n-Gauss + Pol-%d BG using mouse click =====\n", degPol );
@@ -2023,49 +2067,58 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   }
 
   nPeaks = (int) xPeakList.size();
-  printf("------------- Estimate sigma for each peak \n");
-  sigma.clear();
-  int binMin = hist->FindBin(xMin);
-  int binMax = hist->FindBin(xMax);
-  for( int i = 0; i < nPeaks ; i++){
-    int b0 = hist->FindBin(xPeakList[i]);
-    double estBG = bg->Eval(xPeakList[i]);    
-    double sMin = (xMax-xMin)/5., sMax = (xMax-xMin)/5.;
-    //---- backward search, stop when 
-    for( int b = b0-1 ; b > binMin ; b-- ){
-      double y = hist->GetBinContent(b);
-      double x = hist->GetBinCenter(b);
-      if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
-        sMin = xPeakList[i] - hist->GetBinCenter(b);
-        break;
+  if( sigmaMax == 0 ){
+    printf("------------- Estimate sigma for each peak \n");
+    sigma.clear();
+    int binMin = hist->FindBin(xMin);
+    int binMax = hist->FindBin(xMax);
+    for( int i = 0; i < nPeaks ; i++){
+      int b0 = hist->FindBin(xPeakList[i]);
+      double estBG = bg->Eval(xPeakList[i]);    
+      double sMin = (xMax-xMin)/5., sMax = (xMax-xMin)/5.;
+      //---- backward search, stop when 
+      for( int b = b0-1 ; b > binMin ; b-- ){
+        double y = hist->GetBinContent(b);
+        double x = hist->GetBinCenter(b);
+        if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
+          sMin = xPeakList[i] - hist->GetBinCenter(b);
+          break;
+        }
       }
-    }
-    //---- forward search, stop when 
-    for( int b = b0+1 ; b < binMax  ; b++ ){
-      double y = hist->GetBinContent(b);
-      double x = hist->GetBinCenter(b);
-      if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
-        sMax = hist->GetBinCenter(b) - xPeakList[i];
-        break;
+      //---- forward search, stop when 
+      for( int b = b0+1 ; b < binMax  ; b++ ){
+        double y = hist->GetBinContent(b);
+        double x = hist->GetBinCenter(b);
+        if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
+          sMax = hist->GetBinCenter(b) - xPeakList[i];
+          break;
+        }
       }
+
+      double temp = TMath::Min(sMin, sMax);
+      /// When there are multiple peaks closely packed : 
+      if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
+      sigma.push_back(temp);
+      
+      printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
+
     }
 
-    double temp = TMath::Min(sMin, sMax);
-    /// When there are multiple peaks closely packed : 
-    if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
-    sigma.push_back(temp);
-    
-    printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
-
+    //---- use the mean of the sigma
+    double sigma0 = 0;
+    for( int i = 0; i < nPeaks ; i++) sigma0 += sigma[i];
+    sigma0 = sigma0/(nPeaks+1);
+    for( int i = 0; i < nPeaks ; i++) sigma[i] = sigma0;
+    printf("========== use the mean sigma : %f \n", sigma0);
+  }else if( sigmaMax < 0 ){
+    printf("========== use user input sigma : %f (fixed)\n", abs(sigmaMax));
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(abs(sigmaMax));
+  }else if( sigmaMax > 0 ){
+    printf("========== use user input sigma : %f/2. \n", sigmaMax/2.);
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(sigmaMax/2.);
   }
-
-  //---- use the mean of the sigma
-  double sigma0 = 0;
-  for( int i = 0; i < nPeaks ; i++) sigma0 += sigma[i];
-  sigma0 = sigma0/(nPeaks+1);
-  for( int i = 0; i < nPeaks ; i++) sigma[i] = sigma0;
-  printf("========== use the mean sigma : %f \n", sigma0);
-  
 
   printf("-------------- Fit the spectrum with %d-Gauss + Pol-%d\n", nPeaks, nPols );
   cClickFitNGaussPol->cd(2);
@@ -2076,7 +2129,13 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
   for(int i = 0; i < nPeaks ; i++){
     para[3*i+0] = yPeakList[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
     para[3*i+1] = xPeakList[i];
-    para[3*i+2] = sigma[i];  
+    if( sigmaMax == 0){
+      para[3*i+2] = sigma[i];  
+    }else if(sigmaMax < 0 ){
+      para[3*i+2] = abs(sigmaMax);
+    }else if(sigmaMax > 0 ){
+      para[3*i+2] = sigmaMax/2.;
+    }
   }
   for(int i = 0; i < nPols+1 ; i++){
     para[3*nPeaks+i] = bg->GetParameter(i);
@@ -2104,8 +2163,10 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
       dE2 = xPeakList[i+1] - xPeakList[i];
     }
     
-    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
-    fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
+    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
+    if( sigmaMax== 0 ) fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
+    if( sigmaMax < 0 ) fit->FixParameter(3*i+2, abs(sigmaMax));
+    if( sigmaMax > 0 ) fit->SetParLimits(3*i+2, 0, sigmaMax);
   }
   
   hspec->Fit("fit", "Rq");
@@ -2181,7 +2242,7 @@ void clickFitNGaussPol(TH1F * hist, int degPol){
 
 
 
-void clickFitNGaussPolSub(TH1F * hist, int degPol){
+void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
 
   printf("=========================================================\n");
   printf("= fit n-Gauss + Pol-%d BG using mouse click (method-2) =\n", degPol );
@@ -2316,43 +2377,52 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
   }
 
   nPeaks = (int) xPeakList.size();
-  printf("------------- Estimate sigma for each peak \n");
-  sigma.clear();
-  int binMin = hist->FindBin(xMin);
-  int binMax = hist->FindBin(xMax);
-  
-  for( int i = 0; i < nPeaks ; i++){
-    int b0 = hist->FindBin(xPeakList[i]);
-    double estBG = bg->Eval(xPeakList[i]);    
-    double sMin = (xMax-xMin)/5., sMax = (xMax-xMin)/5.;
-    //---- backward search, stop when 
-    for( int b = b0-1 ; b > binMin ; b-- ){
-      double y = hist->GetBinContent(b);
-      double x = hist->GetBinCenter(b);
-      if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
-        sMin = xPeakList[i] - hist->GetBinCenter(b);
-        break;
-      }
-    }
-    //---- forward search, stop when 
-    for( int b = b0+1 ; b < binMax  ; b++ ){
-      double y = hist->GetBinContent(b);
-      double x = hist->GetBinCenter(b);
-      if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
-        sMax = hist->GetBinCenter(b) - xPeakList[i];
-        break;
-      }
-    }
-
-    double temp = TMath::Min(sMin, sMax);
-    /// When there are multiple peaks closely packed : 
-    if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
-    sigma.push_back(temp);
-
-    printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
-
-  }  
+  if( sigmaMax == 0 ){
+    printf("------------- Estimate sigma for each peak \n");
+    sigma.clear();
+    int binMin = hist->FindBin(xMin);
+    int binMax = hist->FindBin(xMax);
     
+    for( int i = 0; i < nPeaks ; i++){
+      int b0 = hist->FindBin(xPeakList[i]);
+      double estBG = bg->Eval(xPeakList[i]);    
+      double sMin = (xMax-xMin)/5., sMax = (xMax-xMin)/5.;
+      //---- backward search, stop when 
+      for( int b = b0-1 ; b > binMin ; b-- ){
+        double y = hist->GetBinContent(b);
+        double x = hist->GetBinCenter(b);
+        if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
+          sMin = xPeakList[i] - hist->GetBinCenter(b);
+          break;
+        }
+      }
+      //---- forward search, stop when 
+      for( int b = b0+1 ; b < binMax  ; b++ ){
+        double y = hist->GetBinContent(b);
+        double x = hist->GetBinCenter(b);
+        if( y - (bg->Eval(x)) < (yPeakList[i]-estBG)/2. ) {
+          sMax = hist->GetBinCenter(b) - xPeakList[i];
+          break;
+        }
+      }
+
+      double temp = TMath::Min(sMin, sMax);
+      /// When there are multiple peaks closely packed : 
+      if( i > 0 && temp > 2.5 * sigma.back() ) temp = sigma.back();
+      sigma.push_back(temp);
+
+      printf("%2d | x : %8.2f | sigma(est) %f \n", i, xPeakList[i], sigma[i]);
+
+    }  
+  }else if( sigmaMax < 0 ){
+    printf("========== use user input sigma : %f (fixed)\n", abs(sigmaMax));
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(abs(sigmaMax));
+  }else if( sigmaMax > 0 ){
+    printf("========== use user input sigma : %f/2. \n", sigmaMax/2.);
+    sigma.clear();
+    for( int i = 0; i < nPeaks ; i++) sigma.push_back(sigmaMax/2.);
+  }
     
   printf("-------------- Fit the subtracted spectrum with %d-Gauss\n", nPeaks );
   cClickFitNGaussPolsub->cd(2);
@@ -2363,7 +2433,13 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
   for(int i = 0; i < nPeaks ; i++){
     para[3*i+0] = yPeakList[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
     para[3*i+1] = xPeakList[i];
-    para[3*i+2] = sigma[i];
+    if( sigmaMax == 0){
+      para[3*i+2] = sigma[i];  
+    }else if(sigmaMax < 0 ){
+      para[3*i+2] = abs(sigmaMax);
+    }else if(sigmaMax > 0 ){
+      para[3*i+2] = sigmaMax/2.;
+    }
   }
 
   TF1 * fit = new TF1("fit", nGauss, xMin, xMax, nPar );
@@ -2389,7 +2465,9 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
     }
     
     fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
-    fit->SetParLimits(3*i+2, 0, 1.2*sigma[i]); // add 20% margin of sigma
+    if( sigmaMax== 0 ) fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
+    if( sigmaMax < 0 ) fit->FixParameter(3*i+2, abs(sigmaMax));
+    if( sigmaMax > 0 ) fit->SetParLimits(3*i+2, 0, sigmaMax);
   }
   
   hspec->Fit("fit", "Rq");
@@ -2443,6 +2521,180 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol){
             paraA[3*i+2], paraE[3*i+2]));
   }
 }
+
+
+//########################################
+//#### fit N-Gauss with pol-1 BG at fixed for < 0
+//########################################
+void fitSpecial(TH1F * hist, TString fitFile = "AutoFit_para.txt"){
+
+  printf("================================================================\n");
+  printf("================ Special fit for h074_82Kr =====================\n");
+  printf(" * need the file input \n");
+  printf("================================================================\n");
+  
+
+  bool isParaRead = loadFitParameters(fitFile);
+  if( !isParaRead ) {
+    printf("Please provide a valid input file\n");
+    return;
+  }
+
+  gStyle->SetOptStat("");
+  gStyle->SetOptFit(0);
+  nPeaks = energy.size();
+  nPols = 1;
+
+  TCanvas * cFitSpecial = NewCanvas("cFitSpecial", "Fitting for h074_82Kr", 1, 3, 800, 300);
+  //if(! cFitSpecial->GetShowEventStatus() ) cFitSpecial->ToggleEventStatus();
+  cFitSpecial->cd(1);
+
+  ScaleAndDrawHist(hist, 0, 0);
+  
+  double  xMin = hist->GetXaxis()->GetXmin();
+  double  xMax = hist->GetXaxis()->GetXmax();
+  int     xBin = hist->GetXaxis()->GetNbins();
+
+  printf("============= find the pol-1 background ..... \n");
+  
+  TF1 * fitpol1 = new TF1("fitpol1", "pol1", xMin, -0.3);
+  fitpol1->SetParameter(0, gRandom->Rndm());
+  fitpol1->SetParameter(1, gRandom->Rndm());
+  
+  hist->Fit("fitpol1", "Rq");
+  
+  double x0 = fitpol1->GetParameter(0);
+  double x1 = fitpol1->GetParameter(1);
+  
+  
+  int  nPar = 3 * nPeaks + nPols + 1;
+  double * para = new double[nPar]; 
+  for(int i = 0; i < nPeaks ; i++){
+    para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
+    para[3*i+1] = energy[i];
+    para[3*i+2] = sigma[i]/2.;
+  }
+
+  para[3*nPeaks+0] = x0;
+  para[3*nPeaks+1] = x1;
+  
+  
+  TF1 * fit = new TF1("fit", nGaussPol, xMin, xMax, nPar );
+  fit->SetLineWidth(3);
+  fit->SetLineColor(1);
+  fit->SetNpx(1000);
+  fit->SetParameters(para);
+
+  //fixing parameters
+  for( int i = 0; i < nPeaks; i++){
+    fit->SetParLimits(3*i  ,       0, 1e9); 
+    if( energyFlag[i] == 1 ) {
+      fit->FixParameter(3*i+1, energy[i]);
+    }else{
+      fit->SetParLimits(3*i+1, lowE[i], highE[i]); 
+    }
+    if( sigmaFlag[i]  == 1 ) {
+      fit->FixParameter(3*i+2, sigma[i]);
+    }else{
+      fit->SetParLimits(3*i+2, 0, sigma[i]);
+    }
+  }
+  
+  fit->FixParameter(3*nPeaks + 0, x0);
+  fit->FixParameter(3*nPeaks + 1, x1);
+  
+  hist->Fit("fit", "Rq");
+  
+  //=========== get the polynomial part 
+  const Double_t* paraA = fit->GetParameters();
+  const Double_t* paraE = fit->GetParErrors();
+
+  TString polExp = "[0]";
+  for( int i = 1; i < nPols + 1; i++){
+    polExp += Form("+[%d]*TMath::Power(x,%d)", i, i );
+  }
+
+  TF1 * bg = new TF1("bg", polExp.Data(), xMin, xMax);
+  for( int i = 0; i < nPols + 1; i++){
+    bg->SetParameter(i, paraA[3*nPeaks+i]);
+  }
+  bg->SetNpx(1000);
+
+  for( int i = 0; i < nPols + 1; i++){
+    printf("%4s : %8.4e(%8.4e)\n", Form("p%d", i), paraA[3*nPeaks+i], paraE[3*nPeaks+i]);
+  }
+  printf("====================================\n");
+  
+  cFitSpecial->cd(1);
+  bg->Draw("same");
+  
+  TLatex text;
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.04);
+  text.SetTextColor(1);
+
+  for( int i = 0; i < nPols + 1; i++){
+    text.DrawLatex(0.6, 0.85 - 0.05*i, Form("%4s : %8.4e(%8.4e)\n", Form("p%d", i), paraA[3*nPeaks+i], paraE[3*nPeaks+i]));
+  }
+
+  double chi2 = fit->GetChisquare();
+  int ndf = fit->GetNDF();
+  text.SetTextSize(0.06);
+  text.DrawLatex(0.15, 0.8, Form("#bar{#chi^{2}} : %5.3f", chi2/ndf));
+
+  
+  //GoodnessofFit(specS, fit); 
+  
+  double bw = hist->GetBinWidth(1);
+
+  for(int i = 0; i < nPeaks ; i++){
+    printf(" %2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]);
+  }
+  printf("\n");
+  
+  
+  const int nn = nPeaks;
+  TF1 ** gFit = new TF1 *[nn];
+  for( int i = 0; i < nPeaks; i++){
+      gFit[i] = new TF1(Form("gFit%d", i), "[0] * TMath::Gaus(x,[1],[2], 1)", xMin, xMax);
+      gFit[i]->SetParameter(0, paraA[3*i]);
+      gFit[i]->SetParameter(1, paraA[3*i+1]);
+      gFit[i]->SetParameter(2, paraA[3*i+2]);
+      gFit[i]->SetLineColor(i+1);
+      gFit[i]->SetNpx(1000);
+      gFit[i]->SetLineWidth(1);
+      gFit[i]->Draw("same");
+  }
+  
+  cFitSpecial->Update();
+
+  cFitSpecial->cd(2);
+  PlotResidual(hist, fit);
+
+  cFitSpecial->cd(3);
+  
+  text.SetNDC();
+  text.SetTextFont(82);
+  text.SetTextSize(0.05);
+  text.SetTextColor(2);
+  
+  text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+  
+  for( int i = 0; i < nPeaks; i++){
+  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+            i, 
+            paraA[3*i] / bw,   paraE[3*i] /bw, 
+            paraA[3*i+1], paraE[3*i+1],
+            paraA[3*i+2], paraE[3*i+2]));
+  }
+  
+}
+
 
 
 

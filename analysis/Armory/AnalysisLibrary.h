@@ -30,8 +30,13 @@ std::vector<std::string> SplitStr(std::string tempLine, std::string splitter, in
     }
 
     //check if secStr is begin with space
-    if( secStr.substr(0, 1) == " "){
+    while( secStr.substr(0, 1) == " "){
       secStr = secStr.substr(1);
+    };
+    
+    //check if secStr is end with space
+    while( secStr.back() == ' '){
+      secStr = secStr.substr(0, secStr.size()-1);
     }
 
     output.push_back(secStr);

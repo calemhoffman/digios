@@ -22,7 +22,7 @@
 #include <algorithm>
 using namespace std;
 
-string data="/Cleopatra/mass16.txt";
+string massData="/Cleopatra/mass20.txt";
 
 // about the mass**.txt
 // Mass Excess = (ATOMIC MASS - A)*amu | e.g. n : (1.088664.91585E-6-1)*amu
@@ -91,22 +91,38 @@ private:
     return 0;
   }
   
+  int fileStartLine;
+  int fileEndLine;
+  int lineMass050_099;
+  int lineMass100_149;
+  int lineMass150_199;
+  int lineMass200;
+  
+  
+  void setFileLines(){
+    fileStartLine = 37;
+    fileEndLine = 3594;
+    
+    lineMass050_099 = 466;
+    lineMass100_149 = 1160;
+    lineMass150_199 = 1994;
+    lineMass200     = 2774;
+  }
+  
   char * heliosPath;
   bool isFindOnce;
 
   void findHeliosPath(){
     heliosPath = getenv("HELIOSSYS");
     if( heliosPath ){
-      //printf(" %s \n", heliosPath);
       dataSource = heliosPath;
-      dataSource += "/analysis" + data;
+      dataSource += "/analysis" + massData;
     }else{
-      //printf(" no env ${HELIOSSYS} found ");
-      dataSource = ".." + data;
+      dataSource = ".." + massData;
     }
-    
-    //printf("data Path: %s \n", dataSource.c_str());
   }
+  
+  
   
   
 };
@@ -115,13 +131,10 @@ void Isotope::SetIso(int a, int z){
     this->A = a;
     this->Z = z;
     FindMassByAZ(a,z); 
-//    this->dataSource = dataPath;
 }
 
 void Isotope::SetIsoByName(string name){
-    
     FindMassByName(name); 
-//    this->dataSource = dataPath;
 }
 
 void Isotope::FindMassByAZ(int A, int Z){
@@ -132,13 +145,15 @@ void Isotope::FindMassByAZ(int A, int Z){
   ifstream myfile;
   int    flag=0;
 
-  int numLineStart = 40;
-  int numLineEnd  = 3392;
+  setFileLines();
 
-  if ( A >= 50 && A < 100) numLineStart = 447; //545;
-  if ( A >=100 && A < 150) numLineStart = 1072;//1100;
-  if ( A >=150 && A < 200) numLineStart = 1833;//1899;
-  if ( A >=200 ) numLineStart = 2534;//2622;
+  int numLineStart = fileStartLine;
+  int numLineEnd  = fileEndLine;
+
+  if ( A >= 50 && A < 100) numLineStart = lineMass050_099;
+  if ( A >=100 && A < 150) numLineStart = lineMass100_149;
+  if ( A >=150 && A < 200) numLineStart = lineMass150_199;
+  if ( A >=200 ) numLineStart           = lineMass200;
 
   myfile.open(dataSource.c_str());
 
@@ -244,13 +259,15 @@ void Isotope::FindMassByName(string name){
     ifstream myfile;
     int    flag=0;
 
-    int numLineStart = 40;
-    int numLineEnd  = 3392;
+    setFileLines();
 
-    if ( this->A >= 50 && this->A < 100) numLineStart = 447; //545;
-    if ( this->A >=100 && this->A < 150) numLineStart = 1072;//1100;
-    if ( this->A >=150 && this->A < 200) numLineStart = 1833;//1899;
-    if ( this->A >=200 ) numLineStart = 2534;//2622;
+    int numLineStart = fileStartLine;
+    int numLineEnd  = fileEndLine;
+
+    if ( A >= 50 && A < 100) numLineStart = lineMass050_099;
+    if ( A >=100 && A < 150) numLineStart = lineMass100_149;
+    if ( A >=150 && A < 200) numLineStart = lineMass150_199;
+    if ( A >=200 ) numLineStart           = lineMass200;
 
     myfile.open(dataSource.c_str());
 
@@ -501,6 +518,7 @@ void Isotope::Print(){
     printf(" mass of \e[47m\e[31m%s\e[m nucleus (Z,A)=(%3d,%3d) is \e[47m\e[31m%12.5f\e[m MeV, BE/A=%7.5f MeV\n", Name.c_str(), Z, A, Mass, BEA/1000.);     
     printf(" total BE    : %12.5f MeV\n",BEA*A/1000.);
     printf(" mass in amu : %12.5f u\n",Mass/amu);
+    printf(" mass excess : %12.5f MeV\n", Mass + Z*0.510998950 - A*amu);
     printf("-------------- Seperation energy \n");
     printf(" S1p: %8.4f| S1n: %8.4f| S(2H ): %8.4f| S1p1n : %8.4f\n", CalSp(1, 0), CalSp(0, 1), CalSp2(2, 1), CalSp(1, 1));
     printf(" S2p: %8.4f| S2n: %8.4f| S(3He): %8.4f| S(3H) : %8.4f\n", CalSp(2, 0), CalSp(0, 2), CalSp2(3, 2), CalSp2(3, 1));

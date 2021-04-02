@@ -80,6 +80,9 @@ public:
       isReady = false;
    }
    
+   void SetReactionFromFile(string settingFile);
+   
+   
    TString GetReactionName(){
       TString rName;
       rName.Form("%s(%s,%s)%s", nameA.c_str(), namea.c_str(), nameb.c_str(), nameB.c_str()); 
@@ -191,6 +194,44 @@ TransferReaction::TransferReaction(){
 
 TransferReaction::~TransferReaction(){
 
+}
+
+void TransferReaction::SetReactionFromFile(string settingFile){
+   int AA = 1, zA = 1;
+   int Aa = 1, za = 1;
+   int Ab = 1, zb = 1;
+   double KEAmean = 10;
+
+   ifstream cFile;
+   cFile.open(settingFile.c_str());
+   if( cFile.is_open() ){
+      string line;
+      int i = 0;
+      while( cFile >> line){
+         //printf("%d, %s \n", i,  line.c_str());
+         if( line.substr(0,2) == "//" ) continue;
+         if( i == 0 ) AA = atoi(line.c_str());
+         if( i == 1 ) zA = atoi(line.c_str());
+         if( i == 2 ) Aa = atoi(line.c_str());
+         if( i == 3 ) za = atoi(line.c_str());
+         if( i == 4 ) Ab = atoi(line.c_str());
+         if( i == 5 ) zb = atoi(line.c_str());
+         if( i == 6 ) KEAmean = atof(line.c_str());
+         if( i > 6 ) break;
+         i = i + 1;
+      }         
+      cFile.close();
+   }
+   
+   int AB = AA+Aa-Ab, zB = zA+za-zb;
+   SetA(AA,zA);
+   Seta(Aa,za);
+   Setb(Ab,zb);
+   SetB(AB,zB);
+   SetIncidentEnergyAngle(KEAmean, 0, 0);
+
+   CalReactionConstant();
+   
 }
 
 void TransferReaction::CalReactionConstant(){
@@ -417,7 +458,9 @@ public:
    int DetAcceptance();
    int CalArrayHit(TLorentzVector Pb, int Zb);
    int CalRecoilHit(TLorentzVector PB, int ZB);
-   int CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double xOff = 0, double yOff = 0 ); // return 0 for no hit, 1 for hit
+   //int CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double xOff = 0, double yOff = 0 ); // return 0 for no hit, 1 for hit
+   
+   void CalTrajectoryPara(TLorentzVector P, int Z, int id); // id = 0 for Pb, id = 1 for PB.
    
    int GetNumberOfDetectorsInSamePos(){return mDet;}
    double GetEnergy(){return e;}
@@ -438,7 +481,6 @@ public:
       double y =  YPos(Zpos, theta, phi, rho, sign) ;
       return sqrt(x*x+y*y);
    }
-   
    
    double GetXPos(double ZPos){
       return XPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
@@ -769,22 +811,44 @@ int HELIOS::DetAcceptance(){
    return -20; // for unknown reason
 }
 
+void HELIOS::CalTrajectoryPara(TLorentzVector P, int Z, int id){
+   
+   if( id == 0 ){
+      orbitb.theta = P.Theta();
+      orbitb.phi = P.Phi();
+      orbitb.rho = P.Pt() / abs(Bfield) / Z / c * 1000; //mm
+      orbitb.vt = P.Beta() * TMath::Sin(P.Theta()) * c ; // mm / nano-second  
+      orbitb.vp = P.Beta() * TMath::Cos(P.Theta()) * c ; // mm / nano-second  
+      orbitb.t0 = TMath::TwoPi() * orbitb.rho / orbitb.vt; // nano-second  
+      orbitb.z0 = orbitb.vp * orbitb.t0;
+      
+      orbitb.detID = -1;
+      orbitb.detRowID = -1;
+   
+   }
+   
+   if( id == 1 ){
+      orbitB.theta = P.Theta();
+      orbitB.phi = P.Phi();
+      orbitB.rho = P.Pt() / abs(Bfield) / Z / c * 1000; //mm
+      orbitB.vt = P.Beta() * TMath::Sin(P.Theta()) * c ; // mm / nano-second  
+      orbitB.vp = P.Beta() * TMath::Cos(P.Theta()) * c ; // mm / nano-second  
+      orbitB.t0 = TMath::TwoPi() * orbitB.rho / orbitB.vt; // nano-second  
+      orbitB.z0 = orbitB.vp * orbitB.t0;
+      
+      orbitB.detID = -1;
+      orbitB.detRowID = -1;
+   
+   }
+}
+
 int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
    
    e = Pb.E() - Pb.M();
    detX = TMath::QuietNaN();
    rhoHit = TMath::QuietNaN();
    
-   orbitb.theta = Pb.Theta();
-   orbitb.phi = Pb.Phi();
-   orbitb.rho = Pb.Pt() / abs(Bfield) / Zb / c * 1000; //mm
-   orbitb.vt = Pb.Beta() * TMath::Sin(Pb.Theta()) * c ; // mm / nano-second  
-   orbitb.vp = Pb.Beta() * TMath::Cos(Pb.Theta()) * c ; // mm / nano-second  
-   orbitb.t0 = TMath::TwoPi() * orbitb.rho / orbitb.vt; // nano-second  
-   orbitb.z0 = orbitb.vp * orbitb.t0;
-   
-   orbitb.detID = -1;
-   orbitb.detRowID = -1;
+   CalTrajectoryPara(Pb, Zb, 0);
    
    int targetLoop = 1;
    int inOut = isFromOutSide == true ? 1: 0; //1 = from Outside, 0 = from inside
@@ -901,13 +965,7 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
 
 int HELIOS::CalRecoilHit(TLorentzVector PB, int ZB){
    
-   orbitB.theta = PB.Theta();
-   orbitB.phi = PB.Phi();
-   orbitB.rho = PB.Pt() / abs(Bfield) / ZB / c * 1000; //mm
-   orbitB.vt = PB.Beta() * TMath::Sin(PB.Theta()) * c ; // mm / nano-second  
-   orbitB.vp = PB.Beta() * TMath::Cos(PB.Theta()) * c ; // mm / nano-second  
-   orbitB.t0 = TMath::TwoPi() * orbitB.rho / orbitB.vt; // nano-second  
-   orbitB.z0 = orbitB.vp * orbitB.t0;
+   CalTrajectoryPara(PB, ZB, 1);
    
    orbitB.z = posRecoil;
    orbitB.x = GetRecoilXPos(posRecoil)  ;
