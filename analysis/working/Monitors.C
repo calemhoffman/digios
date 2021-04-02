@@ -125,24 +125,22 @@ TH2F* heVring[numDet];
 TH2F* hxfVxn[numDet];
 TH2F* heVxs[numDet];
 
-TH1F* hMultiHit; //TODO
-
 TH2F* heVID;
-TH2F* heVIDG; //gated
+TH2F* heVIDG; ///gated
 TH2F* hringVID;
 TH2F* hxfVID;
 TH2F* hxnVID;
 
-TH2F* heVx[numDet]; // e vs (xf-xn)/e
-TH2F* hringVx[numDet]; // ring vs (xf-xn)/e
+TH2F* heVx[numDet]; /// e vs (xf-xn)/e
+TH2F* hringVx[numDet]; /// ring vs (xf-xn)/e
 
 //====== cal data
-TH2F* heVxsCal[numDet]; // raw e vs xf
+TH2F* heVxsCal[numDet]; /// raw e vs xf
 
-TH2F* heCalVxCal[numDet]; // eCal vs xCal
-TH2F* heCalVxCalG[numDet]; // eCal vs xCal
+TH2F* heCalVxCal[numDet]; /// eCal vs xCal
+TH2F* heCalVxCalG[numDet]; /// eCal vs xCal
 TH1F* heCal[numDet];
-TH2F* heCalID; // e vs detID
+TH2F* heCalID; /// e vs detID
 TH2F* hxfCalVxnCal[numDet]; 
 
 TH2F* heCalVz;
@@ -161,8 +159,8 @@ TH1F* hExCut1;
 TH1F* hExCut2;
 
 //====== TAC
-TH1F* htac;   // by TAC
-TH1F* htac2;  // by timestamp
+TH1F* htac;   /// by TAC
+TH1F* htac2;  /// by timestamp
 TH2F* htacEx;
 TH2F* htac2Ex;
 
@@ -192,18 +190,18 @@ TH2F* helumID;
 ///
 ///TH2F* helumTAC;
 ///
-TH1F* helum4D; // elum rate for (d,d)
-TH1F* helum4C; // elum rate for (12C, 12C)
+TH1F* helum4D; /// elum rate for (d,d)
+TH1F* helum4C; /// elum rate for (12C, 12C)
 ///
-TH1F* hBIC; // BIC, beam integrated current
-TH1F* helumDBIC; //elum (d,d)/ BIC
+TH1F* hBIC; /// BIC, beam integrated current
+TH1F* helumDBIC; ///elum (d,d)/ BIC
 
 //======= EZero, or IonChamber when recoil also use
-TH1F* hic0; //ionChamber ch0
+TH1F* hic0; ///ionChamber ch0
 TH1F* hic1;
 TH1F* hic2;
 
-TH2F* hic01; //ionChamber ch0-ch1
+TH2F* hic01; ///ionChamber ch0-ch1
 TH2F* hic02;
 TH2F* hic12;
 
@@ -230,14 +228,14 @@ Float_t eCorr[numDet][2];
 
 //==== parameters for Ex and thetaCM calcualtion
 
-double length ; // detector z-length 
+double length ; /// detector z-length 
 double firstPos;
 vector<double> pos;
-double a ; // perpendicular distance of detector to axis [mm]
+double a ; /// perpendicular distance of detector to axis [mm]
 double Bfield ;
 
 double Ex, thetaCM;
-double q, alpha, Et, beta, gamm, G, massB, mass; //variables for Ex calculation
+double q, alpha, Et, beta, gamm, G, massB, mass; ///parameters for Ex calculation
 bool isReaction;
 
 /***************************
@@ -434,7 +432,7 @@ void Monitors::Begin(TTree *tree)
          if( i >= numDet) break;
          eCorr[i][0] = a;  // 1/a1
          eCorr[i][1] = b;  //  a0 , e' = e * a1 + a0
-         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
+         ///printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
       printf(".............. done.\n");
@@ -449,8 +447,8 @@ void Monitors::Begin(TTree *tree)
    file.close();
    
    //========================================= reaction parameters
-   //check is the transfer.root is using the latest reactionConfig.txt   
-   //sicne reaction.dat is generated as a by-product of transfer.root
+   ///check is the transfer.root is using the latest reactionConfig.txt   
+   ///sicne reaction.dat is generated as a by-product of transfer.root
    TFile * transfer = new TFile("transfer.root");
    TString aaa1 = "";
    TString aaa2 = "";
@@ -460,8 +458,6 @@ void Monitors::Begin(TTree *tree)
       aaa1 = ((TMD5*) reactionConfig->Checksum())->AsString();
       aaa2 = ((TMD5*) presentReactionConfig.Checksum())->AsString();
    }
-   //printf("%s\n", aaa1.Data());
-   //printf("%s\n", aaa2.Data());
 
    if( aaa1 != aaa2 ) {
      printf("########################## recalculate transfer.root \n");
