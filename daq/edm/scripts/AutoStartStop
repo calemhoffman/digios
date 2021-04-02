@@ -129,10 +129,11 @@ while [  $stopFlag -eq 0 ]; do
 	if [ $count -eq $stopCount ]; then 
 	    stopFlag=1
 	    echo $(date) " | Run" ${RUN} " | time:" $count " min >= " $stopCount " min ====> Stop!!!"	
-	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 
 	    echo "tell Mac to run AutoProcess_run firstRun:${firstRunNum} ${RUN}"
 	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${firstRunNum}" "${RUN}" 1" &
+
+	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
