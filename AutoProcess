@@ -6,9 +6,26 @@ Run=$2
 
 isEndRun=$3
 
-#echo $1 $2 $3 >> ~/digios/test.txt
+echo $1 $2 $3 >> ~/digios/AutoProcessLog.txt
 
 cd ~/digios/analysis/working
+
+#remove any zero
+if [ "${RUN:0:2}" == "00" ]; then
+    RUN=${RUN:2:1}
+elif [ "${RUN:0:1}" == "0" ]; then
+    RUN=${RUN:1:2}
+else
+    RUN=$(printf '%d' $RUN)
+fi
+
+if [ "${firstRUN:0:2}" == "00" ]; then
+    firstRUN=${firstRUN:2:1}
+elif [ "${firstRUN:0:1}" == "0" ]; then
+    firstRUN=${firstRUN:1:2}
+else
+    firstRUN=$(printf '%d' $firstRUN)
+fi
 
 ../Armory/process_Download $Run
 ../Armory/process_Merge $Run -1

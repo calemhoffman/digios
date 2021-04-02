@@ -322,43 +322,49 @@ void Cali_e_trace::Init(TTree *tree)
 
    //================= Formation of file name
    int numFile = fChain->GetListOfFiles()->GetLast() + 1;   
-   int oldRunNum = -100;
-   bool contFlag = false; // is runNumber continue;
-   for( int i = 0; i < numFile ; i++){
-      TString name = fChain->GetListOfFiles()->At(i)->GetTitle();
-      int found = name.Last('/');
-      name.Remove(0, found + 1 ); // this should give "XXX_run0XX.root"
-      found = name.Last('.');
-      name.Remove(found); // this should give "XXX_run0XX"
-      found = name.Last('_');
-      int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
+   if( numFile > 0 ) {
+      int oldRunNum = -100;
+      bool contFlag = false; // is runNumber continue;
+      for( int i = 0; i < numFile ; i++){
+         TString name = fChain->GetListOfFiles()->At(i)->GetTitle();
+         int found = name.Last('/');
+         name.Remove(0, found + 1 ); // this should give "XXX_run0XX.root"
+         TString prefix = name;
+         found = name.Last('.');
+         name.Remove(found); // this should give "XXX_run0XX"
+         found = name.Last('_');
+         int runNum = name.Remove(0, found+4).Atoi(); // this should give the 3 digit run number 
 
-      if( i == 0 ) {
-         ///saveFileName = name;
-         ///int kk = saveFileName.Sizeof();
-         ///saveFileName.Remove(kk-4); // this should give "XXX_run" 
-         ///saveFileName = expName + "_" + saveFileName;
-         saveFileName = expName + "_run";
-      }
-
-      if( runNum == oldRunNum + 1 ){
-         int kk = saveFileName.Sizeof();
-         if( contFlag == false ){
-            saveFileName.Remove(kk-2); //remove the "-"
-            saveFileName += "-";
-         }else{
-            saveFileName.Remove(kk-5); //remove the runNum and "-"
+         if( i == 0 ) {
+            found = prefix.First("_");
+            prefix.Remove(found);
+            saveFileName = expName + "_" + prefix +  "_run";
          }
-         contFlag = true;
+
+         if( runNum == oldRunNum + 1 ){
+            int kk = saveFileName.Sizeof();
+            if( contFlag == false ){
+               saveFileName.Remove(kk-2); //remove the "-"
+               saveFileName += "-";
+            }else{
+               saveFileName.Remove(kk-5); //remove the runNum and "-"
+            }
+            contFlag = true;
+         }
+         if( runNum > oldRunNum + 1) contFlag = false;
+         
+         saveFileName += Form("%03d_", runNum);
+         oldRunNum = runNum;
       }
-      if( runNum > oldRunNum + 1) contFlag = false;
-      
-      saveFileName += Form("%03d_", runNum);
-      oldRunNum = runNum;
+      int kk = saveFileName.Sizeof();
+      saveFileName.Remove(kk-2); // remove the last "-"
+      saveFileName += ".root";
+   }else{
+      saveFileName.Form("%s_default.root", expName.Data());
    }
-   int kk = saveFileName.Sizeof();
-   saveFileName.Remove(kk-2); // remove the last "-"
-   saveFileName += ".root";
+   printf("save file name : %s \n", saveFileName.Data());
+   printf("---------------------------------------------\n");
+   if( saveFileName == ".root" ) gROOT->ProcessLine(".q");
    
    //printf("Output File  %s \n", saveFileName.Data());
    
@@ -466,7 +472,7 @@ void Cali_e_trace::Init(TTree *tree)
       
       vector<double> posTemp = pos;
       for(int id = 0; id < iDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[iDet-1-id];
         if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet-1-id];
       }
       

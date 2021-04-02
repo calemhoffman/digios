@@ -41,9 +41,9 @@ public :
    ULong64_t       tac_t[100];
    
    //Trace
-   Float_t         te[24];
-   Float_t         te_r[24];
-   Float_t         te_t[24];
+   Float_t         te[40];
+   Float_t         te_r[40];
+   Float_t         te_t[40];
    Float_t         trdt[8];
    Float_t         trdt_t[8];
    Float_t         trdt_r[8];

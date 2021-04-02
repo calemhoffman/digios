@@ -8,14 +8,14 @@
 //=================================== setting
 bool isTraceON = true;
 bool isSaveTrace = true;
-bool isSaveFitTrace = false;
-int traceMethod = 0; //0 = no process; 1 = fit; 2 = trapezoid
-float delayChannel = 150.; //initial guess of the time
+bool isSaveFitTrace = true;
+int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
+float delayChannel = 300.; //initial guess of the time
 
-bool isTACRF = false;
+bool isTACRF = true;
 bool isRecoil = true;
-bool isElum = true;
-bool isEZero = false;
+bool isElum = false;
+bool isEZero = true;
 //=================================== end of setting
 
 
@@ -235,11 +235,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    psd.eventID = entry;
    psd.runID = runIDLast;
 
+   NumHits = 0;
    b_NumHits->GetEntry(entry);
-   //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac
+   
+   if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac, etc
 
-/**///======================================= Zero struct
-   for (Int_t i=0 ; i< NARRAY; i++) {//num dets
+/**////======================================= Zero struct
+   for (Int_t i=0 ; i< NARRAY; i++) { 
       psd.Energy[i]  = TMath::QuietNaN();
       psd.XF[i]      = TMath::QuietNaN();
       psd.XN[i]      = TMath::QuietNaN();
@@ -296,10 +298,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
       }
       
-      arr->Clear();
+      arr->Clear("C");
    }
 
-/**///======================================= Pull needed entries
+/**////======================================= Pull needed entries
    
    b_id->GetEntry(entry);
    b_pre_rise_energy->GetEntry(entry);
@@ -310,41 +312,41 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       b_trace_length->GetEntry(entry);
    }
 
-   //ID PSD Channels
+   ///ID PSD Channels
    Int_t idKind  = -1;
-   Int_t idDet   = -1; // Detector number
+   Int_t idDet   = -1; /// Detector number
    
-   /* -- Loop over NumHits -- */
+   /** -- Loop over NumHits -- */
    for(Int_t i=0;i<NumHits;i++) {    
       Int_t idTemp   = id[i] - idConst;
       idDet  = idDetMap[idTemp];
       idKind = idKindMap[idTemp];
       
-      //PSD
+      ///PSD
       /***********************************************************************/
       if( NARRAY > idDet && idDet >= 0 && 3 >= idKind && idKind >= 0 ) {
          
          switch(idKind){
-            case 0: /* Energy signal */
+            case 0: /** Energy signal */
                psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.EnergyTimestamp[idDet] = event_timestamp[i];
                break;
-            case 1: // XF
+            case 1: /// XF
                psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.XFTimestamp[idDet] = event_timestamp[i];
                break;
-            case 2: // XN
+            case 2: /// XN
                psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.XNTimestamp[idDet] = event_timestamp[i];
                break;
-            case 3: // Ring
+            case 3: /// Ring
                psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
                psd.RingTimestamp[idDet] = event_timestamp[i];
                break;
          }
       }
       
-      //TAC & RF TIMING
+      ///TAC & RF TIMING
       /***********************************************************************/
       if( isTACRF && 400 <= idDet && idDet <= 400 + NTAC ) {   
         Int_t tacID = idDet - 400;
@@ -352,7 +354,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
         psd.TACTimestamp[tacID] = event_timestamp[i];
       }
 
-      //RECOIL
+      ///RECOIL
       /************************************************************************/
       if( isRecoil && 100 <= idDet && idDet <= 100 + NRDT ) { 
          Int_t rdtTemp = idDet-100;
@@ -360,7 +362,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
       
-      //ELUM
+      ///ELUM
       /************************************************************************/
       if( isElum && 200 <= idDet && idDet <= 200 + NELUM ) {
          Int_t elumTemp = idDet - 200;
@@ -368,7 +370,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
       }
 
-      //EZERO
+      ///EZERO
       /************************************************************************/
       if( isEZero &&  300 <= idDet && idDet < 300 + NEZERO ) {
          Int_t ezeroTemp = idDet - 300;
@@ -376,50 +378,62 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
       }
       
-   }//end of NumHits
+   }///end of NumHits
    
    for(int i = 0 ; i < 24; i++){
       psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
    }
    
-   //Trace
+   ///Trace
    /************************************************************************/
    if( isTraceON ) {
       int countTrace = 0;
+      
+      arr->Clear("C");
+      
       for(Int_t i = 0; i < NumHits ; i++) {
          Int_t idTemp   = id[i] - idConst;
          idDet  = idDetMap[idTemp];
          idKind = idKindMap[idTemp];
          
-         //bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
+         ///bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
          bool isPSD = (NARRAY > idDet && idDet >= 0);
          bool isRDT  = (NRDT + 100 > idDet && idDet >= 100 );
          bool isezero  = (NEZERO + 300 > idDet && idDet >= 300 );
          bool iselum  = (NELUM + 200 > idDet && idDet >= 200 );
-         //if( !isPSD && !isRDT && !isezero) continue;
+         ///if( !isPSD && !isRDT && !isezero) continue;
          
-         //if( !isRDT) continue;         
-                  
-         gTrace = (TGraph*) arr->ConstructedAt(countTrace);
-         gTrace->Clear();
+         if( !isPSD && !isRDT) continue;         
+
+         int traceLength = trace_length[i];
+         gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
+         gTrace->Clear();         
+         gTrace->Set(traceLength);         
+         
          gTrace->SetTitle("");
          countTrace ++;
+
+         ///printf("------- ev : %lld, %d /%d, countTrace : %d, length : %d, idDet : %d \n", entry, i, NumHits, countTrace, traceLength, idDet);
          
-         int traceLength = trace_length[i];
+         if( isPSD ) {
+            delayChannel = 100;
+         }
          
-         //==================  Set gTrace
+         if( isRDT ) {
+            delayChannel = 300;
+         }
+         ///==================  Set gTrace
 
          if( traceMethod == 0 ){
             for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
-            //continue;
          }
          
          
-         //regulate the trace
+         ///=================== regulate the trace
          double base = 0;
-         if( traceMethod >= 0 ) {
+         if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){ 
                if( trace[i][j] < 16000){
                   base = trace[i][j];
@@ -430,13 +444,12 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
          }
          
-         gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength));
-         //gTrace->SetTitle(Form("id=%d, nHit=%d", idDet, i));
+         gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          
-         //===================== fitting , find time
+         ///===================== fitting , find time
          if( traceMethod == 1){
             
-            //Set gFit
+            ///Set gFit
             gFit->SetLineStyle(idDet);
             
             int lineColor = 1;
@@ -454,9 +467,9 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             base = gTrace->Eval(1);
             double fileNameTemp = gTrace->Eval(delayChannel*1.5) - base;
 
-            gFit->SetParameter(0, fileNameTemp); //energy
-            gFit->SetParameter(1, delayChannel); // time
-            gFit->SetParameter(2, 1); //riseTime
+            gFit->SetParameter(0, fileNameTemp); ///energy
+            gFit->SetParameter(1, delayChannel); /// time
+            gFit->SetParameter(2, 1);            ///riseTime
             gFit->SetParameter(3, base);
 
             //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
@@ -497,7 +510,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
          }
          
-         //Trapezoid filter
+         ///Trapezoid filter
          if( traceMethod == 2) {
             
             gTrapezoid  = (TGraph*) arr->ConstructedAt(countTrace);
@@ -508,11 +521,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
          }
          
-         
-      } // End NumHits Loop
-   }// end of trace
+      } /// End NumHits Loop
+   }/// end of trace
 
-   //Fill
+   ///Fill
    /************************************************************************/
    newTree->Fill();  
    
