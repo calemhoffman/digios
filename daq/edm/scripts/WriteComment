@@ -17,10 +17,20 @@ if [ -z  "$COMMENT" ]; then
     comment2="nan"
 else
     comment2="${COMMENT// /\ }"
+    comment2="${comment2//,/\,}"
 fi
 
 echo $comment2
 
-curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=0" --max-time 1 --connect-timeout 1
+#SS=$(caget Online_CS_StartStop | awk '{print$2}')
+#if [ ${SS} == "Start" ]; then
+#   vv=1
+#else
+#   vv=0
+#fi
+
+vv=2
+
+curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=${vv}" --max-time 1 --connect-timeout 1
 
 

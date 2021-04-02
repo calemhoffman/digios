@@ -29,6 +29,16 @@ else
     COMMENT=$1
 fi
 
+if [ -z  "$COMMENT" ]; then  
+    comment2="nan"
+else
+    comment2="${COMMENT// /\ }"
+    comment2="${comment2//,/\,}"
+fi
+echo $comment2
+curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Start_RUN:${comment2} value=1" --max-time 1 --connect-timeout 1
+
+
 echo "#!/bin/bash -l" > ${constFile}
 echo "expName=${expName}" >> ${constFile}
 echo "daqDataPath=${daqDataPath}" >> ${constFile}
@@ -91,16 +101,9 @@ if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
 else 
     slackMsg="RUN=${LastRunNum}.  unable to post to elog.\n"
+    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
     curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}"'"}' ${WebHook}
 fi
-
-if [ -z  "$COMMENT" ]; then  
-    comment2="nan"
-else
-    comment2="${COMMENT// /\ }"
-fi
-curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=1" --max-time 1 --connect-timeout 1
-
 
 export TERM=vt100
 echo " terminals" 
@@ -115,5 +118,6 @@ xterm -T ioc4 -geometry 100x20+0+900  -sb  -sl 1000 -e "gtReceiver4" "ioc4" "${e
 
 ${HELIOSSYS}/daq/edm/scripts/helios_database start
 
-sleep 2
 echo Run${RUN} Started...
+sleep 30
+echo "This window will be closed after 30 sec"

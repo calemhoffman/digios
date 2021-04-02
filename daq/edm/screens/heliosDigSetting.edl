@@ -1,0 +1,575 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1166
+y 982
+w 500
+h 200
+font "courier-medium-r-10.0"
+ctlFont "courier-medium-r-10.0"
+btnFont "courier-medium-r-10.0"
+fgColor index 0
+bgColor index 82
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 0
+ctlBgColor1 index 0
+ctlBgColor2 index 14
+topShadowColor index 0
+botShadowColor index 14
+endScreenProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 88
+y 17
+w 176
+h 21
+font "helvetica-bold-r-18.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "VME $(Name) Mode"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 15
+y 73
+w 40
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Dig. 1"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 15
+y 104
+w 40
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Dig. 2"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 16
+y 134
+w 40
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Dig. 3"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 16
+y 165
+w 40
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "Dig. 4"
+}
+autoSize
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 68
+y 50
+w 89
+h 132
+
+beginGroup
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 68
+y 160
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME01:MDIG4:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 68
+y 131
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME01:MDIG3:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 68
+y 102
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME01:MDIG2:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 68
+y 73
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME01:MDIG1:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 86
+y 50
+w 44
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "VME 1"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 176
+y 50
+w 89
+h 132
+
+beginGroup
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 176
+y 160
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME02:MDIG4:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 176
+y 131
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME02:MDIG3:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 176
+y 102
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME02:MDIG2:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 176
+y 73
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME02:MDIG1:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 194
+y 50
+w 44
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "VME 2"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 284
+y 50
+w 89
+h 132
+
+beginGroup
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 284
+y 160
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME03:MDIG4:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 284
+y 131
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME03:MDIG3:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 284
+y 102
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME03:MDIG2:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 284
+y 73
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME03:MDIG1:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 302
+y 50
+w 44
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "VME 3"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 391
+y 50
+w 89
+h 132
+
+beginGroup
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 391
+y 160
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME04:MDIG4:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 391
+y 131
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME04:MDIG3:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 391
+y 102
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME04:MDIG2:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 391
+y 73
+w 89
+h 22
+fgColor index 0
+bgColor index 83
+inconsistentColor index 14
+topShadowColor index 82
+botShadowColor index 82
+controlPv "VME04:MDIG1:$(MODE)"
+font "helvetica-medium-r-12.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 409
+y 50
+w 44
+h 16
+font "helvetica-bold-r-14.0"
+fgColor index 0
+bgColor index 0
+useDisplayBg
+value {
+  "VME 4"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
