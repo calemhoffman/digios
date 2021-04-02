@@ -48,5 +48,6 @@ analysis/Woods-Saxon/range.txt
 analysis/Woods-Saxon/test
 
 AutoProcessLog.txt
+daq/save/trigger.txt
 
 slurm-*.out
