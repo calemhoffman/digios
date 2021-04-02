@@ -35,6 +35,10 @@ if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 
   GeneralSortMsg="trace with ${isGeneralSort} core"
 fi
 
+if [ ${isGeneralSort} -eq 0 ];  then
+  GeneralSortMsg="skipped by user."
+fi
+
 if [ "${RUN1:0:1}" == "0" ]; then
     RUN1=${RUN1:1:2}
 elif [ "${RUN1:0:2}" == "00" ]; then

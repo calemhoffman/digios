@@ -15,6 +15,9 @@
 #include <TSpectrum.h>
 
 
+#include "../Armory/AnalysisLibrary.h"
+#include "../Armory/AutoFit.C"
+
 void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEnergyRange = 7000){
   
   if( detID < 0 ){
@@ -35,6 +38,16 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
    printf("====================== Cali_e_single.C ====================== \n");
    printf("============ calibration energy for single detector ========= \n");
    printf("============================================================= \n");
+   
+   
+   printf(" Min Raw Energy [ch] (default = %d ch) : ", minEnergyRange);
+   scanf("%d", &minEnergyRange);
+
+   printf(" Max Raw Energy [ch] (default = %d ch) : ", maxEnergyRange);
+   scanf("%d", &maxEnergyRange);   
+   
+   printf("     Raw Energy is now %d ch to %d ch\n", minEnergyRange, maxEnergyRange);
+   
    
 /**///======================================================== Browser or Canvas
 
@@ -99,9 +112,15 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
    vector<double> refEnergy;
    if( method == 2 ){
       printf("---- finding edge using TSepctrum Class...\n");
+      
+      double threshold = 0.2;
+      printf(" peak threshold (default = %.3f) : ", threshold);
+      scanf("%lf", &threshold);
+      printf("     threshold is now %.3f\n", threshold);
+         
          
       TSpectrum * spec = new TSpectrum(10);
-      nPeaks = spec->Search(q, 1, "", 0.2);
+      nPeaks = spec->Search(q, 1, "", threshold);
       printf("found %d peaks | ", nPeaks);
 
       double * xpos = spec->GetPositionX();
@@ -130,13 +149,18 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
       printf("=================== input reference energy\n");
       
       int opt;
-      printf("Use 238Th source? (5 peaks) [1/0] ? ");
+      printf("Use 238Th source? (7 peaks) [1/0] ? ");
       temp = scanf("%d", &opt);
+      
+      vector<double> haha1;
+      vector<double> haha2;
       
       if( opt == 1 ) {
          refEnergy.clear();
+         refEnergy.push_back(5.34);
          refEnergy.push_back(5.423);
          refEnergy.push_back(5.685);
+         refEnergy.push_back(6.050);
          refEnergy.push_back(6.288);
          refEnergy.push_back(6.778);
          refEnergy.push_back(8.785);
@@ -145,6 +169,11 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
          for( n = 0 ; n < nPeaks; n++){
             tempEnergy.push_back(energy[n]);
          }
+         
+         vector<vector<double>> output =  FindMatchingPair(energy, refEnergy);
+      
+         haha1 = output[0];
+         haha2 = output[1];
          
       }else{
          do{
@@ -160,21 +189,21 @@ void Cali_e_single(TTree * tree, int detID, int minEnergyRange = 300, int maxEne
             n++;
          }while( n < nPeaks);
          
+         printf("----- adjusting the energy .....\n");
+         n = refEnergy.size();
+         for( int k = 0; k < n; k++){
+            energy.push_back(tempEnergy[k]);
+            printf("%2d-th peak : %f MeV | %f ch \n", k,  refEnergy[k], energy[k]);
+         }
+         printf("----------------------------------\n");
+      
+         
       }
       if( refEnergy.size() == 0 ) return;
       
-      energy.clear();
-      
-      printf("----- adjusting the energy .....\n");
-      n = refEnergy.size();
-      for( int k = 0; k < n; k++){
-         energy.push_back(tempEnergy[k]);
-         printf("%2d-th peak : %f MeV | %f ch \n", k,  refEnergy[k], energy[k]);
-      }
-      printf("----------------------------------\n");
-      
       cAlpha->cd(2);
-      TGraph * graph = new TGraph(n, &energy[0], &refEnergy[0] );
+      TGraph * graph = new TGraph(haha1.size(), &haha1[0], &haha2[0] );
+      //TGraph * graph = new TGraph(n, &energy[0], &refEnergy[0] );
       graph->Draw("A*");
       gSystem->ProcessEvents();
    

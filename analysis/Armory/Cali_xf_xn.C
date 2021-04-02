@@ -22,8 +22,8 @@ void Cali_xf_xn(TTree * tree){
    const int rowDet = 4;
    const int colDet = 6;
    
-   int energyRange[3] = {400, 1000, 2400}; // bin, min, max
-   float threshold = 0.2;
+   int energyRange[3] = {400, 1000, 2600}; // bin, min, max
+   double threshold = 0.2;
    
 /**///========================================================  load tree
 
@@ -37,6 +37,16 @@ void Cali_xf_xn(TTree * tree){
    printf("------------------------------------------------------------- \n");
    printf("=========== Total #Entry: %10lld \n", tree->GetEntries());
    
+   int temp = 0;
+   printf(" Min Raw Energy [ch] (default = %d ch) : ", energyRange[1]);
+   scanf("%d", &temp);
+   energyRange[1] = temp;
+
+   printf(" Max Raw Energy [ch] (default = %d ch) : ", energyRange[2]);
+   scanf("%d", &temp);   
+   energyRange[2] = temp;
+   
+   printf("     Raw Energy is now %d ch to %d ch\n", energyRange[1], energyRange[2]);
 /**///======================================================== Canvas
 
    const int numDet = rowDet * colDet;
@@ -85,7 +95,7 @@ void Cali_xf_xn(TTree * tree){
    
    //----------- 1, pause for save Canvas
    int dummy = 0;
-   int temp = 0;
+   temp = 0;
    cAlpha->Update();
    gSystem->ProcessEvents();
 
@@ -110,7 +120,12 @@ void Cali_xf_xn(TTree * tree){
    vector<double> refEnergy;
       
    if ( method == 2 ){
-      printf("---- finding peak using TSpectrum Class...\n");      
+      printf("---- finding peak using TSpectrum Class...\n");   
+      
+      printf(" peak threshold (default = %.3f) : ", threshold);
+      scanf("%lf", &threshold);
+      printf("     threshold is now %.3f\n", threshold);
+         
       for( int i = 0; i < numDet; i++){
          
          TSpectrum * spec = new TSpectrum();
@@ -164,7 +179,7 @@ void Cali_xf_xn(TTree * tree){
    printf("========== which detector to be the reference?\n");
    printf(" X =  det-X reference\n");
    printf("-1 =  manual reference\n");
-   printf("-2 =  use 228Th, first 5 strongest peaks \n");
+   printf("-2 =  use 228Th, first 7 strongest peaks \n");
    printf("-3 =  use 148Gd + 244 Cm, (3.1828, 5.8048 MeV)\n");
    //printf("-3 =  use 241Am, 5.481 MeV \n");
    printf("-9 =  stop \n");
@@ -196,8 +211,10 @@ void Cali_xf_xn(TTree * tree){
    
    if( refID == -2 ){
       refEnergy.clear();
+      refEnergy.push_back(5.34);
       refEnergy.push_back(5.423);
       refEnergy.push_back(5.685);
+      refEnergy.push_back(6.050);
       refEnergy.push_back(6.288);
       refEnergy.push_back(6.778);
       refEnergy.push_back(8.785);

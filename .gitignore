@@ -47,4 +47,6 @@ analysis/Woods-Saxon/WSRange
 analysis/Woods-Saxon/range.txt
 analysis/Woods-Saxon/test
 
+AutoProcessLog.txt
+
 slurm-*.out

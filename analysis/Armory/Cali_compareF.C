@@ -23,21 +23,23 @@
 
 //use the fx in refTree, use fx->Eval(x) as e
 
-void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThreshold = 400, TString drawOpt = "colz"){
+void Cali_compareF(TTree *expTree, TFile *refFile, 
+               double a1Min = 220, double a1Max = 320,  
+               double a0Min = -1.0, double a0Max = 1.0,  
+               int nTrial = 800,
+               int option = -1, double eThreshold = 400, TString drawOpt = "colz"){
 /**///======================================================== User Input
 
-   double a1Range[2] = {220, 320};
-   double a0Range[2] = {-1.0, 1.0};
+   double a1Range[2] = {a1Min, a1Max};
+   double a0Range[2] = {a0Min, a0Max};
    
    double eRawRange[2] = {500, 3000};
-   double eRange[2] = {2, 10};
+   double eRange[2] = {1, 10};
    
    double SSR = 150; // sum of square of residual of the fitting
 
    double distThreshold   = 0.01;
    bool isXFXN = false; // only use event for both XF and XN valid
-   
-   int nTrial = 800;
    
    int skipEveryNEvent = 1;
    
@@ -134,7 +136,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile, int option = -1, double eThre
       
       vector<double> posTemp = pos;
       for(int id = 0; id < rDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[rDet -1 - id];
         if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
       }
       

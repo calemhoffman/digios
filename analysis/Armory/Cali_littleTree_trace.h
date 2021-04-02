@@ -214,7 +214,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
       
       vector<double> posTemp = pos;
       for(int id = 0; id < iDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
+        if( firstPos > 0 ) pos[id] = firstPos + posTemp[iDet -1 - id];
         if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet -1 - id];
       }
       

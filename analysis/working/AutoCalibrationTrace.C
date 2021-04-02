@@ -47,7 +47,7 @@ int PrintManual(){
    printf(" 4 = e calibration for single detector (alpha)\n");
    printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
    printf(" 6 = coinTimeUC calibration. (MANUAL) \n");
-   printf(" 7 = run Cleopatra/transfer.C\n");
+   printf(" 7 = run Cleopatra/Transfer\n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
    int option;
@@ -171,14 +171,14 @@ void AutoCalibrationTrace(){
       printf("=============== Auto-Calibration Subrountine ====================\n");
       printf(" Step 1) Generate smaller root file to speed thing up.           \n");
       printf("         ** aware of the Gate in Armory/Cali_little_tree_trace.C \n");
-      printf(" Step 2) Generate kinematics line using Simulation/transfer.C    \n");
+      printf(" Step 2) Generate kinematics line using Cleopatra/Transfer    \n");
       printf("         ** make sure you have correct A) reactoinConfig.txt    \n");
       printf("                                       B) detGeometry.txt    \n");
       printf("                                       C) Ex.txt    \n");
-      printf(" Step 3) Run the Calibration using Armory/compare_F.C   \n");
+      printf(" Step 3) Run the Calibration using Armory/Cali_compare_F.C   \n");
       printf("=================================================================\n");
       int proceedFlag = 0;
-      printf(" Proceed ? (1 = Yes / 0 = No / -1 = to step 3) ");
+      printf(" Proceed ? (1 = Yes / 0 = No / 3 = to step 3) ");
       temp = scanf("%d", &proceedFlag);
       
       if( proceedFlag == 0 ) {
@@ -227,8 +227,8 @@ void AutoCalibrationTrace(){
         }
       }
       
-      if ( proceedFlag == 1 || proceedFlag == -1){
-        if( proceedFlag == -1 ){
+      if ( proceedFlag == 1 || proceedFlag == 3){
+        if( proceedFlag == 3 ){
           caliFile = new TFile ("temp.root", "read");
           if( !caliFile->IsOpen() ){
              printf("!!!!!!!!!!! no temp.root, please run step 1.!!!!!!!\n");
@@ -241,23 +241,47 @@ void AutoCalibrationTrace(){
         }
         printf("#######################################################\n");
         printf("Step 3) =============== Calibrate\n");
-        printf("           Please edit the gate on Armory/CompareF.C\n");
+        printf("           Please edit the gate on Armory/CompareF.C if needed\n");
         float energyThreshold = 300;
-        printf(" Energy Threshold (default = 300 ch, -1 to stop): ");
+        printf(" Energy Threshold (default = 300 ch, -1 to stop, -9 to exist root): ");
         temp = scanf("%f", &energyThreshold);
-        if( energyThreshold < 0 ) {
+        if( energyThreshold == -1 ){
+           return;
+        }
+        if( energyThreshold == -9 ) {
            printf(" ------ bye bye !------- \n");
            gROOT->ProcessLine(".q");
            return;
         }
         
         int eCdet = -1; 
-        printf(" Choose detID (-1 for all & make new root): ");
-        temp = scanf("%d", &eCdet);
-        Cali_compareF(caliTree, fs, eCdet, energyThreshold);
-        
-        if( eCdet == -1) {
-           chain->Process("../Armory/Cali_e_trace.C+");
+        do{
+           printf(" Choose detID (-1 for all, -9 exit ): ");
+           temp = scanf("%d", &eCdet);
+           if( eCdet >= - 1) {
+              double a1Min = 220;
+              double a1Max = 320;
+              double a0Min = -1.0;
+              double a0Max = 1.0;
+              int useDefaultRange = 1;
+              printf("    Use default range ? a1 = (%.0f, %.0f), a0 = (%.1f, %.1f) [ 1 = Yes, 0 = No ]: ", a1Min, a1Max, a0Min, a0Max);
+              temp = scanf("%d", &useDefaultRange);
+              if( useDefaultRange == 0 ) {
+                  printf("    a1 Min : " ); temp = scanf("%lf", &a1Min);
+                  printf("    a1 Max : " ); temp = scanf("%lf", &a1Max);
+                  printf("    a0 Min : " ); temp = scanf("%lf", &a0Min);
+                  printf("    a1 Max : " ); temp = scanf("%lf", &a0Max);
+              }
+              int nTrials = 800;
+              printf("    Number of Trials? [%d] : ", nTrials);
+              temp = scanf("%d", &nTrials);
+              Cali_compareF(caliTree, fs, a1Min, a1Max, a0Min, a0Max, nTrials, eCdet, energyThreshold);
+            }
+         }while( eCdet > -1  );
+         
+         
+        if( eCdet == -9) {
+           //chain->Process("../Armory/Cali_e_trace.C+");
            gROOT->ProcessLine(".q");
         }
       }

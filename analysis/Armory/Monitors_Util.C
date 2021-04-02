@@ -325,9 +325,7 @@ void recoils(bool isLogz = false) {
     crdtS->cd(i+1);
     hrdt[i]->Draw("");
   }
-  
-  
-  
+
   //TCanvas *crdtTAC =  (TCanvas *) gROOT->FindObjectAny("crdtTAC");
   //if( crdtTAC == NULL ) crdtTAC = new TCanvas("crdtTAC",Form("raw RDTtac | %s", canvasTitle.Data()),0,0, 1600, 1600);
   //crdtTAC->Clear(); crdtTAC->Divide(2,4);
@@ -447,7 +445,6 @@ void tac(void) {
 }
 
 
-/**
 void ic(){
   
   TCanvas *cic =  (TCanvas *) gROOT->FindObjectAny("cic");
@@ -464,7 +461,7 @@ void ic(){
   cic->cd(6); hic12->Draw("colz");
   
 }
-*/
+
 
 
 void Count1DH(TString name, TH1F * hist, TCanvas * canvas, int padID,  double x1, double x2, Color_t color){

@@ -136,7 +136,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    
    if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
    
-   /**
+   
    bool coinFlag = false;
    //if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
    int countInvalidRDT = 0;
@@ -155,7 +155,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       }
    }
    if( coinFlag == false ) return kTRUE;
-   */
+   
    //#################################################################### processing
    
    //========================== Array
@@ -256,8 +256,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    
    //=============================== Recoil
    for(int i = 0 ; i < 8 ; i++){
-      rdtC[i]   = rdtCorr[i] * rdt[i];
-      rdtC_t[i] = rdt_t[i]; 
+      rdtC[i]   = rdtCorr[i] * trdt[i];
+      rdtC_t[i] = trdt_t[i]; 
       if( !TMath::IsNaN(rdt[i]) )  rdtID[i] = i;
    }
 
@@ -296,24 +296,24 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          }
       }
 
-      coin_t = (int) eTime - rdtTime;
+      coin_t = (int) eTime - rdtTime; // digitizer timeStamp
      
       ///======== with trace data
       if( isTraceDataExist ) {
          
          Float_t teTime = te_t[detID];
-         Float_t trdtTime = trdt_t[rdtID];
+         Float_t trdtTime =  trdt_t[rdtID];
          
-         tcoin_t = teTime - trdtTime;
+         tcoin_t = teTime - trdtTime; // trace trigger time 
          
          //Ad-hoc solution 
          double rdtCorr = 0;
-         switch(rdtIDtemp){
-            case 0: rdtCorr = 23.0 ; break;
-            case 1: rdtCorr = 0.0 ; break;
-            case 2: rdtCorr = 4.3 ; break;
-            case 3: rdtCorr = 15.3 ; break;
-         }
+         //switch(rdtIDtemp){
+         //   case 0: rdtCorr = 23.0 ; break;
+         //   case 1: rdtCorr = 0.0 ; break;
+         //   case 2: rdtCorr = 4.3 ; break;
+         //   case 3: rdtCorr = 15.3 ; break;
+         //}
          
          coinTimeUC = 10.0*(coin_t + tcoin_t) - rdtCorr; // in nano-sec
          

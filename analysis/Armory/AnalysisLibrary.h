@@ -209,6 +209,9 @@ std::vector<std::vector<double>> FindMatchingPair(std::vector<double> enX, std::
     }else{
       fitEnergy = enX;
       refEnergy = enY;
+      
+      //if nX == nY, ther could be cases that only partial enX and enY are matched. 
+      
     }
     
     

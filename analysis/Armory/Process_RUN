@@ -9,6 +9,7 @@ if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
   echo "   Monitors = 2/1/0         || 1 = single run,  2 = using the list in ChainMonitors.C"
   echo "                              10 = single run and post to websrv, 20 = list runs and post to websrv"
   echo ""
+  echo "       **** When feeding trace data to Monitors, the EventBld flag must be 2 or -2."
   echo ""
   exit 1
 fi;
@@ -31,11 +32,12 @@ GeneralSortMsg="no trace"
 
 if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
   isTrace=1
-  isMonitor=0
   GEBSortMsg="using EventBuilder_trace"
   GEBSort=GEBSort_nogeb_trace
   if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then GeneralSortMsg="trace with ${isGeneralSort} core"; fi
-  OverRideMonitor="overrided by GeneralSortTrace."
+  
+  #isMonitor=0
+  #OverRideMonitor="overrided by GeneralSortTrace."
 fi
 
 if [ ${RUN} == "lastRun" ]; then 
@@ -82,14 +84,21 @@ fi
 
 ########################################
 #################### Monitor
+if [ ${isSort} -eq 1 ] || [ $isSort -eq -1 ] || [ $isSort -eq 0 ] ; then
+  traceFlag=false
+else
+  traceFlag=true
+fi
+
 if [ $isMonitor -eq 1 ] ; then
-  root -l "ChainMonitors.C(${RUN})" # single run
+  root -l "ChainMonitors.C(${RUN}, -1, false, ${traceFlag})" # single run
 elif [ $isMonitor -eq 2 ] ; then
-  root -l ChainMonitors.C  #all runs listed 
+  root -l "ChainMonitors.C(-1,-1, false, ${traceFlag})"  #all runs listed 
 elif [ $isMonitor -eq 20 ] ; then
-  root -l "ChainMonitors.C(-1,-1, true)"
+  root -l "ChainMonitors.C(-1,-1, true, ${traceFlag})"
 elif [ $isMonitor -eq 10 ] ; then
-  root -l "ChainMonitors.C(${RUN},-1, true)"  
+  root -l "ChainMonitors.C(${RUN},-1, true, ${traceFlag})"  
 fi  
+
   
 exit 1
