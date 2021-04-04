@@ -9,11 +9,9 @@
   Made by Ryan Tang (email: goluckyryan@gmail.com) 2019-1-31
 *****************************************************************/
 
-//TODO convert to class
-
 #include <stdio.h>
 #include <string>
-#include <stdlib.h> //for atoi, atof
+#include <stdlib.h> ///for atoi, atof
 #include <cmath>
 #include <vector> 
 #include "RK4.h"
@@ -26,16 +24,16 @@ public:
   WoodsSaxon(){}
   ~WoodsSaxon(){}
 	
-  //=== output
+  ///=== output
   vector<double> energy;
   vector<string> orbString;
-  vector<double> errorU; 
+  vector<double> UatMaxdist; 
   vector<double> errorE; 
-  vector<double> errorUratio; 
+  vector<double> UatMaxdistratio; 
 
-  float A, N; // mass number, neutron number
-  //charge number already in class RKFourth
-  double r0, rSO, rc; // reduced mass
+  float A, N; /// mass number, neutron number
+  ///charge number already in class RKFourth
+  double r0, rSO, rc; 
 
   void IsNeutron(){ this->mu = mn;}
   void IsProton(){ this->mu = mp;}
@@ -43,9 +41,9 @@ public:
   void ClearVector(){
     energy.clear();
     orbString.clear();
-    errorU.clear();
+    UatMaxdist.clear();
     errorE.clear();
-    errorUratio.clear();
+    UatMaxdistratio.clear();
     wf.clear();
   }
   
@@ -71,6 +69,7 @@ public:
   void SetWSRadius(float A, float Z,  double r0, double rSO, double rc){
     this->A = A;
     this->Z = Z;
+    this->N = A-Z;
     this->r0 = r0;
     this->rSO = rSO;
     this->rc = rc;
@@ -92,17 +91,23 @@ public:
   }
 
   void PrintEnergyLevels(){
+    double rMax = dr * nStep;
+    char uMaxStr[100];
+    int nn = sprintf(uMaxStr, "U(%.0ffm)", rMax);
+    char uRatioStr[100];
+    nn = sprintf(uRatioStr, "UMax/U(%.0ffm)", rMax);
+
     printf("================ result\n");
-    printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orbital", "energy", "errorU", "errorE", "errorUratio");  
+    printf("  | %8s,  %12s | %12s | %12s | %12s\n", "orbital", "E [MeV]", "err(E) [keV]", uMaxStr,  uRatioStr);  
     for( int i = 0; i < (int) energy.size() ; i++){
-      printf("%2d| %8s,  %12.6f | %12.5f | %12.4E | %12f\n",i, orbString[i].c_str(), energy[i], errorU[i], errorE[i], errorUratio[i]);  
+      printf("%2d| %8s,  %12.6f | %12.4f | %12.4f | %12f\n",i, orbString[i].c_str(), energy[i], errorE[i]*1000., UatMaxdist[i], UatMaxdistratio[i]);  
     }
   }
 
   void PrintWSParas(){
     printf("================ Woods-Saxon parameters \n");
     printf(" Reduced Mass : %f MeV/c2\n", mu);
-    printf("  A: %4.1f, N: %4.1f, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, N, dr, nStep, dr * nStep);
+    printf("  A: %4.0f, N: %4.0f, dr:%5.3f fm, nStep: %3d, range: %5.3f fm \n", A, N, dr, nStep, dr * nStep);
     printf("-------------------------------\n");
     printf(" V0: %8.4f MeV,  R0: %8.4f(%4.2f) fm,  a0: %8.4f fm \n", V0,   R0,  r0 , a0);
     printf("VSO: %8.4f MeV, RS0: %8.4f(%4.2f) fm, aS0: %8.4f fm \n", VSO,  RSO, rSO, aSO);
@@ -110,18 +115,94 @@ public:
     printf("================================\n");
   }
 
-  // the potential parameters are global values
-  int CalWSEnergies(bool useBarrier = false, int maxL = 7, double torr = 500, double eTorr = 0.001, int maxLoop = 300, double dKE = 0.2){
-	  
+  
+  //============ find Coulomb Barrier
+  double FindBarrier(int L){
+
+    if( L == 0 ) return 0;
+    
+    ///finding the zero crossing point of derivative
+    double step = 0.1;
+    double rMax = R0;
+    double t1 = 100, t2 = -1000;
+    bool isFound = false;
+    for( float r = R0; r < 20 * R0; r += step ) {
+
+      ///using tracing method
+      t1 = Pot(r) + pow( hbarc, 2) * L *(L + 1.) / pow(r,2) / 2 / mu;
+      if( t1 > t2 ) t2 = t1;
+
+      ///printf(" r : %f fm | t1 : %f | t2 : %f \n", r, t1 , t2);
+      if( t1 < t2 ) {
+        rMax = r;
+        isFound = true;
+        break;
+      }
+    }
+
+    double barrier = 0;
+
+    if( isFound ) {
+      ///rMax = rMax + t1 / t2 * step; // when using 1st derivative
+      barrier = Pot(rMax) + pow( hbarc, 2) * L *(L + 1.) / pow(rMax,2) / 2 / mu;
+      if( barrier < 0 ) barrier = 0;
+      ///printf(" max position = %f fm | %f  \n", rMax, barrier);
+    }else{
+      ///printf("max position not found for L = %d \n", L);
+    }
+    
+    return  barrier;
+    
+  }
+
+
+  //============= Potential
+  double Pot(double r){
+    /// Wood-Saxon
+    double WSCentral = V0/(1+exp((r-R0)/a0));
+    /// spin-orbital 
+    double SO = - LS * VSO * exp((r-RSO)/aSO) / pow(1+exp((r-RSO)/aSO), 2) / aSO/ r ;
+    /// Coulomb
+    double Vc = 0;
+    if( r > Rc ){
+      Vc = Z * ee / r;
+    }else{
+      Vc = Z * ee * (3*Rc*Rc - r*r)/(2*Rc*Rc*Rc);
+    }
+    return WSCentral + SO + Vc;
+  }
+
+  //============= derivative of the Potential
+  double dPot(double r){
+    ///derivative of Wood-Saxon
+    double dWSCentral = - V0 * exp((r-R0)/a0) / pow(1+exp((r-R0)/a0), 2) / a0;
+    ///derivative of spin-orbital
+    double dSO = LS * VSO * pow(1./cosh((r-RSO)/2./aSO),2) * ( aSO + r * tanh((r-RSO)/2./aSO) ) / 4 / aSO/ aSO / r / r;
+    ///derivative of Coulomb
+    double dVc = 0;
+    if( r > Rc ){
+      dVc = - Z * ee / r / r;
+    }else{
+      dVc = -Z * ee * r / Rc / Rc ; 
+    }
+    return dWSCentral + dSO + dVc;
+  }
+
+  //================  the potential parameters are global values
+  int CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTorr = 500, double eTorr = 0.001, int maxLoop = 100, double dKE = 0.2, bool debug = false){
+
     energy.clear();
     orbString.clear();
-    errorU.clear();
+    UatMaxdist.clear();
     errorE.clear();
-    errorUratio.clear();
-	  
+    UatMaxdistratio.clear();
+    
     double u = 0;
     double uOld = 0;
-	  
+
+    if( A < 40 ) maxL = 3;
+    if( N < 20 ) maxL = 2;
+  
     for( int L = 0 ; L <= maxL; L++ ){
 
       string orbital;
@@ -136,36 +217,36 @@ public:
       if( L == 7 ) orbital = "j";
       if( L == 8 ) orbital = "k";
 
-      //printf("----------- L : %d \n", L);
-
       for( float J = L + 0.5 ;  J >= abs(L - 0.5) ; J = J - 1. ){
 
         if( VSO == 0. &&  J < L + 0.5 ) continue;
 
         LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
-        //printf(" ----------------  L, J = %d, %3.1f | LS : %f \n", L, J, LS); 
+        if( debug ) printf(" ----------------  L = %d , J = %3.1f | LS : %f \n", L, J, LS); 
         int nValue = 0;
+
         for( float KE = V0 ; KE < 0 ; KE = KE + dKE ){
               
           vector<double> outputRK = SolveRadialFunction(KE, L); // RKfouth will output the wavefunction at the furtherst distant.
-              
           u = outputRK[0];
-
-          //printf(" ====  KE , uOdl,  u : %f , %f,  %f \n", KE, uOld,  u);
 
           if( KE == V0 ) {
             uOld = u;
             continue;
           }
 
-          //check crossing point 
+          ///check crossing point 
           if( u * uOld < 0 ) {
-            //use bi-section method to find zero point 
+            ///use bi-section method to find zero point 
             double e1 = KE - dKE;
             double e2 = KE;
-            double w , wr; 
+            double w , wr; /// wave, and wave ratio = waveMax/wave
             double e , de;
             int loop = 0;
+
+            if( e1 <= V0 ) continue;
+
+            if( debug ) printf(" ====  KE , uOld,  u : %f , %f,  %f \n", KE, uOld,  u);
 
             do{
               loop ++;
@@ -175,8 +256,13 @@ public:
               w = out[0];
               wr = out[0]/out[1];
               if( loop > maxLoop ) break;
-
-              //printf(" %d|  %f< e = %f< %f |  w : %f\n", loop,  e1, e, e2,  w);
+              
+              if( de < 1e-6 ) {
+                loop = -404;
+                break;
+              }
+              
+              if( debug ) printf("         %3d|  %f< e = %f< %f | de = %.2E (eTorr:%.1E) | w : %f\n", loop,  e1, e, e2, de, eTorr, w);
 
               if( uOld * w < 0 ) {
                 e2 = e;
@@ -187,7 +273,7 @@ public:
                 e1 = e;
                 continue;
               }
-            }while( abs(w) > torr || de > eTorr );
+            }while( abs(w) > uTorr || de > eTorr );
 
             char buffer[100];
             int nn = sprintf(buffer, "%d%s%d/2", nValue, orbital.c_str(), J > L ? 2*L+1 : 2*L-1);
@@ -196,27 +282,27 @@ public:
             orbString.push_back(temp);
             if( useBarrier ) {
               double barrier = FindBarrier(L);
-              //printf(" J=%3.1f, L = %d,  barrier = %f \n", J, L, barrier); 
+              if( debug ) printf(" J=%3.1f, L = %d,  barrier = %f \n", J, L, barrier); 
               energy.push_back(e - barrier);
             }else{
               energy.push_back(e);
             }
-            errorU.push_back(w);
+            UatMaxdist.push_back(w);
             errorE.push_back(de);
-            errorUratio.push_back(wr); // It seems that wRatio is useless
+            UatMaxdistratio.push_back(wr); /// It seems that wRatio is useless
                
-            if( loop < maxLoop || (abs(w) < torr && de < eTorr && wr < 0.01)) nValue++;
+            if( (0 < loop && loop < maxLoop) || (abs(w) < uTorr && de < eTorr && wr < 0.01)) nValue++;
                
-            //printf(" %s : %12.6f (Last u = %f ), loop %d, de %f, wr %f \n", temp.c_str(),  e, w , loop, de, wr);
+            if( debug ) printf(" %s : %12.6f (Last u = %f ), loop %d, de %f, wr %f \n", temp.c_str(),  e, w , loop, de, wr);
           }
 
           uOld = u;
 
-        } // end of KE-loop
-      } // end of J-loop
-    } // end of L-loop
+        } /// end of KE-loop
+      } /// end of J-loop
+    } /// end of L-loop
 	  
-    //sorting energy, dubble sort
+    //==================sorting energy, dubble sort
     int i, j ;
     bool swapped;
     int size = energy.size();
@@ -232,37 +318,37 @@ public:
           orbString[j+1] = orbString[j];
           orbString[j] = tempstr;
 
-          temp = errorU[j+1];
-          errorU[j+1] = errorU[j];
-          errorU[j] = temp;
+          temp = UatMaxdist[j+1];
+          UatMaxdist[j+1] = UatMaxdist[j];
+          UatMaxdist[j] = temp;
               
           temp = errorE[j+1];
           errorE[j+1] = errorE[j];
           errorE[j] = temp;
               
-          temp = errorUratio[j+1];
-          errorUratio[j+1] = errorUratio[j];
-          errorUratio[j] = temp;
+          temp = UatMaxdistratio[j+1];
+          UatMaxdistratio[j+1] = UatMaxdistratio[j];
+          UatMaxdistratio[j] = temp;
 
           swapped = true; 
         } 
       } 
 
-      // IF no two elements were swapped by inner loop, then break 
+      /// If no two elements were swapped by inner loop, then break 
       if (swapped == false) break; 
     } 
 
-    //Erase incorrect energy
+    ///Erase incorrect energy
     for( int i = energy.size() - 1 ; i >=0  ; i--){
-      //printf("%s, energy: %f, errorU : |%f|,  torr :  %f \n", orbString[i].c_str(), energy[i],  errorU[i], torr); 
-      //if( errorU[i] > torr || errorU[i] < -torr || errorE[i] > eTorr){
-      if( abs(errorU[i]) > torr || errorE[i] > eTorr){
+      ///printf("%s, energy: %f, UatMaxdist : |%f|,  uTorr :  %f \n", orbString[i].c_str(), energy[i],  UatMaxdist[i], uTorr); 
+      ///if( UatMaxdist[i] > uTorr || UatMaxdist[i] < -uTorr || errorE[i] > eTorr){
+      if( abs(UatMaxdist[i]) > uTorr || errorE[i] > eTorr){
 
         orbString.erase(orbString.begin() + i);
         energy.erase(energy.begin() + i);
-        errorU.erase(errorU.begin() + i);
+        UatMaxdist.erase(UatMaxdist.begin() + i);
         errorE.erase(errorE.begin() + i);
-        errorUratio.erase(errorUratio.begin() + i);
+        UatMaxdistratio.erase(UatMaxdistratio.begin() + i);
 
       }
     }

@@ -71,8 +71,8 @@ int main(int argc, char *argv[]){
     ws.dr = atof(argv[10]);
   }
   
-  double torr = 500; // u < torr
-  double eTorr = 0.001; // energy torr
+  double torr = 500; /// u < torr
+  double eTorr = 0.001; /// energy torr
   int maxLoop = 300;
   double dKE = 0.2;
   
@@ -82,7 +82,8 @@ int main(int argc, char *argv[]){
   ws.IsNeutron();
   if( ws.Z != 0 ) ws.IsProton();
   ws.PrintWSParas();
-  ws.CalWSEnergies();
+
+  ws.CalWSEnergies(false, 7, torr, eTorr, maxLoop, dKE, false);
   
   //print all energy
   ws.PrintEnergyLevels();
