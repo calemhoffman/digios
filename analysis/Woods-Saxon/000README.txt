@@ -39,6 +39,6 @@ WS.h  (inheritage from RK4, added A, and redused radius)
 
 1) WSCal.cpp , use WS.h class to calculate WS level
 2) WSCompare.cpp , use WS.h class to compare 
-3) WSSearch.cpp 
-4) WSProof.C , Proof version of WSSearch
+3) WSFit.cpp 
+4) WSProof.C , Proof version of WSFit
 5) ProofWSSearch.C, code for running WSProof.C

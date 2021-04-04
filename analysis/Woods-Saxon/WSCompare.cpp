@@ -39,7 +39,8 @@ int main(int argc, char *argv[]){
     printf("    showParErr = show Parameters Errors [1/0]\n");
     exit(0); 
   }
-  
+
+  //======================== Read arguments
   string readFile = argv[1];
   int A=atoi(argv[2]);
   double V0ini = atof(argv[3]);
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]){
   bool showParErr = 0;
   if( argc >= 14 ) showParErr = atoi(argv[13]);
 
-  
+  //========================= Read input file
   ifstream file_in;
   file_in.open(readFile.c_str(), ios::in);
 
@@ -68,9 +69,9 @@ int main(int argc, char *argv[]){
     return 0 ; 
   }
   
-  vector<string> NLJ; //orbital label
-  vector<double> BE;  //binding enegry of orbital
-  vector<double> Error; //error/uncertaintly of the binding energy
+  vector<string> NLJ; ///orbital label
+  vector<double> BE;  ///binding enegry of orbital
+  vector<double> Error; ///error/uncertaintly of the binding energy
   
   NLJ.clear();
   BE.clear();
@@ -97,7 +98,9 @@ int main(int argc, char *argv[]){
     printf("NLJ: %6s | %f \n", NLJ[i].c_str(), BE[i]);  
   }
   printf("==============================\n");
-  
+
+
+  //========================== Woods-Saxon Calucaltion
   WoodsSaxon ws;
   
   ws.V0 = V0ini ;    ws.a0  = A0;
@@ -284,7 +287,7 @@ int main(int argc, char *argv[]){
 
   ws.PrintEnergyLevels();
   
-  
+  printf("========== end of program ======= \n");
   return 0;
 }
 
