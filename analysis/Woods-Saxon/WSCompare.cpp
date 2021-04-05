@@ -286,6 +286,14 @@ int main(int argc, char *argv[]){
   }
 
   ws.PrintEnergyLevels();
+
+  //============= Save radial function
+
+  string saveFileName = readFile;
+  saveFileName.erase(saveFileName.end()-4, saveFileName.end());
+  saveFileName = saveFileName + ".WF.dat";
+
+  ws.SaveWaveFunction(saveFileName);
   
   printf("========== end of program ======= \n");
   return 0;

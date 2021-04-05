@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
   }
   
   double torr = 500; /// u < torr
-  double eTorr = 0.001; /// energy torr
+  double eTorr = 1e-7; /// energy torr
   int maxLoop = 300;
   double dKE = 0.2;
   
@@ -88,6 +88,9 @@ int main(int argc, char *argv[]){
   //print all energy
   ws.PrintEnergyLevels();
 
+  //========== Save Radial function
+
+  
   printf("========== end of program ======= \n");
   
   return 0;
