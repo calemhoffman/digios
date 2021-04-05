@@ -31,9 +31,6 @@ public:
   RKFourth(){
 
     mu = mn;
-    
-    Z = 0;
-    Rc = 10000;
 
     V0 = 0;
     R0 = 10;
@@ -42,8 +39,6 @@ public:
     VSO = 0;
     RSO = 10;
     aSO = 1;
-
-    LS = 0;
 
     dr = 0.1;
     nStep = 200;
@@ -65,19 +60,15 @@ public:
   double RSO; // in fm
   double aSO; // in fm
 
-  double Z;   // total charge
-  double Rc;  // in fm
-
-  double LS;  // spin-orbital 
-
+  double rStart; // in fm
   double dr;  // in fm
   int nStep;  // number of step
   
   bool isSaveWaveFunction;
 
-  vector<double> wf;
+  vector<double> wf; // the wave function in U
 
-  void SaveWaveFunction(bool save = true){
+  void SetSaveWaveFunction(bool save = true){
     if( save == true ) {
       isSaveWaveFunction = true;
     }else{
@@ -91,21 +82,14 @@ public:
     return WSCentral;
   }
 
-  //============= derivative of the Potential
-  virtual double dPot(double r){
-    ///derivative of Wood-Saxon
-    double dWSCentral = - V0 * exp((r-R0)/a0) / pow(1+exp((r-R0)/a0), 2) / a0;
-    return dWSCentral ;
-  }
-
   //=============== The G-function, d^2u/dr^2 = G(u,r)
-  double G(double r, double u, double T, double L, double Pot){
+  //TODO simply G-function to be more generic
+  virtual double G(double r, double u, double T, double L, double Pot){
     return (2*mu/pow(hbarc,2))*(Pot-T)*u + L*(L+1)*u/pow(r,2);
   } 
 
-
   //=============== This function output u[max] and uMax
-  vector<double> SolveRadialFunction (double KE, int L){
+  vector<double> SolveRadialFunction (double KE, int L){ // the KE is not kinetic energy, just a name
 
     /// return last u = SolU[last][0];
     vector<double> output;
@@ -119,7 +103,7 @@ public:
     //TODO using a array as potential
 
     const double scale = abs(V0);
-    double rStart = 0.0001;
+    rStart = 0.0001;
     double rEnd = rStart + dr * nStep;
 
     ///printf("-------------- inputs\n");
@@ -178,7 +162,8 @@ public:
       if ( u > maxu) maxu = u;
 
       if( i == nStep ) output[0] = u;
-      if( i == nStep -10 ) output[2] = u;
+      if( nStep >= 200 && i == nStep -50 ) output[2] = u;
+      if( nStep >= 300 && i == nStep - 100 ) output[2] = u;
 
       wf.push_back(u);
       

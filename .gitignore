@@ -45,5 +45,7 @@ analysis/Woods-Saxon/WSSearchTree
 analysis/Woods-Saxon/WSRange
 analysis/Woods-Saxon/range.txt
 analysis/Woods-Saxon/test
+analysis/Woods-Saxon/*WF.dat
+
 
 slurm-*.out
