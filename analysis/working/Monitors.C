@@ -681,7 +681,7 @@ Bool_t Monitors::Process(Long64_t entry)
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
       xncal[detID] = xn[detID] * xnCorr[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
-      eCal[detID] = e[detID] / eCorr[detID][0] + eCorr[detID][1];
+      eCal[detID] = (e[detID] / eCorr[detID][0] + eCorr[detID][1])*eCorr2[detID][0]+eCorr2[detID][1];
 
       if( eCal[detID] < eCalCut ) continue;
 
