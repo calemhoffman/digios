@@ -9,7 +9,8 @@ arg = sys.argv
 #rint(sys.argv)
 
 #set database server
-client = InfluxDBClient(host='localhost', port=8086)
+host='mac2017'
+client = InfluxDBClient(host, port=8086)
 
 #choose database
 client.switch_database('testing')
