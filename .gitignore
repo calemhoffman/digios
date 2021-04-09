@@ -50,4 +50,6 @@ analysis/Woods-Saxon/test
 AutoProcessLog.txt
 daq/save/trigger.txt
 
+daq/edm/scripts/DB_*.txt
+
 slurm-*.out
