@@ -9,8 +9,8 @@ import datetime
 
 print("======== DataBase for HELIOS ========")
 
-waitSec = 30
-alertLevel= 300
+waitSec = 10
+alertLevel= 350
 
 tOld = 0
 
@@ -65,9 +65,10 @@ while 1:
             if ( float(result) < alertLevel ) :
                 #----- close file, push to database
                 f.close()
-                os.system(DB_BashCommand)
+                os.system(DB_BashCommand_Mac)
                 #----- stop ACQ, and wait
                 caput("Online_CS_StartStop", "Stop")
+                caput("Online_CS_SaveData", "No Save")
                 gf=open("/home/helios/helioBuffer.log", "a")
                 dt = datetime.datetime.now()
                 gf.write("  stop : %s\n" % dt)
@@ -77,6 +78,7 @@ while 1:
                     time.sleep(1)
                     print(i)
                 #----- resume ACD
+                caput("Online_CS_SaveData", "Save")
                 caput("Online_CS_StartStop", "Start")
                 dt = datetime.datetime.now()
                 gf.write("resume : %s\n" % dt)
