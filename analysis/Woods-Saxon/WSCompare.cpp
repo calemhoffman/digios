@@ -42,21 +42,26 @@ int main(int argc, char *argv[]){
 
   //======================== Read arguments
   string readFile = argv[1];
-  int A=atoi(argv[2]);
-  double V0ini = atof(argv[3]);
-  double r0 = atof(argv[4]);
-  double A0 = atof(argv[5]);
+  int    A      = atoi(argv[2]);
+  double V0ini  = atof(argv[3]);
+  double r0     = atof(argv[4]);
+  double A0     = atof(argv[5]);
   double VSOini = atof(argv[6]);
-  double rso = atof(argv[7]);
-  double aso = atof(argv[8]);
-  int Z = 0;
+  double rso    = atof(argv[7]);
+  double aso    = atof(argv[8]);
+  
+  int    Z      = 0;
   if( argc > 10 ) Z = atoi(argv[9]);
+
   double rc = 1.25;
   if( argc > 11 ) rc = atof(argv[10]);
+
   int nStep = 200;
   if( argc >= 12 ) nStep = atoi(argv[11]);
+
   double dr = 0.1;
   if( argc >= 13 ) dr = atof(argv[12]);
+
   bool showParErr = 0;
   if( argc >= 14 ) showParErr = atoi(argv[13]);
 
@@ -102,18 +107,19 @@ int main(int argc, char *argv[]){
 
   //========================== Woods-Saxon Calucaltion
   WoodsSaxon ws;
-  
-  ws.V0 = V0ini ;    ws.a0  = A0;
-  ws.VSO = VSOini ;  ws.aSO = aso;
-  ws.SetWSRadius(A, Z, r0, rso, rc);
-  
-  ws.dr = dr; ws.nStep = nStep;
+
+  ws.SetNucleus(A, Z);
+  Z == 0 ? ws.IsNeutron(): ws.IsProton();
+  ws.SetWSPars(V0ini, r0, A0, VSOini, rso, aso, rc);
+  ws.SetRange(0.0001, 0.0001 + dr * nStep, nStep);
+  ws.SetBoundaryCondition(0.0, 1.0);
   
   ws.PrintWSParas();
   ws.CalWSEnergies();
 
   //==== Find parameters error
   if( showParErr ) {
+    
     int fitSize = NLJ.size();
     int paraSize = 6; 
     Matrix Y(fitSize, 1);
@@ -137,10 +143,10 @@ int main(int argc, char *argv[]){
 
     for( int i = 1; i <= fitSize; i++){
 
-      //--- gradiant of V0
-      //printf("====================== V0: %d \n", i);
+      ///--- gradiant of V0
+      ///printf("====================== V0: %d \n", i);
       double dp = 0.001; // deviation of parameters
-      ws.V0 = V0ini + dp;
+      ws.SetV0(V0ini + dp);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -150,12 +156,12 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.V0 = V0ini;
+      ws.SetV0(V0ini);
 
-      //--- gradiant of r0
-      //printf("====================== r0: %d \n", i);
+      ///--- gradiant of r0
+      ///printf("====================== r0: %d \n", i);
       dp = 0.01;
-      ws.SetWSRadius(A, Z, r0 + dp, rso, rc);
+      ws.Setr0(r0 + dp);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -165,11 +171,11 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.SetWSRadius(A, Z, r0, rso, rc);
+      ws.Setr0(r0);
         
-      //--- gradiant of a0
-      //printf("====================== a0: %d \n", i);
-      ws.a0 = A0 + dp;
+      ///--- gradiant of a0
+      ///printf("====================== a0: %d \n", i);
+      ws.Seta0( A0 + dp);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -179,12 +185,12 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.a0 = A0;
+      ws.Seta0(A0);
     
       //--- gradiant of VSO
       //printf("====================== VSO: %d \n", i);
       dp = 0.01;
-      ws.VSO = VSOini + dp;
+      ws.SetVSO(VSOini + dp);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -194,13 +200,12 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.VSO = VSOini;
+      ws.SetVSO(VSOini);
 
       //--- gradiant of rSO
       //printf("====================== rSO: %d \n", i);
       dp = 0.01;
-      ws.SetWSRadius(A, Z, r0, rso + dp, rc);
-      //ws.PrintWSParas();
+      ws.SetrSO(rso + dp);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -210,12 +215,11 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.SetWSRadius(A, Z, r0, rso, rc);
+      ws.SetrSO(rso);
         
       //--- gradiant of aSO
       //printf("====================== aSO: %d \n", i);
-      ws.aSO = aso + dp;
-      //ws.PrintWSParas();
+      ws.SetaSO(aso + dp);
       ws.CalWSEnergies();
       for( int j = 0; j < ws.orbString.size(); j++){
         //printf("%d %s %f \n", j, ws.orbString[j].c_str(), ws.energy[j]);
@@ -225,7 +229,7 @@ int main(int argc, char *argv[]){
           break;
         }
       }
-      ws.aSO = aso;
+      ws.SetaSO(aso);
     }
 
     Matrix Ft = F.Transpose();
@@ -252,9 +256,7 @@ int main(int argc, char *argv[]){
     printf(" %f\n", sqrt(abs(dpar(paraSize, 1))));
     
     //==== restore WS calcualtion
-    ws.V0 = V0ini ;    ws.a0  = A0;
-    ws.VSO = VSOini ;  ws.aSO = aso;
-    ws.SetWSRadius(A, Z, r0, rso, rc);  
+    ws.SetWSPars(V0ini, r0, A0, VSOini, rso, aso, rc);
     ws.CalWSEnergies();
   }
 
