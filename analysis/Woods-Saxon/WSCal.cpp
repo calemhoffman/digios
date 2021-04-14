@@ -37,38 +37,38 @@ int main(int argc, char *argv[]){
   }
   WoodsSaxon ws;
 
-  ws.V0 = atof(argv[1]);
-  ws.R0 = atof(argv[2]);
-  ws.a0 = atof(argv[3]);
+  ws.SetNucleus(1,1);
+  ws.IsNeutron();
+
+  ws.SetV0( atof(argv[1]) );
+  ws.SetR0( atof(argv[2]) );
+  ws.Seta0( atof(argv[3]) );
   
-  ws.VSO = 0.;
-  ws.RSO = 1.;
-  ws.aSO = 1.;
+  ws.SetVSO( 0.);
+  ws.SetRSO( 1.);
+  ws.SetaSO( 1.);
   
   if( argc == 5 ){
-    ws.VSO = atof(argv[4]);
-    ws.RSO = ws.R0;
-    ws.aSO = ws.a0;
+    ws.SetVSO ( atof(argv[4]) );
   }
   
   if( argc >= 7 ){
-    ws.VSO = atof(argv[4]);
-    ws.RSO = atof(argv[5]);
-    ws.aSO = atof(argv[6]);
+    ws.SetVSO ( atof(argv[4]) );
+    ws.SetRSO ( atof(argv[5]) );
+    ws.SetaSO ( atof(argv[6]) );
   }
 
-  ws.Z = 0; 
-  ws.Rc = 1.25; 
+  ws.Setrc(1.25);
   if( argc >= 9 ){
-    ws.Z = atoi(argv[7]);
-    ws.Rc = atof(argv[8]);
+    int Z = atoi(argv[7]) ;
+    ws.SetNucleus(1, Z);
+    ws.SetRc ( atof(argv[8]) );
+    if( Z > 0 ) ws.IsProton();
   }
   
-  ws.nStep = 200; 
-  ws.dr = 0.1; 
+  ws.SetRange2(0.0001, 0.1, 200);
   if( argc >= 11 ){
-    ws.nStep = atoi(argv[9]);
-    ws.dr = atof(argv[10]);
+    ws.SetRange2(0.0001, atof(argv[10]), atoi(argv[9]));
   }
   
   double torr = 500; /// u < torr
@@ -76,20 +76,13 @@ int main(int argc, char *argv[]){
   int maxLoop = 300;
   double dKE = 0.2;
   
-  //calculate WS eigen energy
-  //ws.dr = 0.1; ws.nStep = 200;
-  
-  ws.IsNeutron();
-  if( ws.Z != 0 ) ws.IsProton();
   ws.PrintWSParas();
-
   ws.CalWSEnergies(false, 7, torr, eTorr, maxLoop, dKE, false);
   
-  //print all energy
   ws.PrintEnergyLevels();
 
   //========== Save Radial function
-
+  
   
   printf("========== end of program ======= \n");
   

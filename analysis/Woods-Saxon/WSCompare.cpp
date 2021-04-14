@@ -111,7 +111,7 @@ int main(int argc, char *argv[]){
   ws.SetNucleus(A, Z);
   Z == 0 ? ws.IsNeutron(): ws.IsProton();
   ws.SetWSPars(V0ini, r0, A0, VSOini, rso, aso, rc);
-  ws.SetRange(0.0001, 0.0001 + dr * nStep, nStep);
+  ws.SetRange2(0.0001, dr, nStep);
   ws.SetBoundaryCondition(0.0, 1.0);
   
   ws.PrintWSParas();

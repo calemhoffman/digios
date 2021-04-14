@@ -45,132 +45,33 @@ double FindValue(vector<double> vec, double x, double dx = 0.1){
   return y1 + (y2-y1) * l / dx;
   
 }
-
 int main(int argc, char *argv[]){
 
-  double Energy = 2.0;
-  //if( argc == 2 ) Energy = atof(argv[1]);
-  
-  WoodsSaxon ws;
-  
-  ws.A = 197;
+  RKFourth rk; // the default rk solve give gaussian 
 
-  double J = 1.5;
-  double L = 2;
+  rk.SetBoundaryCondition(1.,0.);
+
+  rk.SetRange(0.0001, 4., 200);
   
-  ws.N = 127;
+  rk.SolveRK4(0);
 
-  ws.V0 = -50.25 * ( 1 - 0.67 * ( 2 * ws.N - ws.A) / ws.A ) ;
-  ws.r0 = 1.30;
-  ws.a0 = 0.71;
-  
-  ws.VSO = 27;
-  ws.rSO = 1.20;
-  ws.aSO = 0.68;
-  
-  ws.Z = 0; 
-  ws.Rc = 1.25; 
-  
-  ws.nStep = 2000; 
-  ws.dr = 0.1; 
+  rk.NormalizeSolution();
 
-  ws.IsNeutron();
+  vector<double> u = rk.GetSolution();
 
-  ws.ClearVector();
-  ws.CalRadius();
-
-  ws.PrintWSParas();
-
-  ws.LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
+  double dr = rk.Getdr();
+  double rStart = rk.GetrStart();
 
   TApplication theApp("App",&argc, argv);
-  
-  printf("Barrier height : %f MeV \n", ws.FindBarrier(L));
 
-  TGraph * g1 = new TGraph();
-  int count = 0;
-  for( Energy = 0.05; Energy <= .5; Energy += 0.01 ){
-
-    if( argc == 2) Energy = atof(argv[1]);
+  TGraph * g = new TGraph();
+  for( int i = 0; i <= rk.GetNStep(); i++){
     
-    printf("---------------- Enegry :%f \n", Energy);
-    double waveNumber = sqrt(2*mn*Energy)/hbarc;
-    double period  = 2*3.1415925 / waveNumber;
-    printf("Free scattering wave number = %f / fm \n", waveNumber ); 
-    printf("                     period = %f  fm \n", period ); 
-    
-    if( argc == 2 ) ws.SaveWaveFunction();
-    ws.ClearVector();
-    ws.SolveRadialFunction( Energy, L);
-  
-    vector<double> wf = ws.wf;
+    g->SetPoint(i, rStart + i*dr, u[i]);
 
-    //find wave function amplitude
-    int n = wf.size();
-    int nStart = 1000;
-    double maxU = 0;
-    for( int i = nStart ; i < nStart + 2 * period / ws.dr; i++){
-      //printf(" %d  %f \n", i, wf[i]);
-      if( wf[i] > maxU ) maxU = wf[i];
-    }
-
-    printf(" max U = %f \n", maxU );
-
-    //fitting with A*sin(x + phi) to get the phase shift
-  
-    TGraph * gr = new TGraph();
-    for(int i = nStart; i < n; i++){
-      gr->SetPoint(i - nStart, ws.dr*i, wf[i]);
-    }
-
-    gr->Draw("AC*");
-  
-    TF1 * fit = new TF1 ("fit", "[0]*sin([1]*x - [3] + [2])");
-    fit->SetParameter(0, maxU);
-    fit->FixParameter(1, waveNumber);
-    fit->SetParameter(2, 0);
-    fit->FixParameter(3, L * 3.1415/2.);
-
-    fit->SetParLimits(2, 0, 3.142 );
-
-    gr->Fit(fit, "Q");
-
-    double p0 = fit->GetParameter(0);
-    double p1 = fit->GetParameter(2) * TMath::RadToDeg();
-
-    double e0 = fit->GetParError(0);
-    double e1 = fit->GetParError(2) * TMath::RadToDeg();
-
-    printf(" p0: %f (%f) \n", p0, e0 );
-    printf(" p1: %f (%f) \n", p1, e1 );
-
-    if( argc == 2) break;
-    
-    g1->SetPoint( count , Energy, p1);
-    count++;
   }
 
-  if( argc == 1 ) g1->Draw("AC*");
-    
-    
-  //.CalWSEnergies();
-  //print all energy
-  //ws.PrintEnergyLevels();
-  //printf("========== end of program ======= \n");
+  g->Draw("Al");
 
-  /*
-  printf("===================== Find value at n * PI() / k \n");
-  int maxI = ws.nStep * ws.dr * waveNumber / 3.1415925 ;
-  for( int i = 1; i < maxI ; i++){
-    double pos = i * 3.1415925 / waveNumber;
-
-    printf("i=%2d, pos=%8.3f, %9.3f \n", i, pos, FindValue(wf, pos));
-
-  }
-  */
-  
   theApp.Run();
-  
-  return 0;
-}
-
+};
