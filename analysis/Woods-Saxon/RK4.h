@@ -42,6 +42,7 @@ public:
   ~RKFourth(){}
 
   void SetRange(double xStart, double xEnd, int Step);
+  void SetRange2(double xStart, double dx, int Step);
   void SetBoundaryCondition(double y0, double dy0 );
   void SetSaveSolution(bool save);
   
@@ -86,6 +87,12 @@ void RKFourth::SetRange(double xStart, double xEnd, int Step){
   this->rStart = xStart;
   this->nStep = Step;
   this->dr = (xEnd - xStart)/Step;
+}
+
+void RKFourth::SetRange2(double xStart, double dx, int Step){
+  this->rStart = xStart;
+  this->nStep = Step;
+  this->dr = dx;
 }
 
 void RKFourth::SetBoundaryCondition(double y0, double dy0 ){

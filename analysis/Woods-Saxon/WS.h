@@ -59,24 +59,36 @@ public:
   void Setrc(double rc) { this->rc = rc ; this->Rc  = rc  * pow(A, 1./3);}
   void SetRc(double Rc) { this->Rc = rc ; this->rc  = Rc  * pow(A, 1./3);}
 
-  //===== old
   void SetMass(double mass);
 
+  //======== Get parameter
+  double GetV0() { return V0; }
+  double GetR0() { return R0; }
+  double Getr0() { return r0; }
+  double Geta0() { return a0; }
+  
+  double GetVSO() { return VSO; }
+  double GetRSO() { return RSO; }
+  double GetrSO() { return rSO; }
+  double GetaSO() { return aSO; }
+
+  double GetRc() { return Rc; }
+  double Getrc() { return rc; }
+
+  //======= other calculations
   void CalRadius();
 
   double CoulombBarrier(int L);
   double FreeWaveNumber(double Energy);
-
   
   double RMSRadius(double * radialWF);
+  vector<double> CalMomentumWF(double * radialWF, int L);
 
   void ClearVector();
 
   void PrintWSParas();
   void PrintEnergyLevels();
   void PrintWaveFunction();
-
-  vector<double> CalMomentumWF(double * radialWF, int L);
 
   void SaveWaveFunction(string saveFileName);
 
@@ -211,7 +223,7 @@ void WoodsSaxon::SetMass(double mass){
 //================  the potential parameters are global values
 int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTorr = 500, double eTorr = 1e-6, int maxLoop = 100, double dKE = 0.2, bool debug = false){
 
-  //debug = 1;
+  ///debug = 1;
 
   energy.clear();
   orbString.clear();
@@ -515,9 +527,6 @@ void WoodsSaxon::SaveWaveFunction(string saveFileName){
   double norm[nOrbital] ;
   
   for( int i = 0; i < nOrbital; i++){
-    //double T = energy[i];
-    //int    L = Lvalue[i];
-    //double J = Jvalue[i];
 
     sol.clear();
     SetEnergy(energy[i]);
@@ -526,8 +535,8 @@ void WoodsSaxon::SaveWaveFunction(string saveFileName){
     LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
 
     SolveRK4(0);
-    //PrintWSParas();
-    //PrintWaveFunction();
+    ///PrintWSParas();
+    ///PrintWaveFunction();
     
     norm[i] = 0;
     bool setZero = false;
@@ -539,7 +548,7 @@ void WoodsSaxon::SaveWaveFunction(string saveFileName){
         rad[i][j] = 0;
       }
       
-      if( dr*j < 15.  ) { // wave function for > 15 fm should zero
+      if( dr*j < 15.  ) { /// wave function for > 15 fm should zero
         norm[i] += pow(rad[i][j] * r, 2);
       }else{
         if( abs(rad[i][j-1]) > abs(rad[i][j]) ) {
@@ -632,7 +641,7 @@ double WoodsSaxon::RMSRadius(double * radialWF){
     norm += pow(radialWF[i] * r, 2);
   }
 
-  //printf(" rms : %f , norm : %f \n", rms, norm);
+  ///printf(" rms : %f , norm : %f \n", rms, norm);
   
   rms = sqrt(rms / norm);
 
@@ -657,7 +666,7 @@ vector<double> WoodsSaxon::CalMomentumWF(double * radialWF, int L){
       integral += SphericalBessel(k*r*0.01, L) * radialWF[j] * r * r;
     }
 
-    mont.push_back( 0.797884560803 * integral); // the coef is sqrt(2/pi)
+    mont.push_back( 0.797884560803 * integral); /// the coef is sqrt(2/pi)
     
   }
 

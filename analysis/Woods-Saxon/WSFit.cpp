@@ -176,20 +176,22 @@ int main(int argc, char *argv[]){
   
   WoodsSaxon ws;
   
-  ws.A = A;
-  ws.SetZ(Z);
-  ws.dr = 0.1;
-  ws.nStep = 200;
+  ws.SetNucleus(A, Z);
+  ws.IsNeutron();
+  ws.SetRange2(0.0001, 0.1, 200);
 
+  double V0, R0, r0, a0;
+  double VSO, RSO, rSO, aSO;
   double rms = TMath::QuietNaN();
-  tree->Branch("V0", &ws.V0, "V0/D");
-  tree->Branch("R0", &ws.R0, "R0/D");
-  tree->Branch("r0", &ws.r0, "r0/D");
-  tree->Branch("a0", &ws.a0, "a0/D");
-  tree->Branch("VSO", &ws.VSO, "VSO/D");
-  tree->Branch("RSO", &ws.RSO, "RSO/D");
-  tree->Branch("rSO", &ws.rSO, "rSO/D");
-  tree->Branch("aSO", &ws.aSO, "aSO/D");
+  
+  tree->Branch("V0", &V0, "V0/D");
+  tree->Branch("R0", &R0, "R0/D");
+  tree->Branch("r0", &r0, "r0/D");
+  tree->Branch("a0", &a0, "a0/D");
+  tree->Branch("VSO", &VSO, "VSO/D");
+  tree->Branch("RSO", &RSO, "RSO/D");
+  tree->Branch("rSO", &rSO, "rSO/D");
+  tree->Branch("aSO", &aSO, "aSO/D");
   tree->Branch("rms", &rms, "rms/D");
   
   printf("############################## Fit V0 and Vso\n");
@@ -221,28 +223,26 @@ int main(int argc, char *argv[]){
   stpWatch.Start();
   int count = 0;
 
-  for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){
-    ws.V0 = v0 ;
-
+  for( double v0 = v0min; v0 <= v0max; v0 = v0 + v0step   ){    
     for( double r0v = r0min ; r0v <= r0max; r0v = r0v + r0step){
-      ws.R0 = r0v * pow(A, 1./3.); 
-      ws.r0 = r0v;
-      ws.rc = ws.r0;
-      ws.Rc = ws.R0;
-
       for( double a0v = a0min; a0v <= a0max; a0v = a0v + a0step){
-        ws.a0 = a0v;
-
         for( double vso = vsomin; vso <= vsomax; vso = vso + vsostep ){
-          ws.VSO = vso;
-
           for( double rsov = rsomin ; rsov <= rsomax; rsov = rsov + rsostep){
-            ws.RSO = rsov * pow(A, 1./3.); 
-            ws.rSO = rsov;
-
             for( double asov = asomin; asov <= asomax; asov = asov + asostep){
-              ws.aSO = asov;
 
+              ws.SetWSPars(v0, r0v, a0v, vso, rsov, asov, r0v);
+
+              V0 = v0;
+              R0 = ws.GetR0();
+              r0 = r0v;
+              a0 = a0v;
+
+              VSO = vso;
+              RSO = ws.GetRSO();
+              rSO = rsov;
+              aSO = asov;
+
+              
               //############## Display
               system("clear");              
               double expTime = stpWatch.RealTime()* numCal/count / 60.;
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]){
               printf("==============================\n");
               stpWatch.Start(kFALSE);            
               printf("%10s|%7s, %7s, %7s, %7s, %7s, %7s, %7s, %7s| %7s\n", "", "V0", "R0", "r0", "a0", "VSO", "RSO", "rSO", "aSO", "rms");
-              printf("%10s|%7.2f, %7.5f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "current", ws.V0, ws.R0, ws.r0, ws.a0, ws.VSO, ws.RSO, ws.rSO, ws.aSO, rms);
+              printf("%10s|%7.2f, %7.5f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "current", ws.GetV0(), ws.GetR0(), ws.Getr0(), ws.Geta0(), ws.GetVSO(), ws.GetRSO(), ws.GetrSO(), ws.GetaSO(), rms);
               printf("%10s|\e[31m%7.2f, %7.5f, %7.5f, %7.5f, %7.2f, %7.5f, %7.5f, %7.5f| %f\e[0m\n", "Best", V0best, R0best, r0best, a0best, Vsobest, Rsobest, rsobest, asobest, rmsMin);
               printf("==============================\n");
               printf("      Experiment      |       Woods-Saxon    |\n");
@@ -294,14 +294,14 @@ int main(int argc, char *argv[]){
 
               if( rms < rmsMin ) {
                 rmsMin = rms;
-                V0best = ws.V0;
-                R0best = ws.R0;
-                r0best = ws.r0;
-                a0best = ws.a0;
-                Vsobest = ws.VSO;
-                Rsobest = ws.RSO;
-                rsobest = ws.rSO;
-                asobest = ws.aSO;
+                V0best = V0;
+                R0best = R0;
+                r0best = r0;
+                a0best = a0;
+                Vsobest = VSO;
+                Rsobest = RSO;
+                rsobest = rSO;
+                asobest = aSO;
                 energyBest = ws.energy;
                 orbStringBest = ws.orbString;
                
@@ -322,18 +322,14 @@ int main(int argc, char *argv[]){
   fileOut->Write();
   fileOut->Close();
 
-  ws.V0 = V0best;
-  ws.R0 = R0best;
-  ws.a0 = a0best;
-  ws.VSO = Vsobest;
-  ws.RSO = Rsobest;
-  ws.aSO = asobest;
-  ws.Rc = R0best;
-
-  ws.r0  = R0best * pow(A, -1./3.);
-  ws.rSO = Rsobest * pow(A, -1./3.);
-  ws.rc  = ws.r0;
-
+  ws.SetV0  ( V0best  );
+  ws.SetR0  ( R0best  );
+  ws.Seta0  ( a0best  );
+  ws.SetVSO ( Vsobest );
+  ws.SetRSO ( Rsobest );
+  ws.SetaSO ( asobest );
+  ws.SetRc  ( R0best  );
+  
   ws.CalWSEnergies();
   printf("================ Best Fit Woods-Saxon parameters \n");
   ws.PrintWSParas();
