@@ -122,10 +122,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 ///   if( !rdt_energy ) return kTRUE;
 
    // need to change manually depends on rdt or trdt
-   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( trdt[0], trdt[1] )) rejRDT1 = false;
-   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( trdt[2], trdt[3] )) rejRDT2 = false;
-   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( trdt[4], trdt[5] )) rejRDT3 = false;
-   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( trdt[6], trdt[7] )) rejRDT4 = false;
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
    if( !isRDTCutExist ){
       rejRDT1 = false;
@@ -174,10 +174,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      ///====== Calibrations go here
      if( isTraceDataExist  && useTraceToReplaceArrayEnergy ){
        eC[idet] = te[idet]/eCorr[idet][0] + eCorr[idet][1];
+       //eC[idet] = (te[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
        eC_t[idet] = e_t[idet] - 100 + te_t[idet];
        e[idet] = te[idet];
      }else{
        eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
+       //eC[idet] = (e[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
        eC_t[idet] = e_t[idet]; 
      }
        
@@ -288,7 +290,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       ULong64_t rdtTime = 0;
       int rdtIDtemp = -1;
       for(int idet = 0 ; idet < 4; idet++){
-         if( rdt[2*idet+1] > 0 && rdt[2*idet] > 0 ) {
+         //if( rdt[2*idet+1] > 0 && rdt[2*idet] > 0 ) {
+         if( rdt[2*idet+1] > 0 ) {
             rdtID = 2*idet+1;
             rdtTime = rdt_t[2*idet+1];
             rdtIDtemp = idet;
@@ -328,7 +331,19 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
-   newTree->Fill();  
+   for(int idet = 0 ; idet < numDet; idet++){
+       //if (!(cutcoin0->IsInside( z[idet], coinTimeUC )&&trdt[1]>0)&&coinTimeUC>-2100&&coinTimeUC<-1750)
+       if ((cutcoin0->IsInside( z[idet], coinTimeUC )&&trdt[1]>0))
+         newTree->Fill();  
+       //else if (!(cutcoin1->IsInside( z[idet], coinTimeUC )&&trdt[3]>0)&&coinTimeUC>-2100&&coinTimeUC<-1750)
+       else if ((cutcoin1->IsInside( z[idet], coinTimeUC )&&trdt[3]>0))
+         newTree->Fill();  
+       //else if (!(cutcoin2->IsInside( z[idet], coinTimeUC )&&trdt[5]>0)&&coinTimeUC>-2100&&coinTimeUC<-1750)
+       //else if ((cutcoin2->IsInside( z[idet], coinTimeUC )&&trdt[5]>0))
+       //else if (coinTimeUC>-2100&&coinTimeUC<-1750)
+       else if (rdt[7]>100&&rdt[6]>300)
+         newTree->Fill();  
+   }
 
    clock.Stop("timer");
    Double_t time = clock.GetRealTime("timer");

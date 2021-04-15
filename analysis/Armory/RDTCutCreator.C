@@ -20,8 +20,8 @@ void RDTCutCreator(TString dataList,
    printf("================ Graphic Cut Creator for RDT ============== \n");
    
    TChain * chain = new TChain(treeName);
-   chain->Add(dataList);
-   ///chain->Add("../root_data/gen_run02[3-9].root");
+   //chain->Add(dataList);
+   chain->Add("../root_data/trace_run09[0-9].root");
    
    chain->GetListOfFiles()->Print();
    
