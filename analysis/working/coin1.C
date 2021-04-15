@@ -1,0 +1,64 @@
+{
+//========= Macro generated from object: coin1/Graph
+//========= by ROOT version6.22/06
+   
+   TCutG *cutg = new TCutG("coin1",53);
+   cutg->SetVarX("z");
+   cutg->SetVarY("coinTimeUC");
+   cutg->SetTitle("Graph");
+   cutg->SetFillStyle(1000);
+   cutg->SetPoint(0,451.053,-2066.04);
+   cutg->SetPoint(1,461.833,-2030.82);
+   cutg->SetPoint(2,469.117,-1995.1);
+   cutg->SetPoint(3,480.188,-1966.43);
+   cutg->SetPoint(4,488.346,-1964.41);
+   cutg->SetPoint(5,498.834,-1994.6);
+   cutg->SetPoint(6,506.701,-2040.38);
+   cutg->SetPoint(7,510.197,-2061.01);
+   cutg->SetPoint(8,517.772,-2051.95);
+   cutg->SetPoint(9,524.182,-2014.72);
+   cutg->SetPoint(10,529.717,-1974.98);
+   cutg->SetPoint(11,538.166,-1947.31);
+   cutg->SetPoint(12,546.033,-1944.79);
+   cutg->SetPoint(13,555.938,-1964.41);
+   cutg->SetPoint(14,564.096,-2032.33);
+   cutg->SetPoint(15,571.671,-2061.51);
+   cutg->SetPoint(16,576.916,-2061.01);
+   cutg->SetPoint(17,583.325,-2030.32);
+   cutg->SetPoint(18,592.648,-1995.1);
+   cutg->SetPoint(19,603.137,-1980.51);
+   cutg->SetPoint(20,615.373,-1997.12);
+   cutg->SetPoint(21,621.783,-2028.31);
+   cutg->SetPoint(22,630.524,-2065.54);
+   cutg->SetPoint(23,636.642,-2064.53);
+   cutg->SetPoint(24,644.508,-2025.79);
+   cutg->SetPoint(25,647.13,-1997.12);
+   cutg->SetPoint(26,652.083,-1965.92);
+   cutg->SetPoint(27,659.658,-1950.33);
+   cutg->SetPoint(28,666.359,-1951.33);
+   cutg->SetPoint(29,671.604,-1966.93);
+   cutg->SetPoint(30,679.179,-2011.2);
+   cutg->SetPoint(31,686.171,-2049.44);
+   cutg->SetPoint(32,689.959,-2059.5);
+   cutg->SetPoint(33,693.163,-2058.49);
+   cutg->SetPoint(34,698.408,-2031.33);
+   cutg->SetPoint(35,701.904,-2005.17);
+   cutg->SetPoint(36,707.439,-1979);
+   cutg->SetPoint(37,712.392,-1954.86);
+   cutg->SetPoint(38,721.715,-1939.26);
+   cutg->SetPoint(39,730.165,-1954.86);
+   cutg->SetPoint(40,740.653,-2014.22);
+   cutg->SetPoint(41,748.228,-2054.97);
+   cutg->SetPoint(42,756.386,-2034.85);
+   cutg->SetPoint(43,764.835,-1988.56);
+   cutg->SetPoint(44,777.946,-1965.42);
+   cutg->SetPoint(45,790.182,-1984.04);
+   cutg->SetPoint(46,798.049,-2014.22);
+   cutg->SetPoint(47,805.041,-2068.05);
+   cutg->SetPoint(48,807.08,-2082.64);
+   cutg->SetPoint(49,799.797,-2095.72);
+   cutg->SetPoint(50,453.093,-2087.67);
+   cutg->SetPoint(51,453.093,-2087.67);
+   cutg->SetPoint(52,451.053,-2066.04);
+   cutg->Draw("");
+}

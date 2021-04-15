@@ -33,9 +33,19 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     //chain->Add("../root_data/gen_run059.root"); //15C(p,p') Target move +8 cm
     //chain->Add("../root_data/gen_run06[0-9].root"); //15C(p,p') Target move +8 cm
     //chain->Add("../root_data/gen_run07[0-9].root"); //15C(p,p') Target move +8 cm
-    chain->Add("../root_data/gen_run080.root"); //15C(p,p') Target move +8 cm after retune
-    chain->Add("../root_data/gen_run08[2-9].root"); //15C(p,p') Target move +8 cm after retune
-    chain->Add("../root_data/gen_run09[0-9].root"); //15C(p,p') Target move +8 cm after retune
+    //chain->Add("../root_data/gen_run080.root"); //15C(p,p') Target move +8 cm after retune
+    //chain->Add("../root_data/gen_run08[2-9].root"); //15C(p,p') Target move +8 cm after retune
+    //chain->Add("../root_data/gen_run09[0-9].root"); //15C(p,p') Target move +8 cm after retune
+    //chain->Add("../root_data/gen_run101.root"); // alpha 3-MeV
+    
+    
+    //chain->Add("../root_data/trace_run059.root"); //15C(p,p') Target move +8 cm
+    //chain->Add("../root_data/trace_run06[0-9].root"); //15C(p,p') Target move +8 cm
+    //chain->Add("../root_data/trace_run07[0-9].root"); //15C(p,p') Target move +8 cm
+    //chain->Add("../root_data/trace_run080.root"); //15C(p,p') Target move +8 cm after retune
+    //chain->Add("../root_data/trace_run08[2-9].root"); //15C(p,p') Target move +8 cm after retune
+    chain->Add("../root_data/trace_run09[0-9].root"); //15C(p,p') Target move +8 cm after retune
+    
     ///********** end Marker for AutoCalibration.
     
     
