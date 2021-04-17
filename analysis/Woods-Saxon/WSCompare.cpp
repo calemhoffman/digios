@@ -110,6 +110,10 @@ int main(int argc, char *argv[]){
 
   ws.SetNucleus(A, Z);
   Z == 0 ? ws.IsNeutron(): ws.IsProton();
+
+  double reducedMass = mn * A / (1+A);
+  ws.SetMass( reducedMass );
+  
   ws.SetWSPars(V0ini, r0, A0, VSOini, rso, aso, rc);
   ws.SetRange2(0.0001, dr, nStep);
   ws.SetBoundaryCondition(0.0, 1.0);
