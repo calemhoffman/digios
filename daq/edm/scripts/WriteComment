@@ -3,6 +3,8 @@
 constFile=${HELIOSSYS}/expName.sh
 source ${constFile} #load expName, etc.
 
+source ${HELIOSSYS}/daq/edm/scripts/DataBaseAddress.sh
+
 #==== read comment
 if [ $# -eq 0 ];then
     echo 'Ctrl+C to cancel with no harm.'
@@ -31,6 +33,6 @@ echo $comment2
 
 vv=2
 
-curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=${vv}" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=${comment2} value=${vv}" --max-time 1 --connect-timeout 1
 
 
