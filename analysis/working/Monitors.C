@@ -397,7 +397,7 @@ void Monitors::Begin(TTree *tree)
 
    for (Int_t i=0;i<numDet;i++) {//array loop
       
-      he[i]      = new TH1F(Form("he%d", i),     Form("Raw e (ch=%d); e (channel); count", i),                    200, rawEnergyRange[0], rawEnergyRange[1]);
+      he[i]      = new TH1F(Form("he%d", i),     Form("Raw e (ch=%d); e (channel); count", i),                    2000, rawEnergyRange[0], rawEnergyRange[1]);
       hring[i]   = new TH1F(Form("hring%d", i),  Form("Raw ring (ch=%d); ring (channel); count", i),              200, rawEnergyRange[0], rawEnergyRange[1]);
       hxf[i]     = new TH1F(Form("hxf%d", i),    Form("Raw xf (ch=%d); xf (channel); count", i),                  200, rawEnergyRange[0], rawEnergyRange[1]);
       hxn[i]     = new TH1F(Form("hxn%d", i),    Form("Raw xn (ch=%d); xn (channel); count", i),                  200, rawEnergyRange[0], rawEnergyRange[1]);
@@ -405,7 +405,7 @@ void Monitors::Begin(TTree *tree)
       hxfVxn[i]  = new TH2F(Form("hxfVxn%d",i),  Form("Raw xf vs. xn (ch=%d);xf (channel);xn (channel)",i),       500,                 0, rawEnergyRange[1], 500,                 0, rawEnergyRange[1]);
       heVxs[i]   = new TH2F(Form("heVxs%d", i),  Form("Raw e vs xf+xn (ch=%d); xf+xn (channel); e (channel)", i), 500, rawEnergyRange[0], rawEnergyRange[1], 500, rawEnergyRange[0], rawEnergyRange[1]);
       
-      heCal[i]        = new TH1F(Form("heCal%d", i),       Form("Corrected e (ch=%d); e (MeV); count", i),                                          200,   energyRange[0], energyRange[1]);
+      heCal[i]        = new TH1F(Form("heCal%d", i),       Form("Corrected e (ch=%d); e (MeV); count", i),                                          2000,   energyRange[0], energyRange[1]);
       hxfCalVxnCal[i] = new TH2F(Form("hxfCalVxnCal%d",i), Form("Corrected XF vs. XN (ch=%d);XF (channel);XN (channel)",i),                         500,                0, rawEnergyRange[1], 500,                 0, rawEnergyRange[1]);      
       heVxsCal[i]     = new TH2F(Form("heVxsCal%d", i),    Form("Raw e vs Corrected xf+xn (ch=%d); corrected xf+xn (channel); Raw e (channel)", i), 500,rawEnergyRange[0], rawEnergyRange[1], 500, rawEnergyRange[0], rawEnergyRange[1]);           
       heVx[i]         = new TH2F(Form("heVx%d",i),         Form("Raw PSD E vs. X (ch=%d);X (channel);E (channel)",i),                               500,             -0.1,               1.1, 500, rawEnergyRange[0], rawEnergyRange[1]);
@@ -681,7 +681,8 @@ Bool_t Monitors::Process(Long64_t entry)
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
       xncal[detID] = xn[detID] * xnCorr[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
-      eCal[detID] = e[detID] / eCorr[detID][0] + eCorr[detID][1];
+      //eCal[detID] = e[detID] / eCorr[detID][0] + eCorr[detID][1];
+      eCal[detID] = (e[detID] / eCorr[detID][0] + eCorr[detID][1])*eCorr2[detID][0]+eCorr2[detID][1];
 
       if( eCal[detID] < eCalCut ) continue;
 

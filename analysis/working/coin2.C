@@ -1,0 +1,43 @@
+{
+//========= Macro generated from object: CUTG/Graph
+//========= by ROOT version6.22/06
+   
+   cutg = new TCutG("CUTG",32);
+   cutg->SetVarX("z");
+   cutg->SetVarY("coinTimeUC");
+   cutg->SetTitle("Graph");
+   cutg->SetFillStyle(1000);
+   cutg->SetPoint(0,517.218,-1978.97);
+   cutg->SetPoint(1,523.888,-1925.04);
+   cutg->SetPoint(2,527.48,-1884.98);
+   cutg->SetPoint(3,531.585,-1844.14);
+   cutg->SetPoint(4,536.972,-1815.64);
+   cutg->SetPoint(5,542.873,-1804.85);
+   cutg->SetPoint(6,548.004,-1808.71);
+   cutg->SetPoint(7,552.622,-1832.59);
+   cutg->SetPoint(8,560.832,-1914.25);
+   cutg->SetPoint(9,566.989,-1965.87);
+   cutg->SetPoint(10,570.324,-1981.28);
+   cutg->SetPoint(11,583.665,-1966.64);
+   cutg->SetPoint(12,597.006,-1938.14);
+   cutg->SetPoint(13,613.425,-1945.84);
+   cutg->SetPoint(14,626.766,-1974.35);
+   cutg->SetPoint(15,634.976,-1991.29);
+   cutg->SetPoint(16,652.934,-1970.49);
+   cutg->SetPoint(17,669.61,-1973.57);
+   cutg->SetPoint(18,689.878,-1992.06);
+   cutg->SetPoint(19,706.554,-1975.12);
+   cutg->SetPoint(20,729.131,-1967.41);
+   cutg->SetPoint(21,746.833,-1991.29);
+   cutg->SetPoint(22,754.53,-1988.21);
+   cutg->SetPoint(23,772.745,-1968.18);
+   cutg->SetPoint(24,796.348,-1971.26);
+   cutg->SetPoint(25,809.432,-1994.38);
+   cutg->SetPoint(26,808.919,-2016.72);
+   cutg->SetPoint(27,808.919,-2016.72);
+   cutg->SetPoint(28,533.637,-2019.03);
+   cutg->SetPoint(29,513.113,-1997.46);
+   cutg->SetPoint(30,513.113,-1997.46);
+   cutg->SetPoint(31,517.218,-1978.97);
+   cutg->Draw("");
+}
