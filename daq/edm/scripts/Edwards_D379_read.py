@@ -9,6 +9,15 @@ import Edwards_D379_driver
 route = Edwards_D379_driver.Route()
 gaude_read = Edwards_D379_driver.EdwardsD397(route)
 
+heliosPath=os.environ["HELIOSSYS"]
+
+fexp=open("%s/daq/edm/scripts/DataBaseAddress.sh" % heliosPath, 'r')
+line=fexp.readline() #this line is bashscript header
+line=fexp.readline() #this line is dataBaseAddress
+dataBaseAddress=line[17:-2]
+fexp.close()
+    
+
 while 1:
 
    output1 = gaude_read.vacuum_g1()/100.
@@ -22,7 +31,7 @@ while 1:
    #print "VacuumGauge = %s mbar." % gaude_read.vacuum_g2()
    #print output4
 
-   DB_command = 'curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "VacuumGauge value=%f" --max-time 1 --connect-timeout 1' % output1
+   DB_command = 'curl -s -XPOST "http://%s:8086/write?db=testing" --data-binary "VacuumGauge value=%f" --max-time 1 --connect-timeout 1' % (dataBaseAddress,output1)
 
    os.system(DB_command)
 
