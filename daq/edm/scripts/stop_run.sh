@@ -2,6 +2,8 @@
 
 source ${HELIOSSYS}/expName.sh
 
+source ${HELIOSSYS}/daq/edm/scripts/DataBaseAddress.sh
+
 RUN=${LastRunNum}
 
 #check RUN is 3 digit
@@ -36,7 +38,7 @@ else
     comment2="${comment2//,/\,}"
 fi
 echo $comment2
-curl -s -XPOST "http://mac2017:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Stop_RUN:${comment2} value=0" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Stop_RUN:${comment2} value=0" --max-time 1 --connect-timeout 1
 
 du -hc ${HELIOSSYS}/analysis/data/${expName}_run_${RUN}*
 
@@ -52,8 +54,8 @@ sleep 2
 
 # take screenshot and copy from mac2017
 screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
-ssh heliosdigios@mac2017 '/Users/heliosdigios/digios/daq/GrafanaWeb.sh'
-scp heliosdigios@mac2017:~/grafanaElog.jpg ${screenShot}
+ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh'
+scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
 
 if [ -z ${elogID} ]; then
     # this will create seperated elog entry
