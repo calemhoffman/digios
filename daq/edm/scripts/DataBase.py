@@ -9,20 +9,26 @@ import datetime
 
 print("======== DataBase for HELIOS ========")
 
-waitSec = 10
-alertLevel= 350
+waitSec = 30
+alertLevel= 300
 
 tOld = 0
-
-#DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
-
-DB_BashCommand_Mac='curl -sS -i -XPOST "http://192.168.203.34:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
-
 
 #route = Edwards_D379_driver.Route()
 #gaude_read = Edwards_D379_driver.EdwardsD397(route)
 
 heliosPath=os.environ["HELIOSSYS"]
+
+fexp=open("%s/daq/edm/scripts/DataBaseAddress.sh" % heliosPath, 'r')
+line=fexp.readline() #this line is bashscript header
+line=fexp.readline() #this line is dataBaseAddress
+pos=line.find("=")
+dataBaseAddress=line[pos+1:-1]
+fexp.close()
+
+#DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
+DB_BashCommand_Mac='curl -sS -i -XPOST "http://%s:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000' % dataBaseAddress
+
 
 while 1:
     f = open("%s/daq/tempDB.txt" % heliosPath, 'w')
@@ -65,10 +71,9 @@ while 1:
             if ( float(result) < alertLevel ) :
                 #----- close file, push to database
                 f.close()
-                os.system(DB_BashCommand_Mac)
+                os.system(DB_BashCommand)
                 #----- stop ACQ, and wait
                 caput("Online_CS_StartStop", "Stop")
-                caput("Online_CS_SaveData", "No Save")
                 gf=open("/home/helios/helioBuffer.log", "a")
                 dt = datetime.datetime.now()
                 gf.write("  stop : %s\n" % dt)
@@ -78,7 +83,6 @@ while 1:
                     time.sleep(1)
                     print(i)
                 #----- resume ACD
-                caput("Online_CS_SaveData", "Save")
                 caput("Online_CS_StartStop", "Start")
                 dt = datetime.datetime.now()
                 gf.write("resume : %s\n" % dt)
