@@ -75,14 +75,13 @@ int main(int argc, char *argv[]){
   double eTorr = 1e-7; /// energy torr
   int maxLoop = 300;
   double dKE = 0.2;
-  
+
   ws.PrintWSParas();
   ws.CalWSEnergies(false, 7, torr, eTorr, maxLoop, dKE, false);
   
   ws.PrintEnergyLevels();
 
   //========== Save Radial function
-  
   
   printf("========== end of program ======= \n");
   
