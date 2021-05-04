@@ -57,7 +57,7 @@ public:
   void SetaSO(double aso) { this->aSO = aso ;}
 
   void Setrc(double rc) { this->rc = rc ; this->Rc  = rc  * pow(A, 1./3);}
-  void SetRc(double Rc) { this->Rc = rc ; this->rc  = Rc  * pow(A, 1./3);}
+  void SetRc(double Rc) { this->Rc = Rc ; this->rc  = Rc  / pow(A, 1./3);}
 
   void SetMass(double mass);
 
@@ -75,6 +75,8 @@ public:
   double GetRc() { return Rc; }
   double Getrc() { return rc; }
 
+  double GetMass() { return mu;}
+
   //======= other calculations
   void CalRadius();
 
@@ -91,6 +93,7 @@ public:
   void PrintWaveFunction();
 
   void SaveWaveFunction(string saveFileName);
+  void SavePotential(string saveFileName);
 
 private:
 
@@ -596,6 +599,55 @@ void WoodsSaxon::SaveWaveFunction(string saveFileName){
     
     fprintf(paraOut, "%8.2f, ", j*0.01 * 197.327);
     for( int i = 0; i < nOrbital ; i ++ ) fprintf(paraOut, "%15.6f, ", wfK[i][j] );
+
+    fprintf(paraOut, "\n");
+  }
+  
+  
+  fclose(paraOut);
+
+
+}
+
+void WoodsSaxon::SavePotential(string saveFileName){
+
+  printf("-----------------------------------------------\n");
+  printf(" save potential functions in %s \n", saveFileName.c_str());
+  
+  FILE * paraOut = fopen (saveFileName.c_str(), "w");
+  fprintf(paraOut, "#  V0: %6.2f MeV,  R0: %6.2f fm,  a0: %6.2f fm\n", V0,  R0, a0);
+  fprintf(paraOut, "# VSO: %6.2f MeV, RSO: %6.2f fm, aSO: %6.2f fm\n", VSO, RSO, aSO);
+  fprintf(paraOut, "#  dr: %5.3f fm, nStep: %3d,  rstart: %f \n", dr, nStep, rStart);
+  fprintf(paraOut, "#   L: %d, J : %.1f, LS: %5.3f \n", L, J, LS);
+  fprintf(paraOut, "#  ee: %f, Z: %.1f, Rc: %f \n", ee, Z, Rc);
+  fprintf(paraOut, "#  mu: %f, T: %f\n", mu, energy.back());
+  fprintf(paraOut, "#==================================================================\n");
+
+
+  fprintf(paraOut,"#%7s, ", "r[fm]");
+  fprintf(paraOut,"%15s, %15s, %15s, %15s, ", "Total", "Central", "SO", "Coulomb");
+  fprintf(paraOut, "\n");
+  
+  
+  for( int j = 0; j < nStep; j++){
+
+    double r = rStart + j * dr;
+    fprintf(paraOut, "%8.2f, ", r );
+
+    double WSCentral = V0/(1+exp((r-R0)/a0));
+    /// spin-orbital 
+    double SO = - LS * VSO * exp((r-RSO)/aSO) / pow(1+exp((r-RSO)/aSO), 2) / aSO/ r ;
+    /// Coulomb
+    double Vc = 0;
+    if( !isNeutron ){
+      if( r > Rc ){
+        Vc = Z * ee / r;
+      }else{
+        Vc = Z * ee * (3*Rc*Rc - r*r)/(2*Rc*Rc*Rc);
+      }
+    }
+
+    fprintf(paraOut, "%15.6f, %15.6f, %15.6f, %15.6f", Pot(r), WSCentral, SO, Vc);
 
     fprintf(paraOut, "\n");
   }

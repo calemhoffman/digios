@@ -165,8 +165,11 @@ void RKFourth::SolveRK4 (bool debug = false){
 
     if ( y > maxy) maxy = y;
 
-    if( i < 10 && debug ) printf("%12f, %12f, %12f, %12f| %12f, %12f, %12f, %12f, %12f| %12f, %12f, %12f, %12f, %12f\n", r, G(r,y,z), y, z, dy, dyy[1], dyy[2], dyy[3], dyy[4], dz, dzz[1], dzz[2], dzz[3], dzz[4]);
-
+    if( i < 10 && debug ) {
+      if ( i == 0 ) printf("%12s, %12s, %12s, %12s| %12s| %12s, %12s, %12s, %12s, %12s| %12s, %12s, %12s, %12s, %12s\n", "r", "G(r,y,z)", "y", "z", "Pot(r+dr/2)", "dy", "dyy[1]", "dyy[2]","dyy[3]", "dyy[4]", "dz", "dzz[1]", "dzz[2]", "dzz[3]", "dzz[4]");
+      printf("%12f, %12f, %12f, %12f| %12f| %12f, %12f, %12f, %12f, %12f| %12f, %12f, %12f, %12f, %12f\n", r, G(r,y,z), y, z, Pot(r+dr/2.), dy, dyy[1], dyy[2], dyy[3], dyy[4], dz, dzz[1], dzz[2], dzz[3], dzz[4]);
+    }
+    
     if( isSaveSolution )   fprintf(paraOut, " %12.3E %12.3E %12.3E %12.3E %12.3E \n", rStart, Pot(rStart), G(rStart, SolU[0][0], Pot(rStart)), SolU[0][0], SolU[0][1]);
 
     sol.push_back(y);
