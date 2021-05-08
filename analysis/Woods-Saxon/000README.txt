@@ -7,13 +7,22 @@ It only required
 2) radius ( not the reduced radius )
 3) diffusiveness 
 
-===================== WSFit
-WSFit is a simple comparison of the WS levels
+===================== WSCompare
+WSCompare is a simple comparison of the WS levels
 It will not do parameter search 
 
+===================== WSFit 
+WSSearch will search parameters and find the best fit 
 
-===================== WSSearch 
-WSSearch will search parameters
+===================== WSRange 
+WSRange generate range of WS energy. useful fo plotting
+
+===================== WSSearchTree
+WSMakeTree will output result in tree.
+
+===================== WSFit2
+This is a special WSSearch for N=127
+
 
 ===================== How to use WSSearch with parallel computation in LCRC
 edit the file <ProofSlurm.sh>
@@ -29,7 +38,7 @@ WS.h  (inheritage from RK4, added A, and redused radius)
 
 
 1) WSCal.cpp , use WS.h class to calculate WS level
-2) WSFit.cpp , use WS.h class to compare 
-3) WSSearch.cpp 
-4) WSProof.C , Proof version of WSSearch
+2) WSCompare.cpp , use WS.h class to compare 
+3) WSFit.cpp 
+4) WSProof.C , Proof version of WSFit
 5) ProofWSSearch.C, code for running WSProof.C
