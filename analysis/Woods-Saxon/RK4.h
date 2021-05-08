@@ -149,15 +149,19 @@ void RKFourth::SolveRK4 (bool debug = false){
     dyy[0] = 1.;
     dzz[0] = 1.;
     for( int j = 1 ; j <= 4 ; j++){
-      dyy[j] = z + parC[j-1]*dzz[j-1]*dr;
-      dzz[j] = G(r + parC[j-1]*dr, y + parC[j-1]*dyy[j-1]*dr, z + parC[j-1]*dzz[j-1]*dr);
+      //dyy[j] = z + parC[j-1]*dzz[j-1]*dr;
+      //dzz[j] = G(r + parC[j-1]*dr, y + parC[j-1]*dyy[j-1]*dr, z + parC[j-1]*dzz[j-1]*dr);
+      dyy[j] = dr* (z + parC[j-1]*dzz[j-1]);
+      dzz[j] = dr* G(r + parC[j-1]*dr, y + parC[j-1]*dyy[j-1], z + parC[j-1]*dzz[j-1]);
     }
 
     dy = 0;
     dz = 0;
     for( int j = 1; j <= 4; j++){
-      dy += dr * parD[j-1] * dyy[j];
-      dz += dr * parD[j-1] * dzz[j];
+      //dy += dr * parD[j-1] * dyy[j];
+      //dz += dr * parD[j-1] * dzz[j];
+      dy += parD[j-1] * dyy[j];
+      dz += parD[j-1] * dzz[j];
     }
 
     SolU[i + 1][0] = y + dy;
