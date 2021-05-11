@@ -36,6 +36,8 @@ public:
 
   //===== Normal declaration
   void SetNucleus(float A, float Z);
+  void SetA(float A);
+  void SetZ(float Z);
   void IsNeutron(){ this->mu = mn; isNeutron = true;}
   void IsProton() { this->mu = mp; isNeutron = false;}
   void SetWSPars(double V0, double r0, double a0, double VSO, double rSO, double aSO, double rc);
@@ -76,9 +78,12 @@ public:
   double Getrc() { return rc; }
 
   double GetMass() { return mu;}
-
+  float  GetZ()    { return Z; }
+  float  GetN()    { return N; }
+  float  GetA()    { return A; }
   //======= other calculations
   void CalRadius();
+  void CalN();
 
   double CoulombBarrier(int L);
   double FreeWaveNumber(double Energy);
@@ -193,6 +198,18 @@ void WoodsSaxon::SetNucleus(float A, float Z){
   this->N = A-Z;
 }
 
+void WoodsSaxon::SetA(float A){
+  this->A = A;
+}
+
+void WoodsSaxon::SetZ(float Z){
+  this->Z = Z;
+}
+
+void WoodsSaxon::CalN(){
+  this->N = this->A-this->Z;
+}
+
 void WoodsSaxon::SetWSPars(double V0, double r0, double a0, double VSO, double rSO, double aSO, double rc = 0){
   this->V0 = V0;
   this->r0 = r0;
@@ -209,6 +226,11 @@ void WoodsSaxon::SetWSPars(double V0, double r0, double a0, double VSO, double r
   this->Rc  = rc  * pow(A, 1./3.);
 }
 
+void WoodsSaxon::CalRadius(){
+  this->R0  = r0  * pow(A, 1./3.);
+  this->RSO = rSO * pow(A, 1./3.);
+  this->Rc  = rc  * pow(A, 1./3.);
+}
 
 void WoodsSaxon::ClearVector(){
   energy.clear();
@@ -242,6 +264,8 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
   if( A < 40 ) maxL = 3;
   if( N < 20 || Z < 20 ) maxL = 2;
 
+  double KEstart = V0 + 5.; ///assume the 1st eigen state is 5 MeV above the well depth
+
   for( int L = 0 ; L <= maxL; L++ ){
 
     string orbital;
@@ -265,7 +289,7 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
       if( debug ) printf(" ----------------  L = %d , J = %3.1f | LS : %f \n", L, J, LS); 
       int nValue = 0;
 
-      for( float KE = V0 ; KE < 0 ; KE = KE + dKE ){ /// the KE is not kinetic energy, just a name
+      for( float KE = KEstart ; KE < 0 ; KE = KE + dKE ){ /// the KE is not kinetic energy, just a name
 
         SetEnergy(KE);
         SolveRK4(0);
@@ -277,12 +301,6 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
         ///u = outputRK[0];
         ///u2 = outputRK[2];///wave at r = Max - 50 (for nStep >= 200 ), or Max - 100  for nStep >= 300
 
-        if( KE == V0 ) {
-          uOld = u;
-          uOld2 = u2;
-          continue;
-        }
-
         ///check crossing point 
         if( u * uOld < 0 ) {
           ///use bi-section method to find zero point 
@@ -293,8 +311,6 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
           double sumW , sumWOld; /// w + w2
           double e , de;
           int loop = 0;
-
-          if( e1 <= V0 ) continue;
 
           if( debug ) printf(" ====  KE , uOld,  u : %f , %f,  %f \n", KE, uOld,  u);
 
@@ -310,9 +326,9 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
             w = GetLastPoint();
             w2 = GetPoint(nStep - 30);
             
-
             sumW = abs(w + w2);
             wr = w/GetMaxSolution();
+            
             if( loop > maxLoop ) break;
             
             if( de < 1e-10 ) {
@@ -333,9 +349,12 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
             sumWOld = sumW;
             
           }while( abs(w) > uTorr || de > eTorr );
+          ///}while( abs(wr) > 1e-3 || de > eTorr );
 
           char buffer[100];
           int nn = sprintf(buffer, "%d%s%d/2", nValue, orbital.c_str(), J > L ? 2*L+1 : 2*L-1);
+
+          ///if( nValue == 0 ) KEstart = e-1.0; ///set the next KE start at the 1st eigen energy from this NLJ 
 
           Lvalue.push_back(L);
           Jvalue.push_back(J);
