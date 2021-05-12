@@ -26,9 +26,10 @@ int main(int argc, char *argv[]){
 
   if(argc != 9 && argc != 11 && argc != 12 ) {
     printf("====== Runge-Kutta 4-th order method to solve SE =====\n");
-    printf("Usage: ./WSRange A1 A2 V0 k r0 a0 <VSO rSO aSO>  <Z rc>  <nStep dx> <fileName>\n");
+    printf("Usage: ./WSRange V0 k r0 a0 VSO rSO aSO  rc  <nStep dx> <fileName>\n");
     printf("        V0 : Wood-Saxons depth [MeV]\n");            ///1
-    printf("         k : isospin-dependent \n");                 ///2
+    printf("         k : isospin-dependent (+ for proton, - for neutron) \n");                 ///2
+    printf("             V  = V0 * ( 1 + k * (N-Z)/A ) \n");
     printf("        r0 : reduced half-maximum radius (fm) \n");  ///3
     printf("        a0 : diffusiveness (fm) \n");                ///4
     printf("       VSO : Spin-orbital depth [MeV]\n");           ///5
@@ -199,14 +200,14 @@ int main(int argc, char *argv[]){
       ws.SetNucleus( ANZ + NZfixed, NZfixed );
       ws.CalRadius();
 
-      ws.SetV0 ( V0 * ( 1 -  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
+      ws.SetV0 ( V0 * ( 1 +  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
     }
     
     if( opt == 3 ){ /// change in Z, ANZ = Z
       ws.SetNucleus( ANZ + NZfixed, ANZ );
       ws.CalRadius();
 
-      ws.SetV0 ( V0 * ( 1 -  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
+      ws.SetV0 ( V0 * ( 1 +  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
     }
   
     double reducedMass = 931.5 * (ws.GetA() )/(1.008664 + ws.GetA());

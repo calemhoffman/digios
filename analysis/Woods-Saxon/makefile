@@ -1,6 +1,7 @@
 CC=g++
 
-all: WSCompare WSCal WSFit WSFitMC WSSearchTree WSRange WSFit2
+#all: WSCompare WSCal WSFit WSFitMC WSSearchTree WSRange WSFit2
+all: WSCompare WSCal WSFit WSRange
 
 WSFit: WSFit.cpp RK4.h WS.h
 	$(CC) WSFit.cpp -o WSFit `root-config --cflags --glibs`
