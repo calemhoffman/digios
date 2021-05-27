@@ -15,7 +15,7 @@
 #include <fstream>
 #include <TCutG.h>
 
-void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tree", double eRange = 6000, double deRange = 4000){  
+void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tree", TString gate ="", double eRange = 6000, double deRange = 4000){  
    
    //============================= RDT cut
    TFile * fileCut = new TFile(rdtCut);
@@ -39,7 +39,9 @@ void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tre
    
    ///TString ezCutFile = "EZCut.root";
    ///TFile * fileEZCut = new TFile(ezCutFile);
-   ///TCutG * ezCut = (TCutG *) fileEZCut->FindObjectAny("cutez"); 
+   ///TCutG * ezCut = (TCutG *) fileEZCut->FindObjectAny("cutez");
+
+   printf("gate : %s \n", gate.Data());
    
 /**///======================================================== read tree         
    TChain * chain = new TChain(treeName);
@@ -79,7 +81,7 @@ void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tre
                         i);
 
      cRDTCut->cd(i+1);
-     chain->Draw(expression[i],"", "colz");
+     chain->Draw(expression[i],gate, "colz");
      cut[i]->Draw("same");
      
 
