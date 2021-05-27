@@ -32,14 +32,17 @@ double ExOffset[30] = { ///calibrated by h064_15N, (d,p), run013
    0.0000,  0.1485,  0.1900,  0.0000,  0.0000};
 
 //16N(d,3He)
-//vector<int> listOfBadDet = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
-//TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
-//double coinTimeGate[2] = {17, 9}; // mean, half-width
+vector<int> listOfBadDet = {0, 1, 2, 3, 4,  6, 7, 9,  11, 14, 18, 19, 23, 28, 29};
+//vector<int> listOfBadDet = {0, 1, 2, 3, 4};
+TString rdtCutFile = "rdtCuts_15C_tight.root"; //"rdt_15N_degraded.root";
+double coinTimeGate[2] = {17, 9}; // mean, half-width
+bool isd3He = true;
 
 //16N(d,t)
-vector<int> listOfBadDet = {0, 1, 2, 3, 4,  7, 8, 9,  11, 14, 18, 19, 23, 24, 28, 29};
-TString rdtCutFile = "rdtCuts_15N_2.root"; 
-double coinTimeGate[2] = {65, 15}; // mean, half-width
+//vector<int> listOfBadDet = {0, 1, 2, 3, 4,  7, 8, 9,  11, 14, 18, 19, 23, 24, 28, 29};
+//TString rdtCutFile = "rdtCuts_15N_2.root"; 
+//double coinTimeGate[2] = {65, 15}; // mean, half-width
+//bool isd3He = false;
 
 //######################################## End of User Input
 
@@ -293,38 +296,57 @@ Bool_t Analyzer::Process(Long64_t entry)
       ///if( i == 16 && e[i] < 6 ) continue;
 
       //################################################## 
-      
-      Ex = ExCal( e[i] , z[i] );
+
+      if( !isd3He){
+        Ex = ExCal( e[i] , z[i] );
+      }
       //if( isExOffset) Ex = Ex - ExOffset[i];
       
       //============ 16N(d,3He)
-      //if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
-      //if( i == 10 ) Ex = 1.10 * Ex - 0.078;
-      //if( i == 15 ) Ex = 1.00 * Ex + 0.035;
-      //if( i == 20 ) Ex = 1.07 * Ex - 0.107;
-      //if( i == 21 ) Ex = 0.89 * Ex - 0.054;
-      //if( i == 25 ) Ex = 1.07 * Ex - 0.062;
-      //if( i == 26 ) Ex = Ex - 0.22;
-      //if( i == 12 ) Ex = Ex - 0.64;
-      //if( i ==  8 ) Ex = Ex - 0.14;
-      //if( i == 13 ) Ex = Ex - 0.24;
-      //if( i == 22 ) Ex = Ex - 0.10;
-      //if( i == 27 ) Ex = Ex - 0.30;
+      if( isd3He) {
+        if( i ==  5 ) Ex = 1.10 * Ex - 0.023;
+        if( i == 10 ) Ex = 1.10 * Ex - 0.078;
+        if( i == 15 ) Ex = 1.00 * Ex + 0.035;
+        if( i == 20 ) Ex = 1.07 * Ex - 0.107;
+        if( i == 21 ) Ex = 0.89 * Ex - 0.054;
+        if( i == 25 ) Ex = 1.07 * Ex - 0.062;
+        if( i == 26 ) Ex = Ex - 0.22;
+        if( i == 12 ) Ex = Ex - 0.64;
+        if( i ==  8 ) Ex = Ex - 0.14;
+        if( i == 13 ) Ex = Ex - 0.24;
+        if( i == 22 ) Ex = Ex - 0.10;
+        if( i == 27 ) Ex = Ex - 0.30;
+      }
+
+      //======= for total spectrum of (d,3He), no more gate is needed.
       
-      
-      //for 16N g.s. -> 15C(0.74)
+      //----- for 16N g.s. -> 15C(0.74)
       //if ( !( 2 > Ex && Ex > 0.4 ) ) continue;
       //if( i%5 == 0 && !(x[i] < 0 )) continue; //16N g.s. -> 15C(0.74), only the 2nd half is used.
 
-      //if ( !( Ex < 0.4 ) ) continue;//16N iso -> 15C(0.00)
+      //----- for 16N iso -> 15C(0.00)
+      //if ( !( Ex < 0.4 ) ) continue;
       
-      //for total spectrum
-      //if( 2 > Ex && Ex > 0.4 && i%5 == 0 && !(x[i] < 0 )) continue; //16N g.s. -> 15C(0.74), only the 2nd half is used.
+      //---- for sum of  spectrum with 16N g.s. -> 15C(0.74), only the 2nd half is used.
+      //if( 2 > Ex && Ex > 0.4 && i%5 == 0 && !(x[i] < 0 )) continue; 
       
-      // compare the yield for thetaCM from 15.63 deg to 17.30 deg
+      //---- compare the yield for thetaCM from 15.63 deg to 17.30 deg
+      //old b4 2021-05-26
       //if( i%5 != 0 ) continue;
       //if( 2 > Ex && Ex > 0.4 && !( x[i] < -0.4545 )) continue;
       //if( Ex < 0.4 && !( x[i] > 0.4545 )) continue;
+
+      //new 2021-05-26
+      //double xRange[2] = {-0.5147, 0.5133 }; if( i%5 != 0 ) continue;// for i%5 == 0
+      //double xRange[2] = {-0.4733, 0.4649 }; if( i%5 != 1 ) continue;// for i%5 == 1
+      double xRange[2] = {-0.4189, 0.4009 }; if( i%5 != 2 ) continue;// for i%5 == 2
+      //double xRange[2] = {-0.3578, 0.3429 }; if( i%5 != 3 ) continue;// for i%5 == 3
+      //double xRange[2] = {-0.2965, 0.2782 }; if( i%5 != 4 ) continue;// for i%5 == 4
+      
+      if( 2 > Ex && Ex > 0.4 && !( x[i] < xRange[0])) continue;
+      if( Ex < 0.4 && !( x[i] > xRange[1] )) continue;
+
+      
       
       multiHit ++;
       
@@ -511,13 +533,17 @@ void Analyzer::Terminate()
    
    //cAna->cd(1); hExT->Draw("colz");
    //hEx->Draw();
-   
+
+   //========= When cut on same thetaCM
    cAna->cd(1); hEx->Draw();
-   cAna->cd(2); hxExi[5]->Draw();
-   cAna->cd(3); hxExi[10]->Draw();
-   cAna->cd(4); hxExi[15]->Draw();
-   cAna->cd(5); hxExi[20]->Draw();
-   cAna->cd(6); hxExi[25]->Draw();
+
+  int index = 2;
+   
+   cAna->cd(2); hxExi[ 5 + index]->Draw(); hxExi[ 5+index]->SetMarkerStyle(5);
+   cAna->cd(3); hxExi[10 + index]->Draw(); hxExi[10+index]->SetMarkerStyle(5);
+   cAna->cd(4); hxExi[15 + index]->Draw(); hxExi[15+index]->SetMarkerStyle(5);
+   cAna->cd(5); hxExi[20 + index]->Draw(); hxExi[20+index]->SetMarkerStyle(5);
+   cAna->cd(6); hxExi[25 + index]->Draw(); hxExi[25+index]->SetMarkerStyle(5);
    
    /*
    //for( int i = 5; i < numDet; i++){
