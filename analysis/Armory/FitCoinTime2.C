@@ -120,7 +120,7 @@ void FitCoinTime2(){
   const int n = 300;
   double x[n], y[n], ey[n], oy[n];
 
-  double rangey[2] = {-1, 4};
+  double rangey[2] = {-2, 4};
   TH2F * h1 = new TH2F("h1", "h1", 500, -0.1, 1.1, 500, rangey[0], rangey[1]);
 
   for( int i = 0; i < n; i++){
@@ -128,7 +128,7 @@ void FitCoinTime2(){
     ey[i] = gRandom->Gaus(0,0.1);
     oy[i] = gRandom->Integer(2);
     //y[i] = -10*x[i]*(x[i]-1) + 5* ey[i] + 6*oy[i];
-    y[i] = x[i] + ey[i] + 2* oy[i];    
+    y[i] = x[i] + ey[i] + 1.5* oy[i]-1.;    
 
     h1->Fill(x[i], y[i]);
 
@@ -154,7 +154,7 @@ void FitCoinTime2(){
     (haha[i].pt).clear();
     haha[i].dim = nPar;
     for( int j = 0; j < nPar ; j++){
-      (haha[i].pt).push_back(gRandom->Rndm()*2);
+      (haha[i].pt).push_back((gRandom->Rndm()-1.)*3);
     }
   }
 
@@ -172,6 +172,8 @@ void FitCoinTime2(){
   bool isGo = true;
 
   Lsq hahaOld;
+
+  double dis = 0;
   
   do{
 
@@ -326,7 +328,7 @@ void FitCoinTime2(){
       
       for( int i = 1; i < nPt; i++){
         for( int j = 0; j < nPar; j++){
-          haha[i].pt[j] = gRandom->Rndm();
+          haha[i].pt[j] = (gRandom->Rndm()-1.)*3;
         }
 
         haha[i] = CalLsq(x,y, n, haha[i], threshold);
@@ -339,14 +341,14 @@ void FitCoinTime2(){
     hahaOld = haha[0];
 
     if( count > 0 ){
-      double dis = 0;
+      dis = 0;
       for( int j = 0; j < nPar ; j++){
         dis += TMath::Power(haha[0].pt[j] - x0.pt[j],2);
       }
 
       if( isDebug )  printf("========= dis : %f \n", dis);
 
-      if( abs(hahaOld.ms - haha[0].ms) < 1e-4 && dis < 1e-10 ) {
+      if( abs(hahaOld.ms - haha[0].ms) < 1e-5 && dis < 1e-15 ) {
         isGo = false;
       }
     }
@@ -355,8 +357,10 @@ void FitCoinTime2(){
     count ++;
 
   }while(count < 1000 && isGo );
+  //}while(count < 200  );
 
   printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d\n", count);
+  printf(" dis = %.9e\n", dis);
   PrintLsqList(haha, nPt);
 
   ///=============== Plot result;
