@@ -8,20 +8,55 @@
 #include <TString.h>
 #include <TObjArray.h>
 
+Float_t rdtCorr2[8][2];
+
+void LoadRDTCorr2(){
+   //========================================= e correction
+   printf(" loading rdt correction.");
+   ifstream file;
+   file.open("correction_rdt.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= 8) break;
+         rdtCorr2[i][0] = a;  ///  a1
+         rdtCorr2[i][1] = b;  ///  a0 , e' = e * a1 + a0
+         i = i + 1;
+      }
+      printf("............ done.\n");
+      
+   }else{
+      printf("............ fail.\n");
+      for( int i = 0; i < 8 ; i++){
+         rdtCorr2[i][0] = 1.;
+         rdtCorr2[i][1] = 0.;
+      }
+   }
+   file.close();
+   
+   for( int i = 0; i < 8; i++){
+      printf("%d | %f, %f \n", i, rdtCorr2[i][0], rdtCorr2[i][1]);
+   }
+   printf("=================================\n");
+   
+}
+
 void RDTCutCreator(TString dataList, 
                    TString treeName = "gen_tree", 
                    bool useTrace = false,
                    TString saveFileName = "rdtCuts.root", 
-                   int eRange=5000, 
-                   int deRange=7000, 
+                   int eRange=6000, 
+                   int deRange=2000, 
                    TString gate = "", 
                    bool isLogz = false){
    
    printf("================ Graphic Cut Creator for RDT ============== \n");
    
+   LoadRDTCorr2();
+   
    TChain * chain = new TChain(treeName);
-   //chain->Add(dataList);
-   chain->Add("../root_data/trace_run09[0-9].root");
+   chain->Add(dataList);
    
    chain->GetListOfFiles()->Print();
    
@@ -38,16 +73,15 @@ void RDTCutCreator(TString dataList,
    TCutG * cut = NULL;
    TObjArray * cutList = new TObjArray();
 
-
    TString expression[10];
 
    TH2F * h[4];
 
+   int count = 0;
    for (Int_t i = 0; i < 4; i++) {
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
-      
       if( useTrace ){   
          varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
@@ -56,15 +90,13 @@ void RDTCutCreator(TString dataList,
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 0, eRange, 500, 0, deRange);
-      
-      ///eRange overRide
-      ///h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 1500, 3000, 500, 100, 800);
 
-      expression[i].Form("%s:%s>>h%d", 
-                         varY.Data(),
-                         varX.Data(),
+      expression[i].Form("%s*%f +%f:%s*%f+%f>>h%d", 
+                         varY.Data(), rdtCorr2[2*i+1][0], rdtCorr2[2*i+1][1],
+                         varX.Data(), rdtCorr2[2*i][0],   rdtCorr2[2*i][1],
                          i);
-      
+                         
+      ///printf("%s \n", expression[i].Data());
 
       chain->Draw(expression[i], gate, "col");
       
@@ -95,13 +127,13 @@ void RDTCutCreator(TString dataList,
 
       printf(" cut-%d \n", i);
               
-     
-	}
-	
+      count ++;
+   }
+
    TFile * cutFile = new TFile(saveFileName, "recreate");
-	cutList->Write("cutList", TObject::kSingleKey);
-	
-	printf("====> saved %d cuts into %s\n", 4, saveFileName.Data());
+   cutList->Write("cutList", TObject::kSingleKey);
+   
+   printf("====> saved %d cuts into %s\n", count, saveFileName.Data());
    gROOT->ProcessLine(".q");
-	
+
 }

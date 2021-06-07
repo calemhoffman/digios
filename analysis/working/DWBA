@@ -60,9 +60,10 @@
 15C(p,p)15C   1/2        none     1/2+         0.000   7.1MeV/u   VV
 15C(p,p)15C   1/2        none     5/2+         0.740   7.1MeV/u   VV
 15C(p,p)15C   1/2        none     1/2-         3.100   7.1MeV/u   VV
-14C(p,p)14C   0        none     0+         0.000   7.1MeV/u   VV
-15C(d,d)15C   1/2        none     1/2+         0.000   7.1MeV/u   AA
+#15C(p,p)15C   1/2        none     1/2+         0.000   7.1MeV/u   VV
+#15C(d,d)15C   1/2        none     1/2+         0.000   7.1MeV/u   AA
 15C(d,d)15C   1/2        none     5/2+         0.740   7.1MeV/u   AA
 15C(d,d)15C   1/2        none     1/2-         3.100   7.1MeV/u   AA
-14C(d,d)14C   0        none     0+         0.000   7.1MeV/u   AA
-
+15C(d,d)15C   1/2        none     1/2+         0.000   7.1MeV/u   AA
+#15C(d,t)14C   1/2        1s1/2     0+           0.000   7.1MeV/u   AX
+#15C(p,d)14C   1/2        1s1/2     0+           0.000   7.1MeV/u   KA

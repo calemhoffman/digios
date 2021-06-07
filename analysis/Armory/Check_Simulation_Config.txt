@@ -17,14 +17,14 @@
 /////              pElum1RThetaCM,    /// 16
 /////              pEmpty };          /// 17
 /////=============================================== User Config
-{pEZ, pExCal, pThetaCM, break, pThetaCM_Z, pRecoilXY, pInfo}   //Canvas config
-hit == 1 && loop <= 1 && thetaCM > 10
+{pEZ, pExCal, pThetaCM, pRecoilRZ, break, pThetaCM_Z, pRecoilXY, pInfo, pEmpty}   //Canvas config
+hit == 1 && loop <= 1 && thetaCM > 10 //&& rhoRecoil > 10
 60              //elum range
-{0,50}        //thetaCM range
+{0,70}        //thetaCM range
 false          //shownKELines
 false          //isOverRideEx
 {-0.5, 4.0}    // over-rdied Ex range
 ///============================== example of gate
-hit == 1 && loop <= 1 && thetaCM > 10
-hit == 1 && loop <= 1
+hit == 1 && loop <= 4 && thetaCM > 10
+hit == 1 && loop <= 4
 15 < rhoElum1 && rhoElum1 < 50 && rhoElum2 > 60

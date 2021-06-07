@@ -44,8 +44,76 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     //chain->Add("../root_data/trace_run07[0-9].root"); //15C(p,p') Target move +8 cm
     //chain->Add("../root_data/trace_run080.root"); //15C(p,p') Target move +8 cm after retune
     //chain->Add("../root_data/trace_run08[2-9].root"); //15C(p,p') Target move +8 cm after retune
-    chain->Add("../root_data/trace_run09[0-9].root"); //15C(p,p') Target move +8 cm after retune
+    //chain->Add("../root_data/trace_run09[0-9].root"); //15C(p,p') Target move +8 cm after retune
     
+    
+    ///============= alpha source
+    //chain->Add("../root_data/gen_run102.root"); // mixed 
+    //chain->Add("../root_data/gen_run003.root"); // 228Th
+    //chain->Add("../root_data/gen_run082.root"); // 228Th
+    //chain->Add("../root_data/gen_run055.root"); // 228Th
+    
+    //chain->Add("../root_data/trace_run104.root");// alpha for recoils
+    
+    //chain->Add("../root_data/gen_run108.root");// 15C on 363 CD2    
+    //chain->Add("../root_data/gen_run109.root");// 15C on 363 CD2
+    //chain->Add("../root_data/gen_run11[0-9].root");// 15C on 363 CD2
+    //chain->Add("../root_data/gen_run12[0-6].root");// 15C on 363 CD2     
+    //chain->Add("../root_data/gen_run12[7-9].root");// 15C on 363 CD2 increase HV on recoils
+    //chain->Add("../root_data/gen_run13[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/gen_run14[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/gen_run15[0-9].root");// 15C on 363 CD2 332 mm from target to array
+    //chain->Add("../root_data/gen_run16[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/gen_run17[0-7].root");// 15C on 363 CD2 
+
+    //chain->Add("../root_data/trace_run108.root");// 15C on 363 CD2    
+    //chain->Add("../root_data/trace_run109.root");// 15C on 363 CD2
+    //chain->Add("../root_data/trace_run11[0-9].root");// 15C on 363 CD2
+    //chain->Add("../root_data/trace_run12[0-6].root");// 15C on 363 CD2     
+    //chain->Add("../root_data/trace_run12[7-9].root");// 15C on 363 CD2 increase HV on recoils
+    //chain->Add("../root_data/trace_run13[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/trace_run14[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/trace_run15[0-9].root");// 15C on 363 CD2 332 mm from target to array
+    //chain->Add("../root_data/trace_run16[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/trace_run17[0-7].root");// 15C on 363 CD2 
+ 
+        
+    //chain->Add("../root_data/gen_run17[8-9].root");// 15C on 363 CD2 -6 cm
+    //chain->Add("../root_data/gen_run18[0-9].root");// 15C on 363 CD2  -6 cm
+    //chain->Add("../root_data/gen_run19[0-9].root");// 15C on 363 CD2  -6 cm 272 mm from target to array
+    //chain->Add("../root_data/trace_run20[0-9].root");// 15C on 363 CD2  -6 cm
+          
+    //chain->Add("../root_data/gen_run21[8-9].root");// 15C on 381 CH2  +8 cm
+    //chain->Add("../root_data/gen_run22[0-9].root");// 15C on 381 CH2  +8 cm
+    //chain->Add("../root_data/gen_run23[0-9].root");// 15C on 381 CH2  +8 cm  352 mm from target to array
+    //chain->Add("../root_data/gen_run24[0-2].root");// 15C on 381 CH2  +8 cm
+    
+    chain->Add("../root_data/trace_run21[8-9].root");// 15C on 381 CH2  +8 cm
+    chain->Add("../root_data/trace_run22[0-9].root");// 15C on 381 CH2  +8 cm
+    chain->Add("../root_data/trace_run23[0-9].root");// 15C on 381 CH2  +8 cm  352 mm from target to array
+    chain->Add("../root_data/trace_run24[0-2].root");// 15C on 381 CH2  +8 cm
+
+    
+    //chain->Add("../root_data/gen_run24[3-9].root");// 15C on 381CH2  +8 cm 8 hours later 
+    //chain->Add("../root_data/gen_run25[0-7].root");// 15C on 381CH2  +8 cm 8 hours later
+    
+    
+    //chain->Add("../root_data/trace_run13[0-9].root");// 15C on 363 CD2     
+    //chain->Add("../root_data/trace_run14[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/trace_run15[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/trace_run16[0-9].root");// 15C on 363 CD2 
+    //chain->Add("../root_data/trace_run17[0-7].root");// 15C on 363 CD2 
+    
+   // chain->Add("../root_data/trace_run21[8-9].root");// 15C on 381 CH2  +8 cm
+    //chain->Add("../root_data/trace_run22[0-9].root");// 15C on 381 CH2  +8 cm
+    //chain->Add("../root_data/trace_run23[0-9].root");// 15C on 381 CH2  +8 cm
+    //chain->Add("../root_data/trace_run24[0-2].root");// 15C on 381 CH2  +8 cm
+
+
+    //chain->Add("../root_data/gen_run26[0-9].root");// 14C on TiD
+    //chain->Add("../root_data/gen_run27[0-2].root");// 14C on TiD
+
+
     ///********** end Marker for AutoCalibration.
     
     
