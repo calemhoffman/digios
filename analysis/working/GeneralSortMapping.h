@@ -3,7 +3,7 @@
  * This is the Mapping for Armory/GeneralSort.C
  * 
  * idDetMap = 0XX ; PSD
- *          = 1XX ; Recoil
+ *          = 1XX ; Recoil,  dE of the Recoil MUST be odd
  *          = 2XX ; ELUM
  *          = 3XX ; EZERO
  *          = 4XX ; TAC & RF-Timing

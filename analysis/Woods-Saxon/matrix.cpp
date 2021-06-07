@@ -24,6 +24,7 @@ Matrix::Matrix(const int row, const int col)
             p[i][j] = 0 ;
         }
     }
+
 }
 
 Matrix::Matrix(const Matrix& a)
@@ -39,6 +40,7 @@ Matrix::Matrix(const Matrix& a)
             p[r][c] = a.p[r][c];
         }
     }
+
 }
 
 Matrix::Matrix(int row, int col, double v){
@@ -60,6 +62,7 @@ Matrix::Matrix(int row, int col, double v){
             }
         }
     }
+
 }
 
 double &Matrix::operator()(const int r, const int c)
@@ -67,7 +70,7 @@ double &Matrix::operator()(const int r, const int c)
     if (p != NULL && r > 0 && r <= rows && c > 0 && c <= cols){
         return p[r-1][c-1];
     }else{
-      printf(" index out of range. \n");
+      printf(" index out of range. Assigning element\n");
     }
 
     return p[0][0];
@@ -86,6 +89,7 @@ Matrix &Matrix::operator=(const Matrix &a)
             p[r][c] = a.p[r][c];
         }
     }
+    
     return *this;
 }
 
@@ -131,7 +135,7 @@ Matrix Matrix::operator - (const Matrix &a)
         return res;
     }else{
         // give an error
-      printf("Dimensions does not match\n");
+      printf("Dimensions does not match. matrix subtraction\n");
     }
 
     // return an empty matrix (this never happens but just for safety)
@@ -154,7 +158,7 @@ Matrix Matrix::operator * (const Matrix &a)
         return res;
     }else{
         // give an error
-        printf("Dimensions does not match\n");
+        printf("Dimensions does not match, matrix multiplication\n");
     }
 
     // return an empty matrix (this never happens but just for safety)
@@ -301,6 +305,7 @@ Matrix Matrix::Inverse(){
         }
     }else{
         printf(" fail to calculate inverse\n");
+        res = Matrix(a.rows, a.cols);
     }
 
     return res;
