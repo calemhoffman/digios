@@ -165,6 +165,6 @@ elif [ ${isGeneralSort} -lt 0 ]; then
     elif [ $isGeneralSort -lt -1 ]; then
         echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
     fi
-    root -l -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
+    \root -l -t -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
 fi
 

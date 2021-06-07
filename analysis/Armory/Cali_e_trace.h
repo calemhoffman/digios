@@ -170,7 +170,7 @@ public :
    
    double eCorr[30][2]; // e-correction
    double eCorr2[30][2]; // e-correction
-   double rdtCorr[8]; //rdt-correction
+   double rdtCorr[8][2]; //rdt-correction
    
    double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
@@ -569,9 +569,10 @@ void Cali_e_trace::Init(TTree *tree)
    if( file.is_open() ){
       double a, b;
       int i = 0;
-      while( file >> a){
+      while( file >> a >> b){
          if( i >= 8) break;
-         rdtCorr[i] = a;  //
+         rdtCorr[i][0] = a;  // a1
+         rdtCorr[i][1] = b;  // a2, e' = e * a1 + a0 
          i = i + 1;
       }
       printf("..................... done.\n");
@@ -580,7 +581,8 @@ void Cali_e_trace::Init(TTree *tree)
    }else{
       printf("..................... fail.\n");
       for( int i = 0; i < numDet ; i++){
-         rdtCorr[i] = 1.;
+         rdtCorr[i][0] = 1.;
+         rdtCorr[i][1] = 0.;
       }
    }
    file.close();
@@ -702,6 +704,10 @@ void Cali_e_trace::Init(TTree *tree)
 
       cutList->Write("rdtCutList");
    }
+
+   TString ezCutFile = "EZCut.root";
+   TFile * fileEZCut = new TFile(ezCutFile);
+   TCutG * ezCut = (TCutG *) fileEZCut->FindObjectAny("cutez"); 
 
    printf("================================== numDet : %d \n", numDet);
    

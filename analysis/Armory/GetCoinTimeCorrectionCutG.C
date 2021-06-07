@@ -33,7 +33,7 @@ Double_t nGauss(Double_t *x, Double_t *par) {
 
 void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
 
-   int timeRange[2] ={-70, 200};
+   int timeRange[2] ={-70, 300};
    TString rdtCutName = "rdtCuts.root";
 
    //====================================================== read file, canvas, histogram
