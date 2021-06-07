@@ -32,8 +32,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,    1600};
-int      rdtERange[2] = {     0,    6000};
+int     rdtDERange[2] = {     0,    3000};
+int      rdtERange[2] = {     0,    8000};
 int      elumRange[2] = {     0,    7000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
@@ -44,14 +44,17 @@ double     exRange[3] = {  20,    -1,     6};  /// bin [keV], low[MeV], high[MeV
 int  coinTimeRange[2] = { -100, 100};
 int    timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
 
-int  icRange [3] = {60, 400, 500}; /// max od IC0,1,2 
+int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2 
 
 bool isUseArrayTrace = false;
 bool isUseRDTTrace = true;
 
+//TODO, load the reaction and find the Sn Sp from Isotope Class 
+double Sn = 1.2181;
+
 //---Gate
 bool isTimeGateOn  = true;
-int timeGate[2]    = {-20, 10};             /// min, max, 1 ch = 10 ns
+int timeGate[2]    = {-20, 20};             /// min, max, 1 ch = 10 ns
 double eCalCut     = 0.5;                   /// lower limit for eCal
 bool  isTACGate    = false;
 int tacGate[2]     = {-8000, -2000};
@@ -59,9 +62,12 @@ int dEgate[2]      = {  500,  1500};
 int Eresgate[2]    = { 1000,  4000};
 double thetaCMGate = 10;                    /// deg
 double xGate       = 0.95;                  ///cut out the edge
-vector<int> skipDetID = { 2, 11} ;
+vector<int> skipDetID = {2,  11, 17, 5, 23} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "rdtCut_14C.root";
+TString rdtCutFile1 = "rdtCuts.root";
+//TString rdtCutFile1 = "rdtCuts15Cunbound.root";
+//TString rdtCutFile1 = "rdtCut_14C.root"
+//TString rdtCutFile1 = "rdtCut_Ryan_20210511.root";
 TString rdtCutFile2 = "";//"rdtCuts_15C.root";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -237,6 +243,7 @@ Float_t xfxneCorr[numDet][2];
 Float_t xScale[numDet];
 Float_t eCorr[numDet][2];
 Float_t eCorr2[numDet][2];
+Float_t rdtCorr[8][2];
 //==== parameters for Ex and thetaCM calcualtion
 
 double length ; // detector z-length 
@@ -282,6 +289,7 @@ void Monitors::Begin(TTree *tree)
    LoadXFXN2ECorr();
    LoadXScaleCorr();
    LoadECorr();
+   LoadRDTCorr();
    LoadReactionPars();
 
    //================  Get Recoil cuts;
@@ -635,6 +643,13 @@ Bool_t Monitors::Process(Long64_t entry)
     
     ///if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
     
+    /*********** Apply Recoil correction here *************************/
+    
+    for( int i = 0 ; i < 8; i++){
+       rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
+    }
+    
+    
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
     Int_t recoilMulti = 0;
@@ -741,6 +756,7 @@ Bool_t Monitors::Process(Long64_t entry)
         for(int i = 0 ; i < numCut1 ; i++ ){
           cutG = (TCutG *)cutList1->At(i) ;
           if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+          //if(cutG->IsInside(rdt[2*i+1],rdt[2*i])) {
             rdtgate1= true;
             break; /// only one is enough
           }
@@ -780,7 +796,8 @@ Bool_t Monitors::Process(Long64_t entry)
    
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
-            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]);
+            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+            //if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]);
             hArrayRDTMatrixG->Fill(detID, j); 
             //if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
             coinFlag = true;
@@ -839,7 +856,7 @@ Bool_t Monitors::Process(Long64_t entry)
          ///recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
-         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //dE-E
+         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
          hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
 
          htacRecoil[i]->Fill(tac[0],rdt[i]);
@@ -988,8 +1005,7 @@ void Monitors::Terminate()
 
    double yMax = 0;
 
-   //Separation energy line //TODO, load the reaction and find the Sn Sp from Isotope Class 
-   double Sn = 1.2181;
+
    
    //TODO, Module each block.
    ///----------------------------------- Canvas - 1
@@ -1008,9 +1024,10 @@ void Monitors::Terminate()
    
    hEx->Draw();
    DrawLine(hEx, Sn);
-
-   if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
+   
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
+   if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.7, "with recoil gated"); 
 
    ///----------------------------------- Canvas - 5
    padID++; cCanvas->cd(padID); 
@@ -1053,7 +1070,7 @@ void Monitors::Terminate()
    Draw2DHist(hic01);
 
    ///----------------------------------- Canvas - 10
-   PlotRDT(3,0);
+    PlotRDT(3,0);
    
    //helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
    //helumDBIC = (TH1F*) helum4D->Clone();

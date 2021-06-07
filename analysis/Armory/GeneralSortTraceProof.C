@@ -238,7 +238,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    NumHits = 0;
    b_NumHits->GetEntry(entry);
    
-   if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac, etc
+   //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac, etc
 
 /**////======================================= Zero struct
    for (Int_t i=0 ; i< NARRAY; i++) { 
