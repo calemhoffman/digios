@@ -294,7 +294,7 @@ void DrawBox(TH1* hist, double x1, double x2, Color_t color, float alpha){
 
 void Monitors::Draw2DHist(TH2F * hist){
    
-   if( hist->Integral() < 2000 ){
+   if( hist->Integral() < 3000 ){
       hist->SetMarkerStyle(20);
       hist->SetMarkerSize(0.3);
       hist->Draw("");
@@ -490,7 +490,7 @@ void LoadECorr(){
       while( file >> a >> b){
          if( i >= numDet) break;
          eCorr2[i][0] = a;  // 1/a1
-         eCorr2[i][1] = b;  //  a0 , e' = e * a1 + a0
+         eCorr2[i][1] = b;  //  a0 , e' = e / a1 + a0
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
@@ -501,6 +501,33 @@ void LoadECorr(){
       for( int i = 0; i < numDet ; i++){
          eCorr2[i][0] = 1.;
          eCorr2[i][1] = 0.;
+      }
+   }
+   file.close();
+   
+}
+
+void LoadRDTCorr(){
+   //========================================= e correction
+   printf(" loading rdt correction.");
+   ifstream file;
+   file.open("correction_rdt.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= 8) break;
+         rdtCorr[i][0] = a;  //  a1
+         rdtCorr[i][1] = b;  //  a0 , e' = e * a1 + a0
+         i = i + 1;
+      }
+      printf("............ done.\n");
+      
+   }else{
+      printf("............ fail.\n");
+      for( int i = 0; i < 8 ; i++){
+         rdtCorr[i][0] = 1.;
+         rdtCorr[i][1] = 0.;
       }
    }
    file.close();
@@ -649,8 +676,13 @@ void Monitors::PlotRDT(int id, bool isRaw){
 
    if( isRaw ){
       Draw2DHist(hrdt2D[id]);
+      //hrdt[2*id]->Draw("");
+      //hrdt[2*id+1]->Draw("");
    }else{
       Draw2DHist(hrdt2Dg[id]);
+      //hrdt[2*id]->Draw("");
+      //hrdt[2*id+1]->Draw("");
+      
    }
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
