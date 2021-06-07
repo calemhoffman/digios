@@ -56,27 +56,31 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    for(int i = 0; i < 8 ; i++){
       rdtC[i] = TMath::QuietNaN();
       rdtC_t[i] = 0;
-      rdtID[i] = -4;
    }
+
+   rdtID = -4;
    
    coin_t = -2000;
 
    if( isTraceDataExist ){
       tcoin_t = TMath::QuietNaN();
-      coinTimeUC = TMath::QuietNaN(); //uncorrected
+      coinTimeUC = TMath::QuietNaN(); ///uncorrected, still bending
       coinTime = TMath::QuietNaN();
       
-      teS = TMath::QuietNaN();
-      te_tS = TMath::QuietNaN();
-      te_rS = TMath::QuietNaN();
-      trdtS = TMath::QuietNaN();
-      trdt_tS = TMath::QuietNaN();
-      trdt_rS = TMath::QuietNaN();
+      for(int i = 0; i < numDet; i++){
+         te[i] = TMath::QuietNaN();
+         te_t[i] = TMath::QuietNaN();
+         te_r[i] = TMath::QuietNaN();
+      }
+      for(int i = 0; i < 8; i++){
+         trdt[i] = TMath::QuietNaN();
+         trdt_t[i] = TMath::QuietNaN();
+         trdt_r[i] = TMath::QuietNaN();
+      }
    }
    
    //#################################################################### get event
    eventID += 1;
-   //if( entry == 1 ) run += 1; //TODO need to modified the GeneralSort.C for run_number
    
    if( isRunIDExist ) {
       b_runID->GetEntry(entry,0);  
@@ -114,7 +118,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       b_Trace_RDT_RiseTime->GetEntry(entry,0);
    }
 
-   //#################################################################### gate
+   //#################################################################### gates
 ///   bool rdt_energy = false;
 ///   for( int rID = 0; rID < 8; rID ++){
 ///      if( rdt[rID] > 5000 ) rdt_energy = true; 
@@ -122,10 +126,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 ///   if( !rdt_energy ) return kTRUE;
 
    // need to change manually depends on rdt or trdt
-   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( trdt[0], trdt[1] )) rejRDT1 = false;
-   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( trdt[2], trdt[3] )) rejRDT2 = false;
-   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( trdt[4], trdt[5] )) rejRDT3 = false;
-   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( trdt[6], trdt[7] )) rejRDT4 = false;
+   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
+   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
+   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
+   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
    
    if( !isRDTCutExist ){
       rejRDT1 = false;
@@ -134,11 +138,11 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       rejRDT4 = false;
    }
    
-   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
+   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; ///######### rdt gate
    
    
    bool coinFlag = false;
-   //if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
+   ///if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
    int countInvalidRDT = 0;
    for( int j = 0; j < 8; j++){
       if( TMath::IsNaN(rdt[j]) ) countInvalidRDT ++;
@@ -258,66 +262,46 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    for(int i = 0 ; i < 8 ; i++){
       rdtC[i]   = rdtCorr[i] * trdt[i];
       rdtC_t[i] = trdt_t[i]; 
-      if( !TMath::IsNaN(rdt[i]) )  rdtID[i] = i;
    }
 
    for( int i = 0; i< 4 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
-      //if( !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
+         rdtID = 2*i+1; ///dE of recoil
       }
    }
 
    //================================= for coincident time bewteen array and rdt
    if( multiHit == 1 && rdtdEMultiHit == 1) {
       
-      int detID = -1;
-      int rdtID = -1;
-      
       ///===== no Trace data
-      ULong64_t eTime = -2000; 
-      for(int idet = 0 ; idet < numDet; idet++){
-         if( !TMath::IsNaN(z[idet]) ) {
-            eTime = e_t[idet];
-            detID = idet;
-            break;
-         }
-      }
+      ULong64_t eTime = e_t[det];
 
       /// for dE detector only
-      ULong64_t rdtTime = 0;
-      int rdtIDtemp = -1;
-      for(int idet = 0 ; idet < 4; idet++){
-         if( rdt[2*idet+1] > 0 && rdt[2*idet] > 0 ) {
-            rdtID = 2*idet+1;
-            rdtTime = rdt_t[2*idet+1];
-            rdtIDtemp = idet;
-            break;
-         }
-      }
+      ULong64_t rdtTime = rdt_t[rdtID];
 
-      coin_t = (int) eTime - rdtTime; // digitizer timeStamp
+      coin_t = (int) eTime - rdtTime; /// digitizer timeStamp
      
       ///======== with trace data
       if( isTraceDataExist ) {
          
-         Float_t teTime = te_t[detID];
+         Float_t teTime = te_t[det];
          Float_t trdtTime =  trdt_t[rdtID];
          
-         tcoin_t = teTime - trdtTime; // trace trigger time 
+         tcoin_t = teTime - trdtTime; /// trace trigger time 
          
-         //Ad-hoc solution 
+         ///Ad-hoc time offset for each dE
          double rdtCorr = 0;
-         //switch(rdtIDtemp){
-         //   case 0: rdtCorr = 23.0 ; break;
-         //   case 1: rdtCorr = 0.0 ; break;
-         //   case 2: rdtCorr = 4.3 ; break;
-         //   case 3: rdtCorr = 15.3 ; break;
-         //}
+         ///switch(rdtID){
+         ///   case 0: rdtCorr = 23.0 ; break;
+         ///   case 1: rdtCorr = 0.0 ; break;
+         ///   case 2: rdtCorr = 4.3 ; break;
+         ///   case 3: rdtCorr = 15.3 ; break;
+         ///}
          
-         coinTimeUC = 10.0*(coin_t + tcoin_t) - rdtCorr; // in nano-sec
+         coinTimeUC = 10.0*(coin_t + tcoin_t) - rdtCorr; /// in nano-sec
          
-         double f7corr = f7[detID]->Eval(x[detID]) + cTCorr[detID][8];
+         double f7corr = f7[det]->Eval(x[det]) + cTCorr[det][8];
          
          coinTime = (coinTimeUC - f7corr);
       }
@@ -327,8 +311,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    if( rejZeroHit && multiHit == 0 ) return kTRUE;
    
    //#################################################################### Timer  
-   saveFile->cd(); //set focus on this file
-   newTree->Fill();  
+   saveFile->cd(); ///set focus on this file
+   newTree->Fill();
 
    clock.Stop("timer");
    Double_t time = clock.GetRealTime("timer");
@@ -357,7 +341,7 @@ void Cali_e_trace::SlaveTerminate(){
 
 void Cali_e_trace::Terminate(){
    
-   saveFile->cd(); //set focus on this file
+   saveFile->cd(); ///set focus on this file
    newTree->Write(); 
    saveFile->Close();
 

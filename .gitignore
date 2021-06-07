@@ -40,6 +40,7 @@ analysis/Cleopatra/Transfer
 analysis/Cleopatra/Isotope
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
+analysis/Woods-Saxon/WSCompare
 analysis/Woods-Saxon/WSSearch
 analysis/Woods-Saxon/WSSearch2
 analysis/Woods-Saxon/WSMakeTree
@@ -47,7 +48,11 @@ analysis/Woods-Saxon/WSRange
 analysis/Woods-Saxon/range.txt
 analysis/Woods-Saxon/test
 
+*.WF.dat
+
 AutoProcessLog.txt
 daq/save/trigger.txt
+
+DB_*.txt
 
 slurm-*.out

@@ -1,6 +1,6 @@
 #include "Monitors.C+" // the plus sign mean compilation
 
-void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false) {
+void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, bool isTraceON = false) {
   
   ///default saveCanvas = false, no save Cavas
   ///                   = true, save Canvas
@@ -11,9 +11,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false) {
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-    // chain->Add("../root_data/gen_run01[1-5].root");
-
-
+  
     ///********** end Marker for AutoCalibration.
     
     
@@ -24,7 +22,9 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false) {
     if( RUNNUM2 == -1) endRUNNUM = RUNNUM;
     
     for( int i = RUNNUM ; i <= endRUNNUM ; i++){
-      fileName.Form("../root_data/gen_run%03d.root", i);
+      
+      if( isTraceON == false )fileName.Form("../root_data/gen_run%03d.root", i);
+      if( isTraceON == true ) fileName.Form("../root_data/trace_run%03d.root", i);
       chain->Add(fileName);
     }
   }

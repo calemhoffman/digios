@@ -16,6 +16,7 @@ public:
     Matrix& operator= (const Matrix& a);
     ~Matrix();
 
+    // Matrix index start from 1
     double & operator () (const int r, const int c);
 
     // Matrix with Matrix
@@ -61,6 +62,7 @@ public:
     Matrix Minor(const int row, const int col) const; //for Det()
     Matrix Transpose();
     Matrix Inverse();
+
     double Det();
     int GetRows(){return rows;}
     int GetCols(){return cols;}
