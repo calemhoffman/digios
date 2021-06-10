@@ -1,3 +1,9 @@
+//////////////////////////////////////////////////////////
+// This class has been automatically generated on
+// Tue Jul 10 21:31:47 2018 by ROOT version 6.10/02
+// from TTree gen_tree/PSD Tree
+// found on file: gen_run11.root
+//////////////////////////////////////////////////////////
 
 #ifndef Cali_e_trace_h
 #define Cali_e_trace_h
@@ -27,7 +33,7 @@ public :
    // the array size MUST be larger or equal to the array size of source root file 
    // e.g. in the source root file has e[50], in here, e[50] or e[100] is OK, but not e[40]
 
-   /// Declaration of leaf types
+   // Declaration of leaf types
    Int_t           runID;
    Float_t         e[100];
    ULong64_t       e_t[100];
@@ -47,7 +53,7 @@ public :
    Float_t         ezero[50];
    ULong64_t       ezero_t[50];
    
-   ///Trace
+   //Trace
    Float_t         te[100];
    Float_t         te_r[100];
    Float_t         te_t[100];
@@ -55,7 +61,7 @@ public :
    Float_t         trdt_t[8];
    Float_t         trdt_r[8];
 
-   /// List of branches
+   // List of branches
    TBranch        *b_runID; //!
    TBranch        *b_Energy;   //!
    TBranch        *b_EnergyTimestamp;   //!
@@ -88,7 +94,7 @@ public :
    bool isTACExist;
    bool isELUMExist;
    bool isEZEROExist;
-   bool isTraceDataExist; /// if b_Trace_** exist
+   bool isTraceDataExist; // if b_Trace_** exist
 
    Cali_e_trace(TTree * /*tree*/ =0) : fChain(0) { }
    virtual ~Cali_e_trace() { }
@@ -112,20 +118,21 @@ public :
    TFile * saveFile;
    TTree * newTree;
    TString saveFileName;
-   int totnumEntry; /// of the original root
+   int totnumEntry; // of original root
   
-   ///tree  
+   //tree  
    Int_t eventID;
    Int_t run;
    Float_t eC[30];
    Float_t xfC[30];
    Float_t xnC[30];
    ULong64_t eC_t[30];
-   Float_t x[30]; /// unadjusted position, range (-1,1)
+   Float_t x[30]; // unadjusted position, range (-1,1)
    Float_t z[30]; 
-   int det;    /// detID that is hit
-   int hitID[30]; /// is e, xf, xn are all fired.
-   int multiHit; /// multipicity of z
+   //Float_t zpos;
+   int det;    //
+   int hitID[30]; // is e, xf, xn are all fired.
+   int multiHit; // multipicity of z
    
    Float_t thetaCM;
    Float_t Ex;   
@@ -133,7 +140,7 @@ public :
    
    Float_t rdtC[8];
    ULong64_t rdtC_t[8];
-   int rdtID; /// rdt hit ID
+   int rdtID; // rdt hit ID
    int rdtdEMultiHit;
 
    Int_t   coin_t;
@@ -143,32 +150,33 @@ public :
    
    TObjArray * fList; //!
    
-   ///clock   
+   //clock   
    TBenchmark clock;
    Bool_t shown;
    Int_t validEventCount;
    
    //========correction parameters
    int numDet;
-   int iDet; /// number of detector at different position
-   int jDet; /// number of detector at same position
+   int iDet; // number of detector at different position
+   int jDet; // number of detector at same position
    vector<double> pos;
    double Bfield;
    double perpDist;
    double length;
    double firstPos;
-   double xnCorr[30]; /// xn correction for xn = xf
-   double xfxneCorr[30][2]; ///xf, xn correction for e = xf + xn
-   double xCorr[30]; /// correction of x, scale to (-1,1)
+   double xnCorr[30]; // xn correction for xn = xf
+   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   double xCorr[30]; // correction of x, scale to (-1,1)
    
-   double eCorr[30][2]; /// e-correction
-   double rdtCorr[8]; ///rdt-correction
+   double eCorr[30][2]; // e-correction
+   double eCorr2[30][2]; // e-correction
+   double rdtCorr[8][2]; //rdt-correction
    
-   double cTCorr[30][9]; /// coinTime correction
+   double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
    
    bool isReaction;
-   double G, Z, H; /// for excitation calcualtion
+   double G, Z, H; // for excitation calcualtion
    double mass, q;
    double beta, gamma;
    double alpha ;
@@ -177,7 +185,10 @@ public :
    //======== RDT cut
    bool isRDTCutExist;
    TCutG ** cut = NULL;
-
+   //======== coin cut   
+   TCutG * cutcoin0 = NULL;
+    TCutG * cutcoin1 = NULL;
+     TCutG * cutcoin2 = NULL;
 };
 
 #endif
@@ -185,6 +196,12 @@ public :
 #ifdef Cali_e_trace_cxx
 void Cali_e_trace::Init(TTree *tree)
 {
+   // The Init() function is called when the selector needs to initialize
+   // a new tree or chain. Typically here the reader is initialized.
+   // It is normally not necessary to make changes to the generated
+   // code, but the routine can be extended by the user if needed.
+   // Init() will be called many times when running on PROOF
+   // (once per file to be processed).
    
    // Set branch addresses and branch pointers
    if (!tree) return;
@@ -198,7 +215,7 @@ void Cali_e_trace::Init(TTree *tree)
 
    
    fChain = (TChain *)tree;
-   printf("========== number of tree loaded : %d \n", fChain->GetNTree());
+   //printf("========== number of tree loaded : %d \n", fChain->GetNTree());
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("e", e, &b_Energy);
@@ -210,9 +227,9 @@ void Cali_e_trace::Init(TTree *tree)
    fChain->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
    fChain->SetBranchAddress("rdt", rdt, &b_RDT);
    fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);   
-   ///fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
-   ///fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
-   ///fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
+   //fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
+   //fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
+   //fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
    
    isRunIDExist = false;
    TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("runID");
@@ -365,7 +382,7 @@ void Cali_e_trace::Init(TTree *tree)
       i = 0;
       string x;
       while( file >> x){
-         ///printf("%d, %s \n", i,  x.c_str());
+         //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
          if( x.substr(0,1) == "#" )  break;
          if( i == 0  )          Bfield = abs(atof(x.c_str()));
@@ -481,9 +498,9 @@ void Cali_e_trace::Init(TTree *tree)
       int i = 0;
       while( file >> a >> b){
          if( i >= numDet) break;
-         eCorr[i][0] = a;  /// 1/a1
-         eCorr[i][1] = b;  ///  a0 , e' = e * a1 + a0
-         ///printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
+         eCorr[i][0] = a;  // 1/a1
+         eCorr[i][1] = b;  //  a0 , e' = e * a1 + a0
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
       printf("....................... done.\n");
@@ -494,6 +511,30 @@ void Cali_e_trace::Init(TTree *tree)
       for( int i = 0; i < numDet ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
+      }
+      //return;
+   }
+   file.close();
+   
+      printf(" loading e correction second.");
+   file.open("correction_e2.dat");
+   if( file.is_open() ){
+      double a, b;
+      int i = 0;
+      while( file >> a >> b){
+         if( i >= numDet) break;
+         eCorr2[i][0] = a;  // 1/a1
+         eCorr2[i][1] = b;  //  a0 , e' = e * a1 + a0
+         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
+         i = i + 1;
+      }
+      printf(".............. done.\n");
+      
+   }else{
+      printf(".............. fail.\n");
+      for( int i = 0; i < numDet ; i++){
+         eCorr2[i][0] = 1.;
+         eCorr2[i][1] = 0.;
       }
    }
    file.close();
@@ -517,6 +558,7 @@ void Cali_e_trace::Init(TTree *tree)
       for( int i = 0; i < numDet ; i++){
          xCorr[i] = 1.;
       }
+      //return;
    }
    file.close();
    
@@ -527,9 +569,10 @@ void Cali_e_trace::Init(TTree *tree)
    if( file.is_open() ){
       double a, b;
       int i = 0;
-      while( file >> a){
+      while( file >> a >> b){
          if( i >= 8) break;
-         rdtCorr[i] = a;  //
+         rdtCorr[i][0] = a;  // a1
+         rdtCorr[i][1] = b;  // a2, e' = e * a1 + a0 
          i = i + 1;
       }
       printf("..................... done.\n");
@@ -538,7 +581,8 @@ void Cali_e_trace::Init(TTree *tree)
    }else{
       printf("..................... fail.\n");
       for( int i = 0; i < numDet ; i++){
-         rdtCorr[i] = 1.;
+         rdtCorr[i][0] = 1.;
+         rdtCorr[i][1] = 0.;
       }
    }
    file.close();
@@ -565,8 +609,8 @@ void Cali_e_trace::Init(TTree *tree)
             cTCorr[i][5] = a5;
             cTCorr[i][6] = a6;
             cTCorr[i][7] = a7;
-            cTCorr[i][8] = a8; /// this is the offset find by fitting the 1-D plot
-            ///printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
+            cTCorr[i][8] = a8; // this is the offset find by fitting the 1-D plot
+            //printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
          printf(".... done.\n");
@@ -641,7 +685,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //====================================== load RDT cut
-   TFile * fileCut = new TFile(""); ///"rdtCuts.root");   
+   TFile * fileCut = new TFile(""); //"rdtCuts.root");   
    TObjArray * cutList = NULL;
    isRDTCutExist = false;
    if( fileCut->IsOpen() ){
@@ -661,9 +705,151 @@ void Cali_e_trace::Init(TTree *tree)
       cutList->Write("rdtCutList");
    }
 
+   TString ezCutFile = "EZCut.root";
+   TFile * fileEZCut = new TFile(ezCutFile);
+   TCutG * ezCut = (TCutG *) fileEZCut->FindObjectAny("cutez"); 
+
    printf("================================== numDet : %d \n", numDet);
    
-   //====================================== Create tree
+    //====================================== load coin cut
+
+      cutcoin0 = new TCutG("cutcoin0",30);
+   cutcoin0->SetVarX("z");
+   cutcoin0->SetVarY("coinTimeUC");
+   cutcoin0->SetTitle("Graph");
+   cutcoin0->SetFillStyle(1000);
+   cutcoin0->SetPoint(0,516.709,-1986.4);
+   cutcoin0->SetPoint(1,522.236,-1944.34);
+   cutcoin0->SetPoint(2,526.945,-1902.74);
+   cutcoin0->SetPoint(3,532.472,-1870.02);
+   cutcoin0->SetPoint(4,540.456,-1852.26);
+   cutcoin0->SetPoint(5,548.44,-1862.55);
+   cutcoin0->SetPoint(6,555.196,-1901.8);
+   cutcoin0->SetPoint(7,561.747,-1963.03);
+   cutcoin0->SetPoint(8,568.503,-2007.9);
+   cutcoin0->SetPoint(9,576.487,-1994.35);
+   cutcoin0->SetPoint(10,593.069,-1963.5);
+   cutcoin0->SetPoint(11,605.352,-1956.02);
+   cutcoin0->SetPoint(12,616.816,-1965.84);
+   cutcoin0->SetPoint(13,629.918,-1996.21);
+   cutcoin0->SetPoint(14,636.265,-2010.7);
+   cutcoin0->SetPoint(15,655.304,-1987.33);
+   cutcoin0->SetPoint(16,671.067,-1987.33);
+   cutcoin0->SetPoint(17,685.602,-2007.9);
+   cutcoin0->SetPoint(18,697.271,-1999.02);
+   cutcoin0->SetPoint(19,714.058,-1985.93);
+   cutcoin0->SetPoint(20,735.144,-1994.35);
+   cutcoin0->SetPoint(21,746.199,-2007.43);
+   cutcoin0->SetPoint(22,749.065,-2009.77);
+   cutcoin0->SetPoint(23,760.325,-1991.54);
+   cutcoin0->SetPoint(24,782.844,-1983.6);
+   cutcoin0->SetPoint(25,797.788,-1990.61);
+   cutcoin0->SetPoint(26,810.686,-2014.91);
+   cutcoin0->SetPoint(27,810.276,-2035.01);
+   cutcoin0->SetPoint(28,516.709,-2025.19);
+   cutcoin0->SetPoint(29,516.709,-1986.4);
+
+   cutcoin1 = new TCutG("cutcoin1",53);
+   cutcoin1->SetVarX("z");
+   cutcoin1->SetVarY("coinTimeUC");
+   cutcoin1->SetTitle("Graph");
+   cutcoin1->SetFillStyle(1000);
+   cutcoin1->SetPoint(0,451.053,-2066.04);
+   cutcoin1->SetPoint(1,461.833,-2030.82);
+   cutcoin1->SetPoint(2,469.117,-1995.1);
+   cutcoin1->SetPoint(3,480.188,-1966.43);
+   cutcoin1->SetPoint(4,488.346,-1964.41);
+   cutcoin1->SetPoint(5,498.834,-1994.6);
+   cutcoin1->SetPoint(6,506.701,-2040.38);
+   cutcoin1->SetPoint(7,510.197,-2061.01);
+   cutcoin1->SetPoint(8,517.772,-2051.95);
+   cutcoin1->SetPoint(9,524.182,-2014.72);
+   cutcoin1->SetPoint(10,529.717,-1974.98);
+   cutcoin1->SetPoint(11,538.166,-1947.31);
+   cutcoin1->SetPoint(12,546.033,-1944.79);
+   cutcoin1->SetPoint(13,555.938,-1964.41);
+   cutcoin1->SetPoint(14,564.096,-2032.33);
+   cutcoin1->SetPoint(15,571.671,-2061.51);
+   cutcoin1->SetPoint(16,576.916,-2061.01);
+   cutcoin1->SetPoint(17,583.325,-2030.32);
+   cutcoin1->SetPoint(18,592.648,-1995.1);
+   cutcoin1->SetPoint(19,603.137,-1980.51);
+   cutcoin1->SetPoint(20,615.373,-1997.12);
+   cutcoin1->SetPoint(21,621.783,-2028.31);
+   cutcoin1->SetPoint(22,630.524,-2065.54);
+   cutcoin1->SetPoint(23,636.642,-2064.53);
+   cutcoin1->SetPoint(24,644.508,-2025.79);
+   cutcoin1->SetPoint(25,647.13,-1997.12);
+   cutcoin1->SetPoint(26,652.083,-1965.92);
+   cutcoin1->SetPoint(27,659.658,-1950.33);
+   cutcoin1->SetPoint(28,666.359,-1951.33);
+   cutcoin1->SetPoint(29,671.604,-1966.93);
+   cutcoin1->SetPoint(30,679.179,-2011.2);
+   cutcoin1->SetPoint(31,686.171,-2049.44);
+   cutcoin1->SetPoint(32,689.959,-2059.5);
+   cutcoin1->SetPoint(33,693.163,-2058.49);
+   cutcoin1->SetPoint(34,698.408,-2031.33);
+   cutcoin1->SetPoint(35,701.904,-2005.17);
+   cutcoin1->SetPoint(36,707.439,-1979);
+   cutcoin1->SetPoint(37,712.392,-1954.86);
+   cutcoin1->SetPoint(38,721.715,-1939.26);
+   cutcoin1->SetPoint(39,730.165,-1954.86);
+   cutcoin1->SetPoint(40,740.653,-2014.22);
+   cutcoin1->SetPoint(41,748.228,-2054.97);
+   cutcoin1->SetPoint(42,756.386,-2034.85);
+   cutcoin1->SetPoint(43,764.835,-1988.56);
+   cutcoin1->SetPoint(44,777.946,-1965.42);
+   cutcoin1->SetPoint(45,790.182,-1984.04);
+   cutcoin1->SetPoint(46,798.049,-2014.22);
+   cutcoin1->SetPoint(47,805.041,-2068.05);
+   cutcoin1->SetPoint(48,807.08,-2082.64);
+   cutcoin1->SetPoint(49,799.797,-2095.72);
+   cutcoin1->SetPoint(50,453.093,-2087.67);
+   cutcoin1->SetPoint(51,453.093,-2087.67);
+   cutcoin1->SetPoint(52,451.053,-2066.04);
+   
+   cutcoin2 = new TCutG("cutcoin2",32);
+   cutcoin2->SetVarX("z");
+   cutcoin2->SetVarY("coinTimeUC");
+   cutcoin2->SetTitle("Graph");
+   cutcoin2->SetFillStyle(1000);
+   cutcoin2->SetPoint(0,517.218,-1978.97);
+   cutcoin2->SetPoint(1,523.888,-1925.04);
+   cutcoin2->SetPoint(2,527.48,-1884.98);
+   cutcoin2->SetPoint(3,531.585,-1844.14);
+   cutcoin2->SetPoint(4,536.972,-1815.64);
+   cutcoin2->SetPoint(5,542.873,-1804.85);
+   cutcoin2->SetPoint(6,548.004,-1808.71);
+   cutcoin2->SetPoint(7,552.622,-1832.59);
+   cutcoin2->SetPoint(8,560.832,-1914.25);
+   cutcoin2->SetPoint(9,566.989,-1965.87);
+   cutcoin2->SetPoint(10,570.324,-1981.28);
+   cutcoin2->SetPoint(11,583.665,-1966.64);
+   cutcoin2->SetPoint(12,597.006,-1938.14);
+   cutcoin2->SetPoint(13,613.425,-1945.84);
+   cutcoin2->SetPoint(14,626.766,-1974.35);
+   cutcoin2->SetPoint(15,634.976,-1991.29);
+   cutcoin2->SetPoint(16,652.934,-1970.49);
+   cutcoin2->SetPoint(17,669.61,-1973.57);
+   cutcoin2->SetPoint(18,689.878,-1992.06);
+   cutcoin2->SetPoint(19,706.554,-1975.12);
+   cutcoin2->SetPoint(20,729.131,-1967.41);
+   cutcoin2->SetPoint(21,746.833,-1991.29);
+   cutcoin2->SetPoint(22,754.53,-1988.21);
+   cutcoin2->SetPoint(23,772.745,-1968.18);
+   cutcoin2->SetPoint(24,796.348,-1971.26);
+   cutcoin2->SetPoint(25,809.432,-1994.38);
+   cutcoin2->SetPoint(26,808.919,-2016.72);
+   cutcoin2->SetPoint(27,808.919,-2016.72);
+   cutcoin2->SetPoint(28,533.637,-2019.03);
+   cutcoin2->SetPoint(29,513.113,-1997.46);
+   cutcoin2->SetPoint(30,513.113,-1997.46);
+   cutcoin2->SetPoint(31,517.218,-1978.97);
+   
+   
+   //====================== Create tree
+   
+
    newTree =  new TTree("tree","tree");
    
    eventID = -1;
@@ -729,17 +915,22 @@ void Cali_e_trace::Init(TTree *tree)
    printf("Is EZero exist : %d\n", isEZEROExist);
    printf("Is TAC   exist : %d\n", isTACExist);
    printf("Is Trace exist : %d\n", isTraceDataExist);
-   
-   
-   //=== start the clock
+   //=== clock
    clock.Reset();
    clock.Start("timer");
    shown = 0;
+   
+   
    
 }
 
 Bool_t Cali_e_trace::Notify()
 {
+   // The Notify() function is called when a new file is opened. This
+   // can be either for a new TTree in a TChain or when when a new TTree
+   // is started when using PROOF. It is normally not necessary to make changes
+   // to the generated code, but the routine can be extended by the
+   // user if needed. The return value is currently not used.
 
    return kTRUE;
 }
