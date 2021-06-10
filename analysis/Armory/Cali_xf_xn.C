@@ -180,7 +180,7 @@ void Cali_xf_xn(TTree * tree){
    printf(" X =  det-X reference\n");
    printf("-1 =  manual reference\n");
    printf("-2 =  use 228Th, first 7 strongest peaks \n");
-   printf("-3 =  use 148Gd + 244 Cm, (3.1828, 5.8048 MeV)\n");
+   printf("-3 =  use 148Gd + 244Cm, (3.1828, 5.8048 MeV)\n");
    //printf("-3 =  use 241Am, 5.481 MeV \n");
    printf("-9 =  stop \n");
    printf("your choice = ");
