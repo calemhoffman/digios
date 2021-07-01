@@ -34,6 +34,7 @@ int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,    3000};
 int      rdtERange[2] = {     0,    8000};
+int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {     0,    7000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
@@ -42,7 +43,7 @@ int   thetaCMRange[2] = {0, 80};
 double     exRange[3] = {  20,    -1,     6};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -100, 100};
-int    timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
+int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
 
 int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2 
 
@@ -53,21 +54,18 @@ bool isUseRDTTrace = true;
 double Sn = 1.2181;
 
 //---Gate
-bool isTimeGateOn  = true;
-int timeGate[2]    = {-20, 20};             /// min, max, 1 ch = 10 ns
-double eCalCut     = 0.5;                   /// lower limit for eCal
-bool  isTACGate    = false;
-int tacGate[2]     = {-8000, -2000};
-int dEgate[2]      = {  500,  1500};
-int Eresgate[2]    = { 1000,  4000};
-double thetaCMGate = 10;                    /// deg
-double xGate       = 0.95;                  ///cut out the edge
+bool isTimeGateOn     = true;
+int timeGate[2]       = {-20, 20};             /// min, max, 1 ch = 10 ns
+double eCalCut        = 0.5;                   /// lower limit for eCal
+bool  isTACGate       = false;
+int tacGate[2]        = {-8000, -2000};
+int dEgate[2]         = {  500,  1500};
+int Eresgate[2]       = { 1000,  4000};
+double thetaCMGate    = 10;                    /// deg
+double xGate          = 0.95;                  ///cut out the edge
 vector<int> skipDetID = {2,  11, 17, 5, 23} ;//{2,  11, 17}
 
 TString rdtCutFile1 = "rdtCuts.root";
-//TString rdtCutFile1 = "rdtCuts15Cunbound.root";
-//TString rdtCutFile1 = "rdtCut_14C.root"
-//TString rdtCutFile1 = "rdtCut_Ryan_20210511.root";
 TString rdtCutFile2 = "";//"rdtCuts_15C.root";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -199,6 +197,11 @@ TH2F* hrdtMatrix; // coincident between rdt
 
 TH1F* hrdt14N;
 TH1F* hrdt14C;
+
+//======= Circular Recoil
+TH2F* hcrdtID;
+TH1F* hcrdt[16];
+TH2F* hcrdtPolar;
 
 //======= ELUM
 TH1F* helum[16];
@@ -455,6 +458,15 @@ void Monitors::Begin(TTree *tree)
    
    hrdt14C = new TH1F("hrdt14C", "14N, 14C recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
    hrdt14C->SetLineColor(4);
+
+   //===================== Circular Recoil
+   hcrdtID = new TH2F("hcrdtID", "Circular Recoil ID; Angular ID; Radial ID;", 8, 0, 8, 8, 0, 8);
+   hcrdtPolar = new TH2F("hcrdtPolar", "Polar ID", 8, -TMath::Pi(), TMath::Pi(),8, 10, 50);
+
+   for( int i = 0; i < 16; i++){
+    hcrdt[i] = new TH1F(Form("hcrdt%d", i), Form("Raw Circular Recoil-%d", i), 500, crdtRange[0], crdtRange[1] );
+   }
+
    
    //===================== multiplicity
    hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
@@ -567,6 +579,11 @@ Bool_t Monitors::Process(Long64_t entry)
    if( isTACExist ){
       b_TAC->GetEntry(entry);
       b_TACTimestamp->GetEntry(entry);
+   }
+
+   if( isCRDTExist ){
+      b_CRDT->GetEntry(entry);
+      b_CRDTTimestamp->GetEntry(entry);
    }
    
    if( isELUMExist ){
@@ -868,6 +885,24 @@ Bool_t Monitors::Process(Long64_t entry)
    ///   if( abs(rdt[4] - 1658) < 40) hrdt14N->Fill(rdt_t[4]/1e8/60.);
    ///   if( abs(rdt[4] - 1783) < 40) hrdt14C->Fill(rdt_t[4]/1e8/60.);
    ///}
+
+   /******************* Circular Recoil *******************************/
+   ///======= 0 -  7 is angular 
+   ///======= 8 - 15 is radial
+   
+   for( int i = 0; i < 8 ; i++){
+     if( TMath::IsNaN(crdt[i]) ) continue;
+     hcrdt[i]->Fill(crdt[i]);
+     
+     for( int j = 8; j < 16; j++){
+      hcrdtID->Fill(i, j);
+
+      double theta = TMath::Pi()/8.*(i+0.5);
+      double rho   = 10.+40./8.*(j+0.5);
+
+      hcrdtPolar->Fill( theta, rho );
+    }
+   }
    
    /******************* Multi-hit *************************************/
    ///hmultEZ->Fill(multiEZ);
