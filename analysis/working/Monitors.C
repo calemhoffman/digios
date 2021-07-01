@@ -897,7 +897,7 @@ Bool_t Monitors::Process(Long64_t entry)
      for( int j = 8; j < 16; j++){
       hcrdtID->Fill(i, j);
 
-      double theta = TMath::Pi()/8.*(i+0.5);
+      double theta = -TMath::Pi() + 2*TMath::Pi()/8.*(i+0.5);
       double rho   = 10.+40./8.*(j+0.5);
 
       hcrdtPolar->Fill( theta, rho );
