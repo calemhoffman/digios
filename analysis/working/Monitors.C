@@ -573,17 +573,19 @@ Bool_t Monitors::Process(Long64_t entry)
    b_Ring->GetEntry(entry);
    b_EnergyTimestamp->GetEntry(entry);
 
-   b_RDT->GetEntry(entry);
-   b_RDTTimestamp->GetEntry(entry);
-   
-   if( isTACExist ){
-      b_TAC->GetEntry(entry);
-      b_TACTimestamp->GetEntry(entry);
+   if( isRDTExist ){
+      b_RDT->GetEntry(entry);
+      b_RDTTimestamp->GetEntry(entry);
    }
 
    if( isCRDTExist ){
       b_CRDT->GetEntry(entry);
       b_CRDTTimestamp->GetEntry(entry);
+   }
+   
+   if( isTACExist ){
+      b_TAC->GetEntry(entry);
+      b_TACTimestamp->GetEntry(entry);
    }
    
    if( isELUMExist ){
@@ -647,7 +649,6 @@ Bool_t Monitors::Process(Long64_t entry)
        helum[i]->Fill(elum[i]);
        helumID->Fill(i, elum[i]);
        ///helumSUM->Fill(elum[i]);
-
        ///helumTAC->Fill(tac[0], elum[i]);
     }
       
@@ -769,7 +770,7 @@ Bool_t Monitors::Process(Long64_t entry)
       heCalVz->Fill(z[detID],eCal[detID]);
 
       //=================== Recoil Gate
-      if( isCutFileOpen1 || isCutFileOpen2){
+      if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
         for(int i = 0 ; i < numCut1 ; i++ ){
           cutG = (TCutG *)cutList1->At(i) ;
           if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {

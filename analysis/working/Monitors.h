@@ -94,6 +94,7 @@ public :
    bool isArrayTraceExist;
    bool isRDTTraceExist;
 
+   bool isRDTExist;   
    bool isCRDTExist;   
    bool isTACExist;
    bool isELUMExist;
@@ -163,19 +164,17 @@ void Monitors::Init(TTree *tree)
    fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
    fChain->SetBranchAddress("ring", ring, &b_Ring);
    fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
-   fChain->SetBranchAddress("rdt", rdt, &b_RDT);
-   fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);
-   
-   TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("tac");
-   if( br == NULL ){
-      printf(" ++++++++ no TAC.\n");
-      isTACExist = false;
-   }else{
-      isTACExist = true;
-      fChain->SetBranchAddress("tac", tac, &b_TAC);
-      fChain->SetBranchAddress("tac_t", tac_t, &b_TACTimestamp);
-   }
 
+   TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("rdt");
+   if( br == NULL ){
+      printf(" ++++++++ no Recoil.\n");
+      isRDTExist = false;
+   }else{
+      isRDTExist = true;
+      fChain->SetBranchAddress("rdt"  , rdt,   &b_RDT);
+      fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);
+   }
+   
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("crdt");
    if( br == NULL ){
       printf(" ++++++++ no Circular Recoil.\n");
@@ -185,6 +184,17 @@ void Monitors::Init(TTree *tree)
       fChain->SetBranchAddress("crdt"  , crdt,   &b_CRDT);
       fChain->SetBranchAddress("crdt_t", crdt_t, &b_CRDTTimestamp);
    }
+   
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("tac");
+   if( br == NULL ){
+      printf(" ++++++++ no TAC.\n");
+      isTACExist = false;
+   }else{
+      isTACExist = true;
+      fChain->SetBranchAddress("tac", tac, &b_TAC);
+      fChain->SetBranchAddress("tac_t", tac_t, &b_TACTimestamp);
+   }
+
    
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("elum");
    if( br == NULL ){
