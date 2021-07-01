@@ -45,6 +45,8 @@ public :
    ULong64_t       elum_t[NELUM];
    Float_t         ezero[NEZERO];
    ULong64_t       ezero_t[NEZERO];
+   Float_t         crdt  [NCRDT];
+   ULong64_t       crdt_t[NCRDT];
    
    // List of branches
    TBranch        *b_runID;   //!
@@ -64,6 +66,8 @@ public :
    TBranch        *b_ELUMTimestamp;   //!
    TBranch        *b_EZERO;   //!
    TBranch        *b_EZEROTimestamp;   //!
+   TBranch        *b_CRDT;   //!
+   TBranch        *b_CRDTTimestamp;   //!
    
 
    // trace analysis data
@@ -73,6 +77,9 @@ public :
    Float_t         trdt[NRDT];
    Float_t         trdt_t[NRDT];
    Float_t         trdt_r[NRDT];
+   Float_t         tcrdt[NCRDT];
+   Float_t         tcrdt_t[NCRDT];
+   Float_t         tcrdt_r[NCRDT];
    
    TBranch        *b_Trace_Energy;   //!
    TBranch        *b_Trace_Energy_RiseTime;   //!
@@ -80,14 +87,17 @@ public :
    TBranch        *b_Trace_RDT;   //!
    TBranch        *b_Trace_RDT_Time;   //!
    TBranch        *b_Trace_RDT_RiseTime;   //!
+   TBranch        *b_Trace_CRDT;   //!
+   TBranch        *b_Trace_CRDT_Time;   //!
+   TBranch        *b_Trace_CRDT_RiseTime;   //!
    
    bool isArrayTraceExist;
    bool isRDTTraceExist;
-   
+
+   bool isCRDTExist;   
    bool isTACExist;
    bool isELUMExist;
-   bool isEZEROExist;
-   
+   bool isEZEROExist;   
    
    int printControlID;
    void printControl(int n){this->printControlID = n;}
@@ -120,6 +130,7 @@ public :
    void PlotEZ(bool isRaw);
    void PlotTDiff(bool isGated);
    void PlotRDT(int id, bool isRaw);
+   void PlotCRDTPolar();
 
    ClassDef(Monitors,0);
 };
@@ -163,6 +174,16 @@ void Monitors::Init(TTree *tree)
       isTACExist = true;
       fChain->SetBranchAddress("tac", tac, &b_TAC);
       fChain->SetBranchAddress("tac_t", tac_t, &b_TACTimestamp);
+   }
+
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("crdt");
+   if( br == NULL ){
+      printf(" ++++++++ no Circular Recoil.\n");
+      isCRDTExist = false;
+   }else{
+      isCRDTExist = true;
+      fChain->SetBranchAddress("crdt"  , crdt,   &b_CRDT);
+      fChain->SetBranchAddress("crdt_t", crdt_t, &b_CRDTTimestamp);
    }
    
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("elum");
@@ -689,6 +710,12 @@ void Monitors::PlotRDT(int id, bool isRaw){
    if( isCutFileOpen1 && numCut1 > id ) {cutG = (TCutG *)cutList1->At(id) ; cutG->Draw("same");}
    if( isCutFileOpen2 && numCut2 > id ) {cutG = (TCutG *)cutList2->At(id) ; cutG->Draw("same");}
 
+}
+
+void Monitors::PlotCRDTPolar(){
+  padID++; cCanvas->cd(padID);
+  cCanvas->cd(padID)->DrawFrame(-50, -50, 50, 50);
+  hcrdtPolar->Draw("same colz pol");
 }
 
 #endif // #ifdef Monitors_cxx

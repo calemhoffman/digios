@@ -31,6 +31,7 @@ typedef struct {
   Float_t TAC[NTAC];
   Float_t ELUM[NELUM];
   Float_t EZERO[NEZERO];
+  Float_t CRDT[NCRDT];
 
   ULong64_t EnergyTimestamp[NARRAY];
   ULong64_t XFTimestamp[NARRAY];
@@ -40,6 +41,7 @@ typedef struct {
   ULong64_t TACTimestamp[NTAC];
   ULong64_t ELUMTimestamp[NELUM];
   ULong64_t EZEROTimestamp[NEZERO];
+  ULong64_t CRDTTimestamp[NCRDT];
   
   Float_t x[NARRAY];
 
@@ -92,31 +94,38 @@ void GeneralSort::Begin(TTree * tree)
   gen_tree->Branch("x",psd.x, Form("x[%d]/F", NARRAY));
 
   if( NRDT > 0 ){
-    gen_tree->Branch("rdt",psd.RDT,            Form("RDT[%d]/F",NRDT));
+    gen_tree->Branch("rdt"  ,psd.RDT,          Form("RDT[%d]/F",NRDT));
     gen_tree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT)); 
   }else{
     printf(" -----  no recoil.\n"); 
   }
   
   if( NTAC > 0 ){
-    gen_tree->Branch("tac",psd.TAC,           Form("TAC[%d]/F", NTAC));
+    gen_tree->Branch("tac"  ,psd.TAC,         Form("TAC[%d]/F", NTAC));
     gen_tree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC)); 
   }else{
     printf(" -----  no TAC.\n"); 
   }
   
   if( NELUM > 0 ){
-    gen_tree->Branch("elum",  psd.ELUM,         Form("ELUM[%d]/F", NELUM));
+    gen_tree->Branch("elum"  ,psd.ELUM,         Form("ELUM[%d]/F", NELUM));
     gen_tree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM)); 
   }else{
     printf(" -----  no elum\n"); 
   }
   
-  if( NZERO > 0 ){
-    gen_tree->Branch("ezero",psd.EZERO,           Form("EZERO[%d]/F", NEZERO));
+  if( NEZERO > 0 ){
+    gen_tree->Branch("ezero"  ,psd.EZERO,         Form("EZERO[%d]/F", NEZERO));
     gen_tree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO)); 
   }else{
     printf(" -----  no ezero.\n"); 
+  }
+
+  if( NCRDT > 0 ){
+    gen_tree->Branch("crdt"  ,psd.CRDT,         Form("CRDT[%d]/F", NCRDT));
+    gen_tree->Branch("crdt_t",psd.CRDTTimestamp,Form("CRDTTimestamp[%d]/l", NCRDT)); 
+  }else{
+    printf(" -----  no crdt.\n"); 
   }
   
   printf("======= ID-MAP: \n");
@@ -137,6 +146,8 @@ void GeneralSort::Begin(TTree * tree)
       printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// EZERO, 
     }else if( 400+NTAC >= idDetMap[i] && idDetMap[i] >= 400){
       printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// TAC, 
+    }else if( 400+NCRDT >= idDetMap[i] && idDetMap[i] >= 500){
+      printf("\033[37m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Circular Recoil
     }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
@@ -173,11 +184,9 @@ void GeneralSort::CheckTime(ULong64_t timeStamp, Long64_t entry){
   
   if( timeStamp == 0 ) return;
   ///if( timeStamp > 7.88e+15) return; // this is too big to be the right timestamp
-  
   if( timeBegin == 0 ) timeBegin = timeStamp;
   
   float frac = 0.01;
-  
   if( timeStamp < timeBegin  && entry < NumEntries*frac ) timeBegin = timeStamp; /// 1st 1 % of event
   if( timeStamp > timeEnd  && entry > NumEntries*(1.0-frac) ) timeEnd = timeStamp; /// last 1 % of event
   
@@ -230,6 +239,10 @@ Bool_t GeneralSort::Process(Long64_t entry)
         psd.EZERO[i]=TMath::QuietNaN();
         psd.EZEROTimestamp[i]= 0;
       }
+      if (i<NCRDT) {
+        psd.CRDT[i]=TMath::QuietNaN();
+        psd.CRDTTimestamp[i]= 0;
+      }
       psd.EnergyTimestamp[i]= 0;
       psd.XFTimestamp[i]    = 0; 
       psd.XNTimestamp[i]	 = 0; 
@@ -242,12 +255,12 @@ Bool_t GeneralSort::Process(Long64_t entry)
     b_pre_rise_energy->GetEntry(entry);
     b_post_rise_energy->GetEntry(entry);
     //   b_base_sample->GetEntry(entry);
-    //    b_baseline->GetEntry(entry);
+    //   b_baseline->GetEntry(entry);
     b_event_timestamp->GetEntry(entry);
 
     //ID PSD Channels
     Int_t idKind = -1;
-    Int_t idDet=-1; // Detector number
+    Int_t idDet  = -1; // Detector number
     
     ///==============================================================
     /** --------------------- Loop over NumHits ------------------ */
@@ -284,14 +297,6 @@ Bool_t GeneralSort::Process(Long64_t entry)
             break;// 
           }
       }
-
-      ///=============================== TAC & RF TIMING
-      if ( idDet >= 400 && idDet <= 400 + NTAC ) {   
-        Int_t tacID = idDet - 400;
-        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
-        psd.TACTimestamp[tacID] = event_timestamp[i];
-        if( event_timestamp[i] < timeBegin ) timeBegin = event_timestamp[i];
-      }
        
       ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 100 + NRDT ) {
@@ -312,6 +317,21 @@ Bool_t GeneralSort::Process(Long64_t entry)
         Int_t ezeroID = idDet - 300;
         psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
+      }
+
+      ///=============================== TAC & RF TIMING
+      if ( idDet >= 400 && idDet <= 400 + NTAC ) {   
+        Int_t tacID = idDet - 400;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+        psd.TACTimestamp[tacID] = event_timestamp[i];
+        if( event_timestamp[i] < timeBegin ) timeBegin = event_timestamp[i];
+      }
+      
+      ///=============================== Circular-Recoil
+      if ( idDet >= 500 && idDet <= 500 + NCRDT ) {
+        Int_t crdtID = idDet - 500;
+        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
+        psd.CRDTTimestamp[crdtID] = event_timestamp[i];
       }
       
     } // End NumHits Loop
