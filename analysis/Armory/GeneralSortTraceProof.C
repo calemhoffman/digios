@@ -16,6 +16,11 @@ bool isTACRF = true;
 bool isRecoil = true;
 bool isElum = false;
 bool isEZero = true;
+bool isCRDT = true;
+
+
+// Also go to line 146 to set the trace analysis gate
+
 //=================================== end of setting
 
 
@@ -74,10 +79,11 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
-   printf( "  TAC/RF : %s \n", isTACRF ?  "On" : "Off");
-   printf( "  Recoil : %s \n", isRecoil ? "On" : "Off");
-   printf( "  Elum   : %s \n", isElum ?   "On" : "Off");
-   printf( "  EZero  : %s \n", isEZero ?  "On" : "Off");
+   printf( "  TAC/RF   : %s \n", isTACRF  ? "On" : "Off");
+   printf( "  Recoil   : %s \n", isRecoil ? "On" : "Off");
+   printf( "  Elum     : %s \n", isElum   ? "On" : "Off");
+   printf( "  EZero    : %s \n", isEZero  ? "On" : "Off");
+   printf( "  C-Recoil : %s \n", isCRDT   ? "On" : "Off");
    TString traceMethodName;
    switch(traceMethod){
    case 0: traceMethodName = "copy"; break;
@@ -109,7 +115,9 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
     }else if( 300+NEZERO >= idDetMap[i] && idDetMap[i] >= 300){
       printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
     }else if( 400+NTAC >= idDetMap[i] && idDetMap[i] >= 400){
-      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // TAC, 
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // TAC,
+    }else if( 400+NCRDT >= idDetMap[i] && idDetMap[i] >= 500){
+      printf("\033[37m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Circular Recoil
     }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
@@ -172,24 +180,40 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    newTree->Branch("x",     psd.x,               Form("x[%d]/F", NARRAY));
 
    if( isRecoil){
-      newTree->Branch("rdt",psd.RDT,            Form("RDT[%d]/F",NRDT));
+      newTree->Branch("rdt"  ,psd.RDT,          Form("RDT[%d]/F",NRDT));
       newTree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT)); 
+   }else{
+      printf(" -----  no recoil.\n"); 
    }
    
    if( isTACRF ){
-      newTree->Branch("tac",psd.TAC,           Form("TAC[%d]/F", NTAC));
+      newTree->Branch("tac"  ,psd.TAC,         Form("TAC[%d]/F", NTAC));
       newTree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC)); 
+   }else{
+      printf(" -----  no TAC.\n"); 
    }
    
    if( isElum ) {
-      newTree->Branch("elum",  psd.ELUM,         Form("ELUM[%d]/F", NELUM));
+      newTree->Branch("elum"  ,psd.ELUM,         Form("ELUM[%d]/F", NELUM));
       newTree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM)); 
+   }else{
+      printf(" -----  no elum\n"); 
    }
    
    if( isEZero ){
-      newTree->Branch("ezero",psd.EZERO,           Form("EZERO[%d]/F", NEZERO));
+      newTree->Branch("ezero"  ,psd.EZERO,         Form("EZERO[%d]/F", NEZERO));
       newTree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO)); 
+   }else{
+      printf(" -----  no ezero.\n"); 
    }
+
+   if( isCRDT ){
+      newTree->Branch("crdt"  ,psd.CRDT,         Form("CRDT[%d]/F", NCRDT));
+      newTree->Branch("crdt_t",psd.CRDTTimestamp,Form("CRDTTimestamp[%d]/l", NCRDT)); 
+   }else{
+      printf(" -----  no crdt.\n"); 
+   }
+   
    if( isTraceON ){
       arr = new TClonesArray("TGraph");
          
@@ -225,6 +249,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
             newTree->Branch("telum_t",     telum_t,  Form("Trace_elum_Time[%d]/F",    NELUM));
             newTree->Branch("telum_r",     telum_r,  Form("Trace_elum_RiseTime[%d]/F",NELUM));         
          }
+         if ( isCRDT ){
+            newTree->Branch("tcrdt"  , tcrdt,    Form("Trace_CRDT[%d]/F", NCRDT));
+            newTree->Branch("tcrdt_t", tcrdt_t,  Form("Trace_CRDT_Time[%d]/l", NCRDT)); 
+            newTree->Branch("tcrdt_r", tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/l", NCRDT)); 
+         }
+         
       }
    }
   
@@ -296,6 +326,12 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             telum_t[i] = TMath::QuietNaN();
             telum_r[i] = TMath::QuietNaN();
          }
+         
+         if( isCRDT &&  i < NCRDT ) {
+            tcrdt[i]   = TMath::QuietNaN();
+            tcrdt_t[i] = TMath::QuietNaN();
+            tcrdt_r[i] = TMath::QuietNaN();
+         }
       }
       
       arr->Clear("C");
@@ -345,14 +381,6 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                break;
          }
       }
-      
-      ///TAC & RF TIMING
-      /***********************************************************************/
-      if( isTACRF && 400 <= idDet && idDet <= 400 + NTAC ) {   
-        Int_t tacID = idDet - 400;
-        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
-        psd.TACTimestamp[tacID] = event_timestamp[i];
-      }
 
       ///RECOIL
       /************************************************************************/
@@ -377,7 +405,23 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
          psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
       }
+
+      ///TAC & RF TIMING
+      /***********************************************************************/
+      if( isTACRF && 400 <= idDet && idDet <= 400 + NTAC ) {   
+        Int_t tacID = idDet - 400;
+        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+        psd.TACTimestamp[tacID] = event_timestamp[i];
+      }
       
+      ///Circular Recoil
+      /************************************************************************/
+      if( isCRDT && 500 <= idDet && idDet < 500 + NCRDT ) {
+        Int_t crdtID = idDet - 500;
+        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
+        psd.CRDTTimestamp[crdtID] = event_timestamp[i];
+      }
+
    }///end of NumHits
    
    for(int i = 0 ; i < 24; i++){
@@ -401,8 +445,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          bool isRDT  = (NRDT + 100 > idDet && idDet >= 100 );
          bool isezero  = (NEZERO + 300 > idDet && idDet >= 300 );
          bool iselum  = (NELUM + 200 > idDet && idDet >= 200 );
+         bool iscrdt  = (NCRDT + 500 > idDet && idDet >= 500 );
+
+         //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
-         
          if( !isPSD && !isRDT) continue;         
 
          int traceLength = trace_length[i];
@@ -506,6 +552,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                tezero[ezeroTemp]   = gFit->GetParameter(0);
                tezero_t[ezeroTemp] = gFit->GetParameter(1);
                tezero_r[ezeroTemp] = gFit->GetParameter(2);
+            }
+
+            if( NCRDT + 500 > idDet && idDet >= 500 ) {
+               int ecrdtTemp = idDet-500;
+               tcrdt  [ecrdtTemp] = gFit->GetParameter(0);
+               tcrdt_t[ecrdtTemp] = gFit->GetParameter(1);
+               tcrdt_r[ecrdtTemp] = gFit->GetParameter(2);
             }
             
          }
