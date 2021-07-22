@@ -1,3 +1,4 @@
 #!/bin/bash -l
-dataBaseAddress=mac2017
+dataBaseAddress=192.168.1.193
+#dataBaseAddress=mac2017
 
