@@ -20,10 +20,14 @@ tOld = 0
 heliosPath=os.environ["HELIOSSYS"]
 
 fexp=open("%s/daq/edm/scripts/DataBaseAddress.sh" % heliosPath, 'r')
-line=fexp.readline() #this line is bashscript header
-line=fexp.readline() #this line is dataBaseAddress
-pos=line.find("=")
-dataBaseAddress=line[pos+1:-1]
+for line in fexp:
+    pos=line.find("#")
+    if pos == 0 :
+        continue
+    else:
+        pos=line.find("=")
+        dataBaseAddress=line[pos+1:-1]
+        print("dataBaseAddress = %s" % dataBaseAddress)
 fexp.close()
 
 #DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
