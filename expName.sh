@@ -1,5 +1,4 @@
 #!/bin/bash -l
-expName=ARR01
+expName=s003_10Be
 daqDataPath=/media/DIGIOSDATA5
-LastRunNum=85
-elogID=22
+LastRunNum=0
