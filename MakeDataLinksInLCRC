@@ -1,4 +1,10 @@
-#!/bin/bash -l
+#!/bin/bash
+
+if [ $0 != "-bash" ]; then
+  echo -e "\e[93m PLEASE source MakeDataLinksInLCRC \e[0m"
+  exit
+fi
+
 echo -e "\e[92m#############################################"
 echo -e "#     Make data link for LCRC"
 echo -e "#############################################\e[0m"
@@ -28,7 +34,7 @@ if [ ${isBranchExist} -eq 0 ]; then
 fi
 
 echo -e "\e[93m=================== Overwrite the expName.sh \e[0m"
-echo "!!!!!!!!!! restore the expName.sh by > git checkout expName.sh"
+echo "!!!!!!!!!! to restore the expName.sh by > git checkout expName.sh"
 echo "#!/bin/bash -l" > ${expDIR}/expName.sh
 echo "expName=${expName}" >> ${expDIR}/expName.sh 
 
@@ -68,5 +74,14 @@ ln -sfv ${Data} ${expDIR}/analysis/data
 ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
 ln -sfv ${rootData} ${expDIR}/analysis/root_data
 
+#===== sourse the heliosrc.sh
+echo -e "\e[93m=================== source heliosrc.sh \e[0m"
+echo $(pwd)
+cd $(pwd)
+source heliosrc.sh
+env | grep "HELIOSSYS"
+
 echo -e "\e[93m=================== done. \e[0m"
 echo -e "\e[91m to restore origin expName.sh, type > git checkout expName.sh \e[0m"
+
+
