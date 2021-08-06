@@ -558,7 +558,8 @@ private:
    double perpDist; // distance from axis
    double width; // width   
    double posRecoil; // recoil, downstream
-   double rhoRecoil; // radius recoil
+   double rhoRecoilin; // radius recoil inner
+   double rhoRecoilout; // radius recoil outter
    double length; // length
    double blocker;
    double firstPos; // m 
@@ -603,7 +604,8 @@ HELIOS::HELIOS(){
    perpDist = 10;
    width = 10;
    posRecoil = 0;
-   rhoRecoil = 0;
+   rhoRecoilin = 0;
+   rhoRecoilout = 0;
    length = 0;
    blocker = 0;
    firstPos = 0;
@@ -632,6 +634,8 @@ HELIOS::~HELIOS(){
 
 bool HELIOS::SetDetectorGeometry(string filename){
    
+   //TODO sue split line by space, and read the 1st, so the comment can be separated by space.
+   
    pos.clear();
    
    printf("----- loading detector geometery : %s.", filename.c_str());
@@ -644,7 +648,9 @@ bool HELIOS::SetDetectorGeometry(string filename){
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,2) == "#=" ) break;
          if( x.substr(0,1) == "#" )  break;
+         if( x.length() == 0 ) continue;
          
          if( i == 0 )                            Bfield = atof(x.c_str());
          sign = Bfield > 0 ? 1 : -1;
@@ -654,22 +660,23 @@ bool HELIOS::SetDetectorGeometry(string filename){
          if( i == 4 )                             width = atof(x.c_str());
          if( i == 5 )                            length = atof(x.c_str());
          if( i == 6 )                         posRecoil = atof(x.c_str());
-         if( i == 7 )                         rhoRecoil = atof(x.c_str());
-         if( i == 8 ){
+         if( i == 7 )                       rhoRecoilin = atof(x.c_str());
+         if( i == 8 )                      rhoRecoilout = atof(x.c_str());
+         if( i == 9 ){
            if( x.compare("false") == 0 ) isCoincidentWithRecoil = false;
            if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
          }
-         if( i == 9 )                        posRecoil1 = atof(x.c_str());
-         if( i == 10 )                       posRecoil2 = atof(x.c_str());
-         if( i == 11)                            zElum1 = atof(x.c_str());
-         if( i == 12 )                           zElum2 = atof(x.c_str());
-         if( i == 13 )                           blocker = atof(x.c_str());
-         if( i == 14 && !overrideFirstPos )     firstPos = atof(x.c_str());
-         if( i == 15 )                            eSigma = atof(x.c_str());
-         if( i == 16 )                            zSigma = atof(x.c_str());
+         if( i == 10 )                        posRecoil1 = atof(x.c_str());
+         if( i == 11 )                       posRecoil2 = atof(x.c_str());
+         if( i == 12)                            zElum1 = atof(x.c_str());
+         if( i == 13 )                           zElum2 = atof(x.c_str());
+         if( i == 14 )                           blocker = atof(x.c_str());
+         if( i == 15 && !overrideFirstPos )     firstPos = atof(x.c_str());
+         if( i == 16 )                            eSigma = atof(x.c_str());
+         if( i == 17 )                            zSigma = atof(x.c_str());
          
-         if( i == 17 )                             mDet = atoi(x.c_str());
-         if( i >= 18 ) {
+         if( i == 18 )                             mDet = atoi(x.c_str());
+         if( i >= 19 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -694,7 +701,7 @@ bool HELIOS::SetDetectorGeometry(string filename){
       if( BfieldTheta != 0.0 ) {
       printf("                                      +---- field angle != 0 is not supported!!! \n");
       }
-      printf("     Recoil detector pos: %8.2f mm, radius: %6.2f mm \n", posRecoil, rhoRecoil);
+      printf("     Recoil detector pos: %8.2f mm, radius: %6.2f - %6.2f mm \n", posRecoil, rhoRecoilin, rhoRecoilout);
       printf("        Blocker Position: %8.2f mm \n", firstPos > 0 ? firstPos - blocker : firstPos + blocker );
       printf("          First Position: %8.2f mm \n", firstPos);
       printf("------------------------------------- Detector Position \n");
@@ -737,12 +744,13 @@ int HELIOS::DetAcceptance(){
    if( bore < 2 * orbitb.rho) return -10; 
    
    // -14 ========== check particle-B hit radius on recoil dectector
-   if( isCoincidentWithRecoil && orbitB.R > rhoRecoil ) return -14;
+   if( isCoincidentWithRecoil && orbitB.R > rhoRecoilout  ) return -14;
+   //if( isCoincidentWithRecoil && (orbitB.R > rhoRecoilout || orbitB.R < rhoRecoilin) ) return -14;
    
    // -12 ========= check is particle-b was blocked by recoil detector
    rhoHit = GetR(posRecoil);
-   if( orbitb.z > 0 && posRecoil > 0 && orbitb.z > posRecoil && rhoHit < rhoRecoil ) return -12;
-   if( orbitb.z < 0 && posRecoil < 0 && orbitb.z < posRecoil && rhoHit < rhoRecoil ) return -12;
+   if( orbitb.z > 0 && posRecoil > 0 && orbitb.z > posRecoil && rhoHit < rhoRecoilout ) return -12;
+   if( orbitb.z < 0 && posRecoil < 0 && orbitb.z < posRecoil && rhoHit < rhoRecoilout ) return -12;
    
    // -13 ========= not more than 3 loops
    if( orbitb.loop > 3 ) return -13;
@@ -1049,14 +1057,14 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
       z0 = vp0 * t0; // mm        
       
       //========== check particle-B hit radius on recoil dectector
-      if(isCoincidentWithRecoil && rhoBHit > rhoRecoil ) return -2; // when particle-B miss the recoil detector
+      if(isCoincidentWithRecoil && rhoBHit > rhoRecoilout ) return -2; // when particle-B miss the recoil detector
 
       //========= check is particle-b was blocked by recoil detector
       rhoHit = GetR(posRecoil) ;// radius of light particle b at recoil detector
-      if( z0 > 0 && posRecoil > 0 && z0 > posRecoil && rhoHit < rhoRecoil) {
+      if( z0 > 0 && posRecoil > 0 && z0 > posRecoil && rhoHit < rhoRecoilout) {
           return -1 ;  // when particle-b blocked by recoil detector
       }
-      if( z0 < 0 && posRecoil < 0 && z0 < posRecoil && rhoHit < rhoRecoil) {
+      if( z0 < 0 && posRecoil < 0 && z0 < posRecoil && rhoHit < rhoRecoilout) {
           return -1 ;
       }
 
