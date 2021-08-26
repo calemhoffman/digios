@@ -75,7 +75,7 @@ while 1:
             if ( float(result) < alertLevel ) :
                 #----- close file, push to database
                 f.close()
-                os.system(DB_BashCommand)
+                os.system(DB_BashCommand_Mac)
                 #----- stop ACQ, and wait
                 caput("Online_CS_StartStop", "Stop")
                 gf=open("/home/helios/helioBuffer.log", "a")

@@ -23,7 +23,7 @@ if [ ${option} == "start" ]; then
     if [ ${isDataBaseRunning} -eq 1 ]; then 
 	echo -e "${YELLOW}!!!!!!!!!!!${RED}Helios_Database is already running${YELLOW}!!!!!!!!!!${NC}"
     else
-	xterm -T database -geometry 80x40+2050+0 -e "${HELIOSSYS}/daq/edm/scripts/DataBase.py" &
+	xterm -hold -T database -geometry 80x40+2050+0 -e "${HELIOSSYS}/daq/edm/scripts/DataBase.py" &
     fi
 
     #check is there any database script is running
@@ -31,7 +31,8 @@ if [ ${option} == "start" ]; then
     if [ ${isVacuumRunning} -eq 1 ]; then 
 	echo -e "${YELLOW}!!!!!!!!!!!${RED}Helios VacuumGauge is already running${YELLOW}!!!!!!!!!!${NC}"
     else
-	xterm -T vacuum -geometry 40x40+2200+600 -e "python2.7 ${HELIOSSYS}/daq/edm/scripts/Edwards_D379_read.py" &
+#	xterm -hold -T vacuum -geometry 60x40+2200+600 -e "python2.7 ${HELIOSSYS}/daq/edm/scripts/Edwards_D379_read.py" &
+	xterm -hold -T vacuum -geometry 60x40+2200+600 -e "${HELIOSSYS}/daq/edm/scripts/FRIB_Vaccume.sh" &
     fi
 
 fi

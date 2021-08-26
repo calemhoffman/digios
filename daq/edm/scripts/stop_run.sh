@@ -38,7 +38,7 @@ else
     comment2="${comment2//,/\,}"
 fi
 echo $comment2
-curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Stop_RUN:${comment2} value=0" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Stop_RUN-${RUN}:${comment2} value=0" --max-time 1 --connect-timeout 1
 
 du -hc ${HELIOSSYS}/analysis/data/${expName}_run_${RUN}*
 
@@ -57,45 +57,58 @@ screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
 ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh'
 scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
 
-if [ -z ${elogID} ]; then
-    # this will create seperated elog entry
-    echo "         stop at ${currentDate}" >> ${HELIOSSYS}/analysis/working/elog.txt
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt -f ${screenShot}
+#===== send to FRIB
+~/scpFRIB.sh ${screenShot}
+~/AutoElogFRIB.sh 2 ${LastRunNum} ${currentDate} ${totalFileSize}  ${COMMENT}
 
-else
+#==== send to SLACK FRIB
+mac2020=heliosdigios@192.168.1.164
+echo "ssh ${mac2020} /Users/heliosdigios/push2Slack.sh 2 ${LastRunNum} ${elogID} \"${currentDate}\" ${totalFileSize}"
+
+ssh ${mac2020} /Users/heliosdigios/push2Slack.sh 2 ${LastRunNum} ${elogID} \"${currentDate}\" ${totalFileSize}
+
+
+#if [ -z ${elogID} ]; then
+#    # this will create seperated elog entry
+#    echo "         stop at ${currentDate}" >> ${HELIOSSYS}/analysis/working/elog.txt
+#    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt -f ${screenShot}
+
+#else
     # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
-    echo "---- downloading the elog entry elohID=${elogID}"
-    elogContext=${HELIOSSYS}/analysis/working/elog.txt
+#    echo "---- downloading the elog entry elohID=${elogID}"
+#    elogContext=${HELIOSSYS}/analysis/working/elog.txt
     #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
-    if [ $expName = "ARR01" ]; then
-	elogName=$expName
-    else
-	elogName="H"${expName:1}
-    fi
+#    if [ $expName = "ARR01" ]; then
+#	elogName=$expName
+#    else if [ ${expName:0:1} = "h" ]; then
+#	elogName="H"${expName:1}
+#    else 
+#        elogName="S"${expName:1}
+#    fi
 
-    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -w ${elogID} > ${elogContext}
-    cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
-    #check encoding
-    encoding=$(grep "Encoding" ${elogContext} | awk '{print $2}')
-    if [ $encoding = "plain" ]; then encodingID=1 ; fi
-    if [ $encoding = "HTML" ]; then encodingID=2 ; fi
-    if [ $encoding = "ELcode" ]; then encodingID=0 ; fi
-    #remove all header
-    sed -i "1,${cutLineNum}d" ${elogContext}
-    #fill stop time
-    echo "         stop at ${currentDate} <br />" >> ${elogContext}
-    echo "grafana screenshot is attached. <br />" >> ${elogContext}
-    echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
-    echo "-----------------------------------------------</p>" >> ${elogContext}
-    echo "$COMMENT <br />" >> ${elogContext}
-    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
+#    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -w ${elogID} > ${elogContext}
+#    cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
+#    #check encoding
+#    encoding=$(grep "Encoding" ${elogContext} | awk '{print $2}')
+#    if [ $encoding = "plain" ]; then encodingID=1 ; fi
+#    if [ $encoding = "HTML" ]; then encodingID=2 ; fi
+#    if [ $encoding = "ELcode" ]; then encodingID=0 ; fi
+#    #remove all header
+#    sed -i "1,${cutLineNum}d" ${elogContext}
+#    #fill stop time
+#    echo "         stop at ${currentDate} <br />" >> ${elogContext}
+#    echo "grafana screenshot is attached. <br />" >> ${elogContext}
+#    echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
+#    echo "-----------------------------------------------</p>" >> ${elogContext}
+#    echo "$COMMENT <br />" >> ${elogContext}
+#    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
 
-    source ~/Slack_Elog_Notification.sh
-    slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
-    auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
+#    source ~/Slack_Elog_Notification.sh
+#    slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+#    auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
+#    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 
-fi
+#fi
 
 echo wait 2 seconds before closing the IOCs
 sleep 2
@@ -115,10 +128,10 @@ do
 done        
 rm -rf temp
 
-echo "=== wait 5 seconds before submit a transfer to LCRC ==="
-sleep 5
+#echo "=== wait 5 seconds before submit a transfer to LCRC ==="
+#sleep 5
 
-${HELIOSSYS}/daq/edm/scripts/globus_out.py
+#${HELIOSSYS}/daq/edm/scripts/globus_out.py
 #${HELIOSSYS}/daq/edm/scripts/globus_in.py
 
 #===== Get root_data/ from LCRC to MAC

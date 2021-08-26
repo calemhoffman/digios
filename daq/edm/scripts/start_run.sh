@@ -38,8 +38,7 @@ else
     comment2="${comment2//,/\,}"
 fi
 echo $comment2
-curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Start_RUN:${comment2} value=1" --max-time 1 --connect-timeout 1
-
+curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Start_RUN-${RUN}:${comment2} value=1" --max-time 1 --connect-timeout 1
 
 echo "#!/bin/bash -l" > ${constFile}
 echo "expName=${expName}" >> ${constFile}
@@ -55,7 +54,7 @@ currentDate=$(date)
 echo "RUN-${RUN} start at ${currentDate}| $COMMENT"
 echo "RUN-${RUN} start at ${currentDate}| $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
 
-
+#============================== Data for elog
 elogFile=${HELIOSSYS}/analysis/working/elog.txt
 echo "************************************************<br />" > ${elogFile}
 echo "RUN-${RUN} start at ${currentDate}.<br />" >> ${elogFile}
@@ -76,36 +75,62 @@ echo "pushing to elog for started a run"
 
 if [ ${expName} == "ARR01" ]; then
     elogName="ARR01"
-else
+elif [ ${expName:0:1} == "h" ]; then
     elogName="H"${expName:1}
+else # SOLARIS
+    elogName="S"${expName:1}
 fi
 
+#========== SOLARIS s003_10Be
+
+echo "===================   to SOLARIS elog"
+SelogName="e20021"
+
+~/scpFRIB.sh ${elogFile}
+~/AutoElogFRIB.sh 1 ${LastRunNum}
+
+
+echo "==================== push to Slack"
+mac2020=heliosdigios@192.168.1.164
+scp ${elogFile}  ${mac2020}:~/.
+
+/home/helios/sshFRIB.sh cat /user/e20021/elogID.txt > ~/elogID_FRIB.txt
+dos2unix.pl ~/elogID_FRIB.txt
+elogIDTxt=$(grep "elogID=" ~/elogID_FRIB.txt)
+elogID=${elogIDTxt:7}
+echo "${elogIDTxt}" >> ${constFile}
+
+echo "ssh ${mac2020} /Users/heliosdigios/push2Slack.sh 1 ${LastRunNum} ${elogID}"
+ssh ${mac2020} /Users/heliosdigios/push2Slack.sh 1 ${LastRunNum} ${elogID}
+
+
+#=========== SOLARIS s003_10Be, disable elog and Slack from the DAQ
 #IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt)
 
-IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ${HELIOSSYS}/analysis/working/elog.txt)
+#IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ${HELIOSSYS}/analysis/working/elog.txt)
 
-echo ${IDStr}
+#echo ${IDStr}
 
-IDStr=$(echo ${IDStr} | tail -1 | awk '{print $4}')
+#IDStr=$(echo ${IDStr} | tail -1 | awk '{print $4}')
 
-echo ${IDStr}
+#echo ${IDStr}
 
 #need to check ID is valid. other wise it crash other script
-re='^[0-9]+$'
-if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
-    elogIDStr="elog"${IDStr}
-    echo "Elog is succefully pushed at ${elogIDStr}"
-    echo ${elogIDStr} >> ${constFile}
-
-    source ~/Slack_Elog_Notification.sh
-    slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
-    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
-else 
-    slackMsg="RUN=${LastRunNum}.  unable to post to elog.\n"
-    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}"'"}' ${WebHook}
-fi
+#re='^[0-9]+$'
+#if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
+#    elogIDStr="elog"${IDStr}
+#    echo "Elog is succefully pushed at ${elogIDStr}"
+#    echo ${elogIDStr} >> ${constFile}
+#
+#    source ~/Slack_Elog_Notification.sh
+#    slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
+#    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
+#    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
+#else 
+#    slackMsg="RUN=${LastRunNum}.  unable to post to elog.\n"
+#    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
+#    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}"'"}' ${WebHook}
+#fi
 
 export TERM=vt100
 echo " terminals" 
@@ -121,5 +146,6 @@ xterm -T ioc4 -geometry 100x20+0+900  -sb  -sl 1000 -e "gtReceiver4" "ioc4" "${e
 ${HELIOSSYS}/daq/edm/scripts/helios_database start
 
 echo Run${RUN} Started...
+echo "If Manual Run: This window will be closed after 30 sec"
 sleep 30
-echo "This window will be closed after 30 sec"
+
