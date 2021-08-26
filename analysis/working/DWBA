@@ -47,21 +47,5 @@
 #23F(d,p)24F        5/2      0d5/2     1+          0.52       10MeV/u     AK
 #23F(d,p)24F        5/2      1s1/2     2+          0.52       10MeV/u     AK
 #23F(d,p)24F        5/2      0d5/2     1+          1.83       10MeV/u     AK
-
-94Ru(d,p)95Ru       0        1d5/2     5/2+        0.000       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d5/2     5/2+        1.648       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        2s1/2     1/2+        0.788       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        2s1/2     1/2+        2.246       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        2s1/2     1/2+        3.288       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        0g7/2     7/2+        0.942       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        0g7/2     7/2+        1.331       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        0h11/2   11/2-        2.450       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        1d3/2     3/2+        1.141       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        1.740       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        2.220       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        3.288       8.4MeV/u    AK
-
+10Be(t,p)12Be     0        1L=0     0+           0.000   9.6MeV/u      lA
+10Be(t,p)12Be     0        1L=2     2+           2.000   5MeV/u      lA

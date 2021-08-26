@@ -129,7 +129,7 @@ public :
    void Draw2DHist(TH2F * hist);
    
    void PlotEZ(bool isRaw);
-   void PlotTDiff(bool isGated);
+   void PlotTDiff(bool isGated, bool isLog);
    void PlotRDT(int id, bool isRaw);
    void PlotCRDTPolar();
 
@@ -249,8 +249,6 @@ void Monitors::Init(TTree *tree)
    
    startTime = 0;
    endTime = 0;
-   
-   //printControlID = 1; // don't quite, cannot pass to Termination() ?? why??
    
    printf("=================================== End of Branch Pointer Inititization. \n");
 }
@@ -683,13 +681,17 @@ void Monitors::PlotEZ(bool isRaw){
 
 }
 
-void Monitors::PlotTDiff(bool isGated){
+void Monitors::PlotTDiff(bool isGated, bool isLog){
    padID++; cCanvas->cd(padID); 
-
+   if( isLog ) cCanvas->cd(padID)->SetLogy(1);
    double yMax = 0;
    if( isGated ){
       yMax = htdiff->GetMaximum()*1.2;
-      htdiff->GetYaxis()->SetRangeUser(0, yMax);
+      if( isLog ){
+         htdiff->GetYaxis()->SetRangeUser(1, yMax);
+      }else{
+         htdiff->GetYaxis()->SetRangeUser(0, yMax);
+      }
    }
    htdiff->Draw();
    if( isGated ){

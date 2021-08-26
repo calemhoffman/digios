@@ -155,7 +155,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; ///######### rdt gate
    
    ///============================= timestamp Coincident gate
-   bool coinFlag = false;
+   bool coinFlag = true;
 
    ///if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
    int countInvalidRDT = 0;
@@ -189,7 +189,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      if( !TMath::IsNaN(xf[idet]) ) hitID[idet] += 1;
      if( !TMath::IsNaN(xn[idet]) ) hitID[idet] += 2;
      if( hitID[idet] == 0 ) continue;
-     if( isTraceDataExist  && te_r[idet] > 50 ) continue; /// when rise time > 50, skip 
+     //if( isTraceDataExist  && te_r[idet] > 50 ) continue; /// when rise time > 50, skip 
      
      ///====== Calibrations go here
      if( isTraceDataExist  && useTraceToReplaceArrayEnergy ){
@@ -325,7 +325,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          
          double f7corr = f7[det]->Eval(x[det]) + cTCorr[det][8];
          
-         coinTime = (coinTimeUC - f7corr); //+ corrofftime
+         coinTime = (coinTimeUC - 10*f7corr); //+ corrofftime
       }
       
    }

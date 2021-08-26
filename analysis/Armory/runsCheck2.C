@@ -22,6 +22,15 @@ void runsCheck2(TString prefix = "gen", int runID = -1){
   const char* treeName="gen_tree";
    
   //==============================================
+  
+  if( prefix != "gen" ){
+    printf(" not supporting trace data yet. sorry, use runsCheck.C \n");
+    return;
+  }
+  
+  printf("================================================\n");
+  printf("  using the timing macro in the root files  \n");
+  printf("================================================\n");
    
   TFile * f = NULL;
   TMacro * timing = NULL;
@@ -46,7 +55,6 @@ void runsCheck2(TString prefix = "gen", int runID = -1){
   }
    
   gROOT->ProcessLine(".!rm -f foundRunList.txt"); 
-   
    
   FILE * paraOut;
   TString filename;
