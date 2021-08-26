@@ -261,10 +261,10 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
   double uOld = 0;
   double uOld2 = 0;
 
-  if( A < 40 ) maxL = 3;
-  if( N < 20 || Z < 20 ) maxL = 2;
+  if( 1 < A && A < 40 ) maxL = 3;
+  if( 1 < N && (N < 20 || Z < 20) ) maxL = 2;
 
-  double KEstart = V0 + 5.; ///assume the 1st eigen state is 5 MeV above the well depth
+  double KEstart = V0 + 2.; ///assume the 1st eigen state is 2 MeV above the well depth
 
   for( int L = 0 ; L <= maxL; L++ ){
 
@@ -331,17 +331,19 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
             
             if( loop > maxLoop ) break;
             
-            if( de < 1e-10 ) {
-              loop = -404;
-              break;
-            }
+            ///if( de < 1e-10 ) {
+            ///  loop = -404;
+            ///  break;
+            ///}
             
             if( debug ) printf("         %3d|  %9.2E< e = %9.2E< %9.2E | de = %.2E (eTorr:%.1E) | w : %9.2E. %9.2E | sumW : %9.2E\n", loop,  e1, e, e2, de, eTorr, w, w2, sumW);
 
             if( uOld * w < 0 ) {
               e2 = e;
+              continue;
             }else if( w * u < 0 ){
               e1 = e;
+              continue;
             }
 
             //if( sumW > sumWOld ) break; //TODO, use the minimum of 2 points for best energy.
