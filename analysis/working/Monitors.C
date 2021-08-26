@@ -21,6 +21,8 @@
 #include <TObjArray.h>
 #include <fstream>
 #include <vector>
+#include "../Cleopatra/Isotope.h"
+
 using namespace std;
 
 //############################################ User setting
@@ -48,10 +50,12 @@ int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this 
 int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2 
 
 bool isUseArrayTrace = false;
-bool isUseRDTTrace = true;
+bool isUseRDTTrace = false;
 
-//TODO, load the reaction and find the Sn Sp from Isotope Class 
-double Sn = 1.2181;
+Isotope hRecoil(12, 4);
+double Sn = hRecoil.CalSp(0,1);
+double Sp = hRecoil.CalSp(1,0);
+double Sa = hRecoil.CalSp(2,2);
 
 //---Gate
 bool isTimeGateOn     = true;
@@ -100,32 +104,32 @@ int numCut2;
 TCutG* EZCut;
 Bool_t isEZCutFileOpen;
 
-/***************************************************
- variable and histogram naming rules
- name are case sensitive, so as any C/C++ code
-  
- ID is dettector ID
- 
- raw data from gen_tree are e, xf, xn, ring.
- the x from raw data is x
- 
- xf + xn = xs, s for sum
-
- calibrated data are  eCal, xfCal, xnCal, ringCal.
- the x from cal data is xCal
-  
- xfCal + xnCal = xsCal
-
- since the z is always from xCal, so it calls z.
- 
- Excitation energy calls Ex 
- 
- 
- TH2D is always using "V" to seperate 2 variables, like eVx
- 
-histogram with TCutG, add suffix "GC" for Graphical-Cut.
-   
-***************************************************/
+/******************************************************************
+*   variable and histogram naming rules                           *
+*   name are case sensitive, so as any C/C++ code                 *
+*                                                                 *
+*   ID is dettector ID                                            *
+*                                                                 *
+*   raw data from gen_tree are e, xf, xn, ring.                   *
+*   the x from raw data is x                                      *
+*                                                                 *
+*   xf + xn = xs, s for sum                                       *
+*                                                                 *
+*   calibrated data are  eCal, xfCal, xnCal, ringCal.             *
+*   the x from cal data is xCal                                   *
+*                                                                 *
+*   xfCal + xnCal = xsCal                                         *
+*                                                                 *
+*   since the z is always from xCal, so it calls z.               *
+*                                                                 *
+*   Excitation energy calls Ex                                    *
+*                                                                 *
+*                                                                 *
+*   TH2D is always using "V" to seperate 2 variables, like eVx    *
+*                                                                 *
+*  histogram with TCutG, add suffix "GC" for Graphical-Cut.       *
+*                                                                 *
+*******************************************************************/
 //======== raw data
 TH1F* he[numDet];
 TH1F* hring[numDet];
@@ -301,7 +305,7 @@ void Monitors::Begin(TTree *tree)
    TFile * fCut1 = new TFile(rdtCutFile1);
    isCutFileOpen1 = fCut1->IsOpen();
    if(!isCutFileOpen1) {
-      printf( "Failed to open cutfile : %s\n" , rdtCutFile1.Data());
+      printf( "Failed to open rdt-cutfile 1 : %s\n" , rdtCutFile1.Data());
       rdtCutFile1 = "";
    }
    numCut1 = 0 ;
@@ -323,7 +327,7 @@ void Monitors::Begin(TTree *tree)
    TFile * fCut2 = new TFile(rdtCutFile2);
    isCutFileOpen2 = fCut2->IsOpen();
    if(!isCutFileOpen2) {
-      printf( "Failed to open cutfile : %s\n" , rdtCutFile2.Data());
+      printf( "Failed to open rdt-cutfile 2 : %s\n" , rdtCutFile2.Data());
       rdtCutFile2 = "";
    }
    numCut2 = 0 ;
@@ -441,7 +445,7 @@ void Monitors::Begin(TTree *tree)
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
       
-      //dE vs E      
+      ///dE vs E      
       if( i % 2 == 0 ) {
          int tempID = i / 2;
          hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i),             500,rdtERange[0],rdtERange[1],500,rdtDERange[0],rdtDERange[1]);
@@ -475,8 +479,8 @@ void Monitors::Begin(TTree *tree)
    hArrayRDTMatrixG   = new TH2I("hArrayRDTMatrixG","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
 
    //===================== coincident time 
-   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil-dE); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
-   htdiffg = new TH1I("htdiffg","Coincident time (array, recoil-dE) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   htdiff  = new TH1I("htdiff" ,"Coincident time (recoil-dE - array); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
+   htdiffg = new TH1I("htdiffg","Coincident time (recoil-dE - array) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
  
    //===================== TAC
    htac  = new TH1F("htac","Array-RF TAC; kind of time diff [a.u.]; Counts", TACRange[0], TACRange[1], TACRange[2]);
@@ -871,7 +875,7 @@ Bool_t Monitors::Process(Long64_t entry)
       
       if( i % 2 == 0  ){        
         if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
-         ///recoilMulti++; // when both dE and E are hit
+         recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
          hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
@@ -907,22 +911,20 @@ Bool_t Monitors::Process(Long64_t entry)
    
    /******************* Multi-hit *************************************/
    ///hmultEZ->Fill(multiEZ);
-   ///hmult->Fill(recoilMulti,arrayMulti);
+   hmult->Fill(recoilMulti,arrayMulti);
 
 
    /*********** EZERO *************************************************/ 
- 
-   //if( isGoodEventFlag ) {
-   if( ezGate ) {
-      hic0->Fill(ezero[0]);
-      hic1->Fill(ezero[1]);
-      hic2->Fill(ezero[2]);
-    
-      hic01->Fill(ezero[1], ezero[0]);
-      hic02->Fill(ezero[1]+ezero[0], ezero[0]);
-      hic12->Fill(ezero[2], ezero[1]);
-      
-   }
+   //if( ezGate ) {
+   //   hic0->Fill(ezero[0]);
+   //   hic1->Fill(ezero[1]);
+   //   hic2->Fill(ezero[2]);
+   // 
+   //   hic01->Fill(ezero[1], ezero[0]);
+   //   hic02->Fill(ezero[1]+ezero[0], ezero[0]);
+   //   hic12->Fill(ezero[2], ezero[1]);
+   //   
+   //}
    
    /*********** Good event Gate ***************************************/ 
    if( !isGoodEventFlag ) return kTRUE;
@@ -935,16 +937,16 @@ Bool_t Monitors::Process(Long64_t entry)
      if( eCal[detID] <  eCalCut ) continue ;
 
      if( isReaction ){
-       //======== Ex calculation by Ryan 
+       ///======== Ex calculation by Ryan 
        double y = eCal[detID] + mass; // to give the KE + mass of proton;
        double Z = alpha * gamm * beta * z[detID];
        double H = TMath::Sqrt(TMath::Power(gamm * beta,2) * (y*y - mass * mass) ) ;
  
        if( TMath::Abs(Z) < H ) {
-         //using Newton's method to solve 0 ==	H * sin(phi) - G * tan(phi) - Z = f(phi) 
+         ///using Newton's method to solve 0 ==	H * sin(phi) - G * tan(phi) - Z = f(phi) 
          double tolerrence = 0.001;
-         double phi = 0; //initial phi = 0 -> ensure the solution has f'(phi) > 0
-         double nPhi = 0; // new phi
+         double phi = 0;  ///initial phi = 0 -> ensure the solution has f'(phi) > 0
+         double nPhi = 0; /// new phi
 
          int iter = 0;
          do{
@@ -955,12 +957,12 @@ Bool_t Monitors::Process(Long64_t entry)
          }while( TMath::Abs(phi - nPhi ) > tolerrence);
          phi = nPhi;
 
-         // check f'(phi) > 0
+         /// check f'(phi) > 0
          double Df = H * TMath::Cos(phi) - G / TMath::Power( TMath::Cos(phi),2);
          if( Df > 0 && TMath::Abs(phi) < TMath::PiOver2()  ){
            double K = H * TMath::Sin(phi);
            double x = TMath::ACos( mass / ( y * gamm - K));
-           double momt = mass * TMath::Tan(x); // momentum of particel b or B in CM frame
+           double momt = mass * TMath::Tan(x); /// momentum of particel b or B in CM frame
            double EB = TMath::Sqrt(mass*mass + Et*Et - 2*Et*TMath::Sqrt(momt*momt + mass * mass));
            Ex = EB - massB;
 
@@ -993,7 +995,7 @@ Bool_t Monitors::Process(Long64_t entry)
             hExCut1->Fill(Ex);
             hExThetaCM->Fill(thetaCM, Ex);
          }
-         if( rdtgate2 && detID%6 != 0) {
+         if( rdtgate2 ) {
             hExCut2->Fill(Ex);
             hExThetaCM->Fill(thetaCM, Ex);
          }
@@ -1051,7 +1053,7 @@ void Monitors::Terminate()
    PlotEZ(0); ///gated EZ
 
    ///----------------------------------- Canvas - 3
-   PlotTDiff(1); ///with Gated Tdiff
+   PlotTDiff(1, 1); ///with Gated Tdiff, isLog
     
    ///----------------------------------- Canvas - 4
    padID++; cCanvas->cd(padID); 
@@ -1195,8 +1197,12 @@ void Monitors::Terminate()
    printf("=============== loaded Armory/AutoFit.C\n");
    gROOT->ProcessLine(".L ../Armory/RDTCutCreator.C");
    printf("=============== loaded Armory/RDTCutCreator.C\n");
+   gROOT->ProcessLine(".L ../Armory/Check_rdtGate.C");
+   printf("=============== loaded Armory/Check_rdtGate.C\n");
    gROOT->ProcessLine(".L ../Armory/readTrace.C");
    printf("=============== loaded Armory/readTrace.C\n");
+   gROOT->ProcessLine(".L ../Armory/readRawTrace.C");
+   printf("=============== loaded Armory/readRawTrace.C\n");
    gROOT->ProcessLine("listDraws()");
    
    /************************* Save histograms to root file*/
@@ -1224,7 +1230,6 @@ void Monitors::Terminate()
       gROOT->ProcessLine(".q");
    }
    
-
    
    /************************************/
    //gROOT->ProcessLine("recoils()");

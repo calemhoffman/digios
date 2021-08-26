@@ -42,7 +42,8 @@ void listDraws(void) {
   printf("   ShowFitMethod() - Shows various fitting methods \n");
   printf("   RDTCutCreator() - Create RDT Cuts [May need to edit]\n");
   printf("   Check_rdtGate() - Check RDT Cuts.  \n");
-  printf("       readTrace() - read trace \n");
+  printf("       readTrace() - read trace from trace_runXXX.root \n");
+  printf("    readRawTrace() - read trace from runXXX.root \n");
 //  printf("         Check1D() - Count Integral within a range\n");
   printf("-----------------------------------------------------\n");
   printf("   %s\n", canvasTitle.Data());
