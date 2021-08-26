@@ -5,6 +5,7 @@ if [ $# -ne 2 ] && [ $# -ne 3 ] ; then
     echo "AutoStartStop  size  [kilo-byte_int]  [repeatition_int]"
     echo "****** if no repeatation, or repeatation = 0 or 1 or  < -1, only do once. "
     echo "       if repeatation = -1, infinity"
+    echo "****** 3 min is a special run that change the recoil trigger (Y-trigger) on"
     exit
 fi
 
@@ -26,9 +27,20 @@ fi
 if [ $method == "time" ]; then
     stopCount=$2
     printTime=$((${stopCount} / 3 + 1)) 
+
+    if [ $printTime -lt 10 ]; then
+	printTime=10
+    fi
+
     echo "##########################################################"
     echo "   Auto $msg1 for ${stopCount} min, print for ${printTime} min "
     echo "##########################################################"
+
+    if [ $stopCount == 3 ]; then
+	caput VME32:MTRG:SUM_Y on
+	echo "===================== 3 mins recoil trigger run "
+    fi
+
 elif [ $method == "size" ]; then
     maxSize=$2
     echo "###################################"
@@ -78,9 +90,14 @@ if [ $isStarted == "Stop" ]; then
     cd ${datalocation}
     
     echo "===================== Auto-Start-Stop script"
-    echo "Crtl+C to cancel with no harm"
-    echo "Please type Single-line comment:"
-    read -p '>>' COMMENT
+
+    if [ $stopCount == 3 ]; then
+	COMMENT="beam check"
+#    else
+#	echo "Crtl+C to cancel with no harm"
+#	echo "Please type Single-line comment:"
+#	read -p '>>' COMMENT
+    fi
 
     source ${HELIOSSYS}/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each. ${COMMENT}"
     stopFlag=0
@@ -134,6 +151,10 @@ while [  $stopFlag -eq 0 ]; do
 	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${firstRunNum}" "${RUN}" 1" &
 
 	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
+
+#	    if [ $stopCount -eq 3 ]; then
+#		caput VME32:MTRG:SUM_Y off
+#	    fi
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
