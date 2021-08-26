@@ -43,13 +43,14 @@ void LoadRDTCorr2(){
 }
 
 void RDTCutCreator(TString dataList, 
-                   TString treeName = "gen_tree", 
-                   bool useTrace = false,
                    TString saveFileName = "rdtCuts.root", 
                    int eRange=6000, 
                    int deRange=2000, 
+                   bool isLogz = false,
                    TString gate = "", 
-                   bool isLogz = false){
+                   TString treeName = "gen_tree", 
+                   bool useTrace = false
+                   ){
    
    printf("================ Graphic Cut Creator for RDT ============== \n");
    

@@ -21,6 +21,9 @@
 #include <TObjArray.h>
 #include <fstream>
 #include <vector>
+
+#include "../Cleopatra/Isotope.h"
+
 using namespace std;
 
 //############################################ User setting
@@ -32,15 +35,15 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,    3000};
-int      rdtERange[2] = {     0,    8000};
+int     rdtDERange[2] = {     0,   12000};
+int      rdtERange[2] = {    20,   10000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {     0,    7000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  20,    -1,     6};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = { 133,    -4,  10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -100, 100};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -48,25 +51,38 @@ int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this 
 int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2 
 
 bool isUseArrayTrace = false;
-bool isUseRDTTrace = true;
+bool isUseRDTTrace = false;
 
-//TODO, load the reaction and find the Sn Sp from Isotope Class 
-double Sn = 1.2181;
+Isotope hRecoil(12, 4);
+double Sn = hRecoil.CalSp(0,1);
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 20};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-10, 5 };             /// min, max, 1 ch = 10 ns
 double eCalCut        = 0.5;                   /// lower limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.95;                  ///cut out the edge
-vector<int> skipDetID = {2,  11, 17, 5, 23} ;//{2,  11, 17}
+double xGate          = 0.99;                  ///cut out the edge
+vector<int> skipDetID = {2} ;
 
-TString rdtCutFile1 = "rdtCuts.root";
-TString rdtCutFile2 = "";//"rdtCuts_15C.root";
+//TString rdtCutFile1 = "rdtCuts.root";
+//TString rdtCutFile1 = "rdtCuts_15N.root";
+//TString rdtCutFile1 = "rdtCuts_15N_a.root";
+//TString rdtCutFile1 = "rdtCuts_Ar.root";
+//TString rdtCutFile1 = "rdtCuts_Ne.root";
+//TString rdtCutFile1 = "rdtCuts_10Be_short.root";
+TString rdtCutFile1 = "rdtCuts_BBBBB.root";
+//TString rdtCutFile1 = "rdtCuts_Be_ryan.root";
+//TString rdtCutFile1 = "rdtCuts_12Be_tight.root";
+//TString rdtCutFile1 = "rdtCuts_10B.root";
+//TString rdtCutFile1 = "rdtCuts_new10Be1.root";
+//TString rdtCutFile1 = "rdtCuts_new10Be2.root";
+//TString rdtCutFile1 = "rdtCuts_n15haha.root";
+//TString rdtCutFile1 = "rdtCuts_Haha.root";
+TString rdtCutFile2 = "";//"rdtCuts_15N.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -195,7 +211,7 @@ TH2F* hrdt2Dg[4];
 
 TH2F* hrdtMatrix; // coincident between rdt
 
-TH1F* hrdt14N;
+TH1F* hrdt10Be;
 TH1F* hrdt14C;
 
 //======= Circular Recoil
@@ -301,7 +317,7 @@ void Monitors::Begin(TTree *tree)
    TFile * fCut1 = new TFile(rdtCutFile1);
    isCutFileOpen1 = fCut1->IsOpen();
    if(!isCutFileOpen1) {
-      printf( "Failed to open cutfile : %s\n" , rdtCutFile1.Data());
+      printf( "Failed to open rdt-cutfile : %s\n" , rdtCutFile1.Data());
       rdtCutFile1 = "";
    }
    numCut1 = 0 ;
@@ -323,7 +339,7 @@ void Monitors::Begin(TTree *tree)
    TFile * fCut2 = new TFile(rdtCutFile2);
    isCutFileOpen2 = fCut2->IsOpen();
    if(!isCutFileOpen2) {
-      printf( "Failed to open cutfile : %s\n" , rdtCutFile2.Data());
+      printf( "Failed to open rdt-cutfile : %s\n" , rdtCutFile2.Data());
       rdtCutFile2 = "";
    }
    numCut2 = 0 ;
@@ -453,8 +469,8 @@ void Monitors::Begin(TTree *tree)
    
    hrdtMatrix = new TH2F("hrdtMatrix", "RDT ID vs RDT ID", 16 , 0, 8, 16, 0, 8);
    
-   hrdt14N = new TH1F("hrdt14N", "14N, 14C recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
-   hrdt14N->SetLineColor(2);
+   hrdt10Be = new TH1F("hrdt10Be", "10Be, 10Be DE-7 recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
+   hrdt10Be->SetLineColor(2);
    
    hrdt14C = new TH1F("hrdt14C", "14N, 14C recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
    hrdt14C->SetLineColor(4);
@@ -475,8 +491,8 @@ void Monitors::Begin(TTree *tree)
    hArrayRDTMatrixG   = new TH2I("hArrayRDTMatrixG","Array ID vs Recoil ID / g; Array ID; Recoil ID",30,0,30,8,0,8);
 
    //===================== coincident time 
-   htdiff  = new TH1I("htdiff" ,"Coincident time (array, recoil-dE); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
-   htdiffg = new TH1I("htdiffg","Coincident time (array, recoil-dE) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
+   htdiff  = new TH1I("htdiff" ,"Coincident time (recoil-dE - array); time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);   
+   htdiffg = new TH1I("htdiffg","Coincident time (recoil-dE - array) w/ recoil gated; time [ch = 10ns]; count", coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
  
    //===================== TAC
    htac  = new TH1F("htac","Array-RF TAC; kind of time diff [a.u.]; Counts", TACRange[0], TACRange[1], TACRange[2]);
@@ -666,7 +682,6 @@ Bool_t Monitors::Process(Long64_t entry)
     for( int i = 0 ; i < 8; i++){
        rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
     }
-    
     
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
@@ -860,7 +875,6 @@ Bool_t Monitors::Process(Long64_t entry)
     }
     
    /*********** RECOILS ***********************************************/    
-   
    for( int i = 0; i < 8 ; i++){
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
@@ -871,7 +885,7 @@ Bool_t Monitors::Process(Long64_t entry)
       
       if( i % 2 == 0  ){        
         if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
-         ///recoilMulti++; // when both dE and E are hit
+         recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
          hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
@@ -882,15 +896,14 @@ Bool_t Monitors::Process(Long64_t entry)
       }
    }
 
-   ///if( rdt_t[4] > 0 ){
-   ///   if( abs(rdt[4] - 1658) < 40) hrdt14N->Fill(rdt_t[4]/1e8/60.);
-   ///   if( abs(rdt[4] - 1783) < 40) hrdt14C->Fill(rdt_t[4]/1e8/60.);
-   ///}
+   if( rdt_t[7] > 0 ){
+      if( abs(rdt[7] - 1050) < 150) hrdt10Be->Fill(rdt_t[7]/1e8/60.);
+//      if( abs(rdt[4] - 1783) < 40) hrdt14C->Fill(rdt_t[4]/1e8/60.);
+   }
 
    /******************* Circular Recoil *******************************/
    ///======= 0 -  7 is angular 
    ///======= 8 - 15 is radial
-   
    for( int i = 0; i < 8 ; i++){
      if( TMath::IsNaN(crdt[i]) ) continue;
      hcrdt[i]->Fill(crdt[i]);
@@ -904,11 +917,9 @@ Bool_t Monitors::Process(Long64_t entry)
       hcrdtPolar->Fill( theta, rho );
     }
    }
-   
    /******************* Multi-hit *************************************/
    ///hmultEZ->Fill(multiEZ);
-   ///hmult->Fill(recoilMulti,arrayMulti);
-
+   hmult->Fill(recoilMulti,arrayMulti);
 
    /*********** EZERO *************************************************/ 
  
@@ -921,7 +932,6 @@ Bool_t Monitors::Process(Long64_t entry)
       hic01->Fill(ezero[1], ezero[0]);
       hic02->Fill(ezero[1]+ezero[0], ezero[0]);
       hic12->Fill(ezero[2], ezero[1]);
-      
    }
    
    /*********** Good event Gate ***************************************/ 
@@ -993,7 +1003,7 @@ Bool_t Monitors::Process(Long64_t entry)
             hExCut1->Fill(Ex);
             hExThetaCM->Fill(thetaCM, Ex);
          }
-         if( rdtgate2 && detID%6 != 0) {
+         if( rdtgate2 ) {
             hExCut2->Fill(Ex);
             hExThetaCM->Fill(thetaCM, Ex);
          }
@@ -1004,7 +1014,7 @@ Bool_t Monitors::Process(Long64_t entry)
          
       }
    }
-  
+
    return kTRUE;
 }
 
@@ -1027,7 +1037,7 @@ void Monitors::Terminate()
    //############################################ User is free to edit this section
    //--- Canvas Size
    int canvasXY[2] = {1200 , 1600} ;// x, y
-   int canvasDiv[2] = {3,4};
+   int canvasDiv[2] = {2,5};
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
@@ -1041,22 +1051,18 @@ void Monitors::Terminate()
 
    double yMax = 0;
 
-
-   
    //TODO, Module each block.
    ///----------------------------------- Canvas - 1
    PlotEZ(1); /// raw EZ
       
    ///----------------------------------- Canvas - 2
+   PlotTDiff(1, 1); ///with Gated Tdiff
+   
+   ///----------------------------------- Canvas - 3   
    PlotEZ(0); ///gated EZ
-
-   ///----------------------------------- Canvas - 3
-   PlotTDiff(1); ///with Gated Tdiff
-    
+ 
    ///----------------------------------- Canvas - 4
    padID++; cCanvas->cd(padID); 
-   
-   //cCanvas->cd(padID)->SetLogy();
    
    hEx->Draw();
    DrawLine(hEx, Sn);
@@ -1065,26 +1071,38 @@ void Monitors::Terminate()
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
    if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.7, "with recoil gated"); 
 
-   ///----------------------------------- Canvas - 5
-   padID++; cCanvas->cd(padID); 
+   ///----------------------------------- Canvas - 5   
+   
+   hrdt2Dg[0]->GetXaxis()->SetRangeUser(0, 6000);
+   hrdt2Dg[0]->GetYaxis()->SetRangeUser(0, 3000);
+   
+   hrdt2Dg[1]->GetXaxis()->SetRangeUser(0, 6000);
+   hrdt2Dg[1]->GetYaxis()->SetRangeUser(0, 3000);
+   
+   hrdt2Dg[2]->GetXaxis()->SetRangeUser(0, 6000);
+   hrdt2Dg[2]->GetYaxis()->SetRangeUser(0, 3000);
+   
+   hrdt2Dg[3]->GetXaxis()->SetRangeUser(0, 6000);
+   hrdt2Dg[3]->GetYaxis()->SetRangeUser(0, 3000);
+   
+   PlotRDT(0, 0);
+   //padID++; cCanvas->cd(padID); 
    
    //Draw2DHist(hExThetaCM);
-   heVIDG->Draw();
-   text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
+   //heVIDG->Draw();
+   //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
    //helum4D->Draw();
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
    
    ///----------------------------------- Canvas - 6
-   padID++; cCanvas->cd(padID); 
-   
-   Draw2DHist(htacEx);
+   PlotRDT(1, 0);
    
    ///------------------------------------- Canvas - 7
-   PlotRDT(0, 0);
+   PlotRDT(2, 0);
    
    ///----------------------------------- Canvas - 8
-   PlotRDT(1, 0);
+   PlotRDT(3,0);
 
    ///yMax = hic2->GetMaximum()*1.2;
    ///hic2->GetYaxis()->SetRangeUser(0, yMax);
@@ -1103,10 +1121,49 @@ void Monitors::Terminate()
    ///----------------------------------- Canvas - 9
    padID++; cCanvas->cd(padID);  
    
-   Draw2DHist(hic01);
+   //Draw2DHist(hic01);
+  
+   //htac->Draw();
+
+   hrdt[7]->Draw();
+   
+   double isoCount[5];
+   
+   int isoCharge[5] = {4, 5, 7, 10, 16};
+   
+   double isoRange[5][2] = { { 900, 1200},
+                             {1600, 1800},
+                             {3100, 3600},
+                             {6500, 7100}, 
+                             {8300, 11000}};
+                             
+   TString isoName[5] = {"10Be", "10B", "15N", "20Ne", "Si+Ar"};
+                           
+   double totCount = 0;
+   for( int i = 0; i < 5; i++){
+      int x1 = hrdt[7]->FindBin(isoRange[i][0]);
+      int x2 = hrdt[7]->FindBin(isoRange[i][1]);
+      
+      isoCount[i] = hrdt[7]->Integral(x1, x2);
+      totCount += isoCount[i]/isoCharge[i]/isoCharge[i];
+      DrawBox(hrdt[7], isoRange[i][0], isoRange[i][1], kGreen, 0.2);
+   }
+   
+   double isoPrecent[5];
+   
+   text.SetTextSize(0.15);
+   
+   for( int i = 0; i < 5; i++){
+      
+      isoPrecent[i] = isoCount[i]/isoCharge[i]/isoCharge[i]/totCount*100;
+      text.DrawLatex(0.15, 0.8 -0.15*i, Form("%5s : %5.0f, %.2f%%", isoName[i].Data(), isoCount[i], isoPrecent[i]));
+      //printf("%s\n", cmd.Data()); 
+      
+   }
 
    ///----------------------------------- Canvas - 10
-    PlotRDT(3,0);
+   padID++; cCanvas->cd(padID);
+   hrdt10Be->Draw();
    
    //helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
    //helumDBIC = (TH1F*) helum4D->Clone();
@@ -1128,12 +1185,9 @@ void Monitors::Terminate()
    //text.DrawLatex(0.15, 0.5, Form("Elum(D) / BIC \n"));
    
    ///----------------------------------- Canvas - 11
-   PlotRDT(2,0);
-   
+ 
    ///----------------------------------- Canvas - 12
-   padID++; cCanvas->cd(padID);
-   htac->Draw();
-
+   
    
    /*
    ///----------------------------------- Canvas - 13
@@ -1149,7 +1203,7 @@ void Monitors::Terminate()
    ///----------------------------------- Canvas - 14
    padID++; cCanvas->cd(padID);
    
-   ///hrdt14N->Draw("");
+   ///hrdt10Be->Draw("");
    ///hrdt14C->Draw("same");
    
    ///----------------------------------- Canvas - 15
@@ -1197,7 +1251,13 @@ void Monitors::Terminate()
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine(".L ../Armory/readTrace.C");
    printf("=============== loaded Armory/readTrace.C\n");
+   gROOT->ProcessLine(".L ../Armory/Check_rdtGate.C");
+   printf("=============== loaded Armory/Check_rdtGate.C\n");
    gROOT->ProcessLine("listDraws()");
+   
+
+   /************************************/   
+   //gROOT->ProcessLine("recoils()");
    
    /************************* Save histograms to root file*/
    
@@ -1205,8 +1265,18 @@ void Monitors::Terminate()
    //TString outFileNameTemp = canvasTitle;
    //outFileNameTemp.ReplaceAll(" - ", "-").ReplaceAll(" ", "_").ReplaceAll(":", "").ReplaceAll(",","");
    //gROOT->GetList()->SaveAs(outFileName + ".root");
-   
-   if( printControlID == 0 ) {
+
+   /*
+   if( printControlID == -1 ){
+      printf("================= push isotopes fraction to database\n");
+      for( int i = 0; i < 5; i++){
+         TString cmd;
+         cmd.Form(".! curl -sS -XPOST 'http://192.168.1.193:8086/write?db=testing' --data-binary \"Isotope,iso=\"%s\" value=%f\" --speed-time 5 --speed-limit 1000 ", isoName[i].Data(), isoPrecent[i]/100.);
+         gROOT->ProcessLine(cmd);
+      }
+   }
+   */
+   if( printControlID == 0 || printControlID == 1) {
       TDatime dateTime;
       TString outFileName;
       outFileName.Form("Canvas_%d%02d%02d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
@@ -1219,7 +1289,16 @@ void Monitors::Terminate()
       
       cmd.Form(".! ../Armory/push_to_websrv.sh %s %s", outFileName.Data(), canvasTitle.ReplaceAll(" ", "").ReplaceAll("|","_").Data()); 
       gROOT->ProcessLine(cmd);
-       
+      /*
+      if( printControlID == 1 ){
+         printf("================= push isotopes fraction to database\n");
+         for( int i = 0; i < 5; i++){
+            TString cmd;
+            cmd.Form(".! curl -sS -XPOST 'http://192.168.1.193:8086/write?db=testing' --data-binary \"Isotope,iso=\"%s\" value=%f\" --speed-time 5 --speed-limit 1000 ", isoName[i].Data(), isoPrecent[i]/100.);
+            gROOT->ProcessLine(cmd);
+         }
+      }
+       */
       ///======================== exit after 
       gROOT->ProcessLine(".q");
    }

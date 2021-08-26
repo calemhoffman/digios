@@ -15,7 +15,12 @@
 #include <fstream>
 #include <TCutG.h>
 
-void Check_rdtGate(TString dataList, TString rdtCut, TString treeName = "gen_tree", TString gate="", double eRange = 6000, double deRange = 4000){  
+void Check_rdtGate(TString dataList, 
+                   TString rdtCut, 
+                   double eRange = 6000, 
+                   double deRange = 4000,
+                   TString treeName = "gen_tree", 
+                   TString gate=""){  
    
    //============================= RDT cut
    TFile * fileCut = new TFile(rdtCut);

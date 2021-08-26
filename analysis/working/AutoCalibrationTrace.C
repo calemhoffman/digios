@@ -21,6 +21,7 @@
 #include "../Armory/Cali_compareF.C"
 #include "../Armory/Cali_e_trace.h"
 #include "../Armory/GetCoinTimeCorrectionCutG.C"
+#include "../Armory/Cali_coinTime_alpha.C"
 
 //==========================================
 //         This file show the steps for calibration 
@@ -48,6 +49,7 @@ int PrintManual(){
    printf(" 5 = x - scaling to full (-1,1) (alpha)\n");
    printf(" 6 = coinTimeUC calibration. (MANUAL) \n");
    printf(" 7 = run Cleopatra/Transfer\n");
+   printf(" 8 = Calibrate trigger time vs X using alpha.\n");
    printf(" ================================================== \n");
    printf(" Choose action : ");
    int option;
@@ -144,13 +146,13 @@ void AutoCalibrationTrace(){
    printf(" -------------------------------------------------- \n");
    
 /**///=========================================== Calibration
-   if( option > 7 || option < 0 ) {
+   if( option > 8 || option < 0 ) {
      printf(" --- bye!----\n");
      gROOT->ProcessLine(".q");
      return;
    }
    
-   if( 0 <= option && option <= 5){
+   if( (0 <= option && option <= 5) || option == 8){
       printf(" ================ files :  \033[0;33m\n");
       chain->GetListOfFiles()->Print();
       printf("\033[0m\n");
@@ -272,9 +274,11 @@ void AutoCalibrationTrace(){
                   printf("    a0 Min : " ); temp = scanf("%lf", &a0Min);
                   printf("    a1 Max : " ); temp = scanf("%lf", &a0Max);
               }
+              printf("         range of a1 = (%.0f, %.0f), a0 = (%.1f, %.1f) \n", a1Min, a1Max, a0Min, a0Max);
               int nTrials = 800;
               printf("    Number of Trials? [%d] : ", nTrials);
               temp = scanf("%d", &nTrials);
+              printf("              trials = %d \n", nTrials);
               Cali_compareF(caliTree, fs, a1Min, a1Max, a0Min, a0Max, nTrials, eCdet, energyThreshold);
             }
          }while( eCdet > -1  );
@@ -319,6 +323,12 @@ void AutoCalibrationTrace(){
          }
       }
       gROOT->ProcessLine(".q");
+   }
+   
+   if (option == 8 ){
+      Cali_coinTime_alpha(chain);
+      //gROOT->ProcessLine(".q");
+      return;
    }
 }
 
