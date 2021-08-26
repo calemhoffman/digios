@@ -239,7 +239,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
         psd.EZERO[i]=TMath::QuietNaN();
         psd.EZEROTimestamp[i]= 0;
       }
-      if (i<NCRDT) {
+      if (i< NCRDT) {
         psd.CRDT[i]=TMath::QuietNaN();
         psd.CRDTTimestamp[i]= 0;
       }
@@ -306,21 +306,21 @@ Bool_t GeneralSort::Process(Long64_t entry)
       }
 
       ///=============================== ELUM
-      if ( idDet >= 200 && idDet <= 200 + NELUM ) {
+      if ( NELUM > 0 && idDet >= 200 && idDet <= 200 + NELUM ) {
         Int_t elumID = idDet - 200;
         psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN ;
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
       ///=============================== EZERO
-      if ( idDet >= 300 && idDet <= 300 + NEZERO ) {
+      if ( NEZERO > 0 && idDet >= 300 && idDet <= 300 + NEZERO ) {
         Int_t ezeroID = idDet - 300;
         psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
       }
 
       ///=============================== TAC & RF TIMING
-      if ( idDet >= 400 && idDet <= 400 + NTAC ) {   
+      if ( NTAC > 0 && idDet >= 400 && idDet <= 400 + NTAC ) {   
         Int_t tacID = idDet - 400;
         psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
         psd.TACTimestamp[tacID] = event_timestamp[i];
@@ -328,7 +328,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       }
       
       ///=============================== Circular-Recoil
-      if ( idDet >= 500 && idDet <= 500 + NCRDT ) {
+      if ( NCRDT > 0 && idDet >= 500 && idDet <= 500 + NCRDT ) {
         Int_t crdtID = idDet - 500;
         psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
         psd.CRDTTimestamp[crdtID] = event_timestamp[i];

@@ -63,7 +63,7 @@ elif [ ${PCName:0:5} == "bebop" ] || [ ${PCName:0:3} == "bdw" ]; then
     echo "in LCRC, no need to get data."
 #elif [ ${PCName:0:4} == "phyw" ]; then
 #    echo "in MAC, no need to download"
-elif [ ${PCName:0:5} == "phywl" ] || [ ${PCName} == "heliosdb" ] || [ ${PCName} == "helioss-iMac" ]; then
+elif [ ${PCName:0:5} == "phywl" ] || [ ${PCName} == "heliosdb" ] || [ ${PCName:0:12} == "helioss-iMac" ]; then
     #============ Get the raw data
     IP=192.168.1.2
     if [ ${PCName} == "heliosdb" ]; then

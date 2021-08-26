@@ -32,8 +32,6 @@
 #include <TH2.h>
 #include <TStyle.h>
 
-double rdtGate = 5000;
-
 void Cali_littleTree_trace::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
@@ -124,14 +122,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    for(int idet = 0 ; idet < numDet; idet++){
       
-      //if( idet > 17 ) continue;
-      //if( idet == 4 ) continue;
-      //if( idet ==10 ) continue;
-      //if( idet ==17 ) continue;
-      //if( idet == 7 ) continue;
-      //if( idet ==  5 ) continue;
-      if( e[idet] < 500 ) continue;
-      
+      if( e[idet] < 100 ) continue;
       //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
       if( TMath::IsNaN(xf[idet]) && TMath::IsNaN(xn[idet])  ) continue;
@@ -144,7 +135,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       
       eTemp = e[idet];
       
-      // range (-1,1)      
+      /// range (-1,1)      
       if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
       if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2* xfC/ eTemp - 1;
       if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
