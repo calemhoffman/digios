@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while [ 1 ]; do
+    AutoStartStop time 3 1
+    echo -e "\033[1;31m============= time for stop. wait 5 sec. to nect RUN\033[0m"
+    wait 5
+    AutoStartStop time 30 1
+done
