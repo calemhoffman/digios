@@ -38,7 +38,7 @@ else
     comment2="${comment2//,/\,}"
 fi
 echo $comment2
-curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Start_RUN:${comment2} value=1" --max-time 1 --connect-timeout 1
+curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Start_RUN-${comment2} value=1" --max-time 1 --connect-timeout 1
 
 
 echo "#!/bin/bash -l" > ${constFile}
@@ -121,5 +121,5 @@ xterm -T ioc4 -geometry 100x20+0+900  -sb  -sl 1000 -e "gtReceiver4" "ioc4" "${e
 ${HELIOSSYS}/daq/edm/scripts/helios_database start
 
 echo Run${RUN} Started...
+echo "If Manual Run: This window will be closed after 30 sec"
 sleep 30
-echo "This window will be closed after 30 sec"
