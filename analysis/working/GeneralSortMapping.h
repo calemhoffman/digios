@@ -7,6 +7,7 @@
  *          = 2XX ; ELUM
  *          = 3XX ; EZERO
  *          = 4XX ; TAC & RF-Timing
+ *          = 5XX ; Circular Recoil
  * 
 ***********************************************************************/
 
@@ -15,9 +16,9 @@
 #define NELUM   2
 #define NEZERO  5
 #define NTAC    3
+#define NCRDT   16
 
 #define MWIN 100 //M value for energy filter from digi setting
-
 
 Int_t idConst = 1010;
 

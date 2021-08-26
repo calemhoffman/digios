@@ -23,7 +23,8 @@
 //relative path does not work
 #ifdef __linux__
    //#include "/lcrc/project/HELIOS/digios/analysis/working/GeneralSortMapping.h"
-   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"   
+   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"
+   #include "/home/ryantang/digios_master/analysis/working/GeneralSortMapping.h"
 #elif __APPLE__
    #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
    //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
@@ -139,6 +140,10 @@ public :
    float trdt[NRDT];
    float trdt_t[NRDT];
    float trdt_r[NRDT];
+      
+   float tcrdt[NCRDT];
+   float tcrdt_t[NCRDT];
+   float tcrdt_r[NCRDT];
    
    float tezero[NEZERO];
    float tezero_t[NEZERO];
@@ -163,6 +168,7 @@ public :
       Float_t TAC[NTAC];
       Float_t ELUM[NELUM];
       Float_t EZERO[NEZERO];
+      Float_t CRDT[NCRDT];
 
       ULong64_t EnergyTimestamp[NARRAY];
       ULong64_t XFTimestamp[NARRAY];
@@ -172,6 +178,7 @@ public :
       ULong64_t TACTimestamp[NTAC];
       ULong64_t ELUMTimestamp[NELUM];
       ULong64_t EZEROTimestamp[NEZERO];
+      ULong64_t CRDTTimestamp[NCRDT];
       
       Float_t x[NARRAY];
       

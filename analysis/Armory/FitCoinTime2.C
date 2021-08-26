@@ -116,8 +116,11 @@ void BubbleSort(Lsq haha[], int n, int aCount){
 //#####################################################
 void FitCoinTime2(){
 
+  double threshold = 0.02; /// when distance is larger than theshold, discard
+  int maxIteration = 1000;
+
   ///============== General data
-  const int n = 300;
+  const int n = 500;
   double x[n], y[n], ey[n], oy[n];
 
   double rangey[2] = {-2, 4};
@@ -140,7 +143,6 @@ void FitCoinTime2(){
   //  for( int i = 0; i < n ; i++) printf("%d, {%6.4f, %10.4f}, \n",i,  x[i], y[i]);
   //}
 
-  double threshold = 0.1; /// when distance is larger than theshold, discard
   ///================= Calculate least-square distance
 
   int nLine = 2; /// number of parallel line
@@ -356,7 +358,7 @@ void FitCoinTime2(){
 
     count ++;
 
-  }while(count < 1000 && isGo );
+  }while(count < maxIteration && isGo );
   //}while(count < 200  );
 
   printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d\n", count);
