@@ -12,11 +12,12 @@ bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
 float delayChannel = 300.; //initial guess of the time
 
+//TODO only global variables can propagate to all slave, How to propagate them from master local to slave?
 bool isTACRF = true;
 bool isRecoil = true;
 bool isElum = false;
-bool isEZero = true;
-bool isCRDT = true;
+bool isEZero = false;
+bool isCRDT = false;
 
 
 // Also go to line 146 to set the trace analysis gate
@@ -79,6 +80,7 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
+   
    printf( "  TAC/RF   : %s \n", isTACRF  ? "On" : "Off");
    printf( "  Recoil   : %s \n", isRecoil ? "On" : "Off");
    printf( "  Elum     : %s \n", isElum   ? "On" : "Off");

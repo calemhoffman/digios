@@ -25,6 +25,10 @@ void runsCheck(TString prefix = "gen", int runID = -1){
   const char* treeName="gen_tree";
    
   //==============================================
+  
+  printf("================================================\n");
+  printf("  Compute the time stamp from root files \n");
+  printf("================================================\n");
    
   TFile * f = NULL;
   TTree * tree = NULL;

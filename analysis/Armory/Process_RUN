@@ -69,6 +69,12 @@ echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
 echo "============================================="
 
 
+if [ ${isGeneralSort} -ne -1 ] || [ ${isGeneralSort} -ne 1 ]; then
+ echo -e "\033[1;31m##########################################################\033[0m"
+ echo -e "\033[1;33m Please check GeneralSortTraceProof.C to enable detectors \033[0m"
+ echo -e "\033[1;31m##########################################################\033[0m"
+fi
+
 #######################################
 ####################  Download raw data
 if [ $isMerge -ne 0 ]; then
