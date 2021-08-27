@@ -682,7 +682,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.close();
 
    //====================================== load RDT cut
-   TFile * fileCut = new TFile(""); //"rdtCuts.root");   
+   TFile * fileCut = new TFile("rdtCuts.root");   
    TObjArray * cutList = NULL;
    isRDTCutExist = false;
    if( fileCut->IsOpen() ){
@@ -698,7 +698,8 @@ void Cali_e_trace::Init(TTree *tree)
             printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
          }
       }
-
+      
+      saveFile->cd();
       cutList->Write("rdtCutList");
    }
 
