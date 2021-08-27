@@ -240,28 +240,47 @@ void Transfer(
   string isotopeName;
   if( file.is_open() ){
     string line;
-    int i = 0;
-    while( file >> line){
-      //printf("%d, %s \n", i,  line.c_str());
+    while( getline(file, line) ){
+      //printf("%s \n", line.c_str());
       if( line.substr(0,2) == "//" ) continue;
-      if( line.substr(0,1) == "#" ) break;
-      if ( i >= 0 ){
-        if( i%4 == 0 ) {
-          ExKnown.push_back(atof(line.c_str()));
-        }else if (i%4 == 1) {
-          ExStrength.push_back(atof(line.c_str()));
-        }else if (i%4 == 2){
-          SF.push_back(atof(line.c_str()));
-          
-        }else{
-          ExWidth.push_back(atof(line.c_str()));
+      if( line.substr(0,2) == "#=" ) break;
+      
+      ///------- split string
+      size_t pos = 0;
+      int i = 0;
+      do{
+        pos = line.find(" "); /// find space
+        if( pos == 0 ){ ///check if it is splitter again
+          line = line.substr(pos+1);
+          continue;
         }
-      }
-      i = i + 1;
+
+        string haha ;
+        if( pos == std::string::npos ){
+          haha = line;
+        }else{
+          haha = line.substr(0, pos);
+          line = line.substr(pos);
+        }
+
+        ///check if haha is begin with space
+        while( haha.substr(0, 1) == " ") haha = haha.substr(1);
+        ///check if haha is end with space
+        while( haha.back() == ' ') haha = haha.substr(0, haha.size()-1);
+  
+        if(i == 3 ) {ExWidth.push_back(atof(haha.c_str())); i++;}
+        if(i == 2 ) {SF.push_back(atof(haha.c_str())); i++;}
+        if(i == 1 ) {ExStrength.push_back(atof(haha.c_str())); i++;}
+        if(i == 0 ) {ExKnown.push_back(atof(haha.c_str())); i++;}
+
+      }while(pos != std::string::npos );
     }
     file.close();
     printf("... done.\n");
     int n = ExKnown.size();
+    
+    printf("%3s | %7s | %4s | %3s | %10s | %5s \n", "", "Ex[MeV]", "Xsec", "SF", "sigma[MeV]", "y0[MeV]");
+    printf("----+---------+------+-----+------------+--------\n");
     for(int i = 0; i < n ; i++){
       reaction.SetExB(ExKnown[i]);
       reaction.CalReactionConstant();
@@ -271,14 +290,15 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+          printf("%3d | %7.2f | %4.2f | %3.1f |   %5.3f    | %5.2f --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }else{
-        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV\n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+          printf("%3d | %7.2f | %4.2f | %3.1f |   %5.3f    | %5.2f \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }
       }else{
-        printf("%d, Ex: %6.2f MeV, Xsec: %4.2f, SF: %3.1f, sigma : %5.3f MeV | y0: %4.2f MeV \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+        printf("%3d | %7.2f | %4.2f | %3.1f |   %5.3f    | %5.2f \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
       }
     }
+    printf("----+---------+------+-----+------------+--------\n");
   }else{
     printf("... fail ------> only ground state.\n");
     ExKnown.push_back(0.0);
