@@ -19,6 +19,7 @@
 #include <TMath.h>
 #include <TProofOutputFile.h>
 
+/**********
 //by copy the GeneralSortMapping.h in to Armory does not work
 //relative path does not work
 #ifdef __linux__
@@ -26,9 +27,13 @@
    //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"
    #include "/home/ryantang/digios_master/analysis/working/GeneralSortMapping.h"
 #elif __APPLE__
-   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
+//   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
    //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
 #endif
+*************/
+
+/// in process_Sort, copy the GeneralSortMapping.h to ~/.proof/working/
+#include "../working/GeneralSortMapping.h"
 
 class GeneralSortTraceProof : public TSelector {
 public :
