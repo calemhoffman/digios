@@ -1,5 +1,4 @@
 #!/bin/bash -l
-expName=s003_10Be
+expName=s005_32Si
 daqDataPath=/media/DIGIOSDATA5
-LastRunNum=528
-
+LastRunNum=0
