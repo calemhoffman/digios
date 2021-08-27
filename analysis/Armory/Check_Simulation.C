@@ -138,12 +138,13 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
   double length = ExtractNumber(5, detGeo);
   
-  double posRecoil  = ExtractNumber(6, detGeo);
-  double rhoRecoil  = ExtractNumber(7, detGeo);
-  double posRecoil1 = ExtractNumber(9, detGeo);
-  double posRecoil2 = ExtractNumber(10, detGeo);
-  double firstPos   = ExtractNumber(14, detGeo);  
-  double elum1      = ExtractNumber(11, detGeo); 
+  double posRecoil    = ExtractNumber(6, detGeo);
+  double rhoRecoilIn  = ExtractNumber(7, detGeo);
+  double rhoRecoilOut = ExtractNumber(8, detGeo);
+  double posRecoil1   = ExtractNumber(10, detGeo);
+  double posRecoil2   = ExtractNumber(11, detGeo);
+  double firstPos     = ExtractNumber(15, detGeo);  
+  double elum1        = ExtractNumber(12, detGeo); 
    
   vector<double> pos;
   int nLine = detGeo->GetListOfLines()->GetLast() + 1;
@@ -285,34 +286,39 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
          }
       }
       if( pID == pRecoilXY       ){
-         TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+         TH2F * hRecoilXY = new TH2F("hRecoilXY", Form("RecoilXY [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil ), 400, -rhoRecoilOut, rhoRecoilOut, 400,-rhoRecoilOut, rhoRecoilOut);
          tree->Draw("yRecoil:xRecoil>>hRecoilXY", gate, "colz");
-         TArc * detArc = new TArc(0,0, rhoRecoil);
-         detArc->SetLineColor(kBlue-8);
-         detArc->SetFillStyle(0);
-         detArc->Draw("same");  
+         TArc * detArc1 = new TArc(0,0, rhoRecoilOut);
+         detArc1->SetLineColor(kBlue-8);
+         detArc1->SetFillStyle(0);
+         detArc1->Draw("same");  
+         TArc * detArc2 = new TArc(0,0, rhoRecoilIn);
+         detArc2->SetLineColor(kBlue-8);
+         detArc2->SetFillStyle(0);
+         detArc2->Draw("same");  
+         
          if( xBeam != 0. || yBeam != 0. ){
             TArc * arc = new TArc(xBeam, yBeam, 1);
             arc->SetLineColor(2);
-            detArc->SetFillStyle(0);
+            detArc1->SetFillStyle(0);
             arc->Draw("same");
          }
       }
       if( pID == pRecoilXY1       ){
-         TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY-1 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+         TH2F * hRecoilXY1 = new TH2F("hRecoilXY1", Form("RecoilXY-1 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil1 ), 400, -rhoRecoilOut, rhoRecoilOut, 400,-rhoRecoilOut, rhoRecoilOut);
          tree->Draw("yRecoil1:xRecoil1>>hRecoilXY1", gate, "colz");
       }
       if( pID == pRecoilXY2       ){
-         TH2F * hRecoilXY2 = new TH2F("hRecoilXY2", Form("RecoilXY-2 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil2 ), 400, -rhoRecoil, rhoRecoil, 400,-rhoRecoil, rhoRecoil);
+         TH2F * hRecoilXY2 = new TH2F("hRecoilXY2", Form("RecoilXY-2 [gated] @ %4.0f mm; X [mm]; Y [mm]", posRecoil2 ), 400, -rhoRecoilOut, rhoRecoilOut, 400,-rhoRecoilOut, rhoRecoilOut);
          tree->Draw("yRecoil2:xRecoil2>>hRecoilXY2", gate, "colz");
       }
       if( pID == pRecoilRZ       ){
-         TH2F * hRecoilRZ = new TH2F("hRecoilRZ", "RecoilR - Z [gated]; z [mm]; RecoilR [mm]",  zRange[0], zRange[1], zRange[2], 400,0, rhoRecoil);
+         TH2F * hRecoilRZ = new TH2F("hRecoilRZ", "RecoilR - Z [gated]; z [mm]; RecoilR [mm]",  zRange[0], zRange[1], zRange[2], 400,0, rhoRecoilOut);
          tree->Draw("rhoRecoil:z>>hRecoilRZ", gate, "colz");
       }
       if( pID == pRecoilRTR      ){
          FindRange("TB", gate, tree, recoilERange);
-         TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoil);
+         TH2F * hRecoilRTR = new TH2F("hRecoilRTR", "RecoilR - recoilE [gated]; recoil Energy [MeV]; RecoilR [mm]", 500, recoilERange[0], recoilERange[1], 500, 0, rhoRecoilOut);
          tree->Draw("rhoRecoil:TB>>hRecoilRTR", gate, "colz");
       }
       if( pID == pTDiffZ         ){
@@ -362,7 +368,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
          tree->Draw("ExCal>>hExCal", gate, "");
       }
       if( pID == pRecoilRThetaCM ){
-        TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoil);
+        TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoilOut);
         tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
       }
       if( pID == pArrayXY ){
