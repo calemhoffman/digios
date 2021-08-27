@@ -10,7 +10,7 @@ bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
-float delayChannel = 300.; //initial guess of the time
+float delayChannel = 200.; //initial guess of the time
 
 //TODO only global variables can propagate to all slave, How to propagate them from master local to slave?
 bool isTACRF = true;
