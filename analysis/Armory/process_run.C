@@ -27,11 +27,12 @@ void process_run(Int_t RUNNUM=5, int isTrace=0, Int_t SORTNUM=0){
         //t1->Process(processCmd);
         //f.Close();
     }else if(isTrace > 1){
+        
         TChain * chain = new TChain("tree");
         chain->Add(name); 
    
         TProof * p = TProof::Open("", Form("workers=%d", isTrace));
-   
+        p->ShowCache(); // this should be ~/proof/....
         chain->SetProof();
         chain->Process("../Armory/GeneralSortTraceProof.C++", name);
                 

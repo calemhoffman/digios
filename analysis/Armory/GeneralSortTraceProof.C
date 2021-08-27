@@ -12,18 +12,17 @@ bool isSaveFitTrace = true;
 int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
 float delayChannel = 200.; //initial guess of the time
 
-//TODO only global variables can propagate to all slave, How to propagate them from master local to slave?
-bool isTACRF = true;
-bool isRecoil = true;
-bool isElum = false;
-bool isEZero = false;
-bool isCRDT = false;
-
-
 // Also go to line 146 to set the trace analysis gate
 
 //=================================== end of setting
 
+
+///------- if the number in GeneralSortMapping.h is zero, the corresponding items will disable.
+bool isTACRF  = true;
+bool isRecoil = true;
+bool isElum   = true;
+bool isEZero  = true;
+bool isCRDT   = true;
 
 TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
    ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
@@ -80,6 +79,14 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
+
+
+   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM  == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+   
    
    printf( "  TAC/RF   : %s \n", isTACRF  ? "On" : "Off");
    printf( "  Recoil   : %s \n", isRecoil ? "On" : "Off");
@@ -153,6 +160,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
 {
    printf("========================= Slave Begin.\n");   
    TString option = GetOption();
+   
+   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM  == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
 
    //create tree in slave
    
