@@ -145,6 +145,8 @@ elif [ $isGeneralSort -gt 0 ]; then
                 echo -e "${RED}######################### GeneralSort.C${NC}"
             elif [ $isGeneralSort -gt 1 ]; then
                 echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
+                mkdir ~/.proof/working
+                cp ../working/GeneralSortMapping.h ~/.proof/working/.
             fi
             root -l -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
 
@@ -164,6 +166,8 @@ elif [ ${isGeneralSort} -lt 0 ]; then
         echo -e "${RED}######################### GeneralSort.C${NC}"
     elif [ $isGeneralSort -lt -1 ]; then
         echo -e "${RED}######################### GeneralSortTraceProof.C${NC}"
+        mkdir ~/.proof/working
+        cp ../working/GeneralSortMapping.h ~/.proof/working/.
     fi
     \root -l -t -q -b "../Armory/process_run.C(${runID}, ${isGeneralSort})"
 fi
