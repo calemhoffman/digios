@@ -205,7 +205,6 @@ public :
    virtual void    SlaveTerminate();
    virtual void    Terminate();
    
-   
    TGraph * TrapezoidFilter(TGraph * trace);
 
    ClassDef(GeneralSortTraceProof,0);
