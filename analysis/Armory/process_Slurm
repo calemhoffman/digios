@@ -12,6 +12,10 @@ if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
   exit 1
 fi;
 
+dir=$(pwd)
+cd ../../
+source heliosrc.sh
+cd $dir
 source ../Armory/process_PathSetting
 
 RUN1=$1
@@ -78,12 +82,12 @@ logFile="slurm-${expName}_${name}_${runID1}-${runID2}.out"
 
 echo "#!/bin/bash" > $slurmFile
 
-echo "#SBATCH -A HELIOS" >> $slurmFile
-echo "#SBATCH -J ${name}" >> $slurmFile
-echo "#SBATCH -p bdwall" >> $slurmFile
-echo "#SBATCH -N 1" >> $slurmFile
+echo "#SBATCH --job-name=${name}" >> $slurmFile
+echo "#SBATCH --account=HELIOS" >> $slurmFile
+echo "#SBATCH --partition=bdwall" >> $slurmFile
+echo "#SBATCH --node=1" >> $slurmFile
 echo "#SBATCH --ntasks-per-node=${core}" >> $slurmFile
-echo "#SBATCH -t ${time}" >> $slurmFile
+echo "#SBATCH --time=${time}" >> $slurmFile
 echo "#SBATCH --output=${logFile}" >> $slurmFile
 echo "" >> $slurmFile
 echo 'echo "===================="' >> $slurmFile
