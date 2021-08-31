@@ -85,7 +85,7 @@ echo "#!/bin/bash" > $slurmFile
 echo "#SBATCH --job-name=${name}" >> $slurmFile
 echo "#SBATCH --account=HELIOS" >> $slurmFile
 echo "#SBATCH --partition=bdwall" >> $slurmFile
-echo "#SBATCH --node=1" >> $slurmFile
+echo "#SBATCH --nodes=1" >> $slurmFile
 echo "#SBATCH --ntasks-per-node=${core}" >> $slurmFile
 echo "#SBATCH --time=${time}" >> $slurmFile
 echo "#SBATCH --output=${logFile}" >> $slurmFile
