@@ -1481,14 +1481,14 @@ public:
       isMotherSet = true;
    }
    
-   int CalDecay(TLorentzVector P, double ExB, double ExD){
+   int CalDecay(TLorentzVector P_mother, double ExB, double ExD){
       if( !isMotherSet ) {
          return -1;
       }
-      this->PB = P;
+      this->PB = P_mother;
       
-      double MB = mB + ExB;
-      double MD = mD + ExD;
+      double MB = mB + ExB; ///mother
+      double MD = mD + ExD; ///Big_Daugther
       Q = MB - MD - md;
       if( Q < 0 ) {
          this->PD = this->PB;
