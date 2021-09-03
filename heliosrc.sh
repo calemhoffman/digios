@@ -51,14 +51,22 @@ unset HELIOSSYS
 SOURCE=${BASH_ARGV[0]}
 PCName=$(uname -n)
 if [ $(uname -n) == "digios1" ]; then
-    HELIOSSYS=~/digios
+  HELIOSSYS=~/digios
 else
-    if [ $(pwd) == $HOME ]; then 
-	HELIOSSYS=$(dirname ${SOURCE})
+  if [ $(pwd) == $HOME ]; then 
+    HELIOSSYS=$(dirname ${SOURCE})
+    
+    if [[ ${HELIOSSYS} == *"$HOME"* ]]; then
+      dummpy=0
     else
-	HELIOSSYS=$(pwd)
+      HELIOSSYS=${HOME}/$HELIOSSYS
     fi
+    
+  else
+    HELIOSSYS=$(pwd)
+  fi
 fi
+
 #-------- optional
 set_GitPS1
 set_HistCtrl
@@ -72,6 +80,7 @@ export HELIOSDAQ
 export HELIOSANA
 
 export PATH=${HELIOSSYS}/analysis/Armory:$PATH
+export PATH=${HELIOSSYS}/analysis/Cleopatra:$PATH
 #make the daq script avalible everywhere
 export PATH=${HELIOSSYS}/daq/edm/scripts/:$PATH
 
