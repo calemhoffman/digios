@@ -16,6 +16,12 @@ float delayChannel = 200.; //initial guess of the time
 
 //=================================== end of setting
 
+///------- if the number in GeneralSortMapping.h is zero, the corresponding items will disable.
+bool isTACRF  = true;
+bool isRecoil = true;
+bool isElum   = true;
+bool isEZero  = true;
+bool isCRDT   = true;
 
 ///------- if the number in GeneralSortMapping.h is zero, the corresponding items will disable.
 bool isTACRF  = true;
@@ -88,11 +94,17 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
    
    
-   printf( "  TAC/RF   : %s \n", isTACRF  ? "On" : "Off");
-   printf( "  Recoil   : %s \n", isRecoil ? "On" : "Off");
-   printf( "  Elum     : %s \n", isElum   ? "On" : "Off");
-   printf( "  EZero    : %s \n", isEZero  ? "On" : "Off");
-   printf( "  C-Recoil : %s \n", isCRDT   ? "On" : "Off");
+   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM  == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+   
+   printf( "  TAC/RF   : %s , %d \n", isTACRF  ? "On" : "Off", NTAC);
+   printf( "  Recoil   : %s , %d \n", isRecoil ? "On" : "Off", NRDT);
+   printf( "  Elum     : %s , %d \n", isElum   ? "On" : "Off", NElum);
+   printf( "  EZero    : %s , %d \n", isEZero  ? "On" : "Off", NEZero);
+   printf( "  C-Recoil : %s , %d \n", isCRDT   ? "On" : "Off", NCRDT);
    TString traceMethodName;
    switch(traceMethod){
    case 0: traceMethodName = "copy"; break;
@@ -161,6 +173,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    printf("========================= Slave Begin.\n");   
    TString option = GetOption();
    
+   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM  == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+
    if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
    if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
    if ( isElum   && NELUM  == 0 ) isElum   = false ;
