@@ -385,9 +385,9 @@ void Cali_e_trace::Init(TTree *tree)
          if( i == 0  )          Bfield = abs(atof(x.c_str()));
          if( i == 3  )        perpDist = atof(x.c_str());
          if( i == 5  )          length = atof(x.c_str());
-         if( i == 14 )        firstPos = atof(x.c_str());
-         if( i == 17 )            jDet = atoi(x.c_str());
-         if( i >= 18 ) {
+         if( i == 15 )        firstPos = atof(x.c_str());
+         if( i == 18 )            jDet = atoi(x.c_str());
+         if( i >= 19 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -607,7 +607,7 @@ void Cali_e_trace::Init(TTree *tree)
             cTCorr[i][6] = a6;
             cTCorr[i][7] = a7;
             cTCorr[i][8] = a8; // this is the offset find by fitting the 1-D plot
-            printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
+            //printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
             i = i + 1;
          }
          printf(".... done.\n");
@@ -698,6 +698,7 @@ void Cali_e_trace::Init(TTree *tree)
             printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
          }
       }
+      
       saveFile->cd();
       cutList->Write("rdtCutList");
    }
@@ -708,7 +709,6 @@ void Cali_e_trace::Init(TTree *tree)
 
    printf("================================== numDet : %d \n", numDet);
 
-   
    //====================== Create tree
    
 

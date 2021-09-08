@@ -120,7 +120,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
     if( pos != string::npos ) {
       reaction.push_back( line.substr(pos + findLen + 1) );
       reactionFlag = 1; // 1 for (d,d) or (p,p)
-      //printf("%d |----------- (d,d), %d\n", lineNum, reactionFlag);
+      ///printf("%d |----------- (d,d), %d\n", lineNum, reactionFlag);
       continue; // nextline
     }
     
@@ -130,7 +130,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
     if( pos != string::npos ) {
       reaction.push_back( line.substr(pos + findLen + 1) );
       reactionFlag = 2; // 2 for (d,p) or (p,d)
-      //printf("%d |----------- (d,p), %d\n", lineNum, reactionFlag);
+      ///printf("%d |----------- (d,p), %d\n", lineNum, reactionFlag);
       continue; // nextline
     }
     
@@ -139,7 +139,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
     pos = line.find(findStr);
     if( pos != string::npos ) {
       preFindForElastic = true;
-      //printf("%d |----------- pre Elastics Flag : %d\n", lineNum, preFindForElastic);
+      ///printf("%d |----------- pre Elastics Flag : %d\n", lineNum, preFindForElastic);
       continue;
     }
 
@@ -186,14 +186,18 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
       
       if( line.length() <  20 ) continue;
       
-      //printf("%d   |%s \n", line.length(), line.c_str());
+      ///printf("%d   |%s \n", line.length(), line.c_str());
       double numAngle, numXsec;
       if( reactionFlag == 1 ){ // Elastics (d,d) or (p,p)
         numAngle = atof( line.substr(0, 7).c_str());
         if( indexForElastic == 1 ){
           numXsec = atof( line.substr(15, 15).c_str());
         }else{
-          numXsec = atof( line.substr(28, 14).c_str());
+          if ( line.length() > 60 ) {
+            numXsec = atof( line.substr(57, 14).c_str());
+          }else{
+            numXsec = -404;
+          }
         }
       }
       
@@ -211,7 +215,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
         if( !angleFilled ) angle.push_back(numAngle);
         dataXsec.push_back(numXsec);
         
-        //printf(" %f , %f \n", angle.back(), dataXsec.back());
+        ///printf(" %f , %f \n", angle.back(), dataXsec.back());
       } 
       
       
@@ -227,8 +231,9 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
     }
     findLen = findStr.length();
     pos = line.find(findStr);
+
     if( pos != string::npos ) {
-      
+
       totalXsec.push_back( atof(line.substr(pos + findLen).c_str()) );
       
       printf("%2d | %s | total Xsec(4pi): %f mb \n", numCal,  title.back().c_str(), totalXsec.back());
@@ -263,12 +268,12 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
     int len = reaction[i].length();
     if( len > reactionStrLen ) reactionStrLen = len;
   }
-  
+
   vector<double> partialXsec;
   partialXsec.clear();
   for( int i = 0; i < numCal ; i++){
     
-    double partialSumXsec = 0.0;
+    double partialSumXsec = 0.0;    
     for( int j = 0; j < (dataMatrix[i]).size() ; j++ ){
       //double theta = (angle[j] + angleStep/2.) * TMath::DegToRad();
       double theta = (angle[j]) * TMath::DegToRad();
