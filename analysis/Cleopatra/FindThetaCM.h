@@ -99,13 +99,15 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
       while( file >> x){
          //printf("%d, %s \n", i,  x.c_str());
          if( x.substr(0,2) == "//" )  continue;
+         if( x.substr(0,2) == "#=" ) break;
          if( x.substr(0,1) == "#" )  continue;
+         if( x.length() == 0 ) continue;
          if( i == 0 )  BField   = atof(x.c_str());
          if( i == 3 )   a       = atof(x.c_str());
          if( i == 5 )  length   = atof(x.c_str());
-         if( i == 14 ) firstPos = atof(x.c_str());
-         if( i == 17 )     jDet = atoi(x.c_str());
-         if( i >= 18 ) {
+         if( i == 15 ) firstPos = atof(x.c_str());
+         if( i == 18 )     jDet = atoi(x.c_str());
+         if( i >= 19 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;
@@ -157,17 +159,31 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    double slope = 299.792458 * zb * abs(BField) / TMath::TwoPi() * beta / 1000.; // MeV/mm
    double gamma = reaction.GetReactionGamma();
    for(int i = 0; i < 100; i++){
-      double thetacm = (i + 8.) * TMath::DegToRad();
+      double thetacm = (i + 5.) * TMath::DegToRad();
       double temp = TMath::TwoPi() * slope / beta / kCM * a / TMath::Sin(thetacm); 
       px[i] = beta /slope * (gamma * beta * q - gamma * kCM * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
       py[i] = thetacm * TMath::RadToDeg();   
    }
 
-   //find minimum z position when ThetaCM = 0;
+   //find minimum z position
    TGraph * xt = new TGraph(100, py, px);
    xt->SetName("xt");
-   double zMin0 = xt->Eval(0);
-   printf("min z for thetaCM = 0 : %f mm \n", zMin0);
+   ///double zMin0 = xt->Eval(0);
+   ///printf("z for thetaCM = 0 : %f mm \n", zMin0);
+   
+   ///xt->Draw("AC*");
+   
+   /// find the minimum z position and the corresponding theta
+   double zMin0 = 0;
+   double tMin0 = 0;
+   for( double ttt = 3 ; ttt < 20 ; ttt += 0.1 ){
+     double zzz = xt->Eval(ttt);
+     if( zzz < zMin0 ) {
+       zMin0 = zzz;
+       tMin0 = ttt;
+     }
+   }   
+   printf(" z min %f mm at thetaCM %f deg \n", zMin0, tMin0);
 
 
    TGraph * tx = new TGraph(100, px, py);
@@ -188,7 +204,7 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    for( int j = 0; j < nDivision + 1; j++) printf("%5.2f   ", length/2 -length*XRATION/2 + length*XRATION/nDivision*j);
    printf(" <<-- in cm \n\n");
    printf("=========================      Ex : %6.4f MeV\n", Ex);
-   printf("            %6s - %6s |  %6s, %6s, %6s\n", "Min",  "Max", "Mean", "Half", "sin(x)dx * 180/pi");
+   printf("            %6s - %6s |  %6s, %6s, %6s\n", "Min",  "Max", "Mean", "Dt", "sin(x)dx * 180/pi");
    printf("-------------------------------------------------\n");
    for( int i = 0; i < iDet; i++){
      double zMin = midPos[i]-length*XRATION/2.;
@@ -197,18 +213,17 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
      double zStep = zLength/(nDivision);
      for( int j = 0 ; j < nDivision ; j++){
        
-       double tMin = tx->Eval(zMin + j*zStep);
-       //if( tMin < 0 ) tMin = 5;
-       if( zMin + j*zStep < zMin0 ) tMin = 10;
-       double tMax = tx->Eval(zMin + (j+1)*zStep);
-       if( tMax < 0 ) tMax = 5;
+       double tMin =  (zMin +     j*zStep > zMin0) ? tx->Eval(zMin +     j*zStep) : TMath::QuietNaN();
+       double tMax =  (zMin + (j+1)*zStep > zMin0) ? tx->Eval(zMin + (j+1)*zStep) : TMath::QuietNaN();
        
        double tMean = (tMax + tMin)/2.;
-       double tHalf = (tMax - tMin)/2.;
+       double dt = (tMax - tMin);
        
-       double sintdt = TMath::Sin(tMean * TMath::DegToRad()) * 2 * tHalf ;
-      
-       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f, %6.4f\n", i, j, tMin,  tMax, tMean, tHalf, sintdt);
+       double sintdt = TMath::Sin(tMean * TMath::DegToRad()) * dt ;
+
+         
+       printf(" det-%d[%d]:  %6.2f - %6.2f |  %6.2f, %6.2f, %6.4f\n", i, j, tMin,  tMax, tMean, dt, sintdt);
+       
      }
      if( nDivision > 0 ) printf("--------------\n");
    }
