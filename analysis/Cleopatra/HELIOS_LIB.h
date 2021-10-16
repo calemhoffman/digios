@@ -797,14 +797,14 @@ int HELIOS::DetAcceptance(){
       }
    }
    
-   // 3 ======== check hit array gap
+   // -5 ======== check hit array gap
    if( firstPos < 0 ){
       for( int i = 0; i < nDet-1 ; i++){
-         if( pos[i] < orbitb.z && orbitb.z < pos[i+1] - length ) increaseLoopFlag = 3; 
+         if( pos[i] < orbitb.z && orbitb.z < pos[i+1] - length ) return -5; //increaseLoopFlag = 3; 
       }      
    }else{
       for( int i = 0; i < nDet-1 ; i++){
-         if( pos[i] + length < orbitb.z && orbitb.z < pos[i+1]  ) increaseLoopFlag = 3;
+         if( pos[i] + length < orbitb.z && orbitb.z < pos[i+1]  ) return -5; //increaseLoopFlag = 3;
       }
    }
    if (increaseLoopFlag == 3 ) {
