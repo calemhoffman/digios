@@ -5,7 +5,7 @@
 1               //target_Z
 1               //recoil_light_A
 1               //recoil-light_Z
-10.0            //beam-energy_in_MeV/u
+8.8            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
@@ -18,7 +18,7 @@ false           //isTargetScattering
 ../SRIM/20F_in_CD2.txt  //stopping_power_for_beam
 ../SRIM/3H_in_CD2.txt   //stopping_power_for_light_recoil
 ../SRIM19F_in_CD2.txt  //stopping_power_for_heavy_recoil
-true           //isDacay
+false           //isDacay
 32               //decayNucleus_A
 14               //decayNucleus_Z
 false           //isReDo
