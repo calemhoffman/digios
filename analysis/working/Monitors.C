@@ -53,7 +53,7 @@ int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2
 bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
-Isotope hRecoil(12, 4);
+Isotope hRecoil(33, 14);
 double Sn = hRecoil.CalSp(0,1);
 
 //---Gate
@@ -66,22 +66,11 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.99;                  ///cut out the edge
-vector<int> skipDetID = {2} ;
+vector<int> skipDetID = {} ;
 
-//TString rdtCutFile1 = "rdtCuts.root";
-//TString rdtCutFile1 = "rdtCuts_15N.root";
-//TString rdtCutFile1 = "rdtCuts_15N_a.root";
-//TString rdtCutFile1 = "rdtCuts_Ar.root";
-//TString rdtCutFile1 = "rdtCuts_Ne.root";
-//TString rdtCutFile1 = "rdtCuts_10Be_short.root";
-TString rdtCutFile1 = "rdtCuts_BBBBB.root";
-//TString rdtCutFile1 = "rdtCuts_Be_ryan.root";
-//TString rdtCutFile1 = "rdtCuts_12Be_tight.root";
-//TString rdtCutFile1 = "rdtCuts_10B.root";
-//TString rdtCutFile1 = "rdtCuts_new10Be1.root";
-//TString rdtCutFile1 = "rdtCuts_new10Be2.root";
-//TString rdtCutFile1 = "rdtCuts_n15haha.root";
-//TString rdtCutFile1 = "rdtCuts_Haha.root";
+
+TString rdtCutFile1 = "";
+
 TString rdtCutFile2 = "";//"rdtCuts_15N.root";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -788,7 +777,7 @@ Bool_t Monitors::Process(Long64_t entry)
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
         for(int i = 0 ; i < numCut1 ; i++ ){
           cutG = (TCutG *)cutList1->At(i) ;
-          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) { // E, dE
           //if(cutG->IsInside(rdt[2*i+1],rdt[2*i])) {
             rdtgate1= true;
             break; /// only one is enough
