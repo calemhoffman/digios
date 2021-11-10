@@ -224,7 +224,7 @@ void Transfer(
   Decay decay;
   if(isDecay) {
     printf("\e[32m#################################### Decay\e[0m\n");
-    decay.SetMotherDaugther(AB, zB, AB-decayA,zB-decayZ); //decay
+    decay.SetMotherDaugther(AB, zB, decayA, decayZ); //decay
   }
   //======= loading excitation energy
   printf("\e[32m#################################### excitation energies\e[0m\n");
@@ -682,13 +682,13 @@ void Transfer(
 
     //======= Decay of particle-B
     int decayID = 0;
-    int new_zB  = zB;
+    int new_zB  = decayZ;
     if( isDecay){
       decayID = decay.CalDecay(PB, Ex, 0); // decay to ground state
       if( decayID == 1 ){
         PB = decay.GetDaugther_D();
         decayTheta = decay.GetAngleChange();
-        new_zB = zB = decayZ;
+        new_zB = decayZ;
       }else{
         decayTheta = TMath::QuietNaN();
       }
