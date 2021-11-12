@@ -4,7 +4,7 @@ if [ $# -eq 0 ]; then
 
    #scp Monitors.html ttang@websrv1.phy.anl.gov:/home/ttang/web/helios/live/Monitors.html
    
-   ~/scpJumpFileToANL.sh Monitors.html live
+   ~/scpJumpFileToANL.sh Monitors.html /
 
 else
 
@@ -17,7 +17,7 @@ else
 
    sed -i "" $'13 i \\\n <a href="Canvas/'${fileName}'" target="_blank">'${fileName}$'</a> '${msg}$'<p></p>\\\n' Monitors.html 
    #scp Monitors.html ttang@websrv1.phy.anl.gov:/home/ttang/web/helios/live/Monitors.html
-   ~/scpJumpFileToANL.sh Monitors.html live
+   ~/scpJumpFileToANL.sh Monitors.html /
 
 
 fi;

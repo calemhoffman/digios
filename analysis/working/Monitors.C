@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,   1000};
-int      rdtERange[2] = {     0,   4000};
+int     rdtDERange[2] = {     0,   4000};
+int      rdtERange[2] = {     0,   5000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {     0,    7000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
@@ -58,7 +58,7 @@ double Sn = hRecoil.CalSp(0,1);
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-10, 5 };             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-20, 20 };             /// min, max, 1 ch = 10 ns
 double eCalCut        = 0.5;                   /// lower limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -69,9 +69,8 @@ double xGate          = 0.99;                  ///cut out the edge
 vector<int> skipDetID = {} ;
 
 
-TString rdtCutFile1 = "";
-
-TString rdtCutFile2 = "";//"rdtCuts_15N.root";
+TString rdtCutFile1 = "rdtCuts.root";
+TString rdtCutFile2 = "rdtCuts_S.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -781,7 +780,8 @@ Bool_t Monitors::Process(Long64_t entry)
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
         for(int i = 0 ; i < numCut1 ; i++ ){
           cutG = (TCutG *)cutList1->At(i) ;
-          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) { // E, dE
+          ///if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) { // E, dE
+          if(cutG->IsInside(-rdt[6],-rdt[i])) { // E, dE
           //if(cutG->IsInside(rdt[2*i+1],rdt[2*i])) {
             rdtgate1= true;
             break; /// only one is enough
@@ -790,7 +790,7 @@ Bool_t Monitors::Process(Long64_t entry)
         
         for(int i = 0 ; i < numCut2 ; i++ ){
           cutG = (TCutG *)cutList2->At(i) ;
-          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+          if(cutG->IsInside(-rdt[6],-rdt[i])) {
             rdtgate2= true;
             break; /// only one is enough
           }
@@ -822,7 +822,7 @@ Bool_t Monitors::Process(Long64_t entry)
    
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
-            if(j < 4 ) hrdt2Dg[j]->Fill(rdt[6],rdt[j]); /// x=E, y=dE
+            if(j < 4 ) hrdt2Dg[j]->Fill(-rdt[6],-rdt[j]); /// x=E, y=dE
             //if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]);
             hArrayRDTMatrixG->Fill(detID, j); 
             //if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
@@ -1006,14 +1006,15 @@ Bool_t Monitors::Process(Long64_t entry)
      
      if( thetaCM > thetaCMGate ) {
 
-         hEx->Fill(Ex);
+   ///      hEx->Fill(Ex);
          
          if( rdtgate1 ) {
             hExCut1->Fill(Ex);
+            hEx->Fill(Ex);
             hExThetaCM->Fill(thetaCM, Ex);
          }
          if( rdtgate2 ) {
-            hExCut2->Fill(Ex);
+            hExCut2->Fill(Ex+4.1337);
             hExThetaCM->Fill(thetaCM, Ex);
          }
          
@@ -1136,7 +1137,7 @@ void Monitors::Terminate()
 
    hrdt[7]->Draw();
    
-   double isoCount[5];
+  /* double isoCount[5];
    
    int isoCharge[5] = {4, 5, 7, 10, 16};
    
@@ -1168,11 +1169,11 @@ void Monitors::Terminate()
       text.DrawLatex(0.15, 0.8 -0.15*i, Form("%5s : %5.0f, %.2f%%", isoName[i].Data(), isoCount[i], isoPrecent[i]));
       //printf("%s\n", cmd.Data()); 
       
-   }
+   }*/
 
    ///----------------------------------- Canvas - 10
    padID++; cCanvas->cd(padID);
-   hrdt10Be->Draw();
+   hExCut2->Draw();
    
    //helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
    //helumDBIC = (TH1F*) helum4D->Clone();
