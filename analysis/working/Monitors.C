@@ -34,16 +34,16 @@ ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,   4000};
-int      rdtERange[2] = {     0,   5000};
+int    energyRange[2] = {     0,      12};       /// in the E-Z plot
+int     rdtDERange[2] = {     0,   10000};
+int      rdtERange[2] = {     0,   4000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {     0,    7000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = { 133,    -4,  10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = { 50,    -2,  8};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -100, 100};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -58,7 +58,7 @@ double Sn = hRecoil.CalSp(0,1);
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 20 };             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-15, 5 };             /// min, max, 1 ch = 10 ns
 double eCalCut        = 0.5;                   /// lower limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -69,8 +69,11 @@ double xGate          = 0.99;                  ///cut out the edge
 vector<int> skipDetID = {} ;
 
 
-TString rdtCutFile1 = "rdtCuts.root";
-TString rdtCutFile2 = "rdtCuts_S.root";
+///TString rdtCutFile1 = "rdtCuts_Sinew.root";
+TString rdtCutFile1 = "rdtCuts_Si2.root";
+///TString rdtCutFile1 = "rdtCuts.root";
+TString rdtCutFile2 = "";
+///TString rdtCutFile2 = "rdtCuts_S.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -1009,7 +1012,7 @@ Bool_t Monitors::Process(Long64_t entry)
    ///      hEx->Fill(Ex);
          
          if( rdtgate1 ) {
-            hExCut1->Fill(Ex);
+            if (eCal[detID] < 5.0) hExCut1->Fill(Ex);
             hEx->Fill(Ex);
             hExThetaCM->Fill(thetaCM, Ex);
          }
@@ -1173,7 +1176,7 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 10
    padID++; cCanvas->cd(padID);
-   hExCut2->Draw();
+   hExCut1->Draw();
    
    //helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
    //helumDBIC = (TH1F*) helum4D->Clone();

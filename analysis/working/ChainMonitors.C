@@ -15,7 +15,13 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     chain->Add("../root_data/gen_run02[6-9].root"); // 32Si(d,p) good
     chain->Add("../root_data/gen_run03[0-9].root"); // 
     chain->Add("../root_data/gen_run04[0-9].root"); // 
-  
+    //chain->Add("../root_data/gen_run04[7-9].root"); // 
+    chain->Add("../root_data/gen_run05[0-9].root"); // 
+    chain->Add("../root_data/gen_run06[0-9].root"); //
+    chain->Add("../root_data/gen_run070.root"); 
+    chain->Add("../root_data/gen_run07[3-9].root"); 
+    chain->Add("../root_data/gen_run08[0-5].root"); // Si(d,p) ended on run 85
+    
     ///********** end Marker for AutoCalibration.
     
     
