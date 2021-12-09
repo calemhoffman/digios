@@ -11,21 +11,21 @@
  * 
 ***********************************************************************/
 
-#define NARRAY  40
+#define NARRAY  24
 #define NRDT    8
-#define NELUM   0
+#define NELUM   16
 #define NEZERO  0
-#define NTAC    3
+#define NTAC    0
 #define NCRDT   0
 
 #define MWIN 100 //M value for energy filter from digi setting
 
 Int_t idConst = 1010;
 
-Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 400,   //VME1-DIG1-Recoil
-                       100, 101, 102, 103, 104, 105, 106, 107,  -1,  -1,   //VME1-DIG2-TAC
-                       300, 301,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG3-IC
-                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG4
+Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 400,   //VME1-DIG1-TAC      0    1  2  3  4  5  6  7
+                       105, 103, 100, 104, 101, 102, 106, 107,  -1,  -1,   //VME1-DIG2-Recoil mapped from G/R, 4, 1, R, 2, 3, F, B
+                       200, 201, 202, 203, 204, 205, 206, 207,  -1,  -1,   //VME1-DIG3-Elum, 11
+                       208, 209, 210, 211, 212, 213, 214, 215,  -1,  -1,   //VME1-DIG4
                    
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,/*1*/
                          3,   2,   1,   0,   5,   4,   3,   2,  -1,  -1,/*2*/

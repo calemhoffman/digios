@@ -1,4 +1,5 @@
 #!/bin/bash -l
 expName=s005_32Si
 daqDataPath=/media/DIGIOSDATA5
-LastRunNum=0
+LastRunNum=91
+elogID=537

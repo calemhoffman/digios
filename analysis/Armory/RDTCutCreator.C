@@ -87,7 +87,8 @@ void RDTCutCreator(TString dataList,
          varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
          ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-         varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
+        /// varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
+         varX.Form("-rdt[6]"); varY.Form("-rdt[%d]",i);
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 0, eRange, 500, 0, deRange);
