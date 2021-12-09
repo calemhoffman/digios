@@ -344,6 +344,55 @@ void recoils(bool isLogz = false) {
   
 }
 
+void recoils2(bool isLogz = false) {
+  TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);
+  crdt->Clear();crdt->Divide(2,2);
+
+  if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2Dsum[0]->Draw("col");  
+  if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2Dsum[1]->Draw("col");  
+  if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2Dsum[3]->Draw("col");  
+  if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2Dsum[2]->Draw("col");  
+
+
+  //TCanvas *crdtSum =  (TCanvas *) gROOT->FindObjectAny("crdtSum");
+  //if( crdtSum == NULL ) crdtSum = new TCanvas("crdtSum",Form("raw RDT dE-Esum | %s", canvasTitle.Data()),100, 0, 1000,1000);
+  //crdtSum->Clear();crdtSum->Divide(2,2);
+  //
+  //if( isLogz ) crdtSum->cd(1)->SetLogz(); crdtSum->cd(1); hrdt2Dsum[0]->Draw("col");  
+  //if( isLogz ) crdtSum->cd(2)->SetLogz(); crdtSum->cd(2); hrdt2Dsum[1]->Draw("col");  
+  //if( isLogz ) crdtSum->cd(3)->SetLogz(); crdtSum->cd(3); hrdt2Dsum[3]->Draw("col");  
+  //if( isLogz ) crdtSum->cd(4)->SetLogz(); crdtSum->cd(4); hrdt2Dsum[2]->Draw("col");    
+  
+  TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
+  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),0,0, 500, 500);
+  crdtID->Clear();
+  if( isLogz ) crdtID->SetLogz(); 
+  hrdtID->Draw("colz");
+  
+  TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),600, 0, 1000, 1000);
+  crdtS->Clear(); crdtS->Divide(2,4);
+  for( int i = 0; i < 8; i ++){
+    crdtS->cd(i+1);
+    if( isLogz ) crdtS->cd(i+1)->SetLogy(); 
+    hrdt[i]->Draw("");
+  }
+
+  //TCanvas *crdtTAC =  (TCanvas *) gROOT->FindObjectAny("crdtTAC");
+  //if( crdtTAC == NULL ) crdtTAC = new TCanvas("crdtTAC",Form("raw RDTtac | %s", canvasTitle.Data()),0,0, 1600, 1600);
+  //crdtTAC->Clear(); crdtTAC->Divide(2,4);
+  //for( int i = 0; i < 8; i ++){
+  //  crdtTAC->cd(i+1);
+  //  htacRecoil[i]->Draw("colz");
+  //}
+  //for( int i = 0; i < 4; i ++){
+  //  crdtTAC->cd(i+1+8);
+  //  htacRecoilsum[i]->Draw("colz");
+  //}
+  
+}
+
 void eCalVz(void) {
   TCanvas *cecalVz =  (TCanvas *) gROOT->FindObjectAny("cecalVz");
   if( cecalVz == NULL ) cecalVz = new TCanvas("cevalVz",Form("ECALVZ : %s", canvasTitle.Data()),1000,650);

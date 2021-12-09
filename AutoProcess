@@ -35,7 +35,8 @@ root -l "ChainMonitors.C(${Run}, -1, true)"
 
 #root -l "ChainMonitors.C(-1,-1, true)"  # this will use the list for the ChainMonitors.C
 
-if [ ${isEndRun} -eq 1 ] && [ ${firstRun} -neq ${Run} ]; then
+#if [ ${isEndRun} -eq 1 ] && [ ${firstRun} -neq ${Run} ]; then
+if [ ${isEndRun} -eq 1 ]; then
    #root -l "ChainMonitors.C(${Run}, -1, true)"     
    root -l "ChainMonitors.C(${firstRun},${Run}, true)"  
 fi
