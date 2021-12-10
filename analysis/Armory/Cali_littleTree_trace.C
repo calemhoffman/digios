@@ -137,8 +137,8 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       
       /// range (-1,1)      
       if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
-      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2* xfC/ eTemp - 1;
-      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
+      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2.0* xfC/ eTemp - 1.0s;
+      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2.0* xnC/ eTemp;
       
       xTemp = xTemp/xScale[idet];
       
