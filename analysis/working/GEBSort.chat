@@ -6,7 +6,7 @@
 ;DumpEvery 5
 
 #-------------------------------------------
-# basic sort parameters 
+# basic sort parameters
 
 # number of event in a block
 nevents           1000000000
@@ -21,7 +21,7 @@ modwrite          100000
 tsnumwrites       100000
 
 # event build windows
-timewin           1000
+timewin           50
 
 #-------------------------------------------
 exit
