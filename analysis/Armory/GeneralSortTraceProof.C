@@ -23,6 +23,13 @@ bool isElum   = true;
 bool isEZero  = true;
 bool isCRDT   = true;
 
+///------- if the number in GeneralSortMapping.h is zero, the corresponding items will disable.
+bool isTACRF  = true;
+bool isRecoil = true;
+bool isElum   = true;
+bool isEZero  = true;
+bool isCRDT   = true;
+
 TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
    ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
 
@@ -78,6 +85,14 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    printf( "==========  GeneralSortTraceProof.C =================\n");
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
+
+
+   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM  == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+   
    
    if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
    if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
@@ -157,6 +172,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
 {
    printf("========================= Slave Begin.\n");   
    TString option = GetOption();
+   
+   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM  == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
 
    if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
    if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
