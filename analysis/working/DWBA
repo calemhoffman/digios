@@ -43,9 +43,9 @@
 
 #9Li(t,p)11Li      3/2        1L=0     3/2-        0.000   10MeV/u      lA                #two-nucleon_transfer   
 
-#23F(d,p)24F        5/2      0d5/2     3+          0.00       10MeV/u     AK
+23F(d,p)24F        5/2      0d5/2     3+          0.00       10MeV/u     AK
 #23F(d,p)24F        5/2      0d5/2     1+          0.52       10MeV/u     AK
 #23F(d,p)24F        5/2      1s1/2     2+          0.52       10MeV/u     AK
 #23F(d,p)24F        5/2      0d5/2     1+          1.83       10MeV/u     AK
-10Be(t,p)12Be     0        1L=0     0+           0.000   9.6MeV/u      lA
-10Be(t,p)12Be     0        1L=2     2+           2.000   5MeV/u      lA
+#10Be(t,p)12Be     0        1L=0     0+           0.000   9.6MeV/u      lA
+#10Be(t,p)12Be     0        1L=2     2+           2.000   5MeV/u      lA
