@@ -32,7 +32,7 @@ wosize     100
 #       written out per buffer
 
 #---------------------------------------
-# how often should we write 
+# how often should we write
 # statistics to output
 
 reportinterval 100000
@@ -40,7 +40,7 @@ reportinterval 100000
 #---------------------------------------
 # TS jump recovery trigger limits
 # (if timestamps jumps outside these
-#  limits GTMerge will read forward to 
+#  limits GTMerge will read forward to
 #  try and recover, 0.1 to 1 sec seems to works)
 #  100000000 ==  1 sec
 #  100000    ==  1 ms
@@ -61,4 +61,3 @@ dtsbabort 50
 # does not work at the moment
 
 ;zzipout
-
