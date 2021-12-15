@@ -11,11 +11,11 @@
  * 
 ***********************************************************************/
 
-#define NARRAY  24
+#define NARRAY  40
 #define NRDT    8
-#define NELUM   0
-#define NEZERO  0
-#define NTAC    0
+#define NELUM   2
+#define NEZERO  5
+#define NTAC    3
 #define NCRDT   0
 
 #define MWIN 100 //M value for energy filter from digi setting
