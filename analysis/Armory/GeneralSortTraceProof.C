@@ -23,13 +23,6 @@ bool isElum   = true;
 bool isEZero  = true;
 bool isCRDT   = true;
 
-///------- if the number in GeneralSortMapping.h is zero, the corresponding items will disable.
-bool isTACRF  = true;
-bool isRecoil = true;
-bool isElum   = true;
-bool isEZero  = true;
-bool isCRDT   = true;
-
 TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
    ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
 
