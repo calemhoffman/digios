@@ -534,7 +534,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             gFit->SetLineColor(lineColor);
-            gFit->SetRange(0, traceLength);
+            //gFit->SetRange(0, traceLength);
+	    gFit->SetRange(0, 300);
 
             base = gTrace->Eval(1);
             double fileNameTemp = gTrace->Eval(delayChannel*1.5) - base;
