@@ -172,12 +172,6 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
    if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
 
-   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
-   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
-   if ( isElum   && NELUM  == 0 ) isElum   = false ;
-   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
-   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
-
    //create tree in slave
    
    saveFileName = option;
@@ -259,6 +253,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
+         // newTree->Branch("txf",             txf,  Form("Trace_XF[%d]/F",          NARRAY));
+         // newTree->Branch("txf_r",         txf_r,  Form("Trace_XF_RiseTime[%d]/F", NARRAY));
+         // newTree->Branch("txf_t",         txf_t,  Form("Trace_XF_Time[%d]/F",     NARRAY));
+         // newTree->Branch("txn",             txn,  Form("Trace_XN[%d]/F",          NARRAY));
+         // newTree->Branch("txn_r",         txn_r,  Form("Trace_XN_RiseTime[%d]/F", NARRAY));
+         // newTree->Branch("txn_t",         txn_t,  Form("Trace_XN_Time[%d]/F",     NARRAY));
          
          if( isRecoil ){
             newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
@@ -334,6 +334,12 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
+         // txf[i]     = TMath::QuietNaN();
+         // txf_r[i]   = TMath::QuietNaN();
+         // txf_t[i]   = TMath::QuietNaN();
+         // txn[i]     = TMath::QuietNaN();
+         // txn_r[i]   = TMath::QuietNaN();
+         // txn_t[i]   = TMath::QuietNaN();
          
          if( isRecoil &&  i < NRDT ) {
             trdt[i]   = TMath::QuietNaN();
@@ -452,7 +458,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    
    for(int i = 0 ; i < 24; i++){
       psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
-   }
+   } //CRH NEED TO CHANGE!
    
    ///Trace
    /************************************************************************/
@@ -476,7 +482,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
          if( !isPSD && !isRDT) continue;         
-
+         if( isPSD && (psd.Energy[idDet]>200) )
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
          gTrace->Clear();         
