@@ -137,6 +137,12 @@ public :
    float te[NARRAY];    // energy from trace
    float te_r[NARRAY];  // rising time from frace
    float te_t[NARRAY];  // time
+   float txf[NARRAY];    // xf from trace
+   float txf_r[NARRAY];  // rising time from frace
+   float txf_t[NARRAY];  // time
+   float txn[NARRAY];    // xn from trace
+   float txn_r[NARRAY];  // rising time from frace
+   float txn_t[NARRAY];  // time
    
    float ttac[NTAC];
    float ttac_t[NTAC];
