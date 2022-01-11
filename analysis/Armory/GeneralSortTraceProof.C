@@ -533,7 +533,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             ///Set gFit
             gFit->SetLineStyle(idDet);
-            gFitlin->SetLineStyle(idDet);
+            gFitLin->SetLineStyle(idDet);
             
             int lineColor = 1;
             switch(idKind){
