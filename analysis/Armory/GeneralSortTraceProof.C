@@ -482,7 +482,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
          if( !isPSD && !isRDT) continue;         
-         if( isPSD && (psd.Energy[idDet]<200) ) continue;
+         if( isPSD && (psd.Energy[idDet]<200 || psd.Energy[idDet]>16000) ) continue;
+
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
          gTrace->Clear();         
