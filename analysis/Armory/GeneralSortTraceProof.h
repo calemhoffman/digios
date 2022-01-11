@@ -133,6 +133,7 @@ public :
    TGraph * gTrace; //!
    TGraph * gTrapezoid; //!
    TF1 * gFit; //!
+   TF1 * gFitLin; //!
    
    float te[NARRAY];    // energy from trace
    float te_r[NARRAY];  // rising time from frace
