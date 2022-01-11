@@ -131,6 +131,7 @@ public :
    TClonesArray * arr ;//!
    TClonesArray * arrTrapezoid ;//!   
    TGraph * gTrace; //!
+   TGraph * gTraceLin; //!
    TGraph * gTrapezoid; //!
    TF1 * gFit; //!
    TF1 * gFitLin; //!

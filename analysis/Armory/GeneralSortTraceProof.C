@@ -244,7 +244,7 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       
       if( traceMethod > 0 ){
 	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
-	      gFitLin = new TF1("gFitLin", "[0] + [1]*x", 0, 140);
+	      gFitLin = new TF1("gFitLin", "[0] + [1]*(x-250)", 0, 140);
 
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
@@ -526,7 +526,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
-         
+         gTraceLin = gTrace;
+
          ///===================== fitting , find time
          if( traceMethod == 1){
             
@@ -547,7 +548,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             gFitLin->SetLineColor(lineColor);
             //gFit->SetRange(0, traceLength);
 	         gFit->SetRange(0, 300);
-            gFitLin->SetRange(delayChannel+100, traceLength)
+            gFitLin->SetRange(250, traceLength)
 
             base = gTrace->Eval(1);
             double fileNameTemp = gTrace->Eval(delayChannel*1.5) - base;
@@ -557,19 +558,25 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             gFit->SetParameter(2, 1);            ///riseTime
             gFit->SetParameter(3, base);
 
+            gFitLin->SetParameter(0, fileNameTemp);
+            gFitLin->SetParameter(1, -10.);
+
             //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
             //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "qR");
+               gTraceLin->Fit("gFitLin","qR");
             }else{
                gTrace->Fit("gFit", "qR0");
+               gTraceLin->Fit("gFitLin","qR0");
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
                te[idDet]   = gFit->GetParameter(0);
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
+               te_m[idDet] = gFitLin->GetParameter(1);
             }
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
