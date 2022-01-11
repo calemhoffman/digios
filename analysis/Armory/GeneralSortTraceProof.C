@@ -85,13 +85,7 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    if ( isElum   && NELUM  == 0 ) isElum   = false ;
    if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
    if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
-   
-   
-   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
-   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
-   if ( isElum   && NELUM  == 0 ) isElum   = false ;
-   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
-   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+
    
    printf( "  TAC/RF   : %s , %d \n", isTACRF  ? "On" : "Off", NTAC);
    printf( "  Recoil   : %s , %d \n", isRecoil ? "On" : "Off", NRDT);
