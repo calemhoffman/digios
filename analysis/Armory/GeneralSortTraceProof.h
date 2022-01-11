@@ -144,6 +144,9 @@ public :
    float txn[NARRAY];    // xn from trace
    float txn_r[NARRAY];  // rising time from frace
    float txn_t[NARRAY];  // time
+   float te_m[NARRAY];  // slope gfitlin
+   float txf_m[NARRAY];  // slope
+   float txn_m[NARRAY];  // slope
    
    float ttac[NTAC];
    float ttac_t[NTAC];
