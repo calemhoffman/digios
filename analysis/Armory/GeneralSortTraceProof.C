@@ -250,6 +250,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       
       if( traceMethod > 0 ){
 	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
+	      gFitLin = new TF1("gFitLin", "[0] + [1]*x", 0, 140);
+
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
@@ -259,6 +261,11 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          // newTree->Branch("txn",             txn,  Form("Trace_XN[%d]/F",          NARRAY));
          // newTree->Branch("txn_r",         txn_r,  Form("Trace_XN_RiseTime[%d]/F", NARRAY));
          // newTree->Branch("txn_t",         txn_t,  Form("Trace_XN_Time[%d]/F",     NARRAY));
+
+         //lin slope fit result
+         //newTree->Branch("te_m",         te_m,  Form("Trace_Energy_Slope[%d]/F",     NARRAY));
+         //newTree->Branch("txf_m",         txf_m,  Form("Trace_XF_Slope[%d]/F",     NARRAY));
+         //newTree->Branch("txn_m",         txn_m,  Form("Trace_XN_Slope[%d]/F",     NARRAY));
          
          if( isRecoil ){
             newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
@@ -458,7 +465,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    
    for(int i = 0 ; i < 24; i++){
       psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
-   } //CRH NEED TO CHANGE!
+   } //CRH NEED TO CHANGE once calibrated
    
    ///Trace
    /************************************************************************/
@@ -482,7 +489,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
          if( !isPSD && !isRDT) continue;         
-         if( isPSD && (psd.Energy[idDet]<200 || psd.Energy[idDet]>16000) ) continue;
+         if( isPSD && (psd.Energy[idDet]<2000 || psd.Energy[idDet]>16000) ) continue;
 
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
