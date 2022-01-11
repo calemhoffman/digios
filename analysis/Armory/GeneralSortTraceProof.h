@@ -148,6 +148,9 @@ public :
    float te_m[NARRAY];  // slope gfitlin
    float txf_m[NARRAY];  // slope
    float txn_m[NARRAY];  // slope
+   float te_b[NARRAY];  // offset gfitlin
+   float txf_b[NARRAY];  // offset
+   float txn_b[NARRAY];  // offset
    
    float ttac[NTAC];
    float ttac_t[NTAC];
@@ -156,6 +159,8 @@ public :
    float trdt[NRDT];
    float trdt_t[NRDT];
    float trdt_r[NRDT];
+   float trdt_m[NRDT];
+   float trdt_b[NRDT];
       
    float tcrdt[NCRDT];
    float tcrdt_t[NCRDT];
