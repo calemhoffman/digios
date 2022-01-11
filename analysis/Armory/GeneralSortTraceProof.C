@@ -249,17 +249,17 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
-         // newTree->Branch("txf",             txf,  Form("Trace_XF[%d]/F",          NARRAY));
-         // newTree->Branch("txf_r",         txf_r,  Form("Trace_XF_RiseTime[%d]/F", NARRAY));
-         // newTree->Branch("txf_t",         txf_t,  Form("Trace_XF_Time[%d]/F",     NARRAY));
-         // newTree->Branch("txn",             txn,  Form("Trace_XN[%d]/F",          NARRAY));
-         // newTree->Branch("txn_r",         txn_r,  Form("Trace_XN_RiseTime[%d]/F", NARRAY));
-         // newTree->Branch("txn_t",         txn_t,  Form("Trace_XN_Time[%d]/F",     NARRAY));
+         newTree->Branch("txf",             txf,  Form("Trace_XF[%d]/F",          NARRAY));
+         newTree->Branch("txf_r",         txf_r,  Form("Trace_XF_RiseTime[%d]/F", NARRAY));
+         newTree->Branch("txf_t",         txf_t,  Form("Trace_XF_Time[%d]/F",     NARRAY));
+         newTree->Branch("txn",             txn,  Form("Trace_XN[%d]/F",          NARRAY));
+         newTree->Branch("txn_r",         txn_r,  Form("Trace_XN_RiseTime[%d]/F", NARRAY));
+         newTree->Branch("txn_t",         txn_t,  Form("Trace_XN_Time[%d]/F",     NARRAY));
 
          //lin slope fit result
-         //newTree->Branch("te_m",         te_m,  Form("Trace_Energy_Slope[%d]/F",     NARRAY));
-         //newTree->Branch("txf_m",         txf_m,  Form("Trace_XF_Slope[%d]/F",     NARRAY));
-         //newTree->Branch("txn_m",         txn_m,  Form("Trace_XN_Slope[%d]/F",     NARRAY));
+         newTree->Branch("te_m",         te_m,  Form("Trace_Energy_Slope[%d]/F",     NARRAY));
+         newTree->Branch("txf_m",         txf_m,  Form("Trace_XF_Slope[%d]/F",     NARRAY));
+         newTree->Branch("txn_m",         txn_m,  Form("Trace_XN_Slope[%d]/F",     NARRAY));
          
          if( isRecoil ){
             newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
@@ -335,12 +335,12 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
-         // txf[i]     = TMath::QuietNaN();
-         // txf_r[i]   = TMath::QuietNaN();
-         // txf_t[i]   = TMath::QuietNaN();
-         // txn[i]     = TMath::QuietNaN();
-         // txn_r[i]   = TMath::QuietNaN();
-         // txn_t[i]   = TMath::QuietNaN();
+         txf[i]     = TMath::QuietNaN();
+         txf_r[i]   = TMath::QuietNaN();
+         txf_t[i]   = TMath::QuietNaN();
+         txn[i]     = TMath::QuietNaN();
+         txn_r[i]   = TMath::QuietNaN();
+         txn_t[i]   = TMath::QuietNaN();
          
          if( isRecoil &&  i < NRDT ) {
             trdt[i]   = TMath::QuietNaN();
@@ -483,7 +483,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
          if( !isPSD && !isRDT) continue;         
-         if( isPSD && (psd.Energy[idDet]<2000 || psd.Energy[idDet]>16000) ) continue;
+         //if( isPSD && (psd.Energy[idDet]<200 || psd.Energy[idDet]>16000) ) continue;
+         //above Does do something but not exactly what expected
 
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
@@ -531,6 +532,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             ///Set gFit
             gFit->SetLineStyle(idDet);
+            gFitlin->SetLineStyle(idDet);
             
             int lineColor = 1;
             switch(idKind){
@@ -542,8 +544,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             gFit->SetLineColor(lineColor);
+            gFitLin->SetLineColor(lineColor);
             //gFit->SetRange(0, traceLength);
-	    gFit->SetRange(0, 300);
+	         gFit->SetRange(0, 300);
+            gFitLin->SetRange(delayChannel+100, traceLength)
 
             base = gTrace->Eval(1);
             double fileNameTemp = gTrace->Eval(delayChannel*1.5) - base;
