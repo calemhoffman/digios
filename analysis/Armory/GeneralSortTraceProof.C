@@ -258,13 +258,18 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
 
          //lin slope fit result
          newTree->Branch("te_m",         te_m,  Form("Trace_Energy_Slope[%d]/F",     NARRAY));
+         newTree->Branch("te_b",         te_b,  Form("Trace_Energy_Offset[%d]/F",     NARRAY));
          newTree->Branch("txf_m",         txf_m,  Form("Trace_XF_Slope[%d]/F",     NARRAY));
+         newTree->Branch("txf_b",         txf_b,  Form("Trace_XF_Offset[%d]/F",     NARRAY));
          newTree->Branch("txn_m",         txn_m,  Form("Trace_XN_Slope[%d]/F",     NARRAY));
+         newTree->Branch("txn_b",         txn_b,  Form("Trace_XN_Offset[%d]/F",     NARRAY));
          
          if( isRecoil ){
             newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
             newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F",     NRDT));
             newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+            newTree->Branch("trdt_m",     trdt_m,  Form("Trace_RDT_Slope[%d]/F", NRDT));
+            newTree->Branch("trdt_b",     trdt_b,  Form("Trace_RDT_Offset[%d]/F", NRDT));
          }
          if ( isEZero ) {
             newTree->Branch("tezero",       tezero,    Form("Trace_ezero[%d]/F",         NEZERO));
@@ -341,11 +346,20 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          txn[i]     = TMath::QuietNaN();
          txn_r[i]   = TMath::QuietNaN();
          txn_t[i]   = TMath::QuietNaN();
+
+         te_m[i]   = TMath::QuietNaN(); 
+         te_b[i]   = TMath::QuietNaN(); 
+         txf_m[i]   = TMath::QuietNaN(); 
+         txf_b[i]   = TMath::QuietNaN(); 
+         txn_m[i]   = TMath::QuietNaN();
+         txn_b[i]   = TMath::QuietNaN();
          
          if( isRecoil &&  i < NRDT ) {
             trdt[i]   = TMath::QuietNaN();
             trdt_t[i] = TMath::QuietNaN();
             trdt_r[i] = TMath::QuietNaN();
+            trdt_m[i] = TMath::QuietNaN();
+            trdt_b[i] = TMath::QuietNaN();
          }
          
          if( isEZero &&  i < NEZERO ) {
@@ -489,8 +503,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
          gTrace->Clear();         
-         gTrace->Set(traceLength);         
-         
+         gTrace->Set(traceLength);
          gTrace->SetTitle("");
          countTrace ++;
 
@@ -504,13 +517,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             delayChannel = 300;
          }
          ///==================  Set gTrace
-
          if( traceMethod == 0 ){
             for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
          }
-         
          
          ///=================== regulate the trace
          double base = 0;
@@ -548,7 +559,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             gFitLin->SetLineColor(lineColor);
             //gFit->SetRange(0, traceLength);
 	         gFit->SetRange(0, 300);
-            gFitLin->SetRange(250, traceLength);
+            gFitLin->SetRange(200, traceLength);
 
             base = gTrace->Eval(1);
             double fileNameTemp = gTrace->Eval(delayChannel*1.5) - base;
@@ -559,7 +570,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             gFit->SetParameter(3, base);
 
             gFitLin->SetParameter(0, fileNameTemp);
-            gFitLin->SetParameter(1, -10.);
+            gFitLin->SetParameter(1, -0.5);
 
             //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
             //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
@@ -572,11 +583,26 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                gTraceLin->Fit("gFitLin","qR0");
             }
             
-            if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = gFit->GetParameter(0);
-               te_t[idDet] = gFit->GetParameter(1);
-               te_r[idDet] = gFit->GetParameter(2);
-               te_m[idDet] = gFitLin->GetParameter(1);
+            if( NARRAY > idDet && idDet >= 0 /* && idKind == 0*/ ) {
+               if ( idKind == 0 ) {
+                  te[idDet]   = gFit->GetParameter(0);
+                  te_t[idDet] = gFit->GetParameter(1);
+                  te_r[idDet] = gFit->GetParameter(2);
+                  te_m[idDet] = gFitLin->GetParameter(1);
+                  te_b[idDet] = gFitLin->GetParameter(0);
+               } else if ( idKind == 1 ) {
+                  txf[idDet]   = gFit->GetParameter(0);
+                  txf_t[idDet] = gFit->GetParameter(1);
+                  txf_r[idDet] = gFit->GetParameter(2);
+                  txf_m[idDet] = gFitLin->GetParameter(1);
+                  txf_b[idDet] = gFitLin->GetParameter(0);
+               } else if ( idKind == 2) {
+                  txn[idDet]   = gFit->GetParameter(0);
+                  txn_t[idDet] = gFit->GetParameter(1);
+                  txn_r[idDet] = gFit->GetParameter(2);
+                  txn_m[idDet] = gFitLin->GetParameter(1);
+                  txn_b[idDet] = gFitLin->GetParameter(0);
+               }
             }
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
@@ -584,6 +610,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);
+               trdt_m[rdtTemp] = gFit->GetParameter(1);
+               trdt_b[rdtTemp] = gFit->GetParameter(0);
             }
             
             if( NELUM + 200 > idDet && idDet >= 200 ) {
