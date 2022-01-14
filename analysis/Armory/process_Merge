@@ -21,6 +21,12 @@ fi
 
 RUN=$(printf '%03d' ${RUN})
 
+dataName=${expName}
+
+if [ ${expName} == "s005_32Si" ]; then
+         dataName="s004_32Si"
+fi
+
 #######################################
 #################### Merge
 echo -e "${RED}######################### Merge raw data: run $RUN${NC}"
@@ -36,9 +42,9 @@ if [ $isMerge -eq 1 ]; then
         if [ ${PCName} == "digios1" ]; then
             echo -e "\033[0;31m WARNING : MAXIMUM MERGE SIZE IS 4.0GB \033[0m."
         fi
-        rawDataTime=`stat -c "%Z"  ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
+        rawDataTime=`stat -c "%Z"  ${DATADIR}/${dataName}_run_$RUN.gtd* | sort -rn | head -1`    
     else
-        rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${expName}_run_$RUN.gtd* | sort -rn | head -1`    
+        rawDataTime=`stat -f "%Sm" -t "%Y%m%d%H%M%S" ${DATADIR}/${dataName}_run_$RUN.gtd* | sort -rn | head -1`    
     fi
 
     #==== check if merged data exist
@@ -64,11 +70,8 @@ if [ $isMerge -eq 1 ]; then
             echo -e "${NC}"
         fi
 
-        if [ ${expName} == "s005_32Si" ]; then
-         ${expName} == "s004_32Si"
-        fi
         echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
-        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${dataName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
         echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
 
         if [ ${expName} == "h072_16N" ]; then
@@ -97,7 +100,7 @@ if [ $isMerge -eq -1 ]; then # force merge
 
     echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
     echo -e "${YELLOW} >>>>>>>>>>>>> force merge by user ${NC}"
-    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${dataName}_run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
     echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
 
     if [ ${expName} == "h072_16N" ]; then
