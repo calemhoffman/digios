@@ -576,11 +576,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
 
             if( isSaveFitTrace ) {
-               gTrace->Fit("gFit", "qR");
-               gTraceLin->Fit("gFitLin","qR");
+               gTraceLin->Fit("gFitLin", "qR");
+               gTrace->Fit("gFit","qR");
             }else{
-               gTrace->Fit("gFit", "qR0");
-               gTraceLin->Fit("gFitLin","qR0");
+               gTraceLin->Fit("gFitLin", "qR0");
+               gTrace->Fit("gFit","qR0");
             }
             
             if( NARRAY > idDet && idDet >= 0 /* && idKind == 0*/ ) {
