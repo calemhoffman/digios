@@ -362,9 +362,9 @@ Bool_t Cali_e_trace_Proof::Process(Long64_t entry)
    //#################################################################### gate
    bool rdt_energy = false;
    for( int rID = 0; rID < 8; rID ++){
-      if( rdt[rID] > 5000 ) rdt_energy = true; 
+      if( TMath::Abs(rdt[rID] > 10) ) rdt_energy = true; //CRH check on this...
    }
-   if( !rdt_energy ) return kTRUE;
+   if( rdt_energy ) return kTRUE;
    
    
    for(int i = 0 ; i < 8 ; i++){
@@ -386,7 +386,7 @@ Bool_t Cali_e_trace_Proof::Process(Long64_t entry)
       if( xf[idet] > 0) xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
       if( xn[idet] > 0) xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
    
-      //========= calculate x
+      //========= calculate x //CRH I am not sure I like this...
       if(xf[idet] > 0  && xn[idet] > 0 ) {
          x[idet] = (xfC-xnC)/(xfC+xnC);
          hitID = 0;
@@ -490,7 +490,7 @@ Bool_t Cali_e_trace_Proof::Process(Long64_t entry)
       ULong64_t rdtTime = 0;
       Float_t rdtQ = 0;
       Float_t trdtTime = 0.;
-      for(int i = 0; i < 8 ; i++){
+      for(int i = 0; i < 8 ; i++){ //gets time from largest signal why ??
          if( rdt[i] > rdtQ ) {
             rdtQ    = rdt[i];
             rdtTime = rdt_t[i];
