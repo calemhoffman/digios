@@ -1953,7 +1953,7 @@ void SaveFitPara(TString fileName = "AutoFit_para.txt"){
   fclose(file_out);
 }
 
-void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
+void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0, double meanRange = 0){
 
   printf("=========================================================\n");
   printf("======== fit n-Gauss + Pol-%d BG using mouse click =====\n", degPol );
@@ -2151,19 +2151,22 @@ void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9);
     
-    double dE1, dE2;
-    if( i == 0 ){
-      dE2 = xPeakList[i+1] - xPeakList[i];
-      dE1 = dE2;
-    }else if ( i == nPeaks-1 ){
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = dE1;
+    if( meanRange <= 0 ) {
+      double dE1, dE2;
+      if( i == 0 ){
+        dE2 = xPeakList[i+1] - xPeakList[i];
+        dE1 = dE2;
+      }else if ( i == nPeaks-1 ){
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = dE1;
+      }else{
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = xPeakList[i+1] - xPeakList[i];
+      }      
+      fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
     }else{
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = xPeakList[i+1] - xPeakList[i];
+      fit->SetParLimits(3*i+1, xPeakList[i] - meanRange/2. , xPeakList[i] + meanRange/2. );
     }
-    
-    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
     if( sigmaMax== 0 ) fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
     if( sigmaMax < 0 ) fit->FixParameter(3*i+2, abs(sigmaMax));
     if( sigmaMax > 0 ) fit->SetParLimits(3*i+2, 0, sigmaMax);
@@ -2242,7 +2245,7 @@ void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
 
 
 
-void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
+void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0, double meanRange = 0){
 
   printf("=========================================================\n");
   printf("= fit n-Gauss + Pol-%d BG using mouse click (method-2) =\n", degPol );
@@ -2451,20 +2454,23 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
   //limit parameters
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9);
-
-    double dE1, dE2;
-    if( i == 0 ){
-      dE2 = xPeakList[i+1] - xPeakList[i];
-      dE1 = dE2;
-    }else if ( i == nPeaks-1 ){
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = dE1;
-    }else{
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = xPeakList[i+1] - xPeakList[i];
-    }
     
-    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
+    if( meanRange <= 0 ) {
+      double dE1, dE2;
+      if( i == 0 ){
+        dE2 = xPeakList[i+1] - xPeakList[i];
+        dE1 = dE2;
+      }else if ( i == nPeaks-1 ){
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = dE1;
+      }else{
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = xPeakList[i+1] - xPeakList[i];
+      }
+      fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
+    }else{
+      fit->SetParLimits(3*i+1, xPeakList[i] - meanRange/2. , xPeakList[i] + meanRange/2. );
+    }
     if( sigmaMax== 0 ) fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
     if( sigmaMax < 0 ) fit->FixParameter(3*i+2, abs(sigmaMax));
     if( sigmaMax > 0 ) fit->SetParLimits(3*i+2, 0, sigmaMax);
