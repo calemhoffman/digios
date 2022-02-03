@@ -158,6 +158,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    bool coinFlag = false;
 
    ///if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
+   // CRH need to make sense of this
    int countInvalidRDT = 0;
    for( int j = 0; j < 8; j++){
       if( TMath::IsNaN(rdt[j]) ) countInvalidRDT ++;
@@ -189,6 +190,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      if( !TMath::IsNaN(xf[idet]) ) hitID[idet] += 1;
      if( !TMath::IsNaN(xn[idet]) ) hitID[idet] += 2;
      if( hitID[idet] == 0 ) continue;
+     //CRH add a skip on the array ?? 
      if( isTraceDataExist  && te_r[idet] > 50 ) continue; /// when rise time > 50, skip 
      
      ///====== Calibrations go here
@@ -206,7 +208,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-     ///========= calculate x, range (-1,1)   
+     ///========= calculate x, range (-1,1)   // CRH the best ?
      if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
      if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
      if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
@@ -286,12 +288,13 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       rdtC_t[i] = rdt_t[i]; 
    }
 
-   for( int i = 0; i< 4 ; i++){
-      if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
-         rdtdEMultiHit ++;
-         rdtID = 2*i+1; //dE
-      }
-   }
+//CRH incorrect !!
+   // for( int i = 0; i< 4 ; i++){
+   //    if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
+   //       rdtdEMultiHit ++;
+   //       rdtID = 2*i+1; //dE
+   //    }
+   // }
 
    //================================= for coincident time bewteen array and rdt
    if( multiHit == 1 /* && rdtdEMultiHit == 1 */) {
@@ -300,6 +303,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       ULong64_t eTime = e_t[det];
 
       /// for dE detector only
+      // fix to dE back for now - should find one with best rise time width
+      rdtID = 4;
       ULong64_t rdtTime = rdt_t[rdtID];
 
       coin_t = (int) eTime - rdtTime; // digitizer timeStamp
