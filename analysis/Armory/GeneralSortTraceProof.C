@@ -583,7 +583,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                gTrace->Fit("gFit","qR0");
             }
             //CRH
-            printf(Form("%f %f",gFit->GetParameter(0),gFitLin->GetParameter(0)));
+            //printf(Form("%f %f",gFit->GetParameter(0),gFitLin->GetParameter(0)));
 
             if( NARRAY > idDet && idDet >= 0 /* && idKind == 0*/ ) {
                if ( idKind == 0 ) {
