@@ -1,7 +1,7 @@
 //---data_path (s005_32Si) (t,p)
 //-----------alpha_source_data_with_-_sign
 //-----------data_with_+_sign
--../root_data/trace_run6.root
+//-../root_data/trace_run6.root
 //+data/trace_run9[3-9].root
 //+data/trace_run10[0-2].root
 //+data/trace_run10[5-9].root
@@ -11,4 +11,4 @@
 //+data/trace_run13[4-9].root
 //+data/trace_run14[0-9].root
 //+data/trace_run15[0-7].root
-+../root_data/trace_run157.root
++../root_data/trace_run6.root
