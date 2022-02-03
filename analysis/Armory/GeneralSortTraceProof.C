@@ -537,7 +537,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
-         gTraceLin = gTrace;
+         gTraceLin->SetTitle(Form("Linear ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
 
          ///===================== fitting , find time
          if( traceMethod == 1){
@@ -582,7 +582,9 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                gTraceLin->Fit("gFitLin", "qR0");
                gTrace->Fit("gFit","qR0");
             }
-            
+            //CRH
+            print(Form("%f %f",gFit->GetParameter(0),gFitLin->GetParameter(0)));
+
             if( NARRAY > idDet && idDet >= 0 /* && idKind == 0*/ ) {
                if ( idKind == 0 ) {
                   te[idDet]   = gFit->GetParameter(0);
