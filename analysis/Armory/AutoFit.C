@@ -39,6 +39,10 @@ void ShowFitMethod(){
   printf("---------------------------------------------------------\n");
 }
 
+void AutoFit(){
+  ShowFitMethod();
+}
+
 std::vector<std::string> SplitStrAF(std::string tempLine, std::string splitter, int shift = 0){
 
   std::vector<std::string> output;
