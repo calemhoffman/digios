@@ -537,6 +537,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         gTraceLin = gTrace;
          gTraceLin->SetTitle(Form("Linear ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
 
          ///===================== fitting , find time
