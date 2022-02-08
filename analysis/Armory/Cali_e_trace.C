@@ -209,10 +209,13 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
      ///========= calculate x, range (-1,1)   // CRH the best ?
-     if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
-     if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
-     if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
-      
+   //   if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
+   //   if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
+   //   if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
+
+if ( (!TMath::IsNaN(xf[idet])) || (xfC[idet] >= e[idet]/2.) ) {2.0*xfC[idet]/e[idet] - 1.0;}
+else if ( (!TMath::IsNaN(xn[idet])) || (xnC[idet] > e[idet]/2.) ) {1.0 - 2.0 * xnC[idet]/e[idet];}
+
      x[idet] = x[idet] / xCorr[idet];
 
      ///========= Calculate z
