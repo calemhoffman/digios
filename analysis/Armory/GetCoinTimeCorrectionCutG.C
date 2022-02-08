@@ -33,7 +33,7 @@ Double_t nGauss(Double_t *x, Double_t *par) {
 
 void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
 
-   int timeRange[2] ={-70, 200};
+   int timeRange[2] ={190, 120};
    TString rdtCutName = "rdtCuts.root";
 
    //====================================================== read file, canvas, histogram
@@ -45,7 +45,12 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
 
-   TBranch * br = (TBranch *) tree->GetListOfBranches()->FindObject("coinTimeUC");
+   // TBranch * br = (TBranch *) tree->GetListOfBranches()->FindObject("coinTimeUC");
+   // if( br == NULL ){
+   //    printf(" Branch <coinTimeUC> not exist!!!!! exit. \n");
+   //    return;
+   // }
+   TBranch * br = (TBranch *) tree->GetListOfBranches()->FindObject("te_t");
    if( br == NULL ){
       printf(" Branch <coinTimeUC> not exist!!!!! exit. \n");
       return;
@@ -110,7 +115,8 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    //====================================================== processing      
    printf("============ detID: %d\n", detID);
 
-   expression.Form("coinTimeUC:x>>hTX");
+   //expression.Form("coinTimeUC:x>>hTX");
+   expression.Form("te_t:x>>hTX");
    if( isBranchDetIDExist ) {   
       gate.Form("detID==%d", detID);
    }else{
@@ -122,7 +128,8 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    //if( fileCut->IsOpen() ) gate = "cut0 && " + gate;
    
    printf("%s \n", gate.Data());
-   name.Form("time vs X (detID-%d); x; coinTimeUC [ch]", detID);
+   // name.Form("time vs X (detID-%d); x; coinTimeUC [ch]", detID);
+   name.Form("time vs X (detID-%d); x; te_t [ch]", detID);
    hTX->SetTitle(name);
    cAna->cd(1);
    tree->Draw(expression, gate, "colz");
@@ -171,7 +178,8 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    //if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
 
    cAna->cd(2);
-   expression.Form("coinTimeUC:x>>hTXg");
+   // expression.Form("coinTimeUC:x>>hTXg");
+   expression.Form("te_t:x>>hTXg");
    tree->Draw(expression, gate, "colz");
    cut->Draw("same");
    gSystem->ProcessEvents();
