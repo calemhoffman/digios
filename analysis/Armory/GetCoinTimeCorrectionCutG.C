@@ -31,9 +31,14 @@ Double_t nGauss(Double_t *x, Double_t *par) {
 }
 */
 
-void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
+TH2F * hTX;   
+TH2F * hTXg;  
+TH2F * hTXc2; 
+TH1F * hT; 
+   
+void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="s005_32Si_trace_run021-043_045-069_073-085.root", int detID=4){
 
-   int timeRange[2] ={190, 120};
+   int timeRange[2] ={-100, 120};
    TString rdtCutName = "rdtCuts.root";
 
    //====================================================== read file, canvas, histogram
@@ -88,10 +93,10 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    
    TString name, expression, gate, gateCut;
 
-   TH2F * hTX   = new TH2F("hTX",   "time vs X; x; coinTimeUC [ch]", 200, -1.5, 1.5, 200, timeRange[0], timeRange[1] );
-   TH2F * hTXg  = new TH2F("hTXg",  "time vs X; x; coinTimeUC [ch]", 200, -1.5, 1.5, 200, timeRange[0], timeRange[1] );
-   TH2F * hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTimeUC [ch]", 200, -1.5, 1.5, 200, timeRange[0], timeRange[1] );
-   TH1F * hT = new TH1F("hT", "", 200, timeRange[0], timeRange[1]);
+   hTX   = new TH2F("hTX",   "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, 95, 115 );
+ hTXg  = new TH2F("hTXg",  "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, 95, 115);
+hTXc2 = new TH2F("hTXc2", "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, -10, 10);
+hT = new TH1F("hT", "", 500, -25, 25);
    TProfile * hp = new TProfile("hp", "time Profile", 400, -1.5,1.5);
    TSpectrum * spec = new TSpectrum(5);
    
@@ -166,8 +171,9 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    cAna->WaitPrimitive("CUTG", "TCutG");
    cut = (TCutG*) gROOT->FindObjectAny("CUTG");
    cut->SetName("cutG");
-   cut->SetVarX("x");
-   cut->SetVarY("coinTimeUC");
+   cut->SetVarX(Form("x[%d]",detID));
+   // cut->SetVarY("coinTimeUC");
+   cut->SetVarY(Form("te_t[%d]",detID));
    printf("Got the TCut.\n");
    
    if( isBranchDetIDExist ) {   
@@ -214,7 +220,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    
    ///***************
    cAna->cd(3);   
-   expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) :x>>hTXc2", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   expression.Form("te_t - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) :x>>hTXc2", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    ///printf("---------- double click for 1D plot.\n");
@@ -222,7 +228,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    
    //==== 1-D plot
    cAna->cd(4);
-   expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) >>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   expression.Form("te_t - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7)>>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    
