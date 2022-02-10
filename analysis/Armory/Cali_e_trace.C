@@ -176,7 +176,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    //       }
    //    }
    // }
-   if( coinFlag == true ) return kTRUE;
+   if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    
