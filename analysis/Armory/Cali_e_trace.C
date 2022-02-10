@@ -163,18 +163,19 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    for( int j = 0; j < 8; j++){
       if( TMath::IsNaN(rdt[j]) ) countInvalidRDT ++;
    }
-   if( countInvalidRDT == 8 ) {
+   if( countInvalidRDT < 8 ) {
       coinFlag = true;
-   }else{
-      for( int i = 0; i < numDet ; i++){
-         for( int j = 0; j < 8 ; j++){
-            if( TMath::IsNaN(rdt[j]) ) continue; 
-            int tdiff = rdt_t[j] - e_t[i];
-            if( -200 < tdiff && tdiff < 200 )   
-            coinFlag = true;
-         }
-      }
    }
+   // else{
+   //    for( int i = 0; i < numDet ; i++){
+   //       for( int j = 0; j < 8 ; j++){
+   //          if( TMath::IsNaN(rdt[j]) ) continue; 
+   //          int tdiff = rdt_t[j] - e_t[i];
+   //          if( -200 < tdiff && tdiff < 200 )   
+   //          coinFlag = true;
+   //       }
+   //    }
+   // }
    if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
