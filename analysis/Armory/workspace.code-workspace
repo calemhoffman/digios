@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.py": "python",
+			"Cali_e_trace_Proof.C": "cpp",
+			"GeneralSortTrace.C": "cpp",
+			"GeneralSortTraceProof.C": "cpp",
+			"Monitors_Util.C": "cpp",
+			"AutoCalibrationTrace.C": "cpp",
+			"Cali_e_trace.C": "cpp",
+			"rootlogon.C": "cpp",
+			"GetCoinTimeCorrectionCutG.C": "cpp"
+		}
+	}
+}
