@@ -88,7 +88,7 @@ for iRUN in $(seq ${RUN1} ${RUN2}); do
 
     #######################################
     ####################  Download raw data
-    ../Armory/process_Download $iRUN
+    #../Armory/process_Download $iRUN
 
     #######################################
     #################### Merge
