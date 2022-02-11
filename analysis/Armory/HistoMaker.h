@@ -91,6 +91,14 @@ void setTreeBranches(TTree * tree) {
    tree->SetBranchAddress("z",z);
    //recoil
    tree->SetBranchAddress("rdt",rdt); 
+   tree->SetBranchAddress("trdt",trdt); 
+   tree->SetBranchAddress("trdt_t",trdt_t); 
+   tree->SetBranchAddress("trdt_r",trdt_r);
+   //final
+   tree->SetBranchAddress("coinTime",&coinTime);
+   tree->SetBranchAddress("tcoin_t",&tcoin_t);
+   tree->SetBranchAddress("Ex",&Ex);
+   tree->SetBranchAddress("thetaLab",&thetaLab);
 }
 
 TH1F * heventID;
@@ -102,8 +110,20 @@ TH2F * htetr[24];
 TH2F * htete[24];
 TH1F * htet[24];
 TH1F * htetg[24];
+TH2F * heVx[24];
+TH2F * heVxg[24];
+TH1F * hrdt[8];
+TH1F * hrdtg[8];
+TH2F * hrdt2d[10];// 5 de vs. 2 e
+TH2F * hrdt2dg[10];// 5 de vs. 2 e
 TH2F * hez;
 TH2F * hezg;
+TH1F * hEx[24];
+TH1F * hExg[24];
+TH1F * hExTot;
+TH1F * hExgTot;
+TH1F * hcoin_t;
+TH1F * hcoinTime;
 void defineHistos() {
        //histograms
    //general
@@ -118,11 +138,31 @@ void defineHistos() {
         htete[i] = new TH2F(Form("htete%d",i),Form("htete%d; e; te_t",i), 1000,0,10,350,90,125);
         htet[i] = new TH1F(Form("htet%d",i),Form("htet%d; te_t",i), 350,90,125);
         htetg[i] = new TH1F(Form("htetg%d",i),Form("htetg%d; te_t",i), 350,90,125);
+        heVx[i] = new TH2F(Form("heVx%d",i),Form("heVx%d; x, e",i), 500, -1.1,1.1, 500,0,10);
+        heVxg[i] = new TH2F(Form("heVxg%d",i),Form("heVxg%d; x, e",i), 500, -1.1,1.1, 500,0,10);
+        hEx[i] = new TH1F(Form("hExTot%d",i),Form("hExTot%d",i),400,-2,8); 
+        hExg[i] = new TH1F(Form("hExTotg%d",i),Form("hExTotg%d",i),400,-2,8); 
    }
    //recoil
+   for (int i=0;i<8;i++) {
+       if (i<8) {
+            hrdt[i] = new TH1F(Form("hrdt%d",i),Form("hrdt%d; rdt",i), 1000,0,5000);
+            hrdtg[i] = new TH1F(Form("hrdtg%d",i),Form("hrdtg%d; rdt",i), 1000,0,5000);
+       }
+       if (i < 5) {
+        hrdt2d[i] = new TH2F(Form("hrdt2d%d",i),Form("htet2d%d; rdt[%d]; rdt[%d];",i,i,6),1000,0,5000,1000,0,5000);
+        hrdt2d[i+5] = new TH2F(Form("hrdt2d%d",i+5),Form("htet2d%d; rdt[%d]; rdt[%d];",i+5,i,7),1000,0,5000,1000,0,5000);
+        hrdt2dg[i] = new TH2F(Form("hrdt2dg%d",i),Form("htet2dg%d; rdt[%d]; rdt[%d];",i,i,6),1000,0,5000,1000,0,5000);
+        hrdt2dg[i+5] = new TH2F(Form("hrdt2dg%d",i+5),Form("htet2dg%d; rdt[%d]; rdt[%d];",i+5,i,7),1000,0,5000,1000,0,5000);
+       }
+   }
    //ez
    hez = new TH2F("hez","hez; z; e",1000,-600,-100,1000,0,10);
    hezg = new TH2F("hezg","gated hez; z; e",1000,-600,-100,1000,0,10);
+   hExTot = new TH1F("hExTot","hExTot",400,-2,8);
+   hExgTot = new TH1F("hExgTot","hExgTot",400,-2,8);
+   hcoin_t = new TH1F("hcoin_t","hcoin_t",400,-200,200);
+   hcoinTime = new TH1F("hcoinTime","hcoinTime",400,-200,200);
    //timing
 }
 
