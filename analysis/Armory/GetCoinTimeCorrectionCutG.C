@@ -36,8 +36,8 @@ TH2F * hTXg;
 TH2F * hTXc2; 
 TH1F * hT; 
    
-void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_trace_tp.root",int detID=4){
-   detID = 5;
+void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_trace_run135.root",int detID=4){
+   detID = 0;
    int timeRange[2] ={-100, 120};
    TString rdtCutName = "rdtCuts.root";
 
@@ -96,7 +96,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_tr
    hTX   = new TH2F("hTX",   "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, 95, 115 );
  hTXg  = new TH2F("hTXg",  "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, 95, 115);
 hTXc2 = new TH2F("hTXc2", "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, -10, 10);
-hT = new TH1F("hT", "", 500, -25, 25);
+hT = new TH1F("hT", "", 500, -50, 50);
    TProfile * hp = new TProfile("hp", "time Profile", 400, -1.5,1.5);
    TSpectrum * spec = new TSpectrum(5);
    
@@ -228,7 +228,7 @@ hT = new TH1F("hT", "", 500, -25, 25);
    
    //==== 1-D plot
    cAna->cd(4);
-   expression.Form("te_t - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7)>>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   expression.Form("(te_t - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7))*10.0>>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    
