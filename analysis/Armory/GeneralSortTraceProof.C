@@ -558,8 +558,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             gFit->SetLineColor(lineColor);
             gFitLin->SetLineColor(lineColor);
-            //gFit->SetRange(0, traceLength);
-	         gFit->SetRange(0, 300);
+            gFit->SetRange(0, traceLength);
+	         //gFit->SetRange(0, 300);
             gFitLin->SetRange(200, traceLength);
 
             base = gTrace->Eval(1);

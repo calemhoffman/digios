@@ -138,14 +138,14 @@ void defineHistos() {
    for (int i=0;i<24;i++) {
         hxfxn[i] = new TH2F(Form("hxfxn%d",i),Form("hxfxn%d; xf; xn",i), 1000,0,2500,1000,0,2500);
         hesumx[i] = new TH2F(Form("hesumx%d",i),Form("hesumx%d; e; xf+xn",i), 1000,0,10,1000,0,2500);
-        htetx[i] = new TH2F(Form("htetx%d",i),Form("htetx%d; x; te_t",i), 1000,-1.1,1.1,350,950,1150);
-        htetr[i] = new TH2F(Form("htetr%d",i),Form("htetr%d; te_r; te_t",i), 1000,0,10,350,950,1150);
-        htete[i] = new TH2F(Form("htete%d",i),Form("htete%d; e; te_t",i), 1000,0,10,350,950,1150);
+        htetx[i] = new TH2F(Form("htetx%d",i),Form("htetx%d; x; te_t",i), 1000,-1.1,1.1,500,-50,50);
+        htetr[i] = new TH2F(Form("htetr%d",i),Form("htetr%d; te_r; te_t",i), 1000,0,10,500,-50,50);
+        htete[i] = new TH2F(Form("htete%d",i),Form("htete%d; e; te_t",i), 1000,0,10,500,-50,50);
         hdtx[i] = new TH2F(Form("hdtx%d",i),Form("hdtx%d; x; dt",i), 1000,-1.1,1.1,300,-100,200);
         hdtr[i] = new TH2F(Form("hdtr%d",i),Form("hdtr%d; te_r; dt",i), 1000,0,10,300,-100,200);
         hdte[i] = new TH2F(Form("hdte%d",i),Form("hdte%d; e; dt",i), 1000,0,10,300,-100,200);
-        htet[i] = new TH1F(Form("htet%d",i),Form("htet%d; te_t",i), 350,950,1150);
-        htetg[i] = new TH1F(Form("htetg%d",i),Form("htetg%d; te_t",i), 350,950,1150);
+        htet[i] = new TH1F(Form("htet%d",i),Form("htet%d; te_t",i), 500,-50,50);
+        htetg[i] = new TH1F(Form("htetg%d",i),Form("htetg%d; te_t",i), 500,-50,50);
         heVx[i] = new TH2F(Form("heVx%d",i),Form("heVx%d; x, e",i), 500, -1.1,1.1, 500,0,10);
         heVxg[i] = new TH2F(Form("heVxg%d",i),Form("heVxg%d; x, e",i), 500, -1.1,1.1, 500,0,10);
         hEx[i] = new TH1F(Form("hExTot%d",i),Form("hExTot%d",i),400,-2,8); 
@@ -170,7 +170,7 @@ void defineHistos() {
    hExTot = new TH1F("hExTot","hExTot",400,-2,8);
    hExgTot = new TH1F("hExgTot","hExgTot",400,-2,8);
    hcoin_t = new TH1F("hcoin_t","hcoin_t",400,-200,200);
-   hcoinTime = new TH1F("hcoinTime","hcoinTime",400,-200,200);
+   hcoinTime = new TH1F("hcoinTime","hcoinTime",400,-20,20);
    hdt = new TH1F("hdt","hdt",400,-50,50);
    //timing
 }
@@ -185,14 +185,14 @@ void getCalibrations() {
         int d;
         double a0, a1, a2, a3, a4, a5, a6, a7, a8;
         int i = 0;
-        while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 /* >> a7 >> a8*/){
+        while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6  >> a7 >> a8){
             if( i >= 29) break;
             tetXCorr[i][0] = a0;tetXCorr[i][1] = a1;tetXCorr[i][2] = a2;
             tetXCorr[i][3] = a3;tetXCorr[i][4] = a4;tetXCorr[i][5] = a5;
-            tetXCorr[i][6] = a6;//tetXCorr[i][7] = a7;tetXCorr[i][8] = a8; 
+            tetXCorr[i][6] = a6;tetXCorr[i][7] = a7;tetXCorr[i][8] = a8; 
             i = i + 1;
         }
-        printf(".... done.\n");
+        printf("%f.... done.\n",tetXCorr[5][8]);
         //TMacro cali_tetX("correction_tetX.dat");
         //cali_tetX.Write("correction_tetX");
     }

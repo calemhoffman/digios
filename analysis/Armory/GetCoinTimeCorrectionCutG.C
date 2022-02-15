@@ -36,8 +36,8 @@ TH2F * hTXg;
 TH2F * hTXc2; 
 TH1F * hT; 
    
-void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="s005_32Si_trace_run021-043_045-069_073-085.root", int detID=4){
-
+void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_trace_tp.root",int detID=4){
+   detID = 5;
    int timeRange[2] ={-100, 120};
    TString rdtCutName = "rdtCuts.root";
 
