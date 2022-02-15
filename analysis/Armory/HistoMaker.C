@@ -36,8 +36,15 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
          for (int detID=0;detID<24;detID++) {
             if ( TMath::IsNaN(e[detID]) || e[detID]<0.5 ) continue;
             //process
-            te_t[detID] = te_t[detID]*10.0 - te_r[detID]*0.0; //correct time
-            dt[detID] = (te_t[detID] - trdt_t[4]*10.0); //de back only
+            //correct timing
+            Double_t tetXCorrFactor = 0;
+            for (int ipwr=0;ipwr<9;ipwr++) {
+               tetXCorrFactor-= tetXCorr[detID][ipwr]*TMath::Power(x[detID],ipwr);
+               //printf("%f %d %f\n",te_t[detID],detID,tetXCorrFactor);
+            }
+            te_t[detID] = (te_t[detID] + tetXCorrFactor)*10.0;
+            //te_t[detID] = te_t[detID]*10.0 - te_r[detID]*0.0; //correct time
+            dt[detID] = (te_t[detID] - (trdt_t[4]-101.0-trdt_r[4])*10.0); //de back only
             //fill //"no" gates
             hxfxn[detID]->Fill(xf[detID],xn[detID]);
             hesumx[detID]->Fill(e[detID],xf[detID]+xn[detID]);
@@ -62,7 +69,9 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
             }
             //full gates
             if (  (rdt[4] > 500) && //rdt energy
-                  (x[detID]>-0.9 && x[detID]<0.9) //&& //x
+                  (x[detID]>-0.9 && x[detID]<0.9)// && //x
+                  //(rdt[0] > 1550 && rdt[0] < 1660) && //recoil energy
+                  //(e[detID] < 5.0)
                )
             { //de back needs a signal
                hdtx[detID]->Fill(x[detID],dt[detID]);
@@ -114,6 +123,7 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
 //DRAW
    TCanvas *ctetx = new TCanvas("ctetx","ctetx",1000,800);
    TCanvas *ctete = new TCanvas("ctete","ctete",1000,800);
+   TCanvas *ctetr = new TCanvas("ctetr","ctetr",1000,800);
    TCanvas *ctet = new TCanvas("ctet","ctet",1000,800);
    TCanvas *cdtx = new TCanvas("cdtx","cdtx",1000,800);
    TCanvas *cdte = new TCanvas("cdte","cdte",1000,800);
@@ -121,6 +131,7 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
    TCanvas *crdt = new TCanvas("crdt","crdt",1000,800);
    ctetx->Divide(6,4);
    ctete->Divide(6,4);
+   ctetr->Divide(6,4);
    ctet->Divide(6,4);
    cdtx->Divide(6,4);
    cdte->Divide(6,4);
@@ -129,9 +140,10 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
    for (int detID=0;detID<24;detID++) {
       ctetx->cd(detID+1); htetx[detID]->Draw("colz");
       ctete->cd(detID+1); htete[detID]->Draw("colz");
+      ctetr->cd(detID+1); htetr[detID]->Draw("colz");
       ctet->cd(detID+1); htetg[detID]->Draw("colz");
-      cdtx->cd(detID+1); hdtx[detID]->Draw("colz");
-      cdte->cd(detID+1); hdte[detID]->Draw("colz");
+      cdtx->cd(detID+1); hdtx[detID]->Draw("");
+      cdte->cd(detID+1); hdte[detID]->Draw("");
    }
    for (int i=0;i<5;i++) {
       crdt->cd(2*i+1);
