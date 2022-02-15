@@ -48,6 +48,7 @@ Int_t   coin_t;
 Float_t tcoin_t;
 Float_t coinTimeUC; 
 Float_t coinTime;
+Float_t dt[30];
 // Declaration of leaf types
 Int_t           runID;
 Float_t         e[100];
@@ -108,6 +109,9 @@ TH2F * hesumx[24];
 TH2F * htetx[24];
 TH2F * htetr[24];
 TH2F * htete[24];
+TH2F * hdtx[24];
+TH2F * hdtr[24];
+TH2F * hdte[24];
 TH1F * htet[24];
 TH1F * htetg[24];
 TH2F * heVx[24];
@@ -124,6 +128,7 @@ TH1F * hExTot;
 TH1F * hExgTot;
 TH1F * hcoin_t;
 TH1F * hcoinTime;
+TH1F * hdt;
 void defineHistos() {
        //histograms
    //general
@@ -133,11 +138,14 @@ void defineHistos() {
    for (int i=0;i<24;i++) {
         hxfxn[i] = new TH2F(Form("hxfxn%d",i),Form("hxfxn%d; xf; xn",i), 1000,0,2500,1000,0,2500);
         hesumx[i] = new TH2F(Form("hesumx%d",i),Form("hesumx%d; e; xf+xn",i), 1000,0,10,1000,0,2500);
-        htetx[i] = new TH2F(Form("htetx%d",i),Form("htetx%d; x; te_t",i), 1000,-1.1,1.1,350,90,125);
-        htetr[i] = new TH2F(Form("htetr%d",i),Form("htetr%d; te_r; te_t",i), 1000,0,10,350,90,125);
-        htete[i] = new TH2F(Form("htete%d",i),Form("htete%d; e; te_t",i), 1000,0,10,350,90,125);
-        htet[i] = new TH1F(Form("htet%d",i),Form("htet%d; te_t",i), 350,90,125);
-        htetg[i] = new TH1F(Form("htetg%d",i),Form("htetg%d; te_t",i), 350,90,125);
+        htetx[i] = new TH2F(Form("htetx%d",i),Form("htetx%d; x; te_t",i), 1000,-1.1,1.1,350,950,1150);
+        htetr[i] = new TH2F(Form("htetr%d",i),Form("htetr%d; te_r; te_t",i), 1000,0,10,350,950,1150);
+        htete[i] = new TH2F(Form("htete%d",i),Form("htete%d; e; te_t",i), 1000,0,10,350,950,1150);
+        hdtx[i] = new TH2F(Form("hdtx%d",i),Form("hdtx%d; x; dt",i), 1000,-1.1,1.1,300,-100,200);
+        hdtr[i] = new TH2F(Form("hdtr%d",i),Form("hdtr%d; te_r; dt",i), 1000,0,10,300,-100,200);
+        hdte[i] = new TH2F(Form("hdte%d",i),Form("hdte%d; e; dt",i), 1000,0,10,300,-100,200);
+        htet[i] = new TH1F(Form("htet%d",i),Form("htet%d; te_t",i), 350,950,1150);
+        htetg[i] = new TH1F(Form("htetg%d",i),Form("htetg%d; te_t",i), 350,950,1150);
         heVx[i] = new TH2F(Form("heVx%d",i),Form("heVx%d; x, e",i), 500, -1.1,1.1, 500,0,10);
         heVxg[i] = new TH2F(Form("heVxg%d",i),Form("heVxg%d; x, e",i), 500, -1.1,1.1, 500,0,10);
         hEx[i] = new TH1F(Form("hExTot%d",i),Form("hExTot%d",i),400,-2,8); 
@@ -163,6 +171,7 @@ void defineHistos() {
    hExgTot = new TH1F("hExgTot","hExgTot",400,-2,8);
    hcoin_t = new TH1F("hcoin_t","hcoin_t",400,-200,200);
    hcoinTime = new TH1F("hcoinTime","hcoinTime",400,-200,200);
+   hdt = new TH1F("hdt","hdt",400,-50,50);
    //timing
 }
 
