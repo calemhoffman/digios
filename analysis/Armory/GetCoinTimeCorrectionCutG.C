@@ -36,8 +36,8 @@ TH2F * hTXg;
 TH2F * hTXc2; 
 TH1F * hT; 
    
-void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_trace_run135.root",int detID=4){
-   detID = 0;
+void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_trace_tp.root",
+int detID=8){
    int timeRange[2] ={-100, 120};
    TString rdtCutName = "rdtCuts.root";
 
@@ -55,7 +55,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_tr
    //    printf(" Branch <coinTimeUC> not exist!!!!! exit. \n");
    //    return;
    // }
-   TBranch * br = (TBranch *) tree->GetListOfBranches()->FindObject("te_t");
+   TBranch * br = (TBranch *) tree->GetListOfBranches()->FindObject("coinTimeUC");
    if( br == NULL ){
       printf(" Branch <coinTimeUC> not exist!!!!! exit. \n");
       return;
@@ -93,10 +93,10 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_tr
    
    TString name, expression, gate, gateCut;
 
-   hTX   = new TH2F("hTX",   "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, 95, 115 );
- hTXg  = new TH2F("hTXg",  "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, 95, 115);
-hTXc2 = new TH2F("hTXc2", "time vs X; x; te_t [ch]", 200, -1.1, 1.1, 200, -10, 10);
-hT = new TH1F("hT", "", 500, -50, 50);
+   hTX   = new TH2F("hTX",   "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 250 );
+ hTXg  = new TH2F("hTXg",  "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 250);
+hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 250);
+hT = new TH1F("hT", "", 50, -50, 50);
    TProfile * hp = new TProfile("hp", "time Profile", 400, -1.5,1.5);
    TSpectrum * spec = new TSpectrum(5);
    
@@ -121,7 +121,7 @@ hT = new TH1F("hT", "", 500, -50, 50);
    printf("============ detID: %d\n", detID);
 
    //expression.Form("coinTimeUC:x>>hTX");
-   expression.Form("te_t:x>>hTX");
+   expression.Form("coinTimeUC:x[%d]>>hTX",detID);
    if( isBranchDetIDExist ) {   
       gate.Form("detID==%d", detID);
    }else{
@@ -134,36 +134,13 @@ hT = new TH1F("hT", "", 500, -50, 50);
    
    printf("%s \n", gate.Data());
    // name.Form("time vs X (detID-%d); x; coinTimeUC [ch]", detID);
-   name.Form("time vs X (detID-%d); x; te_t [ch]", detID);
+   name.Form("time vs X (detID-%d); x; coinTimeUC [ch]", detID);
    hTX->SetTitle(name);
    cAna->cd(1);
    tree->Draw(expression, gate, "colz");
    int entries = hTX->Integral();
    printf("entries : %d \n", entries);
-   
-   /**
-   if( entries < 100 ){
-      printf("set bin = 30\n");
-      hTX->SetBins(30,   -1.5, 1.5, 50, timeRange[0], timeRange[1] );
-      hTXg->SetBins(30,  -1.5, 1.5, 50, timeRange[0], timeRange[1] );
-      hTXc2->SetBins(30, -1.5, 1.5, 50, timeRange[0], timeRange[1] );
-      hp->SetBins(30, -1.5, 1.5); 
-      tree->Draw(expression, gate, "colz");
-   }else if( 100 <= entries && entries < 500 ){
-      printf("set bin = 100\n");
-      hTX->SetBins(100,   -1.5, 1.5, 100, timeRange[0], timeRange[1] );
-      hTXg->SetBins(100,  -1.5, 1.5, 100, timeRange[0], timeRange[1] );
-      hTXc2->SetBins(100, -1.5, 1.5, 100, timeRange[0], timeRange[1] );
-      hp->SetBins(100, -1.5, 1.5);
-      tree->Draw(expression, gate, "colz");
-   }else if ( 500 <= entries ){
-      printf("set bin = 400\n");
-      hTX->SetBins(400,   -1.5, 1.5, 400, timeRange[0], timeRange[1] );
-      hTXg->SetBins(400,  -1.5, 1.5, 400, timeRange[0], timeRange[1] );
-      hTXc2->SetBins(400, -1.5, 1.5, 400, timeRange[0], timeRange[1] );
-      hp->SetBins(400, -1.5, 1.5);
-      tree->Draw(expression, gate, "colz");
-   }*/      
+        
    cAna->Update();
    
    //==== create cut and draw
@@ -172,8 +149,8 @@ hT = new TH1F("hT", "", 500, -50, 50);
    cut = (TCutG*) gROOT->FindObjectAny("CUTG");
    cut->SetName("cutG");
    cut->SetVarX(Form("x[%d]",detID));
-   // cut->SetVarY("coinTimeUC");
-   cut->SetVarY(Form("te_t[%d]",detID));
+   cut->SetVarY("coinTimeUC");
+   //cut->SetVarY(Form("te_t[%d]",detID));
    printf("Got the TCut.\n");
    
    if( isBranchDetIDExist ) {   
@@ -184,9 +161,9 @@ hT = new TH1F("hT", "", 500, -50, 50);
    //if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
 
    cAna->cd(2);
-   // expression.Form("coinTimeUC:x>>hTXg");
-   expression.Form("te_t:x>>hTXg");
-   tree->Draw(expression, gate, "colz");
+    expression.Form("coinTimeUC:x>>hTXg");
+   //expression.Form("te_t:x>>hTXg");
+   tree->Draw(expression, gate, "");
    cut->Draw("same");
    gSystem->ProcessEvents();
    
@@ -220,7 +197,7 @@ hT = new TH1F("hT", "", 500, -50, 50);
    
    ///***************
    cAna->cd(3);   
-   expression.Form("te_t - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) :x>>hTXc2", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) :x>>hTXc2", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    ///printf("---------- double click for 1D plot.\n");
@@ -228,7 +205,7 @@ hT = new TH1F("hT", "", 500, -50, 50);
    
    //==== 1-D plot
    cAna->cd(4);
-   expression.Form("(te_t - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7))*10.0>>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   expression.Form("(coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7))*1.0>>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    
