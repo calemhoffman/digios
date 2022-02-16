@@ -1,7 +1,7 @@
 #include "HistoMaker.h"
 
-void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
-   //rootFile="root_data/s005_32Si_trace_run093-157.root";
+void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_run135_short.root") {
+   rootFile="root_data/s005_32Si_trace_tp.root";
    //rootFile="root_data/s005_32Si_trace_dp.root";
    const char* treeName="tree";
    TFile *file0 = new TFile (rootFile, "read"); 
@@ -14,14 +14,6 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
    //Process events
    Int_t nEntries = tree->GetEntries();
    printf("nEntries: %d\n",nEntries);
-
-// for (Int_t entryNumber=0;entryNumber<numElistEntries; entryNumber++) {
-// //for (Int_t entryNumber=0;entryNumber<nEntries; entryNumber++) {
-// chain->GetEntry(elist_all->GetEntry(entryNumber));
-// //chain->GetEntry(entryNumber);
-// if (((Float_t)entryNumber/(Float_t)numElistEntries)>counter)
-// { printf("^_^_^_%4.1f_^_^_^\n",counter*100);
-// counter=counter+0.1; }
 
    for (Int_t entryNumber=0;entryNumber<=nEntries; entryNumber++) {
       tree->GetEntry(entryNumber);
@@ -38,14 +30,16 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
             //process
             //correct timing
             Double_t tetXCorrFactor = 0;
-            for (int ipwr=0;ipwr<9;ipwr++) {
+            for (int ipwr=0;ipwr<=8;ipwr++) {
                tetXCorrFactor-= tetXCorr[detID][ipwr]*TMath::Power(x[detID],ipwr);
                //printf("%f %d %f\n",te_t[detID],detID,tetXCorrFactor);
             }
-            te_t[detID] = (te_t[detID] + tetXCorrFactor)*10.0;
-            //te_t[detID] = te_t[detID]*10.0 - te_r[detID]*0.0; //correct time
-            dt[detID] = (te_t[detID] - (trdt_t[4]-101.0-trdt_r[4])*10.0); //de back only
-            //fill //"no" gates
+
+            //dt[detID] = 10.0*((float)coin_t + te_t[detID] - trdt_t[4]);//coinTimeUC;
+            Int_t tsDiff = (int)(e_t[detID] - rdt_t[4]);
+            dt[detID] = 10.0*((float)tsDiff + te_t[detID] - trdt_t[4]) + tetXCorrFactor;//coinTimeUC;
+            te_t[detID] = coinTimeUC;
+            //fills no gates
             hxfxn[detID]->Fill(xf[detID],xn[detID]);
             hesumx[detID]->Fill(e[detID],xf[detID]+xn[detID]);
             htetx[detID]->Fill(x[detID],te_t[detID]);
@@ -56,9 +50,13 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
             hEx[detID]->Fill(Ex);
             hez->Fill(z[detID],e[detID]);
             hcoin_t->Fill(tcoin_t);
-            hcoinTime->Fill(coinTime);
-            hdt->Fill(dt[detID]);
+            hcoinTime->Fill(coinTimeUC);
+            hdt[detID]->Fill(dt[detID]);
             hExTot->Fill(Ex);
+            hdtx[detID]->Fill(x[detID],dt[detID]);
+            hdtr[detID]->Fill(te_r[detID],dt[detID]);
+            hdte[detID]->Fill(e[detID],dt[detID]);
+      
             for (int recID=0;recID<8;recID++) {
                if ( TMath::IsNaN(rdt[recID]) ) continue;
                hrdt[recID]->Fill(rdt[recID]);
@@ -69,14 +67,11 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
             }
             //full gates
             if (  (rdt[4] > 500) && //rdt energy
-                  (x[detID]>-0.9 && x[detID]<0.9)// && //x
-                  //(rdt[0] > 1550 && rdt[0] < 1660) && //recoil energy
-                  //(e[detID] < 5.0)
+                  (x[detID]>-0.9 && x[detID]<0.9) && //x
+                  (rdt[0] > 500 && rdt[0] < 1700) && //recoil energy
+                  (dt[detID] < -10.0 && dt[detID]>-33.0)
                )
             { //de back needs a signal
-               hdtx[detID]->Fill(x[detID],dt[detID]);
-               hdtr[detID]->Fill(te_r[detID],dt[detID]);
-               hdte[detID]->Fill(e[detID],dt[detID]);
                hezg->Fill(z[detID],e[detID]);
                htetg[detID]->Fill(te_t[detID]);
                heVxg[detID]->Fill(x[detID],e[detID]);
@@ -106,6 +101,7 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
       htetr[detID]->Write(); htet[detID]->Write();
       heVx[detID]->Write(); heVxg[detID]->Write();
       hEx[detID]->Write(); hExg[detID]->Write();
+      hdt[detID]->Write();
    }
    hcoin_t->Write(); hcoinTime->Write();
    hExTot->Write(); hExgTot->Write();
@@ -138,10 +134,10 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
    cez->Divide(1,2);
    crdt->Divide(2,5);
    for (int detID=0;detID<24;detID++) {
-      ctetx->cd(detID+1); htetx[detID]->Draw("colz");
-      ctete->cd(detID+1); htete[detID]->Draw("colz");
-      ctetr->cd(detID+1); htetr[detID]->Draw("colz");
-      ctet->cd(detID+1); htetg[detID]->Draw("colz");
+      ctetx->cd(detID+1); htetx[detID]->Draw("");
+      ctete->cd(detID+1); htete[detID]->Draw("");
+      ctetr->cd(detID+1); htetr[detID]->Draw("");
+      ctet->cd(detID+1); htetg[detID]->Draw("");
       cdtx->cd(detID+1); hdtx[detID]->Draw("");
       cdte->cd(detID+1); hdte[detID]->Draw("");
    }
@@ -154,4 +150,7 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_trace_tp.root") {
    cez->cd(1); hez->Draw("colz");
    cez->cd(2); hezg->Draw("colz");
    outFile->Write(); outFile->Close();
+
+   TCanvas *cc = new TCanvas("cc","cc",800,800);
+   cc->Clear(); cc->cd();
 } //end

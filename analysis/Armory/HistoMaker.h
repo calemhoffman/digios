@@ -83,6 +83,7 @@ void setTreeBranches(TTree * tree) {
    //array
    tree->SetBranchAddress("multiHit",&multiHit);
    tree->SetBranchAddress("e",e);
+   tree->SetBranchAddress("e_t",e_t);
    tree->SetBranchAddress("x",x);
    tree->SetBranchAddress("xf",xf);
    tree->SetBranchAddress("xn",xn);
@@ -92,12 +93,15 @@ void setTreeBranches(TTree * tree) {
    tree->SetBranchAddress("z",z);
    //recoil
    tree->SetBranchAddress("rdt",rdt); 
+   tree->SetBranchAddress("rdt_t",rdt_t); 
    tree->SetBranchAddress("trdt",trdt); 
    tree->SetBranchAddress("trdt_t",trdt_t); 
    tree->SetBranchAddress("trdt_r",trdt_r);
    //final
+   tree->SetBranchAddress("coinTimeUC",&coinTimeUC);
    tree->SetBranchAddress("coinTime",&coinTime);
    tree->SetBranchAddress("tcoin_t",&tcoin_t);
+   tree->SetBranchAddress("coin_t",&coin_t);
    tree->SetBranchAddress("Ex",&Ex);
    tree->SetBranchAddress("thetaLab",&thetaLab);
 }
@@ -128,7 +132,7 @@ TH1F * hExTot;
 TH1F * hExgTot;
 TH1F * hcoin_t;
 TH1F * hcoinTime;
-TH1F * hdt;
+TH1F * hdt[24];
 void defineHistos() {
        //histograms
    //general
@@ -150,6 +154,8 @@ void defineHistos() {
         heVxg[i] = new TH2F(Form("heVxg%d",i),Form("heVxg%d; x, e",i), 500, -1.1,1.1, 500,0,10);
         hEx[i] = new TH1F(Form("hExTot%d",i),Form("hExTot%d",i),400,-2,8); 
         hExg[i] = new TH1F(Form("hExTotg%d",i),Form("hExTotg%d",i),400,-2,8); 
+        hdt[i] = new TH1F(Form("hdt%d",i),Form("hdt%d",i),100,-50,50);
+
    }
    //recoil
    for (int i=0;i<8;i++) {
@@ -170,8 +176,7 @@ void defineHistos() {
    hExTot = new TH1F("hExTot","hExTot",400,-2,8);
    hExgTot = new TH1F("hExgTot","hExgTot",400,-2,8);
    hcoin_t = new TH1F("hcoin_t","hcoin_t",400,-200,200);
-   hcoinTime = new TH1F("hcoinTime","hcoinTime",400,-20,20);
-   hdt = new TH1F("hdt","hdt",400,-50,50);
+   hcoinTime = new TH1F("hcoinTime","hcoinTime",400,-50,50);
    //timing
 }
 
@@ -187,9 +192,9 @@ void getCalibrations() {
         int i = 0;
         while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6  >> a7 >> a8){
             if( i >= 29) break;
-            tetXCorr[i][0] = a0;tetXCorr[i][1] = a1;tetXCorr[i][2] = a2;
-            tetXCorr[i][3] = a3;tetXCorr[i][4] = a4;tetXCorr[i][5] = a5;
-            tetXCorr[i][6] = a6;tetXCorr[i][7] = a7;tetXCorr[i][8] = a8; 
+            tetXCorr[d][0] = a0;tetXCorr[d][1] = a1;tetXCorr[d][2] = a2;
+            tetXCorr[d][3] = a3;tetXCorr[d][4] = a4;tetXCorr[d][5] = a5;
+            tetXCorr[d][6] = a6;tetXCorr[d][7] = a7;tetXCorr[d][8] = a8; 
             i = i + 1;
         }
         printf("%f.... done.\n",tetXCorr[5][8]);
