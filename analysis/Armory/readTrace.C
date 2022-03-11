@@ -16,7 +16,7 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
 /**///==============================================================   
 
    TFile * f1 = new TFile (fileName, "read");
-   TTree * tree = (TTree *) f1->Get("gen_tree");
+   TTree * tree = (TTree *) f1->Get("tree");
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
