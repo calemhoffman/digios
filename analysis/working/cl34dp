@@ -1,0 +1,35 @@
+#========= Input for Cleopatra
+#===== # for comment line, must be at the beginning of line
+#===== the potential contain two words
+# one for incoming
+# one for outgoing
+#================================================= Potenital abberation
+#========================= deuteron
+# A = An, Cai, 2006                  |         E < 183 | 12 < A < 238             | http://dx.doi.org/10.1103/PhysRevC.73.054605
+# H = Han, Shi, Shen, 2006           |         E < 200 | 12 < A < 209             | http://dx.doi.org/10.1103/PhysRevC.74.044615
+# B = Bojowald et al., 1988          |    50 < E < 80  | 27 < A < 208             | http://dx.doi.org/10.1103/PhysRevC.38.1153
+# D = Daehnick, Childs, Vrcelj, 1980 |  11.8 < E < 80  | 27 < A < 238 (REL)       | http://dx.doi.org/10.1103/PhysRevC.21.2253
+# C = Daehnick, Childs, Vrcelj, 1980 |  11.8 < E < 80  | 27 < A < 238 (NON-REL)   | http://dx.doi.org/10.1103/PhysRevC.21.2253 // not impletmented yet
+# L = Lohr and Haeberli, 1974        |     9 < E < 13  | 40 < A                   | http://dx.doi.org/10.1016/0375-9474(74)90627-7 
+# Q = Perey and Perey, 1963          |    12 < E < 25  | 40 < A                   | http://dx.doi.org/10.1016/0370-1573(91)90039-O 
+#========================= proton
+# K = Koning and Delaroche, 2009     | 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
+# V = Varner et al., (CH89), 1991    |    16 < E < 65  |  4 < A < 209             | http://dx.doi.org/10.1016/0370-1573(91)90039-O
+# M = Menet et al., 1971             |   30 <  E < 60  | 40 < A                   | http://dx/doi.org/10.1016/0092-640X(76)90007-3
+# G = Becchetti and Greenlees, 1969  |         E < 50  | 40 < A                   | http://dx.doi.org/10.1103/PhysRev.182.1190
+# P = Perey, 1963                    |         E < 20  | 30 < A < 100             | http://dx/doi.org/10.1016/0092-640X(76)90007-3
+#========================= A=3
+# x = Xu, Guo, Han, Shen, 2011       |         E < 250 | 20 < A < 209 | 3He       | http://dx.doi.org/10.1007/s11433-011-4488-5
+# l = Liang, Li, Cai, 2009           |         E < 270 | All masses               | http://dx.doi.org/10.1088/0954-3899/36/8/085104
+# p = Pang et al., 2009              |     All E       | All masses   | Iso. Dep. | http://dx.doi.org/10.1103/PhysRevC.79.024615
+# c = Li, Liang, Cai, 2007           |         E < 40  | 48 < A < 232 | Tritons   | http://dx.doi.org/10.1016/j.nuclphysa.2007.03.004
+# t = Trost et al., 1987             |    10 < E < 220 | 10 < A < 208             | http://dx.doi.org/10.1016/0375-9474(87)90551-3
+# h = Hyakutake et al., 1980         |    90 < E < 120 | About 58 < A < 92        | http://dx.doi.org/10.1016/0375-9474(80)90013-5
+# b = Becchetti and Greenlees, 1971  |         E < 40  | 40 < A       | Iso. Dep.
+#=======================================================================
+#reaction          gs-spin  orbital  spin-pi(Ex)  Ex      ELab        Potentials 
+34Cl(d,p)35Cl   3        0f7/2    13/2-         6.087   10.00MeV/u   QP
+34Cl(d,p)35Cl   3        0f7/2    11/2-         5.927   10.00MeV/u   QP
+34Cl(d,p)35Cl   3        0f7/2    11/2-         5.407   10.00MeV/u   QP
+#34Cl(d,p)35Cl   3        1p3/2    9/2-         5.000   10.00MeV/u   QP
+#34Cl(d,p)35Cl   0        0d3/2    3/2+         0.000   10.00MeV/u   QP
