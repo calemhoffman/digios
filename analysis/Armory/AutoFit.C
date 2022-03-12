@@ -1,3 +1,10 @@
+/********************************************************
+ * This is a root macro for Auto fitting
+ * Created by Tsz Leung (Ryan) Tang around Feb, 2019
+ *                             last update  
+ * contact goluckyryan@gmail.com
+*********************************************************/
+
 #ifndef AutoFit_C
 #define AutoFit_C
 
