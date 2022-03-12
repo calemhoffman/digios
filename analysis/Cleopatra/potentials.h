@@ -25,7 +25,7 @@ void PrintPotential(){
 }
 
 /// A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-/// 1 1 1 1 0 0 1 1 0 0 1 1 1 0 0 1 1 0 0 0 0 1 0 0 1 1
+/// 1 1 1 1 0 0 1 1 0 0 1 1 1 0 0 1 1 0 0 0 0 1 0 1 1 1
 string potentialRef(string name){
   
   //======== Deuteron 
@@ -49,6 +49,10 @@ string potentialRef(string name){
   }
   if( name == "Q" ){
     return "Perey and Perey (1963) 12 < E < 25  | 40 < A | http://dx.doi.org/10.1016/0370-1573(91)90039-O";
+  }
+  
+  if( name == "Z" ){
+    return "Zhang, Pang, Lou (2016) 5 < E < 170  | A < 18 | https://doi.org/10.1103/PhysRevC.94.014619";
   }
    
   //======= Proton 
@@ -108,11 +112,34 @@ string potentialRef(string name){
   if( name == "Y"){
     return "Bardayan Parameters PRC 78 052801(R) (2008)";
   }
-  if( name == "Z"){
+  if( name == "X"){
     return "Bardayan Parameters PRC 78 052801(R) (2008)";
   }
    
   return "";
+}
+
+
+bool CustomXPotential(int A, int Z, double E){
+
+v = 54.19    ;
+r0 = 1.25    ;
+a = 0.65     ;
+vi = 0.0     ;
+ri0 = 1.25   ;
+ai = 0.65    ;
+vsi = 13.5   ;
+rsi0 = 1.25  ;
+asi = 0.47   ;
+vso = 7.5    ;
+rso0 = 1.25  ;
+aso = 0.47   ;
+vsoi = 0.0   ;
+rsoi0 = 1.25 ;
+asoi = 0.47 ;
+rc0 = 1.25  ;
+
+  return true;
 }
 
 bool CustomYPotential(int A, int Z, double E){
@@ -141,28 +168,6 @@ bool CustomYPotential(int A, int Z, double E){
 
   return true;
 }
-bool CustomZPotential(int A, int Z, double E){
-
-v = 54.19    ;
-r0 = 1.25    ;
-a = 0.65     ;
-vi = 0.0     ;
-ri0 = 1.25   ;
-ai = 0.65    ;
-vsi = 13.5   ;
-rsi0 = 1.25  ;
-asi = 0.47   ;
-vso = 7.5    ;
-rso0 = 1.25  ;
-aso = 0.47   ;
-vsoi = 0.0   ;
-rsoi0 = 1.25 ;
-asoi = 0.47 ;
-rc0 = 1.25  ;
-
-  return true;
-}
-
 //======================== deuteron 
 bool AnCaiPotential(int A, int Z, double E){
   // d + A(Z)
@@ -400,6 +405,63 @@ bool PereyPereyPotential(int A, int Z, double E){
   return true;
 }
 
+bool ZhangPangLouPotential(int A, int Z, double E, double Zproj){
+  
+  vso = 0;
+  rso0 = 0;
+  aso = 0;
+  vsoi = 0;
+  rsoi0 = 0;
+  rc0 = 1.3;
+    
+  double A3 = pow(A, 1./3.);
+
+  double RC = rc0 * A3;  
+  double Ec = 6 * Zproj * Z * 1.44 / 5 / RC;
+  
+  if( A == 6 && Z == 3 ){
+    r0  = 1.62 - 0.0122 * (E - Ec) / A3;
+    ri0 = 2.83 - 0.0911 * (E - Ec) / A3;
+    rsi0 = ri0;
+    
+    a   = 0.876;
+    ai  = 0.27;
+    asi = ai;
+    
+    v   = 47.9 + 2.37 * (E - Ec);
+    vi  = 0;
+    vsi = 11.3 + 3.44 * (E - Ec); 
+
+  }else if( A == 7 && Z == 3 ){
+    r0  = 1.45  + 0.097 * (E - Ec) / A3;
+    ri0 = 2.12  + 0.022 * (E - Ec) / A3;
+    rsi0 = ri0;
+    
+    a   = 0.844;
+    ai  = 0.261;
+    asi = ai;
+    
+    v   = 26.1 + 1.19 * (E - Ec);
+    vi  = 0;
+    vsi = 215.0 - 16.1 * (E - Ec);     
+    
+  }else{ 
+    r0   = 1.11  - 0.167 / A3 + 0.00117 * (E - Ec) / A3;
+    ri0  = 0.561 + 3.07  / A3 - 0.00449 * (E - Ec) / A3;
+    rsi0 = ri0;
+    
+    a   = 0.776;
+    ai  = 0.744;
+    asi = ai;
+    
+    v   = 98.9 - 0.279 * (E - Ec);
+    vi  = 11.5 / ( 1 + exp((18.1 - (E - Ec))/5.97));
+    vsi = 7.56 / ( 1 + exp(((E - Ec) - 14.3)/4.55)); 
+    
+  }
+    
+  return true;
+}
 
 //======================== proton 
 bool KoningPotential(int A, int Z, double E, double Zproj){
@@ -980,6 +1042,7 @@ bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   if( potName == "D") okFlag = DaehnickPotential(A, Z, E);
   if( potName == "L") okFlag = LohrPotential(A, Z, E);
   if( potName == "Q") okFlag = PereyPereyPotential(A, Z, E);
+  if( potName == "Z") okFlag = ZhangPangLouPotential(A, Z, E, Zproj);
   
   if( potName == "K") okFlag = KoningPotential(A, Z, E, Zproj);
   if( potName == "V") okFlag = VarnerPotential(A, Z, E);
@@ -998,9 +1061,9 @@ bool CallPotential(string potName, int A, int Z, double E, int Zproj){
   if( potName == "s") okFlag = SuAndHanPotential(A, Z, E);
   if( potName == "a") okFlag = AvrigeanuPotential(A, Z, E);
   if( potName == "f") okFlag = BassaniPicardPotential(A, Z, E);
-  
+
+  if( potName == "X") okFlag = CustomXPotential(A, Z, E);  
   if( potName == "Y") okFlag = CustomYPotential(A, Z, E);
-  if( potName == "Z") okFlag = CustomZPotential(A, Z, E);
   
   //printf(" Potenital : %s | A : %d | Z : %d | E : %f\n", potName.c_str(), A, Z, E);
   //PrintPotential();
