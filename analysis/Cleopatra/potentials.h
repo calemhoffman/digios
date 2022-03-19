@@ -650,11 +650,11 @@ bool BecchettiPotential(int A, int Z, double E){
   ri0 = 1.32;
   ai  = 0.51 + 0.7 * (N-Z)/A;
 
-  vsi  = 4.2 - 0.05 * E + 15.5 * (N-Z)/A;
-  rsi0 = 11.8 - 0.258 * E + 12. * (N-Z)/A;
-  if( rsi0 < 0 ) {
-    rsi0 = 0;
+  vsi = 11.8 - 0.258 * E + 12. * (N-Z)/A;
+  if( vsi < 0 ) {
+    vsi = 0;
   }
+  rsi0 = 1.320;
   asi  = 0.51 + 0.7 * (N-Z)/A;
 
   vso  = 6.2;
