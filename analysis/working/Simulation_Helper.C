@@ -280,9 +280,9 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    extractFlag->SetWidth(130);
    extractFlag->SetHeight(30);
    
-   extractFlag->AddEntry("Xse.", 2);
+   extractFlag->AddEntry("Xsec.", 2);
    extractFlag->AddEntry("Ratio to Ruth.", 1);
-   extractFlag->AddEntry("(n,n) Xsec", 3);
+   extractFlag->AddEntry("(n,n) Xsec.", 3);
    extractFlag->Select(2);
    DWBAFrame->AddFrame(extractFlag, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
