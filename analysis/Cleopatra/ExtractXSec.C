@@ -32,6 +32,7 @@ int main (int argc, char *argv[]) {
     printf("Usage: ./ExtractXSec input_file <ElasticFlag>\n");
     printf("                 ElasticFlag = 1 , default, extarct Ratio to Rutherford\n");
     printf("                 ElasticFlag = 2 ,          extarct Total Xsec\n");
+    printf("                 ElasticFlag = 3 ,          (n,n) Xsec\n");
     exit(0); 
   }else{
     printf("From file : %s \n", argv[1]);

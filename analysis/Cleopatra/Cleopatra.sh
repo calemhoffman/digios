@@ -52,6 +52,7 @@ if [ $# -eq 0 ] ; then
   echo "                     |  |  Extract cross-section? (2/1/0)"
   echo "                     |  |             if 1 = extract Ratio to Rutherford for (d,d) or (p,p)"
   echo "                     |  |             if 2 = extract total Xsec for (d,d) or (p,p)"
+  echo "                     |  |             if 3 = extract (n,n)"
   echo "                     |  Run Ptolemy? (1/0)"
   echo "                     Create infile? (1/0)"
   echo "default angMin = 0, angMax = 50, angStep = 0.5"

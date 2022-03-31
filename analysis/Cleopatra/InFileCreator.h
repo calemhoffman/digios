@@ -1,7 +1,7 @@
 /***********************************************************************
  * 
  *  This is InFileCreator, To creator the in-file for Ptolemy
- *          only for (x,y), x or y = p, d, t, 3He
+ *          only for (x,y), x or y = n, p, d, t, 3He
  * 
  *  It read a simple infile.in from reaction_setting file
  * 
