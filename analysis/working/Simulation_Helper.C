@@ -234,12 +234,12 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    
    angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
    angMax->SetWidth(50);
-   angMin->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
+   angMax->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
    hframe001->AddFrame(angMax, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
    
    angStep = new TGNumberEntry(hframe001, 1, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
    angStep->SetWidth(50);
-   angMin->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
+   angStep->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
    hframe001->AddFrame(angStep, new TGLayoutHints(kLHintsCenterX, 5, 5, 0, 0));
 
    //------- Check Boxes
