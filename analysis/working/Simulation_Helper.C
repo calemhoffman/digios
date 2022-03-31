@@ -273,7 +273,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    
    extractFlag->AddEntry("Xsec.", 2);
    extractFlag->AddEntry("Ratio to Ruth.", 1);
-   extractFlag->AddEntry("(n,n) Xsec.", 3);
+   extractFlag->AddEntry("Rutherford", 3);
    extractFlag->Select(2);
    DWBAFrame->AddFrame(extractFlag, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
@@ -301,7 +301,14 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
 
    // Map main frame
    fMain->MapWindow();   
-   
+
+   int versionInt = gROOT->GetVersionInt();
+
+   if( versionInt < 62600 ) {
+      statusLabel->SetText(Form("Root version : %s. Please Update Root to v6.26/00",gROOT->GetVersion()));  
+   }else{
+      statusLabel->SetText(Form("Root version : %s",gROOT->GetVersion()));    
+   }
 }
 
 bool MyMainFrame::IsFileExist(TString filename){
@@ -481,11 +488,6 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("");
      editor->AddLine("================ Tips for using the editor, both MAC or LINUX");
      editor->AddLine("");
-     editor->AddLine("DO NOT PRESS SHIFT");
-     editor->AddLine("DO NOT PRESS SHIFT");
-     editor->AddLine("DO NOT PRESS SHIFT");
-     editor->AddLine("DO NOT PRESS SHIFT");
-     editor->AddLine("");
      editor->AddLine("Ctrl+U      | Delete current line.  ");
      editor->AddLine("Ctrl+C      | Copy            ");
      editor->AddLine("Ctrl+V      | Paste            ");
@@ -495,6 +497,14 @@ void MyMainFrame::Command(int ID) {
      osTypeStr.Form("OS type is %s", (OS_Type == 0 ? "Mac" : "Linux"));
 
      editor->AddLine(osTypeStr);
+
+     editor->AddLine(Form("Root version : %s",gROOT->GetVersion()));
+     int versionInt = gROOT->GetVersionInt();
+
+     if( versionInt < 62600 ) {
+         editor->AddLine("Please Update Root to v6.26/00");
+     }
+     
   }
   
   if( ID == 5) {
