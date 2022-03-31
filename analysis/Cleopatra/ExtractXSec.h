@@ -57,6 +57,7 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
   
   //indexForElastic = 1 ; for Ratio
   //indexForElastic = 2 ; for Total
+  //indexForElastic = 3 ; for (n,n) sigma
    
   //--- open file.out
   ifstream file_in;
@@ -192,9 +193,15 @@ int ExtractXSec (string readFile, int indexForElastic=1) {
         numAngle = atof( line.substr(0, 7).c_str());
         if( indexForElastic == 1 ){
           numXsec = atof( line.substr(15, 15).c_str());
-        }else{
+        }else if( indexForElastic == 2 ){
           if ( line.length() > 60 ) {
             numXsec = atof( line.substr(57, 14).c_str());
+          }else{
+            numXsec = -404;
+          }
+        }else{
+          if ( line.length() > 60 ) {
+            numXsec = atof( line.substr(32, 7).c_str());
           }else{
             numXsec = -404;
           }

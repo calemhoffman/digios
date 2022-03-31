@@ -5,6 +5,7 @@
 #include <TGButton.h>
 #include <TGLabel.h>
 #include <TGFrame.h>
+#include <TGComboBox.h>
 #include <TRootEmbeddedCanvas.h>
 #include <RQ_OBJECT.h>
 
@@ -55,7 +56,9 @@ private:
    TGCheckButton * isExtract;
    TGCheckButton * isPlot;
    
-   TGCheckButton * isElastic;
+   //TGCheckButton * isElastic;
+   TGComboBox    * extractFlag;
+   
    
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
@@ -268,11 +271,20 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    isPlot->SetState(kButtonDown);
    DWBAFrame->AddFrame(isPlot, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
-   isElastic = new TGCheckButton(DWBAFrame, "Ratio to RutherFord");
-   isElastic->SetWidth(130);
-   isElastic->ChangeOptions(kFixedSize );
-   DWBAFrame->AddFrame(isElastic, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+   //isElastic = new TGCheckButton(DWBAFrame, "Ratio to RutherFord");
+   //isElastic->SetWidth(130);
+   //isElastic->ChangeOptions(kFixedSize );
+   //DWBAFrame->AddFrame(isElastic, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
+   extractFlag = new TGComboBox(DWBAFrame, 100);
+   extractFlag->SetWidth(130);
+   extractFlag->SetHeight(30);
+   
+   extractFlag->AddEntry("Xse.", 2);
+   extractFlag->AddEntry("Ratio to Ruth.", 1);
+   extractFlag->AddEntry("(n,n) Xsec", 3);
+   extractFlag->Select(2);
+   DWBAFrame->AddFrame(extractFlag, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
    TGTextButton *DWBA = new TGTextButton(DWBAFrame, "DWBA");
    DWBA->SetWidth(150);
@@ -378,7 +390,8 @@ void MyMainFrame::Command(int ID) {
     
     if( isRunOK && isExtract->GetState() && IsFileExist("DWBA.out")){
        int ElasticFlag = 0; // 1 for ratio to Rutherford, 2 for total Xsec
-       if (isElastic->GetState()) ElasticFlag = 1;
+       //if (isElastic->GetState()) ElasticFlag = 1;
+       ElasticFlag = extractFlag->GetSelected();
        statusLabel->SetText("Extracting X-sec.....");
        ExtractXSec("DWBA.out", ElasticFlag);
        statusLabel->SetText("X-sec Extracted.");
