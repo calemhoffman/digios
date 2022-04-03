@@ -12,6 +12,7 @@
 # C = Daehnick, Childs, Vrcelj, 1980 |  11.8 < E < 80  | 27 < A < 238 (NON-REL)   | http://dx.doi.org/10.1103/PhysRevC.21.2253 // not impletmented yet
 # L = Lohr and Haeberli, 1974        |     9 < E < 13  | 40 < A                   | http://dx.doi.org/10.1016/0375-9474(74)90627-7 
 # Q = Perey and Perey, 1963          |    12 < E < 25  | 40 < A                   | http://dx.doi.org/10.1016/0370-1573(91)90039-O 
+# Z = Zhang, Pang, Lou, 2016         |     5 < E < 170 |      A < 18, spe 6-7Li   | https://doi.org/10.1103/PhysRevC.94.014619
 #========================= proton
 # K = Koning and Delaroche, 2009     | 0.001 < E < 200 | 24 < A < 209 | Iso. Dep. | http://dx.doi.org/10.1016/S0375-9474(02)01321-0
 # V = Varner et al., (CH89), 1991    |    16 < E < 65  |  4 < A < 209             | http://dx.doi.org/10.1016/0370-1573(91)90039-O
@@ -41,27 +42,10 @@
 #32Si(t,p)34Si     0        0L=0     0+           0.000   8MeV/u      lA                #two-nucleon_transfer
 #133Sb(t,3He)133Sn 7/2      0g7/2    0+           0.000   8.5MeV/u    Ax .... cannot cal
 
-#9Li(t,p)11Li      3/2        1L=0     3/2-        0.000   10MeV/u      lA                #two-nucleon_transfer   
+#82Kr(d,p)83Kr      0        0g9/2    9/2+         0.000   10MeV/u  AK
+#82Kr(d,p)83Kr      0        1p1/2    1/2-         0.000   10MeV/u  AK
+#82Kr(d,p)83Kr      0        1d3/2    3/2+         1.220   10MeV/u  AK
+#82Kr(d,p)83Kr      0        2s1/2    1/2+         1.220   10MeV/u  AK
 
-#23F(d,p)24F        5/2      0d5/2     3+          0.00       10MeV/u     AK
-#23F(d,p)24F        5/2      0d5/2     1+          0.52       10MeV/u     AK
-#23F(d,p)24F        5/2      1s1/2     2+          0.52       10MeV/u     AK
-#23F(d,p)24F        5/2      0d5/2     1+          1.83       10MeV/u     AK
-
-94Ru(d,p)95Ru       0        1d5/2     5/2+        0.000       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d5/2     5/2+        1.648       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        2s1/2     1/2+        0.788       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        2s1/2     1/2+        2.246       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        2s1/2     1/2+        3.288       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        0g7/2     7/2+        0.942       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        0g7/2     7/2+        1.331       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        0h11/2   11/2-        2.450       8.4MeV/u    AK
-
-94Ru(d,p)95Ru       0        1d3/2     3/2+        1.141       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        1.740       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        2.220       8.4MeV/u    AK
-94Ru(d,p)95Ru       0        1d3/2     3/2+        3.288       8.4MeV/u    AK
-
+10Be(d,d)10Be       0       none      0+         0.000   9MeV/u  ZZ
+10Be(d,d)10Be       0       none      0+         0.000   9MeV/u  AA

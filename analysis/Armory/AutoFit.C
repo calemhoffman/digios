@@ -1,12 +1,11 @@
 /***************************************************
- * Created by Tsz Leung (Ryan) TANG, around 2019.
- *                            updated 12-02-2021
+ * This is a root macro for Auto fitting
  *
- * This is a standalone script for fitting Gaussian. 
+ * Created by Tsz Leung (Ryan) TANG, around 2019.
+ *                            updated 01-04-2022
+ *
+ * contact goluckyryan@gmail.com
  ***************************************************/
-
-
-
 
 #ifndef AutoFit_C
 #define AutoFit_C
@@ -17,6 +16,14 @@
 #include <TSpectrum.h>
 #include <TMath.h>
 #include <vector>
+
+//Global fit paramaters
+
+vector<double> BestFitMean;
+vector<double> BestFitCount;
+vector<double> BestFitSigma;
+
+TString recentFitMethod;
 
 void ShowFitMethod(){
   printf("----------------------- Method of Fitting ---------------\n");
@@ -34,8 +41,15 @@ void ShowFitMethod(){
   printf("------- Mouse click Fit : \n");
   printf("    clickFitNGaussPol() - fit n-Gauss + pol-n BG \n");
   printf(" clickFitNGaussPolSub() - Fit Pol-n BG, subtract, fit n-Gauss\n");
-  printf("          SaveFitPara() - Save the initial guess parameters.\n");
+  printf("\n");
+  printf("------- Utility : \n");
+  printf("          SaveFitPara() - Save the inital/Best fit parameters.\n");
+  printf("        ShowFitMerhod() - Show this menual.\n");
   printf("---------------------------------------------------------\n");
+}
+
+void AutoFit(){
+  ShowFitMethod();
 }
 
 std::vector<std::string> SplitStrAF(std::string tempLine, std::string splitter, int shift = 0){
@@ -370,6 +384,8 @@ void fitGaussPol(TH1F * hist, double mean, double sigmaMax, int degPol, double x
   printf(" * mean Range  +- 5 sigmaMax \n");
   printf(" * inital parameters of the polynomial is random/pow(10, i) \n"); 
   printf("==========================================================\n");
+
+  recentFitMethod = "fitGaussPol";
   
   gStyle->SetOptStat(optStat);
   TCanvas * cFitGaussPol = NewCanvas("cFitGaussPol", Form("fit Gauss & Pol-%d | fitGaussPol", degPol), 1, 2, 800, 350);  
@@ -460,6 +476,14 @@ void fitGaussPol(TH1F * hist, double mean, double sigmaMax, int degPol, double x
   cFitGaussPol->cd(2);
   PlotResidual(hist, fit);
 
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
+
+  BestFitCount.push_back(paraA[0]);
+  BestFitMean.push_back(paraA[1]);
+  BestFitSigma.push_back(paraA[2]);
+
 }
 
 //########################################
@@ -474,7 +498,8 @@ vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1,
   printf("================ fit 2-Gauss + Pol-1 BG ================\n" );
   printf(" NOT updated. It works, but the code is old \n"); 
   printf("==========================================================\n");
-  
+
+  recentFitMethod = "fit2GaussP1";
   
   vector<double> output;
   output.clear();
@@ -558,6 +583,18 @@ vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1,
                                     paraA[7], paraE[7]));
                                     
   GoodnessofFit(hist, fit);
+
+
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
+  
+  for( int i = 0; i < 2; i++){
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
+  }
+  
   return output;
 }
 
@@ -572,7 +609,8 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
   printf(" * mean Range  = xMin, xMax \n");
   printf(" * inital parameters of the polynomial is random/pow(10, i) \n"); 
   printf("==========================================================\n");
-  
+
+  recentFitMethod = "fitGF3Pol";
 
   gStyle->SetOptStat(optStat);
 
@@ -727,6 +765,8 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   printf("    i-th peak and (i+1)-th peak \n");
   printf("   i.e. [peak(i-1)+peak(i)]/2  < limit of peak(i) < [peak(i)+peak(i+1)]/2 \n");
   printf("================================================================\n");
+
+  recentFitMethod = "fitAuto";
 
   gStyle->SetOptStat(optStat);
   TCanvas *cFitAuto = NewCanvas("cFitAuto","Auto Fitting | fitAuto", 1, 4, 800, 300);
@@ -937,13 +977,21 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   text.SetTextColor(2);
   
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
   
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
   
   return exPos;
@@ -969,6 +1017,8 @@ vector<double> fitNGF3(TH1 * hist, int bgEst = 10,
     cFitAuto->cd(1);
     hist->Draw();
   }
+
+  recentFitMethod = "fitNGF3";
   
   TH1F * specS = (TH1F*) hist->Clone();
   double xMin = hist->GetXaxis()->GetXmin();
@@ -1163,7 +1213,8 @@ void fitNGauss(TH1F * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"
   printf(" 1) The histogram will be subtracted by the estimated BG. \n");
   printf(" 2) n-Gauss will then be fitted the BG subtracted histogram \n");
   printf("================================================================\n");
-  
+
+  recentFitMethod = "fitNGauss";
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -1301,13 +1352,21 @@ void fitNGauss(TH1F * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"
   text.SetTextColor(2);
   
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
   
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
   
   cFitNGauss->Update();
@@ -1330,7 +1389,8 @@ void fitNGaussSub(TH1F * hist, int bgEst = 10, int degPol = 1, TString fitFile =
   printf(" 2) The histogram will be subtracted by the polynomial. \n"); 
   printf(" 3) n-Gauss will then be fitted the subtracted histogram \n");
   printf("================================================================\n");
-  
+
+  recentFitMethod = "fitNGaussSub";
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -1490,12 +1550,20 @@ void fitNGaussSub(TH1F * hist, int bgEst = 10, int degPol = 1, TString fitFile =
   
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
   
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
+  
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
   
 }
@@ -1514,7 +1582,8 @@ void fitNGaussPol(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.txt"
   printf(" \n");
   printf(" 1) The histogram will be fitted by n-Gauss + Pol \n");
   printf("================================================================\n");
-  
+
+  recentFitMethod  = "fitNGaussPol";
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -1660,14 +1729,21 @@ void fitNGaussPol(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.txt"
   
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
   
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
+  
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
-  
 }
 
 
@@ -1688,7 +1764,8 @@ void fitNGaussPolSub(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.t
   printf(" 2) The histogram will be subtracted by the Pol BG. \n");
   printf(" 3) n-Gauss will then be fitted the BG subtracted histogram \n");
   printf("================================================================\n");
-  
+
+  recentFitMethod = "fitNGaussPolSub";
 
   bool isParaRead = loadFitParameters(fitFile);
   if( !isParaRead ) {
@@ -1882,14 +1959,23 @@ void fitNGaussPolSub(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.t
   text.SetTextColor(2);
   
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
   
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
+
   
 }
 
@@ -1944,7 +2030,18 @@ void Clicked() {
 }
 
 
-void SaveFitPara(TString fileName = "AutoFit_para.txt"){
+void SaveFitPara(bool isBestFit = true, TString fileName = "AutoFit_para.txt"){
+
+  if( xPeakList.size() == 0 && BestFitMean.size() == 0 ){
+    printf(" no fit paramaters availible. \n");
+    return;
+  }
+
+  if( recentFitMethod == "fitGF3Pol" || recentFitMethod == "fitGF3" ){
+    printf(" Not support for GF3 fitting. \n");
+    return;
+  } 
+
   printf("Save to : %s \n", fileName.Data()); 
   FILE * file_out;
   file_out = fopen (fileName.Data(), "w+");
@@ -1952,22 +2049,37 @@ void SaveFitPara(TString fileName = "AutoFit_para.txt"){
   fprintf(file_out, "# for n-Gauss fit, can use \"#\", or \"//\" to comment out whole line\n");
   fprintf(file_out, "# peak    low    high   fixed?  sigma_Max    fixed?  hight\n");
 
-  for( int i = 0 ; i < xPeakList.size() ; i++){
-    fprintf(file_out, "%.3f    %.3f    %.3f    0    %.3f     0    %.0f\n",
-                      xPeakList[i],
-                      xPeakList[i] - 5*sigma[i],
-                      xPeakList[i] + 5*sigma[i],
-                      sigma[i],
-                      yPeakList[i]);
+
+  if ( xPeakList.size() == 0 || isBestFit  ){
+    for( int i = 0 ; i < BestFitMean.size() ; i++){
+      fprintf(file_out, "%.3f    %.3f    %.3f    0    %.3f     0    %.0f\n",
+                        BestFitMean[i],
+                        BestFitMean[i] - 5*BestFitSigma[i],
+                        BestFitMean[i] + 5*BestFitSigma[i],
+                        BestFitSigma[i],
+                        BestFitCount[i]);
+    }
+  }else{
+    for( int i = 0 ; i < xPeakList.size() ; i++){
+      fprintf(file_out, "%.3f    %.3f    %.3f    0    %.3f     0    %.0f\n",
+                        xPeakList[i],
+                        xPeakList[i] - 5*sigma[i],
+                        xPeakList[i] + 5*sigma[i],
+                        sigma[i],
+                        yPeakList[i]);
+    }
   }
   fclose(file_out);
 }
 
-void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
+
+void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0, double meanRange = 0){
 
   printf("=========================================================\n");
   printf("======== fit n-Gauss + Pol-%d BG using mouse click =====\n", degPol );
   printf("==========================================================\n");
+
+  recentFitMethod = "clickFitNGaussPol";
 
   gStyle->SetOptStat("");
   gStyle->SetOptFit(0);
@@ -2161,19 +2273,22 @@ void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9);
     
-    double dE1, dE2;
-    if( i == 0 ){
-      dE2 = xPeakList[i+1] - xPeakList[i];
-      dE1 = dE2;
-    }else if ( i == nPeaks-1 ){
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = dE1;
+    if( meanRange <= 0 ) {
+      double dE1, dE2;
+      if( i == 0 ){
+        dE2 = xPeakList[i+1] - xPeakList[i];
+        dE1 = dE2;
+      }else if ( i == nPeaks-1 ){
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = dE1;
+      }else{
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = xPeakList[i+1] - xPeakList[i];
+      }      
+      fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
     }else{
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = xPeakList[i+1] - xPeakList[i];
+      fit->SetParLimits(3*i+1, xPeakList[i] - meanRange/2. , xPeakList[i] + meanRange/2. );
     }
-    
-    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
     if( sigmaMax== 0 ) fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
     if( sigmaMax < 0 ) fit->FixParameter(3*i+2, abs(sigmaMax));
     if( sigmaMax > 0 ) fit->SetParLimits(3*i+2, 0, sigmaMax);
@@ -2240,24 +2355,35 @@ void clickFitNGaussPol(TH1F * hist, int degPol, double sigmaMax = 0){
   text.SetTextSize(0.05);
   text.SetTextColor(2);
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
   
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
+
 }
 
 
 
-void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
+void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0, double meanRange = 0){
 
   printf("=========================================================\n");
   printf("= fit n-Gauss + Pol-%d BG using mouse click (method-2) =\n", degPol );
   printf("==========================================================\n");
 
+  recentFitMethod = "clickFitNGaussPolSub";
+  
   gStyle->SetOptStat("");
   gStyle->SetOptFit(0);
   
@@ -2461,20 +2587,23 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
   //limit parameters
   for( int i = 0; i < nPeaks; i++){
     fit->SetParLimits(3*i  ,       0, 1e9);
-
-    double dE1, dE2;
-    if( i == 0 ){
-      dE2 = xPeakList[i+1] - xPeakList[i];
-      dE1 = dE2;
-    }else if ( i == nPeaks-1 ){
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = dE1;
-    }else{
-      dE1 = xPeakList[i] - xPeakList[i-1];
-      dE2 = xPeakList[i+1] - xPeakList[i];
-    }
     
-    fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 ); 
+    if( meanRange <= 0 ) {
+      double dE1, dE2;
+      if( i == 0 ){
+        dE2 = xPeakList[i+1] - xPeakList[i];
+        dE1 = dE2;
+      }else if ( i == nPeaks-1 ){
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = dE1;
+      }else{
+        dE1 = xPeakList[i] - xPeakList[i-1];
+        dE2 = xPeakList[i+1] - xPeakList[i];
+      }
+      fit->SetParLimits(3*i+1, xPeakList[i] - dE1 , xPeakList[i] + dE2 );
+    }else{
+      fit->SetParLimits(3*i+1, xPeakList[i] - meanRange/2. , xPeakList[i] + meanRange/2. );
+    }
     if( sigmaMax== 0 ) fit->SetParLimits(3*i+2, 0, 1.5*sigma[i]); // add 50% margin of sigma
     if( sigmaMax < 0 ) fit->FixParameter(3*i+2, abs(sigmaMax));
     if( sigmaMax > 0 ) fit->SetParLimits(3*i+2, 0, sigmaMax);
@@ -2522,13 +2651,21 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0){
   text.SetTextSize(0.05);
   text.SetTextColor(2);
   text.DrawLatex(0.1, 0.9, Form("      %13s, %18s, %18s", "count", "mean", "sigma"));
+
+  BestFitCount.clear();
+  BestFitMean.clear();
+  BestFitSigma.clear();
   
   for( int i = 0; i < nPeaks; i++){
-  text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
+    text.DrawLatex(0.1, 0.8-0.05*i, Form(" %2d, %8.0f(%3.0f), %8.4f(%8.4f), %8.4f(%8.4f)\n", 
             i, 
             paraA[3*i] / bw,   paraE[3*i] /bw, 
             paraA[3*i+1], paraE[3*i+1],
             paraA[3*i+2], paraE[3*i+2]));
+            
+    BestFitCount.push_back(paraA[3*i]/ bw);
+    BestFitMean.push_back(paraA[3*i+1]);
+    BestFitSigma.push_back(paraA[3*i+2]);
   }
 }
 
@@ -2704,8 +2841,6 @@ void fitSpecial(TH1F * hist, TString fitFile = "AutoFit_para.txt"){
   }
   
 }
-
-
 
 
 #endif 

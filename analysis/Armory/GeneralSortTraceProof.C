@@ -122,8 +122,8 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
       printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
     }else if( 400+NTAC >= idDetMap[i] && idDetMap[i] >= 400){
       printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // TAC,
-    }else if( 400+NCRDT >= idDetMap[i] && idDetMap[i] >= 500){
-      printf("\033[37m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Circular Recoil
+    }else if( 500+NCRDT >= idDetMap[i] && idDetMap[i] >= 500){
+      printf("\033[100m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Circular Recoil
     }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
