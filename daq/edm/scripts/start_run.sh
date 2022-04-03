@@ -80,32 +80,46 @@ else
     elogName="H"${expName:1}
 fi
 
+scp ${elogFile} heliosdigios@192.168.1.164:~/elog.txt
+ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh start ${elogName} ${RUN}"
+
+echo "wait 3 sec for Mac2020 reply elog ID"
+sleep 3
+
+source ~/elogID.txt
+echo ${ID}
+elogIDStr="elogID="${ID}
+echo ${elogID}
+
+
 #IDStr=$(elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Start Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt)
-
-IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ${HELIOSSYS}/analysis/working/elog.txt)
-
-echo ${IDStr}
-
-IDStr=$(echo ${IDStr} | tail -1 | awk '{print $4}')
-
-echo ${IDStr}
+#IDStr=$(elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Run ${LastRunNum}" -n 2 -m ${HELIOSSYS}/analysis/working/elog.txt)
+#echo ${IDStr}
+#IDStr=$(echo ${IDStr} | tail -1 | awk '{print $4}')
+#echo ${IDStr}
 
 #need to check ID is valid. other wise it crash other script
-re='^[0-9]+$'
-if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
-    elogIDStr="elog"${IDStr}
-    echo "Elog is succefully pushed at ${elogIDStr}"
-    echo ${elogIDStr} >> ${constFile}
+#re='^[0-9]+$'
+#if [ ${IDStr:0:3} == "ID=" ] && [[ ${IDStr:3} =~ ${re} ]]; then
+#    elogIDStr="elog"${IDStr}
+#    echo "Elog is succefully pushed at ${elogIDStr}"
+#    echo ${elogIDStr} >> ${constFile}
 
-    source ~/Slack_Elog_Notification.sh
-    slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
-    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
-else 
-    slackMsg="RUN=${LastRunNum}.  unable to post to elog.\n"
-    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}"'"}' ${WebHook}
-fi
+#    source ~/Slack_Elog_Notification.sh
+#    slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogIDStr:7}\n"
+#    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
+#    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
+#else 
+#    slackMsg="RUN=${LastRunNum}.  unable to post to elog.\n"
+#    elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
+#    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}"'"}' ${WebHook}
+#fi
+
+source ~/Slack_Elog_Notification.sh
+slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
+curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
+
 
 export TERM=vt100
 echo " terminals" 
