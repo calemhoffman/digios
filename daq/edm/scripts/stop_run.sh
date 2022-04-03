@@ -54,48 +54,74 @@ sleep 2
 
 # take screenshot and copy from mac2017
 screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
-ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh'
+ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh' #this is in mac2017
 scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
+# send the screenshot to Mac2020 for elog
+scp ${screenShot} heliosdigios@192.168.1.164:~/grafanaElog.jpg
 
-if [ -z ${elogID} ]; then
-    # this will create seperated elog entry
-    echo "         stop at ${currentDate}" >> ${HELIOSSYS}/analysis/working/elog.txt
-    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt -f ${screenShot}
+elogContext=${HELIOSSYS}/analysis/working/elogEndRun.txt
+echo "         stop at ${currentDate} <br />" > ${elogContext}
+echo "grafana screenshot is attached. <br />" >> ${elogContext}
+echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
+echo "-----------------------------------------------</p>" >> ${elogContext}
+echo "$COMMENT <br />" >> ${elogContext}
 
+scp ${elogContext} heliosdigios@192.168.1.164:~/.
+
+# tell Mac2020 run push2elog script
+if [ $expName = "ARR01" ]; then
+  elogName=$expName
 else
-    # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
-    echo "---- downloading the elog entry elohID=${elogID}"
-    elogContext=${HELIOSSYS}/analysis/working/elog.txt
-    #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
-    if [ $expName = "ARR01" ]; then
-	elogName=$expName
-    else
-	elogName="H"${expName:1}
-    fi
-
-    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -w ${elogID} > ${elogContext}
-    cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
-    #check encoding
-    encoding=$(grep "Encoding" ${elogContext} | awk '{print $2}')
-    if [ $encoding = "plain" ]; then encodingID=1 ; fi
-    if [ $encoding = "HTML" ]; then encodingID=2 ; fi
-    if [ $encoding = "ELcode" ]; then encodingID=0 ; fi
-    #remove all header
-    sed -i "1,${cutLineNum}d" ${elogContext}
-    #fill stop time
-    echo "         stop at ${currentDate} <br />" >> ${elogContext}
-    echo "grafana screenshot is attached. <br />" >> ${elogContext}
-    echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
-    echo "-----------------------------------------------</p>" >> ${elogContext}
-    echo "$COMMENT <br />" >> ${elogContext}
-    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
-
-    source ~/Slack_Elog_Notification.sh
-    slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
-    auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
-
+  elogName="H"${expName:1}
 fi
+ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
+
+
+#if [ -z ${elogID} ]; then
+#    # this will create seperated elog entry
+#    echo "         stop at ${currentDate}" >> ${HELIOSSYS}/analysis/working/elog.txt
+#    elog -h websrv1.phy.anl.gov -p 8080 -l "H"${expName:1} -u GeneralHelios helios -a Category=Run -a RunNo=${LastRunNum} -a Subject="Stop Run ${LastRunNum}" -n 1 -m ${HELIOSSYS}/analysis/working/elog.txt -f ${screenShot}
+#
+#else
+#    # in order to replace the elog entry, comment out above line, the GrafanaElog.sh in heliosdb (you have to edit GrafanaElog.sh)  will do the job
+#    echo "---- downloading the elog entry elohID=${elogID}"
+#    elogContext=${HELIOSSYS}/analysis/working/elog.txt
+#    #elog -h www.phy.anl.gov -d elog -p 443 -l "H"${expName:1} -s -u GeneralHelios helios -w ${elogID} > ${elogContext}
+#    if [ $expName = "ARR01" ]; then
+#	elogName=$expName
+#    else
+#	elogName="H"${expName:1}
+#    fi
+#
+#    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -w ${elogID} > ${elogContext}
+#    cutLineNum=$(grep -n "==============" ${elogContext} | cut -d: -f1)
+#    #check encoding
+#    encoding=$(grep "Encoding" ${elogContext} | awk '{print $2}')
+#    if [ $encoding = "plain" ]; then encodingID=1 ; fi
+#    if [ $encoding = "HTML" ]; then encodingID=2 ; fi
+#    if [ $encoding = "ELcode" ]; then encodingID=0 ; fi
+#    #remove all header
+#    sed -i "1,${cutLineNum}d" ${elogContext}
+#    #fill stop time
+#    echo "         stop at ${currentDate} <br />" >> ${elogContext}
+#    echo "grafana screenshot is attached. <br />" >> ${elogContext}
+#    echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
+#    echo "-----------------------------------------------</p>" >> ${elogContext}
+#    echo "$COMMENT <br />" >> ${elogContext}
+#    elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -e ${elogID} -n ${encodingID} -m ${elogContext} -f ${screenShot}
+#
+#    source ~/Slack_Elog_Notification.sh
+#    slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+#    auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
+#    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
+#
+#fi
+
+source ~/Slack_Elog_Notification.sh
+slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
+curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
+
 
 echo wait 2 seconds before closing the IOCs
 sleep 2
@@ -115,10 +141,10 @@ do
 done        
 rm -rf temp
 
-echo "=== wait 5 seconds before submit a transfer to LCRC ==="
-sleep 5
-
-${HELIOSSYS}/daq/edm/scripts/globus_out.py
+echo -e "\033[1;31m ### Globus is disabled ###\033[m"
+#echo "=== wait 5 seconds before submit a transfer to LCRC ==="
+#sleep 5
+#${HELIOSSYS}/daq/edm/scripts/globus_out.py
 #${HELIOSSYS}/daq/edm/scripts/globus_in.py
 
 #===== Get root_data/ from LCRC to MAC
