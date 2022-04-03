@@ -10,7 +10,13 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
   if( RUNNUM == -1){
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
-
+    ///chain->Add("../root_data/gen_run007.root");
+    //chain->Add("../root_data/gen_run03[5-9].root");
+    chain->Add("../root_data/gen_run049.root");
+    chain->Add("../root_data/gen_run05[0-9].root");
+    chain->Add("../root_data/gen_run06[0-9].root");
+    chain->Add("../root_data/gen_run07[0-9].root");
+    chain->Add("../root_data/gen_run08[0-9].root");
   
     ///********** end Marker for AutoCalibration.
     

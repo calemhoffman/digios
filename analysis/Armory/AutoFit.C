@@ -1,3 +1,13 @@
+/***************************************************
+ * Created by Tsz Leung (Ryan) TANG, around 2019.
+ *                            updated 12-02-2021
+ *
+ * This is a standalone script for fitting Gaussian. 
+ ***************************************************/
+
+
+
+
 #ifndef AutoFit_C
 #define AutoFit_C
 
