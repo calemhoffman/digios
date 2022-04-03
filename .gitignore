@@ -24,6 +24,7 @@ core.*
 tempDB.txt
 elog.txt
 elog_context.txt
+elogEndRun.txt
 grafanaElog.jpg
 run_Summary.dat
 MakeDataLinks
