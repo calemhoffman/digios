@@ -385,9 +385,9 @@ void Cali_e_trace::Init(TTree *tree)
          if( i == 0  )          Bfield = abs(atof(x.c_str()));
          if( i == 3  )        perpDist = atof(x.c_str());
          if( i == 5  )          length = atof(x.c_str());
-         if( i == 14 )        firstPos = atof(x.c_str());
-         if( i == 17 )            jDet = atoi(x.c_str());
-         if( i >= 18 ) {
+         if( i == 15 )        firstPos = atof(x.c_str());
+         if( i == 18 )            jDet = atoi(x.c_str());
+         if( i >= 19 ) {
             pos.push_back(atof(x.c_str()));
          }
          i = i + 1;

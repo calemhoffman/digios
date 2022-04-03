@@ -224,7 +224,7 @@ void Transfer(
   Decay decay;
   if(isDecay) {
     printf("\e[32m#################################### Decay\e[0m\n");
-    decay.SetMotherDaugther(AB, zB, AB-decayA,zB-decayZ); //decay
+    decay.SetMotherDaugther(AB, zB, decayA, decayZ); //decay
   }
   //======= loading excitation energy
   printf("\e[32m#################################### excitation energies\e[0m\n");
@@ -405,8 +405,9 @@ void Transfer(
   tree->Branch("detRowID", &detRowID, "detRowID/I");
   tree->Branch("loop", &loop, "loop/I");
   
-  double rho; //orbit radius
+  double rho, rhoB; //orbit radius
   tree->Branch("rho", &rho, "orbit_radius_light/D");
+  tree->Branch("rhoB", &rhoB, "orbit_radius_heavy/D");
   
   int ExAID;
   double ExA;
@@ -688,7 +689,7 @@ void Transfer(
       if( decayID == 1 ){
         PB = decay.GetDaugther_D();
         decayTheta = decay.GetAngleChange();
-        new_zB = zB = decayZ;
+        new_zB = decayZ;
       }else{
         decayTheta = TMath::QuietNaN();
       }
@@ -713,7 +714,7 @@ void Transfer(
       helios.CalArrayHit(Pb, zb);
       helios.CalRecoilHit(PB, new_zB);
       hit = 2;
-      while( hit > 1 ){ hit = helios.DetAcceptance(); }
+      while( hit > 1 ){   hit = helios.DetAcceptance(); } /// while hit > 1, goto next loop;
       
       trajectory orb_b = helios.GetTrajectory_b();
       trajectory orb_B = helios.GetTrajectory_B();
@@ -753,6 +754,7 @@ void Transfer(
       tB = orb_B.t;
       xRecoil = orb_B.x;
       yRecoil = orb_B.y;
+      rhoB = orb_B.rho;
 
       //other recoil detectors
       if ( zRecoil1 != 0 ){

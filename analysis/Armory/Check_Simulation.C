@@ -148,7 +148,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    
   vector<double> pos;
   int nLine = detGeo->GetListOfLines()->GetLast() + 1;
-  for( int i = 18; i < nLine; i++){
+  for( int i = 19; i < nLine; i++){
     TString temp = ExtractString(i, detGeo);
     if( temp[0] == '#' ) break;
     pos.push_back(ExtractNumber(i, detGeo));
@@ -196,6 +196,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
    for(int i = 1; i <= numEx ; i++){
      string temp = exListMacro->GetListOfLines()->At(i)->GetName();
      if( temp[0] == '#' ) break;
+     if( temp[0] == '/' ) continue;
      vector<string> tempStr = SplitStr(temp, " ");
      printf("%d | %s \n", i, tempStr[0].c_str());
      exList.push_back(atof(tempStr[0].c_str()));

@@ -1,6 +1,6 @@
 //-------for_comment
 15             //beam_A
-6         //beam_Z
+6              //beam_Z
 3               //target_A
 1               //target_Z
 1               //recoil_light_A
@@ -19,8 +19,8 @@ false           //isTargetScattering
 ../SRIM/3H_in_CD2.txt   //stopping_power_for_light_recoil
 ../SRIM19F_in_CD2.txt  //stopping_power_for_heavy_recoil
 false           //isDacay
-98               //decayNucleus_A
-38               //decayNucleus_Z
+32               //decayNucleus_A
+14               //decayNucleus_Z
 false           //isReDo
 0.0           //excitation_energy_of_A[MeV]
 Out           //detector_facing_Out_or_In
