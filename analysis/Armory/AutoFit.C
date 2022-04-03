@@ -1,9 +1,11 @@
-/********************************************************
+/***************************************************
  * This is a root macro for Auto fitting
- * Created by Tsz Leung (Ryan) Tang around Feb, 2019
- *                             last update  
+ *
+ * Created by Tsz Leung (Ryan) TANG, around 2019.
+ *                            updated 01-04-2022
+ *
  * contact goluckyryan@gmail.com
-*********************************************************/
+ ***************************************************/
 
 #ifndef AutoFit_C
 #define AutoFit_C
@@ -2839,8 +2841,6 @@ void fitSpecial(TH1F * hist, TString fitFile = "AutoFit_para.txt"){
   }
   
 }
-
-
 
 
 #endif 
