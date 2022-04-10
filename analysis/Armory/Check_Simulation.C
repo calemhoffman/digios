@@ -19,8 +19,6 @@
 #include <TCutG.h>
 #include "../Armory/AnalysisLibrary.h"
 
-//#include "../Cleopatra/HELIOS_LIB.h"
-
 double * FindRange(TString branch, TString gate, TTree * tree, double output[2]);
 double ExtractNumber(int index, TMacro * macro);
 TString ExtractString(int index, TMacro * macro);
