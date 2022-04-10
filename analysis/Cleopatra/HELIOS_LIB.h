@@ -1,3 +1,6 @@
+#ifndef HELIOS_Library_h
+#define HELIOS_Library_h
+
 #include "TBenchmark.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
@@ -5,10 +8,13 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TRandom.h"
+#include "TMacro.h"
 #include "TGraph.h"
 #include <vector>
 #include <fstream>
+
 #include "Isotope.h"
+#include "../Armory/AnalysisLibrary.h"
 
 //=======================================================
 //#######################################################
@@ -24,90 +30,17 @@ public:
    TransferReaction();
    ~TransferReaction();
   
-   void SetA(int A, int Z, double Ex = 0){
-      Isotope temp (A, Z);
-      mA = temp.Mass;
-      AA = A;
-      zA = Z;
-      ExA = Ex;
-      nameA = temp.Name;
-      isReady = false;
-      isBSet = true;
-      
-   }
-   void Seta(int A, int Z){
-      Isotope temp (A, Z);
-      ma = temp.Mass;
-      Aa = A;
-      za = Z;
-      namea = temp.Name;
-      isReady = false;
-      isBSet = false;
-      
-   }
-   void Setb(int A, int Z){
-      Isotope temp (A, Z);
-      mb = temp.Mass;
-      Ab = A;
-      zb = Z;
-      nameb = temp.Name;
-      isReady = false;
-      isBSet = false;
-      
-   }
-   void SetB(int A, int Z){
-      Isotope temp (A, Z);
-      mB = temp.Mass;
-      AB = A;
-      zB = Z;
-      nameB = temp.Name;
-      isReady = false;
-      isBSet = true;
-   }
-   void SetIncidentEnergyAngle(double KEA, double theta, double phi){
-      this->TA = KEA;
-      this->T = TA * AA;
-      this->thetaIN = theta;
-      this->phiIN = phi;
-      isReady = false;
-   }
-   void SetExA(double Ex){
-      this->ExA = Ex;
-      isReady = false;
-   }
-   void SetExB(double Ex){
-      this->ExB = Ex;
-      isReady = false;
-   }
-   
+   void SetA(int A, int Z, double Ex = 0);
+   void Seta(int A, int Z);
+   void Setb(int A, int Z);
+   void SetB(int A, int Z);
+   void SetIncidentEnergyAngle(double KEA, double theta, double phi);
+   void SetExA(double Ex);
+   void SetExB(double Ex);
    void SetReactionFromFile(string settingFile);
    
-   
-   TString GetReactionName(){
-      TString rName;
-      rName.Form("%s(%s,%s)%s", nameA.c_str(), namea.c_str(), nameb.c_str(), nameB.c_str()); 
-      return rName;
-   }
-
-   TString format(TString name){
-      if( name.IsAlpha() ) return name;
-      int len = name.Length();
-      TString temp = name;
-      TString temp2 = name;
-      if( temp.Remove(0, len-2).IsAlpha()){
-         temp2.Remove(len-2);
-      }else{
-         temp = name;
-         temp.Remove(0, len-1);
-         temp2.Remove(len-1);
-      }
-      return "^{"+temp2+"}"+temp;
-   }
-   TString GetReactionName_Latex(){
-      TString rName;
-      rName.Form("%s(%s,%s)%s", format(nameA).Data(), format(namea).Data(), format(nameb).Data(), format(nameB).Data()); 
-      return rName;
-   }
+   TString GetReactionName();
+   TString GetReactionName_Latex();
    
    int GetAtomicNumber_A(){return AA;}
    int GetAtomicNumber_a(){return Aa;}
@@ -125,8 +58,8 @@ public:
    int GetCharge_B(){return zB;}
    
    double GetCMTotalKE() {return Etot - mA - ma;}
-   double GetQValue() {return mA + ExA + ma - mb - mB - ExB;}
-   double GetMaxExB() {return Etot - mb - mB;}
+   double GetQValue()    {return mA + ExA + ma - mb - mB - ExB;}
+   double GetMaxExB()    {return Etot - mb - mB;}
    
    TLorentzVector GetPA(){return PA;}
    TLorentzVector GetPa(){return Pa;}
@@ -134,18 +67,24 @@ public:
    TLorentzVector GetPB(){return PB;}
    
    void CalReactionConstant();
+   int CalExThetaCM(double e, double z, double Bfield, double a); // return 0 for no-result, 1 for OK.
+   
    TLorentzVector * Event(double thetaCM, double phiCM);
    
-   int CalExThetaCM(double e, double z, double Bfield, double a); // return 0 for no-result, 1 for OK.
    double GetEx(){return Ex;}
    double GetThetaCM(){return thetaCM;}
    
-   double GetMomentumbCM(){return p;}
-   double GetReactionBeta(){return beta;}
-   double GetReactionGamma(){return gamma;}
-   double GetCMTotalEnergy(){return Etot;}
+   double GetMomentumbCM()   {return p;}
+   double GetReactionBeta()  {return beta;}
+   double GetReactionGamma() {return gamma;}
+   double GetCMTotalEnergy() {return Etot;}
+
+   ReactionConfig GetRectionConfig() { return reaction;}
    
 private:
+
+   ReactionConfig reaction;
+
    string nameA, namea, nameb, nameB;
    double thetaIN, phiIN;
    double mA, ma, mb, mB;
@@ -164,9 +103,13 @@ private:
    double p; // CM frame momentum of b, B
    
    TLorentzVector PA, Pa, Pb, PB;
+
+   TString format(TString name);
+   
 };
 
 TransferReaction::TransferReaction(){
+  
    thetaIN = 0.;
    phiIN = 0.;
    SetA(12, 6, 0);
@@ -196,42 +139,109 @@ TransferReaction::~TransferReaction(){
 
 }
 
-void TransferReaction::SetReactionFromFile(string settingFile){
-   int AA = 1, zA = 1;
-   int Aa = 1, za = 1;
-   int Ab = 1, zb = 1;
-   double KEAmean = 10;
+void TransferReaction::SetA(int A, int Z, double Ex = 0){
+  Isotope temp (A, Z);
+  mA = temp.Mass;
+  AA = A;
+  zA = Z;
+  ExA = Ex;
+  nameA = temp.Name;
+  isReady = false;
+  isBSet = true;
+  
+}
 
-   ifstream cFile;
-   cFile.open(settingFile.c_str());
-   if( cFile.is_open() ){
-      string line;
-      int i = 0;
-      while( cFile >> line){
-         //printf("%d, %s \n", i,  line.c_str());
-         if( line.substr(0,2) == "//" ) continue;
-         if( i == 0 ) AA = atoi(line.c_str());
-         if( i == 1 ) zA = atoi(line.c_str());
-         if( i == 2 ) Aa = atoi(line.c_str());
-         if( i == 3 ) za = atoi(line.c_str());
-         if( i == 4 ) Ab = atoi(line.c_str());
-         if( i == 5 ) zb = atoi(line.c_str());
-         if( i == 6 ) KEAmean = atof(line.c_str());
-         if( i > 6 ) break;
-         i = i + 1;
-      }         
-      cFile.close();
+void TransferReaction::Seta(int A, int Z){
+  Isotope temp (A, Z);
+  ma = temp.Mass;
+  Aa = A;
+  za = Z;
+  namea = temp.Name;
+  isReady = false;
+  isBSet = false;
+}
+
+void TransferReaction::Setb(int A, int Z){
+  Isotope temp (A, Z);
+  mb = temp.Mass;
+  Ab = A;
+  zb = Z;
+  nameb = temp.Name;
+  isReady = false;
+  isBSet = false;
+}
+void TransferReaction::SetB(int A, int Z){
+  Isotope temp (A, Z);
+  mB = temp.Mass;
+  AB = A;
+  zB = Z;
+  nameB = temp.Name;
+  isReady = false;
+  isBSet = true;
+}
+void TransferReaction::SetIncidentEnergyAngle(double KEA, double theta, double phi){
+  this->TA = KEA;
+  this->T = TA * AA;
+  this->thetaIN = theta;
+  this->phiIN = phi;
+  isReady = false;
+}
+
+void TransferReaction::SetExA(double Ex){
+  this->ExA = Ex;
+  isReady = false;
+}
+
+void TransferReaction::SetExB(double Ex){
+  this->ExB = Ex;
+  isReady = false;
+}
+
+void TransferReaction::SetReactionFromFile(string settingFile){
+
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(settingFile.c_str()) > 0 ) {
+      reaction = LoadReactionConfig(haha);
+
+     SetA(reaction.beamA, reaction.beamZ);
+     Seta(reaction.targetA, reaction.targetZ);
+     Setb(reaction.recoilLightA, reaction.recoilLightZ);
+     SetB(reaction.recoilHeavyA, reaction.recoilHeavyZ);
+
+     SetIncidentEnergyAngle(reaction.beamEnergy, 0, 0);
+     CalReactionConstant();
+   }else{
+     
+     printf("cannot read file %s.\n", settingFile.c_str());
+     isReady = false;
    }
    
-   int AB = AA+Aa-Ab, zB = zA+za-zb;
-   SetA(AA,zA);
-   Seta(Aa,za);
-   Setb(Ab,zb);
-   SetB(AB,zB);
-   SetIncidentEnergyAngle(KEAmean, 0, 0);
+}
 
-   CalReactionConstant();
-   
+TString TransferReaction::GetReactionName(){
+  TString rName;
+  rName.Form("%s(%s,%s)%s", nameA.c_str(), namea.c_str(), nameb.c_str(), nameB.c_str()); 
+  return rName;
+}
+
+TString TransferReaction::format(TString name){
+  if( name.IsAlpha() ) return name;
+  int len = name.Length();
+  TString temp = name;
+  TString temp2 = name;
+  if( temp.Remove(0, len-2).IsAlpha()){
+     temp2.Remove(len-2);
+  }else{
+     temp = name;
+     temp.Remove(0, len-1);
+     temp2.Remove(len-1);
+  }
+  return "^{"+temp2+"}"+temp;
+}
+TString TransferReaction::GetReactionName_Latex(){
+  TString rName;
+  rName.Form("%s(%s,%s)%s", format(nameA).Data(), format(namea).Data(), format(nameb).Data(), format(nameB).Data()); 
+  return rName;
 }
 
 void TransferReaction::CalReactionConstant(){
@@ -434,10 +444,7 @@ public:
    bool SetDetectorGeometry(string filename);
    void SetBeamPosition(double x, double y) { xOff = x; yOff = y;}
    
-   void OverrideMagneticField(double BField){ 
-      this->Bfield = BField;
-      this->sign = BField > 0 ? 1: -1;
-   }
+   void OverrideMagneticField(double BField){ this->Bfield = BField; this->sign = BField > 0 ? 1: -1;}
    void OverrideMagneticFieldDirection(double BfieldThetaInDeg){ this->BfieldTheta = BfieldThetaInDeg;}
    void OverrideFirstPos(double firstPos){
       overrideFirstPos = true;
@@ -466,58 +473,35 @@ public:
    double GetEnergy(){return e;}
    double GetDetX(){return detX;} // position in each detector, range from -1, 1
    
-   // clockwise rotation for B-field along the z-axis, sign = 1.
+   /// clockwise rotation for B-field along the z-axis, sign = 1.
    double XPos(double Zpos, double theta, double phi, double rho, int sign){
      return rho * ( TMath::Sin( TMath::Tan(theta) * Zpos / rho - sign * phi ) + sign * TMath::Sin(phi) ) + xOff;
    }
    double YPos(double Zpos, double theta, double phi, double rho, int sign){
      return rho * sign * (TMath::Cos( TMath::Tan(theta) * Zpos / rho - sign * phi ) - TMath::Cos(phi)) + yOff;
    }
-   //double RPos(double Zpos, double theta, double phi, double rho){
-   //  return rho * TMath::Sqrt(2 - 2 * TMath::Cos( TMath::Tan(theta) * Zpos / rho));
-   //}
    double RPos(double Zpos, double theta, double phi, double rho, int sign){
       double x =  XPos(Zpos, theta, phi, rho, sign) ;
       double y =  YPos(Zpos, theta, phi, rho, sign) ;
       return sqrt(x*x+y*y);
    }
    
-   double GetXPos(double ZPos){
-      return XPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
-   }
-   double GetYPos(double ZPos){
-      return YPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
-   }
-   double GetR(double ZPos){
-      return RPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign);
-   }
+   double GetXPos(double ZPos){ return XPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign); }
+   double GetYPos(double ZPos){ return YPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign); }
+   double GetR(double ZPos)   { return RPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign); }
    
    double GetRecoilEnergy(){return eB;}
-   double GetRecoilXPos(double ZPos){
-      return XPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign);
-   }   
-   double GetRecoilYPos(double ZPos){
-      return YPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign);
-   }
-   double GetRecoilR(double ZPos){
-      return RPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign);
-   }
+   double GetRecoilXPos(double ZPos){ return XPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign); }   
+   double GetRecoilYPos(double ZPos){ return YPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign); }
+   double GetRecoilR(double ZPos)   { return RPos( ZPos, orbitB.theta, orbitB.phi, orbitB.rho, sign); }
    
    double GetBField() {return Bfield;}
    double GetDetRadius() {return perpDist;}
-   
-   double GetDetEnergyResol(){return eSigma;}
-   double GetDetPositionResol(){return zSigma;}
-   
-   double GetRecoil1Pos(){return posRecoil1;}
-   double GetRecoil2Pos(){return posRecoil2;}
-   
-   double GetElum1Pos(){return zElum1;}
-   double GetElum2Pos(){return zElum2;}
-   
+
    trajectory GetTrajectory_b() {return orbitb;}
    trajectory GetTrajectory_B() {return orbitB;}
 
+   DetGeo GetDetectorGeometry() {return detGeo;}
    
 private:   
       
@@ -537,14 +521,15 @@ private:
       t.detRowID = -1;
       t.loop = -1;
    }
-   
+
+   DetGeo detGeo;
    
    trajectory orbitb, orbitB;
    
-   double e,detX ;
-   double rhoHit; // radius of particle-b hit on recoil detector
+   double e,detX ; ///energy of light recoil, position X
+   double rhoHit;  /// radius of particle-b hit on recoil detector
    
-   double eB;
+   double eB;  ///energy of heavy recoil
    
    bool isDetReady;
    
@@ -571,13 +556,6 @@ private:
    bool overrideDetDistance;
    bool overrideFirstPos;
    bool isCoincidentWithRecoil;
-   
-   double eSigma;
-   double zSigma;
-   double posRecoil1;
-   double posRecoil2;
-   double zElum1;
-   double zElum2;
    
    const double c = 299.792458; //mm/ns
 };
@@ -619,106 +597,44 @@ HELIOS::HELIOS(){
    overrideFirstPos = false;
    isCoincidentWithRecoil = false;
    
-   eSigma = 0;
-   zSigma = 0;
-   
-   posRecoil1 = 0;
-   posRecoil2 = 0;
-   
-   zElum1 = 0;
-   zElum2 = 0;
 }
 
 HELIOS::~HELIOS(){
+  
 }
 
 bool HELIOS::SetDetectorGeometry(string filename){
-   
-   //TODO sue split line by space, and read the 1st, so the comment can be separated by space.
-   
-   pos.clear();
-   
-   printf("----- loading detector geometery : %s.", filename.c_str());
-   ifstream file;
-   file.open(filename.c_str());
-   string line;
-   int i = 0;
-   if( file.is_open() ){
-      string x;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,2) == "#=" ) break;
-         if( x.substr(0,1) == "#" )  break;
-         if( x.length() == 0 ) continue;
-         
-         if( i == 0 )                            Bfield = atof(x.c_str());
-         sign = Bfield > 0 ? 1 : -1;
-         if( i == 1 )                       BfieldTheta = atof(x.c_str());
-         if( i == 2 )                              bore = atof(x.c_str());
-         if( i == 3 && !overrideDetDistance )  perpDist = atof(x.c_str());
-         if( i == 4 )                             width = atof(x.c_str());
-         if( i == 5 )                            length = atof(x.c_str());
-         if( i == 6 )                         posRecoil = atof(x.c_str());
-         if( i == 7 )                       rhoRecoilin = atof(x.c_str());
-         if( i == 8 )                      rhoRecoilout = atof(x.c_str());
-         if( i == 9 ){
-           if( x.compare("false") == 0 ) isCoincidentWithRecoil = false;
-           if( x.compare("true")  == 0 ) isCoincidentWithRecoil = true;
-         }
-         if( i == 10 )                        posRecoil1 = atof(x.c_str());
-         if( i == 11 )                       posRecoil2 = atof(x.c_str());
-         if( i == 12)                            zElum1 = atof(x.c_str());
-         if( i == 13 )                           zElum2 = atof(x.c_str());
-         if( i == 14 )                           blocker = atof(x.c_str());
-         if( i == 15 && !overrideFirstPos )     firstPos = atof(x.c_str());
-         if( i == 16 )                            eSigma = atof(x.c_str());
-         if( i == 17 )                            zSigma = atof(x.c_str());
-         
-         if( i == 18 )                             mDet = atoi(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
-      
-      nDet = pos.size();
-      file.close();
-      printf("... done.\n");
 
-      vector<double> posTemp;
-      posTemp.clear();
-      posTemp = pos;
-      
-      for(int id = 0; id < nDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[nDet-1 - id];
-      }
-      
-      printf("=====================================================\n");
-      printf("                 B-field: %8.2f  T, Theta : %6.2f deg \n", Bfield, BfieldTheta);
-      BfieldTheta = BfieldTheta * TMath::DegToRad();
-      if( BfieldTheta != 0.0 ) {
-      printf("                                      +---- field angle != 0 is not supported!!! \n");
-      }
-      printf("     Recoil detector pos: %8.2f mm, radius: %6.2f - %6.2f mm \n", posRecoil, rhoRecoilin, rhoRecoilout);
-      printf("        Blocker Position: %8.2f mm \n", firstPos > 0 ? firstPos - blocker : firstPos + blocker );
-      printf("          First Position: %8.2f mm \n", firstPos);
-      printf("------------------------------------- Detector Position \n");
-      for(int i = 0; i < nDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("=====================================================\n");
-		isDetReady = true;
-   
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(filename.c_str()) > 0 ) {
+    detGeo = LoadDetectorGeo(haha);
+
+    PrintDetGeo(detGeo);
+
+    Bfield = detGeo.Bfield;
+    BfieldTheta = detGeo.BfieldTheta;
+    sign = detGeo.BfieldSign;
+    bore = detGeo.bore;
+    perpDist = detGeo.detPerpDist;
+    width = detGeo.detWidth;
+    posRecoil = detGeo.recoilPos;
+    rhoRecoilin = detGeo.recoilInnerRadius;
+    rhoRecoilout = detGeo.recoilOuterRadius;
+    length = detGeo.detLength;
+    blocker = detGeo.blocker;
+    firstPos = detGeo.firstPos;
+    pos = detGeo.detPos;
+    nDet = detGeo.nDet;
+    mDet = detGeo.mDet;
+
+    isCoincidentWithRecoil = detGeo.isCoincidentWithRecoil;
+
+    isFromOutSide = detGeo.detFaceOut;
+    
+    isDetReady = true;
    }else{
-       printf("... fail\n");
-       printf("    ----> Use no-detector setting.\n");
-       isDetReady = false;
+    printf("cannot read file %s.\n", filename.c_str());
+    isDetReady = false;
    }
    
    return isDetReady;  
@@ -1852,3 +1768,5 @@ void Knockout::Event(double thetaCM, double phiCM){
    
 }
 
+
+#endif 
