@@ -346,7 +346,7 @@ void MyMainFrame::OpenFile(int ID){
     
     editor->ShowBottom();
 
-    if( ID < 5){
+    if( ID < 6){
       statusLabel->SetText(fileName + " opened.");
     }else{
       statusLabel->SetText(fileName + " opened. (READ ONLY)");
