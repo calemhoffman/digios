@@ -69,6 +69,8 @@ public :
    TBranch        *b_Trace_RDT_RiseTime;  //!
    
    bool isTraceDataExist; // if b_Trace_** exist
+
+   DetGeo detGeo;
    
    //=============================== 
    TFile * saveFile; //!
@@ -112,10 +114,7 @@ public :
    int iDet; // number of detector at different position
    int jDet; // number of detector at same position
    vector<double> pos;
-   double Bfield;
-   double a;
    double length;
-   double firstPos;
    double xnCorr[24]; // xn correction for xn = xf
    double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
    

@@ -15,6 +15,8 @@
 #include <fstream>
 #include <TCutG.h>
 
+#include "../Armory/AnalysisLibrary.h"
+
 int nPeaks = 16;
 TTree *tree = NULL;
 
@@ -99,67 +101,33 @@ void Check_e_z(TString rootfile){
    int numDet;
    int rDet = 5; // number of detector at different position, row-Det
    int cDet = 6; // number of detector at same position, column-Det
-   vector<double> pos;
-   double length = 50.5;
-   double firstPos = -110;
+
    double xnCorr[24]; // xn correction for xn = xf
    double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
    
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
-   file.open(detGeoFileName.c_str());
-   int i = 0;
-   if( file.is_open() ){
-      string x;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,1) == "#" )  break;
-         if( i == 5 ) length   = atof(x.c_str());
-         if( i == 15 ) firstPos = atof(x.c_str());
-         if( i == 18 ) cDet = atoi(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
+
+
+   DetGeo detGeo;
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+
+      detGeo = LoadDetectorGeo(haha);
+
+      PrintDetGeo(detGeo);
+
+      rDet = detGeo.nDet;
+      cDet = detGeo.mDet;
       
-      rDet = pos.size();
-      file.close();
       printf("... done.\n");
-      
-      vector<double> posTemp = pos;
-      for(int id = 0; id < rDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
-      }
-      
-      for(int i = 0; i < rDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("=======================\n");
-      
    }else{
-       printf("... fail\n");
-       return;
+      printf("... fail\n");
+      return;
    }
    
    numDet = rDet * cDet;
-   
-   double zRange[3];
-   zRange[0] = 400; // number of bin
-   
-   if( firstPos > 0 ){
-      zRange[1] = pos[0]-50;
-      zRange[2] = pos[rDet-1] + length + 50;
-   }else{
-      zRange[1] = pos[0]- length - 50;
-      zRange[2] = pos[rDet-1] + 50;
-   }
+
+   double zRange[3]= {400, detGeo.zMin, detGeo.zMax}; // nBin, min, max
 
 
 /**///======================================================== Analysis
