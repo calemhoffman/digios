@@ -30,7 +30,7 @@ public:
    TransferReaction();
    ~TransferReaction();
   
-   void SetA(int A, int Z, double Ex = 0);
+   void SetA(int A, int Z, double Ex);
    void Seta(int A, int Z);
    void Setb(int A, int Z);
    void SetB(int A, int Z);

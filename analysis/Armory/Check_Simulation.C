@@ -18,6 +18,7 @@
 #include <fstream>
 #include <TCutG.h>
 #include "../Armory/AnalysisLibrary.h"
+#include "../Cleopatra/Isotope.h"
 
 double * FindRange(TString branch, TString gate, TTree * tree, double output[2]);
 double ExtractNumber(int index, TMacro * macro);
@@ -357,6 +358,28 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       if( pID == pExCal          ){
          TH1F * hExCal = new TH1F("hExCal", Form("calculated Ex [gated]; Ex [MeV]; count / %.2f keV",  (ExRange[1]-ExRange[0])/400.*1000),  400, ExRange[0], ExRange[1]);
          tree->Draw("ExCal>>hExCal", gate, "");
+         Isotope hRecoil(reactionConfig.recoilHeavyA, reactionConfig.recoilHeavyZ);
+         double Sn = hRecoil.CalSp(0,1);
+         double Sp = hRecoil.CalSp(1,0);
+         double Sa = hRecoil.CalSp(2,2);
+
+         printf("Heavy recoil: %s \n", hRecoil.Name.c_str());
+         printf("Sn : %f MeV/u \n", Sn);
+         printf("Sp : %f MeV/u \n", Sp);
+         printf("Sa : %f MeV/u \n", Sa);
+
+         double yMax = hExCal->GetMaximum();
+         TLine * lineSn = new TLine(Sn, 0, Sn, yMax); lineSn->SetLineColor(2); lineSn->Draw("");
+         TLine * lineSp = new TLine(Sp, 0, Sp, yMax); lineSp->SetLineColor(4); lineSp->Draw("same");
+         TLine * lineSa = new TLine(Sa, 0, Sa, yMax); lineSa->SetLineColor(6); lineSa->Draw("same");
+
+         TLatex * text = new TLatex();
+         text->SetTextFont(82);
+         text->SetTextSize(0.06);
+         text->SetTextColor(2); text->DrawLatex(Sn, yMax*0.9, "S_{n}");
+         text->SetTextColor(4); text->DrawLatex(Sp, yMax*0.9, "S_{p}");
+         text->SetTextColor(6); text->DrawLatex(Sa, yMax*0.9, "S_{a}");
+         
       }
       if( pID == pRecoilRThetaCM ){
         TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoilOut);

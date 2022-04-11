@@ -53,11 +53,6 @@ int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2
 bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
-Isotope hRecoil(16, 6);
-double Sn = hRecoil.CalSp(0,1);
-double Sp = hRecoil.CalSp(1,0);
-double Sa = hRecoil.CalSp(2,2);
-
 //---Gate
 bool isTimeGateOn     = true;
 int timeGate[2]       = {-12, 12};             /// min, max, 1 ch = 10 ns
@@ -256,12 +251,7 @@ Float_t eCorr2[numDet][2];
 Float_t rdtCorr[8][2];
 //==== parameters for Ex and thetaCM calcualtion
 
-double length ; // detector z-length 
-double firstPos;
-vector<double> pos;
 double zRange[2] = {-1000, 0}; // zMin, zMax
-double a ; // perpendicular distance of detector to axis [mm]
-double Bfield ;
 
 double Ex, thetaCM;
 double q, alpha, Et, beta, gamm, G, massB, mass; //variables for Ex calculation
@@ -294,7 +284,7 @@ void Monitors::Begin(TTree *tree)
    //===================================================== loading parameter
    printf("################## loading parameter files\n"); 
    
-   LoadDetectorGeo();
+   LoadDetGeoAndReactionConfigFile();
    LoadXFXNCorr();
    LoadXFXN2ECorr();
    LoadXScaleCorr();
@@ -762,10 +752,10 @@ Bool_t Monitors::Process(Long64_t entry)
       if( abs(xcal[detID] - 0.5) > xGate/2. ) continue; 
       
       //==================== calculate Z
-      if( firstPos > 0 ) {
-        z[detID] = length*(1.0-xcal[detID]) + pos[detID%numCol];
+      if( detGeo.firstPos > 0 ) {
+        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[detID%numCol];
       }else{
-        z[detID] = length*(xcal[detID]-1.0) + pos[detID%numCol];
+        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[detID%numCol];
       }
 
       //===================== multiplicity
@@ -775,7 +765,7 @@ Bool_t Monitors::Process(Long64_t entry)
       heVx[detID]->Fill(x[detID],e[detID]);
       hringVx[detID]->Fill(x[detID],ring[detID]);
      
-      heCalVxCal[detID]->Fill(xcal[detID]*length,eCal[detID]);
+      heCalVxCal[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
       heCalVz->Fill(z[detID],eCal[detID]);
 
       //=================== Recoil Gate
@@ -848,7 +838,7 @@ Bool_t Monitors::Process(Long64_t entry)
       if( coinFlag && (rdtgate1 || rdtgate2) && ezGate){ 
          heCalVzGC->Fill( z[detID] , eCal[detID] );
         
-         heCalVxCalG[detID]->Fill(xcal[detID]*length,eCal[detID]);
+         heCalVxCalG[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
          heVIDG->Fill(detID, e[detID]);
       
          multiEZ ++;
@@ -1050,7 +1040,10 @@ void Monitors::Terminate()
 
    double yMax = 0;
 
-
+   Isotope hRecoil(reactionConfig.recoilHeavyA, reactionConfig.recoilHeavyZ);
+   double Sn = hRecoil.CalSp(0,1);
+   double Sp = hRecoil.CalSp(1,0);
+   double Sa = hRecoil.CalSp(2,2);
    
    //TODO, Module each block.
    ///----------------------------------- Canvas - 1
