@@ -136,6 +136,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
 
     if( isotopeA.A + isotopea.A != isotopeB.A + isotopeb.A || isotopeA.Z + isotopea.Z != isotopeB.Z + isotopeb.Z ) {
       printf("    ====> ERROR! A-number or Z-number not balanced. \n");
+
+      Isotope isotopeK(isotopeA.A + isotopea.A - isotopeb.A, isotopeA.Z + isotopea.Z - isotopeb.Z);
+
+      printf("      try : %s ??\n", isotopeK.Name.c_str());
+      
       continue;
     }
     
