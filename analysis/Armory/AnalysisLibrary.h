@@ -6,6 +6,7 @@
 #include <TSpectrum.h>
 #include <TMath.h>
 #include <TMacro.h>
+#include <TList.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -34,10 +35,11 @@ struct DetGeo{
   double eSigma;    /// intrinsic energy resolution MeV
   double zSigma;    /// intrinsic position resolution mm
   
-  vector<double> pos;  /// near position in meter
+  std::vector<double> pos;  /// near position in meter
   int nDet, mDet;      /// nDet = number of different pos, mDet, number of same pos
+  double zMin, zMax;   /// range of detectors
 
-  vector<double> detPos; ///absolute position of detector
+  std::vector<double> detPos; ///absolute position of detector
 
   bool isCoincidentWithRecoil;
 
@@ -65,14 +67,14 @@ struct ReactionConfig{
   bool isTargetScattering;  ///isTargetScattering
   float targetDensity;      ///target_density_in_g/cm3
   float targetThickness;    ///targetThickness_in_cm
-  string beamStoppingPowerFile;         ///stopping_power_for_beam
-  string recoilLightStoppingPowerFile;  ///stopping_power_for_light_recoil
-  string recoilHeavyStoppingPowerFile;  ///stopping_power_for_heavy_recoil
+  std::string beamStoppingPowerFile;         ///stopping_power_for_beam
+  std::string recoilLightStoppingPowerFile;  ///stopping_power_for_light_recoil
+  std::string recoilHeavyStoppingPowerFile;  ///stopping_power_for_heavy_recoil
   bool isDecay;        ///isDacay
   int heavyDecayA;     ///decayNucleus_A
   int heavyDecayZ;     ///decayNucleus_Z
   bool isRedo;         ///isReDo
-  vector<float> beamEx;        ///excitation_energy_of_A[MeV]
+  std::vector<float> beamEx;        ///excitation_energy_of_A[MeV]
   
 
 };
@@ -119,7 +121,8 @@ DetGeo LoadDetectorGeo(TMacro * macro){
 
   if( macro == NULL ) return detGeo;
 
-  int numLine = macro->GetListOfLines()->GetSize();
+  TList * haha = macro->GetListOfLines();
+  int numLine = (haha)->GetSize();
 
   detGeo.pos.clear();
 
@@ -165,6 +168,9 @@ DetGeo LoadDetectorGeo(TMacro * macro){
     if( detGeo.firstPos < 0 ) detGeo.detPos.push_back(detGeo.firstPos - detGeo.pos[detGeo.nDet - 1 - id]);
     ///printf("%d | %f, %f \n", id, detGeo.pos[id], detGeo.detPos[id]);
   }
+
+  detGeo.zMin = TMath::Min(detGeo.detPos.front(), detGeo.detPos.back());
+  detGeo.zMax = TMath::Max(detGeo.detPos.front(), detGeo.detPos.back());
   
   return detGeo;
 }
@@ -189,9 +195,8 @@ void PrintDetGeo(DetGeo detGeo){
   }
 
   printf(" detector facing : %s\n", detGeo.detFaceOut ? "Out" : "In");
-
-  printf("  energy resol.: %f MeV\n", detGeo.eSigma);
-  printf("   pos-Z resol.: %f mm \n", detGeo.zSigma);
+  printf("    energy resol.: %f MeV\n", detGeo.eSigma);
+  printf("     pos-Z resol.: %f mm \n", detGeo.zSigma);
 
   if( detGeo.elumPos1 != 0 || detGeo.elumPos2 != 0 || detGeo.recoilPos1 != 0 || detGeo.recoilPos2 != 0){
     printf("=================================== Auxillary/Imaginary Detectors\n");
