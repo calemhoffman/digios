@@ -273,17 +273,17 @@ ReactionConfig LoadReactionConfig(TMacro * macro){
 void PrintReactionConfig(ReactionConfig reaction){
 
   printf("=====================================================\n");
-  printf("   beam : A = %d, Z = %d \n", reaction.beamA, reaction.beamZ);
-  printf(" target : A = %d, Z = %d \n", reaction.targetA, reaction.targetZ);
-  printf("  light : A = %d, Z = %d \n", reaction.recoilLightA, reaction.recoilLightZ);
+  printf("   beam : A = %3d, Z = %2d \n", reaction.beamA, reaction.beamZ);
+  printf(" target : A = %3d, Z = %2d \n", reaction.targetA, reaction.targetZ);
+  printf("  light : A = %3d, Z = %2d \n", reaction.recoilLightA, reaction.recoilLightZ);
 
-  printf(" beam Energy : %.2f MeV/u +- %.2f, dE/E = %5.2f %%\n", reaction.beamEnergy, reaction.beamEnergySigma, reaction.beamEnergySigma/reaction.beamEnergy);
-  printf("       Angle : %.2f mrad +- %.2f \n", reaction.beamAngle, reaction.beamAngleSigma);
+  printf(" beam Energy : %.2f +- %.2f MeV/u, dE/E = %5.2f %%\n", reaction.beamEnergy, reaction.beamEnergySigma, reaction.beamEnergySigma/reaction.beamEnergy);
+  printf("       Angle : %.2f +- %.2f mrad\n", reaction.beamAngle, reaction.beamAngleSigma);
   printf("      offset : (x,y) = (%.2f, %.2f) mmm \n", reaction.beamX, reaction.beamY);
 
   printf("##### number of Simulation Events : %d \n", reaction.numEvents);
   
-  printf(" is target scattering : %s \n", reaction.isTargetScattering ? "Yes" : "No");
+  printf("    is target scattering : %s \n", reaction.isTargetScattering ? "Yes" : "No");
 
   if(reaction.isTargetScattering){
     printf(" target density : %.f g/cm3\n", reaction.targetDensity);
@@ -293,15 +293,15 @@ void PrintReactionConfig(ReactionConfig reaction){
     printf(" recoil heavy stopping file : %s \n", reaction.recoilHeavyStoppingPowerFile.c_str());
   }
   
-  printf(" is simulate decay : %s \n", reaction.isDecay ? "Yes" : "No");
+  printf("       is simulate decay : %s \n", reaction.isDecay ? "Yes" : "No");
   if( reaction.isDecay ){
     printf(" heavy decay : A = %d, Z = %d \n", reaction.heavyDecayA, reaction.heavyDecayZ);
   }
   printf(" is Redo until hit array : %s \n", reaction.isRedo ? "Yes" : "No");
 
-  printf(" beam Ex :\n");
-  for( int i = 0; i < (int) reaction.beamEx.size(); i++){
-    printf("    %.2f MeV \n", reaction.beamEx[i]);
+  printf(" beam Ex : %.2f MeV \n", reaction.beamEx[0]);
+  for( int i = 1; i < (int) reaction.beamEx.size(); i++){
+    printf("         %.2f MeV \n", reaction.beamEx[i]);
   }
   
   printf("=====================================================\n");

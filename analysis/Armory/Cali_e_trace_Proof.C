@@ -5,6 +5,7 @@
 //      the gate should be modified as needed. 
 //##########################################################
 
+#include "AnalysisLibrary.h"
 #include "Cali_e_trace_Proof.h"
 #include <TH2.h>
 #include <TStyle.h>
@@ -70,64 +71,30 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
    //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
-   file.open(detGeoFileName.c_str());
-   int i = 0;
-   if( file.is_open() ){
-      string x;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,1) == "#" )  break;
-         if( i == 0 ) Bfield   = atof(x.c_str());
-         if( i == 3 ) a        = atof(x.c_str());         
-         if( i == 5 ) length   = atof(x.c_str());
-         if( i == 15 ) firstPos = atof(x.c_str());
-         if( i == 18 ) jDet = atoi(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
+
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+
+      detGeo = LoadDetectorGeo(haha);
+
+      PrintDetGeo(detGeo);
+
+      length = detGeo.detLength;
+      jDet = detGeo.mDet;
+      pos = detGeo.detPos;
       
-      iDet = pos.size();
-      file.close();
       printf("... done.\n");
-     
-      vector<double> posTemp = pos;
-      for(int id = 0; id < iDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet -1 - id];
-      }
-      
-      for(int i = 0; i < iDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("=======================\n");
-      
    }else{
-       printf("... fail\n");
-       firstPos =  0;
-       a = 9;
-       length = 50.5;
-       jDet = 4;
-       iDet = 6;
-       pos[0] = 0;
-       pos[1] = 58.6;
-       pos[2] = 117.9;
-       pos[3] = 176.8;
-       pos[4] = 235.8;
-       pos[5] = 294.8;
+      printf("... fail\n");
+      Terminate();
    }
-   
+      
    numDet = iDet * jDet;
    
    //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
+
+   ifstream file;
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
       double a;
@@ -272,19 +239,19 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
       printf("... done.\n");
 
       isReaction = true;
-      alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.;
+      alpha = 299.792458 * abs(detGeo.Bfield) * q / TMath::TwoPi()/1000.;
       gamma = 1./TMath::Sqrt(1-beta*beta);
-      G = alpha * gamma * beta * a ;
+      G = alpha * gamma * beta * detGeo.detPerpDist ;
       printf("============\n");
-      printf("mass-b  : %f MeV/c2 \n", mass);
-      printf("charge-b: %f \n", q);
-      printf("E-total : %f MeV \n", Et);
-      printf("mass-B  : %f MeV/c2 \n", massB);      
-      printf("beta    : %f \n", beta);
-      printf("B-field : %f T \n", Bfield);
-      printf("alpha   : %f MeV/mm \n", alpha);
-      printf("a       : %f mm \n", a);
-      printf("G       : %f MeV \n", G);
+      printf("mass-b   : %f MeV/c2 \n", mass);
+      printf("charge-b : %f \n", q);
+      printf("E-total  : %f MeV \n", Et);
+      printf("mass-B   : %f MeV/c2 \n", massB);      
+      printf("beta     : %f \n", beta);
+      printf("B-field  : %f T \n", abs(detGeo.Bfield));
+      printf("alpha    : %f MeV/mm \n", alpha);
+      printf("perpDist : %f mm \n", detGeo.detPerpDist);
+      printf("G        : %f MeV \n", G);
 
 
    }else{
