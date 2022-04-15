@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.py": "python",
+        "HistoMaker.C": "cpp",
+        "GetCoinTimeCorrectionCutG.C": "cpp",
+        "Cali_e_trace.C": "cpp",
+        "QuickChecks.C": "cpp",
+        "saberMet.C": "cpp",
+        "rootlogon.C": "cpp",
+        "Check_e_z.C": "cpp"
+    }
+}
