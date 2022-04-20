@@ -173,8 +173,8 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
   int numDet = rDet * cDet;
 
-  zRange[1] = TMath::Min(pos[0], pos[rDet-1]) - 50 ;
-  zRange[2] = TMath::Max(pos[0], pos[rDet-1]) + 50 ;
+  zRange[1] = detGeo.zMin - 50;
+  zRange[2] = detGeo.zMax + 50;
 
   printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
   printf("=================================\n");
