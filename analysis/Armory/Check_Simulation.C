@@ -18,6 +18,7 @@
 #include <fstream>
 #include <TCutG.h>
 #include "../Armory/AnalysisLibrary.h"
+#include "../Cleopatra/Isotope.h"
 
 double * FindRange(TString branch, TString gate, TTree * tree, double output[2]);
 double ExtractNumber(int index, TMacro * macro);
@@ -103,14 +104,16 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   static int nExID = fxList->GetLast()+1;
 
   //================== reactionConfig
-  TMacro * reactionConfig = (TMacro *) file->FindObjectAny("reactionConfig");
-  TString Reaction=reactionConfig->GetName(); ///TODO change to Latex
+  TMacro * reactionConfigTxt = (TMacro *) file->FindObjectAny("reactionConfig");
+  TString Reaction=reactionConfigTxt->GetName(); 
 
-  int nEvent = (int) ExtractNumber(13, reactionConfig);
+  ReactionConfig reactionConfig = LoadReactionConfig(reactionConfigTxt);
+
+  int nEvent = reactionConfig.numEvents;
    printf("number of events generated : %d \n", nEvent);
 
-   double xBeam = ExtractNumber(11, reactionConfig); 
-   double yBeam = ExtractNumber(12, reactionConfig); 
+   double xBeam = reactionConfig.beamX;
+   double yBeam = reactionConfig.beamY; 
    printf("             beam position : (%5.2f, %5.2f) mm \n", xBeam, yBeam); 
 
    gStyle->SetOptStat("");
@@ -130,38 +133,30 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   //================================== detetcor Geometry
   printf("=================================\n");
   printf(" loading detector Geometry.\n");
-  TMacro * detGeo = (TMacro *) file->FindObjectAny("detGeo");  
-  double field = ExtractNumber(0, detGeo);
+  TMacro * detGeoTxt = (TMacro *) file->FindObjectAny("detGeo");  
+
+  DetGeo detGeo = LoadDetectorGeo(detGeoTxt);
+
+  double field = detGeo.Bfield;  
   TString fdmsg = field > 0 ? "out of plan" : "into plan";
   TString msg2;
   msg2.Form("field = %.2f T, %s", field, fdmsg.Data());
   
-  double length = ExtractNumber(5, detGeo);
-  
-  double posRecoil    = ExtractNumber(6, detGeo);
-  double rhoRecoilIn  = ExtractNumber(7, detGeo);
-  double rhoRecoilOut = ExtractNumber(8, detGeo);
-  double posRecoil1   = ExtractNumber(10, detGeo);
-  double posRecoil2   = ExtractNumber(11, detGeo);
-  double firstPos     = ExtractNumber(15, detGeo);  
-  double elum1        = ExtractNumber(12, detGeo); 
-   
-  vector<double> pos;
-  int nLine = detGeo->GetListOfLines()->GetLast() + 1;
-  for( int i = 19; i < nLine; i++){
-    TString temp = ExtractString(i, detGeo);
-    if( temp[0] == '#' ) break;
-    pos.push_back(ExtractNumber(i, detGeo));
-  }
+  double length = detGeo.detLength;
+  double posRecoil = detGeo.recoilPos;
+  double rhoRecoilIn = detGeo.recoilInnerRadius;
+  double rhoRecoilOut = detGeo.recoilOuterRadius;
 
-  int rDet = pos.size(); /// number of detector at different position, row-Det
-  int cDet = (int) ExtractNumber(17, detGeo); /// number of detector at same position, column-Det
+  double posRecoil1 = detGeo.recoilPos1;
+  double posRecoil2 = detGeo.recoilPos2;
 
-  vector<double> posTemp = pos;
-  for(int id = 0; id < rDet; id++){
-    if( firstPos > 0 ) pos[id] = firstPos + posTemp[id];
-    if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
-  }  
+  vector<double> pos = detGeo.detPos;
+
+  float firstPos = detGeo.firstPos;
+  int rDet = detGeo.nDet;
+  int cDet = detGeo.mDet;
+
+  double elum1 = detGeo.elumPos1;
   
   printf("number of row-Det : %d \n", rDet);
   printf("number of col-Det : %d \n", cDet);
@@ -173,17 +168,13 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
         printf("%d, %10.2f mm - %10.2f mm \n", i, pos[i] - length , pos[i]);
      }
   }
+
   printf("=================================\n");
   
   int numDet = rDet * cDet;
 
-  if( firstPos > 0 ){
-    zRange[1] = pos[0]-50;
-    zRange[2] = pos[rDet-1] + length + 50;
-  }else{
-    zRange[1] = pos[0]- length - 50;
-    zRange[2] = pos[rDet-1] + 50;
-  }
+  zRange[1] = detGeo.zMin - 50;
+  zRange[2] = detGeo.zMax + 50;
 
   printf(" zRange : %f - %f \n", zRange[1], zRange[2]);
   printf("=================================\n");
@@ -367,6 +358,28 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
       if( pID == pExCal          ){
          TH1F * hExCal = new TH1F("hExCal", Form("calculated Ex [gated]; Ex [MeV]; count / %.2f keV",  (ExRange[1]-ExRange[0])/400.*1000),  400, ExRange[0], ExRange[1]);
          tree->Draw("ExCal>>hExCal", gate, "");
+         Isotope hRecoil(reactionConfig.recoilHeavyA, reactionConfig.recoilHeavyZ);
+         double Sn = hRecoil.CalSp(0,1);
+         double Sp = hRecoil.CalSp(1,0);
+         double Sa = hRecoil.CalSp(2,2);
+
+         printf("Heavy recoil: %s \n", hRecoil.Name.c_str());
+         printf("Sn : %f MeV/u \n", Sn);
+         printf("Sp : %f MeV/u \n", Sp);
+         printf("Sa : %f MeV/u \n", Sa);
+
+         double yMax = hExCal->GetMaximum();
+         TLine * lineSn = new TLine(Sn, 0, Sn, yMax); lineSn->SetLineColor(2); lineSn->Draw("");
+         TLine * lineSp = new TLine(Sp, 0, Sp, yMax); lineSp->SetLineColor(4); lineSp->Draw("same");
+         TLine * lineSa = new TLine(Sa, 0, Sa, yMax); lineSa->SetLineColor(6); lineSa->Draw("same");
+
+         TLatex * text = new TLatex();
+         text->SetTextFont(82);
+         text->SetTextSize(0.06);
+         text->SetTextColor(2); text->DrawLatex(Sn, yMax*0.9, "S_{n}");
+         text->SetTextColor(4); text->DrawLatex(Sp, yMax*0.9, "S_{p}");
+         text->SetTextColor(6); text->DrawLatex(Sa, yMax*0.9, "S_{a}");
+         
       }
       if( pID == pRecoilRThetaCM ){
         TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoilOut);

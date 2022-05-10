@@ -18,6 +18,7 @@
 #include <TCutG.h>
 
 #include "GeneralSortMapping.h"
+#include "../Armory/AnalysisLibrary.h"
 
 // Header file for the classes stored in the TTree if any.
 
@@ -102,7 +103,18 @@ public :
    
    int printControlID;
    void printControl(int n){this->printControlID = n;}
-   
+
+   DetGeo detGeo;
+   ReactionConfig reactionConfig;
+
+   void LoadDetGeoAndReactionConfigFile();
+   void LoadReactionPars();
+   void LoadXFXNCorr();
+   void LoadXFXN2ECorr();
+   void LoadXScaleCorr();
+   void LoadECorr();
+   void LoadRDTCorr();
+
    double z[100];
    
    ULong64_t startTime ;
@@ -351,64 +363,41 @@ double solid_angle( double th ) {
    
 }
 
-void LoadDetectorGeo(){
-   //========================================= detector Geometry
-   string detGeoFileName = "detectorGeo.txt";
-   printf("=======================\n");
-   printf(" loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
-   file.open(detGeoFileName.c_str());
-   
-   if( file.is_open() ){
-      string x;
-      int i = 0;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,1) == "#" )  break;
-         if( i == 0 ) Bfield  = abs(atof(x.c_str()));
-         if( i == 3 )     a   = atof(x.c_str());
-         if( i == 5 ) length   = atof(x.c_str());
-         if( i == 15 ) firstPos = atof(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
-      file.close();
-      printf("... done.\n");
+void Monitors::LoadDetGeoAndReactionConfigFile(){
 
-      vector<double> posTemp = pos;
-      for(int id = 0; id < numCol; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[numCol-1-id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[numCol-1-id];
-      }
-      
-      for(int i = 0; i < numCol ; i++){
-         if( firstPos > 0 ){
-            printf("\t%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("\t%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      
-      if( firstPos > 0 ){
-         zRange[1] = pos[0] + length + 30;
-         zRange[0] = pos[numCol-1]  - 30;
-      }else{
-         zRange[0] = pos[0] -length - 30;
-         zRange[1] = pos[numCol-1] + 30;
-      }
-      
-      printf(" ------- z Range : %.2f - %.2f mm\n", zRange[0], zRange[1]);
-      
-   }else{
-      printf("... fail\n");
-   }
-   
+  string detGeoFileName = "detectorGeo.txt";
+  printf("=======================\n");
+  printf(" loading detector geometery : %s.", detGeoFileName.c_str());
+  TMacro * haha = new TMacro();
+  if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+    detGeo = LoadDetectorGeo(haha);
+    PrintDetGeo(detGeo);
+
+    zRange[0] = detGeo.zMin - 50 ;
+    zRange[1] = detGeo.zMax + 50 ;
+    
+    printf("... done.\n");
+  }else{
+
+    printf("... fail\n");
+  }
+
+  string reactionConfigFileName = "reactionConfig.txt";
+  printf("=======================\n");
+  printf(" loading reaction config : %s.", reactionConfigFileName.c_str());
+  TMacro * kaka = new TMacro();
+  if( kaka->ReadFile(reactionConfigFileName.c_str()) > 0 ) {
+    reactionConfig  = LoadReactionConfig(kaka);
+    PrintReactionConfig(reactionConfig);
+    printf("..... done.\n");
+  }else{
+
+    printf("..... fail\n");
+  }
+
 }
 
-void LoadXFXNCorr(){
+void Monitors::LoadXFXNCorr(){
    //========================================= xf = xn correction
    printf(" loading xf-xn correction.");
    ifstream file;
@@ -434,7 +423,7 @@ void LoadXFXNCorr(){
    
 }
 
-void LoadXFXN2ECorr(){
+void Monitors::LoadXFXN2ECorr(){
    //========================================= e = xf + xn correction
    printf(" loading xf/xn-e correction.");
    ifstream file;
@@ -459,7 +448,7 @@ void LoadXFXN2ECorr(){
    file.close();
 } 
 
-void LoadXScaleCorr(){
+void Monitors::LoadXScaleCorr(){
    //========================================= X-Scale correction
    printf(" loading x-Scale correction.");
    ifstream file;
@@ -485,7 +474,7 @@ void LoadXScaleCorr(){
 }
 
 
-void LoadECorr(){
+void Monitors::LoadECorr(){
    //========================================= e correction
    printf(" loading e correction.");
    ifstream file;
@@ -536,7 +525,7 @@ void LoadECorr(){
    
 }
 
-void LoadRDTCorr(){
+void Monitors::LoadRDTCorr(){
    //========================================= e correction
    printf(" loading rdt correction.");
    ifstream file;
@@ -563,7 +552,7 @@ void LoadRDTCorr(){
    
 }
 
-void LoadReactionPars(){
+void Monitors::LoadReactionPars(){
    
    //========================================= reaction parameters
    //check is the transfer.root is using the latest reactionConfig.txt   
@@ -604,17 +593,17 @@ void LoadReactionPars(){
       printf("........ done.\n");
 
       isReaction = true;
-      alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
+      alpha = 299.792458 * detGeo.Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
       gamm = 1./TMath::Sqrt(1-beta*beta);
-      G = alpha * gamm * beta * a ;
+      G = alpha * gamm * beta * detGeo.detPerpDist ;
       printf("\tmass-b    : %f MeV/c2 \n", mass);
       printf("\tcharge-b  : %f \n", q);
       printf("\tE-total   : %f MeV \n", Et);
-      printf("\tmass-B    : %f MeV/c2 \n", massB);		 
+      printf("\tmass-B    : %f MeV/c2 \n", massB);
       printf("\tbeta      : %f \n", beta);
-      printf("\tB-field   : %f T \n", Bfield);
+      printf("\tB-field   : %f T \n", detGeo.Bfield);
       printf("\tslope     : %f MeV/mm \n", alpha * beta);
-      printf("\tdet radius: %f mm \n", a);
+      printf("\tdet radius: %f mm \n", detGeo.detPerpDist);
       printf("\tG-coeff   : %f MeV \n", G);
       printf("=================================\n");
 

@@ -22,8 +22,9 @@
 #include "TMacro.h"
 #include "TClonesArray.h"
 
-// Headers needed by this particular selector
+#include "../Armory/AnalysisLibrary.h"
 
+// Headers needed by this particular selector
 
 class Cali_e_trace : public TSelector {
 public :
@@ -156,6 +157,8 @@ public :
    Int_t validEventCount;
    
    //========correction parameters
+   DetGeo detGeo;
+   
    int numDet;
    int iDet; // number of detector at different position
    int jDet; // number of detector at same position
@@ -374,69 +377,27 @@ void Cali_e_trace::Init(TTree *tree)
    printf("======================= loading parameters files .... \n");
    string detGeoFileName = "detectorGeo.txt";
    printf("loading detector geometery : %s.", detGeoFileName.c_str());
-   file.open(detGeoFileName.c_str());
-   if( file.is_open() ){
-      i = 0;
-      string x;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,1) == "#" )  break;
-         if( i == 0  )          Bfield = abs(atof(x.c_str()));
-         if( i == 3  )        perpDist = atof(x.c_str());
-         if( i == 5  )          length = atof(x.c_str());
-         if( i == 15 )        firstPos = atof(x.c_str());
-         if( i == 18 )            jDet = atoi(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
-      
-      iDet = pos.size();
-      file.close();
-      printf("... done.\n");
-      
-      vector<double> posTemp = pos;
-      for(int id = 0; id < iDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[iDet-1-id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet-1-id];
-      }
-      
-      printf(" Bfield       : %6.2f T\n", Bfield);
-      printf(" PSD prepDist : %6.3f mm\n", perpDist);
-      printf(" PSD length   : %6.3f mm\n", length);
-      printf(" # row Det    : %6d \n", jDet);
-      printf(" # col Det    : %6d \n", iDet);
-      printf("----------- list of detector position\n");
-      for(int i = 0; i < iDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %8.2f mm - %8.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("==================================\n");
 
-      TMacro detGeo("detectorGeo.txt");
-      detGeo.Write("detGeo");
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+
+      detGeo = LoadDetectorGeo(haha);
+
+      PrintDetGeo(detGeo);
+
+      Bfield = detGeo.Bfield;
+      perpDist = detGeo.detPerpDist;
+      firstPos = detGeo.firstPos;
+      length = detGeo.detLength;
+      jDet = detGeo.mDet;
+      pos = detGeo.detPos;
       
+      printf("... done.\n");
    }else{
-       printf("... fail\n");
-       Bfield = 2.5;
-       firstPos =  0;
-       perpDist = 9;
-       length = 50.5;
-       jDet = 4;
-       iDet = 6;
-       pos[0] = 0;
-       pos[1] = 58.6;
-       pos[2] = 117.9;
-       pos[3] = 176.8;
-       pos[4] = 235.8;
-       pos[5] = 294.8;
+      printf("... fail\n");
+      Terminate();
    }
-   
+
    numDet = iDet * jDet;
 
    //========================================= xf = xn correction

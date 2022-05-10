@@ -5,6 +5,9 @@
 #include <TGButton.h>
 #include <TGLabel.h>
 #include <TGFrame.h>
+#include <TGTextEditor.h>
+#include <TGNumberEntry.h>
+#include <TGComboBox.h>
 #include <TRootEmbeddedCanvas.h>
 #include <RQ_OBJECT.h>
 
@@ -27,18 +30,13 @@
   #define OS_Type 0
 #endif
 
-
 class MyMainFrame {
    RQ_OBJECT("MyMainFrame")
 private:
-   TGMainFrame         *fMain;
-   TGGroupFrame * reactionframe;
-   TRootEmbeddedCanvas *fEcanvas;
+   TGMainFrame *fMain;
   
-   ///TGNumberEntry * nb[4][2];
-   ///TGNumberEntry * reactionEnergy;
+   TGTextEdit * editor;
    
-   TGTextEdit * editor ;
    TString fileName;
    
    TGLabel * fileLabel;
@@ -55,7 +53,8 @@ private:
    TGCheckButton * isExtract;
    TGCheckButton * isPlot;
    
-   TGCheckButton * isElastic;
+   TGComboBox    * extractFlag;
+   
    
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
@@ -64,6 +63,8 @@ public:
    void OpenFile(int);
    bool IsFileExist(TString filename);
 };
+
+
 MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    // Create a main frame
    fMain = new TGMainFrame(p,w,h);
@@ -85,7 +86,6 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fileLabel = new TGLabel(hframe00, "");
    fileLabel->SetWidth(370);
    fileLabel->SetHeight(20);
-   //fileLabel->SetTextJustify(kTextLeft);
    fileLabel->SetTextColor(kRed);
    fileLabel->ChangeOptions(kFixedSize | kSunkenFrame);
    fileLabel->SetText(fileName);
@@ -106,7 +106,6 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    help->Connect("Clicked()","MyMainFrame",this,"Command(=4)");
    hframe00->AddFrame(help,new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
    
-  
    editor = new TGTextEdit(hframe2, 600, 700);
    editor->LoadFile(fileName);
    hframe2->AddFrame(editor);
@@ -230,17 +229,17 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    
    angMin = new TGNumberEntry(hframe001, 0, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
    angMin->SetWidth(50);
-   angMin->SetLimitValues(0, 180);
+   angMin->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
    hframe001->AddFrame(angMin, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
    
    angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
    angMax->SetWidth(50);
-   angMax->SetLimitValues(0, 180);
+   angMax->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
    hframe001->AddFrame(angMax, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
    
    angStep = new TGNumberEntry(hframe001, 1, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
    angStep->SetWidth(50);
-   angStep->SetLimitValues(0, 30);
+   angStep->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
    hframe001->AddFrame(angStep, new TGLayoutHints(kLHintsCenterX, 5, 5, 0, 0));
 
    //------- Check Boxes
@@ -268,11 +267,15 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    isPlot->SetState(kButtonDown);
    DWBAFrame->AddFrame(isPlot, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
-   isElastic = new TGCheckButton(DWBAFrame, "Ratio to RutherFord");
-   isElastic->SetWidth(130);
-   isElastic->ChangeOptions(kFixedSize );
-   DWBAFrame->AddFrame(isElastic, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-
+   extractFlag = new TGComboBox(DWBAFrame, 100);
+   extractFlag->SetWidth(130);
+   extractFlag->SetHeight(30);
+   
+   extractFlag->AddEntry("Xsec.", 2);
+   extractFlag->AddEntry("Ratio to Ruth.", 1);
+   extractFlag->AddEntry("Rutherford", 3);
+   extractFlag->Select(2);
+   DWBAFrame->AddFrame(extractFlag, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
 
    TGTextButton *DWBA = new TGTextButton(DWBAFrame, "DWBA");
    DWBA->SetWidth(150);
@@ -287,8 +290,6 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    exit->ChangeOptions( exit->GetOptions() | kFixedSize );
    hframe1->AddFrame(exit, new TGLayoutHints(kLHintsCenterX, 5,5,3,4));
 
-
-
    // Set a name to the main frame
    fMain->SetWindowName("Simulation Helper");
 
@@ -299,7 +300,15 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fMain->Resize(fMain->GetDefaultSize());
 
    // Map main frame
-   fMain->MapWindow();
+   fMain->MapWindow();   
+
+   int versionInt = gROOT->GetVersionInt();
+
+   if( versionInt < 62600 ) {
+      statusLabel->SetText(Form("Root version : %s. Please Update Root to v6.26/00",gROOT->GetVersion()));  
+   }else{
+      statusLabel->SetText(Form("Root version : %s",gROOT->GetVersion()));    
+   }
 }
 
 bool MyMainFrame::IsFileExist(TString filename){
@@ -326,12 +335,25 @@ void MyMainFrame::OpenFile(int ID){
   if ( IsFileExist(fileName) ){
     
     fileLabel->SetText(fileName);
+
     editor->LoadFile(fileName);
-    statusLabel->SetText(fileName + "   opened.");
+   
+    if( ID >= 5 ) {
+       editor->SetReadOnly(true);
+    }else{
+      editor->SetReadOnly(false);
+    }
     
+    editor->ShowBottom();
+
+    if( ID < 6){
+      statusLabel->SetText(fileName + " opened.");
+    }else{
+      statusLabel->SetText(fileName + " opened. (READ ONLY)");
+    }
   }else{
   
-    statusLabel->SetText(fileName + "   not exist.");    
+    statusLabel->SetText(fileName + " not exist.");    
     fileName = oldFileName;
 
   }
@@ -377,8 +399,8 @@ void MyMainFrame::Command(int ID) {
     }
     
     if( isRunOK && isExtract->GetState() && IsFileExist("DWBA.out")){
-       int ElasticFlag = 0; // 1 for ratio to Rutherford, 2 for total Xsec
-       if (isElastic->GetState()) ElasticFlag = 1;
+       int ElasticFlag = 0; // 1 for ratio to Rutherford, 2 for total Xsec, 3 for (n,n) Xsec
+       ElasticFlag = extractFlag->GetSelected();
        statusLabel->SetText("Extracting X-sec.....");
        ExtractXSec("DWBA.out", ElasticFlag);
        statusLabel->SetText("X-sec Extracted.");
@@ -428,7 +450,8 @@ void MyMainFrame::Command(int ID) {
   if( ID == 4 ){
      fileName = "";
      statusLabel->SetText("Help Page.");
-     editor->LoadBuffer("===================== For Simulation");
+     editor->LoadBuffer("==================== For Simulation");
+     editor->AddLine("");
      editor->AddLine("1) Make sure you check :");
      editor->AddLine("      a) reaction Config");
      editor->AddLine("      b) detector Geo.");
@@ -443,11 +466,11 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("");
      editor->AddLine("4) After simulation, it will plot the result.");
      editor->AddLine("      To change the plotting, Click on the Config Simulation Plot.");
-     //editor->AddLine("      Please save, and exit, reOpen the Simulation_Helper to make the change effective.");
      editor->AddLine("");
      editor->AddLine("5) If the transfer.root is already here, simply Plot Simulation.");
      editor->AddLine("");
-     editor->AddLine("===================== For DWBA (only for linux)");
+     editor->AddLine("========================= For DWBA ");
+     editor->AddLine("");
      editor->AddLine("1) Only need to change the DWBA setting.");
      editor->AddLine("");
      editor->AddLine("2) The GUI offer a view on the infile and outfile.");
@@ -462,12 +485,26 @@ void MyMainFrame::Command(int ID) {
      editor->AddLine("              * DWBA.Ex.txt");
      editor->AddLine("              * DWBA.root");
      editor->AddLine("      d) Plot the cross section from the DWBA.root.");
+     editor->AddLine("");
+     editor->AddLine("================ Tips for using the editor, both MAC or LINUX");
+     editor->AddLine("");
+     editor->AddLine("Ctrl+U      | Delete current line.  ");
+     editor->AddLine("Ctrl+C      | Copy            ");
+     editor->AddLine("Ctrl+V      | Paste            ");
      editor->AddLine("=================================================== eof");
 
      TString osTypeStr;
      osTypeStr.Form("OS type is %s", (OS_Type == 0 ? "Mac" : "Linux"));
 
      editor->AddLine(osTypeStr);
+
+     editor->AddLine(Form("Root version : %s",gROOT->GetVersion()));
+     int versionInt = gROOT->GetVersionInt();
+
+     if( versionInt < 62600 ) {
+         editor->AddLine("Please Update Root to v6.26/00");
+     }
+     
   }
   
   if( ID == 5) {
@@ -493,7 +530,8 @@ MyMainFrame::~MyMainFrame() {
    delete fMain;
 }
 
+
 void Simulation_Helper() {
-  
+
    new MyMainFrame(gClient->GetRoot(),800,600);
 }

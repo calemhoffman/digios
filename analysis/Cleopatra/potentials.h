@@ -515,16 +515,16 @@ bool KoningPotential(int A, int Z, double E, double Zproj){
   double rc = 1.198 + 0.697/pow(A3,2) + 12.995/pow(A3,5);
   double vc = 1.73/rc * Z / A3;
 
-  v  = vp1*(1 - vp2*(E-epf) + vp3*pow(E-epf,2) + vp4*pow(E-epf,3)) + vc * vp1 * (vp2 - 2*vp3*(E-epf) + 3*vp4*pow(E-epf,2));
+  v  = vp1*(1 - vp2*(E-epf) + vp3*pow(E-epf,2) - vp4*pow(E-epf,3)) + vc * vp1 * (vp2 - 2*vp3*(E-epf) + 3*vp4*pow(E-epf,2));
   //neutron
-  if( Zproj == 0 ) v  = vn1*(1 - vn2*(E-enf) + vn3*pow(E-enf,2) + vn4*pow(E-enf,3)) + vc * vn1 * (vn2 - 2*vn3*(E-enf) + 3*vn4*pow(E-enf,2));
+  if( Zproj == 0 ) v  = vn1*(1 - vn2*(E-enf) + vn3*pow(E-enf,2) - vn4*pow(E-enf,3));
 
 
   r0 = 1.3039 - 0.4054 / A3;
   a  = 0.6778 - 0.000148 * A;
 
   vi  = wp1 * pow(E-epf,2)/(pow(E-epf,2) + pow(wp2,2));
-  if( Zproj == 0 ) vi  = wn1 * pow(E-epf,2)/(pow(E-epf,2) + pow(wn2,2));
+  if( Zproj == 0 ) vi  = wn1 * pow(E-enf,2)/(pow(E-enf,2) + pow(wn2,2));
   
   ri0 = 1.3039 - 0.4054 / A3;
   ai  = 0.6778 - 0.000148 * A;
@@ -534,6 +534,7 @@ bool KoningPotential(int A, int Z, double E, double Zproj){
 
   rsi0 = 1.3424 - 0.01585 * A3;
   asi  = 0.5187 + 0.0005205 * A;
+  if( Zproj == 0 ) asi = 0.5446 - 0.0001656 * A;
 
   vso  = vso1 * exp(-vso2 * (E-epf));
   if( Zproj == 0 ) vso = vso1 * exp(-vso2 * (E-enf));
@@ -650,11 +651,11 @@ bool BecchettiPotential(int A, int Z, double E){
   ri0 = 1.32;
   ai  = 0.51 + 0.7 * (N-Z)/A;
 
-  vsi  = 4.2 - 0.05 * E + 15.5 * (N-Z)/A;
-  rsi0 = 11.8 - 0.258 * E + 12. * (N-Z)/A;
-  if( rsi0 < 0 ) {
-    rsi0 = 0;
+  vsi = 11.8 - 0.258 * E + 12. * (N-Z)/A;
+  if( vsi < 0 ) {
+    vsi = 0;
   }
+  rsi0 = 1.320;
   asi  = 0.51 + 0.7 * (N-Z)/A;
 
   vso  = 6.2;

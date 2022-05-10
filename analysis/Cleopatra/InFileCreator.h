@@ -1,7 +1,7 @@
 /***********************************************************************
  * 
  *  This is InFileCreator, To creator the in-file for Ptolemy
- *          only for (x,y), x or y = p, d, t, 3He
+ *          only for (x,y), x or y = n, p, d, t, 3He
  * 
  *  It read a simple infile.in from reaction_setting file
  * 
@@ -136,6 +136,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
 
     if( isotopeA.A + isotopea.A != isotopeB.A + isotopeb.A || isotopeA.Z + isotopea.Z != isotopeB.Z + isotopeb.Z ) {
       printf("    ====> ERROR! A-number or Z-number not balanced. \n");
+
+      Isotope isotopeK(isotopeA.A + isotopea.A - isotopeb.A, isotopeA.Z + isotopea.Z - isotopeb.Z);
+
+      printf("      try : %s ??\n", isotopeK.Name.c_str());
+      
       continue;
     }
     

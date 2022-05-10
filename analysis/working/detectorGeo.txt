@@ -16,6 +16,7 @@ false    //is_coincident_with_recoil
 -121     //first_position_-_for_upstream_[mm]
 0.03     //energy_resolution_of_PSD_array_[MeV]
 1.00     //position_resolution_of_PSD_array_[mm]
+Out           //detector_facing_Out_or_In
 4        //number_of_detector_as_same_side
 0.00     //1st_detector_near_position_in_reference_to_det6_[mm]
 58.6     //2nd_det

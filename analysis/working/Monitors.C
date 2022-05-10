@@ -22,6 +22,7 @@
 #include <fstream>
 #include <vector>
 #include "../Cleopatra/Isotope.h"
+#include "GeneralSortMapping.h"
 
 using namespace std;
 
@@ -37,12 +38,12 @@ int    energyRange[2] = {     0,      10};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,    3000};
 int      rdtERange[2] = {     0,    8000};
 int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {     0,    7000};
+int      elumRange[2] = {     200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  20,    -1,     6};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  125,    -2,     8};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -100, 100};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -52,14 +53,9 @@ int  icRange [3] = {100, 800, 500}; /// max of IC0,1,2
 bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
-Isotope hRecoil(12, 4);
-double Sn = hRecoil.CalSp(0,1);
-double Sp = hRecoil.CalSp(1,0);
-double Sa = hRecoil.CalSp(2,2);
-
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 20};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-12, 12};             /// min, max, 1 ch = 10 ns
 double eCalCut        = 0.5;                   /// lower limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -67,9 +63,9 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.95;                  ///cut out the edge
-vector<int> skipDetID = {2,  11, 17, 5, 23} ;//{2,  11, 17}
+vector<int> skipDetID = {7, 11, 16} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "rdtCuts.root";
+TString rdtCutFile1 = "";//15Ctp_rdtCuts.root";
 TString rdtCutFile2 = "";//"rdtCuts_15C.root";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -175,6 +171,8 @@ TH2F* hExThetaCM;
 TH1F* hExCut1;
 TH1F* hExCut2;
 
+TH1F* hExA;
+
 //====== TAC
 TH1F* htac;   // by TAC
 TH1F* htac2;  // by timestamp
@@ -208,7 +206,7 @@ TH1F* hcrdt[16];
 TH2F* hcrdtPolar;
 
 //======= ELUM
-TH1F* helum[16];
+TH1F* helum[NELUM];
 ///TH1F* helumSUM;
 TH2F* helumID;
 ///
@@ -253,12 +251,7 @@ Float_t eCorr2[numDet][2];
 Float_t rdtCorr[8][2];
 //==== parameters for Ex and thetaCM calcualtion
 
-double length ; // detector z-length 
-double firstPos;
-vector<double> pos;
 double zRange[2] = {-1000, 0}; // zMin, zMax
-double a ; // perpendicular distance of detector to axis [mm]
-double Bfield ;
 
 double Ex, thetaCM;
 double q, alpha, Et, beta, gamm, G, massB, mass; //variables for Ex calculation
@@ -291,7 +284,7 @@ void Monitors::Begin(TTree *tree)
    //===================================================== loading parameter
    printf("################## loading parameter files\n"); 
    
-   LoadDetectorGeo();
+   LoadDetGeoAndReactionConfigFile();
    LoadXFXNCorr();
    LoadXFXN2ECorr();
    LoadXScaleCorr();
@@ -507,6 +500,7 @@ void Monitors::Begin(TTree *tree)
    
    //===================== energy spectrum
    hEx    = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   hExA    = new TH1F("hExA",Form("excitation spectrum w/ alpha cut out; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    
    hExCut1  = new TH1F("hExCut1",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    hExCut1->SetLineColor(2);
@@ -525,10 +519,10 @@ void Monitors::Begin(TTree *tree)
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, thetaCMRange[0], thetaCMRange[1],  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
 
    //===================== ELUM
-   for( int i = 0; i < 16; i++){
+   for( int i = 0; i < NELUM; i++){
       helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 500, elumRange[0], elumRange[1]);
    }
-   helumID = new TH2F("helumID", "Elum vs ID", 16, 0 , 16, 500, elumRange[0], elumRange[1]);
+   helumID = new TH2F("helumID", "Elum vs ID", NELUM, 0 , NELUM, 500, elumRange[0], elumRange[1]);
    ///helumSUM = new TH1F("helumSUM", "ElumSUM", 500, elumRange[0], elumRange[1]);
    ///
    ///helumTAC = new TH2F("helumTAC", "Elum vs TAC; TAC [a.u.]; Elum ", TACRange[0], TACRange[1], TACRange[2], 500, elumRange[0], elumRange[1]);
@@ -649,7 +643,7 @@ Bool_t Monitors::Process(Long64_t entry)
     //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
     
     /*********** ELUM *************************************************/
-    for( int i = 0; i < 2; i++){
+    for( int i = 0; i < NELUM; i++){
        helum[i]->Fill(elum[i]);
        helumID->Fill(i, elum[i]);
        ///helumSUM->Fill(elum[i]);
@@ -716,12 +710,13 @@ Bool_t Monitors::Process(Long64_t entry)
       if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
 
       //==================== Calibrations go here
-      xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
-      xncal[detID] = xn[detID] * xnCorr[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
+      xfcal[detID] = xf[detID] / xfxneCorr[detID][1] + xfxneCorr[detID][0]/2;
+      xncal[detID] = xn[detID] * xnCorr[detID] / xfxneCorr[detID][1] - xfxneCorr[detID][0]/2;
       //eCal[detID] = e[detID] / eCorr[detID][0] + eCorr[detID][1];
       eCal[detID] = (e[detID] / eCorr[detID][0] + eCorr[detID][1])*eCorr2[detID][0]+eCorr2[detID][1];
 
       if( eCal[detID] < eCalCut ) continue;
+      
 
       //===================== fill Calibrated  data
       heCal[detID]->Fill(eCal[detID]);
@@ -757,10 +752,10 @@ Bool_t Monitors::Process(Long64_t entry)
       if( abs(xcal[detID] - 0.5) > xGate/2. ) continue; 
       
       //==================== calculate Z
-      if( firstPos > 0 ) {
-        z[detID] = length*(1.0-xcal[detID]) + pos[detID%numCol];
+      if( detGeo.firstPos > 0 ) {
+        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[detID%numCol];
       }else{
-        z[detID] = length*(xcal[detID]-1.0) + pos[detID%numCol];
+        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[detID%numCol];
       }
 
       //===================== multiplicity
@@ -770,7 +765,7 @@ Bool_t Monitors::Process(Long64_t entry)
       heVx[detID]->Fill(x[detID],e[detID]);
       hringVx[detID]->Fill(x[detID],ring[detID]);
      
-      heCalVxCal[detID]->Fill(xcal[detID]*length,eCal[detID]);
+      heCalVxCal[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
       heCalVz->Fill(z[detID],eCal[detID]);
 
       //=================== Recoil Gate
@@ -843,7 +838,7 @@ Bool_t Monitors::Process(Long64_t entry)
       if( coinFlag && (rdtgate1 || rdtgate2) && ezGate){ 
          heCalVzGC->Fill( z[detID] , eCal[detID] );
         
-         heCalVxCalG[detID]->Fill(xcal[detID]*length,eCal[detID]);
+         heCalVxCalG[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
          heVIDG->Fill(detID, e[detID]);
       
          multiEZ ++;
@@ -987,6 +982,8 @@ Bool_t Monitors::Process(Long64_t entry)
      htacEx->Fill(tac[2], Ex);
      htac2Ex->Fill(tac_t[1]-e_t[detID], Ex);
      
+     if( eCal[detID] < 5 && eCal[detID] > 1.5) hExA->Fill(Ex);
+     
      if( thetaCM > thetaCMGate ) {
 
          hEx->Fill(Ex);
@@ -1043,7 +1040,10 @@ void Monitors::Terminate()
 
    double yMax = 0;
 
-
+   Isotope hRecoil(reactionConfig.recoilHeavyA, reactionConfig.recoilHeavyZ);
+   double Sn = hRecoil.CalSp(0,1);
+   double Sp = hRecoil.CalSp(1,0);
+   double Sa = hRecoil.CalSp(2,2);
    
    //TODO, Module each block.
    ///----------------------------------- Canvas - 1
@@ -1071,8 +1071,11 @@ void Monitors::Terminate()
    padID++; cCanvas->cd(padID); 
    
    //Draw2DHist(hExThetaCM);
-   heVIDG->Draw();
-   text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
+   //heVIDG->Draw();
+   //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
+   hExA->Draw();
+   text.DrawLatex(.15,0.8,Form("1.5 < EA < 5"));
+   DrawLine(hExA, Sn);
 
    //helum4D->Draw();
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));

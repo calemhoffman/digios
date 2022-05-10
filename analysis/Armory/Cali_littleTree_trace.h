@@ -27,8 +27,10 @@
 #include <TObjArray.h>
 #include <TCutG.h>
 
-// Headers needed by this particular selector
 
+#include "../Armory/AnalysisLibrary.h"
+
+// Headers needed by this particular selector
 
 class Cali_littleTree_trace : public TSelector {
 public :
@@ -116,6 +118,8 @@ public :
    double a;
    double length;
    double firstPos;
+
+   DetGeo detGeo;
    
    double xnCorr[30]; // xn correction for xn = xf
    double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
@@ -188,55 +192,33 @@ void Cali_littleTree_trace::Init(TTree *tree)
    //========================================= detector Geometry
    string detGeoFileName = "detectorGeo.txt";
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
-   file.open(detGeoFileName.c_str());
-   int i = 0;
-   if( file.is_open() ){
-      string x;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,1) == "#" )  break;
-         if( i == 0 ) Bfield   = atof(x.c_str());
-         if( i == 3 ) a        = atof(x.c_str());         
-         if( i == 5 ) length   = atof(x.c_str());
-         if( i == 15 ) firstPos = atof(x.c_str());
-         if( i == 18 ) jDet = atoi(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
+
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+
+      detGeo = LoadDetectorGeo(haha);
+
+      PrintDetGeo(detGeo);
+
+      iDet = detGeo.nDet;
+      jDet = detGeo.mDet;
+
+      Bfield = detGeo.Bfield;
+      a = detGeo.detPerpDist;
+      length = detGeo.detLength;
+      firstPos = detGeo.firstPos;
       
-      iDet = pos.size();
-      file.close();
       printf("... done.\n");
-      
-      vector<double> posTemp = pos;
-      for(int id = 0; id < iDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[iDet -1 - id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[iDet -1 - id];
-      }
-      
-      for(int i = 0; i < iDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("=======================\n");
-      
    }else{
-       printf("... fail\n");
-       Terminate();
-       return;
+      printf("... fail\n");
+      Terminate();
    }
-   
+
    numDet = iDet * jDet;
    
    //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
+   ifstream file;
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
       double a;
