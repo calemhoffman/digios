@@ -278,7 +278,7 @@ void eCalVxCalG(void) {
     heCalVxCalG[i]->Draw("");
   } 
 }
-/**
+
 void elum(void) {
   TCanvas *celum = (TCanvas *) gROOT->FindObjectAny("celum");
   if( celum == NULL )  celum = new TCanvas("celum",Form("ELUM | %s", canvasTitle.Data()),1000,1000);
@@ -294,7 +294,7 @@ void elum(void) {
   helumID->Draw("colz");
   
 }
-*/
+
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);

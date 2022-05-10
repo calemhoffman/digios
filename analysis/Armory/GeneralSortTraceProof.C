@@ -87,8 +87,8 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    
    printf( "  TAC/RF   : %s , %d \n", isTACRF  ? "On" : "Off", NTAC);
    printf( "  Recoil   : %s , %d \n", isRecoil ? "On" : "Off", NRDT);
-   printf( "  Elum     : %s , %d \n", isElum   ? "On" : "Off", NElum);
-   printf( "  EZero    : %s , %d \n", isEZero  ? "On" : "Off", NEZero);
+   printf( "  Elum     : %s , %d \n", isElum   ? "On" : "Off", NELUM);
+   printf( "  EZero    : %s , %d \n", isEZero  ? "On" : "Off", NEZERO);
    printf( "  C-Recoil : %s , %d \n", isCRDT   ? "On" : "Off", NCRDT);
    TString traceMethodName;
    switch(traceMethod){

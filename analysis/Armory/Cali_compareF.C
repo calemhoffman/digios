@@ -9,6 +9,7 @@
 #include <TH2F.h>
 #include <TH1F.h>
 #include <TF1.h>
+#include <TMacro.h>
 #include <TCanvas.h>
 #include <TGraph2D.h>
 #include <TGraph.h>
@@ -20,6 +21,8 @@
 #include <TRandom.h>
 #include <TDatime.h>
 #include <TObjArray.h>
+
+#include "../Armory/AnalysisLibrary.h"
 
 //use the fx in refTree, use fx->Eval(x) as e
 
@@ -105,53 +108,27 @@ void Cali_compareF(TTree *expTree, TFile *refFile,
    int numDet;
    int rDet = 5; // number of detector at different position, row-Det
    int cDet = 6; // number of detector at same position, column-Det
-   vector<double> pos;
-   double length = 50.5;
-   double firstPos = -110;
    double xnCorr[24]; // xn correction for xn = xf
    double xfxneCorr[24][2]; //xf, xn correction for e = xf + xn
+
+   DetGeo detGeo;
    
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
-   ifstream file;
-   file.open(detGeoFileName.c_str());
-   int i = 0;
-   if( file.is_open() ){
-      string x;
-      while( file >> x){
-         //printf("%d, %s \n", i,  x.c_str());
-         if( x.substr(0,2) == "//" )  continue;
-         if( x.substr(0,1) == "#" )  break;
-         if( i == 5 ) length   = atof(x.c_str());
-         if( i == 15 ) firstPos = atof(x.c_str());
-         if( i == 18 ) cDet = atoi(x.c_str());
-         if( i >= 19 ) {
-            pos.push_back(atof(x.c_str()));
-         }
-         i = i + 1;
-      }
+
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+
+      detGeo = LoadDetectorGeo(haha);
+
+      PrintDetGeo(detGeo);
+
+      rDet = detGeo.nDet;
+      cDet = detGeo.mDet;
       
-      rDet = pos.size();
-      file.close();
       printf("... done.\n");
-      
-      vector<double> posTemp = pos;
-      for(int id = 0; id < rDet; id++){
-        if( firstPos > 0 ) pos[id] = firstPos + posTemp[rDet -1 - id];
-        if( firstPos < 0 ) pos[id] = firstPos - posTemp[rDet -1 - id];
-      }
-      
-      for(int i = 0; i < rDet ; i++){
-         if( firstPos > 0 ){
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i], pos[i] + length);
-         }else{
-            printf("%d, %6.2f mm - %6.2f mm \n", i, pos[i] - length , pos[i]);
-         }
-      }
-      printf("=======================\n");
-      
    }else{
-       printf("... fail\n");
-       return;
+      printf("... fail\n");
+      return;
    }
    
    numDet = rDet * cDet;
@@ -265,14 +242,7 @@ void Cali_compareF(TTree *expTree, TFile *refFile,
       
       /**///======================================================== histogram
       double iDet = idet%rDet;
-      double zRange[2];
-      if( firstPos > 0 ){
-         zRange[0] = pos[iDet] - 10;
-         zRange[1] = pos[iDet] + length + 10;
-      }else{
-         zRange[0] = pos[iDet] - length - 10;
-         zRange[1] = pos[iDet] + 10;
-      }
+      double zRange[2] = {detGeo.zMin, detGeo.zMax};
       
       printf("=============================== detID = %d (%6.2f mm, %6.2f mm) \n", idet, zRange[0], zRange[1]);
       
