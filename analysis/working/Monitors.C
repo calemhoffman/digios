@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,    3000};
-int      rdtERange[2] = {     0,    8000};
+int     rdtDERange[2] = {     -3000,    3000};
+int      rdtERange[2] = {     -3000,    3000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {     200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
