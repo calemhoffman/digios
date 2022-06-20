@@ -31,7 +31,7 @@ expName=$1
 
 if [ $# -ne 0 ]; then
     if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
-	expName="ARR01"
+	expName="H081_85Kr"
     fi
 fi
     
@@ -55,7 +55,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
-   expName="ARR01"
+   expName="H081_85Kr"
    echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m = master"
 else
    echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
@@ -155,7 +155,7 @@ fi
 echo "=================== Checking/Create Git Branch"
 pullFlag="K"
 isBranchExist=`git branch -a | grep ${expName} | wc -l`
-if [ ${expName} == "ARR01" ]; then
+if [ ${expName} == "H081_85Kr" ]; then
    echo "this is master experiment name. no branch create."
    git checkout master
    isBranchExist=1
@@ -218,8 +218,8 @@ echo "=================== done."
 
 #===== Modify Monitors.html
 
-if [ ${expName} == "ARR01" ]; then
-    capExpName="ARR01"
+if [ ${expName} == "H081_85Kr" ]; then
+    capExpName="H081_85Kr"
 else
     capExpName="H"${expName:1}
 fi
