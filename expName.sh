@@ -1,4 +1,4 @@
 #!/bin/bash -l
-expName=H081_85Kr
+expName=h081_85Kr
 daqDataPath=/media/DIGIOSDATA5
-LastRunNum=2
+LastRunNum=0
