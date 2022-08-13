@@ -35,7 +35,7 @@ void Check_e_z(TString rootfile){
    const char* treeName="tree";
    const char* simfile="transfer.root"; const char* treeNameS="tree";
 
-   int Div[2] = {5,6};  //x,y
+   int Div[2] = {6,4};  //x,y
    
    double ExRange[3] = {180, -1, 6};
 	double eRange[3]  = {400, 0, 10};
