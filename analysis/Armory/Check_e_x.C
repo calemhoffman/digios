@@ -10,7 +10,7 @@
 #include "TLatex.h"
 #include <fstream>
 
-void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
+void Check_e_x( TString rootFile = "cal_alpha.root",double eThreshold = 400){
 /**///======================================================== User input
    
    const char* treeName="tree";

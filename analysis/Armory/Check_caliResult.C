@@ -15,7 +15,7 @@
 
 void Check_caliResult(){
 
-   TFile * caliResult = new TFile("caliResult.root", "read");
+   TFile * caliResult = new TFile("cal_alpha.root", "read");
    
    gStyle->SetPalette(1,0);
 
