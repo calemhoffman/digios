@@ -133,6 +133,9 @@ TH1F * hExgTot;
 TH1F * hcoin_t;
 TH1F * hcoinTime;
 TH1F * hdt[24];
+TH1F * hdtg[24];
+TH2F * hdtEx[24];
+TH2F * hdtrdt[24];
 void defineHistos() {
        //histograms
    //general
@@ -154,7 +157,10 @@ void defineHistos() {
         heVxg[i] = new TH2F(Form("heVxg%d",i),Form("heVxg%d; x, e",i), 500, -1.1,1.1, 500,0,10);
         hEx[i] = new TH1F(Form("hExTot%d",i),Form("hExTot%d",i),400,-2,8); 
         hExg[i] = new TH1F(Form("hExTotg%d",i),Form("hExTotg%d",i),400,-2,8); 
-        hdt[i] = new TH1F(Form("hdt%d",i),Form("hdt%d",i),100,-50,50);
+        hdt[i] = new TH1F(Form("hdt%d",i),Form("hdt%d",i),200,-100,100);
+        hdtg[i] = new TH1F(Form("hdtg%d",i),Form("hdtg%d",i),200,-100,100);
+        hdtEx[i] = new TH2F(Form("hdtEx%d",i),Form("hdtEx%d; Ex; dt",i), 100,-1,9,200,-100,100);
+        hdtrdt[i] = new TH2F(Form("hdtrdt%d",i),Form("hdtrdt%d; rdt; dt",i), 500,0,2500,200,-100,100);
 
    }
    //recoil
@@ -190,11 +196,11 @@ void getCalibrations() {
         int d;
         double a0, a1, a2, a3, a4, a5, a6, a7, a8;
         int i = 0;
-        while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6  >> a7 >> a8){
+        while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 >> a7 >> a8){
             if( i >= 29) break;
             tetXCorr[d][0] = a0;tetXCorr[d][1] = a1;tetXCorr[d][2] = a2;
             tetXCorr[d][3] = a3;tetXCorr[d][4] = a4;tetXCorr[d][5] = a5;
-            tetXCorr[d][6] = a6;tetXCorr[d][7] = a7;tetXCorr[d][8] = a8; 
+            tetXCorr[d][6] = a6; tetXCorr[d][7] = a7; tetXCorr[d][8] = a8;
             i = i + 1;
         }
         printf("%f.... done.\n",tetXCorr[5][8]);
