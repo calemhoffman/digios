@@ -17,27 +17,13 @@
 //   require processed by Cali_e_trace.C
 //######################################################
 
-/*
-int nPeaks = 16;
-Double_t nGauss(Double_t *x, Double_t *par) {
-   Double_t result = 0;
-   for (Int_t p=0;p<nPeaks;p++) {
-      Double_t norm  = par[3*p+0];
-      Double_t mean  = par[3*p+1];
-      Double_t sigma = par[3*p+2];
-      result += norm * TMath::Gaus(x[0],mean,sigma, 1); // normalized Gaussian
-   }
-   return result;
-}
-*/
-
 TH2F * hTX;   
 TH2F * hTXg;  
 TH2F * hTXc2; 
 TH1F * hT; 
    
-void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_trace_tp.root",
-int detID=8){
+void GetCoinTimeCorrectionCutG(TString A_fileName_TChain="root_data/s005_32Si_tp.root",
+int detID=23){
    int timeRange[2] ={-100, 120};
    TString rdtCutName = "rdtCuts.root";
 
@@ -93,9 +79,9 @@ int detID=8){
    
    TString name, expression, gate, gateCut;
 
-   hTX   = new TH2F("hTX",   "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 250 );
- hTXg  = new TH2F("hTXg",  "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 250);
-hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 250);
+   hTX   = new TH2F("hTX",   "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 300 );
+ hTXg  = new TH2F("hTXg",  "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 300);
+hTXc2 = new TH2F("hTXc2", "time vs X; x; coinTimeUC [ns]", 100, -1.1, 1.1, 100, -200, 300);
 hT = new TH1F("hT", "", 50, -50, 50);
    TProfile * hp = new TProfile("hp", "time Profile", 400, -1.5,1.5);
    TSpectrum * spec = new TSpectrum(5);
@@ -123,11 +109,11 @@ hT = new TH1F("hT", "", 50, -50, 50);
    //expression.Form("coinTimeUC:x>>hTX");
    expression.Form("coinTimeUC:x[%d]>>hTX",detID);
    if( isBranchDetIDExist ) {   
-      gate.Form("detID==%d", detID);
+      gate.Form("detID==%d && x[%d]>-1.1 && x[%d]<1.1", detID, detID, detID);
    }else{
       gate.Form("Iteration$==%d", detID);
    }
-   
+   hTX->SetMarkerStyle(7);
    ///***************
    //if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
    //if( fileCut->IsOpen() ) gate = "cut0 && " + gate;
@@ -137,7 +123,7 @@ hT = new TH1F("hT", "", 50, -50, 50);
    name.Form("time vs X (detID-%d); x; coinTimeUC [ch]", detID);
    hTX->SetTitle(name);
    cAna->cd(1);
-   tree->Draw(expression, gate, "colz");
+   tree->Draw(expression, gate, "");
    int entries = hTX->Integral();
    printf("entries : %d \n", entries);
         
@@ -154,7 +140,7 @@ hT = new TH1F("hT", "", 50, -50, 50);
    printf("Got the TCut.\n");
    
    if( isBranchDetIDExist ) {   
-      gate.Form("cutG && detID==%d", detID);
+      gate.Form("cutG && detID==%d && x[%d]>-0.95 && x[%d]<0.95", detID, detID, detID);
    }else{
       gate.Form("cutG && Iteration$==%d", detID);
    }
@@ -172,7 +158,11 @@ hT = new TH1F("hT", "", 50, -50, 50);
    hp->Draw("same");
    
    TF1 * fit7 = new TF1("fit7", "pol7", -2, 2);
-   hp->Fit("fit7", "");
+   TF1 * fit2 = new TF1("fit2", "pol2", -2, 2);
+   int FIT = 1;
+   if (FIT == 2) {hp->Fit("fit2", "");} else {hp->Fit("fit7", "");}
+
+   
    gSystem->ProcessEvents();
    
    ///printf("---------- double click for flatten.\n");
@@ -180,6 +170,11 @@ hT = new TH1F("hT", "", 50, -50, 50);
    
    //==== create substract
    double q[8];
+   if (FIT == 2 ) {
+      q[0] = fit2->GetParameter(0);
+      q[1] = fit2->GetParameter(1);
+      q[2] = fit2->GetParameter(2);} 
+   else {
    q[0] = fit7->GetParameter(0);
    q[1] = fit7->GetParameter(1);
    q[2] = fit7->GetParameter(2);
@@ -188,16 +183,23 @@ hT = new TH1F("hT", "", 50, -50, 50);
    q[5] = fit7->GetParameter(5);
    q[6] = fit7->GetParameter(6);
    q[7] = fit7->GetParameter(7);
+   }
  
    if( isBranchDetIDExist ) {   
-      gate.Form("detID==%d", detID);
+      gate.Form("detID==%d && x[%d]>-0.95 && x[%d]<0.95", detID, detID, detID);
    }else{
       gate.Form("Iteration$==%d", detID);
    } 
    
    ///***************
    cAna->cd(3);   
+   if (FIT == 2) {
+       expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2):x>>hTXc2", q[0], q[1], q[2]);
+   }
+   else {
    expression.Form("coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7) :x>>hTXc2", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   }
+   
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    ///printf("---------- double click for 1D plot.\n");
@@ -205,7 +207,12 @@ hT = new TH1F("hT", "", 50, -50, 50);
    
    //==== 1-D plot
    cAna->cd(4);
+   if (FIT ==2 ) {
+       expression.Form("(coinTimeUC - %f - %f*x - %f*TMath::Power(x,2))>>hT", q[0], q[1], q[2]);
+   }
+   else {
    expression.Form("(coinTimeUC - %f - %f*x - %f*TMath::Power(x,2) - %f*TMath::Power(x,3)- %f*TMath::Power(x,4)- %f*TMath::Power(x,5)- %f*TMath::Power(x,6)- %f*TMath::Power(x,7))*1.0>>hT", q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]);
+   }
    tree->Draw(expression, gate, "colz");
    gSystem->ProcessEvents();
    
@@ -232,7 +239,7 @@ hT = new TH1F("hT", "", 50, -50, 50);
    for(int i = 0; i < nPeaks ; i++){
       para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
       para[3*i+1] = energy[i];
-      para[3*i+2] = 5;
+      para[3*i+2] = 1;
    }
    
    TF1 * fit = new TF1("fit", nGauss, timeRange[0], timeRange[1], 3* nPeaks );
@@ -269,7 +276,7 @@ hT = new TH1F("hT", "", 50, -50, 50);
    for( int i = 0; i < 8; i++){
       fprintf(paraOut, "%11.6f\t", q[i]);
    }
-   fprintf(paraOut, "%11.6f\n", ExPos[0]);
+   fprintf(paraOut, "%11.6f\n", 0.0000);
 
    
    fflush(paraOut);
