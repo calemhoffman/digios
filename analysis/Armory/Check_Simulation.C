@@ -361,24 +361,28 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
          Isotope hRecoil(reactionConfig.recoilHeavyA, reactionConfig.recoilHeavyZ);
          double Sn = hRecoil.CalSp(0,1);
          double Sp = hRecoil.CalSp(1,0);
-         double Sa = hRecoil.CalSp(2,2);
+         double Sa = hRecoil.CalSp2(4,2);
+         double S2n = hRecoil.CalSp(0, 2);
 
          printf("Heavy recoil: %s \n", hRecoil.Name.c_str());
-         printf("Sn : %f MeV/u \n", Sn);
-         printf("Sp : %f MeV/u \n", Sp);
-         printf("Sa : %f MeV/u \n", Sa);
+         printf("Sn  : %f MeV/u \n", Sn);
+         printf("Sp  : %f MeV/u \n", Sp);
+         printf("Sa  : %f MeV/u \n", Sa);
+         printf("S2n : %f MeV/u \n", S2n);
 
          double yMax = hExCal->GetMaximum();
-         TLine * lineSn = new TLine(Sn, 0, Sn, yMax); lineSn->SetLineColor(2); lineSn->Draw("");
-         TLine * lineSp = new TLine(Sp, 0, Sp, yMax); lineSp->SetLineColor(4); lineSp->Draw("same");
-         TLine * lineSa = new TLine(Sa, 0, Sa, yMax); lineSa->SetLineColor(6); lineSa->Draw("same");
+         TLine * lineSn  = new TLine(Sn,  0,  Sn, yMax); lineSn->SetLineColor(2); lineSn->Draw("");
+         TLine * lineSp  = new TLine(Sp,  0,  Sp, yMax); lineSp->SetLineColor(4); lineSp->Draw("same");
+         TLine * lineSa  = new TLine(Sa,  0,  Sa, yMax); lineSa->SetLineColor(6); lineSa->Draw("same");
+         TLine * lineS2n = new TLine(S2n, 0, S2n, yMax); lineS2n->SetLineColor(8); lineS2n->Draw("same");
 
          TLatex * text = new TLatex();
          text->SetTextFont(82);
          text->SetTextSize(0.06);
-         text->SetTextColor(2); text->DrawLatex(Sn, yMax*0.9, "S_{n}");
-         text->SetTextColor(4); text->DrawLatex(Sp, yMax*0.9, "S_{p}");
-         text->SetTextColor(6); text->DrawLatex(Sa, yMax*0.9, "S_{a}");
+         text->SetTextColor(2); text->DrawLatex(Sn,  yMax*0.9, "S_{n}");
+         text->SetTextColor(4); text->DrawLatex(Sp,  yMax*0.9, "S_{p}");
+         text->SetTextColor(6); text->DrawLatex(Sa,  yMax*0.9, "S_{a}");
+         text->SetTextColor(8); text->DrawLatex(S2n, yMax*0.9, "S_{2n}");
          
       }
       if( pID == pRecoilRThetaCM ){
