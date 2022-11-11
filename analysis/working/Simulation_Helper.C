@@ -70,7 +70,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fMain = new TGMainFrame(p,w,h);
   
    TGHorizontalFrame *hframe = new TGHorizontalFrame(fMain,600,600 );
-   fMain->AddFrame(hframe, new TGLayoutHints(kLHintsCenterX, 2,2,2,2));
+   fMain->AddFrame(hframe, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX, 2,2,2,2));
 
    TGVerticalFrame *hframe1 = new TGVerticalFrame(fMain,600,600 );
    hframe->AddFrame(hframe1);
@@ -81,7 +81,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fileName = "reactionConfig.txt";
    
    TGHorizontalFrame *hframe00 = new TGHorizontalFrame(hframe2,600,600 );
-   hframe2->AddFrame(hframe00, new TGLayoutHints(kLHintsCenterX, 2,2,2,2));
+   hframe2->AddFrame(hframe00, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX, 2,2,2,2));
    
    fileLabel = new TGLabel(hframe00, "");
    fileLabel->SetWidth(370);
@@ -288,7 +288,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    exit->SetWidth(150);
    exit->SetHeight(40);
    exit->ChangeOptions( exit->GetOptions() | kFixedSize );
-   hframe1->AddFrame(exit, new TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+   hframe1->AddFrame(exit, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX, 5,5,3,4));
 
    // Set a name to the main frame
    fMain->SetWindowName("Simulation Helper");
@@ -339,7 +339,8 @@ void MyMainFrame::OpenFile(int ID){
     editor->LoadFile(fileName);
    
     if( ID >= 5 ) {
-       editor->SetReadOnly(true);
+       //editor->SetReadOnly(true);
+       editor->SetReadOnly(false);
     }else{
       editor->SetReadOnly(false);
     }
