@@ -47,6 +47,7 @@ int GetLValue(string spdf){
   return -1;
 }
 
+
 int InFileCreator(string readFile, string infile, double angMin, double angMax, double angStep) {
    
   //================= read infile. extract the reactions, write pptolemy infile for each reaction
@@ -89,28 +90,37 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     
     str2[0] = "(" + str2[0];
     
-    //TODO use mass table for d, p, t, 3He
     int lenStr20 = str2[0].length();
     size_t posTemp1 = str2[0].find(",");
-    string ma = str2[0].substr(1, posTemp1-1);
+    string mass_a = str2[0].substr(1, posTemp1-1);
     size_t posTemp2 = str2[0].find(")");
-    string mb = str2[0].substr(posTemp1+1, posTemp2-posTemp1-1);
-    ///printf(" ma : |%s| , mb : |%s| \n", ma.c_str(), mb.c_str());
-    Isotope isotopea(ma);
-    Isotope isotopeb(mb);
-    
+    string mass_b = str2[0].substr(posTemp1+1, posTemp2-posTemp1-1);
+    ///printf(" mass_a : |%s| , mass_b : |%s| \n", mass_a.c_str(), mass_b.c_str());
+    Isotope iso_a(mass_a);
+    Isotope iso_b(mass_b);
+  
+    // Check is the Reaction supported
     bool isReactionSupported = false;
-    if( isotopea.A <= 4 && isotopea.Z <= 2 && isotopeb.A <=4 && isotopeb.Z <=2 ) isReactionSupported = true; 
-
-    ///if( ma == "p" || ma == "d" || ma == "t" || ma == "3He" || mb == "n"){
-    ///  if( mb == "p" || mb == "d" || mb == "t" || mb == "3He" ||  mb == "n" ) isReactionSupported = true;
-    ///}
-
+    bool isTransferReaction = true;
+    
+    if( iso_a.A <= 4 && iso_a.Z <= 2 && iso_b.A <=4 && iso_b.Z <=2 ) isReactionSupported = true;     
+    
+    ///======= elastics-ish scattering
+    if( iso_a.Mass == iso_b.Mass ) isTransferReaction = false;
+    
+    ///======= p/n-exchange is not supported
+    if( iso_a.A == iso_b.A && iso_a.Z != iso_b.Z ) isReactionSupported = false;
+    
+    ///======= 3-nucleons transfer is not supported. e.g. (n,a), (p,a), (a,n), (a,p)
+    int numNucleonsTransfer = iso_a.A - iso_b.A;
+    if( abs(numNucleonsTransfer) >= 3 ) isReactionSupported = false;
+    
     if( isReactionSupported == false ){
       printf("  ===> Ignored. Reaction type not supported. \n"); 
       continue;
     }
     
+    // Continues to decode the input string
     string gsSpinA = str0[1];
     string orbital = str0[2];
 
@@ -127,28 +137,25 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     string isoB = str2[1];
     string reactionType = str2[0];
     
-    Isotope isotopeA(str1[0]);
-    Isotope isotopeB(str2[1]);
+    Isotope iso_A(str1[0]);
+    Isotope iso_B(str2[1]);
     
-    ///check reaction valid by balancing the A and Z number;
-    ///printf("A: %d + %d = %d + %d \n", isotopeA.A, isotopea.A, isotopeB.A, isotopeb.A);
-    ///printf("Z: %d + %d = %d + %d \n", isotopeA.Z, isotopea.Z, isotopeB.Z, isotopeb.Z);
-
-    if( isotopeA.A + isotopea.A != isotopeB.A + isotopeb.A || isotopeA.Z + isotopea.Z != isotopeB.Z + isotopeb.Z ) {
-      printf("    ====> ERROR! A-number or Z-number not balanced. \n");
-
-      Isotope isotopeK(isotopeA.A + isotopea.A - isotopeb.A, isotopeA.Z + isotopea.Z - isotopeb.Z);
-
-      printf("      try : %s ??\n", isotopeK.Name.c_str());
-      
+    /// check is iso_A or iso_B exist in the mass table
+    if( iso_A.Mass == -404 || iso_B.Mass == -404 ){
+      printf("  ===> Error! mass does not found. \n");
       continue;
     }
     
-    bool isTransferReaction = true;
-    if( ma == mb ) isTransferReaction = false;
+    /// check reaction valid by balancing the A and Z number;
+    if( iso_A.A + iso_a.A != iso_B.A + iso_b.A || iso_A.Z + iso_a.Z != iso_B.Z + iso_b.Z ) {
+      printf("====> ERROR! A-number or Z-number not balanced. \n");
+      Isotope isotopeK(iso_A.A + iso_a.A - iso_b.A, iso_A.Z + iso_a.Z - iso_b.Z);
+      printf("      try : %s(%s,%s)%s ??\n", iso_A.Name.c_str(), iso_a.Name.c_str(), iso_b.Name.c_str(), isotopeK.Name.c_str());
+      continue;
+    }
 
     if( isTransferReaction && potential.length() != 2 ){
-      printf("     ===> ERROR! Potential input should be 2 charaters! skipped. \n");
+      printf("====> ERROR! Potential input should be 2 charaters! skipped. \n");
       continue;
     }
     
@@ -158,13 +165,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     int spdf = -1;
     
     if( isTransferReaction ) {
-      
-      ///printf("------------ %d nucleon(s) transfer \n", abs(isotopea.A - isotopeb.A));
-      
+      ///printf("------------ %d nucleon(s) transfer \n", abs(iso_a.A - iso_b.A));
       node = orbital.substr(0,1);
       
       // single nucleon transfer
-      if( abs(isotopea.A - isotopeb.A) == 1 ){
+      if( abs(iso_a.A - iso_b.A) == 1 ){
         lValue = orbital.substr(1,1);
         jValue = orbital.substr(2);
         ///printf(" l : %s, j : %s \n", lValue.c_str(), jValue.c_str());
@@ -172,13 +177,13 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       }
       
       // two-nucleons transfer
-      if( abs(isotopea.A - isotopeb.A) == 2 ){
+      if( abs(iso_a.A - iso_b.A) == 2 ){
         size_t posEq = orbital.find('=');
         lValue = orbital.substr(posEq+1,1);
         spdf=atoi(lValue.c_str());
       }
       
-      if( abs(isotopea.A - isotopeb.A) == 0 ){
+      if( abs(iso_a.A - iso_b.A) == 0 ){
         printf(" ===? skipped. p-n exchange reaction does not support. \n");
       }
       
@@ -186,7 +191,6 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         printf(" ===> skipped. Not reconginzed orbital-label. (user input : l=%s | %s) \n", lValue.c_str(), orbital.c_str());
         continue;
       }
-
     }
     
     //get Beam energy, distingusih MeV or MeV/u
@@ -198,9 +202,8 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       }
     }
     string unit = reactionEnergy.substr(pos+1);
-    //string beamParticle = reactionType.substr(1,1);
     int factor = 1;
-    if( unit == "MeV/u") factor = isotopea.A;
+    if( unit == "MeV/u") factor = iso_a.A;
     double totalBeamEnergy = atof(reactionEnergy.substr(0, pos+1).c_str()) * factor;
     
     ///printf("unit : |%s| , %f\n", unit.c_str(), totalBeamEnergy);
@@ -212,59 +215,115 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     ///printf("         orbital : %s \n", orbital.c_str());
     ///printf("        Ex [MeV] : %s \n", Ex.c_str());
     
-    double Qvalue = isotopea.Mass + isotopeA.Mass - isotopeb.Mass  - isotopeB.Mass;
+    double Qvalue = iso_a.Mass + iso_A.Mass - iso_b.Mass  - iso_B.Mass;
     ///printf("Q-Value = %f MeV\n", Qvalue);
     
-    ///printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeA.A, isotopeA.Z, isotopeA.Mass);
-    ///printf("A: %d, Z: %d, mass: %f MeV/c2 \n", isotopeB.A, isotopeB.Z, isotopeB.Mass);
-    if( isotopeA.Mass == -404 || isotopeB.Mass == -404 ){
-      printf("  ===> Error! mass does not found. \n");
-      continue;
-    }
-    
-    //write ptolmey infile
+    //##########################################################
+    //============ write ptolmey infile
     numOfReaction ++ ;
     
+    //================ elastic-ish transfer
+    if( isTransferReaction == false ){
+      if ( atof(Ex.c_str()) == 0.0 ) {
+        fprintf(file_out, "$============================================ ELab=%5.2f(%s+%s)%s\n", 
+          totalBeamEnergy, mass_a.c_str(), isoA.c_str(), potential.c_str());
+        fprintf(file_out, "reset\n");
+        fprintf(file_out, "CHANNEL %s + %s\n", mass_a.c_str(), isoA.c_str());
+        fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
+        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        string pot1Name = potential.substr(0,1);
+        string pot1Ref = potentialRef(pot1Name);
+        fprintf(file_out, "$%s\n", pot1Ref.c_str());
+        CallPotential(pot1Name, iso_A.A, iso_A.Z, totalBeamEnergy, iso_a.Z);
+        fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+        fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+        fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+        fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+        fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+        fprintf(file_out, "ELASTIC SCATTERING\n");
+        fprintf(file_out, ";\n");
+      }else{
+        fprintf(file_out, "$============================================ Ex=%s(%s+%s|%s%s)%s,ELab=%5.2f\n", 
+          Ex.c_str(), mass_a.c_str(), isoA.c_str(), spin.c_str(), parity.c_str(), potential.c_str(),totalBeamEnergy);
+        fprintf(file_out, "reset\n");
+        fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
+                     isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
+        fprintf(file_out, "PARAMETERSET ineloca2 r0target\n");
+        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        if( str0.size() >= 8 ){
+          fprintf(file_out, "BETA=%s\n", str0[7].c_str());  //deformation length
+        }
+        string pot1Name = potential.substr(0,1);
+        string pot1Ref = potentialRef(pot1Name);
+        fprintf(file_out, "$%s\n", pot1Ref.c_str());
+        CallPotential(pot1Name, iso_A.A, iso_A.Z, totalBeamEnergy, iso_a.Z);
+        fprintf(file_out, "INCOMING\n");
+        fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+        fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+        fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f  rc0 = %7.3f\n", vsi, rsi0, asi, rc0);
+        ///fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+        ///fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+        fprintf(file_out, ";\n");
+        
+        fprintf(file_out, "OUTGOING\n");
+        fprintf(file_out, "$%s\n", pot1Ref.c_str());
+        CallPotential(pot1Name, iso_A.A, iso_A.Z, totalBeamEnergy - atof(Ex.c_str()), iso_a.Z);
+        fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
+        fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
+        fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f  rc0 = %7.3f\n", vsi, rsi0, asi, rc0);
+        ///fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
+        ///fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
+        ///fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
+        fprintf(file_out, ";\n");
+      }
+    }
+    
+    //================ Transfer reaction
     if( isTransferReaction ){
       fprintf(file_out, "$============================================ Ex=%s(%s)%s\n", Ex.c_str(), orbital.c_str(), potential.c_str());
       fprintf(file_out, "reset\n");
       fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
                isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
-      if( isotopea.A <= 2 && isotopea.Z <= 1){ // incoming d or p
-        fprintf(file_out, "PARAMETERSET dpsb r0target \n");
-        fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
-        fprintf(file_out, "\n");
-        fprintf(file_out, "PROJECTILE \n");
-        fprintf(file_out, "wavefunction av18 \n");
-        fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
-      }
-      if( 3 <= isotopea.A && isotopea.A <= 4 && abs(isotopea.A-isotopeb.A) == 1){ 
-        fprintf(file_out, "PARAMETERSET alpha3 r0target \n");
-        fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
-        fprintf(file_out, "\n");
-        fprintf(file_out, "PROJECTILE \n");
-        fprintf(file_out, "wavefunction phiffer \n");
-        if( isotopeb.A <= 3 ){ 
-          fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
+      
+      //-------- Projectile (the light particle)
+      if( abs(numNucleonsTransfer) == 1 ){         
+        if( iso_a.A <= 2 && iso_a.Z <= 1 && iso_b.A <=2 && iso_b.Z <= 1){ // incoming d or p
+          fprintf(file_out, "PARAMETERSET dpsb r0target \n");
+          fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+          fprintf(file_out, "\n");
+          fprintf(file_out, "PROJECTILE \n");
+          fprintf(file_out, "wavefunction av18 \n");
+          fprintf(file_out, "r0=1 a=0.5 l=0 rc0=1.2\n");
         }
-        if( isotopeb.A == 4 ){
-          fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.61 v=202.21 r=.93 a=.66 param1=.81 param2=.87 rc=2.0 $ rc=2 is a quirk\n");
-        } 
-      } 
-      if( abs(isotopea.A-isotopeb.A) == 2 ){ // 2 neutron transfer
+        
+        if( (3 <= iso_a.A && iso_a.A <= 4) || (3 <= iso_b.A && iso_b.A <= 4) ){ 
+          fprintf(file_out, "PARAMETERSET alpha3 r0target \n");
+          fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+          fprintf(file_out, "\n");
+          fprintf(file_out, "PROJECTILE \n");
+          fprintf(file_out, "wavefunction phiffer \n");
+          if( iso_b.A <= 3 ){ 
+            fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
+          }
+          if( iso_b.A == 4 ){
+            fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.61 v=202.21 r=.93 a=.66 param1=.81 param2=.87 rc=2.0 $ rc=2 is a quirk\n");
+          } 
+        }
+      }else if( abs(numNucleonsTransfer) == 2 ){ // 2 nucleons transfer
         fprintf(file_out, "PARAMETERSET alpha3 r0target\n");
         fprintf(file_out, "lstep=1 lmin=0 lmax=30 maxlextrap=0 ASYMPTOPIA=40\n");
         fprintf(file_out, "\n");
         fprintf(file_out, "PROJECTILE\n");
+        fprintf(file_out, "wavefunction phiffer\n");
         fprintf(file_out, "L = 0  NODES=0 R0 = 1.25  A = .65     RC0 = 1.25\n");
-      }
+      } 
       fprintf(file_out, ";\n");
       
       //===== TARGET
       fprintf(file_out, "TARGET\n");
       ///check Ex is above particle threshold
-      double nThreshold = isotopeB.CalSp(0,1);
-      double pThreshold = isotopeB.CalSp(1,0);
+      double nThreshold = iso_B.CalSp(0,1);
+      double pThreshold = iso_B.CalSp(1,0);
       bool isAboveThreshold = false;
       double ExEnergy = atof(Ex.c_str());
       if( ExEnergy > nThreshold || ExEnergy > pThreshold ) {
@@ -272,7 +331,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         printf("         Ex = %.3f MeV is above thresholds; Sp = %.3f MeV, Sn = %.3f MeV\n", ExEnergy, pThreshold, nThreshold);
       }
       
-      if( abs(isotopea.A-isotopeb.A) == 1 ){
+      if( abs(iso_a.A-iso_b.A) == 1 ){
         fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
         if( isAboveThreshold ) {
           fprintf(file_out, "nodes=%s l=%d jp=%s E=-.2 $node is n-1, set binding 200 keV \n", node.c_str(), spdf, jValue.c_str());
@@ -284,7 +343,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         fprintf(file_out, "rc0=1.3 \n");
       }
       
-      if( abs(isotopea.A-isotopeb.A) == 2 ){
+      if( abs(iso_a.A-iso_b.A) == 2 ){
         fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
         if( isAboveThreshold ){
           fprintf(file_out, "nodes=%s L=%d E=-.2 $node is n-1, binding by 200 keV \n", node.c_str(), spdf);
@@ -299,7 +358,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       string pot1Name = potential.substr(0,1);
       string pot1Ref = potentialRef(pot1Name);
       fprintf(file_out, "INCOMING $%s\n", pot1Ref.c_str());
-      CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
+      CallPotential(pot1Name, iso_A.A, iso_A.Z, totalBeamEnergy, iso_a.Z);
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
       fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
@@ -312,7 +371,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, "OUTGOING $%s\n", pot2Ref.c_str());
       //printf(" total Beam Energy : %f | Qvalue : %f | Ex : %f \n", totalBeamEnergy, Qvalue, atof(Ex.c_str()));
       double eBeam = totalBeamEnergy + Qvalue - atof(Ex.c_str());
-      CallPotential(pot2Name, isotopeB.A, isotopeB.Z, eBeam, isotopeb.Z); 
+      CallPotential(pot2Name, iso_B.A, iso_B.Z, eBeam, iso_b.Z); 
       fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
       fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
       fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
@@ -321,60 +380,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       fprintf(file_out, ";\n");
     }
     
-    if( isTransferReaction == false ){
-      if ( atof(Ex.c_str()) == 0.0 ) {
-	fprintf(file_out, "$============================================ ELab=%5.2f(%s+%s)%s\n", 
-		totalBeamEnergy, ma.c_str(), isoA.c_str(), potential.c_str());
-	fprintf(file_out, "reset\n");
-	fprintf(file_out, "CHANNEL %s + %s\n", ma.c_str(), isoA.c_str());
-	fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
-	fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-	string pot1Name = potential.substr(0,1);
-	string pot1Ref = potentialRef(pot1Name);
-	fprintf(file_out, "$%s\n", pot1Ref.c_str());
-	CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
-	fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
-	fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
-	fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
-	fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
-	fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
-	fprintf(file_out, "ELASTIC SCATTERING\n");
-	fprintf(file_out, ";\n");
-      }else{
-	fprintf(file_out, "$============================================ Ex=%s(%s+%s|%s%s)%s,ELab=%5.2f\n", 
-		Ex.c_str(), ma.c_str(), isoA.c_str(), spin.c_str(), parity.c_str(), potential.c_str(),totalBeamEnergy);
-	fprintf(file_out, "reset\n");
-	fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
-               isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
-	fprintf(file_out, "PARAMETERSET ineloca2 r0target\n");
-	fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
-	if( str0.size() >= 8 ){
-	  fprintf(file_out, "BETA=%s\n", str0[7].c_str());  //deformation length
-	}
-	string pot1Name = potential.substr(0,1);
-	string pot1Ref = potentialRef(pot1Name);
-	fprintf(file_out, "$%s\n", pot1Ref.c_str());
-	CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy, isotopea.Z);
-	fprintf(file_out, "INCOMING\n");
-	fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
-	fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
-	fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f  rc0 = %7.3f\n", vsi, rsi0, asi, rc0);
-        //fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
-	//fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
-	fprintf(file_out, ";\n");
-	
-	fprintf(file_out, "OUTGOING\n");
-	fprintf(file_out, "$%s\n", pot1Ref.c_str());
-	CallPotential(pot1Name, isotopeA.A, isotopeA.Z, totalBeamEnergy - atof(Ex.c_str()), isotopea.Z);
-	fprintf(file_out, "v    = %7.3f    r0 = %7.3f    a = %7.3f\n", v, r0, a);
-	fprintf(file_out, "vi   = %7.3f   ri0 = %7.3f   ai = %7.3f\n", vi, ri0, ai);
-	fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f  rc0 = %7.3f\n", vsi, rsi0, asi, rc0);
-	//fprintf(file_out, "vsi  = %7.3f  rsi0 = %7.3f  asi = %7.3f\n", vsi, rsi0, asi);
-	//fprintf(file_out, "vso  = %7.3f  rso0 = %7.3f  aso = %7.3f\n", vso, rso0, aso);
-        //fprintf(file_out, "vsoi = %7.3f rsoi0 = %7.3f asoi = %7.3f  rc0 = %7.3f\n", vsoi, rsoi0, asoi, rc0);
-	fprintf(file_out, ";\n");
-      }
-    }
+
     
     
     fprintf(file_out, "anglemin=%f anglemax=%f anglestep=%f\n", angMin, angMax, angStep);
