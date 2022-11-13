@@ -37,6 +37,7 @@ int rawEnergyRange[2] = {  100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,    3000};
 int      rdtERange[2] = {     0,    8000};
+int      apolloRange[2] = {0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {     200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
@@ -187,6 +188,8 @@ TH2F* htacTdiffg;
 
 TH2F* htacRecoil[8];
 TH2F* htacRecoilsum[4];
+
+TH1F* hApollo[20];
 
 //======= Recoil
 TH2F* hrdtID;
@@ -456,12 +459,18 @@ void Monitors::Begin(TTree *tree)
    hrdt14C = new TH1F("hrdt14C", "14N, 14C recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
    hrdt14C->SetLineColor(4);
 
+ //===================== APOLLO
+   for (Int_t i=0;i<20;i++) {
+      hApollo[i] = new TH1F(Form("hApollo%d",i),Form("Raw Apollo E(ch=%d); E (channel)",i), 250,apolloRange[0],apolloRange[1]);
+   }
+   
+   
    //===================== Circular Recoil
    hcrdtID = new TH2F("hcrdtID", "Circular Recoil ID; Angular ID; Radial ID;", 8, 0, 8, 8, 0, 8);
    hcrdtPolar = new TH2F("hcrdtPolar", "Polar ID", 8, -TMath::Pi(), TMath::Pi(),8, 10, 50);
 
    for( int i = 0; i < 16; i++){
-    hcrdt[i] = new TH1F(Form("hcrdt%d", i), Form("Raw Circular Recoil-%d", i), 500, crdtRange[0], crdtRange[1] );
+      hcrdt[i] = new TH1F(Form("hcrdt%d", i), Form("Raw Circular Recoil-%d", i), 500, crdtRange[0], crdtRange[1] );
    }
 
    
@@ -880,6 +889,16 @@ Bool_t Monitors::Process(Long64_t entry)
          htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
       }
    }
+   
+   
+   
+      /*********** Apollo ***********************************************/    
+   
+   for( int i = 0; i <20 ; i++){
+      hApollo[i]->Fill(-tac[i]);
+   
+   }
+   
 
    ///if( rdt_t[4] > 0 ){
    ///   if( abs(rdt[4] - 1658) < 40) hrdt14N->Fill(rdt_t[4]/1e8/60.);
