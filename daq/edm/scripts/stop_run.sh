@@ -52,12 +52,13 @@ sleep 2
 #ssh heliosdatabase@heliosdb '/home/heliosdatabase/digios/daq/GrafanaElog.sh'
 #scp heliosdatabase@heliosdb:~/grafanaElog.jpg ${screenShot}
 
+echo "############ disbale the elog and screenshot"
 # take screenshot and copy from mac2017
-screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
-ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh' #this is in mac2017
-scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
+#screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
+#ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh' #this is in mac2017
+#scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
 # send the screenshot to Mac2020 for elog
-scp ${screenShot} heliosdigios@192.168.1.164:~/grafanaElog.jpg
+#scp ${screenShot} heliosdigios@192.168.1.164:~/grafanaElog.jpg
 
 elogContext=${HELIOSSYS}/analysis/working/elogEndRun.txt
 echo "         stop at ${currentDate} <br />" > ${elogContext}
@@ -66,7 +67,7 @@ echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
 echo "-----------------------------------------------</p>" >> ${elogContext}
 echo "$COMMENT <br />" >> ${elogContext}
 
-scp ${elogContext} heliosdigios@192.168.1.164:~/.
+#scp ${elogContext} heliosdigios@192.168.1.164:~/.
 
 # tell Mac2020 run push2elog script
 if [ $expName = "ARR01" ]; then
@@ -74,9 +75,10 @@ if [ $expName = "ARR01" ]; then
 else
   elogName="H"${expName:1}
 fi
-ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
+#ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 
+#==== this is old code:
 #if [ -z ${elogID} ]; then
 #    # this will create seperated elog entry
 #    echo "         stop at ${currentDate}" >> ${HELIOSSYS}/analysis/working/elog.txt
@@ -116,6 +118,7 @@ ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop
 #    curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
 #
 #fi
+
 
 source ~/Slack_Elog_Notification.sh
 slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
