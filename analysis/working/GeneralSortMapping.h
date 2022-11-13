@@ -18,16 +18,16 @@
 #define NRDT    8
 #define NELUM   16
 #define NEZERO  2
-#define NTAC    3
+#define NTAC    20
 #define NCRDT   16
 
 #define MWIN 100 //M value for energy filter from digi setting
 
 Int_t idConst = 1010;
 
-Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG1
-                       400, 401, 402,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG2-TAC
-                       300, 301,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG3-IC
+Int_t idDetMap[160] = {410, 411,  412,  413, 414,  415,  416,  417,  418, 419,  //VME1-DIG1-APOLLO
+                       400, 401, 402,  403,  404,  405,  406,  407,  408, 409,   //VME1-DIG2-APOLLO
+                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG3-IC
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG4
                    
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,   // 1, VME2-DIG1, array
