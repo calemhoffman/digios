@@ -676,7 +676,7 @@ int HELIOS::DetAcceptance(){
    
    // -3 ==== when zPos further the range of whole array, more loop would not save
    if( firstPos < 0 && orbitb.z < pos[0] - length ) return -3; 
-   if( firstPos > 0 && orbitb.z > pos[nDet-1]  ) return -3; 
+   if( firstPos > 0 && orbitb.z > pos[nDet-1] + length ) return -3; 
 
    // -4 ======== Hit on blacker
    if( blocker != 0 && firstPos > 0 && pos[0] - blocker  < orbitb.z && orbitb.z < pos[0] ) return -4; 
@@ -705,7 +705,8 @@ int HELIOS::DetAcceptance(){
       }      
    }else{
       for( int i = 0; i < nDet ; i++){
-         if( pos[i] < orbitb.z && orbitb.z < pos[i] + length)  {
+         if( pos[i] <= orbitb.z && orbitb.z <= pos[i] + length)  {
+            ///printf(" %d | %f < z = %f < %f \n", i,  pos[i], orbitb.z, pos[i]+length); 
             orbitb.detID = i;
             detX = ( orbitb.z - (pos[i] - length/2 ))/ length*2 ;// range from -1 , 1 
             return 1;
@@ -783,12 +784,12 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
       printf("===================================\n");
       printf("theta : %f deg, phi : %f deg \n", orbitb.theta * TMath::RadToDeg(), orbitb.phi * TMath::RadToDeg());
       printf("z0: %f mm, rho : %f mm \n", orbitb.z0, orbitb.rho);
-      printf("target loop : %d \n", targetLoop);
       printf("      inOut : %d = %s \n", inOut, inOut == 1 ? "Out" : "in");
+      printf(" z range : %.2f - %.2f \n", detGeo.zMin, detGeo.zMax);
       printf("-----------------------------------\n");
    }
 
-   vector<double> zCan;
+   vector<double> zPossible;
    vector<int> dID; //detRowID
    
    int iStart = ( sign == 1 ? 0 : -mDet );
@@ -804,7 +805,7 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
       
       double zP = orbitb.z0 /TMath::TwoPi() * ( sign * dphi + n * TMath::Pi() + pow(-1, n) * hahaha );
       
-      if( debug) {
+      if( debug ) {
          double xP = GetXPos(zP) ;
          double yP = GetYPos(zP) ;
          printf("phiD: %4.0f, dphi: %6.1f, mod(pi): %6.1f, Loop : %9.5f, zHit : %8.3f mm, (x,y) = (%7.2f, %7.2f) \n",
@@ -816,12 +817,12 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
       
       ///Selection
       if( !TMath::IsNaN(zP) && 0< zP/orbitb.z0 && TMath::Max(0, targetLoop-1) < zP/orbitb.z0 && zP/orbitb.z0 < targetLoop ) {
-         zCan.push_back(zP);
+         zPossible.push_back(zP);
          dID.push_back(i);
       }
    }
    /*
-   if( zCan.size() == 0 ){ // will not happen
+   if( zPossible.size() == 0 ){ // will not happen
       zHit = TMath::QuietNaN();
       xPos = TMath::QuietNaN();
       yPos = TMath::QuietNaN();
@@ -833,16 +834,16 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
    
    if( debug ) printf("-----------------------------------\n");
    double dMin = 1;   
-   for( int i = 0; i < (int) zCan.size(); i++){
+   for( int i = 0; i < (int) zPossible.size(); i++){
       
-      double dd = abs(zCan[i]/orbitb.z0 - (targetLoop - (1-inOut)));
+      double dd = abs(zPossible[i]/orbitb.z0 - (targetLoop - (1-inOut)));
       
-      if( debug) printf(" %d | zP : %8.3f mm; loop : %9.5f ", i, zCan[i], zCan[i]/orbitb.z0);
+      if( debug ) printf(" %d | zP : %8.3f mm; loop : %9.5f ", i, zPossible[i], zPossible[i]/orbitb.z0);
       
       if( dd < dMin) {
-         orbitb.z    = zCan[i];
+         orbitb.z    = zPossible[i];
          dMin = dd;
-         orbitb.effLoop = zCan[i]/orbitb.z0;
+         orbitb.effLoop = zPossible[i]/orbitb.z0;
          orbitb.loop = TMath::Ceil(orbitb.effLoop);
          orbitb.detRowID = (12+dID[i])%4;
          orbitb.t = orbitb.t0 * orbitb.effLoop;
