@@ -92,7 +92,7 @@ alias gotoExp='cd ${HELIOSSYS}; pwd'
 alias gotoDaq='cd ${HELIOSDAQ}; pwd'
 alias gotoAna='cd ${HELIOSANA}; pwd'
 alias sshMac='ssh -XY heliosdigios@192.168.1.164'  #iMac2020
-alias sshDB='ssh -XY heliosdatabase@heliosDB.onenet'
+alias sshDB='ssh -XY heliosdigios@mac2017' #iMac2017
 
 
 alias Helios_Database='${HELIOSSYS}/daq/edm/scripts/helios_database'
