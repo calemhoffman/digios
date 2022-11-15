@@ -169,8 +169,8 @@ DetGeo LoadDetectorGeo(TMacro * macro){
     ///printf("%d | %f, %f \n", id, detGeo.pos[id], detGeo.detPos[id]);
   }
 
-  detGeo.zMin = TMath::Min(detGeo.detPos.front(), detGeo.detPos.back());
-  detGeo.zMax = TMath::Max(detGeo.detPos.front(), detGeo.detPos.back());
+  detGeo.zMin = TMath::Min(detGeo.detPos.front(), detGeo.detPos.back()) - (detGeo.firstPos < 0 ? detGeo.detLength : 0);
+  detGeo.zMax = TMath::Max(detGeo.detPos.front(), detGeo.detPos.back()) + (detGeo.firstPos > 0 ? detGeo.detLength : 0);
   
   return detGeo;
 }
@@ -194,6 +194,7 @@ void PrintDetGeo(DetGeo detGeo){
      }
   }
 
+  printf("   number of det : %d x %d \n", detGeo.mDet, detGeo.nDet);
   printf(" detector facing : %s\n", detGeo.detFaceOut ? "Out" : "In");
   printf("    energy resol.: %f MeV\n", detGeo.eSigma);
   printf("     pos-Z resol.: %f mm \n", detGeo.zSigma);
