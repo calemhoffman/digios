@@ -89,6 +89,7 @@ void Cali_gamma_histogram(TH1F * hist, float threshold = 0.1){
   printf("-1 =  manual reference\n");
   printf("-2 =  use 228Th, first 5 strongest peaks \n");
   printf("-3 =  use 207Bi, 3 peaks \n");
+  printf("-4 =  use 152Eu, 11 peaks \n");
   printf("-9 =  stop \n");
   printf("your choice = ");
   temp = scanf("%d", &option);
@@ -137,6 +138,21 @@ void Cali_gamma_histogram(TH1F * hist, float threshold = 0.1){
     refEnergy.push_back(0.569702);
     refEnergy.push_back(1.063662);
     refEnergy.push_back(1.770237);
+  }
+
+  if( option == -4 ){
+    refEnergy.clear();
+    refEnergy.push_back( 121.783);
+    refEnergy.push_back( 244.699);
+    refEnergy.push_back( 344.281);
+    refEnergy.push_back( 411.115);
+    refEnergy.push_back( 443.965);
+    refEnergy.push_back( 778.903);
+    refEnergy.push_back( 867.390);
+    refEnergy.push_back( 964.055);
+    refEnergy.push_back(1085.842);
+    refEnergy.push_back(1112.087);
+    refEnergy.push_back(1408.022);
   }
   
   //==================== adjusting energy
