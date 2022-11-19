@@ -398,7 +398,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       /************************************************************************/
       if( isRecoil && 100 <= idDet && idDet <= 100 + NRDT ) { 
          Int_t rdtTemp = idDet-100;
-         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/MWIN ;
+         psd.RDT[rdtTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_RDT ;
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
       
@@ -461,7 +461,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
          //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
-         if( !isPSD && !isRDT) continue;         
+         ///if( !isPSD && !isRDT) continue;         
 
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");

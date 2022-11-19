@@ -15,6 +15,8 @@
 #include <TColor.h>
 #include <TSpectrum.h>
 #include <TMath.h>
+#include <TRandom.h>
+#include <TMarker.h>
 #include <vector>
 
 //Global fit paramaters
@@ -221,7 +223,7 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
          double x = hist->GetBinCenter(i);
          double ybar = fit->Eval(x);
          ysq += y*y;
-         mean + y;
+         mean += y;
          SSR += (y - ybar)*(y-ybar);
          chisq += (y - ybar)*(y-ybar)/e/e;
          

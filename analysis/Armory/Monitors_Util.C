@@ -294,7 +294,17 @@ void elum(void) {
   helumID->Draw("colz");
   
 }
-
+void apollo(void) {
+  TCanvas *capollo = (TCanvas *) gROOT->FindObjectAny("capollo");
+  if( capollo == NULL )  capollo = new TCanvas("capollo",Form("APOLLO | %s", canvasTitle.Data()),1000,1000);
+  capollo->Clear(); capollo->Divide(5,4);
+  for( int i = 0 ; i < 20 ; i++){
+    capollo->cd(i+1);
+    hApollo[i]->Draw("");
+  }
+}
+  
+  
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);
