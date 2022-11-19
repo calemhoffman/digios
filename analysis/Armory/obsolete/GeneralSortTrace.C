@@ -329,8 +329,8 @@ Bool_t GeneralSortTrace::Process(Long64_t entry)
       //RECOIL
       /************************************************************************/
       if( isRecoil && (id[i]>1000&&id[i]<2000)&&(idDet>=100&&idDet<=110)) { 
-         Int_t rdtTemp = idDet-101;
-         psd.RDT[rdtTemp] = ((float)(pre_rise_energy[i])-(float)(post_rise_energy[i]))/M;
+         Int_t rdtTemp = idDet-100;
+         psd.RDT[rdtTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/M * POLARITY_RDT;
          psd.RDTTimestamp[rdtTemp] = event_timestamp[i];
       }
       

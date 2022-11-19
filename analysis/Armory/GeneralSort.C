@@ -301,7 +301,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== RECOIL
       if ( idDet >= 100 && idDet <= 100 + NRDT ) {
         Int_t rdtID = idDet-100;
-        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN*(-1) ;
+        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_RDT ;
         psd.RDTTimestamp[rdtID] = event_timestamp[i];
       }
 

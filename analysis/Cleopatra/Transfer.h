@@ -140,7 +140,7 @@ void Transfer(
     printf("... done.\n");
     int n = (int) ExKnown.size();
     
-    printf("%3s | %7s | %4s | %3s | %10s | %5s \n", "", "Ex[MeV]", "Xsec", "SF", "sigma[MeV]", "y0[MeV]");
+    printf("%3s | %7s | %5s | %3s | %10s | %5s \n", "", "Ex[MeV]", "Xsec", "SF", "sigma[MeV]", "y0[MeV]");
     printf("----+---------+------+-----+------------+--------\n");
     for(int i = 0; i < n ; i++){
       reaction.SetExB(ExKnown[i]);
@@ -151,15 +151,15 @@ void Transfer(
         TLorentzVector temp(0,0,0,0);
         int decayID = decay.CalDecay(temp, ExKnown[i], 0);
         if( decayID == 1) {
-          printf("%3d | %7.2f | %4.2f | %3.1f |   %5.3f    | %5.2f --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+          printf("%3d | %7.2f | %5.2f | %3.1f |   %5.3f    | %5.2f --> Decay. \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }else{
-          printf("%3d | %7.2f | %4.2f | %3.1f |   %5.3f    | %5.2f \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+          printf("%3d | %7.2f | %5.2f | %3.1f |   %5.3f    | %5.2f \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
         }
       }else{
-        printf("%3d | %7.2f | %4.2f | %3.1f |   %5.3f    | %5.2f \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
+        printf("%3d | %7.2f | %5.2f | %3.1f |   %5.3f    | %5.2f \n", i, ExKnown[i], ExStrength[i], SF[i], ExWidth[i], y0[i]);
       }
     }
-    printf("----+---------+------+-----+------------+--------\n");
+    printf("----+---------+-------+-----+------------+--------\n");
   }else{
     printf("... fail ------> only ground state.\n");
     ExKnown.push_back(0.0);
@@ -475,10 +475,10 @@ void Transfer(
       //==== Set Ex of B
       if( ExKnown.size() == 1 ) {
         ExID = 0;
-        Ex = ExKnown[0] + gRandom->Gaus(0, ExWidth[0]);
+        Ex = ExKnown[0] + (ExWidth[0] == 0 ? 0 : gRandom->Gaus(0, ExWidth[0]));
       }else{
         ExID = exDist->GetRandom();
-        Ex = ExKnown[ExID]+ gRandom->Gaus(0, ExWidth[ExID]);
+        Ex = ExKnown[ExID]+ (ExWidth[ExID] == 0 ? 0 : gRandom->Gaus(0, ExWidth[ExID]));
       }
       reaction.SetExB(Ex);
   
@@ -547,10 +547,13 @@ void Transfer(
     int decayID = 0;
     int new_zB  = reactionConfig.recoilHeavyZ;
     if( reactionConfig.isDecay){
-      decayID = decay.CalDecay(PB, Ex, 0); // decay to ground state
+      
+      //decayID = decay.CalDecay(PB, Ex, 0, phiCM + TMath::Pi()/2.); // decay to ground state
+      decayID = decay.CalDecay(PB, Ex, 0, phiCM + TMath::Pi()/2); // decay to ground state
       if( decayID == 1 ){
         PB = decay.GetDaugther_D();
-        decayTheta = decay.GetAngleChange();
+        //decayTheta = decay.GetAngleChange();
+        decayTheta = decay.GetThetaCM();
         new_zB = reactionConfig.heavyDecayZ;
       }else{
         decayTheta = TMath::QuietNaN();

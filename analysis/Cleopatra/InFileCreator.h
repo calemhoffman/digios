@@ -289,7 +289,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       if( abs(numNucleonsTransfer) == 1 ){         
         if( iso_a.A <= 2 && iso_a.Z <= 1 && iso_b.A <=2 && iso_b.Z <= 1){ // incoming d or p
           fprintf(file_out, "PARAMETERSET dpsb r0target \n");
-          fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+          fprintf(file_out, "lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
           fprintf(file_out, "\n");
           fprintf(file_out, "PROJECTILE \n");
           fprintf(file_out, "wavefunction av18 \n");
@@ -298,7 +298,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         
         if( (3 <= iso_a.A && iso_a.A <= 4) || (3 <= iso_b.A && iso_b.A <= 4) ){ 
           fprintf(file_out, "PARAMETERSET alpha3 r0target \n");
-          fprintf(file_out, "$lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
+          fprintf(file_out, "lstep=1 lmin=0 lmax=30 maxlextrap=0 asymptopia=50 \n");
           fprintf(file_out, "\n");
           fprintf(file_out, "PROJECTILE \n");
           fprintf(file_out, "wavefunction phiffer \n");
