@@ -46,7 +46,7 @@ enum plotID { pEZ,               /// 0
               pElum1RThetaCM,    /// 16
               pEmpty };          /// 17
 plotID StringToPlotID(TString str);
-void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
+void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
 
   printf("=========================== Check_Simulation.C\n");
   
@@ -100,8 +100,6 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
   TObjArray * fxList = (TObjArray *) file->FindObjectAny("fxList");
   TObjArray * txList = (TObjArray *) file->FindObjectAny("txList");
-
-  static int nExID = fxList->GetLast()+1;
 
   //================== reactionConfig
   TMacro * reactionConfigTxt = (TMacro *) file->FindObjectAny("reactionConfig");
@@ -195,6 +193,8 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 300){
   
    double exSpan = exList.back() - exList[0];
    
+   const int nExID = exList.size();
+   printf("========= number of excited states : %d \n", nExID);
 
    ExRange[0] = exList[0] - exSpan * 0.2;
    ExRange[1] = exList.back() + exSpan * 0.2;

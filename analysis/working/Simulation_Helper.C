@@ -30,6 +30,8 @@
   #define OS_Type 0
 #endif
 
+TString isoFileName;
+
 class MyMainFrame {
    RQ_OBJECT("MyMainFrame")
 private:
@@ -56,11 +58,16 @@ private:
    TGComboBox    * extractFlag;
    
    
+   TGTextEntry * txtName ;    
+   TGTextEntry * txtEx ; 
+   
+   
 public:
    MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h);
    virtual ~MyMainFrame();
    void Command(int);
    void OpenFile(int);
+   void GetData();
    bool IsFileExist(TString filename);
 };
 
@@ -70,18 +77,18 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fMain = new TGMainFrame(p,w,h);
   
    TGHorizontalFrame *hframe = new TGHorizontalFrame(fMain,600,600 );
-   fMain->AddFrame(hframe, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX, 2,2,2,2));
+   fMain->AddFrame(hframe, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX | kLHintsExpandY, 2,2,2,2));
 
    TGVerticalFrame *hframe1 = new TGVerticalFrame(fMain,600,600 );
    hframe->AddFrame(hframe1);
    
    TGVerticalFrame *hframe2 = new TGVerticalFrame(fMain,600,800 );
-   hframe->AddFrame(hframe2);
+   hframe->AddFrame(hframe2,new TGLayoutHints( kLHintsExpandX | kLHintsExpandY, 2,2,2,2));
 
    fileName = "reactionConfig.txt";
    
    TGHorizontalFrame *hframe00 = new TGHorizontalFrame(hframe2,600,600 );
-   hframe2->AddFrame(hframe00, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX, 2,2,2,2));
+   hframe2->AddFrame(hframe00, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX , 2,2,2,2));
    
    fileLabel = new TGLabel(hframe00, "");
    fileLabel->SetWidth(370);
@@ -90,7 +97,6 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    fileLabel->ChangeOptions(kFixedSize | kSunkenFrame);
    fileLabel->SetText(fileName);
    hframe00->AddFrame(fileLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
-   
    
    TGTextButton *save = new TGTextButton(hframe00,"Save");
    save->SetWidth(100);
@@ -108,7 +114,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    
    editor = new TGTextEdit(hframe2, 600, 700);
    editor->LoadFile(fileName);
-   hframe2->AddFrame(editor);
+   hframe2->AddFrame(editor, new TGLayoutHints(kLHintsCenterX | kLHintsExpandX | kLHintsExpandY, 2,2,2,2));
    
    statusLabel = new TGLabel(hframe2, "");
    statusLabel->SetWidth(600);
@@ -116,174 +122,204 @@ MyMainFrame::MyMainFrame(const TGWindow *p,UInt_t w,UInt_t h) {
    statusLabel->SetTextJustify(kTextLeft);
    statusLabel->SetTextColor(1);
    statusLabel->ChangeOptions(kFixedSize | kSunkenFrame);
-   hframe2->AddFrame(statusLabel, new TGLayoutHints(kLHintsLeft, 2,2,2,2));
+   hframe2->AddFrame(statusLabel, new TGLayoutHints(kLHintsLeft | kLHintsExpandX, 2,2,2,2));
    
-   //================= Simulation group
-   TGGroupFrame * simFrame = new TGGroupFrame(fMain, "Kinematics Simulation", kVerticalFrame);
-   hframe1->AddFrame(simFrame, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+   {//================= Simulation group
+      TGGroupFrame * simFrame = new TGGroupFrame(hframe1, "Kinematics Simulation", kVerticalFrame);
+      hframe1->AddFrame(simFrame, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+      
+      TGTextButton *openRec = new TGTextButton(simFrame, "reaction Config");
+      openRec->SetWidth(150);
+      openRec->SetHeight(20);
+      openRec->ChangeOptions( openRec->GetOptions() | kFixedSize );
+      openRec->Connect("Clicked()","MyMainFrame",this, "OpenFile(=1)");
+      simFrame->AddFrame(openRec,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+      TGTextButton *openDet = new TGTextButton(simFrame, "detector Geo.");
+      openDet->SetWidth(150);
+      openDet->SetHeight(20);
+      openDet->ChangeOptions( openDet->GetOptions() | kFixedSize );
+      openDet->Connect("Clicked()","MyMainFrame",this, "OpenFile(=0)");
+      simFrame->AddFrame(openDet,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+      
+      TGTextButton *openEx = new TGTextButton(simFrame, "Ex List");
+      openEx->SetWidth(150);
+      openEx->SetHeight(20);
+      openEx->ChangeOptions( openEx->GetOptions() | kFixedSize );
+      openEx->Connect("Clicked()","MyMainFrame",this, "OpenFile(=2)");
+      simFrame->AddFrame(openEx,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+      withDWBA = new TGCheckButton(simFrame, "Sim with DWBA\n+DWBA.root\n+DWBA.Ex.txt");
+      withDWBA->SetWidth(140);
+      withDWBA->ChangeOptions(kFixedSize );
+      simFrame->AddFrame(withDWBA, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+
+      TGTextButton *Sim = new TGTextButton(simFrame,"Simulate");
+      Sim->SetWidth(150);
+      Sim->SetHeight(40);
+      Sim->ChangeOptions( Sim->GetOptions() | kFixedSize );
+      Sim->Connect("Clicked()","MyMainFrame",this,"Command(=1)");
+      simFrame->AddFrame(Sim, new TGLayoutHints(kLHintsRight,5,5,3,4));
+
+      TGTextButton *openSimChk = new TGTextButton(simFrame, "Config Simulation Plot");
+      openSimChk->SetWidth(150);
+      openSimChk->SetHeight(20);
+      openSimChk->ChangeOptions( openSimChk->GetOptions() | kFixedSize );
+      openSimChk->Connect("Clicked()","MyMainFrame",this, "OpenFile(=4)");
+      simFrame->AddFrame(openSimChk,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+      TGTextButton *SimChk = new TGTextButton(simFrame,"Plot Simulation");
+      SimChk->SetWidth(150);
+      SimChk->SetHeight(40);
+      SimChk->ChangeOptions( SimChk->GetOptions() | kFixedSize );
+      SimChk->Connect("Clicked()","MyMainFrame",this,"Command(=2)");
+      simFrame->AddFrame(SimChk, new TGLayoutHints(kLHintsRight,5,5,3,4));
+
+      TGTextButton *autoFit = new TGTextButton(simFrame,"AutoFit ExCal");
+      autoFit->SetWidth(150);
+      autoFit->SetHeight(40);
+      autoFit->ChangeOptions( autoFit->GetOptions() | kFixedSize );
+      autoFit->Connect("Clicked()","MyMainFrame",this,"Command(=5)");
+      simFrame->AddFrame(autoFit, new TGLayoutHints(kLHintsRight,5,5,3,4));
+   }
+
+   {//================= DWBA group
+      TGGroupFrame * DWBAFrame = new TGGroupFrame(hframe1, "DWBA calculation", kVerticalFrame);
+      hframe1->AddFrame(DWBAFrame, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+
+      TGTextButton *openDWBA = new TGTextButton(DWBAFrame, "DWBA setting");
+      openDWBA->SetWidth(150);
+      openDWBA->SetHeight(20);
+      openDWBA->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+      openDWBA->Connect("Clicked()","MyMainFrame",this, "OpenFile(=3)");
+      DWBAFrame->AddFrame(openDWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+      
+      TGTextButton *openInFile = new TGTextButton(DWBAFrame, "InFile");
+      openInFile->SetWidth(150);
+      openInFile->SetHeight(20);
+      openInFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+      openInFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=5)");
+      DWBAFrame->AddFrame(openInFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+      TGTextButton *openOutFile = new TGTextButton(DWBAFrame, "OutFile");
+      openOutFile->SetWidth(150);
+      openOutFile->SetHeight(20);
+      openOutFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+      openOutFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=6)");
+      DWBAFrame->AddFrame(openOutFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+
+      TGTextButton *xsecFile = new TGTextButton(DWBAFrame, "X-Sec");
+      xsecFile->SetWidth(150);
+      xsecFile->SetHeight(20);
+      xsecFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
+      xsecFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=7)");
+      DWBAFrame->AddFrame(xsecFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+      
+      //-------- angle setting
+      TGHorizontalFrame * hframe000 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
+      DWBAFrame->AddFrame(hframe000);
+      
+      TGLabel * lb1 = new TGLabel(hframe000, "angMin");
+      lb1->SetWidth(50); lb1->ChangeOptions( kFixedSize);
+      hframe000->AddFrame(lb1, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
+
+      TGLabel * lb2 = new TGLabel(hframe000, "angMax");
+      lb2->SetWidth(50); lb2->ChangeOptions( kFixedSize);
+      hframe000->AddFrame(lb2, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
+      
+      TGLabel * lb3 = new TGLabel(hframe000, "angStep");
+      lb3->SetWidth(50); lb3->ChangeOptions( kFixedSize);
+      hframe000->AddFrame(lb3, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
+      
+      TGHorizontalFrame * hframe001 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
+      DWBAFrame->AddFrame(hframe001);
+      
+      angMin = new TGNumberEntry(hframe001, 0, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
+      angMin->SetWidth(50);
+      angMin->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
+      hframe001->AddFrame(angMin, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
+      
+      angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
+      angMax->SetWidth(50);
+      angMax->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
+      hframe001->AddFrame(angMax, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
    
-   TGTextButton *openRec = new TGTextButton(simFrame, "reaction Config");
-   openRec->SetWidth(150);
-   openRec->SetHeight(20);
-   openRec->ChangeOptions( openRec->GetOptions() | kFixedSize );
-   openRec->Connect("Clicked()","MyMainFrame",this, "OpenFile(=1)");
-   simFrame->AddFrame(openRec,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+      angStep = new TGNumberEntry(hframe001, 1, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
+      angStep->SetWidth(50);
+      angStep->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
+      hframe001->AddFrame(angStep, new TGLayoutHints(kLHintsCenterX, 5, 5, 0, 0));
 
-   TGTextButton *openDet = new TGTextButton(simFrame, "detector Geo.");
-   openDet->SetWidth(150);
-   openDet->SetHeight(20);
-   openDet->ChangeOptions( openDet->GetOptions() | kFixedSize );
-   openDet->Connect("Clicked()","MyMainFrame",this, "OpenFile(=0)");
-   simFrame->AddFrame(openDet,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+      //------- Check Boxes
+      isInFile = new TGCheckButton(DWBAFrame, "Create inFile");
+      isInFile->SetWidth(100);
+      isInFile->ChangeOptions(kFixedSize );
+      isInFile->SetState(kButtonDown);
+      DWBAFrame->AddFrame(isInFile, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+      
+      isRun = new TGCheckButton(DWBAFrame, "Run Ptolemy");
+      isRun->SetWidth(100);
+      isRun->ChangeOptions(kFixedSize );
+      isRun->SetState(kButtonDown);
+      DWBAFrame->AddFrame(isRun, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+      
+      isExtract = new TGCheckButton(DWBAFrame, "Extract Xsec");
+      isExtract->SetWidth(100);
+      isExtract->ChangeOptions(kFixedSize );
+      isExtract->SetState(kButtonDown);
+      DWBAFrame->AddFrame(isExtract, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+
+      isPlot = new TGCheckButton(DWBAFrame, "Plot");
+      isPlot->SetWidth(100);
+      isPlot->ChangeOptions(kFixedSize );
+      isPlot->SetState(kButtonDown);
+      DWBAFrame->AddFrame(isPlot, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+
+      extractFlag = new TGComboBox(DWBAFrame, 100);
+      extractFlag->SetWidth(130);
+      extractFlag->SetHeight(30);
+      
+      extractFlag->AddEntry("Xsec.", 2);
+      extractFlag->AddEntry("Ratio to Ruth.", 1);
+      extractFlag->AddEntry("Rutherford", 3);
+      extractFlag->Select(2);
+      DWBAFrame->AddFrame(extractFlag, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
+
+      TGTextButton *DWBA = new TGTextButton(DWBAFrame, "DWBA");
+      DWBA->SetWidth(150);
+      DWBA->SetHeight(40);
+      DWBA->ChangeOptions( DWBA->GetOptions() | kFixedSize );
+      DWBA->Connect("Clicked()","MyMainFrame",this,"Command(=0)");
+      DWBAFrame->AddFrame(DWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+   }
    
-   TGTextButton *openEx = new TGTextButton(simFrame, "Ex List");
-   openEx->SetWidth(150);
-   openEx->SetHeight(20);
-   openEx->ChangeOptions( openEx->GetOptions() | kFixedSize );
-   openEx->Connect("Clicked()","MyMainFrame",this, "OpenFile(=2)");
-   simFrame->AddFrame(openEx,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
-
-   withDWBA = new TGCheckButton(simFrame, "Sim with DWBA\n+DWBA.root\n+DWBA.Ex.txt");
-   withDWBA->SetWidth(140);
-   withDWBA->ChangeOptions(kFixedSize );
-   simFrame->AddFrame(withDWBA, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-
-   TGTextButton *Sim = new TGTextButton(simFrame,"Simulate");
-   Sim->SetWidth(150);
-   Sim->SetHeight(40);
-   Sim->ChangeOptions( Sim->GetOptions() | kFixedSize );
-   Sim->Connect("Clicked()","MyMainFrame",this,"Command(=1)");
-   simFrame->AddFrame(Sim, new TGLayoutHints(kLHintsRight,5,5,3,4));
-
-   TGTextButton *openSimChk = new TGTextButton(simFrame, "Config Simulation Plot");
-   openSimChk->SetWidth(150);
-   openSimChk->SetHeight(20);
-   openSimChk->ChangeOptions( openSimChk->GetOptions() | kFixedSize );
-   openSimChk->Connect("Clicked()","MyMainFrame",this, "OpenFile(=4)");
-   simFrame->AddFrame(openSimChk,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
-
-   TGTextButton *SimChk = new TGTextButton(simFrame,"Plot Simulation");
-   SimChk->SetWidth(150);
-   SimChk->SetHeight(40);
-   SimChk->ChangeOptions( SimChk->GetOptions() | kFixedSize );
-   SimChk->Connect("Clicked()","MyMainFrame",this,"Command(=2)");
-   simFrame->AddFrame(SimChk, new TGLayoutHints(kLHintsRight,5,5,3,4));
-
-   TGTextButton *autoFit = new TGTextButton(simFrame,"AutoFit ExCal");
-   autoFit->SetWidth(150);
-   autoFit->SetHeight(40);
-   autoFit->ChangeOptions( autoFit->GetOptions() | kFixedSize );
-   autoFit->Connect("Clicked()","MyMainFrame",this,"Command(=5)");
-   simFrame->AddFrame(autoFit, new TGLayoutHints(kLHintsRight,5,5,3,4));
-
-   //================= DWBA group
-   TGGroupFrame * DWBAFrame = new TGGroupFrame(fMain, "DWBA calculation", kVerticalFrame);
-   hframe1->AddFrame(DWBAFrame, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
-
-   TGTextButton *openDWBA = new TGTextButton(DWBAFrame, "DWBA setting");
-   openDWBA->SetWidth(150);
-   openDWBA->SetHeight(20);
-   openDWBA->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
-   openDWBA->Connect("Clicked()","MyMainFrame",this, "OpenFile(=3)");
-   DWBAFrame->AddFrame(openDWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
    
-   TGTextButton *openInFile = new TGTextButton(DWBAFrame, "InFile");
-   openInFile->SetWidth(150);
-   openInFile->SetHeight(20);
-   openInFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
-   openInFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=5)");
-   DWBAFrame->AddFrame(openInFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
-
-   TGTextButton *openOutFile = new TGTextButton(DWBAFrame, "OutFile");
-   openOutFile->SetWidth(150);
-   openOutFile->SetHeight(20);
-   openOutFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
-   openOutFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=6)");
-   DWBAFrame->AddFrame(openOutFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
-
-   TGTextButton *xsecFile = new TGTextButton(DWBAFrame, "X-Sec");
-   xsecFile->SetWidth(150);
-   xsecFile->SetHeight(20);
-   xsecFile->ChangeOptions( openDWBA->GetOptions() | kFixedSize );
-   xsecFile->Connect("Clicked()","MyMainFrame",this, "OpenFile(=7)");
-   DWBAFrame->AddFrame(xsecFile,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+   {//====================== Nuclear data API
+      TGGroupFrame * dataFrame = new TGGroupFrame(hframe1, "Nuclear Data", kVerticalFrame);
+      hframe1->AddFrame(dataFrame, new  TGLayoutHints(kLHintsCenterX, 5,5,3,4));
+      
+      TGHorizontalFrame * hfData = new TGHorizontalFrame(dataFrame); dataFrame->AddFrame(hfData, new TGLayoutHints(kLHintsNormal, 0, 0, 5, 0));   
+      
+      TGVerticalFrame * vfLabel = new TGVerticalFrame(hfData, 200); hfData->AddFrame(vfLabel );
+      TGVerticalFrame * vfTxt = new TGVerticalFrame(hfData); hfData->AddFrame(vfTxt);
+      
+      TGLayoutHints * haha = new TGLayoutHints(kLHintsRight | kLHintsCenterY, 5,5,5,2);
+      TGLayoutHints * kaka = new TGLayoutHints(kLHintsLeft  | kLHintsCenterY, 5,5,0,0);
+      
+      TGLabel * lb1 = new TGLabel(vfLabel, "Nuclear Name :"); vfLabel->AddFrame(lb1, haha);
+      TGLabel * lb2 = new TGLabel(vfLabel, "Max Ex [MeV] :"); vfLabel->AddFrame(lb2, haha);
+      
+      
+      txtName = new TGTextEntry(vfTxt, "25F"); vfTxt->AddFrame(txtName, kaka); txtName->Resize(50, 20);    
+      txtEx = new TGTextEntry(vfTxt, "0"); vfTxt->AddFrame(txtEx, kaka); txtEx->Resize(50, 20);  
+      
+      TGTextButton *GetData = new TGTextButton(dataFrame, "Get Data");
+      GetData->SetWidth(150);
+      GetData->SetHeight(40);
+      GetData->ChangeOptions( GetData->GetOptions() | kFixedSize );
+      GetData->Connect("Clicked()","MyMainFrame",this,"GetData()");
+      dataFrame->AddFrame(GetData,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
+   }
    
-   //-------- angle setting
-   TGHorizontalFrame * hframe000 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
-   DWBAFrame->AddFrame(hframe000);
-   
-   TGLabel * lb1 = new TGLabel(hframe000, "angMin");
-   lb1->SetWidth(50); lb1->ChangeOptions( kFixedSize);
-   hframe000->AddFrame(lb1, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
-
-   TGLabel * lb2 = new TGLabel(hframe000, "angMax");
-   lb2->SetWidth(50); lb2->ChangeOptions( kFixedSize);
-   hframe000->AddFrame(lb2, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
-   
-   TGLabel * lb3 = new TGLabel(hframe000, "angStep");
-   lb3->SetWidth(50); lb3->ChangeOptions( kFixedSize);
-   hframe000->AddFrame(lb3, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY, 5, 5, 0, 0));
-   
-   TGHorizontalFrame * hframe001 = new TGHorizontalFrame(DWBAFrame, 150, 30, kFixedSize);
-   DWBAFrame->AddFrame(hframe001);
-   
-   angMin = new TGNumberEntry(hframe001, 0, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
-   angMin->SetWidth(50);
-   angMin->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
-   hframe001->AddFrame(angMin, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
-   
-   angMax = new TGNumberEntry(hframe001, 60, 0, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative);
-   angMax->SetWidth(50);
-   angMax->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 180);
-   hframe001->AddFrame(angMax, new TGLayoutHints(kLHintsCenterX , 5, 5, 0, 0));
-   
-   angStep = new TGNumberEntry(hframe001, 1, 0, 0, TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
-   angStep->SetWidth(50);
-   angStep->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 30);
-   hframe001->AddFrame(angStep, new TGLayoutHints(kLHintsCenterX, 5, 5, 0, 0));
-
-   //------- Check Boxes
-   isInFile = new TGCheckButton(DWBAFrame, "Create inFile");
-   isInFile->SetWidth(100);
-   isInFile->ChangeOptions(kFixedSize );
-   isInFile->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isInFile, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-   
-   isRun = new TGCheckButton(DWBAFrame, "Run Ptolemy");
-   isRun->SetWidth(100);
-   isRun->ChangeOptions(kFixedSize );
-   isRun->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isRun, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-   
-   isExtract = new TGCheckButton(DWBAFrame, "Extract Xsec");
-   isExtract->SetWidth(100);
-   isExtract->ChangeOptions(kFixedSize );
-   isExtract->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isExtract, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-
-   isPlot = new TGCheckButton(DWBAFrame, "Plot");
-   isPlot->SetWidth(100);
-   isPlot->ChangeOptions(kFixedSize );
-   isPlot->SetState(kButtonDown);
-   DWBAFrame->AddFrame(isPlot, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-
-   extractFlag = new TGComboBox(DWBAFrame, 100);
-   extractFlag->SetWidth(130);
-   extractFlag->SetHeight(30);
-   
-   extractFlag->AddEntry("Xsec.", 2);
-   extractFlag->AddEntry("Ratio to Ruth.", 1);
-   extractFlag->AddEntry("Rutherford", 3);
-   extractFlag->Select(2);
-   DWBAFrame->AddFrame(extractFlag, new  TGLayoutHints(kLHintsLeft, 5,5,3,4));
-
-   TGTextButton *DWBA = new TGTextButton(DWBAFrame, "DWBA");
-   DWBA->SetWidth(150);
-   DWBA->SetHeight(40);
-   DWBA->ChangeOptions( DWBA->GetOptions() | kFixedSize );
-   DWBA->Connect("Clicked()","MyMainFrame",this,"Command(=0)");
-   DWBAFrame->AddFrame(DWBA,new  TGLayoutHints(kLHintsRight, 5,5,3,4));
-
    TGTextButton *exit = new TGTextButton(hframe1,"Exit", "gApplication->Terminate(0)");
    exit->SetWidth(150);
    exit->SetHeight(40);
@@ -330,6 +366,7 @@ void MyMainFrame::OpenFile(int ID){
   if ( ID == 5 ) fileName = "DWBA.in";
   if ( ID == 6 ) fileName = "DWBA.out";
   if ( ID == 7 ) fileName = "DWBA.Xsec.txt";
+  if ( ID == 8 ) fileName = isoFileName;
   
   //test if file exist
   if ( IsFileExist(fileName) ){
@@ -338,10 +375,9 @@ void MyMainFrame::OpenFile(int ID){
 
     editor->LoadFile(fileName);
    
-    if( ID >= 5 ) {
-       //editor->SetReadOnly(true);
-       editor->SetReadOnly(false);
-    }else{
+    if( ID >= 6 ) {
+       editor->SetReadOnly(true);
+   }else{
       editor->SetReadOnly(false);
     }
     
@@ -359,6 +395,23 @@ void MyMainFrame::OpenFile(int ID){
 
   }
   
+}
+
+void MyMainFrame::GetData(){
+   
+   TString name = txtName->GetText();
+   TString maxEx = txtEx->GetText();
+   
+   TString cmd = "../Cleopatra/nuclear_data.py " + name + " " + maxEx;
+   
+   system(cmd.Data());
+   
+   statusLabel->SetText("Check termial.");
+   
+   //isoFileName = name + ".txt";
+   
+   //OpenFile(8);
+   
 }
 
 void MyMainFrame::Command(int ID) {
