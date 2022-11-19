@@ -1377,6 +1377,8 @@ public:
       double dot = vD.Dot(vB);
       return TMath::ACos(dot)*TMath::RadToDeg() ;
    }
+   
+   double GetThetaCM() { return theta * TMath::RadToDeg();}
     
    double GetCMMomentum(){ return k;}
    TLorentzVector GetDaugther_d() {return Pd;}
@@ -1398,7 +1400,7 @@ public:
       isMotherSet = true;
    }
    
-   int CalDecay(TLorentzVector P_mother, double ExB, double ExD){
+   int CalDecay(TLorentzVector P_mother, double ExB, double ExD, double normOfReactionPlane = 0){
       if( !isMotherSet ) {
          return -1;
       }
@@ -1422,7 +1424,11 @@ public:
       k = TMath::Sqrt((MB+MD+md)*(MB+MD-md)*(MB-MD+md)*(MB-MD-md))/2./MB;
       
       //in mother's frame, assume isotropic decay
-      double theta = TMath::ACos(2 * gRandom->Rndm() - 1) ; 
+      theta = TMath::ACos(2 * gRandom->Rndm() - 1) ; 
+      
+      //for non isotropic decay, edit f1. 
+      //theta = TMath::ACos(f1->GetRandom());
+      
       double phi = TMath::TwoPi() * gRandom->Rndm();
       PD.SetE(TMath::Sqrt(mD * mD + k * k ));
       PD.SetPz(k);
@@ -1433,6 +1439,12 @@ public:
       Pd.SetPz(k);
       Pd.SetTheta(theta + TMath::Pi());
       Pd.SetPhi(phi + TMath::Pi());
+      
+      PD.RotateY(TMath::Pi()/2.);
+      PD.RotateZ(normOfReactionPlane);
+
+      Pd.RotateY(TMath::Pi()/2.);
+      Pd.RotateZ(normOfReactionPlane);
       
       //Transform to Lab frame;
       TVector3 boost = PB.BoostVector();
@@ -1447,6 +1459,9 @@ private:
    TLorentzVector PB, Pd, PD;
    
    double mB, mD, md;
+   double theta;
+   
+   TF1 * f1;
    
    bool isMotherSet;
    double Q;
@@ -1463,16 +1478,19 @@ Decay::Decay(){
    mB = TMath::QuietNaN();
    mD = TMath::QuietNaN();
    md = TMath::QuietNaN(); 
+   theta = TMath::QuietNaN();
    
    k = TMath::QuietNaN();
    
    Q = TMath::QuietNaN();
    dTheta = TMath::QuietNaN();
    isMotherSet = false;
+   
+   f1 = new TF1("f1", "(1+ROOT::Math::legendre(2,x))/2.", -1, 1);
 }
 
 Decay::~Decay(){
-   
+   delete f1;
 }
 
 //=======================================================
