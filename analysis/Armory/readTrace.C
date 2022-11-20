@@ -86,11 +86,13 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
          TString kTitle; 
          
          if( gFit != NULL ){ 
-            double base, time = 0, riseTime, energy, chiSq;
+            double base, time = 0, riseTime, energy, chiSq, decay, pre_rise_slope;
             energy   = gFit->GetParameter(0);
             time     = gFit->GetParameter(1);
             riseTime = gFit->GetParameter(2);
             base     = gFit->GetParameter(3);
+            decay    = gFit->GetParameter(4);
+            pre_rise_slope = gFit->GetParameter(5);
             chiSq    = gFit->GetChisquare()/gFit->GetNDF();
             int kind = gFit->GetLineColor();
             int det  = gFit->GetLineStyle();
@@ -106,8 +108,8 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
             
             //if( energy < 400 ) continue;
                         
-            kTitle = Form("(%3d,%d), base: %8.1f, rise: %6.2f, time: %6.1f, energy: %8.1f | chi2: %8.1f, RMS: %6.1f",
-                     det, kind, base, riseTime, time, energy, chiSq, g->GetRMS(2));
+            kTitle = Form("(%3d,%d), base: %8.1f, rise: %6.2f, time: %6.1f, energy: %8.1f | chi2: %8.1f, RMS: %6.1f\n    decay: %6.2f, pre_rise_slope: %6.2f",
+                     det, kind, base, riseTime, time, energy, chiSq, g->GetRMS(2), decay, pre_rise_slope);
             
             printf("%s |(q = break, w = last one)", kTitle.Data());
 

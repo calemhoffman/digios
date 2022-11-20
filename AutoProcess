@@ -6,6 +6,8 @@ Run=$2
 
 isEndRun=$3
 
+isTrace="true"
+
 echo $1 $2 $3 >> ~/digios/AutoProcessLog.txt
 
 cd ~/digios/analysis/working
@@ -31,12 +33,12 @@ fi
 ../Armory/process_Merge $Run -1
 ../Armory/process_Sort $Run -1 -1
 #root -l "ChainMonitors.C(${firstRun},${Run}, true)"     #multi-runs
-root -l "ChainMonitors.C(${Run}, -1, true)"     #single-run
+root -l "ChainMonitors.C(${Run}, -1, true, ${isTrace})"     #single-run
 
 #root -l "ChainMonitors.C(-1,-1, true)"  # this will use the list for the ChainMonitors.C
 
 if [ ${isEndRun} -eq 1 ] && [ ${firstRun} -neq ${Run} ]; then
    #root -l "ChainMonitors.C(${Run}, -1, true)"     #single-run
-   root -l "ChainMonitors.C(${firstRun},${Run}, true)"   #multi-runs  
+   root -l "ChainMonitors.C(${firstRun},${Run}, true, ${isTrace})"   #multi-runs  
 fi
 
