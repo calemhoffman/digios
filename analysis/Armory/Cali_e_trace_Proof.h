@@ -111,8 +111,6 @@ public :
    
    //========correction parameters
    int numDet;
-   int iDet; // number of detector at different position
-   int jDet; // number of detector at same position
    vector<double> pos;
    double length;
    double xnCorr[24]; // xn correction for xn = xf
