@@ -214,7 +214,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      x[idet] = x[idet] / xCorr[idet];
 
      ///========= Calculate z
-     int detID = idet%iDet;
+     int detID = idet%detGeo.nDet;
      if( pos[detID] < 0 ){
        z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
      }else{

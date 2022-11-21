@@ -467,10 +467,11 @@ void Cali_e_trace::Init(TTree *tree)
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
       }
+      //return;
    }
    file.close();
    
-   printf("loading e correction second.");
+      printf("loading e correction second.");
    file.open("correction_e2.dat");
    if( file.is_open() ){
       double a, b;
@@ -616,7 +617,7 @@ void Cali_e_trace::Init(TTree *tree)
       printf("................. done.\n");
 
       isReaction = true;
-      alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.;
+      alpha = 299.792458 * abs(Bfield) * q / TMath::TwoPi()/1000.;
       gamma = 1./TMath::Sqrt(1-beta*beta);
       G = alpha * gamma * beta * perpDist ;
       printf("============\n");
