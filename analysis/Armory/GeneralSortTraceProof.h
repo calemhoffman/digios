@@ -14,6 +14,8 @@
 #include <TFile.h>
 #include <TSelector.h>
 #include <TF1.h>
+#include <TH1F.h>
+#include <TSpectrum.h>
 #include <TGraph.h>
 #include <TClonesArray.h>
 #include <TMath.h>
@@ -299,6 +301,7 @@ void GeneralSortTraceProof::Init(TTree *tree)
    }
    
    runIDLast = fileNameTemp.Atoi();
+
    
 }
 

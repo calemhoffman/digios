@@ -79,11 +79,13 @@ void RDTCutCreator(TString dataList,
    TH2F * h[4];
 
    int count = 0;
-   for (Int_t i = 0; i < 4; i++) {
+   // was i<4
+   for (Int_t i = 0; i < 1; i++) {
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
       if( useTrace ){   
+         //varX.Form("trdt[0]+trdt[1]",2*i); varY.Form("trdt[%d]",2*i+1); Ivan's terrible mistake/okay
          varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
          ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
@@ -96,6 +98,13 @@ void RDTCutCreator(TString dataList,
                          varY.Data(), rdtCorr2[2*i+1][0], rdtCorr2[2*i+1][1],
                          varX.Data(), rdtCorr2[2*i][0],   rdtCorr2[2*i][1],
                          i);
+             
+             
+   //         expression[i].Form("%s*%f +%f:%s*%f+%f + %s*%f+%f>>h%d",
+   //                      varY.Data(), rdtCorr2[2*i+1][0], rdtCorr2[2*i+1][1],
+   //                      varX.Data(), rdtCorr2[2*i][0],   rdtCorr2[2*i][1],
+   //                      varY.Data(), rdtCorr2[2*i+1][0], rdtCorr2[2*i+1][1],
+   //                      i);
                          
       ///printf("%s \n", expression[i].Data());
 
