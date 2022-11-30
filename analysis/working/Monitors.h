@@ -48,6 +48,8 @@ public :
    ULong64_t       ezero_t[NEZERO];
    Float_t         crdt  [NCRDT];
    ULong64_t       crdt_t[NCRDT];
+   Float_t         apollo  [NAPOLLO];
+   ULong64_t       apollo_t[NAPOLLO];
    
    // List of branches
    TBranch        *b_runID;   //!
@@ -69,7 +71,8 @@ public :
    TBranch        *b_EZEROTimestamp;   //!
    TBranch        *b_CRDT;   //!
    TBranch        *b_CRDTTimestamp;   //!
-   
+   TBranch        *b_APOLLO;   //!
+   TBranch        *b_APOLLOTimestamp;   //!
 
    // trace analysis data
    Float_t         te[NARRAY];
@@ -100,6 +103,7 @@ public :
    bool isTACExist;
    bool isELUMExist;
    bool isEZEROExist;   
+   bool isAPOLLOExist;   
    
    int printControlID;
    void printControl(int n){this->printControlID = n;}
@@ -152,15 +156,7 @@ public :
 
 
 #ifdef Monitors_cxx
-void Monitors::Init(TTree *tree)
-{
-   // The Init() function is called when the selector needs to initialize
-   // a new tree or chain. Typically here the branch addresses and branch
-   // pointers of the tree will be set.
-   // It is normally not necessary to make changes to the generated
-   // code, but the routine can be extended by the user if needed.
-   // Init() will be called many times when running on PROOF
-   // (once per file to be processed).
+void Monitors::Init(TTree *tree){
 
    // Set branch addresses and branch pointers
    if (!tree) return;
@@ -196,6 +192,16 @@ void Monitors::Init(TTree *tree)
       fChain->SetBranchAddress("crdt"  , crdt,   &b_CRDT);
       fChain->SetBranchAddress("crdt_t", crdt_t, &b_CRDTTimestamp);
    }
+
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("apollo");
+   if( br == NULL ){
+      printf(" ++++++++ no APOLLO.\n");
+      isAPOLLOExist = false;
+   }else{
+      isAPOLLOExist = true;
+      fChain->SetBranchAddress("apollo"  , apollo,   &b_APOLLO);
+      fChain->SetBranchAddress("apollo_t", apollo_t, &b_APOLLOTimestamp);
+   }
    
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("tac");
    if( br == NULL ){
@@ -207,7 +213,6 @@ void Monitors::Init(TTree *tree)
       fChain->SetBranchAddress("tac_t", tac_t, &b_TACTimestamp);
    }
 
-   
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("elum");
    if( br == NULL ){
       printf(" ++++++++ no ELUM.\n");
@@ -265,14 +270,7 @@ void Monitors::Init(TTree *tree)
    printf("=================================== End of Branch Pointer Inititization. \n");
 }
 
-Bool_t Monitors::Notify()
-{
-   // The Notify() function is called when a new file is opened. This
-   // can be either for a new TTree in a TChain or when when a new TTree
-   // is started when using PROOF. It is normally not necessary to make changes
-   // to the generated code, but the routine can be extended by the
-   // user if needed. The return value is currently not used.
-
+Bool_t Monitors::Notify(){
    return kTRUE;
 }
 
@@ -358,7 +356,6 @@ void Monitors::SlaveTerminate(){
 double solid_angle( double th ) {
    
    double ang = 2. * TMath::Pi() * TMath::Sin( th*TMath::DegToRad() );
-   
    return 1.0 / ( ang * TMath::RadToDeg() );
    
 }
@@ -378,7 +375,6 @@ void Monitors::LoadDetGeoAndReactionConfigFile(){
     
     printf("... done.\n");
   }else{
-
     printf("... fail\n");
   }
 
@@ -391,7 +387,6 @@ void Monitors::LoadDetGeoAndReactionConfigFile(){
     PrintReactionConfig(reactionConfig);
     printf("..... done.\n");
   }else{
-
     printf("..... fail\n");
   }
 
@@ -499,30 +494,7 @@ void Monitors::LoadECorr(){
       }
    }
    file.close();
-   
-   printf(" loading e correction second.");
-   file.open("correction_e2.dat");
-   if( file.is_open() ){
-      double a, b;
-      int i = 0;
-      while( file >> a >> b){
-         if( i >= numDet) break;
-         eCorr2[i][0] = a;  // 1/a1
-         eCorr2[i][1] = b;  //  a0 , e' = e / a1 + a0
-         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
-         i = i + 1;
-      }
-      printf(".............. done.\n");
-      
-   }else{
-      printf(".............. fail.\n");
-      for( int i = 0; i < numDet ; i++){
-         eCorr2[i][0] = 1.;
-         eCorr2[i][1] = 0.;
-      }
-   }
-   file.close();
-   
+
 }
 
 void Monitors::LoadRDTCorr(){
@@ -698,13 +670,8 @@ void Monitors::PlotRDT(int id, bool isRaw){
 
    if( isRaw ){
       Draw2DHist(hrdt2D[id]);
-      //hrdt[2*id]->Draw("");
-      //hrdt[2*id+1]->Draw("");
    }else{
       Draw2DHist(hrdt2Dg[id]);
-      //hrdt[2*id]->Draw("");
-      //hrdt[2*id+1]->Draw("");
-      
    }
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));

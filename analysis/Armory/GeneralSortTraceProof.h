@@ -21,19 +21,6 @@
 #include <TMath.h>
 #include <TProofOutputFile.h>
 
-/**********
-//by copy the GeneralSortMapping.h in to Armory does not work
-//relative path does not work
-#ifdef __linux__
-   //#include "/home/ttang/digios/analysis/working/GeneralSortMapping.h"
-   #include "/home/ryantang/digios_master/analysis/working/GeneralSortMapping.h"
-#elif __APPLE__
-   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-//   #include "/Users/heliosdigios/digios/analysis/working/GeneralSortMapping.h"
-   //#include "/Users/mobileryan/digios/analysis/working/GeneralSortMapping.h"
-#endif
-*************/
-
 /// in process_Sort, copy the GeneralSortMapping.h to ~/.proof/working/
 #include "../working/GeneralSortMapping.h"
 
@@ -135,7 +122,6 @@ public :
    TGraph * gTrace; //!
    TGraph * gTrapezoid; //!
    TF1 * gFit; //!
-   TF1 * gFit2; //!
    
    float te[NARRAY];    // energy from trace
    float te_r[NARRAY];  // rising time from frace
@@ -177,6 +163,7 @@ public :
       Float_t ELUM[NELUM];
       Float_t EZERO[NEZERO];
       Float_t CRDT[NCRDT];
+      Float_t APOLLO[NAPOLLO];
 
       ULong64_t EnergyTimestamp[NARRAY];
       ULong64_t XFTimestamp[NARRAY];
@@ -187,6 +174,7 @@ public :
       ULong64_t ELUMTimestamp[NELUM];
       ULong64_t EZEROTimestamp[NEZERO];
       ULong64_t CRDTTimestamp[NCRDT];
+      ULong64_t APOLLOTimestamp[NAPOLLO];
       
       Float_t x[NARRAY];
       
@@ -226,16 +214,6 @@ public :
 #ifdef GeneralSortTraceProof_cxx
 void GeneralSortTraceProof::Init(TTree *tree)
 {
-   // The Init() function is called when the selector needs to initialize
-   // a new tree or chain. Typically here the branch addresses and branch
-   // pointers of the tree will be set.
-   // It is normally not necessary to make changes to the generated
-   // code, but the routine can be extended by the user if needed.
-   // Init() will be called many times when running on PROOF
-   // (once per file to be processed).
-
-   // this will be called when a new file is loaded in a new tree? possibly
-   
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -305,14 +283,8 @@ void GeneralSortTraceProof::Init(TTree *tree)
    
 }
 
-Bool_t GeneralSortTraceProof::Notify()
-{
-   // The Notify() function is called when a new file is opened. This
-   // can be either for a new TTree in a TChain or when when a new TTree
-   // is started when using PROOF. It is normally not necessary to make changes
-   // to the generated code, but the routine can be extended by the
-   // user if needed. The return value is currently not used.
-  
+Bool_t GeneralSortTraceProof::Notify(){
+
    return kTRUE;
 }
 

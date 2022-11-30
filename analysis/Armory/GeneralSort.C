@@ -32,6 +32,7 @@ typedef struct {
   Float_t ELUM[NELUM];
   Float_t EZERO[NEZERO];
   Float_t CRDT[NCRDT];
+  Float_t APOLLO[NAPOLLO];
 
   ULong64_t EnergyTimestamp[NARRAY];
   ULong64_t XFTimestamp[NARRAY];
@@ -42,6 +43,7 @@ typedef struct {
   ULong64_t ELUMTimestamp[NELUM];
   ULong64_t EZEROTimestamp[NEZERO];
   ULong64_t CRDTTimestamp[NCRDT];
+  ULong64_t APOLLOTimestamp[NAPOLLO];
   
   Float_t x[NARRAY];
 
@@ -128,6 +130,13 @@ void GeneralSort::Begin(TTree * tree)
     printf(" -----  no crdt.\n"); 
   }
   
+  if( NAPOLLO > 0 ){
+    gen_tree->Branch("apollo"  ,psd.APOLLO,         Form("APOLLO[%d]/F", NAPOLLO));
+    gen_tree->Branch("apollo_t",psd.APOLLOTimestamp,Form("APOLLOTimestamp[%d]/l", NAPOLLO)); 
+  }else{
+    printf(" -----  no APOLLO.\n"); 
+  }
+  
   printf("======= ID-MAP: \n");
   printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
@@ -148,6 +157,8 @@ void GeneralSort::Begin(TTree * tree)
       printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// TAC, 
     }else if( 500+NCRDT >= idDetMap[i] && idDetMap[i] >= 500){
       printf("\033[100m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Circular Recoil
+    }else if( 600+NAPOLLO >= idDetMap[i] && idDetMap[i] >= 600){
+      printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// APOLLO
     }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
@@ -217,36 +228,47 @@ Bool_t GeneralSort::Process(Long64_t entry)
   if (ProcessedEntries<MaxProcessedEntries) {
 
     ///=============================== Zero struct
-    for (Int_t i=0;i<NARRAY;i++) {//num dets
+    for (Int_t i=0; i < NARRAY; i++) {
       psd.Energy[i]=TMath::QuietNaN();
       psd.XF[i]=TMath::QuietNaN();
       psd.XN[i]=TMath::QuietNaN();
       psd.x[i]=TMath::QuietNaN();
       psd.Ring[i]=0.;
-      if (i<NRDT)   {
-        psd.RDT[i]=TMath::QuietNaN();
-        psd.RDTTimestamp[i]	 = 0; 
-      }
-      if (i<NTAC)   {
-        psd.TAC[i]=TMath::QuietNaN();
-        psd.TACTimestamp[i]	 = 0; 
-      }
-      if (i<NELUM)  {
-        psd.ELUM[i]=TMath::QuietNaN();
-        psd.ELUMTimestamp[i] = 0;
-      }
-      if (i<NEZERO) {
-        psd.EZERO[i]=TMath::QuietNaN();
-        psd.EZEROTimestamp[i]= 0;
-      }
-      if (i< NCRDT) {
-        psd.CRDT[i]=TMath::QuietNaN();
-        psd.CRDTTimestamp[i]= 0;
-      }
-      psd.EnergyTimestamp[i]= 0;
-      psd.XFTimestamp[i]    = 0; 
-      psd.XNTimestamp[i]	 = 0; 
-      psd.RingTimestamp[i]	 = 0; 
+      
+      psd.EnergyTimestamp[i] = 0;
+      psd.XFTimestamp[i]     = 0; 
+      psd.XNTimestamp[i]     = 0; 
+      psd.RingTimestamp[i]   = 0;
+    }
+    
+    for (Int_t i=0; i < NRDT; i++) {
+      psd.RDT[i]=TMath::QuietNaN();
+      psd.RDTTimestamp[i]	 = 0; 
+    }
+    
+    for (Int_t i=0; i < NTAC; i++) {
+      psd.TAC[i]=TMath::QuietNaN();
+      psd.TACTimestamp[i]	 = 0; 
+    }
+    
+    for (Int_t i=0; i < NELUM; i++) {
+      psd.ELUM[i]=TMath::QuietNaN();
+      psd.ELUMTimestamp[i] = 0;
+    }
+    
+    for (Int_t i=0; i < NEZERO; i++) {
+      psd.EZERO[i]=TMath::QuietNaN();
+      psd.EZEROTimestamp[i]= 0;
+    }
+    
+    for (Int_t i=0; i < NCRDT; i++) {
+      psd.CRDT[i]=TMath::QuietNaN();
+      psd.CRDTTimestamp[i]= 0;
+    }
+    
+    for (Int_t i=0; i < NAPOLLO; i++) {    
+      psd.APOLLO[i]=TMath::QuietNaN();
+      psd.APOLLOTimestamp[i]= 0;
     }
 
     ///=============================== Pull needed entries
@@ -308,14 +330,14 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== ELUM
       if ( NELUM > 0 && idDet >= 200 && idDet <= 200 + NELUM ) {
         Int_t elumID = idDet - 200;
-        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN ;
+        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_ELUM;
         psd.ELUMTimestamp[elumID] = event_timestamp[i];
       }
       
       ///=============================== EZERO
       if ( NEZERO > 0 && idDet >= 300 && idDet <= 300 + NEZERO ) {
         Int_t ezeroID = idDet - 300;
-        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
+        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_EZERO;
         psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
       }
 
@@ -330,8 +352,15 @@ Bool_t GeneralSort::Process(Long64_t entry)
       ///=============================== Circular-Recoil
       if ( NCRDT > 0 && idDet >= 500 && idDet <= 500 + NCRDT ) {
         Int_t crdtID = idDet - 500;
-        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
+        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_CRDT;
         psd.CRDTTimestamp[crdtID] = event_timestamp[i];
+      }
+
+      ///=============================== APOLLO
+      if ( NAPOLLO > 0 && idDet >= 600 && idDet <= 600 + NAPOLLO ) {
+        Int_t apolloID = idDet - 600;
+        psd.APOLLO[apolloID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_APOLLO;
+        psd.APOLLOTimestamp[apolloID] = event_timestamp[i];
       }
       
     } // End NumHits Loop
