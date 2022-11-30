@@ -33,7 +33,8 @@ void Cali_ex(int detID = -1){
    //====================================================== read file
    
    TChain * tree = new TChain("tree");
-   tree->Add("temp.root"); 
+   tree->Add("../root_data/gen_run.005root"); 
+   //tree->Add("temp.root"); 
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
