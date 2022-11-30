@@ -14,7 +14,11 @@ xterm -T stopdata -fa "Monospace" -fs 12 -bg rgb:7f/99/ff -fg white -geometry 13
 
 #========= check is autorun
 autoRunID=$(ps -e | grep "AutoStartStop" | awk '{print $1}')
-kill -9 $autoRunID
+if [ -z ${autoRunID} ]; then
+    echo "No AutoRun"
+else
+    kill -9 $autoRunID
+fi
 
 #globus task list
 

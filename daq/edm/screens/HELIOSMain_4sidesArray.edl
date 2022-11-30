@@ -5,8 +5,8 @@ minor 0
 release 1
 x 785
 y 244
-w 1778
-h 925
+w 1350
+h 800
 font "helvetica-bold-r-10.0"
 ctlFont "helvetica-bold-r-10.0"
 btnFont "helvetica-bold-r-10.0"
