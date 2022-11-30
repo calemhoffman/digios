@@ -569,11 +569,11 @@ void Monitors::LoadReactionPars(){
    //printf("%s\n", aaa1.Data());
    //printf("%s\n", aaa2.Data());
 
-   if( aaa1 != aaa2 ) {
-     printf("########################## recalculate transfer.root \n");
-     system("../Cleopatra/Transfer");
-     printf("########################## transfer.root updated\n");
-   }
+   //if( aaa1 != aaa2 ) {
+   //  printf("########################## recalculate transfer.root \n");
+   //  system("../Cleopatra/Transfer");
+   //  printf("########################## transfer.root updated\n");
+   //}
    printf(" loading reaction parameters");
    ifstream file;
    file.open("reaction.dat");
@@ -585,7 +585,7 @@ void Monitors::LoadReactionPars(){
          if( x.substr(0,2) == "//" )  continue;
          if( i == 0 ) mass = atof(x.c_str());
          if( i == 1 ) q    = atof(x.c_str());
-         if( i == 2 ) beta = atof(x.c_str()); 
+         if( i == 2 ) betRel = atof(x.c_str()); 
          if( i == 3 ) Et   = atof(x.c_str()); 
          if( i == 4 ) massB = atof(x.c_str()); 
          i = i + 1;
@@ -593,16 +593,16 @@ void Monitors::LoadReactionPars(){
       printf("........ done.\n");
 
       isReaction = true;
-      alpha = 299.792458 * detGeo.Bfield * q / TMath::TwoPi()/1000.; //MeV/mm
-      gamm = 1./TMath::Sqrt(1-beta*beta);
-      G = alpha * gamm * beta * detGeo.detPerpDist ;
+      alpha = 299.792458 * abs(detGeo.Bfield) * q / TMath::TwoPi()/1000.; //MeV/mm
+      gamm = 1./TMath::Sqrt(1-betRel*betRel);
+      G = alpha * gamm * betRel * detGeo.detPerpDist ;
       printf("\tmass-b    : %f MeV/c2 \n", mass);
       printf("\tcharge-b  : %f \n", q);
       printf("\tE-total   : %f MeV \n", Et);
       printf("\tmass-B    : %f MeV/c2 \n", massB);
-      printf("\tbeta      : %f \n", beta);
+      printf("\tbeta      : %f \n", betRel);
       printf("\tB-field   : %f T \n", detGeo.Bfield);
-      printf("\tslope     : %f MeV/mm \n", alpha * beta);
+      printf("\tslope     : %f MeV/mm \n", alpha * betRel);
       printf("\tdet radius: %f mm \n", detGeo.detPerpDist);
       printf("\tG-coeff   : %f MeV \n", G);
       printf("=================================\n");
@@ -633,7 +633,7 @@ void Monitors::PlotEZ(bool isRaw){
          }
       }
 
-      text.DrawLatex(0.15, 0.8, Form("eCal > %.1f MeV", eCalCut));
+      text.DrawLatex(0.15, 0.8, Form("%.1f < eCal < %.1f MeV", eCalCut[0], eCalCut[1]));
       if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
 
    }else{
