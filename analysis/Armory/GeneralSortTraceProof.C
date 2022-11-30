@@ -9,10 +9,56 @@
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
-float delayChannel = 200.; //initial guess of the time
+int traceMethod = 2; //0 = no process; 1 = fit; 2 = trapezoid
+float delayChannel = 100.; //initial guess of the time
 
 // Also go to line 146 to set the trace analysis gate
+
+//############# fit function definition
+//=== Don;t forget to set fit parameter at line ~ 550
+const int numPara = 6;
+const float fitRange[2] = {0, 250};
+
+double fitFunc(double * x, double * par){
+   
+   /// par[0] = A
+   /// par[1] = t0
+   /// par[2] = rise time
+   /// par[3] = baseline
+   /// par[4] = decay
+   /// par[5] = pre-rise slope
+   
+   if( x[0] < par[1] ) return  par[3] + par[5] * (x[0]-par[1]);
+   
+   return par[3] + par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[2]) ) * TMath::Exp(- (x[0] - par[1]) / par[4]);
+}
+
+
+const int numPara2 = 10;
+double fitFunc2(double * x, double * par){
+
+   /// par[0] = A
+   /// par[1] = t0
+   /// par[2] = rise time
+   /// par[3] = baseline
+   /// par[4] = decay
+   /// par[5] = pre-rise slope
+   /// par[6] = A2
+   /// par[7] = t0_2
+   /// par[8] = rise time2
+   /// par[9] = decay2
+   
+   if( x[0] < par[1] ) return  par[3] + par[5] * (x[0]-par[1]);
+   
+   double pulse1 = par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[2]) ) * TMath::Exp(- (x[0] - par[1]) / par[4]);
+   
+   double pulse2 = 0 ;
+   if( x[0] > par[7] ) pulse2 = par[6] * (1 - TMath::Exp(- (x[0] - par[7]) / par[8]) ) * TMath::Exp(- (x[0] - par[7]) / par[9]);
+   
+   return par[3] + pulse1 + pulse2;
+}
+//===================================================
+
 
 //=================================== end of setting
 
@@ -28,11 +74,12 @@ TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
 
    int baseLineEnd = 80;
    
-   int riseTime = 20; //ch
+   int riseTime = 10; //ch
    int flatTop = 20;
-   float decayTime = 300;
+   float decayTime = 2000;
    
    TGraph *  trapezoid = new TGraph();
+   //TH1F *  trapezoid = new TH1F("hTrap", "hTrap", fitRange[1] - fitRange[0], fitRange[0], fitRange[1]);
    trapezoid->Clear();
    
    ///find baseline;
@@ -241,7 +288,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       }
       
       if( traceMethod > 0 ){
-	      gFit = new TF1("gFit", "[0]/(1+TMath::Exp(-(x-[1])/[2]))+[3]", 0, 140);
+         gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
+         gFit2 = new TF1("gFit2", fitFunc2, fitRange[0], fitRange[1], numPara2);
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
@@ -266,7 +314,7 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
             newTree->Branch("tcrdt_t", tcrdt_t,  Form("Trace_CRDT_Time[%d]/l", NCRDT)); 
             newTree->Branch("tcrdt_r", tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/l", NCRDT)); 
          }
-         
+
       }
    }
   
@@ -473,13 +521,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
          ///printf("------- ev : %lld, %d /%d, countTrace : %d, length : %d, idDet : %d \n", entry, i, NumHits, countTrace, traceLength, idDet);
          
-         if( isPSD ) {
-            delayChannel = 100;
-         }
+         delayChannel = 100;
          
-         if( isRDT ) {
-            delayChannel = 300;
-         }
+         //if( isRDT ) {
+         //   delayChannel = 300;
+         //}
          ///==================  Set gTrace
 
          if( traceMethod == 0 ){
@@ -487,7 +533,6 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                gTrace->SetPoint(j, j, trace[i][j]);
             }
          }
-         
          
          ///=================== regulate the trace
          double base = 0;
@@ -529,14 +574,46 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             gFit->SetParameter(1, delayChannel); /// time
             gFit->SetParameter(2, 1);            ///riseTime
             gFit->SetParameter(3, base);
+            gFit->SetParameter(4, 100);
+            gFit->SetParameter(5, -1);
+            
+            gFit->SetParLimits(1, 85, 110);
+            gFit->SetParLimits(5, -2, 0);
 
             //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop    
             //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
 
             if( isSaveFitTrace ) {
-               gTrace->Fit("gFit", "qR");
+               gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               
+               /// if bad fit, fit gfit2
+               //if( gFit->GetChisquare()/gFit->GetNDF() > 10 ){
+               //   
+               //   gFit2->SetParameter(0, gFit->GetParameter(0)); /// energy
+               //   gFit2->SetParameter(1, gFit->GetParameter(1)); /// time
+               //   gFit2->SetParameter(2, gFit->GetParameter(2)); /// riseTime
+               //   gFit2->SetParameter(3, gFit->GetParameter(3)); /// baseline
+               //   gFit2->SetParameter(4, gFit->GetParameter(4));
+               //   gFit2->SetParameter(5, gFit->GetParameter(5)); /// pre_rise_slop
+               //   gFit2->SetParameter(6, 100);
+               //   gFit2->SetParameter(7, 150);
+               //   gFit2->SetParameter(8, 100); 
+               //   gFit2->SetParameter(9, 200);
+               //
+               //   gFit2->FixParameter(1, gFit->GetParameter(1));
+               //   gFit2->FixParameter(3, gFit->GetParameter(3));
+               //   gFit2->FixParameter(5, gFit->GetParameter(5));
+               //   
+               //   gFit2->SetParLimits(2, 7 ,10);
+               //   gFit2->SetParLimits(8, 7 ,10);
+               //   gFit2->SetParLimits(7, gFit->GetParameter(1) +10 ,fitRange[1]);
+               //   
+               //   gTrace->Fit("gFit2", "QR", "", fitRange[0], fitRange[1]);
+               //}
+               
+               
             }else{
-               gTrace->Fit("gFit", "qR0");
+               gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
@@ -580,10 +657,48 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             gTrapezoid  = (TGraph*) arr->ConstructedAt(countTrace);
             gTrapezoid->Clear();
-            
             gTrapezoid = TrapezoidFilter(gTrace);
+
+            int len = gTrapezoid->GetN();
+
+            TH1F h1 ("h1", "h1", len, 0, len);
+            for( int i =0 ; i < len; i++){
+               h1.Fill( gTrapezoid->GetPointX(i)-0.5, gTrapezoid->GetPointY(i));
+            }
+
+            TSpectrum peak(10);
+
+            int nPeaksRaw = peak.Search(&h1, 4, "", 0.4);
             
+            double * xpos = peak.GetPositionX();
+            double * ypos = peak.GetPositionY();
             
+            int inX[nPeaksRaw];
+            TMath::Sort(nPeaksRaw, xpos, &inX[0], 0);
+            
+            double xxx = 0, yyy = 0;
+            
+            for( int k = 0; k < nPeaksRaw; k++){
+               if( 280 < xpos[inX[k]] && xpos[inX[k]] < 340  ) {
+                  xxx = xpos[inX[k]];
+                  yyy = ypos[inX[k]];
+                  break;
+               }
+            }
+            
+            if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
+               te[idDet]   = yyy;
+               te_t[idDet] = xxx - 30;
+               te_r[idDet] = 0;
+            }
+            
+            if( NRDT + 100 > idDet && idDet >= 100 ) {
+               int rdtTemp = idDet-100;
+               trdt[rdtTemp]   = yyy;
+               trdt_t[rdtTemp] = xxx - 30;
+               trdt_r[rdtTemp] = 0;
+            }
+
          }
          
       } /// End NumHits Loop

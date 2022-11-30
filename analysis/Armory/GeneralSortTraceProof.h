@@ -14,6 +14,8 @@
 #include <TFile.h>
 #include <TSelector.h>
 #include <TF1.h>
+#include <TH1F.h>
+#include <TSpectrum.h>
 #include <TGraph.h>
 #include <TClonesArray.h>
 #include <TMath.h>
@@ -133,6 +135,7 @@ public :
    TGraph * gTrace; //!
    TGraph * gTrapezoid; //!
    TF1 * gFit; //!
+   TF1 * gFit2; //!
    
    float te[NARRAY];    // energy from trace
    float te_r[NARRAY];  // rising time from frace
@@ -298,6 +301,7 @@ void GeneralSortTraceProof::Init(TTree *tree)
    }
    
    runIDLast = fileNameTemp.Atoi();
+
    
 }
 

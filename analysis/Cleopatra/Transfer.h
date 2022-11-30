@@ -52,12 +52,12 @@ void Transfer(
   const DetGeo detGeo = helios.GetDetectorGeometry();
   
   printf("==================================== E-Z plot slope\n");
-  double  beta = reaction.GetReactionBeta() ;
+  double  betaRect = reaction.GetReactionBeta() ;
   double gamma = reaction.GetReactionGamma();
   double    mb = reaction.GetMass_b();
   double   pCM = reaction.GetMomentumbCM();
   double     q = TMath::Sqrt(mb*mb + pCM*pCM); ///energy of light recoil in center of mass
-  double slope = 299.792458 * reaction.GetCharge_b() * abs(helios.GetBField()) / TMath::TwoPi() * beta / 1000.; /// MeV/mm
+  double slope = 299.792458 * reaction.GetCharge_b() * abs(helios.GetBField()) / TMath::TwoPi() * betaRect / 1000.; /// MeV/mm
   printf("                       e-z slope : %f MeV/mm\n", slope);   
   double intercept = q/gamma - mb; // MeV
   printf("    e-z intercept (ground state) : %f MeV\n", intercept); 
@@ -73,7 +73,7 @@ void Transfer(
     fprintf(keyParaOut, "%-15.8f  //%s\n", reaction.GetReactionBeta(), "betaCM");
     fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetCMTotalEnergy(), "Ecm");
     fprintf(keyParaOut, "%-15.4f  //%s\n", reaction.GetMass_B(), "mass_B");
-    fprintf(keyParaOut, "%-15.4f  //%s\n", slope/beta, "alpha=slope/beta");
+    fprintf(keyParaOut, "%-15.4f  //%s\n", slope/betaRect, "alpha=slope/betaRect");
 
     fflush(keyParaOut);
     fclose(keyParaOut);
@@ -363,7 +363,7 @@ void Transfer(
     double gS2 = TMath::Power(TMath::Sin(thetacm)*gamma,2);
     gx[i]->SetParameter(0, TMath::Cos(thetacm));
     gx[i]->SetParameter(1, mb*mb*(1-gS2));
-    gx[i]->SetParameter(2, TMath::Power(slope/beta,2));
+    gx[i]->SetParameter(2, TMath::Power(slope/betaRect,2));
     gx[i]->SetParameter(3, 1-gS2);
     gx[i]->SetParameter(4, mb);
     gx[i]->SetParameter(5, -gS2*slope);
@@ -393,19 +393,26 @@ void Transfer(
   //--- cal modified f
   TObjArray * fxList = new TObjArray();
   TGraph ** fx = new TGraph*[n];
+  vector<double> px, py;
+  int countfx = 0;
   for( int j = 0 ; j < n; j++){
-    double px[100];
-    double py[100];
     double a = helios.GetDetRadius();
     double q = TMath::Sqrt(mb*mb + kCM[j] * kCM[j] );
+    px.clear();
+    py.clear();
+    countfx = 0;
     for(int i = 0; i < 100; i++){
       double thetacm = TMath::Pi()/TMath::Log(100) * (TMath::Log(100) - TMath::Log(100-i)) ;//using log scale, for more point in small angle.
-      double temp = TMath::TwoPi() * slope / beta / kCM[j] * a / TMath::Sin(thetacm); 
-      px[i] = beta /slope * (gamma * beta * q - gamma * kCM[j] * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi()) ;
-      py[i] = gamma * q - mb - gamma * beta * kCM[j] * TMath::Cos(thetacm);   
+      double temp = TMath::TwoPi() * slope / betaRect / kCM[j] * a / TMath::Sin(thetacm); 
+      double pxTemp = betaRect /slope * (gamma * betaRect * q - gamma * kCM[j] * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi()) ;
+      double pyTemp = gamma * q - mb - gamma * betaRect * kCM[j] * TMath::Cos(thetacm);   
+      if( TMath::IsNaN(pxTemp) || TMath::IsNaN(pyTemp) ) continue;
+      px.push_back(pxTemp);
+      py.push_back(pyTemp);
+      countfx ++;
     }
 
-    fx[j] = new TGraph(100, px, py);
+    fx[j] = new TGraph(countfx, &px[0], &py[0]);
     name.Form("fx%d", j);
     fx[j]->SetName(name);
     fx[j]->SetLineColor(4);
@@ -419,18 +426,23 @@ void Transfer(
   TObjArray * txList = new TObjArray();
   TGraph ** tx = new TGraph*[n];
   for( int j = 0 ; j < n; j++){
-    double px[100];
-    double py[100];
     double a = helios.GetDetRadius();
     double q = TMath::Sqrt(mb*mb + kCM[j] * kCM[j] );
+    px.clear();
+    py.clear();
+    countfx = 0;
     for(int i = 0; i < 100; i++){
       double thetacm = (i + 8.) * TMath::DegToRad();
-      double temp = TMath::TwoPi() * slope / beta / kCM[j] * a / TMath::Sin(thetacm); 
-      px[i] = beta /slope * (gamma * beta * q - gamma * kCM[j] * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
-      py[i] = thetacm * TMath::RadToDeg();   
+      double temp = TMath::TwoPi() * slope / betaRect / kCM[j] * a / TMath::Sin(thetacm); 
+      double pxTemp = betaRect /slope * (gamma * betaRect * q - gamma * kCM[j] * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
+      double pyTemp = thetacm * TMath::RadToDeg();   
+      if( TMath::IsNaN(pxTemp) || TMath::IsNaN(pyTemp) ) continue;
+      px.push_back(pxTemp);
+      py.push_back(pyTemp);
+      countfx ++;
     }
 
-    tx[j] = new TGraph(100, px, py);
+    tx[j] = new TGraph(countfx, &px[0], &py[0]);
     name.Form("tx%d", j);
     tx[j]->SetName(name);
     tx[j]->SetLineColor(4);
