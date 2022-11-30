@@ -31,7 +31,7 @@ expName=$1
 
 if [ $# -ne 0 ]; then
     if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
-	expName="H081_85Kr"
+	expName="ARR01"
     fi
 fi
     
@@ -55,7 +55,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
-   expName="H081_85Kr"
+   expName="ARR01"
    echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m = master"
 else
    echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
