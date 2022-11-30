@@ -137,7 +137,7 @@ TH2F* heVring[numDet];
 TH2F* hxfVxn[numDet];
 TH2F* heVxs[numDet];
 
-TH1F* hMultiHit; //TODO
+//TH1F* hMultiHit; //TODO
 
 TH2F* heVID;
 TH2F* heVIDG; //gated
@@ -172,8 +172,6 @@ TH2F* hExThetaCM;
 TH1F* hExCut1;
 TH1F* hExCut2;
 
-TH2F* hExZ;
-
 //====== TAC
 TH1F* htac;   // by TAC
 TH1F* htac2;  // by timestamp
@@ -189,20 +187,22 @@ TH2F* htacTdiffg;
 TH2F* htacRecoil[8];
 TH2F* htacRecoilsum[4];
 
+//======= APOLLO
 TH1F* hApollo[20];
 
 //======= Recoil
 TH2F* hrdtID;
 TH1F* hrdt[8]; // single recoil
 TH1F* hrdtg[8]; 
+
 TH2F* hrdt2D[4];
 TH2F* hrdt2Dsum[4];
 TH2F* hrdt2Dg[4];
 
 TH2F* hrdtMatrix; // coincident between rdt
 
-TH1F* hrdt14N;
-TH1F* hrdt14C;
+TH1F* hrdtRate1;
+TH1F* hrdtRate2;
 
 //======= Circular Recoil
 TH2F* hcrdtID;
@@ -211,16 +211,12 @@ TH2F* hcrdtPolar;
 
 //======= ELUM
 TH1F* helum[NELUM];
-///TH1F* helumSUM;
 TH2F* helumID;
-///
-///TH2F* helumTAC;
-///
+
 TH1F* helum4D; // elum rate for (d,d)
 TH1F* helum4C; // elum rate for (12C, 12C)
-///
+
 TH1F* hBIC; // BIC, beam integrated current
-TH1F* helumDBIC; //elum (d,d)/ BIC
 
 //======= EZero, or IonChamber when recoil also use
 TH1F* hic0; //ionChamber ch0
@@ -234,10 +230,12 @@ TH2F* hic12;
 //======= multi-Hit
 TH2I *hmult;
 TH1I *hmultEZ;
-TH1I *htdiff;
-TH1I *htdiffg;
 TH2I *hArrayRDTMatrix;
 TH2I *hArrayRDTMatrixG;
+
+//======= ARRAY-RDT time diff
+TH1I *htdiff;
+TH1I *htdiffg;
 
 /***************************
  ***************************/
@@ -251,7 +249,6 @@ Float_t xnCorr[numDet];
 Float_t xfxneCorr[numDet][2];
 Float_t xScale[numDet];
 Float_t eCorr[numDet][2];
-Float_t eCorr2[numDet][2];
 Float_t rdtCorr[8][2];
 //==== parameters for Ex and thetaCM calcualtion
 
@@ -342,7 +339,6 @@ void Monitors::Begin(TTree *tree)
       }
    }
    
-   
    //================  Get EZ cuts;
    TFile * fCutez = new TFile(ezCutFile);
    isEZCutFileOpen = fCutez->IsOpen(); 
@@ -361,7 +357,6 @@ void Monitors::Begin(TTree *tree)
    }
    
    //=============== Get Time stamp range
-   
    TString branch = FindStartEndTime(tree, "e_t");
    if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "rdt_t");
    if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "ezero_t");
@@ -389,10 +384,7 @@ void Monitors::Begin(TTree *tree)
       timeRange[1] = 1000;
    }
    
-   
    //========================= Generate all of the histograms needed for drawing later on
-   
-   
    printf("======================================== Histograms declaration\n");
 
    gROOT->cd();
@@ -438,8 +430,6 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   hrdtExGated = new TH2F("hrdtExGated", "Ex Gated Recoil",             500,rdtERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0],rdtDERange[1]);
-
    for (Int_t i=0;i<8;i++) {
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
@@ -458,17 +448,16 @@ void Monitors::Begin(TTree *tree)
    
    hrdtMatrix = new TH2F("hrdtMatrix", "RDT ID vs RDT ID", 16 , 0, 8, 16, 0, 8);
    
-   hrdt14N = new TH1F("hrdt14N", "14N, 14C recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
-   hrdt14N->SetLineColor(2);
+   hrdtRate1 = new TH1F("hrdtRate1", "recoil rate 1 / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
+   hrdtRate1->SetLineColor(2);
    
-   hrdt14C = new TH1F("hrdt14C", "14N, 14C recoil rate / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
-   hrdt14C->SetLineColor(4);
+   hrdtRate2 = new TH1F("hrdtRate2", "recoil rate 2 / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
+   hrdtRate2->SetLineColor(4);
 
- //===================== APOLLO
+   //===================== APOLLO
    for (Int_t i=0;i<20;i++) {
       hApollo[i] = new TH1F(Form("hApollo%d",i),Form("Raw Apollo E(ch=%d); E (channel)",i), 250,apolloRange[0],apolloRange[1]);
    }
-   
    
    //===================== Circular Recoil
    hcrdtID = new TH2F("hcrdtID", "Circular Recoil ID; Angular ID; Radial ID;", 8, 0, 8, 8, 0, 8);
@@ -478,7 +467,6 @@ void Monitors::Begin(TTree *tree)
       hcrdt[i] = new TH1F(Form("hcrdt%d", i), Form("Raw Circular Recoil-%d", i), 500, crdtRange[0], crdtRange[1] );
    }
 
-   
    //===================== multiplicity
    hmult   = new TH2I("hmult","Array Multiplicity vs Recoil Multiplicity; Array ; Recoil",10,0,10,10,0,10);
    hmultEZ = new TH1I("hmultEZ","Filled EZ with coinTime and recoil",10,0,10);
@@ -536,10 +524,7 @@ void Monitors::Begin(TTree *tree)
       helum[i] = new TH1F(Form("helum%d", i), Form("Elum-%d", i), 500, elumRange[0], elumRange[1]);
    }
    helumID = new TH2F("helumID", "Elum vs ID", NELUM, 0 , NELUM, 500, elumRange[0], elumRange[1]);
-   ///helumSUM = new TH1F("helumSUM", "ElumSUM", 500, elumRange[0], elumRange[1]);
-   ///
-   ///helumTAC = new TH2F("helumTAC", "Elum vs TAC; TAC [a.u.]; Elum ", TACRange[0], TACRange[1], TACRange[2], 500, elumRange[0], elumRange[1]);
-   
+
    helum4D = new TH1F("helum4d", "Elum rate for Z = 1; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
    helum4C = new TH1F("helum4C", "Elum rate for carbon; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (12C, 12C)
    hBIC = new TH1F("hBIC", "BIC rate ; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
@@ -592,6 +577,11 @@ Bool_t Monitors::Process(Long64_t entry)
    if( isCRDTExist ){
       b_CRDT->GetEntry(entry);
       b_CRDTTimestamp->GetEntry(entry);
+   }
+   
+   if( isAPOLLOExist ){
+      b_APOLLO->GetEntry(entry);
+      b_APOLLOTimestamp->GetEntry(entry);
    }
    
    if( isTACExist ){
@@ -659,8 +649,6 @@ Bool_t Monitors::Process(Long64_t entry)
     for( int i = 0; i < NELUM; i++){
        helum[i]->Fill(elum[i]);
        helumID->Fill(i, elum[i]);
-       ///helumSUM->Fill(elum[i]);
-       ///helumTAC->Fill(tac[0], elum[i]);
     }
       
     if( 800 < elum[0]  && elum[0] < 1200 ) helum4D->Fill(elum_t[0]/1e8/60.); 
@@ -677,7 +665,6 @@ Bool_t Monitors::Process(Long64_t entry)
     for( int i = 0 ; i < 8; i++){
        rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
     }
-    
     
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
@@ -732,13 +719,11 @@ Bool_t Monitors::Process(Long64_t entry)
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
       xncal[detID] = xn[detID] * xnCorr[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
-      //eCal[detID] = e[detID] / eCorr[detID][0] + eCorr[detID][1];
-      eCal[detID] = (e[detID] / eCorr[detID][0] + eCorr[detID][1])*eCorr2[detID][0]+eCorr2[detID][1];
+      eCal[detID] = e[detID] / eCorr[detID][0] + eCorr[detID][1];
 
       if( eCal[detID] < eCalCut[0] ) continue;
       if( eCal[detID] > eCalCut[1] ) continue;
       
-
       //===================== fill Calibrated  data
       heCal[detID]->Fill(eCal[detID]);
       heCalID->Fill(detID, eCal[detID]);
@@ -755,17 +740,6 @@ Bool_t Monitors::Process(Long64_t entry)
       if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 0.5 + 0.5 * (xfcal[detID] - xncal[detID] ) / e[detID];
       if  ( !TMath::IsNaN(xf[detID]) &&  TMath::IsNaN(xn[detID]) ) xcal[detID] = xfcal[detID]/ e[detID];
       if  (  TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 1.0 - xncal[detID]/ e[detID];
-      ///if  (  TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) xcal[detID] = TMath::QuietNaN();
-      
-      /**
-      if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) {
-        if (xfcal[detID]>0.5*e[detID]) {
-          xcal[detID] = xfcal[detID]/e[detID];
-        }else if {
-          xcal[detID] = 1.0 - xncal[detID]/e[detID];
-        }
-      }**/
-   
       
       //======= Scale xcal from (0,1)      
       xcal[detID] = (xcal[detID]-0.5)/xScale[detID] + 0.5; /// if include this scale, need to also inclused in Cali_littleTree
@@ -792,11 +766,10 @@ Bool_t Monitors::Process(Long64_t entry)
       //=================== Recoil Gate
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
         for(int i = 0 ; i < numCut1 ; i++ ){
-          cutG = (TCutG *)cutList1->At(i) ;
-          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
-      //                 if(cutG->IsInside(rdt[2*i] + rdt[2*i+1],rdt[2*i+1])) {
+            cutG = (TCutG *)cutList1->At(i) ;
+            if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+            // if(cutG->IsInside(rdt[2*i] + rdt[2*i+1],rdt[2*i+1])) {
 
-          //if(cutG->IsInside(rdt[2*i+1],rdt[2*i])) {
             rdtgate1= true;
             break; /// only one is enough
           }
@@ -805,7 +778,7 @@ Bool_t Monitors::Process(Long64_t entry)
         for(int i = 0 ; i < numCut2 ; i++ ){
           cutG = (TCutG *)cutList2->At(i) ;
           if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
-//                       if(cutG->IsInside(rdt[2*i]+ rdt[2*i+1],rdt[2*i+1])) {
+          //if(cutG->IsInside(rdt[2*i]+ rdt[2*i+1],rdt[2*i+1])) {
 
             rdtgate2= true;
             break; /// only one is enough
@@ -824,7 +797,7 @@ Bool_t Monitors::Process(Long64_t entry)
    
           int tdiff = rdt_t[j] - e_t[detID];
    
-          if( j==1 || j==3 || j==5 || j==7) {
+          if( j%2 == 1) {
              hrtac[j/2]->Fill(detID,tdiff);
              htdiff->Fill(tdiff);
              htacTdiff->Fill( tac[0], tdiff);
@@ -839,12 +812,10 @@ Bool_t Monitors::Process(Long64_t entry)
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
             if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
-            //if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]);
+            ///if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]); /// x=dE, y=E
             hArrayRDTMatrixG->Fill(detID, j); 
-            //if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
+            ///if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
             
-            //Aux for h081
-            hrdtg[j+1]->Fill(rdt[j+1]);
             hrdtg[j]->Fill(rdt[j]);
             coinFlag = true;
             
@@ -889,12 +860,11 @@ Bool_t Monitors::Process(Long64_t entry)
     }
     
    /*********** RECOILS ***********************************************/    
-   
-   for( int i = 0; i < 8 ; i++){
+   for( int i = 0; i < NRDT ; i++){
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
       
-      for( int j = 0; j < 8 ; j++){
+      for( int j = 0; j < NRDT ; j++){
          if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
       }
       
@@ -911,18 +881,15 @@ Bool_t Monitors::Process(Long64_t entry)
       }
    }
    
+   /*********** Apollo ***********************************************/    
    
-   
-      /*********** Apollo ***********************************************/    
-   
-   for( int i = 0; i <20 ; i++){
-      hApollo[i]->Fill(-tac[i]);
-   
+   for( int i = 0; i < NAPOLLO ; i++){
+      hApollo[i]->Fill(apollo[i]);
    }
    
    ///if( rdt_t[4] > 0 ){
-   ///   if( abs(rdt[4] - 1658) < 40) hrdt14N->Fill(rdt_t[4]/1e8/60.);
-   ///   if( abs(rdt[4] - 1783) < 40) hrdt14C->Fill(rdt_t[4]/1e8/60.);
+   ///   if( abs(rdt[4] - 1658) < 40) hrdtRate1->Fill(rdt_t[4]/1e8/60.);
+   ///   if( abs(rdt[4] - 1783) < 40) hrdtRate2->Fill(rdt_t[4]/1e8/60.);
    ///}
 
    /******************* Circular Recoil *******************************/
@@ -944,7 +911,7 @@ Bool_t Monitors::Process(Long64_t entry)
    }
    
    /******************* Multi-hit *************************************/
-   ///hmultEZ->Fill(multiEZ);
+   hmultEZ->Fill(multiEZ);
    hmult->Fill(recoilMulti,arrayMulti);
 
 
@@ -1017,7 +984,6 @@ Bool_t Monitors::Process(Long64_t entry)
        Ex = TMath::QuietNaN();
        thetaCM = TMath::QuietNaN();
      }
-     //ungated excitation energy
      
      htacEx->Fill(tac[2], Ex);
      htac2Ex->Fill(tac_t[1]-e_t[detID], Ex);
@@ -1040,11 +1006,6 @@ Bool_t Monitors::Process(Long64_t entry)
          hExi[detID]->Fill(Ex);
          hExVxCal[detID]->Fill(xcal[detID], Ex);
          hExc[detID%numCol]->Fill(Ex);
-
-         /// h081, Ex gated Recoil
-         if( ExGate[0] < Ex && Ex < ExGate[1] ){
-            hrdtExGated->Fill(rdt[0]+rdt[1],rdt[1]);
-         }
          
       }
    }
@@ -1090,7 +1051,7 @@ void Monitors::Terminate()
    double Sp = hRecoil.CalSp(1,0);
    double Sa = hRecoil.CalSp2(4,2);
    
-   //TODO, Module each block.
+   //TODO, Module each plot
    ///----------------------------------- Canvas - 1
    PlotEZ(1); /// raw EZ
       
@@ -1102,8 +1063,6 @@ void Monitors::Terminate()
    
    ///----------------------------------- Canvas - 4
    padID++; cCanvas->cd(padID); 
-   
-   //cCanvas->cd(padID)->SetLogy();
    
    //hEx->Draw();
    hExCut1->Draw("");
@@ -1169,7 +1128,7 @@ void Monitors::Terminate()
    ///----------------------------------- Canvas - 10
    //PlotRDT(3,0);
    
-   //helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
+   //TH1F * helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
    //helumDBIC = (TH1F*) helum4D->Clone();
    //helumDBIC->SetTitle("elum(d)/BIC; time [min]; count/min");
    //helumDBIC->SetName("helumDBIC");
@@ -1210,8 +1169,8 @@ void Monitors::Terminate()
    ///----------------------------------- Canvas - 14
    padID++; cCanvas->cd(padID);
    
-   ///hrdt14N->Draw("");
-   ///hrdt14C->Draw("same");
+   ///hrdtRate1->Draw("");
+   ///hrdtRate2->Draw("same");
    
    ///----------------------------------- Canvas - 15
    padID++; cCanvas->cd(padID);  

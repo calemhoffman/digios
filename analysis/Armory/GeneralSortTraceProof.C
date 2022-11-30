@@ -9,7 +9,7 @@
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 2; //0 = no process; 1 = fit; 2 = trapezoid
+int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
 float delayChannel = 100.; //initial guess of the time
 
 // Also go to line 146 to set the trace analysis gate
@@ -68,6 +68,7 @@ bool isRecoil = true;
 bool isElum   = true;
 bool isEZero  = true;
 bool isCRDT   = true;
+bool isAPOLLO = true;
 
 TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
    ///Trapezoid filter https://doi.org/10.1016/0168-9002(94)91652-7
@@ -126,17 +127,19 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
    printf( "============  General Sort w/ Trace  ================\n");
    printf( "=====================================================\n");
    
-   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
-   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
-   if ( isElum   && NELUM  == 0 ) isElum   = false ;
-   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
-   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+   if ( isTACRF  && NTAC    == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT    == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM   == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO  == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT   == 0 ) isCRDT   = false ;
+   if ( isCRDT   && NAPOLLO == 0 ) isAPOLLO = false ;
    
    printf( "  TAC/RF   : %s , %d \n", isTACRF  ? "On" : "Off", NTAC);
    printf( "  Recoil   : %s , %d \n", isRecoil ? "On" : "Off", NRDT);
    printf( "  Elum     : %s , %d \n", isElum   ? "On" : "Off", NELUM);
    printf( "  EZero    : %s , %d \n", isEZero  ? "On" : "Off", NEZERO);
    printf( "  C-Recoil : %s , %d \n", isCRDT   ? "On" : "Off", NCRDT);
+   printf( "  APOLLO   : %s , %d \n", isAPOLLO ? "On" : "Off", NAPOLLO);
    TString traceMethodName;
    switch(traceMethod){
    case 0: traceMethodName = "copy"; break;
@@ -162,15 +165,17 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/)
        if(((i+1)/10)/4+1 < 5) printf("%11s|", Form("VME%d-Dig%d", ((i+1)/10)/4+1, ((i+1)/10)%4+1)); 
     }
     if( 100 + NRDT >= idDetMap[i] && idDetMap[i] >= 100){
-      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Recoil, Cyan
+      printf("\033[36m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Recoil, Cyan
     }else if( 200+NELUM >= idDetMap[i] && idDetMap[i] >= 200){
-      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Elum, 
+      printf("\033[91m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Elum, 
     }else if( 300+NEZERO >= idDetMap[i] && idDetMap[i] >= 300){
-      printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // EZERO, 
+      printf("\033[35m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// EZERO, 
     }else if( 400+NTAC >= idDetMap[i] && idDetMap[i] >= 400){
-      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // TAC,
+      printf("\033[93m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// TAC,
     }else if( 500+NCRDT >= idDetMap[i] && idDetMap[i] >= 500){
-      printf("\033[100m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); // Circular Recoil
+      printf("\033[100m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// Circular Recoil
+    }else if( 600+NAPOLLO >= idDetMap[i] && idDetMap[i] >= 600){
+      printf("\033[32m%3d(%2d)\033[0m|", idDetMap[i], idKindMap[i]); /// APOLLO
     }else if(  NARRAY > idDetMap[i] && idDetMap[i] >= 0){    
       switch (idKindMap[i]) {
          case -1: printf("%7s|", ""); break;
@@ -205,11 +210,12 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    printf("========================= Slave Begin.\n");   
    TString option = GetOption();
 
-   if ( isTACRF  && NTAC   == 0 ) isTACRF  = false ;
-   if ( isRecoil && NRDT   == 0 ) isRecoil = false ;
-   if ( isElum   && NELUM  == 0 ) isElum   = false ;
-   if ( isEZero  && NEZERO == 0 ) isEZero  = false ;
-   if ( isCRDT   && NCRDT  == 0 ) isCRDT   = false ;
+   if ( isTACRF  && NTAC    == 0 ) isTACRF  = false ;
+   if ( isRecoil && NRDT    == 0 ) isRecoil = false ;
+   if ( isElum   && NELUM   == 0 ) isElum   = false ;
+   if ( isEZero  && NEZERO  == 0 ) isEZero  = false ;
+   if ( isCRDT   && NCRDT   == 0 ) isCRDT   = false ;
+   if ( isAPOLLO && NAPOLLO == 0 ) isAPOLLO = false ;
 
    //create tree in slave
    
@@ -273,6 +279,13 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       printf(" -----  no crdt.\n"); 
    }
    
+   if( isAPOLLO ){
+      newTree->Branch("apollo"  ,psd.APOLLO,         Form("APOLLO[%d]/F", NAPOLLO));
+      newTree->Branch("apollo_t",psd.APOLLOTimestamp,Form("APOLLOTimestamp[%d]/l", NAPOLLO)); 
+   }else{
+      printf(" -----  no crdt.\n"); 
+   }
+   
    if( isTraceON ){
       arr = new TClonesArray("TGraph");
          
@@ -289,7 +302,6 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       
       if( traceMethod > 0 ){
          gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
-         gFit2 = new TF1("gFit2", fitFunc2, fitRange[0], fitRange[1], numPara2);
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
@@ -331,36 +343,47 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    //if( NumHits < 4 ) return kTRUE; // e, xn, xf, tac, etc
 
 /**////======================================= Zero struct
-   for (Int_t i=0 ; i< NARRAY; i++) { 
-      psd.Energy[i]  = TMath::QuietNaN();
-      psd.XF[i]      = TMath::QuietNaN();
-      psd.XN[i]      = TMath::QuietNaN();
-      psd.Ring[i]    = 0.0;
+   for (Int_t i=0; i < NARRAY; i++) {
+      psd.Energy[i]=TMath::QuietNaN();
+      psd.XF[i]=TMath::QuietNaN();
+      psd.XN[i]=TMath::QuietNaN();
+      psd.x[i]=TMath::QuietNaN();
+      psd.Ring[i]=0.;
       
       psd.EnergyTimestamp[i] = 0;
-      psd.XFTimestamp[i]     = 0;
-      psd.XNTimestamp[i]     = 0;
+      psd.XFTimestamp[i]     = 0; 
+      psd.XNTimestamp[i]     = 0; 
       psd.RingTimestamp[i]   = 0;
-      
-      psd.x[i]       = TMath::QuietNaN();    
-   
-      if ( i < NRDT ){
-         psd.RDT[i]     = TMath::QuietNaN();
-         psd.RDTTimestamp[i]    = 0;
-      }
-      if ( i < NTAC ){
-         psd.TAC[i]     = TMath::QuietNaN();
-         psd.TACTimestamp[i]    = 0;
-      }
-      if ( i < NELUM ) {
-         psd.ELUM[i] = TMath::QuietNaN();
-         psd.ELUMTimestamp[i]   = 0;
-      }
-      if ( i < NEZERO ) {
-         psd.EZERO[i] = TMath::QuietNaN();
-         psd.EZEROTimestamp[i]  = 0;
-      }
-      
+   }
+    
+   for (Int_t i=0; i < NRDT; i++) {
+      psd.RDT[i]=TMath::QuietNaN();
+      psd.RDTTimestamp[i]	 = 0; 
+   }
+    
+   for (Int_t i=0; i < NTAC; i++) {
+      psd.TAC[i]=TMath::QuietNaN();
+      psd.TACTimestamp[i]	 = 0; 
+   }
+    
+   for (Int_t i=0; i < NELUM; i++) {
+      psd.ELUM[i]=TMath::QuietNaN();
+      psd.ELUMTimestamp[i] = 0;
+   }
+    
+   for (Int_t i=0; i < NEZERO; i++) {
+      psd.EZERO[i]=TMath::QuietNaN();
+      psd.EZEROTimestamp[i]= 0;
+   }
+    
+   for (Int_t i=0; i < NCRDT; i++) {
+      psd.CRDT[i]=TMath::QuietNaN();
+      psd.CRDTTimestamp[i]= 0;
+   }
+    
+   for (Int_t i=0; i < NAPOLLO; i++) {    
+      psd.APOLLO[i]=TMath::QuietNaN();
+      psd.APOLLOTimestamp[i]= 0;
    }
    
    if( isTraceON ){
@@ -454,7 +477,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       /************************************************************************/
       if( isElum && 200 <= idDet && idDet <= 200 + NELUM ) {
          Int_t elumTemp = idDet - 200;
-         psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+         psd.ELUM[elumTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_ELUM;
          psd.ELUMTimestamp[elumTemp] = event_timestamp[i];
       }
 
@@ -462,7 +485,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       /************************************************************************/
       if( isEZero &&  300 <= idDet && idDet < 300 + NEZERO ) {
          Int_t ezeroTemp = idDet - 300;
-         psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+         psd.EZERO[ezeroTemp] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_EZERO;
          psd.EZEROTimestamp[ezeroTemp] = event_timestamp[i];
       }
 
@@ -478,13 +501,21 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       /************************************************************************/
       if( isCRDT && 500 <= idDet && idDet < 500 + NCRDT ) {
         Int_t crdtID = idDet - 500;
-        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN ;
+        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_CRDT;
         psd.CRDTTimestamp[crdtID] = event_timestamp[i];
+      }
+      
+      ///APOLLO
+      /************************************************************************/
+      if ( NAPOLLO > 0 && idDet >= 600 && idDet <= 600 + NAPOLLO ) {
+        Int_t apolloID = idDet - 600;
+        psd.APOLLO[apolloID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_APOLLO;
+        psd.APOLLOTimestamp[apolloID] = event_timestamp[i];
       }
 
    }///end of NumHits
    
-   for(int i = 0 ; i < 24; i++){
+   for(int i = 0 ; i < NARRAY; i++){
       psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
    }
    
@@ -501,15 +532,18 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          idKind = idKindMap[idTemp];
          
          ///bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
-         bool isPSD = (NARRAY > idDet && idDet >= 0);
-         bool isRDT  = (NRDT + 100 > idDet && idDet >= 100 );
+         bool isPSD    = (NARRAY > idDet && idDet >= 0);
+         bool isRDT    = (NRDT + 100 > idDet && idDet >= 100 );
          bool isezero  = (NEZERO + 300 > idDet && idDet >= 300 );
-         bool iselum  = (NELUM + 200 > idDet && idDet >= 200 );
-         bool iscrdt  = (NCRDT + 500 > idDet && idDet >= 500 );
+         bool iselum   = (NELUM + 200 > idDet && idDet >= 200 );
+         bool iscrdt   = (NCRDT + 500 > idDet && idDet >= 500 );
+         bool isapollo = (NAPOLLO + 600 > idDet && idDet >= 600 );
 
          //================ Set Gate
          ///if( !isPSD && !isRDT && !isezero) continue;
-         ///if( !isPSD && !isRDT) continue;         
+         ///if( !isPSD && !isRDT) continue; 
+         
+         if( isapollo) continue; /// becasue APOLLO trace branch is not set
 
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
@@ -523,17 +557,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          
          delayChannel = 100;
          
-         //if( isRDT ) {
-         //   delayChannel = 300;
-         //}
          ///==================  Set gTrace
-
          if( traceMethod == 0 ){
             for ( long long int j = 0 ; j < traceLength; j++){
                gTrace->SetPoint(j, j, trace[i][j]);
             }
          }
-         
+
          ///=================== regulate the trace
          double base = 0;
          if ( traceMethod >= 1 ){
@@ -585,33 +615,6 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               
-               /// if bad fit, fit gfit2
-               //if( gFit->GetChisquare()/gFit->GetNDF() > 10 ){
-               //   
-               //   gFit2->SetParameter(0, gFit->GetParameter(0)); /// energy
-               //   gFit2->SetParameter(1, gFit->GetParameter(1)); /// time
-               //   gFit2->SetParameter(2, gFit->GetParameter(2)); /// riseTime
-               //   gFit2->SetParameter(3, gFit->GetParameter(3)); /// baseline
-               //   gFit2->SetParameter(4, gFit->GetParameter(4));
-               //   gFit2->SetParameter(5, gFit->GetParameter(5)); /// pre_rise_slop
-               //   gFit2->SetParameter(6, 100);
-               //   gFit2->SetParameter(7, 150);
-               //   gFit2->SetParameter(8, 100); 
-               //   gFit2->SetParameter(9, 200);
-               //
-               //   gFit2->FixParameter(1, gFit->GetParameter(1));
-               //   gFit2->FixParameter(3, gFit->GetParameter(3));
-               //   gFit2->FixParameter(5, gFit->GetParameter(5));
-               //   
-               //   gFit2->SetParLimits(2, 7 ,10);
-               //   gFit2->SetParLimits(8, 7 ,10);
-               //   gFit2->SetParLimits(7, gFit->GetParameter(1) +10 ,fitRange[1]);
-               //   
-               //   gTrace->Fit("gFit2", "QR", "", fitRange[0], fitRange[1]);
-               //}
-               
-               
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
