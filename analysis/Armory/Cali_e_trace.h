@@ -160,8 +160,6 @@ public :
    DetGeo detGeo;
    
    int numDet;
-   int iDet; // number of detector at different position
-   int jDet; // number of detector at same position
    vector<double> pos;
    double Bfield;
    double perpDist;
@@ -389,7 +387,6 @@ void Cali_e_trace::Init(TTree *tree)
       perpDist = detGeo.detPerpDist;
       firstPos = detGeo.firstPos;
       length = detGeo.detLength;
-      jDet = detGeo.mDet;
       pos = detGeo.detPos;
       
       printf("... done.\n");
@@ -398,7 +395,7 @@ void Cali_e_trace::Init(TTree *tree)
       Terminate();
    }
 
-   numDet = iDet * jDet;
+   numDet = detGeo.nDet * detGeo.mDet;
 
    //========================================= xf = xn correction
    printf("loading xf-xn correction.");
@@ -474,7 +471,7 @@ void Cali_e_trace::Init(TTree *tree)
    }
    file.close();
    
-      printf(" loading e correction second.");
+      printf("loading e correction second.");
    file.open("correction_e2.dat");
    if( file.is_open() ){
       double a, b;
@@ -486,10 +483,10 @@ void Cali_e_trace::Init(TTree *tree)
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
-      printf(".............. done.\n");
+      printf("................ done.\n");
       
    }else{
-      printf(".............. fail.\n");
+      printf("................ fail.\n");
       for( int i = 0; i < numDet ; i++){
          eCorr2[i][0] = 1.;
          eCorr2[i][1] = 0.;

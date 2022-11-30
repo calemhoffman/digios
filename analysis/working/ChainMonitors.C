@@ -22,9 +22,20 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
      
      //chain->Add("../root_data/trace_run024.root"); // slit out
      
-     
-     chain->Add("../root_data/trace_run026.root"); // good run
+     chain->Add("../root_data/trace_run026.root"); // good run ********** 180 torr
      chain->Add("../root_data/trace_run02[8-9].root"); // good run
+     chain->Add("../root_data/trace_run03[0-3].root"); // good run     
+     chain->Add("../root_data/trace_run033.root"); // good run
+     
+     //chain->Add("../root_data/trace_run034.root"); // good run **** 225 torr
+     
+     //chain->Add("../root_data/trace_run03[5-9].root"); // good run **** 204 torr
+     //chain->Add("../root_data/trace_run04[0-1].root"); // good run **** 204 torr
+     //run 42 is 11 GB of garbage
+     //chain->Add("../root_data/trace_run04[3-5].root"); // good run **** 204 torr 
+     //chain->Add("../root_data/trace_run04[8-9].root"); // good run **** 204 torr 100ug /cm2
+     //chain->Add("../root_data/trace_run05[0-9].root"); // good run **** 204 torr 100ug /cm2
+     chain->Add("../root_data/gen_run053.root"); // alpha run with source at 30 cm 
   
     ///********** end Marker for AutoCalibration.
     

@@ -30,7 +30,9 @@ double fitFunc(double * x, double * par){
    
    if( x[0] < par[1] ) return  par[3] + par[5] * (x[0]-par[1]);
    
-   return par[3] + par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[2]) ) * TMath::Exp(- (x[0] - par[1]) / par[4]);
+  return par[3] + par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[2]) ) * TMath::Exp(- (x[0] - par[1]) / par[4]);
+  // return par[3] + par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[4]) ) - TMath::Exp(- (x[0] - par[1]) / par[2]); // Gemma testing
+  // https://doi.org/10.1140/epja/i2019-12684-7
 }
 
 
@@ -51,10 +53,10 @@ double fitFunc2(double * x, double * par){
    if( x[0] < par[1] ) return  par[3] + par[5] * (x[0]-par[1]);
    
    double pulse1 = par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[2]) ) * TMath::Exp(- (x[0] - par[1]) / par[4]);
-   
+   //double pulse1 = par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[4]) ) - TMath::Exp(- (x[0] - par[1]) / par[2]); // Gemma
    double pulse2 = 0 ;
    if( x[0] > par[7] ) pulse2 = par[6] * (1 - TMath::Exp(- (x[0] - par[7]) / par[8]) ) * TMath::Exp(- (x[0] - par[7]) / par[9]);
-   
+   //if( x[0] > par[7] ) pulse2 = par[6] * (1 - TMath::Exp(- (x[0] - par[7]) / par[9]) ) - TMath::Exp(- (x[0] - par[7]) / par[8]); // Gemma
    return par[3] + pulse1 + pulse2;
 }
 //===================================================
@@ -74,12 +76,11 @@ TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
 
    int baseLineEnd = 80;
    
-   int riseTime = 10; //ch
+   int riseTime = 20; //ch
    int flatTop = 20;
-   float decayTime = 2000;
+   float decayTime = 300;
    
    TGraph *  trapezoid = new TGraph();
-   //TH1F *  trapezoid = new TH1F("hTrap", "hTrap", fitRange[1] - fitRange[0], fitRange[0], fitRange[1]);
    trapezoid->Clear();
    
    ///find baseline;
@@ -314,7 +315,7 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
             newTree->Branch("tcrdt_t", tcrdt_t,  Form("Trace_CRDT_Time[%d]/l", NCRDT)); 
             newTree->Branch("tcrdt_r", tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/l", NCRDT)); 
          }
-
+         
       }
    }
   
@@ -657,48 +658,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             gTrapezoid  = (TGraph*) arr->ConstructedAt(countTrace);
             gTrapezoid->Clear();
+            
             gTrapezoid = TrapezoidFilter(gTrace);
-
-            int len = gTrapezoid->GetN();
-
-            TH1F h1 ("h1", "h1", len, 0, len);
-            for( int i =0 ; i < len; i++){
-               h1.Fill( gTrapezoid->GetPointX(i)-0.5, gTrapezoid->GetPointY(i));
-            }
-
-            TSpectrum peak(10);
-
-            int nPeaksRaw = peak.Search(&h1, 4, "", 0.4);
             
-            double * xpos = peak.GetPositionX();
-            double * ypos = peak.GetPositionY();
             
-            int inX[nPeaksRaw];
-            TMath::Sort(nPeaksRaw, xpos, &inX[0], 0);
-            
-            double xxx = 0, yyy = 0;
-            
-            for( int k = 0; k < nPeaksRaw; k++){
-               if( 280 < xpos[inX[k]] && xpos[inX[k]] < 340  ) {
-                  xxx = xpos[inX[k]];
-                  yyy = ypos[inX[k]];
-                  break;
-               }
-            }
-            
-            if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = yyy;
-               te_t[idDet] = xxx - 30;
-               te_r[idDet] = 0;
-            }
-            
-            if( NRDT + 100 > idDet && idDet >= 100 ) {
-               int rdtTemp = idDet-100;
-               trdt[rdtTemp]   = yyy;
-               trdt_t[rdtTemp] = xxx - 30;
-               trdt_r[rdtTemp] = 0;
-            }
-
          }
          
       } /// End NumHits Loop
