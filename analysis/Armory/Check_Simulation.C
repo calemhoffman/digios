@@ -46,7 +46,7 @@ enum plotID { pEZ,               /// 0
               pElum1RThetaCM,    /// 16
               pEmpty };          /// 17
 plotID StringToPlotID(TString str);
-void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
+void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500, bool outputCanvas = false){
 
   printf("=========================== Check_Simulation.C\n");
   
@@ -249,7 +249,6 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
    printf("gate : %s\n", gate.Data());
    printf("====================================\n");
 
-      
    Int_t size[2] = {padSize,padSize}; ///x,y, single Canvas size
    TCanvas * cCheck = new TCanvas("cCheck", "Check For Simulation", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
@@ -520,6 +519,15 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
    cCheck->Modified();
    cCheck->Update();
    
+   if( outputCanvas ){
+      TDatime dateTime;
+      TString outPNGName = Form("Sim_%d%02d%02d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
+      
+      cCheck->SaveAs(outPNGName);
+      
+      gROOT->ProcessLine(".q");
+      
+   }
 }
 
 ///============================================================
