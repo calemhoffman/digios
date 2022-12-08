@@ -9,6 +9,7 @@
 #include <TF1.h>
 #include <TArc.h>
 #include <TMath.h>
+#include <TLine.h>
 #include <TSpectrum.h>
 #include <TGraph.h>
 #include <TLegend.h>

@@ -39,6 +39,7 @@ analysis/Cleopatra/InFileCreator
 analysis/Cleopatra/PlotTGraphTObjArray
 analysis/Cleopatra/Transfer
 analysis/Cleopatra/Isotope
+analysis/Cleopatra/PlotSimulation
 analysis/Woods-Saxon/WSCal
 analysis/Woods-Saxon/WSFit
 analysis/Woods-Saxon/WSCompare
