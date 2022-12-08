@@ -25,14 +25,16 @@ int main (int argc, char *argv[]) {
   printf("=================================================================\n");
   
   if(argc == 2 || argc > 7) { 
-    printf("Usage: ./Transfer [1] [2] [3] [4] [5] [6]\n");
+    printf("Usage: ./Transfer [1] [2] [3] [4] [5] [6] [7]\n");
     printf("       default file name \n");
-    printf("   [1] reactionConfig.txt (intput) reaction Setting \n");
-    printf("   [2] detectorGeo.txt    (intput) detector Setting \n");
-    printf("   [3] Ex.txt             (intput) Excitation energies \n");
-    printf("   [4] DWBA.root          (intput) thetaCM distribution from DWBA \n");
-    printf("   [5] transfer.root      (output) rootFile name for output \n");
-    printf("   [6] reaction.dat       (output) Key reaction parameters \n");
+    printf("   [1] reactionConfig.txt (input) reaction Setting \n");
+    printf("   [2] detectorGeo.txt    (input) detector Setting \n");
+    printf("   [3] Ex.txt             (input) Excitation energies \n");
+    printf("   [4] output png         (input) will it output a png file [1/0] \n");
+    printf("   [5] DWBA.root          (input) thetaCM distribution from DWBA \n");
+    printf("   [6] transfer.root      (output) rootFile name for output \n");
+    printf("   [7] reaction.dat       (output) Key reaction parameters \n");
+
     printf("------------------------------------------------------\n");
     return 0 ; 
   }
@@ -43,13 +45,17 @@ int main (int argc, char *argv[]) {
   TString      ptolemyRoot = "DWBA.root"; // when no file, use isotropic distribution of thetaCM
   TString     saveFileName = "transfer.root";
   TString         filename = "reaction.dat"; //when no file, no output
+  bool           outputPNG = false;
    
   if( argc >= 2) basicConfig = argv[1];  
   if( argc >= 3) heliosDetGeoFile = argv[2];  
   if( argc >= 4) excitationFile = argv[3];  
-  if( argc >= 5) ptolemyRoot = argv[4];
-  if( argc >= 6) saveFileName = argv[5];
-  if( argc >= 7) filename = argv[6];
+  if( argc >= 5) outputPNG = atoi(argv[4]);
+  if( argc >= 6) ptolemyRoot = argv[5];
+  if( argc >= 7) saveFileName = argv[6];
+  if( argc >= 8) filename = argv[7];
+  
+  printf("=============== output PNG : %d \n", outputPNG);
   
   Transfer( basicConfig, heliosDetGeoFile, excitationFile, ptolemyRoot, saveFileName,  filename);
 
@@ -57,10 +63,13 @@ int main (int argc, char *argv[]) {
   ifstream file_in;
   file_in.open("../Armory/Check_Simulation.C", ios::in);
   if( file_in){
-    
     printf("---- running ../Armory/Check_Simulation.C on %s \n", saveFileName.Data());
     TString cmd;
-    cmd.Form("root -l '../Armory/Check_Simulation.C(\"%s\")'", saveFileName.Data());
+    if ( outputPNG ){
+      cmd.Form("root -l '../Armory/Check_Simulation.C(\"%s\", 500, true)'", saveFileName.Data());
+    }else{
+      cmd.Form("root -l '../Armory/Check_Simulation.C(\"%s\", 500)'", saveFileName.Data());
+    }
     
     system(cmd.Data());
   }else{
