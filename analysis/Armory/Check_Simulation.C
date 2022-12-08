@@ -525,6 +525,7 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500, b
       TString outPNGName = Form("Sim_%d%02d%02d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
       
       cCheck->SaveAs(outPNGName);
+      printf("%s\n", outPNGName.Data());
       
       gROOT->ProcessLine(".q");
       
