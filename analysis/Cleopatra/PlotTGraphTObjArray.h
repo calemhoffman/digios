@@ -26,7 +26,7 @@
 #include <TH1F.h>
 #include <TLegend.h>
 
-void PlotTGraphTObjArray(TString rootFileName){
+void PlotTGraphTObjArray(TString rootFileName, bool isSavePNG = false){
   
   TFile * file = new TFile(rootFileName, "READ");
   
@@ -84,5 +84,15 @@ void PlotTGraphTObjArray(TString rootFileName){
   
   cPlots->Update();
   cPlots->Draw();
+
+  if( isSavePNG ){
+    TDatime dateTime;
+    TString outPNGName = Form("Xsec_%d%02d%02d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
+      
+    cPlots->SaveAs(outPNGName);
+    printf("%s\n", outPNGName.Data());
+      
+    gROOT->ProcessLine(".q");
+  }
   
 }
