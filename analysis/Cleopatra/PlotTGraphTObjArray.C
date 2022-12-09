@@ -29,8 +29,9 @@ int main (int argc, char *argv[]) {
   printf("==================== Plot Results in ROOT =======================\n");
   printf("=================================================================\n");
 
-  if(argc != 2) { 
-    printf("Usage: ./PlotTGraphTObjArray root_file\n");
+  if(argc < 2) { 
+    printf("Usage: ./PlotTGraphTObjArray root_file [savePNG]\n");
+    printf("   savePNG : 1 or 0, default is 0\n");
     exit(0); 
   }else{
     printf("From file : %s \n", argv[1]);
@@ -38,13 +39,20 @@ int main (int argc, char *argv[]) {
   }
   
   string readFile = argv[1];
-  
-  TApplication app ("app", &argc, argv);
+  bool isSavePNG = false;
+  if( argc >= 3) isSavePNG = atoi(argv[2]);
 
-  PlotTGraphTObjArray(readFile);
+  if( isSavePNG ){
+    
+    PlotTGraphTObjArray(readFile, true);
+    
+  }else{
+    TApplication app ("app", &argc, argv);
+
+    PlotTGraphTObjArray(readFile);
   
-  app.Run(); //anything after this line is not running
-  
+    app.Run(); //anything after this line is not running
+  }
   return 0;
 
 } 

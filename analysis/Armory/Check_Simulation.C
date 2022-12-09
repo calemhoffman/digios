@@ -47,11 +47,14 @@ enum plotID { pEZ,               /// 0
               pElum1RThetaCM,    /// 16
               pEmpty };          /// 17
 plotID StringToPlotID(TString str);
-void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500, bool outputCanvas = false){
+void Check_Simulation(TString filename = "transfer.root",
+                      TString configFile = "../Armory/Check_Simulation_Config.txt",
+                      Int_t padSize = 500,
+                      bool outputCanvas = false){
 
   printf("=========================== Check_Simulation.C\n");
   
-  TMacro * config = new TMacro("../Armory/Check_Simulation_Config.txt");
+  TMacro * config = new TMacro(configFile);
   int numLine = config->GetListOfLines()->GetSize();
   int startLineNum = 0;
   for( int i = 0; i < numLine ; i++){
