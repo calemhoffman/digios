@@ -1,6 +1,6 @@
 CC=g++
 
-all: Isotope InFileCreator ExtractXSec ExtractXSecFromText PlotTGraphTObjArray FindThetaCM Transfer PlotSimulation
+all: Isotope InFileCreator ExtractXSec ExtractXSecFromText PlotTGraphTObjArray FindThetaCM Transfer PlotSimulation IsotopeShort
 
 #Cleopatra: Cleopatra.C ../Simulation/Isotope.h ../Simulation/constant.h potentials.h InFileCreator.h ExtractXSec.h PlotTGraphTObjArray.h
 #	$(CC) Cleopatra.C -o Cleopatra `root-config --cflags --glibs`
@@ -28,3 +28,6 @@ PlotSimulation: PlotSimulation.C ../Armory/Check_Simulation.C
 
 Isotope: ../Cleopatra/Isotope.h ../Cleopatra/Isotope.C
 	$(CC) Isotope.C -o Isotope
+	
+IsotopeShort: ../Cleopatra/Isotope.h ../Cleopatra/IsotopeShort.C
+	$(CC) IsotopeShort.C -o IsotopeShort
