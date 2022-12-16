@@ -11,7 +11,24 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
+     //chain->Add("../root_data/gen_run00[7-9].root"); // with attenuator on dE channel, 116 ug target
+     //chain->Add("../root_data/gen_run011.root"); // with no attenuator on dE channel, 116 ug target
+     //chain->Add("../root_data/gen_run01[2-3].root"); // with no attenuator on dE channel, 56 ug target
+     //chain->Add("../root_data/gen_run01[5-9].root"); // with no attenuator on dE channel, 56 ug target
+     //chain->Add("../root_data/gen_run02[0-9].root"); // with no attenuator on dE channel, 56 ug target
+     //chain->Add("../root_data/gen_run03[0-9].root"); // with no attenuator on dE channel, 56 ug target
+     //chain->Add("../root_data/gen_run04[0-1].root"); // with no attenuator on dE channel, 56 ug target
+     
+     chain->Add("../root_data/trace_run01[2-3].root"); // with no attenuator on dE channel, 56 ug target
+     chain->Add("../root_data/trace_run01[5-9].root"); // with no attenuator on dE channel, 56 ug target
+     chain->Add("../root_data/trace_run02[5-9].root"); // with no attenuator on dE channel, 56 ug target
+     chain->Add("../root_data/trace_run03[0-9].root"); // with no attenuator on dE channel, 56 ug target
+     chain->Add("../root_data/trace_run04[0-1].root"); // with no attenuator on dE channel, 56 ug target
+     
+    //chain->Add("../root_data/gen_run045.root"); // alpha run at end of experiment 
+
+
+
      ///chain->Add("../root_data/trace_run135.root");
   
     ///********** end Marker for AutoCalibration.
