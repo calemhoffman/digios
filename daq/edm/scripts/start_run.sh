@@ -97,7 +97,7 @@ slackMsg="RUN=${LastRunNum}.  https://www.phy.anl.gov/elog/${elogName}/${elogID}
 elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
 curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
 
-return
+echo "============== Opening IOC...."
 
 export TERM=vt100
 echo " terminals" 
