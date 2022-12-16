@@ -9,6 +9,7 @@
 #include <TF1.h>
 #include <TArc.h>
 #include <TMath.h>
+#include <TLine.h>
 #include <TSpectrum.h>
 #include <TGraph.h>
 #include <TLegend.h>
@@ -46,11 +47,14 @@ enum plotID { pEZ,               /// 0
               pElum1RThetaCM,    /// 16
               pEmpty };          /// 17
 plotID StringToPlotID(TString str);
-void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
+void Check_Simulation(TString filename = "transfer.root",
+                      TString configFile = "../Armory/Check_Simulation_Config.txt",
+                      Int_t padSize = 500,
+                      bool outputCanvas = false){
 
   printf("=========================== Check_Simulation.C\n");
   
-  TMacro * config = new TMacro("../Armory/Check_Simulation_Config.txt");
+  TMacro * config = new TMacro(configFile);
   int numLine = config->GetListOfLines()->GetSize();
   int startLineNum = 0;
   for( int i = 0; i < numLine ; i++){
@@ -249,7 +253,6 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
    printf("gate : %s\n", gate.Data());
    printf("====================================\n");
 
-      
    Int_t size[2] = {padSize,padSize}; ///x,y, single Canvas size
    TCanvas * cCheck = new TCanvas("cCheck", "Check For Simulation", 0, 0, size[0]*Div[0], size[1]*Div[1]);
    if(cCheck->GetShowEditor() )cCheck->ToggleEditor();
@@ -520,6 +523,16 @@ void Check_Simulation(TString filename = "transfer.root", Int_t padSize = 500){
    cCheck->Modified();
    cCheck->Update();
    
+   if( outputCanvas ){
+      TDatime dateTime;
+      TString outPNGName = Form("Sim_%d%02d%02d_%06d.png", dateTime.GetYear(), dateTime.GetMonth(), dateTime.GetDay(), dateTime.GetTime());
+      
+      cCheck->SaveAs(outPNGName);
+      printf("%s\n", outPNGName.Data());
+      
+      gROOT->ProcessLine(".q");
+      
+   }
 }
 
 ///============================================================
