@@ -5,7 +5,6 @@ if [ $# -ne 2 ] && [ $# -ne 3 ] ; then
     echo "AutoStartStop  size  [kilo-byte_int]  [repeatition_int]"
     echo "****** if no repeatation, or repeatation = 0 or 1 or  < -1, only do once. "
     echo "       if repeatation = -1, infinity"
-    echo "****** 3 min is a special run that change the recoil trigger (Y-trigger) on"
     exit
 fi
 
@@ -36,10 +35,10 @@ if [ $method == "time" ]; then
     echo "   Auto $msg1 for ${stopCount} min, print for ${printTime} min "
     echo "##########################################################"
 
-    if [ $stopCount == 3 ]; then
-	caput VME32:MTRG:SUM_Y on
-	echo "===================== 3 mins recoil trigger run "
-    fi
+    #if [ $stopCount == 3 ]; then
+    #	caput VME32:MTRG:SUM_Y on
+    #	echo "===================== 3 mins recoil trigger run "
+    #fi
 
 elif [ $method == "size" ]; then
     maxSize=$2
@@ -54,15 +53,15 @@ else
 fi
 
 #=========== Check DAQ is saving
-#isDAQSaving=$(caget Online_CS_SaveData | awk '{print $2}')
-#if [ $isDAQSaving == "Save" ]; then
-#    echo -e "\033[33m !!!!!! it seem that the DAQ is saving. Please fix that or call Ryan!!!! \033[m"
-#    exit
-#fi
+isDAQSaving=$(caget Online_CS_SaveData | awk '{print $2}')
+if [ $isDAQSaving == "Save" ]; then
+    echo -e "\033[33m !!!!!! it seem that the DAQ is saving. Please fix that or call Ryan!!!! \033[m"
+    exit
+fi
 
-#if [ $repeat -eq -1 ] ;then
-#    echo -e "\033[1;33m !!!!! infinite runs !!!!! \033[m"
-#fi
+if [ $repeat -eq -1 ] ;then
+    echo -e "\033[1;33m !!!!! infinite runs !!!!! \033[m"
+fi
 
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -90,14 +89,9 @@ if [ $isStarted == "Stop" ]; then
     cd ${datalocation}
     
     echo "===================== Auto-Start-Stop script"
-
-    if [ $stopCount == 3 ]; then
-	COMMENT="beam check"
-#    else
-#	echo "Crtl+C to cancel with no harm"
-#	echo "Please type Single-line comment:"
-#	read -p '>>' COMMENT
-    fi
+    echo "Crtl+C to cancel with no harm"
+    echo "Please type Single-line comment:"
+    read -p '>>' COMMENT
 
     source ${HELIOSSYS}/daq/edm/scripts/start_run.sh "Auto Start for $repeat times, $stopCount min each. ${COMMENT}"
     stopFlag=0
@@ -151,10 +145,6 @@ while [  $stopFlag -eq 0 ]; do
 	    xterm -T AutoProcess -e "ssh heliosdigios@192.168.1.164 /Users/heliosdigios/digios/AutoProcess "${firstRunNum}" "${RUN}" 1" &
 
 	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
-
-#	    if [ $stopCount -eq 3 ]; then
-#		caput VME32:MTRG:SUM_Y off
-#	    fi
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
 		echo "################# wait for 10 sec before next run"
