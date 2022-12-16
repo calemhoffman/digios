@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
+int     rdtDERange[2] = {     0,    6000}; 
+int      rdtERange[2] = {     0,    6000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -44,7 +44,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  50,    -2,     14};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -64,10 +64,10 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {11, 16, 23} ;//{2,  11, 17}
+vector<int> skipDetID = {11} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
-TString rdtCutFile2 = "";
+TString rdtCutFile1 = "";//"rdtTightBe8.root";//"rdtTightN.root";//"rdt4.root"rdtTightBe.root;
+TString rdtCutFile2 = ""; //rdt1.root
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -1031,8 +1031,8 @@ void Monitors::Terminate()
 
    //############################################ User is free to edit this section
    //--- Canvas Size
-   int canvasXY[2] = {1200 , 800} ;// x, y
-   int canvasDiv[2] = {3,2};
+   int canvasXY[2] = {1000 , 1600} ;// x, y
+   int canvasDiv[2] = {2,4};
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
@@ -1075,24 +1075,27 @@ void Monitors::Terminate()
    if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.7, "with recoil gated"); 
 
    ///----------------------------------- Canvas - 5
-   padID++; cCanvas->cd(padID); 
+  PlotRDT(0,0);
+  // padID++; cCanvas->cd(padID); 
+    // Draw2DHist(hrdt2D[0]);
+      //if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
+   //if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
    
    //Draw2DHist(hExThetaCM);
    //heVIDG->Draw();
    //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
-   Draw2DHist(hrdt2D[0]);
+ 
 //      Draw2DHist(hrdt2Dsum[0]);
 
-   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
-   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
+  
 
 
    //helum4D->Draw();
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
    
    ///----------------------------------- Canvas - 6
-   PlotRDT(0,0);
+   PlotRDT(1,0);
    
   // padID++; cCanvas->cd(padID); 
  //  Draw2DHist(hrdtExGated);
@@ -1101,10 +1104,10 @@ void Monitors::Terminate()
    //Draw2DHist(htacEx);
    
    ///------------------------------------- Canvas - 7
-   //PlotRDT(0, 0);
+   PlotRDT(2, 0);
    
    ///----------------------------------- Canvas - 8
-   //PlotRDT(1, 0);
+   PlotRDT(3, 0);
 
    ///yMax = hic2->GetMaximum()*1.2;
    ///hic2->GetYaxis()->SetRangeUser(0, yMax);
@@ -1124,6 +1127,7 @@ void Monitors::Terminate()
    //padID++; cCanvas->cd(padID);  
    
    //Draw2DHist(hic01);
+   //PlotRDT(3,0);
 
    ///----------------------------------- Canvas - 10
    //PlotRDT(3,0);

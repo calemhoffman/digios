@@ -17,13 +17,13 @@
 
 #define NARRAY  24
 #define NRDT    8
-#define NELUM   0
+#define NELUM   16
 #define NEZERO  0
 #define NTAC    0
 #define NCRDT   0
 #define NAPOLLO 0
 
-#define POLARITY_RDT    +1
+#define POLARITY_RDT    -1
 #define POLARITY_ELUM   +1
 #define POLARITY_EZERO  +1
 #define POLARITY_CRDT   +1
@@ -43,17 +43,17 @@ Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,   // 1, VME2-DIG1, array
                          3,   2,   1,   0,   5,   4,   3,   2,  -1,  -1,   // 2, VME2-DIG2, array
                         11,  10,   9,   8,   7,   6,   5,   4,  -1,  -1,   // 3, VME2-DIG3, array
-                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //10, VME2-DIG4
+                        200,  201,  202,  203,  204,  205,  206,  207,  -1,  -1,   //10, VME2-DIG4, ELUM1
                         
                          7,   6,  11,  10,   9,   8,   7,   6,  -1,  -1,   // 4, VME3-DIG1, array
                         15,  14,  13,  12,  11,  10,   9,   8,  -1,  -1,   // 5, VME3-DIG2, array
                         17,  16,  15,  14,  13,  12,  17,  16,  -1,  -1,   // 6, VME3-DIG3, array
-                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //11, VME3-DIG4
+                        208,  209,  210,  211,  212,  213,  214,  215,  -1,  -1,   //11, VME3-DIG4. ELUM2
                         
                         19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
                         21,  20,  19,  18,  23,  22,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
                         23,  22,  21,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
-                       101, 100,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};  //12, VME4-DIG4, IC
+                       100, 101,  102,  103,  104,  105,  106,  107,  -1,  -1};  //12, VME4-DIG4, RECOIL
 
 
 Int_t idKindMap[160] = {-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
