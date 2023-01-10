@@ -302,9 +302,15 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
           fprintf(file_out, "\n");
           fprintf(file_out, "PROJECTILE \n");
           fprintf(file_out, "wavefunction phiffer \n");
-          if( iso_b.A <= 3 ){ 
+          
+          if( iso_a.Z + iso_b.Z == 2){ // (t,d) or (d,t)
+            fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.30 v=172.88 r=0.56 a=0.69 param1=0.64 param2=1.15 rc=2.0\n");
+          }
+
+          if( iso_a.Z + iso_b.Z == 3){ // (3He,d) or (d, 3He)
             fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.31 v=179.94 r=0.54 a=0.68 param1=0.64 param2=1.13 rc=2.0\n");
           }
+          
           if( iso_b.A == 4 ){
             fprintf(file_out, "nodes=0 l=0 jp=1/2 spfacp=1.61 v=202.21 r=.93 a=.66 param1=.81 param2=.87 rc=2.0 $ rc=2 is a quirk\n");
           } 
