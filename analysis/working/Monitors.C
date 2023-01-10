@@ -23,8 +23,12 @@
 #include <vector>
 #include "../Cleopatra/Isotope.h"
 #include "GeneralSortMapping.h"
+#include "TError.h"
+
+
 
 using namespace std;
+
 
 //############################################ User setting
 const int numDet = 24;
@@ -33,11 +37,11 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {     0,    10000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
-int    apolloRange[2] = {     0,    1000};
+int     rdtDERange[2] = {     0,     3500}; 
+int      rdtERange[2] = {     0,     3500};  
+int    apolloRange[2] = {     -10,    1100};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
@@ -46,7 +50,7 @@ int   thetaCMRange[2] = {0, 80};
 
 double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
-int  coinTimeRange[2] = { -200, 200};
+int  coinTimeRange[2] = { -150, 50};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
 
 int  icRange [3] = {1000, 1000, 500}; /// max of IC0,1,2 
@@ -56,7 +60,7 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-60, -20};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -64,7 +68,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {11, 16, 23} ;//{2,  11, 17}
+vector<int> skipDetID = {11} ;//{2,  11, 17}
 
 TString rdtCutFile1 = "";
 TString rdtCutFile2 = "";
@@ -192,7 +196,7 @@ TH1F* hApollo[20];
 
 //======= Recoil
 TH2F* hrdtID;
-TH1F* hrdt[8]; // single recoil
+TH1F* hrdt[20]; // single recoil
 TH1F* hrdtg[8]; 
 
 TH2F* hrdt2D[4];
@@ -249,7 +253,7 @@ Float_t xnCorr[numDet];
 Float_t xfxneCorr[numDet][2];
 Float_t xScale[numDet];
 Float_t eCorr[numDet][2];
-Float_t rdtCorr[8][2];
+Float_t rdtCorr[NRDT][2];
 //==== parameters for Ex and thetaCM calcualtion
 
 double zRange[2] = {-1000, 0}; // zMin, zMax
@@ -268,6 +272,8 @@ TLatex text;
  ***************************/
 void Monitors::Begin(TTree *tree)
 {
+   
+
    TString option = GetOption();
    numCol = numDet/numRow;
    NumEntries = tree->GetEntries();
@@ -430,7 +436,7 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<8;i++) {
+   for (Int_t i=0;i<20;i++) {
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
@@ -491,7 +497,7 @@ void Monitors::Begin(TTree *tree)
    htacTdiff  = new TH2F("htacTdiff", "TDiff vs TAC; TAC [a.u.]; tDiff [ch=10ns]", TACRange[0], TACRange[1], TACRange[2], coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
    htacTdiffg = new TH2F("htacTdiffg", "TDiff vs TAC (recoil gate); TAC [a.u.]; tDiff [ch=10ns]", TACRange[0], TACRange[1], TACRange[2], coinTimeRange[1] - coinTimeRange[0], coinTimeRange[0], coinTimeRange[1]);
 
-   for (Int_t i=0; i < 8; i++){
+   for (Int_t i=0; i < 20; i++){
       htacRecoil[i] = new TH2F(Form("htacRecoil%d", i), Form("RDT-%d - TAC; TAC ; RDT ", i), TACRange[0], TACRange[1] , TACRange[2], 200, 0, 4000);
       
       if( i % 2 == 0 ) {
@@ -662,7 +668,7 @@ Bool_t Monitors::Process(Long64_t entry)
     
     /*********** Apply Recoil correction here *************************/
     
-    for( int i = 0 ; i < 8; i++){
+    for( int i = 0 ; i < NRDT; i++){
        rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
     }
     
@@ -807,16 +813,17 @@ Bool_t Monitors::Process(Long64_t entry)
              }
           }
 
-          hArrayRDTMatrix->Fill(detID, j); 
+          //hArrayRDTMatrix->Fill(detID, j); 
    
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
-            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+           // if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+            //if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
             ///if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]); /// x=dE, y=E
-            hArrayRDTMatrixG->Fill(detID, j); 
+            //hArrayRDTMatrixG->Fill(detID, j); 
             ///if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
             
-            hrdtg[j]->Fill(rdt[j]);
+            //hrdtg[j]->Fill(rdt[j]);
             coinFlag = true;
             
           }
@@ -883,9 +890,9 @@ Bool_t Monitors::Process(Long64_t entry)
    
    /*********** Apollo ***********************************************/    
    
-   for( int i = 0; i < NAPOLLO ; i++){
-      hApollo[i]->Fill(apollo[i]);
-   }
+ //  for( int i = 0; i < NRDT ; i++){
+  //    hApollo[i]->Fill(apollo[i]);
+  // }
    
    ///if( rdt_t[4] > 0 ){
    ///   if( abs(rdt[4] - 1658) < 40) hrdtRate1->Fill(rdt_t[4]/1e8/60.);
@@ -1059,7 +1066,7 @@ void Monitors::Terminate()
    PlotEZ(0); ///gated EZ
 
    ///----------------------------------- Canvas - 3
-   PlotTDiff(1, 1); ///with Gated Tdiff, isLog
+   PlotTDiff(0, 1); ///with Gated Tdiff, isLog
    
    ///----------------------------------- Canvas - 4
    padID++; cCanvas->cd(padID); 
@@ -1075,17 +1082,21 @@ void Monitors::Terminate()
    if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.7, "with recoil gated"); 
 
    ///----------------------------------- Canvas - 5
-   padID++; cCanvas->cd(padID); 
+   
+    padID++; cCanvas->cd(padID); 
+   
+   hEx->Draw();
+  // padID++; cCanvas->cd(padID); 
    
    //Draw2DHist(hExThetaCM);
    //heVIDG->Draw();
    //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
-   Draw2DHist(hrdt2D[0]);
+   //Draw2DHist(hrdt2D[0]);
 //      Draw2DHist(hrdt2Dsum[0]);
 
-   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
-   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
+  // if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
+   //if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
 
 
    //helum4D->Draw();

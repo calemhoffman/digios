@@ -294,13 +294,23 @@ void elum(void) {
   helumID->Draw("colz");
   
 }
+//void apollo(void) {
+ // TCanvas *capollo = (TCanvas *) gROOT->FindObjectAny("capollo");
+ // if( capollo == NULL )  capollo = new TCanvas("capollo",Form("APOLLO | %s", canvasTitle.Data()),1000,1000);
+ // capollo->Clear(); capollo->Divide(5,4);
+ // for( int i = 0 ; i < 20 ; i++){
+ //   capollo->cd(i+1);
+ //   hApollo[i]->Draw("");
+ // }
+//}
+ 
 void apollo(void) {
-  TCanvas *capollo = (TCanvas *) gROOT->FindObjectAny("capollo");
-  if( capollo == NULL )  capollo = new TCanvas("capollo",Form("APOLLO | %s", canvasTitle.Data()),1000,1000);
-  capollo->Clear(); capollo->Divide(5,4);
+  TCanvas *crdt = (TCanvas *) gROOT->FindObjectAny("crdt");
+  if( crdt == NULL )  crdt = new TCanvas("crdt",Form("APOLLO | %s", canvasTitle.Data()),1000,1000);
+  crdt->Clear(); crdt->Divide(5,4);
   for( int i = 0 ; i < 20 ; i++){
-    capollo->cd(i+1);
-    hApollo[i]->Draw("");
+    crdt->cd(i+1);
+    hrdt[i]->Draw("");
   }
 }
   

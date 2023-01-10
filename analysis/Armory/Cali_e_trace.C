@@ -53,7 +53,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    thetaCM  = TMath::QuietNaN();
    thetaLab  = TMath::QuietNaN();
    
-   for(int i = 0; i < 8 ; i++){
+   for(int i = 0; i < NRDT ; i++){
       rdtC[i] = TMath::QuietNaN();
       rdtC_t[i] = 0;
    }
@@ -72,7 +72,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          te_t[i] = TMath::QuietNaN();
          te_r[i] = TMath::QuietNaN();
       }
-      for(int i = 0; i < 8; i++){
+      for(int i = 0; i < NRDT; i++){
          trdt[i] = TMath::QuietNaN();
          trdt_t[i] = TMath::QuietNaN();
          trdt_r[i] = TMath::QuietNaN();
@@ -159,14 +159,14 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
    ///if no recoil. i.e. all rdt are NAN, coinFlag == true, i.e disable
    int countInvalidRDT = 0;
-   for( int j = 0; j < 8; j++){
+   for( int j = 0; j < NRDT; j++){
       if( TMath::IsNaN(rdt[j]) ) countInvalidRDT ++;
    }
-   if( countInvalidRDT == 8 ) {
+   if( countInvalidRDT == NRDT ) {
       coinFlag = true;
    }else{
       for( int i = 0; i < numDet ; i++){
-         for( int j = 0; j < 8 ; j++){
+         for( int j = 0; j < NRDT ; j++){
             if( TMath::IsNaN(rdt[j]) ) continue; 
             int tdiff = rdt_t[j] - e_t[i];
             if( -200 < tdiff && tdiff < 200 )   
@@ -277,25 +277,43 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
    
    //=============================== Recoil
-   for(int i = 0 ; i < 8 ; i++){
+   for(int i = 0 ; i < NRDT ; i++){
+      if( TMath::IsNaN(rdt[i]) ) continue;
       if( isTraceDataExist ){
          trdt[i]   = rdtCorr[i][0] * trdt[i] + rdtCorr[i][1];
          trdt_t[i] = trdt_t[i]; 
       }
       rdtC[i]   = rdtCorr[i][0] * rdt[i] + rdtCorr[i][1];
       rdtC_t[i] = rdt_t[i]; 
-   }
 
-   for( int i = 0; i< 4 ; i++){
+      //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
+   }
+   
+   /**** commented out for h083_85Kr rdt -> apollo
+   for( int i = 0; i< NRDT/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
          rdtID = 2*i+1; //dE
       }
    }
+   */
+   ///h083_85Kr find the earliest apollo
+   ULong64_t rdtTime0 = -1;
+   for( int i = 0; i < NRDT; i++){
+     if( !TMath::IsNaN(rdt[i])){
+       rdtdEMultiHit ++;
+       if(rdt_t[i] < rdtTime0){
+	 rdtTime0 = rdt_t[i];
+	 rdtID = i;
+       } 
+       //  printf("%llu, %llu, %d\n", rdt_t[i], rdtTime0, rdtID);
+     }
+   }
+   
 
    //================================= for coincident time bewteen array and rdt
-   if( multiHit == 1 && rdtdEMultiHit == 1) {
-      
+   //if( multiHit == 1 && rdtdEMultiHit == 1) {
+   if( multiHit ==1 && rdtdEMultiHit > 1 ){ 
       ///===== no Trace data
       ULong64_t eTime = e_t[det];
 
