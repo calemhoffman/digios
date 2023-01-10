@@ -11,7 +11,11 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
+     ///chain->Add("../root_data/gen_run999.root"); // alpha calibration from 10B run
+     ///chain->Add("../root_data/gen_run06[1-3].root"); // long over night run, slits open, x100 att. so around 1e7 pps, 175 ug/cm2
+     ///chain->Add("../root_data/gen_run061.root"); // long over night run, slits open, x100 att. so around 1e7 pps, 175 ug/cm2
+     ///chain->Add("../root_data/gen_run062.root"); // short run, slits open, x100 att. so around 1e7 pps, 70 ug/cm2
+     chain->Add("../root_data/gen_run063.root"); // long over night run, slits open, x300 att. so around 3e6 pps, 120 ug/cm2
      ///chain->Add("../root_data/trace_run135.root");
   
     ///********** end Marker for AutoCalibration.
