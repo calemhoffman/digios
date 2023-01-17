@@ -40,7 +40,7 @@ void PlotTGraphTObjArray(TString rootFileName, bool isSavePNG = false){
   TCanvas * cPlots = new TCanvas("cPlots", "Ptolemy Results", 0, 0, 800, 600);
   cPlots->SetLogy();
   
-  TLegend * legend = new TLegend( 0.6, 0.2, 0.9, 0.4); 
+  TLegend * legend = new TLegend( 0.6, 0.6, 0.9, 0.9); //x1, y1, x2, y2
   
   const int n = gList->GetLast() + 1 ; 
   
