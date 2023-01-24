@@ -394,7 +394,7 @@ void Check_Simulation(TString filename = "transfer.root",
         tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
       }
       if( pID == pArrayXY ){
-        TH2F * hArrayXY = new TH2F("hArrayXY", "Array-XY [gated]; X [mm]; Y [mm]", 400, -prepDist*1.5, prepDist*1.5, 400, -prepDist*1.5, prepDist*.15);
+        TH2F * hArrayXY = new TH2F("hArrayXY", "Array-XY [gated]; X [mm]; Y [mm]", 400, -prepDist*1.5, prepDist*1.5, 400, -prepDist*1.5, prepDist*1.5);
         tree->Draw("yArray:xArray>>hArrayXY", gate, "colz");
       }
       if( pID == pInfo           ){
