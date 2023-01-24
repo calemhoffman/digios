@@ -143,7 +143,8 @@ void Check_Simulation(TString filename = "transfer.root",
   TString fdmsg = field > 0 ? "out of plan" : "into plan";
   TString msg2;
   msg2.Form("field = %.2f T, %s", field, fdmsg.Data());
-  
+
+  double prepDist = detGeo.detPerpDist;
   double length = detGeo.detLength;
   double posRecoil = detGeo.recoilPos;
   double rhoRecoilIn = detGeo.recoilInnerRadius;
@@ -393,7 +394,7 @@ void Check_Simulation(TString filename = "transfer.root",
         tree->Draw("rhoRecoil:thetaCM>>hRecoilRThetaCM", gate, "colz");
       }
       if( pID == pArrayXY ){
-        TH2F * hArrayXY = new TH2F("hArrayXY", "Array-XY [gated]; X [mm]; Y [mm]", 400, -20, 20, 400, -20, 20);
+        TH2F * hArrayXY = new TH2F("hArrayXY", "Array-XY [gated]; X [mm]; Y [mm]", 400, -prepDist*1.5, prepDist*1.5, 400, -prepDist*1.5, prepDist*.15);
         tree->Draw("yArray:xArray>>hArrayXY", gate, "colz");
       }
       if( pID == pInfo           ){
