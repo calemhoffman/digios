@@ -495,18 +495,19 @@ void Transfer(
       reaction.SetExB(Ex);
   
       //==== Set incident beam
-      float KEA = reactionConfig.beamEnergy;
+      KEA = reactionConfig.beamEnergy;
       if( reactionConfig.beamEnergySigma == 0 ){
         KEA = reactionConfig.beamEnergy;
       }else{
         KEA = gRandom->Gaus(reactionConfig.beamEnergy, reactionConfig.beamEnergySigma);
       }
-      float theta = 0.0;
+      theta = 0.0;
       if( reactionConfig.beamAngleSigma == 0 ){
         theta = reactionConfig.beamAngle;
       }else{
         theta = gRandom->Gaus(reactionConfig.beamAngle, reactionConfig.beamAngleSigma);
       }
+      phi = 0.0;
       
       //==== for taregt scattering
       reaction.SetIncidentEnergyAngle(KEA, theta, 0.);
