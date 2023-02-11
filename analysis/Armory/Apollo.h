@@ -119,6 +119,7 @@ public :
    Int_t  iH, jH;
    Double_t pTheta, pPhi, pE;
    Double_t pThetaCM;
+   Double_t pRho;
 
 };
 
@@ -186,6 +187,7 @@ void Apollo::Init(TTree *tree)
    newTree->Branch("phi", &pPhi, "phi/D");
    newTree->Branch("e", &pE, "e/D");
    newTree->Branch("thetaCM", &pThetaCM, "thetaCM/D");
+   newTree->Branch("rho", &pRho, "rho/D");
 }
 
 Bool_t Apollo::Notify()
