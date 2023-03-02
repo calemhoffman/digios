@@ -192,8 +192,8 @@ TH1F* hApollo[20];
 
 //======= Recoil
 TH2F* hrdtID;
-TH1F* hrdt[8]; // single recoil
-TH1F* hrdtg[8]; 
+TH1F* hrdt[NRDT]; // single recoil
+TH1F* hrdtg[NRDT]; 
 
 TH2F* hrdt2D[4];
 TH2F* hrdt2Dsum[4];
@@ -430,7 +430,7 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<8;i++) {
+   for (Int_t i=0;i<=NRDT;i++) {
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
@@ -662,7 +662,7 @@ Bool_t Monitors::Process(Long64_t entry)
     
     /*********** Apply Recoil correction here *************************/
     
-    for( int i = 0 ; i < 8; i++){
+    for( int i = 0 ; i < NRDT; i++){
        rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
     }
     
