@@ -229,6 +229,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
           totalBeamEnergy, mass_a.c_str(), isoA.c_str(), potential.c_str());
         fprintf(file_out, "reset\n");
         fprintf(file_out, "CHANNEL %s + %s\n", mass_a.c_str(), isoA.c_str());
+        fprintf(file_out, "r0target\n");
         fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
         fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
         string pot1Name = potential.substr(0,1);
