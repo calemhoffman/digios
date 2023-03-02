@@ -17,15 +17,15 @@
 
 #define NARRAY  24
 #define NRDT    20
-#define NELUM   0
-#define NEZERO  0
+#define NELUM   3
+#define NEZERO  3
 #define NTAC    0
 #define NCRDT   0
 #define NAPOLLO 20
 
 #define POLARITY_RDT    -1
 #define POLARITY_ELUM   +1
-#define POLARITY_EZERO  +1
+#define POLARITY_EZERO  -1
 #define POLARITY_CRDT   +1
 #define POLARITY_APOLLO -1
 
@@ -53,7 +53,7 @@ Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME
                         19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
                         21,  20,  19,  18,  23,  22,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
                         23,  22,  21,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
-                       -1, -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};  //12, VME4-DIG4, IC
+                        300, -1,  301,  -1,  302,  -1,  -1,  -1,  -1,  -1};  //12, VME4-DIG4, IC
 
 
 Int_t idKindMap[160] = {-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
