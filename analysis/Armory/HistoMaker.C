@@ -1,6 +1,6 @@
 #include "HistoMaker.h"
 
-void HistoMaker(TString rootFile = "root_data/s005_32Si_tp.root") {
+void HistoMaker(TString rootFile = "../../../data/s005_32Si_tp.root") {
    //rootFile="root_data/s005_32Si_tp.root";
    //rootFile="root_data/s005_32Si_trace_dp.root";
    const char* treeName="tree";
@@ -26,7 +26,7 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_tp.root") {
       heventID->Fill(eventID); hrunID->Fill(run);
       for (int i=0;i<multiHit;i++) {
          for (int detID=0;detID<24;detID++) {
-            if ( TMath::IsNaN(e[detID]) || e[detID]<0.5 ) continue;
+            if ( TMath::IsNaN(e[detID]) || e[detID]<0.5) continue;
             //process
             //correct timing
             Double_t tetXCorrFactor = 0;
@@ -55,11 +55,11 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_tp.root") {
                hcoinTime->Fill(coinTimeUC);
                hdt[detID]->Fill(dt[detID]);
                hExTot->Fill(Ex);
-               hdtx[detID]->Fill(x[detID],dt[detID]);
+               
                hdtr[detID]->Fill(te_r[detID],dt[detID]);
                hdte[detID]->Fill(e[detID],dt[detID]);
                hdtEx[detID]->Fill(Ex,dt[detID]);
-               hdtrdt[detID]->Fill(rdt[7],dt[detID]);
+               hdtrdt[detID]->Fill(rdt[4],dt[detID]);
                for (int recID=0;recID<8;recID++) {
                   if ( TMath::IsNaN(rdt[recID]) ) continue;
                   hrdt[recID]->Fill(rdt[recID]);
@@ -70,10 +70,11 @@ void HistoMaker(TString rootFile = "root_data/s005_32Si_tp.root") {
                }
             }
             //full gates
-            if (  (rdt[4] > 500 && rdt[7]>50 && rdt[4] <1800 && rdt[7]<1000) && //rdt energy
+            if (  (rdt[4] > 1050 && rdt[4] <1500 && rdt[7]>50 && rdt[7]<550) && //rdt energy
                   (x[detID]>-0.95 && x[detID]<0.95) && //x
-                  (dt[detID]>-20 && dt[detID]<0)               )
+                  (dt[detID]>0 && dt[detID]<25)               )
             { //de back needs a signal
+            hdtx[detID]->Fill(x[detID],dt[detID]);
                hezg->Fill(z[detID],e[detID]);
                htetg[detID]->Fill(te_t[detID]);
                heVxg[detID]->Fill(x[detID],e[detID]);
