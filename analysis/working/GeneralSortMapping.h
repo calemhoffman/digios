@@ -17,9 +17,9 @@
 
 #define NARRAY  24
 #define NRDT    8
-#define NELUM   0
+#define NELUM   1
 #define NEZERO  0
-#define NTAC    0
+#define NTAC    1
 #define NCRDT   0
 #define NAPOLLO 0
 
