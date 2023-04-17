@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    8000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     8000}; 
-int      rdtERange[2] = {     0,     8000};  
+int     rdtDERange[2] = {     0,     4000}; 
+int      rdtERange[2] = {     0,     5000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   100,    8000};
@@ -55,7 +55,7 @@ bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
 //---Gate
-bool isTimeGateOn     = false;
+bool isTimeGateOn     = true;
 int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.2, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
@@ -988,7 +988,7 @@ Bool_t Monitors::Process(Long64_t entry)
      htacEx->Fill(tac[2], Ex);
      htac2Ex->Fill(tac_t[1]-e_t[detID], Ex);
      
-     if( thetaCM > thetaCMGate ) {
+     //if( thetaCM > thetaCMGate ) {
 
          hEx->Fill(Ex);
 
@@ -1007,7 +1007,7 @@ Bool_t Monitors::Process(Long64_t entry)
          hExVxCal[detID]->Fill(xcal[detID], Ex);
          hExc[detID%numCol]->Fill(Ex);
          
-      }
+    //  }
    }
   
    return kTRUE;
