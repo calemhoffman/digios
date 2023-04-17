@@ -33,13 +33,13 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {   100,    8000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
 int     rdtDERange[2] = {     0,     80}; 
 int      rdtERange[2] = {     0,     80};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {   200,    4000};
+int      elumRange[2] = {   200,    8000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
@@ -55,7 +55,7 @@ bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
 //---Gate
-bool isTimeGateOn     = true;
+bool isTimeGateOn     = false;
 int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;

@@ -2,25 +2,40 @@
  * 
  * This is the Mapping for Armory/GeneralSort.C
  * 
- * idDetMap = [  0, 100) ; PSD
- *          = [100, 110) ; Recoil
- *          = (200, 240] ; ELUM
- *          = [300, 310) ; EZERO
- *          = [400, 450] ; TAC & RF-Timing
+ * idDetMap = 0XX ; PSD
+ *          = 1XX ; Recoil,  dE of the Recoil MUST be odd
+ *          = 2XX ; ELUM
+ *          = 3XX ; EZERO
+ *          = 4XX ; TAC & RF-Timing
+ *          = 5XX ; Circular Recoil
+ *          = 6XX ; APOLLO
  * 
 ***********************************************************************/
 
-//Arrays for mapping things...
-//id = ((VME_ID -1 )x4 + (Dig_ID-1)) x 10 + CH_ID + 1010
+#ifndef MAPPING
+#define MAPPING
 
-//detID =   0 ...  99 = PSD array
-//detID = 100 ... 110 = recoil
-//detID = 200 ... 240 = ELUM
-//detID = 300 ... 310 = EZERO
-//detID = 400 ... 450 = TAC timing
+#define NARRAY  24
+#define NRDT    8
+#define NELUM   1
+#define NEZERO  0
+#define NTAC    1
+#define NCRDT   0
+#define NAPOLLO 0
+
+#define POLARITY_RDT    +1
+#define POLARITY_ELUM   +1
+#define POLARITY_EZERO  +1
+#define POLARITY_CRDT   +1
+#define POLARITY_APOLLO +1
+
+///TODO, trigger time for trace analysis, that is the initial guess for the fit
+
+#define MWIN -100 ///M value for energy filter from digi setting
 
 
-int idConst = 1010;
+Int_t idConst = 1010;
+
 Int_t idDetMap[160] = {  4,   3,   2,   1,   0,   4,   3,   2,   1,   0,   //VME1-DIG1-TL-E,R
                          4,   3,   2,   1,   0,   4,   3,   2,   1,   0,   //VME1-DIG2-TL-F,N
                         29,  28,  27,  26,  25,  29,  28,  27,  26,  25,   //VME1-DIG3-BL-E,R
@@ -56,3 +71,6 @@ Int_t idKindMap[160] = { 0,   0,   0,   0,   0,   3,   3,   3,   3,   3,//VME1
                          0,   0,   0,   0,   0,   3,   3,   3,   3,   3,
                          2,   2,   2,   2,   2,   1,   1,   1,   1,   1,
                         -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2};
+
+#endif
+
