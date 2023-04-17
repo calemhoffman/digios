@@ -1,4 +1,4 @@
-#include "Monitors.C+" // the plus sign mean compilation
+#include "Monitors.C" // the plus sign mean compilation
 
 void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, bool isTraceON = false) {
   
