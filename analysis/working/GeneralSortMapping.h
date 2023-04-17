@@ -15,7 +15,7 @@
 #ifndef MAPPING
 #define MAPPING
 
-#define NARRAY  24
+#define NARRAY  30
 #define NRDT    8
 #define NELUM   1
 #define NEZERO  0
