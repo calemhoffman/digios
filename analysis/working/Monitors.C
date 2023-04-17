@@ -27,8 +27,8 @@
 using namespace std;
 
 //############################################ User setting
-const int numDet = 24;
-const int numRow = 4;  
+const int numDet = 30;
+const int numRow = 6;  
 
 ULong64_t maxNumberEvent = 1000000000;
 
