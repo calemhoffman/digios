@@ -31,7 +31,7 @@
 
 ///TODO, trigger time for trace analysis, that is the initial guess for the fit
 
-#define MWIN 100 ///M value for energy filter from digi setting
+#define MWIN -100 ///M value for energy filter from digi setting
 
 
 Int_t idConst = 1010;
