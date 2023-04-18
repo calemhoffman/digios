@@ -55,7 +55,7 @@ bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
 //---Gate
-bool isTimeGateOn     = true;
+bool isTimeGateOn     = false;
 int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.2, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
