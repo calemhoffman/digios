@@ -4,7 +4,7 @@
 11.5     //distance_from_axis_[mm]
 10.0     //width_of_detector_[mm]
 50       //length_of_detector_[mm]
-500      //recoil_position_+_for_downstream_[mm]
+1100      //recoil_position_+_for_downstream_[mm]
 8.0     //inner_radius_of_recoil_detector_[mm]
 40.2     //outter_radius_of_recoil_detector_[mm]
 false    //is_coincident_with_recoil

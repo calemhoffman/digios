@@ -666,7 +666,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             TH1F h1 ("h1", "h1", len, 0, len);
             for( int i =0 ; i < len; i++){
-               h1.Fill( gTrapezoid->GetPointX(i)-0.5, gTrapezoid->GetPointY(i));
+	      //h1.Fill( gTrapezoid->GetPointX(i)-0.5, gTrapezoid->GetPointY(i));
             }
 
             TSpectrum peak(10);
