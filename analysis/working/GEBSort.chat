@@ -21,7 +21,7 @@ modwrite          100000
 tsnumwrites       100000
 
 # event build windows
-timewin           1000
+timewin           200
 
 #-------------------------------------------
 exit
