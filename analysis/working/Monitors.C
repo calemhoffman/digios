@@ -55,7 +55,7 @@ bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
 //---Gate
-bool isTimeGateOn     = true;
+bool isTimeGateOn     = false;
 int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.2, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
@@ -64,7 +64,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 0;                    /// deg
 double xGate          = 0.95;                  ///cut out the edge
-vector<int> skipDetID = {11} ;//{2,  11, 17}
+vector<int> skipDetID = {2,5,8,10,11,12,23,24,25,26,27,28,29} ;//{2,  11, 17}
 
 TString rdtCutFile1 = "";
 TString rdtCutFile2 = "";
