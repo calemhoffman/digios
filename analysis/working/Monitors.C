@@ -64,7 +64,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 0;                    /// deg
 double xGate          = 0.95;                  ///cut out the edge
-vector<int> skipDetID = {11} ;//{2,  11, 17}
+vector<int> skipDetID = {2,5,6,8,10,11,12,13,16,18,19,23,24,25,26,27,28,29} ;//
 
 TString rdtCutFile1 = "";
 TString rdtCutFile2 = "";
