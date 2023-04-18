@@ -4,7 +4,7 @@
 1               //target_Z
 1               //recoil_light_A
 1               //recoil-light_Z
-11.5           //beam-energy_in_MeV/u
+11.5          //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
 0.000           //beam-angle_in_mrad
 0.000           //beam-emittance_in_mrad
