@@ -55,7 +55,7 @@ bool isUseArrayTrace = false;
 bool isUseRDTTrace = false;
 
 //---Gate
-bool isTimeGateOn     = false;
+bool isTimeGateOn     = true;
 int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.2, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
@@ -66,7 +66,7 @@ double thetaCMGate    = 0;                    /// deg
 double xGate          = 0.95;                  ///cut out the edge
 vector<int> skipDetID = {2,5,6,8,10,11,12,13,16,18,19,23,24,25,26,27,28,29} ;//
 
-TString rdtCutFile1 = "";
+TString rdtCutFile1 = "rdtCuts.root";
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -869,7 +869,7 @@ Bool_t Monitors::Process(Long64_t entry)
       }
       
       if( i % 2 == 0  ){        
-        if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
+        //if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
          recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
