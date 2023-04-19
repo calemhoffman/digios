@@ -36,7 +36,7 @@ fi
 if [ ${expName} == "master" ] || [ ${expName} == "ARR01" ]; then
    echo -e "\e[93m============ Restore everything to master \e[0m"
    git checkout master expName.sh
-   git checkout master ${expDIR}/analysis/working/GeneralSortMapping.h
+   #git checkout master ${expDIR}/analysis/working/GeneralSortMapping.h
    expName="ARR01"
    isMaster=1
 else
@@ -94,9 +94,9 @@ env | grep "HELIOSSYS"
 if [ ${isMaster} == 0 ]; then
    echo -e "\e[93m=================== Checkout the mapping from the branch \e[0m"
    cd ${HELIOSSYS}/analysis/working
-   git checkout origin/${expName} GeneralSortMapping.h 
+   #git checkout origin/${expName} GeneralSortMapping.h 
 
-   isNewMapping=$(grep -rn "NARRAY" GeneralSortMapping.h)
+   #isNewMapping=$(grep -rn "NARRAY" GeneralSortMapping.h)
 
    if [ -z ${isNewMapping} ]; then
       echo " patching up old Mapping file"
