@@ -35,7 +35,7 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    8000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     4000}; 
+int     rdtDERange[2] = {     0,     2200}; 
 int      rdtERange[2] = {     0,     5000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
@@ -430,7 +430,7 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<=NRDT;i++) {
+   for (Int_t i=0;i<NRDT;i++) {
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
@@ -867,8 +867,7 @@ Bool_t Monitors::Process(Long64_t entry)
       for( int j = 0; j < NRDT ; j++){
          if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
       }
-      
-      if( i % 2 == 0  ){        
+      if( ((i % 2) == 0)  ){        
         //if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
          recoilMulti++; // when both dE and E are hit
          rdtot[i/2] = rdt[i]+rdt[i+1];
@@ -1250,7 +1249,7 @@ void Monitors::Terminate()
    
    
    /************************************/
-   //gROOT->ProcessLine("recoils()");
+   gROOT->ProcessLine("recoils()");
 
 
 }
