@@ -310,20 +310,28 @@ void recoils(bool isLogz = false) {
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);
   crdt->Clear();crdt->Divide(2,2);
 
-  if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col");  
-  if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
-  if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  
-  if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
+  if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col");  hrdt2Dg[0]->Draw("same");  
+  if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  hrdt2Dg[1]->Draw("same"); 
+  if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  hrdt2Dg[3]->Draw("same"); 
+  if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  hrdt2Dg[2]->Draw("same"); 
 
+  TCanvas *crdtg =  (TCanvas *) gROOT->FindObjectAny("crdtg");
+  if( crdtg == NULL ) crdtg = new TCanvas("crdtg",Form("raw RDT Gates | %s", canvasTitle.Data()),1700, 0, 1000,1000);
+  crdtg->Clear();crdtg->Divide(2,2);
 
-  //TCanvas *crdtSum =  (TCanvas *) gROOT->FindObjectAny("crdtSum");
-  //if( crdtSum == NULL ) crdtSum = new TCanvas("crdtSum",Form("raw RDT dE-Esum | %s", canvasTitle.Data()),100, 0, 1000,1000);
-  //crdtSum->Clear();crdtSum->Divide(2,2);
-  //
-  //if( isLogz ) crdtSum->cd(1)->SetLogz(); crdtSum->cd(1); hrdt2Dsum[0]->Draw("col");  
-  //if( isLogz ) crdtSum->cd(2)->SetLogz(); crdtSum->cd(2); hrdt2Dsum[1]->Draw("col");  
-  //if( isLogz ) crdtSum->cd(3)->SetLogz(); crdtSum->cd(3); hrdt2Dsum[3]->Draw("col");  
-  //if( isLogz ) crdtSum->cd(4)->SetLogz(); crdtSum->cd(4); hrdt2Dsum[2]->Draw("col");    
+  if( isLogz ) crdtg->cd(1)->SetLogz(); crdtg->cd(1); hrdt2Dg[0]->Draw("col");  
+  if( isLogz ) crdtg->cd(2)->SetLogz(); crdtg->cd(2); hrdt2Dg[1]->Draw("col");  
+  if( isLogz ) crdtg->cd(3)->SetLogz(); crdtg->cd(3); hrdt2Dg[3]->Draw("col");  
+  if( isLogz ) crdtg->cd(4)->SetLogz(); crdtg->cd(4); hrdt2Dg[2]->Draw("col");  
+
+  TCanvas *crdtSum =  (TCanvas *) gROOT->FindObjectAny("crdtSum");
+  if( crdtSum == NULL ) crdtSum = new TCanvas("crdtSum",Form("raw RDT dE-Esum | %s", canvasTitle.Data()),100, 0, 1000,1000);
+  crdtSum->Clear();crdtSum->Divide(2,2);
+  
+  if( isLogz ) crdtSum->cd(1)->SetLogz(); crdtSum->cd(1); hrdt2Dsum[0]->Draw("col");  
+  if( isLogz ) crdtSum->cd(2)->SetLogz(); crdtSum->cd(2); hrdt2Dsum[1]->Draw("col");  
+  if( isLogz ) crdtSum->cd(3)->SetLogz(); crdtSum->cd(3); hrdt2Dsum[3]->Draw("col");  
+  if( isLogz ) crdtSum->cd(4)->SetLogz(); crdtSum->cd(4); hrdt2Dsum[2]->Draw("col");    
   
   TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
   if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),0,0, 500, 500);
