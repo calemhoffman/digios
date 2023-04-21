@@ -59,3 +59,8 @@ daq/save/trigger.txt
 DB_*.txt
 
 slurm-*.out
+analysis/working/transfer.root.si31
+analysis/working/.vscode/settings.json
+.vscode/settings.json
+.vscode/settings.json
+.vscode/settings.json
