@@ -74,3 +74,21 @@ Int_t idKindMap[160] = { 0,   0,   0,   0,   0,   3,   3,   3,   3,   3,//VME1
 
 #endif
 
+#define NARRAY 30
+#define NRDT 8
+#define NELUM 16
+#define NEZERO 5
+#define NTAC 3
+#define NCRDT 0
+#define NARRAY 30
+#define NRDT 8
+#define NELUM 16
+#define NEZERO 5
+#define NTAC 3
+#define NCRDT 0
+#define NARRAY 30
+#define NRDT 8
+#define NELUM 16
+#define NEZERO 5
+#define NTAC 3
+#define NCRDT 0
