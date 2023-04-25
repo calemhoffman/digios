@@ -560,7 +560,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          ///==================  Set gTrace
          if( traceMethod == 0 ){
             for ( long long int j = 0 ; j < traceLength; j++){
-               gTrace->SetPoint(j, j, trace[i][j]);
+               gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
             }
          }
 
@@ -568,9 +568,9 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          double base = 0;
          if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){ 
-               if( trace[i][j] < 16000){
-                  base = trace[i][j];
-                  gTrace->SetPoint(j, j, trace[i][j]);
+               if( TMath::Abs(trace[i][j]) < 16000){
+                  base = TMath::Abs(trace[i][j]);
+                  gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
                }else{
                   gTrace->SetPoint(j, j, base);
                }
