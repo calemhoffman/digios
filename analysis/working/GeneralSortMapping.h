@@ -17,9 +17,9 @@
 
 #define NARRAY  30
 #define NRDT    8
-#define NELUM   1
+#define NELUM   16
 #define NEZERO  0
-#define NTAC    1
+#define NTAC    3
 #define NCRDT   0
 #define NAPOLLO 0
 
@@ -73,46 +73,3 @@ Int_t idKindMap[160] = { 0,   0,   0,   0,   0,   3,   3,   3,   3,   3,//VME1
                         -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2,  -2};
 
 #endif
-
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
-#define NARRAY 30
-#define NRDT 8
-#define NELUM 16
-#define NEZERO 5
-#define NTAC 3
-#define NCRDT 0
