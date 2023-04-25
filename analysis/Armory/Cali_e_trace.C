@@ -152,7 +152,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       rejRDT4 = false;
    }
    
-   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; ///######### rdt gate
+   // uncomment for ???
+//   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; ///######### rdt gate
    
    ///============================= timestamp Coincident gate
    bool coinFlag = false;
@@ -174,7 +175,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          }
       }
    }
-   if( coinFlag == false ) return kTRUE;
+// uncomment for recoil coincidence
+//   if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    
@@ -288,9 +290,9 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
       //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
    }
-   //double check below
+   //double check below - ok, except maybe could be > E not just NaN ??
    for( int i = 0; i< NRDT/2 ; i++){
-      if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
+      if( /* !TMath::IsNaN(rdt[2*i]) &&*/ !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
          rdtID = 2*i+1; //dE
       }
@@ -298,7 +300,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    
    //================================= for coincident time bewteen array and rdt
    //if( multiHit == 1 && rdtdEMultiHit == 1) {
-   if( multiHit ==1 && rdtdEMultiHit > 1 ){ 
+   if( multiHit ==1 && rdtdEMultiHit >= 1 ){ 
       ///===== no Trace data
       ULong64_t eTime = e_t[det];
 
@@ -333,7 +335,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       
    }
    
-   if( rejZeroHit && multiHit == 0 ) return kTRUE;
+   //if( rejZeroHit && multiHit == 0 ) return kTRUE;
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
