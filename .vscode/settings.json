@@ -81,5 +81,10 @@
       "bold": false,
       "italic": false
     }
-  ]
+  ],
+  "files.associations": {
+    "Monitors.C": "cpp",
+    "Cali_e_trace.C": "cpp",
+    "GetCoinTimeCorrectionCutG.C": "cpp"
+  }
 }
