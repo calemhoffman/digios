@@ -627,8 +627,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                te[idDet]   = TMath::Abs(gFit->GetParameter(0));
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
-               te_cfd[iDet] = 0.0;
-               te_rise[iDet] = 0.0;
+               te_cfd[idDet] = 0.0;
+               te_rise[idDet] = 0.0;
             }
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
