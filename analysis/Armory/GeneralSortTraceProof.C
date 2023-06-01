@@ -305,6 +305,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
+         newTree->Branch("te_cfd",         te_cfd,  Form("Trace_Energy_CFD[%d]/F",     NARRAY));
+         newTree->Branch("te_rise",         te_rise,  Form("Trace_Energy_Rise[%d]/F",     NARRAY));
          
          if( isRecoil ){
             newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
@@ -391,6 +393,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
          te_t[i]   = TMath::QuietNaN();
+         te_cfd[i]   = TMath::QuietNaN();
+         te_rise[i]   = TMath::QuietNaN();
          
          if( isRecoil &&  i < NRDT ) {
             trdt[i]   = TMath::QuietNaN();
@@ -574,7 +578,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                }else{
                   gTrace->SetPoint(j, j, base);
                }
-            }
+            }/// CRH this is a location to either calc CFD etc., or use gTrace later on
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
@@ -623,6 +627,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                te[idDet]   = TMath::Abs(gFit->GetParameter(0));
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
+               te_cfd[iDet] = 0.0;
+               te_rise[iDet] = 0.0;
             }
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
