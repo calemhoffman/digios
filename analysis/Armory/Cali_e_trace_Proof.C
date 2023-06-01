@@ -328,7 +328,7 @@ Bool_t Cali_e_trace_Proof::Process(Long64_t entry)
    //#################################################################### gate
    bool rdt_energy = false;
    for( int rID = 0; rID < 8; rID ++){
-      if( rdt[rID] > 5000 ) rdt_energy = true; 
+      if( rdt[rID] > 0 ) rdt_energy = true; 
    }
    if( !rdt_energy ) return kTRUE;
    
