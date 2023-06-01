@@ -124,8 +124,10 @@ public :
    TF1 * gFit; //!
    
    float te[NARRAY];    // energy from trace
-   float te_r[NARRAY];  // rising time from frace
+   float te_r[NARRAY];  // rising time from trace
    float te_t[NARRAY];  // time
+   float te_cfd[NARRAY];  // constant fraction time
+   float te_rise[NARRAY];  // rise time from fit
    
    float ttac[NTAC];
    float ttac_t[NTAC];
