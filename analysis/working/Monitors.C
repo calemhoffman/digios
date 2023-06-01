@@ -51,11 +51,11 @@ int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this 
 
 int  icRange [3] = {1000, 1000, 500}; /// max of IC0,1,2 
 
-bool isUseArrayTrace = false;
+bool isUseArrayTrace = true;
 bool isUseRDTTrace = false;
 
 //---Gate
-bool isTimeGateOn     = true;
+bool isTimeGateOn     = false;
 int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.2, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
@@ -63,8 +63,8 @@ int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 0;                    /// deg
-double xGate          = 0.95;                  ///cut out the edge
-vector<int> skipDetID = {2,5,6,8,10,11,12,13,16,18,19,23,24,25,26,27,28,29} ;//
+double xGate          = 0.99;                  ///cut out the edge
+vector<int> skipDetID = {};//2,5,6,8,10,11,12,13,16,18,19,23,24,25,26,27,28,29} ;//
 
 TString rdtCutFile1 = "rdtCuts.root";
 TString rdtCutFile2 = "";
