@@ -98,16 +98,7 @@ if [ ${isMaster} == 0 ]; then
 
    #isNewMapping=$(grep -rn "NARRAY" GeneralSortMapping.h)
 
-   if [ -z ${isNewMapping} ]; then
-      echo " patching up old Mapping file"
-      echo "#define NARRAY 30" >> GeneralSortMapping.h
-      echo "#define NRDT 8"    >> GeneralSortMapping.h
-      echo "#define NELUM 16"  >> GeneralSortMapping.h
-      echo "#define NEZERO 5"  >> GeneralSortMapping.h
-      echo "#define NTAC 3"    >> GeneralSortMapping.h
-      echo "#define NCRDT 0"   >> GeneralSortMapping.h
-   fi
-  
+   
    cd ${HELIOSSYS}
 fi
 

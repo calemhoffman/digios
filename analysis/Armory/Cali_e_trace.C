@@ -183,15 +183,15 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    //========================== Array
    int uniqeDetID = -1;
    for(int idet = 0 ; idet < numDet; idet++){
-
+     //crh need to be careful and check these here ...
      hitID[idet] = 0; /// hitID = 1 for only xf, hitID = 2 for only xn, hitID = 3 for both xf and xn
      ///======= Basic array gate
      if( TMath::IsNaN(e[idet])) continue;
-     if( ring[idet] < -100 || ring[idet] > 100 ) continue;
+     //if( ring[idet] < -100 || ring[idet] > 100 ) continue;
      if( !TMath::IsNaN(xf[idet]) ) hitID[idet] += 1;
      if( !TMath::IsNaN(xn[idet]) ) hitID[idet] += 2;
      if( hitID[idet] == 0 ) continue;
-     if( isTraceDataExist  && te_r[idet] > 50 ) continue; /// when rise time > 50, skip 
+     if( isTraceDataExist  && te_r[idet] > 200 ) continue; /// when rise time > 50, skip 
      
      ///====== Calibrations go here
      if( isTraceDataExist  && useTraceToReplaceArrayEnergy ){
@@ -204,7 +204,9 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
        //eC[idet] = (e[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
        eC_t[idet] = e_t[idet]; 
      }
-       
+     
+     if (eC[idet] < 0.6) continue; //
+
      xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
@@ -336,7 +338,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
    
    //if( rejZeroHit && multiHit == 0 ) return kTRUE;
-   
+   if (multiHit < 1) return kTRUE;
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
    newTree->Fill();
