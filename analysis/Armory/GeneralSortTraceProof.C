@@ -552,9 +552,12 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          int traceLength = trace_length[i];
          gTrace = (TGraph*) arr->ConstructedAt(countTrace, "C");
          gTrace->Clear();         
-         gTrace->Set(traceLength);         
-         
+         gTrace->Set(traceLength);
          gTrace->SetTitle("");
+         gSmooth = (TGraph*) arr->ConstructedAt(countTrace, "C");
+         gSmooth->Clear();         
+         gSmooth->Set(traceLength);
+         gSmooth->SetTitle("");
          countTrace ++;
 
          ///printf("------- ev : %lld, %d /%d, countTrace : %d, length : %d, idDet : %d \n", entry, i, NumHits, countTrace, traceLength, idDet);
@@ -570,18 +573,34 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
          ///=================== regulate the trace
          double base = 0;
+         double tSmooth[2000];
+         for (int nn=0;nn<2000;nn++) {tSmooth[nn]=0;}
+      
          if ( traceMethod >= 1 ){
-            for( int j = 0; j < traceLength; j++){ 
+            tSmooth[0]=trace[i][j][0];tSmooth[1]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2])/3.;
+            tSmooth[2]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2]+trace[i][j][3]+trace[i][j][4])/5.;
+            tSmooth[3]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2]+trace[i][j][3]+trace[i][j][4]+trace[i][j][5]
+            +trace[i][j][6])/7.;
+            for( int j = 0; j < traceLength; j++){
+	            if (j>=4) {
+	            tSmooth[j] = (trace[i][j][j-4] + trace[i][j][j-3] +trace[i][j][j-2] + trace[i][j][j-1] + trace[i][j][j] 
+               + trace[i][j][j+1] + trace[i][j][j+2] + trace[i][j][j+3] + trace[i][j][j+4])/9.;
+	            }
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
+                  gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));
                }else{
                   gTrace->SetPoint(j, j, base);
+                  gSmooth->SetPoint(j, j, base);
                }
+
+
             }/// CRH this is a location to either calc CFD etc., or use gTrace later on
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         gSmooth->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          
          ///===================== fitting , find time
          if( traceMethod == 1){

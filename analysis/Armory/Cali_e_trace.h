@@ -59,6 +59,8 @@ public :
    Float_t         te[100];
    Float_t         te_r[100];
    Float_t         te_t[100];
+   Float_t         te_cfd[100];
+   Float_t         te_rise[100];
    Float_t         trdt[50];
    Float_t         trdt_t[50];
    Float_t         trdt_r[50];
@@ -289,6 +291,8 @@ void Cali_e_trace::Init(TTree *tree)
       fChain->SetBranchAddress("te",   te,   &b_Trace_Energy);
       fChain->SetBranchAddress("te_t", te_t, &b_Trace_Energy_Time);
       fChain->SetBranchAddress("te_r", te_r, &b_Trace_Energy_RiseTime);
+      fChain->SetBranchAddress("te_cfd", te_cfd, &b_Trace_Energy_CFD);
+      fChain->SetBranchAddress("te_rise", te_rise, &b_Trace_Energy_Rise);
 
       fChain->SetBranchAddress("trdt",   trdt,   &b_Trace_RDT);
       fChain->SetBranchAddress("trdt_t", trdt_t, &b_Trace_RDT_Time);
@@ -727,6 +731,8 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F", numDet) );
       newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", numDet));
       newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F", numDet));
+      newTree->Branch("te_cfd",         te_cfd,  Form("Trace_Energy_CFD[%d]/F", numDet));
+      newTree->Branch("te_rise",         te_rise,  Form("Trace_Energy_Rise[%d]/F", numDet));
       newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
       newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
       newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
