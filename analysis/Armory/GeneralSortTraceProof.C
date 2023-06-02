@@ -573,27 +573,32 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
          ///=================== regulate the trace
          double base = 0;
-         double tSmooth[2000];
-         for (int nn=0;nn<2000;nn++) {tSmooth[nn]=0;}
+         float tSmooth[1024];
+         float ftrace[1024];
+         for (int nn=0;nn<1024;nn++) {
+            tSmooth[nn]=0;
+            ftrace[nn]=0;
+         }
 
-         tSmooth[0]=trace[i][0];tSmooth[1]=(trace[i][0]+trace[i][1]+trace[i][2])/3.;
-         tSmooth[2]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4])/5.;
-         tSmooth[3]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4]+trace[i][5]
-         +trace[i][6])/7.;
+         // tSmooth[0]=trace[i][0];tSmooth[1]=(trace[i][0]+trace[i][1]+trace[i][2])/3.;
+         // tSmooth[2]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4])/5.;
+         // tSmooth[3]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4]+trace[i][5]
+         // +trace[i][6])/7.;
 
          if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){
+               ftrace[j] = (float)(trace[i][j] & 0x3fff);
 	            if (j>=4) {
-	            tSmooth[j] = (trace[i][j-4] + trace[i][j-3] +trace[i][j-2] + trace[i][j-1] + trace[i][j] 
-               + trace[i][j+1] + trace[i][j+2] + trace[i][j+3] + trace[i][j+4])/9.;
+	            tSmooth[j] = (ftrace[i][j-4] + ftrace[i][j-3] +ftrace[i][j-2] + ftrace[i][j-1] + ftrace[i][j] 
+               + ftrace[i][j+1] + ftrace[i][j+2] + ftrace[i][j+3] + ftrace[i][j+4])/9.;
 	            }
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
-                  gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));
+                  if (j>=4) {gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));}
                }else{
                   gTrace->SetPoint(j, j, base);
-                  gSmooth->SetPoint(j, j, base);
+                  if (j>=4) {gSmooth->SetPoint(j, j, base);}
                }
 
 
