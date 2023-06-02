@@ -577,7 +577,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          for (int nn=0;nn<2000;nn++) {tSmooth[nn]=0;}
 
          tSmooth[0]=trace[i][0];tSmooth[1]=(trace[i][0]+trace[i][1]+trace[i][2])/3.;
-         Smooth[2]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4])/5.;
+         tSmooth[2]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4])/5.;
          tSmooth[3]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4]+trace[i][5]
          +trace[i][6])/7.;
 
