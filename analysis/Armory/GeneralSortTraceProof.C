@@ -593,17 +593,18 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){
                ftrace[j] = (Double_t)(trace[i][j]);
-	            if (j>=4) {
-	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
-               + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
-	            }
+               tSmooth[j] = ftrace[j];
+	            // if (j>=4) {
+	            // tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
+               // + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
+	            // }
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
                   if (j>=4) {gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));}
                }else{
                   gTrace->SetPoint(j, j, base);
-                  if (j>=4) {gSmooth->SetPoint(j, j, base);}
+                  //if (j>=4) {gSmooth->SetPoint(j, j, base);}
                }
 
 
