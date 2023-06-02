@@ -118,6 +118,7 @@ public :
 
    //trace
    TClonesArray * arr ;//!
+   TClonesArray * arr2 ;//!
    TClonesArray * arrTrapezoid ;//!   
    TGraph * gTrace; //!
    TGraph * gSmooth; //! smooth trace
@@ -186,7 +187,7 @@ public :
    PSD psd; 
    
    //need to put NULL on pointer
-   GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), gSmooth(0), gFit(0) { }
+   GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gTrace(0), arr2(0), gSmooth(0), gFit(0) { }
    //GeneralSortTraceProof(TTree * /*tree*/ = 0) : fChain(0), saveFile(0), proofFile(0), newTree(0), arr(0), gFit(0) { }
    virtual ~GeneralSortTraceProof() { }
    
