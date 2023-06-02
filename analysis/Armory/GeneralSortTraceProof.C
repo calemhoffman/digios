@@ -288,10 +288,13 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    
    if( isTraceON ){
       arr = new TClonesArray("TGraph");
+      arr2 = new TClonesArray("TGraph");
          
       if( isSaveTrace){
          newTree->Branch("trace", arr, 256000);
          arr->BypassStreamer();
+         newTree->Branch("tsmooth", arr2, 256000);
+         arr2->BypassStreamer();
       }
       
       arrTrapezoid = new TClonesArray("TGraph");
@@ -422,6 +425,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       }
       
       arr->Clear("C");
+      arr2->Clear("C");
    }
 
 /**////======================================= Pull needed entries
@@ -529,6 +533,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       int countTrace = 0;
       
       arr->Clear("C");
+      arr2->Clear("C");
       
       for(Int_t i = 0; i < NumHits ; i++) {
          Int_t idTemp   = id[i] - idConst;
@@ -554,7 +559,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          gTrace->Clear();         
          gTrace->Set(traceLength);
          gTrace->SetTitle("");
-         gSmooth = (TGraph*) arr->ConstructedAt(countTrace, "C");
+         gSmooth = (TGraph*) arr2->ConstructedAt(countTrace, "C");
          gSmooth->Clear();         
          gSmooth->Set(traceLength);
          gSmooth->SetTitle("");
@@ -595,10 +600,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
-                  // if (j>=4) {gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));}
+                  if (j>=4) {gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));}
                }else{
                   gTrace->SetPoint(j, j, base);
-                  // if (j>=4) {gSmooth->SetPoint(j, j, base);}
+                  if (j>=4) {gSmooth->SetPoint(j, j, base);}
                }
 
 
@@ -606,7 +611,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
-         // gSmooth->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         gSmooth->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          
          ///===================== fitting , find time
          if( traceMethod == 1){
@@ -644,8 +649,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
