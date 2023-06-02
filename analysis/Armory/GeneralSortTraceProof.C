@@ -577,11 +577,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          for (int nn=0;nn<2000;nn++) {tSmooth[nn]=0;}
       
          if ( traceMethod >= 1 ){
-            tSmooth[0]=trace[i][j][0];tSmooth[1]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2])/3.;
-            tSmooth[2]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2]+trace[i][j][3]+trace[i][j][4])/5.;
-            tSmooth[3]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2]+trace[i][j][3]+trace[i][j][4]+trace[i][j][5]
-            +trace[i][j][6])/7.;
             for( int j = 0; j < traceLength; j++){
+               tSmooth[0]=trace[i][j][0];tSmooth[1]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2])/3.;
+               tSmooth[2]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2]+trace[i][j][3]+trace[i][j][4])/5.;
+               tSmooth[3]=(trace[i][j][0]+trace[i][j][1]+trace[i][j][2]+trace[i][j][3]+trace[i][j][4]+trace[i][j][5]
+               +trace[i][j][6])/7.;
 	            if (j>=4) {
 	            tSmooth[j] = (trace[i][j][j-4] + trace[i][j][j-3] +trace[i][j][j-2] + trace[i][j][j-1] + trace[i][j][j] 
                + trace[i][j][j+1] + trace[i][j][j+2] + trace[i][j][j+3] + trace[i][j][j+4])/9.;
