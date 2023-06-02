@@ -589,8 +589,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             for( int j = 0; j < traceLength; j++){
                ftrace[j] = (float)(trace[i][j] & 0x3fff);
 	            if (j>=4) {
-	            tSmooth[j] = (ftrace[i][j-4] + ftrace[i][j-3] +ftrace[i][j-2] + ftrace[i][j-1] + ftrace[i][j] 
-               + ftrace[i][j+1] + ftrace[i][j+2] + ftrace[i][j+3] + ftrace[i][j+4])/9.;
+	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
+               + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
 	            }
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
