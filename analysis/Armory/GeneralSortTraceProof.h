@@ -67,7 +67,7 @@ public :
    UShort_t        base_sample[200];   //[NumHits]
    Int_t           baseline[200];   //[NumHits]
    UShort_t        trace_length[200];   //[NumHits]
-   Short_t         trace[200][1024];   //[NumHits]
+   UShort_t         trace[200][1024];   //[NumHits]
 
    // List of branches
    TBranch        *b_RunNum;
