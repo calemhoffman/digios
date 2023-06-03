@@ -32,7 +32,8 @@ for (Int_t run=0;run<numRuns;run++) {
     hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),1000,1000,5600);
     gen_tree->Draw("rdt[1]:rdt[0]>>hrdt0","","col");
     gen_tree->Draw("rdt[0]>>hrdtE0");
-    gen_tree->Draw("rdt[1]+rdt[0]>>hrdtTOTE0","","");
+    gen_tree->Draw(Form("rdt[1]+rdt[0]>>hrdtTOTE%d",run),"","");
+    if (run>0) hrdtTOTE0->Draw("same");
 }
 
 }
