@@ -616,7 +616,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 	            }
 
                if (j >= 10) {
-                  tcfd[j] = frac * (ftrace[j] - tSmooth[10]) - (ftrace[j+delta]-tSmooth[10]);
+                  tcfd[j] = frac * (ftrace[j] - ftrace[9]) - (ftrace[j+delta]-ftrace[9]);
                }
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
