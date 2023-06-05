@@ -581,10 +581,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          double basesmooth = 0;
          Double_t tSmooth[1024];
          Double_t ftrace[1024];
+         Double_t tcfd[1024];
          for (int nn=0;nn<1024;nn++) {
             tSmooth[nn]=0;
             ftrace[nn]=0;
+            tcfd[nn]=0;
          }
+         Double_t frac = 0.5;
+         Int_t delta = 1;
+         Double_t riseTime = 0.0;
+         Double_t cfdTime = 0.0;
 
          // tSmooth[0]=trace[i][0];tSmooth[1]=(trace[i][0]+trace[i][1]+trace[i][2])/3.;
          // tSmooth[2]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4])/5.;
@@ -598,13 +604,22 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 	            if (j>=4) {
 	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
                + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
+
+               //min/max
+               if (j>=50 && j<90) riseMin+=tSmooth[j];
+               if (tSmooth[j] > riseMax && (j <= 200) ) 
+                  {
+                     riseMax = tSmooth[j];
+                     riseMaxJ = j;
+                  }
 	            }
+               tcfd[j] = Frac * ftrace[j] - ftrace[j+delta];
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
                   if (j>=4) {
-                     gSmooth->SetPoint(j, j, TMath::Abs(tSmooth[j]));
-                     basesmooth = TMath::Abs(tSmooth[j]);
+                     gSmooth->SetPoint(j, j, TMath::Abs(tcfd[j]));
+                     basesmooth = TMath::Abs(tcfd[j]);
                   }
                }else{
                   gTrace->SetPoint(j, j, base);
@@ -613,6 +628,22 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
 
             }/// CRH this is a location to either calc CFD etc., or use gTrace later on
+            Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNiny=0.; Double_t Slope = 0.;
+            if (riseMaxJ > 200) {riseMaxJ = 200; riseMax = tSmooth[200];}
+            riseMin = riseMin / 40.;
+
+            for( int j = 90; j < 210; j++){
+               if ((tSmooth[j] > ((riseMax-riseMin)*0.1+riseMin)) && (iTen==0)) {
+                  iTen = j; Slope = (tSmooth[iTen] - tSmooth[iTen+1]);
+                  fTen = (Double_t)iTen - (tSmooth[iTen] - ((riseMax-riseMin)*0.1+riseMin)) / Slope;
+               }
+               if ((tSmooth[j] > ((riseMax-riseMin)*0.9+riseMin)) && (iNinty==0)) {
+                  iNinty=j; Slope = (tSmooth[iNinty] - tSmooth[iNinty-1]);
+                  fNinty = (Double_t)iNinty - (tSmooth[iNinty] - ((riseMax-riseMin)*0.9+riseMin)) / Slope;
+               }
+            }
+            riseTime = (fNinty-fTen)*10.0;
+
          }
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
@@ -654,18 +685,18 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
                te[idDet]   = TMath::Abs(gFit->GetParameter(0));
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
-               te_cfd[idDet] = 0.0;
-               te_rise[idDet] = 0.0;
+               te_cfd[idDet] = cfdTime;
+               te_rise[idDet] = riseTime;
             }
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
