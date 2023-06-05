@@ -614,7 +614,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
 	            }
-               tcfd[j] = Frac * ftrace[j] - ftrace[j+delta];
+               tcfd[j] = frac * ftrace[j] - ftrace[j+delta];
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
@@ -628,7 +628,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                }
 
             }/// CRH this is a location to either calc CFD etc., or use gTrace later on
-            Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNiny=0.; Double_t Slope = 0.;
+            Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNinty=0.; Double_t Slope = 0.;
             if (riseMaxJ > 200) {riseMaxJ = 200; riseMax = tSmooth[200];}
             riseMin = riseMin / 40.;
 
