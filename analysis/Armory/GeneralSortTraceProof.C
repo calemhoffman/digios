@@ -589,6 +589,9 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
          Double_t frac = 0.5;
          Int_t delta = 1;
+         Double_t riseMin=0.0;
+         Double_t riseMax = 16000.0;
+         Int_t riseMaxJ=210;
          Double_t riseTime = 0.0;
          Double_t cfdTime = 0.0;
 
@@ -604,13 +607,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 	            if (j>=4) {
 	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
                + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
-
                //min/max
                if (j>=50 && j<90) riseMin+=tSmooth[j];
                if (tSmooth[j] > riseMax && (j <= 200) ) 
                   {
-                     riseMax = tSmooth[j];
-                     riseMaxJ = j;
+                     riseMax = tSmooth[j]; riseMaxJ = j;
                   }
 	            }
                tcfd[j] = Frac * ftrace[j] - ftrace[j+delta];
@@ -625,7 +626,6 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   gTrace->SetPoint(j, j, base);
                   if (j>=4) {gSmooth->SetPoint(j, j, basesmooth);}
                }
-
 
             }/// CRH this is a location to either calc CFD etc., or use gTrace later on
             Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNiny=0.; Double_t Slope = 0.;
