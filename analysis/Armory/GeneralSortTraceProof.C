@@ -534,11 +534,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       arr->Clear("C");
       arr2->Clear("C");
+
+      Double_t tpol = 1.0;
       
       for(Int_t i = 0; i < NumHits ; i++) {
          Int_t idTemp   = id[i] - idConst;
          idDet  = idDetMap[idTemp];
          idKind = idKindMap[idTemp];
+         if (pre_rise_energy > post_rise_energy) {
+            tpol = -1.0;
+         }
          
          ///bool isPSDe = (30 > idDet && idDet >= 0 && idKind == 0);
          bool isPSD    = (NARRAY > idDet && idDet >= 0);
@@ -587,7 +592,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             ftrace[nn]=0;
             tcfd[nn]=0;
          }
-         Double_t frac = 0.4;
+         Double_t frac = -0.4;
          Int_t delta = 2;
          Double_t riseMin=0.0;
          Double_t riseMax = 16000.0;
@@ -595,39 +600,39 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          Double_t riseTime = 0.0;
          Double_t cfdTime = 0.0;
 
-         // tSmooth[0]=trace[i][0];tSmooth[1]=(trace[i][0]+trace[i][1]+trace[i][2])/3.;
-         // tSmooth[2]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4])/5.;
-         // tSmooth[3]=(trace[i][0]+trace[i][1]+trace[i][2]+trace[i][3]+trace[i][4]+trace[i][5]
-         // +trace[i][6])/7.;
-
          if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){
                ftrace[j] = (Double_t)(trace[i][j] & 0x3fff);
-               tSmooth[j] = ftrace[j];
+               if (tpol < 0) {
+                  ftrace[j] = 16384. - ftrace[j]; //flip  if needed
+                  trace[i][j] = 16384 - trace[i][j];
+               }
+               if (j==0) tSmooth[0]=ftrace[0];
+               if (j==1) tSmooth[1]=(ftrace[0]+ftrace[1]+ftrace[2])/3.;
+               if (j==2) tSmooth[2]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4])/5.;
+               if (j==3) tSmooth[3]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4]+ftrace[5]+ftrace[6])/7.;
 	            if (j>=4) {
 	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
                + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
+               }
                //min/max
                if (j>=50 && j<90) riseMin+=tSmooth[j];
-               if (tSmooth[j] > riseMax && (j <= 200) ) 
+               if ((j >= 90) && (tSmooth[j] > riseMax) && (j <= 200) ) 
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-	            }
-
-               if (j >= 1) {
-                  tcfd[j] = frac * (ftrace[j] - ftrace[1]) - (ftrace[j+delta]-ftrace[1]);
+               if (j >= 5) {
+                  tcfd[j] = frac * (tSmooth[j] - tSmooth[4]) + (tSmooth[j+delta] - tSmooth[4]);
+                  gSmooth->SetPoint(j, j, tcfd[j]);
+                  basesmooth = tcfd[j];
                }
-               if( TMath::Abs(trace[i][j]) < 16000){
-                  base = TMath::Abs(trace[i][j]);
-                  gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
-                  if (j>=1) {
-                     gSmooth->SetPoint(j, j, TMath::Abs(tcfd[j]));
-                     basesmooth = TMath::Abs(tcfd[j]);
-                  }
-               }else{
+
+               if( trace[i][j] < 16000){
+                  base = trace[i][j];
+                  gTrace->SetPoint(j, j, trace[i][j]);
+               } else {
                   gTrace->SetPoint(j, j, base);
-                  if (j>=10) {gSmooth->SetPoint(j, j, basesmooth);}
+                  // if (j>=10) {gSmooth->SetPoint(j, j, basesmooth);}
                }
 
             }/// CRH this is a location to either calc CFD etc., or use gTrace later on
