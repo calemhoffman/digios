@@ -34,8 +34,8 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
    TClonesArray * arr = new TClonesArray("TGraph");
    //tree->GetBranch("trace")->SetAutoDelete(kFALSE);
    //tree->GetBranch("trace")->SetAutoDelete(kTRUE);
-   tree->SetBranchAddress("trace", &arr);
-   //tree->SetBranchAddress("tsmooth", &arr);
+   //tree->SetBranchAddress("trace", &arr);
+   tree->SetBranchAddress("tsmooth", &arr);
    
    //TODO UP-Down arrow for pervious-next control
    TLine timeVLine;
