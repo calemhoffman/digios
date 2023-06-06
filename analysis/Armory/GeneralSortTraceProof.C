@@ -593,7 +593,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             tcfd[nn]=0;
          }
          Double_t frac = -0.4;
-         Int_t delta = 2;
+         Int_t delta = 5;
          Double_t riseMin=0.0;
          Double_t riseMax = 16000.0;
          Int_t riseMaxJ=210;
