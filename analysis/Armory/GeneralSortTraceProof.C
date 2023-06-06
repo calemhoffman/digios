@@ -541,7 +541,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          Int_t idTemp   = id[i] - idConst;
          idDet  = idDetMap[idTemp];
          idKind = idKindMap[idTemp];
-         if (pre_rise_energy > post_rise_energy) {
+         if (pre_rise_energy[i] > post_rise_energy[i]) {
             tpol = -1.0;
          }
          
