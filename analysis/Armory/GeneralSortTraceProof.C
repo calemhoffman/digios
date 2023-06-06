@@ -17,7 +17,7 @@ float delayChannel = 100.; //initial guess of the time
 //############# fit function definition
 //=== Don;t forget to set fit parameter at line ~ 550
 const int numPara = 6;
-const float fitRange[2] = {0, 250};
+const float fitRange[2] = {10, 280};
 
 double fitFunc(double * x, double * par){
    
@@ -688,10 +688,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
