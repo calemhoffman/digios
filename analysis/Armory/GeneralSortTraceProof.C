@@ -587,8 +587,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             ftrace[nn]=0;
             tcfd[nn]=0;
          }
-         Double_t frac = 0.5;
-         Int_t delta = 1;
+         Double_t frac = 0.4;
+         Int_t delta = 2;
          Double_t riseMin=0.0;
          Double_t riseMax = 16000.0;
          Int_t riseMaxJ=210;
@@ -615,13 +615,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   }
 	            }
 
-               if (j >= 10) {
-                  tcfd[j] = frac * (ftrace[j] - ftrace[9]) - (ftrace[j+delta]-ftrace[9]);
+               if (j >= 1) {
+                  tcfd[j] = frac * (ftrace[j] - ftrace[1]) - (ftrace[j+delta]-ftrace[1]);
                }
                if( TMath::Abs(trace[i][j]) < 16000){
                   base = TMath::Abs(trace[i][j]);
                   gTrace->SetPoint(j, j, TMath::Abs(trace[i][j]));
-                  if (j>=10) {
+                  if (j>=1) {
                      gSmooth->SetPoint(j, j, TMath::Abs(tcfd[j]));
                      basesmooth = TMath::Abs(tcfd[j]);
                   }
@@ -688,10 +688,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
