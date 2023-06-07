@@ -626,7 +626,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                if (j==1) tSmooth[1]=(ftrace[0]+ftrace[1]+ftrace[2])/3.;
                if (j==2) tSmooth[2]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4])/5.;
                if (j==3) tSmooth[3]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4]+ftrace[5]+ftrace[6])/7.;
-	            if (j>=4) {
+	            if (j>=4 && j<traceLength-4) {
 	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
                }
                //min/max
@@ -635,7 +635,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-               tcfd[j] = frac * (tSmooth[j] - base) + (tSmooth[j+delta] - base);
+
+               if (j < traceLength - delta) tcfd[j] = frac * (tSmooth[j] - base) + (tSmooth[j+delta] - base);
 
                gSmooth->SetPoint(j, j, tSmooth[j]);
                gCFD->SetPoint(j, j, tcfd[j]);
@@ -664,7 +665,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          gSmooth->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
-         gCFD->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         gCFD->SetTitle(Form("CFD ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          
          ///===================== fitting , find time
          if( traceMethod == 1){
@@ -702,10 +703,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
