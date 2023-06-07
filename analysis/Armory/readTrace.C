@@ -21,8 +21,8 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 300);
-   cRead->Divide(1,1);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 600);
+   cRead->Divide(1,2);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
    }
@@ -32,10 +32,11 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
    
 /**///==============================================================   
    TClonesArray * arr = new TClonesArray("TGraph");
+   TClonesArray * arr2 = new TClonesArray("TGraph");
    //tree->GetBranch("trace")->SetAutoDelete(kFALSE);
    //tree->GetBranch("trace")->SetAutoDelete(kTRUE);
-   //tree->SetBranchAddress("trace", &arr);
-   tree->SetBranchAddress("tsmooth", &arr);
+   tree->SetBranchAddress("trace", &arr);
+   tree->SetBranchAddress("tsmooth", &arr2);
    
    //TODO UP-Down arrow for pervious-next control
    TLine timeVLine;
@@ -66,9 +67,12 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
       for( int j = 0; j <  nTrace ; j++){
 
          TGraph * g  = (TGraph*) arr->At(j);
+         TGraph * g2  = (TGraph*) arr2->At(j);
          
          TString gTitle;
          gTitle = g->GetTitle();
+         TString gTitle2;
+         gTitle2 = g2->GetTitle();
          ///printf("TGraph Title : %s\n", gTitle.Data());
          
          int detID = 0;
@@ -127,6 +131,9 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
          //g->GetYaxis()->SetRangeUser(7500, 35000);
          timeVLine.Draw("same");
          if( gFit != NULL ) text.DrawText(0.11, 0.85, kTitle.Data());
+
+         cRead->cd(2);
+         g2->Draw("AC");
          
          cRead->Update();         
          gSystem->ProcessEvents();
