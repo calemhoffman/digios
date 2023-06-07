@@ -295,6 +295,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          arr->BypassStreamer();
          newTree->Branch("tsmooth", arr2, 256000);
          arr2->BypassStreamer();
+         newTree->Branch("tcfd", arr3, 256000);
+         arr3->BypassStreamer();
       }
       
       arrTrapezoid = new TClonesArray("TGraph");
@@ -426,6 +428,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       arr->Clear("C");
       arr2->Clear("C");
+      arr3->Clear("C");
    }
 
 /**////======================================= Pull needed entries
@@ -534,6 +537,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       arr->Clear("C");
       arr2->Clear("C");
+      arr3->Clear("C");
 
       Double_t tpol = 1.0;
       
@@ -568,6 +572,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          gSmooth->Clear();         
          gSmooth->Set(traceLength);
          gSmooth->SetTitle("");
+         gCFD = (TGraph*) arr3->ConstructedAt(countTrace, "C");
+         gCFD->Clear();         
+         gCFD->Set(traceLength);
+         gCFD->SetTitle("");
          countTrace ++;
 
          ///printf("------- ev : %lld, %d /%d, countTrace : %d, length : %d, idDet : %d \n", entry, i, NumHits, countTrace, traceLength, idDet);
@@ -601,20 +609,25 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          Double_t cfdTime = 0.0;
 
          if ( traceMethod >= 1 ){
-            for( int j = 0; j < traceLength; j++){
+            for( int j = 0; j < traceLength; j++){ //first loop to pass correct values
                // UShort_t temp = (UShort_t)(trace[i][j]);
                ftrace[j] = (Double_t)(trace[i][j] & 0x3fff);
                if (tpol < 0) {
                   ftrace[j] = 16384. - ftrace[j]; //flip  if needed
                   trace[i][j] = 16384 - trace[i][j];
                }
+               if (j<90) base += =ftrace[j];
+
+            }
+            base = base/90.
+
+            for ( int j = 0; j < traceLength; j++) {
                if (j==0) tSmooth[0]=ftrace[0];
                if (j==1) tSmooth[1]=(ftrace[0]+ftrace[1]+ftrace[2])/3.;
                if (j==2) tSmooth[2]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4])/5.;
                if (j==3) tSmooth[3]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4]+ftrace[5]+ftrace[6])/7.;
 	            if (j>=4) {
-	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] 
-               + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
+	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
                }
                //min/max
                if (j>=50 && j<90) riseMin+=tSmooth[j];
@@ -622,17 +635,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-               
-               tcfd[j] = frac * (tSmooth[j]) + (tSmooth[j+delta]);
+               tcfd[j] = frac * (tSmooth[j] - base) + (tSmooth[j+delta] - base);
+
                gSmooth->SetPoint(j, j, tSmooth[j]);
-               basesmooth = tSmooth[j];
-               // if( ftrace[j] < 16000){
-               base = trace[i][j];
+               gCFD->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
-               // } else {
-                  // gTrace->SetPoint(j, j, 0);
-                  // if (j>=10) {gSmooth->SetPoint(j, j, basesmooth);}
-               // }
 
             }
             
@@ -657,6 +664,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          gSmooth->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         gCFD->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          
          ///===================== fitting , find time
          if( traceMethod == 1){
