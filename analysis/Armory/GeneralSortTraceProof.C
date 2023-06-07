@@ -572,10 +572,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          gSmooth->Clear();         
          gSmooth->Set(traceLength);
          gSmooth->SetTitle("");
-         gCFD = (TGraph*) arr3->ConstructedAt(countTrace, "C");
-         gCFD->Clear();         
-         gCFD->Set(traceLength);
-         gCFD->SetTitle("");
+         // gCFD = (TGraph*) arr3->ConstructedAt(countTrace, "C");
+         // gCFD->Clear();         
+         // gCFD->Set(traceLength);
+         // gCFD->SetTitle("");
          countTrace ++;
 
          ///printf("------- ev : %lld, %d /%d, countTrace : %d, length : %d, idDet : %d \n", entry, i, NumHits, countTrace, traceLength, idDet);
@@ -639,7 +639,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                // if (j < traceLength - delta) tcfd[j] = frac * (tSmooth[j] - base) + (tSmooth[j+delta] - base);
 
                gSmooth->SetPoint(j, j, tSmooth[j]);
-               gCFD->SetPoint(j, j, tcfd[j]);
+               // gCFD->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
             }
@@ -665,7 +665,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          
          gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          gSmooth->SetTitle(Form("Smooth ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
-         gCFD->SetTitle(Form("CFD ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         // gCFD->SetTitle(Form("CFD ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
          
          ///===================== fitting , find time
          if( traceMethod == 1){
