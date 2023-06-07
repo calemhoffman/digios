@@ -619,7 +619,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                if (j<90) base += =ftrace[j];
 
             }
-            base = base/90.
+            base = base/90.;
 
             for ( int j = 0; j < traceLength; j++) {
                if (j==0) tSmooth[0]=ftrace[0];
