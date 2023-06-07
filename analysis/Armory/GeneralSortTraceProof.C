@@ -602,7 +602,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
          if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){
-               UShort_t temp = (UShort_t)(trace[i][j])
+               UShort_t temp = (UShort_t)(trace[i][j]);
                ftrace[j] = (Double_t)(temp & 0x3fff);
                if (tpol < 0) {
                   ftrace[j] = 16384. - ftrace[j]; //flip  if needed
