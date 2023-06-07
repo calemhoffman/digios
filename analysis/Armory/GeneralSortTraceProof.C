@@ -622,21 +622,21 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-               if (j >= 5) {
-                  tcfd[j] = frac * (tSmooth[j] - tSmooth[4]) + (tSmooth[j+delta] - tSmooth[4]);
-                  gSmooth->SetPoint(j, j, tcfd[j]);
-                  basesmooth = tcfd[j];
-               }
-
-               if( ftrace[j] < 16000){
-                  base = trace[i][j];
-                  gTrace->SetPoint(j, j, ftrace[j]);
-               } else {
-                  gTrace->SetPoint(j, j, 0);
+               
+               tcfd[j] = frac * (tSmooth[j]) + (tSmooth[j+delta]);
+               gSmooth->SetPoint(j, j, tSmooth[j]);
+               basesmooth = tSmooth[j];
+               // if( ftrace[j] < 16000){
+               base = trace[i][j];
+               gTrace->SetPoint(j, j, ftrace[j]);
+               // } else {
+                  // gTrace->SetPoint(j, j, 0);
                   // if (j>=10) {gSmooth->SetPoint(j, j, basesmooth);}
-               }
+               // }
 
-            }/// CRH this is a location to either calc CFD etc., or use gTrace later on
+            }
+            
+            /// CRH this is a location to either calc CFD etc., or use gTrace later on
             Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNinty=0.; Double_t Slope = 0.;
             if (riseMaxJ > 200) {riseMaxJ = 200; riseMax = tSmooth[200];}
             riseMin = riseMin / 40.;
@@ -694,10 +694,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
