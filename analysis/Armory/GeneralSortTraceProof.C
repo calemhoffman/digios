@@ -590,7 +590,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          }
 
          ///=================== regulate the trace
-         double base = 8000.
+         double base = 8000.;
          double basesmooth = 8000.;
          Double_t tSmooth[1024];
          Double_t ftrace[1024];
