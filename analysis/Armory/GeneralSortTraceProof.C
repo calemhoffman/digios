@@ -295,8 +295,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          arr->BypassStreamer();
          newTree->Branch("tsmooth", arr2, 256000);
          arr2->BypassStreamer();
-         newTree->Branch("tcfd", arr3, 256000);
-         arr3->BypassStreamer();
+         // newTree->Branch("tcfd", arr3, 256000);
+         // arr3->BypassStreamer();
       }
       
       arrTrapezoid = new TClonesArray("TGraph");
@@ -428,7 +428,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       arr->Clear("C");
       arr2->Clear("C");
-      arr3->Clear("C");
+      // arr3->Clear("C");
    }
 
 /**////======================================= Pull needed entries
@@ -537,7 +537,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       
       arr->Clear("C");
       arr2->Clear("C");
-      arr3->Clear("C");
+      // arr3->Clear("C");
 
       Double_t tpol = 1.0;
       
