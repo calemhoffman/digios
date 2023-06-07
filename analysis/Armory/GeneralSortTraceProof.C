@@ -602,7 +602,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
          if ( traceMethod >= 1 ){
             for( int j = 0; j < traceLength; j++){
-               ftrace[j] = (Double_t)(trace[i][j] & 0x3fff);
+               UShort_t temp = (UShort_t)(trace[i][j])
+               ftrace[j] = (Double_t)(temp & 0x3fff);
                if (tpol < 0) {
                   ftrace[j] = 16384. - ftrace[j]; //flip  if needed
                   trace[i][j] = 16384 - trace[i][j];
@@ -627,11 +628,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   basesmooth = tcfd[j];
                }
 
-               if( trace[i][j] < 16000){
+               if( ftrace[j] < 16000){
                   base = trace[i][j];
-                  gTrace->SetPoint(j, j, trace[i][j]);
+                  gTrace->SetPoint(j, j, ftrace[j]);
                } else {
-                  gTrace->SetPoint(j, j, base);
+                  gTrace->SetPoint(j, j, 0);
                   // if (j>=10) {gSmooth->SetPoint(j, j, basesmooth);}
                }
 
