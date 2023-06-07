@@ -629,7 +629,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 	            if (j>=4 && j<traceLength-4) {
 	            tSmooth[j] = (ftrace[j-4] + ftrace[j-3] +ftrace[j-2] + ftrace[j-1] + ftrace[j] + ftrace[j+1] + ftrace[j+2] + ftrace[j+3] + ftrace[j+4])/9.;
                } else if (j >= traceLength - 4) {
-                  tSmooth[j] = tSmooth[traceLength - 4];
+                  tSmooth[j] = tSmooth[traceLength - 5];
                }
                //min/max
                if (j>=50 && j<90) riseMin+=tSmooth[j];
