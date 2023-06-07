@@ -616,7 +616,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   ftrace[j] = 16384. - ftrace[j]; //flip  if needed
                   trace[i][j] = 16384 - trace[i][j];
                }
-               if (j<90) base += =ftrace[j];
+               if (j<90) base += ftrace[j];
 
             }
             base = base/90.;
