@@ -618,10 +618,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                }
                if (j<90) base += ftrace[j];
 
-            }
+            } //first loop ends
             base = base/90.;
 
-            for ( int j = 0; j < traceLength; j++) {
+            for ( int j = 0; j < traceLength; j++) { //second loop
                if (j==0) tSmooth[0]=ftrace[0];
                if (j==1) tSmooth[1]=(ftrace[0]+ftrace[1]+ftrace[2])/3.;
                if (j==2) tSmooth[2]=(ftrace[0]+ftrace[1]+ftrace[2]+ftrace[3]+ftrace[4])/5.;
@@ -637,18 +637,17 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-               int temp = j+delta;
-               if (j < traceLength - delta - 1) {
-                  tcfd[j] = (tSmooth[temp] - 8000.0);
+               if (j < (traceLength - delta - 1)) {
+                  tcfd[j] = tSmooth[j];
                } else {
-                  tcfd[j] = tSmooth[traceLength - 11] - 8000.0;
+                  tcfd[j] = TMath::QuietNan();
                }
 
-               gSmooth->SetPoint(j, j, tSmooth[j]);
+               //gSmooth->SetPoint(j, j, tSmooth[j]);
                // gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
-            }
+            } //second loop ends
             
             /// CRH this is a location to either calc CFD etc., or use gTrace later on
             Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNinty=0.; Double_t Slope = 0.;
