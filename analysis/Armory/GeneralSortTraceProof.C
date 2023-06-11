@@ -637,8 +637,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-               int temp=j+10;
-               tcfd[j] = frac * (tSmooth[temp] - base);
+               int temp=j-10;
+               if (j>10) tcfd[j] = frac * (tSmooth[temp] - base);
 
                //gSmooth->SetPoint(j, j, tSmooth[j]);
                gSmooth->SetPoint(j, j, tcfd[j]);
