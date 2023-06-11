@@ -638,13 +638,13 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
                if (j < (traceLength - delta - 1)) {
-                  tcfd[j] = tSmooth[j];
+                  tcfd[j] = tSmooth[j] - base;
                } else {
                   tcfd[j] = TMath::QuietNaN();
                }
 
                //gSmooth->SetPoint(j, j, tSmooth[j]);
-               // gSmooth->SetPoint(j, j, tcfd[j]);
+               gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
             } //second loop ends
