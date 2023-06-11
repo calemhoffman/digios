@@ -705,10 +705,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
