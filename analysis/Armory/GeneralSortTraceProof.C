@@ -640,7 +640,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                if (j < (traceLength - delta - 1)) {
                   tcfd[j] = tSmooth[j];
                } else {
-                  tcfd[j] = TMath::QuietNan();
+                  tcfd[j] = TMath::QuietNaN();
                }
 
                //gSmooth->SetPoint(j, j, tSmooth[j]);
