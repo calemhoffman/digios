@@ -601,7 +601,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             tcfd[nn]=0;
          }
          Double_t frac = -0.4;
-         Int_t delta = 10;
+         int delta = 10;
          Double_t riseMin=0.0;
          Double_t riseMax = 16000.0;
          Int_t riseMaxJ=210;
@@ -637,14 +637,15 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
-
+               int temp = j+delta;
                if (j < traceLength - delta - 1) {
-                  int temp = j+10;
-                  tcfd[j] = frac * (tSmooth[j] - 8000.0) + (tSmooth[temp] - 8000.0);
-                  gSmooth->SetPoint(j, j, tcfd[j]);
+                  tcfd[j] = (tSmooth[temp] - 8000.0);
+               } else {
+                  tcfd[j] = tSmooth[traceLength - 11] - 8000.0;
                }
 
                // gSmooth->SetPoint(j, j, tSmooth[j]);
+               gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
             }
