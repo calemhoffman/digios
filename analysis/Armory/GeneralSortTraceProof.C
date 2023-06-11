@@ -638,7 +638,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                      riseMax = tSmooth[j]; riseMaxJ = j;
                   }
                if (j < (traceLength - delta - 1)) {
-                  tcfd[j] = frac * (tSmooth[j+delta] - base);
+                  tcfd[j] = frac * (tSmooth[(j+delta)] - base);
                } else {
                   tcfd[j] = TMath::QuietNaN();
                }
