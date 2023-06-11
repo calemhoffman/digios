@@ -644,8 +644,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   tcfd[j] = tSmooth[traceLength - 11] - 8000.0;
                }
 
-               // gSmooth->SetPoint(j, j, tSmooth[j]);
-               gSmooth->SetPoint(j, j, tcfd[j]);
+               gSmooth->SetPoint(j, j, tSmooth[j]);
+               // gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
             }
