@@ -639,7 +639,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   }
 
                if (j < traceLength - delta - 1) {
-                  tcfd[j] = frac*(tSmooth[j]);//frac * (tSmooth[j] - 8000.0) + (tSmooth[j+delta] - 8000.0);
+                  int temp = j+10;
+                  tcfd[j] = frac * (tSmooth[j] - 8000.0) + (tSmooth[temp] - 8000.0);
                   gSmooth->SetPoint(j, j, tcfd[j]);
                }
 
