@@ -640,8 +640,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                int temp=j-5;
                if (j>5) tcfd[j] = frac * (tSmooth[temp] - base) + (tSmooth[j] - base);
 
-               //gSmooth->SetPoint(j, j, tSmooth[j]);
-               gSmooth->SetPoint(j, j, tcfd[j]);
+               gSmooth->SetPoint(j, j, tSmooth[j]);
+               //gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
             } //second loop ends
@@ -705,10 +705,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
                gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
