@@ -13,9 +13,9 @@
 #include <TGraph.h>
 #include <TStyle.h>
 
-void Check_caliResult(){
+void Check_caliResult(TString rootFile = "temp.root"){
 
-   TFile * caliResult = new TFile("caliResult.root", "read");
+   TFile * caliResult = new TFile(rootFile, "read");
    
    gStyle->SetPalette(1,0);
 
