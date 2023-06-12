@@ -99,10 +99,9 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    for( int idet = 0 ; idet < numDet ; idet ++){
       cCheck->cd(idet+1);  
       name.Form("hEX%02d", idet);
-      hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
       expression.Form("e:x>>hEX%02d", idet);
-      
-      gate.Form("detID == %d", idet);
+      gate.Form("(detID == %d) && (ring[%d] >= -50) && (ring[%d] <= 50)", idet, idet, idet);
+      hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
 
       tree->Draw(expression, gate, "box");
       line->Draw("same");
