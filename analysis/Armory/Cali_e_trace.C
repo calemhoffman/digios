@@ -212,11 +212,11 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       
      ///========= calculate x, range (-1,1)    //crh otherwise check...
      if( hitID[idet] == 3 ) {
-      x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
-      // hitID[idet] = 2;
-      // if (xfC[idet] >= xnC[idet]) {
-      //    hitID[idet] = 1;
-      // }
+      // x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
+      hitID[idet] = 2;
+      if (xfC[idet] >= xnC[idet]) {
+         hitID[idet] = 1;
+      }
      }
      if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
      if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
