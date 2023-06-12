@@ -600,8 +600,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             ftrace[nn]=0;
             tcfd[nn]=0;
          }
-         Double_t frac = -0.4;
-         static int delta = 50;
+         Double_t frac = -0.9;
+         static int delta = 5;
          Double_t riseMin=0.0;
          Double_t riseMax = 16000.0;
          Int_t riseMaxJ=210;
@@ -616,10 +616,9 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   ftrace[j] = 16384. - ftrace[j]; //flip  if needed
                   trace[i][j] = 16384 - trace[i][j];
                }
-               if (j<90) base += ftrace[j];
-
+               if (j<70) base += ftrace[j];
             } //first loop ends
-            base = base/90.;
+            base = base/70.;
 
             for ( int j = 0; j < traceLength; j++) { //second loop
                if (j==0) tSmooth[0]=ftrace[0];
@@ -632,7 +631,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   tSmooth[j] = tSmooth[traceLength - 5];
                }
                //min/max
-               if (j>=50 && j<90) riseMin+=tSmooth[j];
+               if (j>=50 && j<80) riseMin+=tSmooth[j];
                if ((j >= 90) && (tSmooth[j] > riseMax) && (j <= 200) ) 
                   {
                      riseMax = tSmooth[j]; riseMaxJ = j;
@@ -640,7 +639,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                int temp=j-5;
                if (j>5) tcfd[j] = frac * (tSmooth[temp] - base) + (tSmooth[j] - base);
 
-               gSmooth->SetPoint(j, j, tSmooth[j]);
+               gSmooth->SetPoint(j, j, tcfd[j]);
                //gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
 
@@ -649,7 +648,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             /// CRH this is a location to either calc CFD etc., or use gTrace later on
             Int_t iTen=0; Int_t iNinty=0; Double_t fTen=0.; Double_t fNinty=0.; Double_t Slope = 0.;
             if (riseMaxJ > 200) {riseMaxJ = 200; riseMax = tSmooth[200];}
-            riseMin = riseMin / 40.;
+            riseMin = riseMin / 30.;
 
             for( int j = 90; j < 210; j++){
                if ((tSmooth[j] > ((riseMax-riseMin)*0.1+riseMin)) && (iTen==0)) {
@@ -661,7 +660,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   fNinty = (Double_t)iNinty - (tSmooth[iNinty] - ((riseMax-riseMin)*0.9+riseMin)) / Slope;
                }
             }
-            riseTime = (fNinty-fTen)*10.0;
+            riseTime = (fNinty-fTen)*1.0;
 
          }
          
@@ -692,7 +691,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             gFit->SetParameter(0, fileNameTemp); ///energy
             gFit->SetParameter(1, delayChannel); /// time
-            gFit->SetParameter(2, 1);            ///riseTime
+            gFit->SetParameter(2, 10);            ///riseTime
             gFit->SetParameter(3, base);
             gFit->SetParameter(4, 100);
             gFit->SetParameter(5, -1);
