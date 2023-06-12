@@ -17,12 +17,12 @@
 
 #include "../Armory/AnalysisLibrary.h"
 
-int nPeaks = 16;
+int nPeakss = 16;
 TTree *tree = NULL;
 
 Double_t fpeaks(Double_t *x, Double_t *par) {
    Double_t result = 0;
-   for (Int_t p=0;p<nPeaks;p++) {
+   for (Int_t p=0;p<nPeakss;p++) {
       Double_t norm  = par[3*p+0];
       Double_t mean  = par[3*p+1];
       Double_t sigma = par[3*p+2];
@@ -185,7 +185,7 @@ void Check_e_z(TString rootfile){
    //=================== find peak and fit
    printf("============= estimate background and find peak\n");
    TSpectrum * peak = new TSpectrum(50);
-   nPeaks = peak->Search(hEx, 1, "", 0.1);
+   nPeakss = peak->Search(hEx, 1, "", 0.1);
    TH1 * h1 = peak->Background(hEx,10);
    h1->Draw("same");
    
@@ -198,7 +198,7 @@ void Check_e_z(TString rootfile){
    
    //========== Fitting 
    printf("============= Fit.....");
-   printf(" found %d peaks \n", nPeaks);
+   printf(" found %d peaks \n", nPeakss);
    
    //float * xpos =  peak->GetPositionX();
    //float * ypos =  peak->GetPositionY();
@@ -206,23 +206,23 @@ void Check_e_z(TString rootfile){
    double * xpos = peak->GetPositionX();
    double * ypos = peak->GetPositionY();
    
-   int * inX = new int[nPeaks];
-   TMath::Sort(nPeaks, xpos, inX, 0 );
+   int * inX = new int[nPeakss];
+   TMath::Sort(nPeakss, xpos, inX, 0 );
    vector<double> energy, height;
-   for( int j = 0; j < nPeaks; j++){
+   for( int j = 0; j < nPeakss; j++){
       energy.push_back(xpos[inX[j]]);
       height.push_back(ypos[inX[j]]);
    }
    
-   const int  n = 3 * nPeaks;
+   const int  n = 3 * nPeakss;
    double * para = new double[n]; 
-   for(int i = 0; i < nPeaks ; i++){
+   for(int i = 0; i < nPeakss ; i++){
       para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
       para[3*i+1] = energy[i];
       para[3*i+2] = 0.08;
    }
 
-   TF1 * fit = new TF1("fit", fpeaks, ExRange[1], ExRange[2], 3* nPeaks );
+   TF1 * fit = new TF1("fit", fpeaks, ExRange[1], ExRange[2], 3* nPeakss );
    fit->SetLineWidth(1);
    fit->SetNpx(1000);
    fit->SetParameters(para);
@@ -234,9 +234,9 @@ void Check_e_z(TString rootfile){
    
    double bw = specS->GetBinWidth(1);
    
-   double * ExPos = new double[nPeaks];
-   double * ExSigma = new double[nPeaks];   
-   for(int i = 0; i < nPeaks ; i++){
+   double * ExPos = new double[nPeakss];
+   double * ExSigma = new double[nPeakss];   
+   for(int i = 0; i < nPeakss ; i++){
       ExPos[i] = paraA[3*i+1];
       ExSigma[i] = paraA[3*i+2];
       printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
@@ -312,13 +312,13 @@ void Check_e_z(TString rootfile){
    cCheck6->SetGrid();
    gStyle->SetOptStat(0);
    
-   TH1F ** hTheta = new TH1F *[nPeaks];
+   TH1F ** hTheta = new TH1F *[nPeakss];
    double yMax = 0;
    
    TLegend * legend = new TLegend(0.6,0.1,0.9,0.35);
    legend->SetName("legend");
    
-   for(int i = 0; i < nPeaks; i++){
+   for(int i = 0; i < nPeakss; i++){
       TString name, title, gate, expression;
       name.Form("hTheta%d", i);
       title.Form("thetaCM +-3Sigma; thetCM * sin() [deg]; count / 0.5 deg");
@@ -362,7 +362,7 @@ void Check_e_z(TString rootfile){
 	hExTheta->Write();
 	
 	TObjArray * hThetaList = new TObjArray();
-   for(int i = 0 ; i < nPeaks; i++){
+   for(int i = 0 ; i < nPeakss; i++){
 		hThetaList->Add(hTheta[i]);
 	}
 	hThetaList->Write("hThetaList", TObject::kSingleKey);

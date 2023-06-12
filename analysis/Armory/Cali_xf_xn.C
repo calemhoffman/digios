@@ -19,10 +19,10 @@
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
-   const int rowDet = 4;
-   const int colDet = 6;
+   const int rowDet = 6;
+   const int colDet = 5;
    
-   int energyRange[3] = {400, 1000, 2600}; // bin, min, max
+   int energyRange[3] = {400, 1500, 7500}; // bin, min, max
    double threshold = 0.2;
    
 /**///========================================================  load tree
@@ -38,13 +38,13 @@ void Cali_xf_xn(TTree * tree){
    printf("=========== Total #Entry: %10lld \n", tree->GetEntries());
    
    int temp = 0;
-   printf(" Min Raw Energy [ch] (default = %d ch) : ", energyRange[1]);
-   scanf("%d", &temp);
-   energyRange[1] = temp;
+   // printf(" Min Raw Energy [ch] (default = %d ch) : ", energyRange[1]);
+   // scanf("%d", &temp);
+   // energyRange[1] = temp;
 
-   printf(" Max Raw Energy [ch] (default = %d ch) : ", energyRange[2]);
-   scanf("%d", &temp);   
-   energyRange[2] = temp;
+   // printf(" Max Raw Energy [ch] (default = %d ch) : ", energyRange[2]);
+   // scanf("%d", &temp);   
+   // energyRange[2] = temp;
    
    printf("     Raw Energy is now %d ch to %d ch\n", energyRange[1], energyRange[2]);
 /**///======================================================== Canvas
@@ -85,7 +85,7 @@ void Cali_xf_xn(TTree * tree){
       expression.Form("e[%d] >> q%d" ,i, i);
       //gate[i].Form("ring[%d]==0 && !TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", i, i, i);
       //gate[i].Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", i, i);
-      //gate[i].Form("e[%d] > 0", i);
+      gate[i].Form("(ring[%d] >= -50 && ring[%d] <= 50)", i, i);
       
       cAlpha->cd(i+1);
       tree->Draw(expression, gate[i] , "");
@@ -122,8 +122,8 @@ void Cali_xf_xn(TTree * tree){
    if ( method == 2 ){
       printf("---- finding peak using TSpectrum Class...\n");   
       
-      printf(" peak threshold (default = %.3f) : ", threshold);
-      scanf("%lf", &threshold);
+      // printf(" peak threshold (default = %.3f) : ", threshold);
+      // scanf("%lf", &threshold);
       printf("     threshold is now %.3f\n", threshold);
          
       for( int i = 0; i < numDet; i++){

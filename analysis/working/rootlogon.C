@@ -2,11 +2,17 @@
   printf("rootlogon.C\n");
   // gROOT->ProcessLine(".L GSUtil_new_cc.so");
   //printf("GSUtil_new_cc.so loaded\n");
+  gROOT->ProcessLine(".L ../Armory/Check_e_x.C");
+  gROOT->ProcessLine(".L ../Armory/Check_e_z.C");
+  gROOT->ProcessLine(".L ../Armory/Check_alignment.C");
+  gROOT->ProcessLine(".L ../Armory/Check_caliResult.C");
 
 
   // Set ROOT defaults
   gStyle->SetPalette(1);
   gStyle->SetOptStat("im");
+  gStyle->ToggleEditor();
+  gStyle->ToggleToolBar();
   /* gStyle->SetLineWidth(2); */
   /* gStyle->SetStatW(0.3); */
   /* gStyle->SetStatH(0.3); */
