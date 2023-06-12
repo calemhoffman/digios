@@ -191,7 +191,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      if( !TMath::IsNaN(xf[idet]) ) hitID[idet] += 1;
      if( !TMath::IsNaN(xn[idet]) ) hitID[idet] += 2;
      if( hitID[idet] == 0 ) continue;
-     if( isTraceDataExist  && te_r[idet] > 200 ) continue; /// when rise time > 50, skip 
+     //if( isTraceDataExist  && te_r[idet] > 200 ) continue; /// when rise time > 50, skip 
      
      ///====== Calibrations go here
      if( isTraceDataExist  && useTraceToReplaceArrayEnergy ){
@@ -210,8 +210,14 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-     ///========= calculate x, range (-1,1)   
-     if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
+     ///========= calculate x, range (-1,1)    //crh otherwise check...
+     if( hitID[idet] == 3 ) {
+      //x[idet] = (xfC[idet]-xnC[idet])/(xfC[idet]+xnC[idet]);
+      hitID[idet] = 2;
+      if (xfC[idet] >= xnC[idet]) {
+         hitID[idet] = 1;
+      }
+     }
      if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
      if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
       
@@ -227,7 +233,6 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
      ///========= multiplicity the 2 array detectors are hit.
      if( !TMath::IsNaN(z[idet]) ) multiHit++;
-     
      det = idet;
    }
    
