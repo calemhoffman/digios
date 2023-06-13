@@ -70,7 +70,7 @@ void Check_e_z(TString rootfile){
       gate_RDT = "&& (cut0 || cut1 || cut2 || cut3)";
    }
    
-   TString detGate = "detID != 2 && detID !=5 && detID != 10 && detID != 18 && detID != 19 && detID != 25";
+   TString detGate = "ring > -100 && ring < 100";
 
 /**///======================================================== read tree   
    printf("################### Check_e_z.C ######################\n");
@@ -149,7 +149,7 @@ void Check_e_z(TString rootfile){
       name.Form("hEX%02d", idet);
       hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
       expression.Form("e:x>>hEX%02d", idet);
-      gate.Form("detID == %d && hitID >= 0", idet);
+      gate.Form("detID == %d && hitID >= 0 && ring[%d]>-100 && ring[%d]<100", idet,idet,idet);
       tree->Draw(expression, gate, "colz");
       cCheck1->Update();
    }
