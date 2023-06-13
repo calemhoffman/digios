@@ -3,9 +3,10 @@
   // gROOT->ProcessLine(".L GSUtil_new_cc.so");
   //printf("GSUtil_new_cc.so loaded\n");
   gROOT->ProcessLine(".L ../Armory/Check_e_x.C");
-  gROOT->ProcessLine(".L ../Armory/Check_e_z.C");
-  gROOT->ProcessLine(".L ../Armory/Check_alignment.C");
-  gROOT->ProcessLine(".L ../Armory/Check_caliResult.C");
+  // gROOT->ProcessLine(".L ../Armory/Check_e_z.C");
+  // gROOT->ProcessLine(".L ../Armory/Check_alignment.C");
+  // gROOT->ProcessLine(".L ../Armory/Check_caliResult.C");
+  // gROOT->ProcessLine(".L ../Armory/CRH_cals.C");
 
 
   // Set ROOT defaults
