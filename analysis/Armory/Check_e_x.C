@@ -16,7 +16,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
 /**///======================================================== User input
    
    const char* treeName="tree";
-   double eRange[3]  = {400, 0, 8000};
+   double eRange[3]  = {400, 0, 10};
 
 /**///======================================================== read tree and create Canvas
    printf("################### Check_e_x.C ######################\n");
