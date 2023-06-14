@@ -71,7 +71,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    eventID += 1;
    
    b_Energy->GetEntry(entry,0);
-   b_Ring->GetEntry(entry,0);
+   b_RING->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
