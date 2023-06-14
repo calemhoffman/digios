@@ -109,7 +109,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       for( int j = 0; j < 8 ; j++){
          if( TMath::IsNaN(rdt[j]) ) continue; 
          int tdiff = rdt_t[j] - e_t[i];
-         if( -20 < tdiff && tdiff < 20 )  {
+         if( -40 < tdiff && tdiff < 40 )  {
             coinFlag = true;
          }
       }
@@ -122,10 +122,10 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    for(int idet = 0 ; idet < numDet; idet++){
       
-      if( e[idet] < 100 ) continue;
+      //if( e[idet] < 100 ) continue;
       //if( ring[idet] > 100 ) continue;
       if( TMath::IsNaN(e[idet]) ) continue;
-      if( TMath::IsNaN(xf[idet]) && TMath::IsNaN(xn[idet])  ) continue;
+      if( TMath::IsNaN(xf[idet]) || TMath::IsNaN(xn[idet])  ) continue;
       
       if( e[idet] == 0 ) continue;
       if( xf[idet] == 0 && xn[idet] == 0 ) continue;
@@ -136,11 +136,11 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       eTemp = e[idet];
       
       /// range (-1,1)      
-      if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
-      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2* xfC/ eTemp - 1;
-      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
+      //if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
+      if  ( xfC >= eTemp/2. ) xTemp= 2* xfC/ eTemp - 1;
+      if  (  xnC >= eTemp/2. ) xTemp= 1.0 - 2* xnC/ eTemp;
       
-      xTemp = xTemp/xScale[idet];
+      xTemp = xTemp;///xScale[idet];
       
       /*
       if(xfC > eTemp/2.){
@@ -209,16 +209,16 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       coinTimeUC = 10.0 * (coin_t + tcoin_t) ; // in nano-sec
       
       if( isTraceDataExist ){
-         double f7corr = f7[detIDTemp]->Eval(xTemp) + cTCorr[detIDTemp][8];
+         // double f7corr = f7[detIDTemp]->Eval(xTemp) + cTCorr[detIDTemp][8];
          
          //Ad-hoc solution 
-         double rdtCorr = 0;
-         switch(rdtIDtemp){
-            case 0: rdtCorr = 23.0 ; break;
-            case 1: rdtCorr = 0.0 ; break;
-            case 2: rdtCorr = 4.3 ; break;
-            case 3: rdtCorr = 15.3 ; break;
-         }
+         // double rdtCorr = 0;
+         // switch(rdtIDtemp){
+         //    case 0: rdtCorr = 23.0 ; break;
+         //    case 1: rdtCorr = 0.0 ; break;
+         //    case 2: rdtCorr = 4.3 ; break;
+         //    case 3: rdtCorr = 15.3 ; break;
+         // }
          
          coinTime = (coinTimeUC - f7corr) - rdtCorr;
       }

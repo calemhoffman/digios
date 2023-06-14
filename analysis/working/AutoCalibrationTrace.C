@@ -199,7 +199,8 @@ void AutoCalibrationTrace(){
         printf("Step 1) ========= creating smaller tree.\n");
         chain->Process("../Armory/Cali_littleTree_trace.C+");
         double eThreshold = 300;
-        Check_e_x("temp.root", eThreshold);
+        printf("checking vs. e_x");
+//        Check_e_x("temp.root", eThreshold);
         
         caliFile = new TFile ("temp.root", "read");
         if( !caliFile->IsOpen() ){
