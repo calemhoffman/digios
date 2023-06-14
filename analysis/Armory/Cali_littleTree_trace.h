@@ -37,32 +37,68 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
+   Int_t           runID;
    Float_t         e[100];
    ULong64_t       e_t[100];
-   Float_t         ring[100];
+   ULong64_t       EBIS_t;
    Float_t         xf[100];
+   ULong64_t       xf_t[100];
    Float_t         xn[100];
-   Float_t         rdt[100];
-   ULong64_t       rdt_t[100];
+   ULong64_t       xn_t[100];
+   Float_t         ring[100];
+   ULong64_t       ring_t[100];
+   Float_t         rdt[50];
+   ULong64_t       rdt_t[50];
+   Float_t         tac[10];
+   ULong64_t       tac_t[10];
+   Float_t         elum[50];
+   ULong64_t       elum_t[50];
+   Float_t         ezero[50];
+   ULong64_t       ezero_t[50];
    
    //Trace
-   Float_t         te_t[30];
-   Float_t         trdt[8];
-   Float_t         trdt_t[8];
+   Float_t         te[100];
+   Float_t         te_r[100];
+   Float_t         te_t[100];
+   Float_t         te_cfd[100];
+   Float_t         te_rise[100];
+   Float_t         trdt[50];
+   Float_t         trdt_t[50];
+   Float_t         trdt_r[50];
 
    // List of branches
+   TBranch        *b_runID; //!
    TBranch        *b_Energy;   //!
    TBranch        *b_EnergyTimestamp;   //!
-   TBranch        *b_Ring;   //!
+   TBranch        *b_EBISTimestamp;   //!
    TBranch        *b_XF;   //!
+   TBranch        *b_XFTimestamp;   //!
    TBranch        *b_XN;   //!
+   TBranch        *b_XNTimestamp;   //!
+   TBranch        *b_RING;   //!
+   TBranch        *b_RINGTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
+   TBranch        *b_TAC;   //!
+   TBranch        *b_TACTimestamp;   //!
+   TBranch        *b_ELUM;   //!
+   TBranch        *b_ELUMTimestamp;   //!
+   TBranch        *b_EZERO;   //!
+   TBranch        *b_EZEROTimestamp;   //!
    
-   TBranch        *b_Trace_Energy_Time;  //!   
+   TBranch        *b_Trace_Energy;  //!
+   TBranch        *b_Trace_Energy_Time;  //!
+   TBranch        *b_Trace_Energy_RiseTime;  //!
+   
    TBranch        *b_Trace_RDT;  //!
    TBranch        *b_Trace_RDT_Time;  //!
+   TBranch        *b_Trace_RDT_RiseTime;  //!
    
+   bool isRunIDExist;
+   bool isEBISExist;
+   bool isTACExist;
+   bool isELUMExist;
+   bool isEZEROExist;
    bool isTraceDataExist; // if b_Trace_** exist
 
    Cali_littleTree_trace(TTree * /*tree*/ =0) : fChain(0) { }
