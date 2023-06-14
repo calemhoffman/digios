@@ -1314,6 +1314,12 @@ void fitNGauss(TH1F * hist, int bgEst = 10, TString fitFile = "AutoFit_para.txt"
   }
   printf("\n");
 
+  for(int i = 0; i < nPeaks ; i++){
+    printf("%8.4f\n",
+            paraA[3*i+1]);
+  }
+  printf("\n");
+
   //draw the indivual fit
   specS->Draw("hist");
   fit->Draw("same");
