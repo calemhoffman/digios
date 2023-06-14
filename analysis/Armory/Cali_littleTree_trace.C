@@ -220,7 +220,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
          //    case 3: rdtCorr = 15.3 ; break;
          // }
          
-         coinTime = (coinTimeUC - f7corr) - rdtCorr;
+         coinTime = (coinTimeUC);// - f7corr) - rdtCorr;
       }
    }
    //printf("%f \n", coinTime);
