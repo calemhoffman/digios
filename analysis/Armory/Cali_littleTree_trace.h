@@ -189,7 +189,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    fChain->SetBranchAddress("e", e, &b_Energy);
    fChain->SetBranchAddress("xf", xf, &b_XF);
    fChain->SetBranchAddress("xn", xn, &b_XN);
-   fChain->SetBranchAddress("ring", ring, &b_Ring);
+   fChain->SetBranchAddress("ring", ring, &b_RING);
    
    fChain->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
    fChain->SetBranchAddress("rdt", rdt, &b_RDT);
