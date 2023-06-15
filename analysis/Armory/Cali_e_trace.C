@@ -328,18 +328,18 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          
          //Ad-hoc solution 
          double rdtCorrAux = 0;
-         //switch(rdtID){
-         //   case 0: rdtCorrAux = 23.0 ; break;
-         //   case 1: rdtCorrAux = 0.0 ; break;
-         //   case 2: rdtCorrAux = 4.3 ; break;
-         //   case 3: rdtCorrAux = 15.3 ; break;
-         //}
+         switch(rdtID){
+           case 1: rdtCorrAux = 0.5 ; break;
+           case 3: rdtCorrAux = -7.0 ; break;
+           case 5: rdtCorrAux = 2.0 ; break;
+           case 7: rdtCorrAux = 10.0 ; break;
+         }
          
-         coinTimeUC = 10.0*(coin_t + tcoin_t) - rdtCorrAux; // in nano-sec
+         coinTimeUC = 10.0*(coin_t + tcoin_t);// // in nano-sec
          
          double f7corr = f7[det]->Eval(x[det]);// - cTCorr[det][8];
          
-         coinTime = (coinTimeUC - f7corr); //+ corrofftime
+         coinTime = (coinTimeUC - f7corr) - rdtCorrAux;; //+ corrofftime
       }
       
    }
