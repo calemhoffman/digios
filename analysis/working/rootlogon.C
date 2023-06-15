@@ -1,6 +1,6 @@
 {
   printf("rootlogon.C\n");
-  // gROOT->ProcessLine(".L GSUtil_new_cc.so");
+  gROOT->ProcessLine(".L ../Armory/AutoFit.C");
   //printf("GSUtil_new_cc.so loaded\n");
   gROOT->ProcessLine(".L ../Armory/Check_e_x.C");
   // gROOT->ProcessLine(".L ../Armory/Check_e_z.C");
