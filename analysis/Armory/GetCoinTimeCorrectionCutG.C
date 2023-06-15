@@ -118,7 +118,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    }
    
    ///***************
-   //if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
+   if( fileCut->IsOpen() ) gate = "(cut0 || cut1 || cut2 || cut3) && " + gate;
    //if( fileCut->IsOpen() ) gate = "cut0 && " + gate;
    
    printf("%s \n", gate.Data());
