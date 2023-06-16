@@ -1,0 +1,444 @@
+#include <TFile.h>
+#include <TTree.h>
+#include <TCanvas.h>
+#include <TROOT.h>
+#include <TObjArray.h>
+#include <TStyle.h>
+#include <TH2F.h>
+#include <TH1F.h>
+#include <TF1.h>
+#include <TMath.h>
+#include <TSpectrum.h>
+#include <TGraph.h>
+#include <TLegend.h>
+#include <TObjArray.h>
+#include <fstream>
+#include <TCutG.h>
+
+#include "../Armory/AnalysisLibrary.h"
+
+// int nPeakss = 16;
+//TTree *tr = NULL;
+
+bool doEZ=true;
+bool doEx=true;
+bool doRDT=false;
+
+// Double_t fpeaks(Double_t *x, Double_t *par) {
+//    Double_t result = 0;
+//    for (Int_t p=0;p<nPeakss;p++) {
+//       Double_t norm  = par[3*p+0];
+//       Double_t mean  = par[3*p+1];
+//       Double_t sigma = par[3*p+2];
+//       result += norm * TMath::Gaus(x[0],mean,sigma, 1);
+//    }
+//    return result;
+// }
+
+void Check_crh(TString rootfile){  
+/**///======================================================== User input
+   //const char* rootfile="A_gen_run107.root"; 
+   const char* treeName="tree";
+   const char* simfile="transfer.root"; const char* treeNameS="tree";
+
+   int Div[2] = {5,6};  //x,y
+   
+   double ExRange[3] = {180, -1, 6};
+	double eRange[3]  = {400, 0, 10};
+   
+   bool showFx = true;
+   bool showTx = false;
+
+   TString drawOption ="colz"; 
+   //============================= extra calibrations
+   // RDT
+   double rdtCorr[8] = {1.0,1.4,1.0,1.22,1.0,1.2,1.0,1.2};//match DE to E
+   double rdtOff[8] = {0.0,-115.,0.0,104.0,0.0,-36.,0.0,2.0};//offset to match
+   //============================= Set Gates!
+   bool RDTCUT=true;
+   bool RINGCUT=true;
+   bool XCUT=true;
+   bool TIMECUT=true;
+
+   TFile * fileCut = new TFile("rdtCuts.root");
+   
+   TObjArray * cutList = NULL;
+   TCutG ** cut = NULL;
+   
+   TString gate_RDT = "";
+   
+   if( fileCut->IsOpen() ){
+      
+      TObjArray * cutList = (TObjArray*) fileCut->FindObjectAny("cutList");
+      
+      const int numCut = cutList->GetEntries();
+      cut = new TCutG * [numCut];
+      printf(" ======== found %d cuts in %s \n", numCut, fileCut->GetName());
+      for( int i = 0 ; i < numCut; i++){
+         cut[i] = (TCutG* ) cutList->At(i);
+         printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
+      }
+      if (RDTCUT){
+         gate_RDT = "&& (cut3)";
+      }
+   }
+   
+   TString detGate = "";
+   if (RINGCUT) {
+      detGate = detGate + "ring > -100 && ring < 100";
+   }
+   if (XCUT) {
+      detGate = detGate + " && x>=-1.0 && x<=1.0";
+   }
+   TString timeGate = "";
+   if (TIMECUT) {
+      timeGate = " && coinTime > -25 && coinTime < 20";
+   }
+
+/**///======================================================== read tree   
+   printf("################### Check_crh.C ######################\n");
+   
+   printf("det Gate : %s \n", detGate.Data());
+   
+   printf("======================================== \n");
+   
+   
+   TFile *file0 = new TFile (rootfile, "read"); 
+   TTree *tree = (TTree*)file0->Get(treeName);
+   printf("=====> /// %20s //// is loaded. Total #Entry: %10lld \n", rootfile.Data(),  tree->GetEntries());
+   
+   TFile *file1 = new TFile (simfile, "read"); 
+   TTree *sTree = (TTree*)file1->Get(treeNameS);
+   printf("=====> /// %20s //// is loaded. Total #Entry: %10lld \n", simfile,  sTree->GetEntries());
+
+   gStyle->SetOptStat(10001);
+   gStyle->SetStatY(0.9);
+   gStyle->SetStatX(0.9);
+   gStyle->SetStatW(0.4);
+   gStyle->SetStatH(0.2);
+   gStyle->SetLabelSize(0.05, "XY");
+   gStyle->SetTitleFontSize(0.1);
+
+//========================================= detector Geometry
+   string detGeoFileName = "detectorGeo.txt";
+   int numDet;
+   int rDet = 5; // number of detector at different position, row-Det
+   int cDet = 6; // number of detector at same position, column-Det
+
+   double xnCorr[30]; // xn correction for xn = xf
+   double xfxneCorr[30][2]; //xf, xn correction for e = xf + xn
+   
+   printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
+   DetGeo detGeo;
+   TMacro * haha = new TMacro();
+   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
+      detGeo = LoadDetectorGeo(haha);
+      PrintDetGeo(detGeo);
+      rDet = detGeo.nDet;
+      cDet = detGeo.mDet;
+      printf("... done.\n");
+   }else{
+      printf("... fail\n");
+      return;
+   }
+   
+   numDet = rDet * cDet;
+   double zRange[3]= {400, detGeo.zMin-20, detGeo.zMax+20}; // nBin, min, max
+
+
+/**///======================================================== Analysis
+/**///======================================================== e vs z
+   gStyle->SetOptStat("i");
+   gStyle->SetStatY(0.9);
+   gStyle->SetStatX(0.35);
+   gStyle->SetStatW(0.25);
+   gStyle->SetStatH(0.10);
+   gStyle->SetLabelSize(0.035, "XY");
+   gStyle->SetTitleFontSize(0.035);
+   if (doEZ) {
+      TCanvas * cCheck1 = new TCanvas("cCheck1", "cCheck1", 700, 50,  1800, 1400);
+      cCheck1->ToggleEditor();cCheck1->ToggleToolBar();
+      cCheck1->SetGrid(); cCheck1->Divide(3,2);
+      TH2F * hEZ[6];
+      for (int i=0;i<6;i++) {
+         cCheck1->cd(i+1);
+         TString detIDGate;
+         detIDGate.Form("detID >= %d && detID < %d && ",i*5,i*5+5);
+         hEZ[i] = new TH2F(Form("hEZ%d",i), Form("e:z [det %d - %d]; z [mm]; e [MeV]",i*5,i*5+5), zRange[0], zRange[1], zRange[2], eRange[0], eRange[1], eRange[2]);
+         tree->Draw(Form("e:z >> hEZ%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate , drawOption);
+      
+         if( showFx ) {
+            TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
+            int numFx = fxList->GetEntries();
+            for( int i = 0; i < numFx ; i++){
+               fxList->At(i)->Draw("same");
+            }
+         }
+      }
+      cCheck1->Update();
+   }
+
+   /**///======================================================== Ex
+   if (doEx) {
+      TCanvas * cCheck2 = new TCanvas("cCheck2", "cCheck2", 700, 50,  1800, 1600);
+      cCheck2->ToggleEditor();cCheck2->ToggleToolBar();
+      cCheck2->SetGrid(); cCheck2->Divide(5,6);
+      TH1F * hEx[30];
+      TH1F * hExSum;
+      for (int i=0;i<30;i++) {
+         cCheck2->cd(i+1);
+         TString detIDGate;
+         detIDGate.Form("detID == %d &&",i);
+         hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 600,-1,11); //20 keV/ch
+         tree->Draw(Form("Ex >> hEx%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate , drawOption);
+         }
+      // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
+      // cCheck2->Clear(); cCheck2->Divide(3,2);
+      // for (int i=0;i<30;i++) {
+      //    if (i<5) {cCheck->cd(1); hEx[i]-Draw("same")}
+      // }
+      TCanvas * cCheck2b = new TCanvas("cCheck2b", "cCheck2b", 700, 50,  1000, 800);
+      cCheck2b->Clear();
+      hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 600,-1,11); //20 keV/ch
+      tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + gate_RDT + timeGate , drawOption);
+      cCheck2b->Update();
+   }
+    /**///======================================================== RDT
+   if (doRDT) {
+      TCanvas * cCheck3 = new TCanvas("cCheck3", "cCheck3", 700, 50,  1800, 1600);
+      cCheck3->ToggleToolBar();cCheck3->Divide(2,2);
+      TH2F * hRDT[8];
+      TH2F * hRDTg[8];
+      TString exGate("&& Ex<6.0");
+      for (int i=0;i<4;i++) {
+         cCheck3->cd(i+1);
+         hRDT[i] = new TH2F(Form("hRDT%d",2*i+1), Form("RDT  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,500,0,2000);
+         tree->Draw(Form("rdt[%d]:(rdt[%d]*%f+rdt[%d])+%f >> hRDT%d",2*i+1,2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],2*i+1),  "hitID>=0", drawOption);
+         hRDTg[i] = new TH2F(Form("hRDT%dg",2*i+1), Form("RDTg  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,500,0,2000);
+         tree->Draw(Form("rdt[%d]:(rdt[%d]*%f+rdt[%d])+%f >> hRDTg%d",2*i+1,2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],2*i+1),  "hitID>=0 && " + detGate + timeGate + exGate, "same");
+         if (RDTCUT) cut[i]->Draw("same");
+      }
+      // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
+      // cCheck3->Clear(); cCheck3->Divide(3,2);
+      // for (int i=0;i<30;i++) {
+      //    if (i<5) {cCheck->cd(1); hEx[i]-Draw("same")}
+      // }
+      cCheck3->Update();
+   }
+
+/**///======================================================== e vs x
+   // Int_t size[2] = {230,230}; //x,y
+   // TCanvas * cCheck1 = new TCanvas("cCheck1", "cCheck1", 0, 0, size[0]*Div[0], size[1]*Div[1]);
+   // if(cCheck1->GetShowEditor() )cCheck1->ToggleEditor();
+   // if(cCheck1->GetShowToolBar() )cCheck1->ToggleToolBar();
+   // cCheck1->Divide(Div[0],Div[1]);
+   // for( int i = 1; i <= Div[0]*Div[1] ; i++){
+   //    cCheck1->cd(i)->SetGrid();
+   // }
+   
+   // TH2F ** hEX = new TH2F*[numDet];
+   // TString expression, name, gate;
+   // for( int idet = 0 ; idet < numDet ; idet ++){
+   //    cCheck1->cd(idet+1);  
+   //    name.Form("hEX%02d", idet);
+   //    hEX[idet] = new TH2F(name, name, 400, -1.3, 1.3, eRange[0], eRange[1], eRange[2]);
+   //    expression.Form("e:x>>hEX%02d", idet);
+   //    gate.Form("detID == %d && hitID >= 0 && ring[%d]>-100 && ring[%d]<100", idet,idet,idet);
+   //    tree->Draw(expression, gate, "colz");
+   //    cCheck1->Update();
+   // }
+   
+/**///======================================================== Ex and fit
+   
+   // TCanvas * cCheck3 = new TCanvas("cCheck3", "cCheck3", 50, 50,  600, 400);
+   // if(cCheck3->GetShowEditor() )cCheck3->ToggleEditor();
+   // if(cCheck3->GetShowToolBar() )cCheck3->ToggleToolBar();
+   // cCheck3->Divide(1,2);
+   // cCheck3->cd(1)->SetGrid();
+   // cCheck3->cd(1);
+   // gStyle->SetOptStat(0);
+   // gStyle->SetLabelSize(0.05, "XY");
+   // TString titleH;
+   // titleH.Form("excitation energy; Ex [MeV]; Count / %3.0f keV", (ExRange[2] - ExRange[1])*1000/ExRange[0]);
+   // TH1F * hEx = new TH1F("hEx", titleH, ExRange[0], ExRange[1], ExRange[2]);
+   // hEx->GetXaxis()->SetTitleSize(0.06);
+   // hEx->GetYaxis()->SetTitleSize(0.06);
+   // hEx->GetXaxis()->SetTitleOffset(0.7);
+   // hEx->GetYaxis()->SetTitleOffset(0.6);
+   // tree->Draw("Ex >> hEx", detGate + gate_RDT); 
+   
+   
+   // TH1F * specS = (TH1F*) hEx->Clone();
+   // titleH.Form("fitted spectrum; Ex [MeV]; Count / %3.0f keV", (ExRange[2] - ExRange[1])*1000/ExRange[0]);
+   // specS->SetTitle(titleH);   
+   // specS->SetName("specS");
+   // specS->GetXaxis()->SetTitleSize(0.06);
+   // specS->GetYaxis()->SetTitleSize(0.06);
+   // specS->GetXaxis()->SetTitleOffset(0.7);
+   // specS->GetYaxis()->SetTitleOffset(0.6);
+   // //=================== find peak and fit
+   // printf("============= estimate background and find peak\n");
+   // TSpectrum * peak = new TSpectrum(50);
+   // nPeakss = peak->Search(hEx, 1, "", 0.1);
+   // TH1 * h1 = peak->Background(hEx,10);
+   // h1->Draw("same");
+   
+   // cCheck3->cd(2)->SetGrid();
+   // cCheck3->cd(2);
+   
+   // specS->Add(h1, -1.);
+   // specS->Sumw2();
+   // specS->Draw();
+   
+   // //========== Fitting 
+   // printf("============= Fit.....");
+   // printf(" found %d peaks \n", nPeakss);
+   
+   // //float * xpos =  peak->GetPositionX();
+   // //float * ypos =  peak->GetPositionY();
+	// // in root-6, 
+   // double * xpos = peak->GetPositionX();
+   // double * ypos = peak->GetPositionY();
+   
+   // int * inX = new int[nPeakss];
+   // TMath::Sort(nPeakss, xpos, inX, 0 );
+   // vector<double> energy, height;
+   // for( int j = 0; j < nPeakss; j++){
+   //    energy.push_back(xpos[inX[j]]);
+   //    height.push_back(ypos[inX[j]]);
+   // }
+   
+   // const int  n = 3 * nPeakss;
+   // double * para = new double[n]; 
+   // for(int i = 0; i < nPeakss ; i++){
+   //    para[3*i+0] = height[i] * 0.05 * TMath::Sqrt(TMath::TwoPi());
+   //    para[3*i+1] = energy[i];
+   //    para[3*i+2] = 0.08;
+   // }
+
+   // TF1 * fit = new TF1("fit", fpeaks, ExRange[1], ExRange[2], 3* nPeakss );
+   // fit->SetLineWidth(1);
+   // fit->SetNpx(1000);
+   // fit->SetParameters(para);
+   // specS->Fit("fit", "q");
+
+   // printf("============= display\n");   
+   // const Double_t* paraE = fit->GetParErrors();
+   // const Double_t* paraA = fit->GetParameters();
+   
+   // double bw = specS->GetBinWidth(1);
+   
+   // double * ExPos = new double[nPeakss];
+   // double * ExSigma = new double[nPeakss];   
+   // for(int i = 0; i < nPeakss ; i++){
+   //    ExPos[i] = paraA[3*i+1];
+   //    ExSigma[i] = paraA[3*i+2];
+   //    printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
+   //            i, 
+   //            paraA[3*i] / bw,   paraE[3*i] /bw, 
+   //            paraA[3*i+1], paraE[3*i+1],
+   //            paraA[3*i+2], paraE[3*i+2]);
+   // }
+   // cCheck3->Update();
+
+
+/**///======================================================== thetaCM vs Ex
+   // gStyle->SetStatY(0.9);
+   // gStyle->SetStatX(0.9);
+   // TCanvas * cCheck4 = new TCanvas("cCheck4", "cCheck4", 700, 500,  600, 400);
+   // if(cCheck4->GetShowEditor() )cCheck4->ToggleEditor();
+   // if(cCheck4->GetShowToolBar() )cCheck4->ToggleToolBar();
+   // cCheck4->SetGrid();
+   // TH2F * hExTheta = new TH2F("hExTheta", "Ex:thetaCM:z; thetaCM [deg]; Ex [MeV]", 400, 0, 45, ExRange[0], ExRange[1], ExRange[2]);
+   // tree->Draw("Ex:thetaCM >> hExTheta", detGate + gate_RDT,  drawOption); 
+   
+   // if( showTx ) {
+   //    TObjArray * txList = (TObjArray*)  file1->FindObjectAny("txList");
+   //    int numFx = txList->GetEntries();
+   //    for( int i = 0; i < numFx ; i++){
+   //       txList->At(i)->Draw("same");
+   //    }
+   // }
+   // cCheck4->Update();
+
+/**///======================================================== Ex vs z 
+   // gStyle->SetStatY(0.35);
+   // gStyle->SetStatX(0.9);
+   // gStyle->SetStatW(0.25);
+   // gStyle->SetStatH(0.10);
+   // TCanvas * cCheck5 = new TCanvas("cCheck5", "cCheck5", 50, 500,  600, 400);
+   // if(cCheck5->GetShowEditor() )cCheck5->ToggleEditor();
+   // if(cCheck5->GetShowToolBar() )cCheck5->ToggleToolBar();
+   // cCheck5->SetGrid();
+   // TH2F * hExZ = new TH2F("hExZ", "z:Ex; Ex [MeV]; z [mm]", ExRange[0], ExRange[1], ExRange[2], zRange[0], zRange[1], zRange[2]);
+   // tree->Draw("z : Ex >> hExZ", detGate + gate_RDT, drawOption); 
+   // cCheck5->Update();
+
+
+/**///======================================================== thetaCM   
+   // TCanvas * cCheck6 = new TCanvas("cCheck6", "cCheck6", 1300, 50,  600, 400);
+   // if(cCheck6->GetShowEditor() )cCheck6->ToggleEditor();
+   // if(cCheck6->GetShowToolBar() )cCheck6->ToggleToolBar();
+   // cCheck6->SetGrid();
+   // gStyle->SetOptStat(0);
+   
+   // TH1F ** hTheta = new TH1F *[nPeakss];
+   // double yMax = 0;
+   
+   // TLegend * legend = new TLegend(0.6,0.1,0.9,0.35);
+   // legend->SetName("legend");
+   
+   // for(int i = 0; i < nPeakss; i++){
+   //    TString name, title, gate, expression;
+   //    name.Form("hTheta%d", i);
+   //    title.Form("thetaCM +-3Sigma; thetCM * sin() [deg]; count / 0.5 deg");
+   //    hTheta[i] = new TH1F(name, title, 100, 0, 45);
+   //    hTheta[i]->SetLineColor(2*i+2);
+   //    expression.Form("thetaCM >> hTheta%d", i);
+   //    gate.Form("%f > Ex && Ex > %f", ExPos[i] + 3*ExSigma[i], ExPos[i] - 3*ExSigma[i] );
+   //    if( i == 0 )tree->Draw(expression, gate + "&&" + detGate + gate_RDT);
+   //    if( i > 0 )tree->Draw(expression, gate + "&&" + detGate + gate_RDT, "same");
+      
+   //    TString lTitle;
+   //    lTitle.Form("Ex = %6.2f MeV, %3.0f keV", ExPos[i], ExSigma[i]*1000.);
+   //    legend->AddEntry(name,lTitle, "l");
+   
+   //    if( hTheta[i]->GetMaximum() > yMax ) yMax = hTheta[i]->GetMaximum();
+   //    hTheta[0]->GetYaxis()->SetRangeUser(1, yMax*1.5);
+      
+   //    //cCheck6->SetLogy();
+   //    cCheck6->Update();
+   // }
+   
+   // legend->Draw();
+   // cCheck6->Update();
+   
+   //========================== save histograms and fit-result
+   // TFile * saveFile = new TFile("checkResult.root", "recreate");
+   
+   // TObjArray * hEXList = new TObjArray();
+   // for(int i = 0 ; i < numDet; i++){
+	// 	hEXList->Add(hEX[i]);
+	// }
+	// hEXList->Write("hEXList", TObject::kSingleKey);
+	
+	// hEx->Write();
+	// h1->Write();
+	// specS->Write();
+	// fit->Write();
+	
+	// hEZ->Write();
+	// hExZ->Write();
+	// hExTheta->Write();
+	
+	// TObjArray * hThetaList = new TObjArray();
+   // for(int i = 0 ; i < nPeakss; i++){
+	// 	hThetaList->Add(hTheta[i]);
+	// }
+	// hThetaList->Write("hThetaList", TObject::kSingleKey);
+	// legend->Write();
+	
+	// saveFile->Write();
+   
+   // printf("=========> saved histograms in checkResult.root \n");
+}
