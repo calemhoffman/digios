@@ -79,6 +79,8 @@ void RDTCutCreator(TString dataList,
    TH2F * h[4];
 
    int count = 0;
+   double rdtCorr[8] = {1.0,1.4,1.0,1.22,1.0,1.2,1.0,1.2};//match DE to E
+   double rdtOff[8] = {0.0,-115.,0.0,104.0,0.0,-36.,0.0,2.0};//offset to match
    for (Int_t i = 0; i < 4; i++) {
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
@@ -87,15 +89,13 @@ void RDTCutCreator(TString dataList,
          varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
          ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-         varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
+         varX.Form("(rdt[%d]*%f+rdt[%d])+%f",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1]); varY.Form("rdt[%d]",2*i+1);
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 0, eRange, 1000, 0, deRange);
 
-      expression[i].Form("%s*%f +%f:%s*%f+%f>>h%d", 
-                         varY.Data(), rdtCorr2[2*i+1][0], rdtCorr2[2*i+1][1],
-                         varX.Data(), rdtCorr2[2*i][0],   rdtCorr2[2*i][1],
-                         i);
+      expression[i].Form("%s:%s>>h%d", 
+                         varY.Data(),varX.Data(),i);
                          
       ///printf("%s \n", expression[i].Data());
 
