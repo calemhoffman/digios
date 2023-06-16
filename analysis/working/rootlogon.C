@@ -1,9 +1,10 @@
 {
   printf("rootlogon.C\n");
   gROOT->ProcessLine(".L ../Armory/AutoFit.C");
-  //gROOT->ProcessLine(".L ../Armory/GetCoinTimeCorrectionCutG.C");
+  gROOT->ProcessLine(".L ../Armory/GetCoinTimeCorrectionCutG.C");
   gROOT->ProcessLine(".L ../Armory/Check_e_x.C");
   gROOT->ProcessLine(".L ../Armory/Check_e_z.C");
+  gROOT->ProcessLine(".L ../Armory/Check_crh.C");
   // gROOT->ProcessLine(".L ../Armory/Check_alignment.C");
   // gROOT->ProcessLine(".L ../Armory/Check_caliResult.C");
   // gROOT->ProcessLine(".L ../Armory/CRH_cals.C");
