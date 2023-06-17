@@ -22,7 +22,11 @@
 
 bool doEZ=true;
 bool doEx=true;
-bool doRDT=false;
+bool doRDT=true;
+   bool RDTCUT=true;
+   bool RINGCUT=true;
+   bool XCUT=true;
+   bool TIMECUT=true;
 
 // Double_t fpeaks(Double_t *x, Double_t *par) {
 //    Double_t result = 0;
@@ -55,10 +59,7 @@ void Check_crh(TString rootfile){
    double rdtCorr[8] = {1.0,1.4,1.0,1.22,1.0,1.2,1.0,1.2};//match DE to E
    double rdtOff[8] = {0.0,-115.,0.0,104.0,0.0,-36.,0.0,2.0};//offset to match
    //============================= Set Gates!
-   bool RDTCUT=true;
-   bool RINGCUT=true;
-   bool XCUT=true;
-   bool TIMECUT=true;
+
 
    TFile * fileCut = new TFile("rdtCuts.root");
    
@@ -79,7 +80,7 @@ void Check_crh(TString rootfile){
          printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
       }
       if (RDTCUT){
-         gate_RDT = "&& (cut3)";
+         gate_RDT = "&& ((cut0) || (cut1) || (cut2) || (cut3))";
       }
    }
    
