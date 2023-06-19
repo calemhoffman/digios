@@ -92,7 +92,7 @@ void RDTCutCreator(TString dataList,
          varX.Form("(rdt[%d]*%f+rdt[%d])+%f",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1]); varY.Form("rdt[%d]",2*i+1);
       }
 
-      h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 0, eRange, 1000, 0, deRange);
+      h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 3000, eRange, 1000, 500, deRange);
 
       expression[i].Form("%s:%s>>h%d", 
                          varY.Data(),varX.Data(),i);

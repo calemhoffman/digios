@@ -23,7 +23,7 @@
 bool doEZ=true;
 bool doEx=true;
 bool doRDT=true;
-   bool RDTCUT=false;
+   bool RDTCUT=true;
    bool RINGCUT=true;
    bool XCUT=true;
    bool TIMECUT=true;
@@ -80,7 +80,7 @@ void Check_crh(TString rootfile){
          printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
       }
       if (RDTCUT){
-         gate_RDT = "&& ((cut0) || (cut1) || (cut2) || (cut3))";
+         gate_RDT = "&& ((!cut0) || (!cut1) || (!cut2) || (!cut3))";
       }
    }
    
