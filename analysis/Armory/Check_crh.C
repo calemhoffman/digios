@@ -23,7 +23,7 @@
 bool doEZ=true;
 bool doEx=true;
 bool doRDT=true;
-   bool RDTCUT=true;
+   bool RDTCUT=false;
    bool RINGCUT=true;
    bool XCUT=true;
    bool TIMECUT=true;
