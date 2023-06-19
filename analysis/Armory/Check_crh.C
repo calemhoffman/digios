@@ -20,13 +20,15 @@
 // int nPeakss = 16;
 //TTree *tr = NULL;
 
-bool doEZ=true;
+bool doEZ=false;
 bool doEx=true;
 bool doRDT=true;
-   bool RDTCUT=true;
-   bool RINGCUT=true;
-   bool XCUT=true;
-   bool TIMECUT=true;
+bool doEx2d=true;
+
+bool RDTCUT=true;
+bool RINGCUT=true;
+bool XCUT=true;
+bool TIMECUT=true;
 
 // Double_t fpeaks(Double_t *x, Double_t *par) {
 //    Double_t result = 0;
@@ -80,7 +82,7 @@ void Check_crh(TString rootfile){
          printf("cut name: %s , VarX: %s, VarY: %s\n", cut[i]->GetName(), cut[i]->GetVarX(), cut[i]->GetVarY()); 
       }
       if (RDTCUT){
-         gate_RDT = "&& ((!cut0) || (!cut1) || (!cut2) || (!cut3))";
+         gate_RDT = "&& ((cut0) || (cut1) || (cut2) || (cut3))";
       }
    }
    
@@ -179,13 +181,32 @@ void Check_crh(TString rootfile){
       cCheck1->Update();
    }
 
+      /**///======================================================== Ex2d
+   if (doEx2d) {
+      TCanvas * cCheckEx2d = new TCanvas("cCheckEx2d", "cCheckEx2d", 700, 50,  1800, 1600);
+      cCheckEx2d->ToggleEditor();cCheckEx2d->ToggleToolBar();
+      cCheckEx2d->SetGrid(); cCheckEx2d->Divide(3,2);
+      TH2F * hExCoinT;
+      TH2F * hExRDT[4];
+      cCheckEx2d->cd(1);
+      hExCoinT = new TH2F("hExCoinT","hExCoinT; Ex; coinTime",100,-100,100,600,-1,11);
+      tree->Draw("Ex:coinTime>>hExCoinT","hitID>=0 && " + detGate + gate_RDT, "colz");
+      for (int i=0;i<4;i++) {
+         cCheckEx2d->cd(i+3);
+         hExRDT[i] = new TH2F(Form("hExRdT%d",i), Form("ExRDT [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,2000,6000,600,-1,11); //20 keV/ch
+         tree->Draw(Form("Ex:((rdt[%d]*%f+rdt[%d])+%f) >> hExRdT%d",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],i), "hitID>=0 && " + detGate , drawOption);
+      }
+      cCheckEx2d->Update();
+   }
+
    /**///======================================================== Ex
    if (doEx) {
-      TCanvas * cCheck2 = new TCanvas("cCheck2", "cCheck2", 700, 50,  1800, 1600);
+      TCanvas * cCheck2 = new TCanvas("cCheck2", "cCheck2", 700, 50,  1400, 1200);
       cCheck2->ToggleEditor();cCheck2->ToggleToolBar();
       cCheck2->SetGrid(); cCheck2->Divide(5,6);
       TH1F * hEx[30];
       TH1F * hExSum;
+      TH1F * hExSum2;
       for (int i=0;i<30;i++) {
          cCheck2->cd(i+1);
          TString detIDGate;
@@ -201,7 +222,10 @@ void Check_crh(TString rootfile){
       TCanvas * cCheck2b = new TCanvas("cCheck2b", "cCheck2b", 700, 50,  1000, 800);
       cCheck2b->Clear();
       hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 600,-1,11); //20 keV/ch
-      tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + gate_RDT + timeGate , drawOption);
+      hExSum2 = new TH1F(Form("hExSum2"), Form("Ex2 [sum]; Ex [MeV]"), 600,-1,11); //20 keV/ch
+
+      tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + timeGate , drawOption);
+      tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate , "same");
       cCheck2b->Update();
    }
     /**///======================================================== RDT
