@@ -22,13 +22,14 @@
 
 bool doEZ=false;
 bool doEx=true;
-bool doRDT=true;
+bool doRDT=false;
 bool doEx2d=true;
 
 bool RDTCUT=true;
 bool RINGCUT=true;
 bool XCUT=true;
 bool TIMECUT=true;
+bool THETACUT=true;
 
 // Double_t fpeaks(Double_t *x, Double_t *par) {
 //    Double_t result = 0;
@@ -96,6 +97,11 @@ void Check_crh(TString rootfile){
    TString timeGate = "";
    if (TIMECUT) {
       timeGate = " && coinTime > -25 && coinTime < 20";
+   }
+
+   TString thetaGate = "";
+   if (THETACUT) {
+      thetaGate = " && thetaCM > 20";
    }
 
 /**///======================================================== read tree   
@@ -168,7 +174,7 @@ void Check_crh(TString rootfile){
          TString detIDGate;
          detIDGate.Form("detID >= %d && detID < %d && ",i*5,i*5+5);
          hEZ[i] = new TH2F(Form("hEZ%d",i), Form("e:z [det %d - %d]; z [mm]; e [MeV]",i*5,i*5+5), zRange[0], zRange[1], zRange[2], eRange[0], eRange[1], eRange[2]);
-         tree->Draw(Form("e:z >> hEZ%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate , drawOption);
+         tree->Draw(Form("e:z >> hEZ%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate + thetaGate  , drawOption);
       
          if( showFx ) {
             TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
@@ -188,13 +194,17 @@ void Check_crh(TString rootfile){
       cCheckEx2d->SetGrid(); cCheckEx2d->Divide(3,2);
       TH2F * hExCoinT;
       TH2F * hExRDT[4];
+      TH2F * hExRDTde[4];
+
       cCheckEx2d->cd(1);
-      hExCoinT = new TH2F("hExCoinT","hExCoinT; Ex; coinTime",100,-100,100,600,-1,11);
+      hExCoinT = new TH2F("hExCoinT","hExCoinT; Ex; coinTime",100,-100,100,700,-1,13);
       tree->Draw("Ex:coinTime>>hExCoinT","hitID>=0 && " + detGate + gate_RDT, "colz");
       for (int i=0;i<4;i++) {
          cCheckEx2d->cd(i+3);
-         hExRDT[i] = new TH2F(Form("hExRdT%d",i), Form("ExRDT [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,2000,6000,600,-1,11); //20 keV/ch
-         tree->Draw(Form("Ex:((rdt[%d]*%f+rdt[%d])+%f) >> hExRdT%d",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],i), "hitID>=0 && " + detGate , drawOption);
+         // hExRDTde[i] = new TH2F(Form("hExRDTde%d",i), Form("ExRDTde [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,0,2200,700,-1,13); //20 keV/ch
+         // tree->Draw(Form("Ex:rdt[%d] >> hExRDTde%d",2*i+1,i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
+         hExRDT[i] = new TH2F(Form("hExRdT%d",i), Form("ExRDT [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,2000,6000,700,-1,13); //20 keV/ch
+         tree->Draw(Form("Ex:((rdt[%d]*%f+rdt[%d])+%f) >> hExRdT%d",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
       }
       cCheckEx2d->Update();
    }
@@ -207,12 +217,13 @@ void Check_crh(TString rootfile){
       TH1F * hEx[30];
       TH1F * hExSum;
       TH1F * hExSum2;
+      TH2F * hExAng;
       for (int i=0;i<30;i++) {
          cCheck2->cd(i+1);
          TString detIDGate;
          detIDGate.Form("detID == %d &&",i);
-         hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 600,-1,11); //20 keV/ch
-         tree->Draw(Form("Ex >> hEx%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate , drawOption);
+         hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
+         tree->Draw(Form("Ex >> hEx%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
          }
       // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
       // cCheck2->Clear(); cCheck2->Divide(3,2);
@@ -221,12 +232,17 @@ void Check_crh(TString rootfile){
       // }
       TCanvas * cCheck2b = new TCanvas("cCheck2b", "cCheck2b", 700, 50,  1000, 800);
       cCheck2b->Clear();
-      hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 600,-1,11); //20 keV/ch
-      hExSum2 = new TH1F(Form("hExSum2"), Form("Ex2 [sum]; Ex [MeV]"), 600,-1,11); //20 keV/ch
+      hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
+      hExSum2 = new TH1F(Form("hExSum2"), Form("Ex2 [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
+      hExAng = new TH2F(Form("hExAng"), Form("ExAng [sum]; Ex [MeV] ; Ang [deta]"), 500,0,60,700,-1,13); //20 keV/ch
 
       tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + timeGate , drawOption);
-      tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate , "same");
+      tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "same");
       cCheck2b->Update();
+
+      TCanvas * cCheck2c = new TCanvas("cCheck2c", "cCheck2c", 700, 50,  1000, 800);
+      cCheck2c->Clear();
+      tree->Draw(Form("Ex:thetaCM >> hExAng"),  "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "colz");
    }
     /**///======================================================== RDT
    if (doRDT) {
