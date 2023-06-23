@@ -25,7 +25,7 @@ bool doEx=true;
 bool doRDT=false;
 bool doEx2d=true;
 
-bool RDTCUT=true;
+bool RDTCUT=false;
 bool RINGCUT=true;
 bool XCUT=true;
 bool TIMECUT=true;
@@ -101,7 +101,7 @@ void Check_crh(TString rootfile){
 
    TString thetaGate = "";
    if (THETACUT) {
-      thetaGate = " && thetaCM > 20";
+      thetaGate = " && thetaCM > 15";
    }
 
 /**///======================================================== read tree   
