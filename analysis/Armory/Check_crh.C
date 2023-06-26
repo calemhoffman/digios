@@ -22,7 +22,7 @@
 
 bool doEZ=false;
 bool doEx=true;
-bool doRDT=false;
+bool doRDT=true;
 bool doEx2d=true;
 
 bool RDTCUT=false;
