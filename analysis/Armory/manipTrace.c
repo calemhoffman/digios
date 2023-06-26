@@ -134,6 +134,14 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
          //slopeMax = (tempY[maxID] - tempY[100])/((float)maxID-100.);
          data[id][15] = slopeMax; data[id][16] = slopeID;
          //printf("metha1, metha2: %f %f\n",metha[id][1],metha[id][0]);
+
+         Double_t range=(maxValue - data[id][11]);
+         //second loop for risetime / slop from % values
+         // for (int j=0;j<300;j++) { //second full loop so add ifs 
+         //    if (tempY[j] > (0.1*range+data[id][11]) && slope10==0) {}
+         // }//
+
+
         // fill the histograms
         if (detID >= 100 && detID <=107) {
          hrdta[id]->Fill(metha[id][1] - metha[id][0]);hrdtb[id]->Fill(methb[id][1] - methb[id][0]);
