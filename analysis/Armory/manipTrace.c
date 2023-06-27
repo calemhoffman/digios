@@ -70,9 +70,10 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       hmaxID[i] = new TH1F(Form("hmaxID%d",i),Form("hmaxID%d ; hmaxID [arb]",i),400,0,400);
       hbase[i] = new TH1F(Form("hbase%d",i),Form("hbase%d ; Base [arb]",i),400,7000,9000);
       hslope[i] = new TH1F(Form("hslope%d",i),Form("hslope%d ; Eres [arb]",i),1000,0,200);
+      hrise[i] = new TH1F(Form("hrise%d",i),Form("hrise%d ; rise [arb]",i),500,0,250);
       hslopeID[i] = new TH1F(Form("hslopeID%d",i),Form("hslopeID%d ; hslopeID [arb]",i),400,0,400);
-      hrise[i] = new TH1F(Form("hrise%d",i),Form("hrise%d ; Eres [arb]",i),200,0,200);
       heVslope[i] = new TH2F(Form("heVslope%d",i),Form("heVslope%d ; Eres [arb]; Slope [arb]",i),1000,0,4500,200,0,200);
+      hriseVe[i] = new TH2F(Form("hriseVe%d",i),Form("hriseVe%d ; Eres [arb]; rise [arb]",i),2000,100,6500,500,0,250);
       heVslopeID[i] = new TH2F(Form("heVslopeID%d",i),Form("heVslopeID%d ; Eres [arb]; SlopeID [arb]",i),1000,0,4500,200,0,200);
       if (i<4) {
          hdeVe[i] = new TH2F(Form("hdeVe%d",2*i),Form("hdeVe%d",2*i),500,2000,6000,500,0,2000);
@@ -84,7 +85,8 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       tree->GetEntry(ev);
       int nTrace = arr->GetEntriesFast();
       int countJ = 0;
-      Double_t data[8][20];// id, [0 - 10 energies, 11 - baseVal, 12-baseID, 13 - maxVal, 14 - maxID, 15 - slope, 16 - slopeID, 17 - rise] for each reaciton
+      Double_t data[8][20];// id, [0 - 10 energies, 11 - baseVal, 12-baseID, 13 - maxVal, 14 - maxID, 15 - slope, 
+      // 16 - slopeID, 17 - rise] for each reaciton
       for (int ii=0;ii<8;ii++) {
          for (int jj=0;jj<20;jj++) {
             data[ii][jj]=TMath::QuietNaN();
@@ -129,18 +131,30 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
          metha[id][0] = metha[id][0]/65.;metha[id][1] = metha[id][1]/65.;methb[id][0] = methb[id][0]/65.;
          methb[id][1] = methb[id][1]/95.;
          data[id][0] = methb[id][1] - methb[id][0];
+         data[id][1] = metha[id][1] - metha[id][0];
+         data[id][2] = maxValue - metha[id][0];
          data[id][11] = metha[id][0]; data[id][12] = baseID;
          data[id][13] = maxValue;data[id][14] = maxID;
          //slopeMax = (tempY[maxID] - tempY[100])/((float)maxID-100.);
-         data[id][15] = slopeMax; data[id][16] = slopeID;
+         data[id][15] = 220. - slopeMax; data[id][16] = slopeID;
          //printf("metha1, metha2: %f %f\n",metha[id][1],metha[id][0]);
 
-         Double_t range=(maxValue - data[id][11]);
+         Double_t range=(maxValue - data[id][11]); //could also just use the energy! range=data[id][0];
+         Double_t tenPercent=0.0;
+         Double_t nintyPercent=0.0;
          //second loop for risetime / slop from % values
-         // for (int j=0;j<300;j++) { //second full loop so add ifs 
-         //    if (tempY[j] > (0.1*range+data[id][11]) && slope10==0) {}
-         // }//
-
+         //could also norm all the traces to view them
+         for (int j=0;j<300;j++) { //second full loop so add ifs 
+            if ((tempY[j] > 0.1*range+data[id][11]) && tenPercent==0.0) {
+               Double_t tempSlope = (tempY[j] - tempY[j+1]);
+               tenPercent = (Double_t)j - ( tempY[j]- (range*0.1+data[id][11])) / tempSlope;
+            }
+            if ((tempY[j] > 0.9*range+data[id][11]) && nintyPercent==0.0) {
+               Double_t tempSlope = (tempY[j] - tempY[j-1]); //pos or negative ?????
+               nintyPercent = (Double_t)j - 1. - (tempY[j-1]- (range*0.9+data[id][11])) / tempSlope;
+            }
+         }//
+         data[id][17] = 200.0 - (nintyPercent - tenPercent);
 
         // fill the histograms
         if (detID >= 100 && detID <=107) {
@@ -149,13 +163,15 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
          hslope[id]->Fill(data[id][15]); hslopeID[id]->Fill(data[id][16]);
          heVslope[id]->Fill(metha[id][1]-metha[id][0],data[id][15]);
          heVslopeID[id]->Fill(metha[id][1]-metha[id][0],data[id][16]);
+         hrise[id]->Fill(data[id][17]);
         }
          countJ ++;   
       }
       for (int mm = 0 ; mm < 4; mm++) {
-         if (data[2*mm][0] > 100 && data[2*mm+1][0]> 100){
+         if (data[2*mm][0] > 100 /*&& data[2*mm+1][0]> 100*/){
             hdeVe[mm]->Fill(data[2*mm][0]+1.25*data[2*mm+1][0],data[2*mm+1][0]);
             hslopeVe[mm]->Fill(data[2*mm][0]+1.25*data[2*mm+1][0],(data[2*mm][15]));
+            hriseVe[mm]->Fill(data[2*mm][0],data[2*mm][17]); 
          }
       }
       if (ev%10000 == 0) {
@@ -176,6 +192,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       // hrdtb[i*2]->SetLineColor(kBlue); hrdtb[2*i]->Draw("");
       // hslope[i*2]->Draw();
       hdeVe[i]->Draw("colz");
+      // hrise[i*2]->Draw();
    }
     TCanvas * cRead2 = new TCanvas("cRead2", "Read Trace2", 1000, 2500, 1200, 1000);
    cRead2->Clear(); cRead2->Divide(2,2);
@@ -185,6 +202,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       // hrdtb[i*2]->SetLineColor(kBlue); hrdtb[2*i]->Draw("");
       // hslope[i*2]->Draw();
       // heVslopeID[i*2]->Draw("colz");
-      hslopeVe[i]->Draw("colz");
+      // hslopeVe[i]->Draw("colz");
+      hriseVe[i]->Draw("colz");
    }
 }
