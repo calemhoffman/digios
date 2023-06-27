@@ -52,6 +52,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
    TH1F * hmax[8];
    TH1F * hmaxID[8];
    TH1F * hslope[8];
+   TH1F * hpostSlope[8];
    TH1F * hslopeID[8];
    TH1F * hrise[8];
 
@@ -59,6 +60,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
    TH2F * hslopeVe[4];
    TH2F * hriseVe[4];
    TH2F * heVslope[8];
+   TH2F * heVpostSlope[8];
    TH2F * heVslopeID[8];
    TH2F * heVmaxID[8];
    double rdtCorr[8] = {1.0,1.4,1.0,1.22,1.0,1.2,1.0,1.2};//match DE to E
@@ -70,9 +72,11 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       hmaxID[i] = new TH1F(Form("hmaxID%d",i),Form("hmaxID%d ; hmaxID [arb]",i),400,0,400);
       hbase[i] = new TH1F(Form("hbase%d",i),Form("hbase%d ; Base [arb]",i),400,7000,9000);
       hslope[i] = new TH1F(Form("hslope%d",i),Form("hslope%d ; Eres [arb]",i),1000,0,200);
+      hpostSlope[i] = new TH1F(Form("hpostSlope%d",i),Form("hpostSlope%d ; postSlope [arb]",i),1000,-1,1);
       hrise[i] = new TH1F(Form("hrise%d",i),Form("hrise%d ; rise [arb]",i),500,0,250);
       hslopeID[i] = new TH1F(Form("hslopeID%d",i),Form("hslopeID%d ; hslopeID [arb]",i),400,0,400);
       heVslope[i] = new TH2F(Form("heVslope%d",i),Form("heVslope%d ; Eres [arb]; Slope [arb]",i),1000,0,4500,200,0,200);
+      heVpostSlope[i] = new TH2F(Form("heVpostSlope%d",i),Form("heVpostSlope%d ; Eres [arb]; postSlope [arb]",i),1000,0,4500,500,-1,1);
       hriseVe[i] = new TH2F(Form("hriseVe%d",i),Form("hriseVe%d ; Eres [arb]; rise [arb]",i),2000,100,6500,500,0,250);
       heVslopeID[i] = new TH2F(Form("heVslopeID%d",i),Form("heVslopeID%d ; Eres [arb]; SlopeID [arb]",i),1000,0,4500,200,0,200);
       if (i<4) {
@@ -117,9 +121,16 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
          Double_t maxValue=0; Int_t maxID=0;
          Int_t baseID=100; // % use LED value for now
          Double_t slopeMax=0; Int_t slopeID=0;
+         Double_t tmpA=0.;
+         Double_t tmpB=0.;
+         Double_t postSlope=0.;
          for (int j=0;j<300;j++) { //full loop so add ifs 
+            if (j<5) {
+               tmpA += tempY[220+j]/5.;
+               tmpB += tempY[290+j]/5.;
+            }
             if (j<65) {
-               methb[id][0]+=tempY[j];metha[id][0]+=tempY[j];metha[id][1]+=tempY[j+205];
+               methb[id][0]+=tempY[j];metha[id][0]+=tempY[j];metha[id][1]+=tempY[j+225];
                }
             if (j<95) {methb[id][1]+=tempY[j+155]; }
             if (j<200) {
@@ -138,6 +149,10 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
          //slopeMax = (tempY[maxID] - tempY[100])/((float)maxID-100.);
          data[id][15] = 220. - slopeMax; data[id][16] = slopeID;
          //printf("metha1, metha2: %f %f\n",metha[id][1],metha[id][0]);
+         postSlope = (tmpB - tmpA)/70.;
+         data[id][18] = postSlope;
+         // data[id][0] = data[id][0] - (data[id][18]*95.0);
+         // data[id][1] = data[id][1] - (data[id][18]*65.0);
 
          Double_t range=(maxValue - data[id][11]); //could also just use the energy! range=data[id][0];
          Double_t tenPercent=0.0;
@@ -164,17 +179,19 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
          heVslope[id]->Fill(metha[id][1]-metha[id][0],data[id][15]);
          heVslopeID[id]->Fill(metha[id][1]-metha[id][0],data[id][16]);
          hrise[id]->Fill(data[id][17]);
+         hpostSlope[id]->Fill(data[id][18]);
         }
          countJ ++;   
       }
       for (int mm = 0 ; mm < 4; mm++) {
          if (data[2*mm][0] > 100 /*&& data[2*mm+1][0]> 100*/){
-            hdeVe[mm]->Fill(data[2*mm][0]+1.25*data[2*mm+1][0],data[2*mm+1][0]);
+            if (data[2*mm][18]<-0.2) hdeVe[mm]->Fill(data[2*mm][0]+1.25*data[2*mm+1][0],data[2*mm+1][0]);
             hslopeVe[mm]->Fill(data[2*mm][0]+1.25*data[2*mm+1][0],(data[2*mm][15]));
             hriseVe[mm]->Fill(data[2*mm][0],data[2*mm][17]); 
+            heVpostSlope[mm]->Fill(data[2*mm+1][0],data[2*mm+1][18]); 
          }
       }
-      if (ev%10000 == 0) {
+      if (ev%100000 == 0) {
           if (nTrace == 1) {printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d | detID : %d\n", ev, evPointer, nTrace, detID);}
        else {
        printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d\n", ev, evPointer, nTrace);
@@ -193,6 +210,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       // hslope[i*2]->Draw();
       hdeVe[i]->Draw("colz");
       // hrise[i*2]->Draw();
+      // hpostSlope[i*2]->Draw();
    }
     TCanvas * cRead2 = new TCanvas("cRead2", "Read Trace2", 1000, 2500, 1200, 1000);
    cRead2->Clear(); cRead2->Divide(2,2);
@@ -203,6 +221,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       // hslope[i*2]->Draw();
       // heVslopeID[i*2]->Draw("colz");
       // hslopeVe[i]->Draw("colz");
-      hriseVe[i]->Draw("colz");
+      //hriseVe[i]->Draw("colz");
+      heVpostSlope[i]->Draw("colz");
    }
 }
