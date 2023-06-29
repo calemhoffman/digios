@@ -335,7 +335,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
            case 7: rdtCorrAux = 10.0 ; break;
          }
          
-         coinTimeUC = 10.0*(coin_t + tcoin_t);// // in nano-sec
+         coinTimeUC = 10.0*((float)coin_t + tcoin_t);// // in nano-sec
          
          double f7corr = f7[det]->Eval(x[det]);// - cTCorr[det][8];
          

@@ -63,7 +63,7 @@ void manipTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool is
       tree->GetEntry(ev);
       int nTrace = arr->GetEntriesFast();
       int countJ = 0;
-      Double_t data[50][20];// id, e, e, [e3,xf0,xn1,r4], slope, rise, ... id=0-3, det 21, id=4 - 7 det 22
+      Double_t data[50][20];// id, e, e, [e2,xf0,xn1,r3], slope, rise, ... id=0-3, det 21, id=4 - 7 det 22
       for (int ii=0;ii<50;ii++) {
          for (int jj=0;jj<20;jj++) {
             data[ii][jj]=TMath::QuietNaN();
