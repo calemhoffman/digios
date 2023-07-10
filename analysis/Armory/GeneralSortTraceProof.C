@@ -703,11 +703,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
 
             if( isSaveFitTrace ) {
-               gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               //gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);
             }else{
-               gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
-               //gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               //gTrace->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
+               gSmooth->Fit("gFit", "QR0", "", fitRange[0], fitRange[1]);
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
