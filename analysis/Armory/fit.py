@@ -178,7 +178,70 @@ fig.add_trace(go.Scatter(x=df_efit['ch'],y=df_efit['e'],
                          mode='markers'))
 mm=1./m
 bb=1./b
-print('y (etot) = 1/%.6f*x + 1/%.4f' % (mm, bb))
+print('y = 1/%.6f*x + 1/%.4f' % (mm, bb))
 fig.show()
 
+# %%
+det20a = [[0.0,6.785],[3.133,3.704],[3.533,3.275]]
+df_det20a = pd.DataFrame(det20a,columns=['e','ch'])
+x1 = df_det20a['ch'].to_numpy()#
+y1 = df_det20a['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det20a = %.6f*x + %.4f' % (m, b))
+
+det20b = [[0.0,6.723],
+[0.752,5.965],
+[3.133,3.650],
+[3.533,3.254]]
+df_det20b = pd.DataFrame(det20b,columns=['e','ch'])
+x1 = df_det20b['ch'].to_numpy()#
+y1 = df_det20b['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det20b = %.6f*x + %.4f' % (m, b))
+
+det21a = [[0.0,7.770],
+[0.752,7.047],
+[3.133,4.748],
+[3.533,4.377],
+[4.382,3.513]]
+df_det21a = pd.DataFrame(det21a,columns=['e','ch'])
+x1 = df_det21a['ch'].to_numpy()#
+y1 = df_det21a['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det21a = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 10, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det21a['ch'],y=df_det21a['e'],
+                         mode='markers'))
+
+det21b = [[0.0,7.842],
+[0.752,7.088],
+[3.133,4.784],
+[3.533,4.386],
+[4.382,3.600]]
+df_det21b = pd.DataFrame(det21b,columns=['e','ch'])
+x1 = df_det21b['ch'].to_numpy()#
+y1 = df_det21b['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det21b = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 10, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det21b['ch'],y=df_det21b['e'],
+                         mode='markers'))
 # %%
