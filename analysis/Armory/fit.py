@@ -244,4 +244,95 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
 fig.add_trace(go.Scatter(x=df_det21b['ch'],y=df_det21b['e'],
                          mode='markers'))
+det22a = [[0.752,8.055],
+[3.133,5.79],
+[3.533,5.407]]
+df_det22a = pd.DataFrame(det22a,columns=['e','ch'])
+x1 = df_det22a['ch'].to_numpy()#
+y1 = df_det22a['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det22a = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 10, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det22a['ch'],y=df_det22a['e'],
+                         mode='markers'))
+det22b = [[0.752,7.965],
+[3.133,5.765],
+[3.533,5.415],
+[5.281,3.693]]
+df_det22b = pd.DataFrame(det22b,columns=['e','ch'])
+x1 = df_det22b['ch'].to_numpy()#
+y1 = df_det22b['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det22b = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 10, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det22b['ch'],y=df_det22b['e'],
+                         mode='markers'))
+det23a = [[0.752,9.148],
+[3.133,6.840],
+[3.533,6.44],
+[5.281,4.754]]
+df_det23a = pd.DataFrame(det23a,columns=['e','ch'])
+x1 = df_det23a['ch'].to_numpy()#
+y1 = df_det23a['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det23a = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 11, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det23a['ch'],y=df_det23a['e'],
+                         mode='markers'))
+det23b = [[0.752,9.148],
+[3.133,6.81],
+[3.533,6.40],
+[5.281,4.68]]
+df_det23b = pd.DataFrame(det23b,columns=['e','ch'])
+x1 = df_det23b['ch'].to_numpy()#
+y1 = df_det23b['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det23b = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 11, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det23b['ch'],y=df_det23b['e'],
+                         mode='markers'))
+det24a = [[3.133,7.918],
+[3.533,7.526],
+[4.3,6.738],
+[5.281,5.812],
+[7.4,3.66]]#,
+#[3.02]]
+df_det24a = pd.DataFrame(det24a,columns=['e','ch'])
+x1 = df_det24a['ch'].to_numpy()#
+y1 = df_det24a['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det24a = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 11, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det24a['ch'],y=df_det24a['e'],
+                         mode='markers'))
 # %%
