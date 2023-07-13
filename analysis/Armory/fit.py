@@ -335,4 +335,72 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
 fig.add_trace(go.Scatter(x=df_det24a['ch'],y=df_det24a['e'],
                          mode='markers'))
+det24b = [[3.133,7.84],
+[3.533,7.43],
+[5.28,5.72],
+[5.44,5.56],
+[7.9,3.52]]#,
+#[3.02]]
+df_det24b = pd.DataFrame(det24b,columns=['e','ch'])
+x1 = df_det24b['ch'].to_numpy()#
+y1 = df_det24b['e'].to_numpy()#
+def objective(x, m, b):
+	return m*x + b
+popt1, _ = curve_fit(objective, x1, y1)
+m, b = popt1
+print('det24b = %.6f*x + %.4f' % (m, b))
+x_line = arange(0, 11, 1)
+y_line1 = objective(x_line, m, b)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+fig.add_trace(go.Scatter(x=df_det24b['ch'],y=df_det24b['e'],
+                         mode='markers'))
+# %%
+def objective(x, m, b):
+	return m*x + b
+
+col0 = [0.0,0.752,2.788,3.133,3.533,4.382,5.281]
+df = pd.DataFrame(col0,columns=['e'])
+
+det0a = [-0.0234,0.7813,2.7860,3.1740,3.5840,None,None]
+df['det0a'] = det0a
+det0b = [-0.0369,0.7508,2.8141,3.1715,3.5900,None,None]
+df['det0b'] = det0b
+
+det1a = [0.0617,
+  0.8180,
+  2.7785,
+  3.1765,
+  3.5777,
+  4.4202,
+  5.3173]
+df['det1a'] = det1a
+det1b = [0.0073,
+  0.7973,
+  2.7229,
+  3.1662,
+  3.5814,
+  4.3294,
+  5.3286]
+df['det1b'] = det1b
+
+dets = ['det0a','det0b','det1a','det1b']
+
+
+for i in range(len(dets)):
+	x1 = df[dets[i]].to_numpy()#
+	x1 = x1[~np.isnan(x1)]
+	y1 = df['e'].to_numpy()#
+	y1 = y1[~np.isnan(y1)]
+	popt1, _ = curve_fit(objective, x1, y1)
+	m, b = popt1
+	print('%s = %.6f*x + %.4f' % (dets[i], m, b))
+	print('{%.6f,%.4f}' % (m, b))
+	x_line = arange(0, 11, 1)
+	y_line1 = objective(x_line, m, b)
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
+	fig.add_trace(go.Scatter(x=df[dets[i]],y=df['e'],
+                         mode='markers'))
+	fig.show()
 # %%
