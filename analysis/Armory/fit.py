@@ -359,50 +359,213 @@ fig.add_trace(go.Scatter(x=df_det24b['ch'],y=df_det24b['e'],
 def objective(x, m, b):
 	return m*x + b
 
-col0 = [0.0,0.752,2.788,3.133,3.533,None,None]
-col1 = [0.0,0.752,2.788,3.133,3.533,4.382,5.281]
+col0 = [0.0,0.752,2.788,3.133,3.533,4.382,None,None]
+col1 = [0.0,0.752,2.788,3.133,3.533,4.382,5.281,5.44]
+col3 = [None,None,None,3.133,3.533,5.281,5.44,8.0]
+col4 = [None,None,None,3.133,3.533,5.281,5.44,9.2]
+
 df = pd.DataFrame(col0,columns=['e0'])
 df['e1'] = col1
+df['e3'] = col3
+df['e4'] = col4
 
-det0a = [-0.0234,0.7813,2.7860,3.1740,3.5840,None,None]
-df['det0a'] = det0a
-det0b = [-0.0369,0.7508,2.8141,3.1715,3.5900,None,None]
-df['det0b'] = det0b
+det0 = [-0.0279,0.7561,2.7906,3.1734,3.5859,4.4157,None,None]
+det15 = [0.0672,
+  0.7681,
+  2.8038,
+  3.1699,
+  3.5907,
+  4.4045,
+  None,
+  None]
+det20 = [-0.0036,
+  0.7688,
+  2.7630,
+  3.1458,
+  3.5708,
+  4.3544,
+ None,
+ None]
+det1 = [0.3990,
+  0.8179,
+  2.7443,
+  3.1712,
+  3.5802,
+  4.3950,
+  5.3243,
+  5.45]
+det6 = [0.3,
+0.987,
+  2.9000,
+  3.2463,
+  3.6500,
+  4.4230,
+  5.3474,
+  5.5910]
+det11 = [ 0.23,
+  0.976,
+  2.9017,
+  3.2964,
+  3.6844,
+  4.5497,
+  5.429,
+  5.56]
+det16 = [0.0674,
+  0.7990,
+  2.8351,
+  3.2157,
+  3.6211,
+  4.4449,
+  5.3923,
+  5.5792]
+det21 = [-0.0469,
+  0.7328,
+  2.7648,
+  3.1016,
+  3.4960,
+  4.3567,
+  5.2666,
+  5.4412]
+det26 = [-0.0876,
+  0.7149,
+  2.7474,
+  3.0821,
+  3.4709,
+  4.3136,
+  5.2339,
+  5.4018]
+det7 = [0.1684,
+  0.9222,
+  2.9335,
+  3.2820,
+  3.6692,
+  4.5247,
+  5.3937,
+  5.5499]
+det12 = [0.2121,
+  0.8924,
+  2.9348,
+  3.2623,
+  3.6574,
+  4.4385,
+  5.3620,
+  5.5592]
+det17 = [   -0.0262,
+  0.8841,
+  2.9000,
+  3.2240,
+  3.6242,
+  4.4556,
+  5.3891,
+  5.5464]
+det22 = [  0.0095,0.8104,
+  2.7478,
+  3.1322,
+  3.5259,
+  4.2979,
+  5.2653,
+  5.4615]
+det27 = [ -0.1000,
+  0.6173,
+  2.7000,
+  3.0400,
+  3.4051,
+  4.2261,
+  5.2055,
+  5.4000]
+det3 = [None,None,None,3.2414,
+  3.6626,
+  5.3981,
+  5.5793,
+  8.2908]
+det13 = [None,None,None,3.1443,
+  3.5259,
+  5.3689,
+  5.5458,
+  8.1361]
+det23 = [None,None,None,3.1463,
+  3.5492,
+  5.3080,
+  5.4845,
+  8.1248]
+det28 = [None,None,None,3.0612,
+  3.4724,
+  5.2188,
+  5.4056,
+  8.1466]
+det4 = [None,None,None,3.1836,
+  3.6512,
+  5.4000,
+  5.6000,
+  9.2416]
+det14 = [None,None,None,3.2905,
+  3.6673,
+  5.4000,
+  5.5997,
+  9.1733]
+det19 = [None,None,None,3.2162,
+  3.5947,
+  5.3581,
+  5.5129,
+  9.1875]
+det24 = [None,None,None,3.0743,
+  3.4956,
+  5.2500,
+  5.4440,
+  9.1794]
+det29 = [None,None,None,3.0835,
+  3.5059,
+  5.2772,
+  5.4807,
+  9.0770]
+df['det0'] = det0
+df['det15'] = det15
+df['det20'] = det20
+df['det1'] = det1
+df['det6'] = det6
+df['det11'] = det11
+df['det16'] = det16
+df['det21'] = det21
+df['det26'] = det26
+df['det7'] = det7
+df['det12'] = det12
+df['det17'] = det17
+df['det22'] = det22
+df['det27'] = det27
+df['det3'] = det3
+df['det13'] = det13
+df['det23'] = det23
+df['det28'] = det28
+df['det4'] = det4
+df['det14'] = det14
+df['det19'] = det19
+df['det24'] = det24
+df['det29'] = det29
 
-det1a = [0.0617,
-  0.8180,
-  2.7785,
-  3.1765,
-  3.5777,
-  4.4202,
-  5.3173]
-df['det1a'] = det1a
-det1b = [0.0073,
-  0.7973,
-  2.7229,
-  3.1662,
-  3.5814,
-  4.3294,
-  5.3286]
-df['det1b'] = det1b
 
-dets = ['det1a','det1b']
+dets = ['det0','det15','det20']
+dets = ['det1','det6','det11','det16','det21','det26']
+dets = ['det7','det12','det17','det22','det27']
+dets = ['det3','det13','det23','det28']
+dets = ['det4','det14','det19','det24','det29']
 
 
 for i in range(len(dets)):
 	x1 = df[dets[i]].to_numpy()#
 	x1 = x1[~np.isnan(x1)]
-	y1 = df['e1'].to_numpy()#
+	y1 = df['e4'].to_numpy()#
 	y1 = y1[~np.isnan(y1)]
-	popt1, _ = curve_fit(objective, x1, y1)
+	popt1, errt1 = curve_fit(objective, x1, y1)
 	m, b = popt1
-	print('%s = %.6f*x + %.4f' % (dets[i], m, b))
-	print('{%.6f,%.4f}' % (m, b))
+	mm = math.sqrt(errt1[0][0])
+	bb = math.sqrt(errt1[1][1])
+	print('%s = %.6f(%.6f)*x + %.4f(%.4f)' % (dets[i], m, mm, b, bb))
+	print('p[%d][0] = %.6f; p[%d][1] = %.4f;' % (i,m,i,b))
 	x_line = arange(0, 11, 1)
 	y_line1 = objective(x_line, m, b)
 	fig = go.Figure()
 	fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
-	fig.add_trace(go.Scatter(x=df[dets[i]],y=df['e1'],
+	fig.add_trace(go.Scatter(x=df[dets[i]],y=df['e4'],
                          mode='markers'))
 	fig.show()
 # %%
