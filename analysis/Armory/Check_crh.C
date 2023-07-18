@@ -61,6 +61,33 @@ void Check_crh(TString rootfile){
    // RDT
    double rdtCorr[8] = {1.0,1.4,1.0,1.22,1.0,1.2,1.0,1.2};//match DE to E
    double rdtOff[8] = {0.0,-115.,0.0,104.0,0.0,-36.,0.0,2.0};//offset to match
+   Float_t p[30][4];
+   for (int ll=0;ll<30;ll++){
+    p[ll][0]=1.0;p[ll][1]=0.0;p[ll][2]=1.0;p[ll][3]=0.0;
+}
+p[0][0] = 0.985223;p[0][1] = 0.0186;
+p[15][0] = 1.003435; p[15][1] = -0.0445;
+p[20][0] = 1.001980; p[20][1] =-0.0067;
+p[1][0] = 1.045362; p[1][1] = -0.2184;
+p[6][0] = 1.036781; p[6][1] = -0.2635;
+p[11][0] = 1.017317; p[11][1] = -0.2224;
+p[16][0] = 0.988451; p[16][1] = -0.0432;
+p[21][0] = 0.995145; p[21][1] = 0.0398;
+p[26][0] = 0.996624; p[26][1] = 0.0645;
+p[27][0] = 0.992819; p[27][1] = 0.1239;
+p[22][0] = 1.008689; p[22][1] = -0.0201;
+p[17][0] = 0.988156; p[17][1] = -0.0475;
+p[12][0] = 1.018902; p[12][1] = -0.1884;
+p[7][0] = 1.010720; p[7][1] = -0.1773;
+p[28][0] = 0.958577; p[28][1] = 0.2261;
+p[23][0] = 0.977891; p[23][1] = 0.0681;
+p[13][0] = 0.970958; p[13][1] = 0.0826;
+p[3][0] = 0.966338; p[3][1] = 0.0192;
+p[29][0] = 1.013431; p[29][1] = -0.0384;
+p[24][0] = 0.994901; p[24][1] = 0.0557;
+p[19][0] = 1.014655; p[19][1] = -0.1352;
+p[14][0] = 1.029827; p[14][1] = -0.2706;
+p[4][0] = 1.005909; p[4][1] = -0.1299;
    //============================= Set Gates!
 
 
@@ -217,13 +244,21 @@ void Check_crh(TString rootfile){
       TH1F * hEx[30];
       TH1F * hExSum;
       TH1F * hExSum2;
-      TH2F * hExAng;
+      TH2F * hExAng[30];
+      TH2F * hExAngSum;
+      hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
+      hExSum2 = new TH1F(Form("hExSum2"), Form("Ex2 [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
+      hExAngSum = new TH2F(Form("hExAngSum"), Form("ExAngSum [sum]; Ex [MeV] ; Ang [deta]"), 500,0,60,700,-1,13); //20 keV/ch
       for (int i=0;i<30;i++) {
          cCheck2->cd(i+1);
          TString detIDGate;
          detIDGate.Form("detID == %d &&",i);
          hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
-         tree->Draw(Form("Ex >> hEx%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
+         tree->Draw(Form("Ex*%f+%f >> hEx%d",p[i][0],p[i][1],i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
+         hExSum->Add(hEx[i]);
+         hExAng[i] = new TH2F(Form("hExAng%d",i), Form("ExAng%d [sum]; Ex [MeV] ; Ang [deta]",i), 500,0,60,700,-1,13); //20 keV/ch
+         tree->Draw(Form("Ex*%f+%f:thetaCM >> hExAng%d",p[i][0],p[i][1],i),  "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "colz");
+         hExAngSum->Add(hExAng[i]);
          }
       // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
       // cCheck2->Clear(); cCheck2->Divide(3,2);
@@ -232,17 +267,15 @@ void Check_crh(TString rootfile){
       // }
       TCanvas * cCheck2b = new TCanvas("cCheck2b", "cCheck2b", 700, 50,  1000, 800);
       cCheck2b->Clear();
-      hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
-      hExSum2 = new TH1F(Form("hExSum2"), Form("Ex2 [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
-      hExAng = new TH2F(Form("hExAng"), Form("ExAng [sum]; Ex [MeV] ; Ang [deta]"), 500,0,60,700,-1,13); //20 keV/ch
-
-      tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + timeGate , drawOption);
-      tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "same");
+      
+      // tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + timeGate , drawOption);
+      hExSum->Draw();
+      tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate, "same");
       cCheck2b->Update();
 
       TCanvas * cCheck2c = new TCanvas("cCheck2c", "cCheck2c", 700, 50,  1000, 800);
       cCheck2c->Clear();
-      tree->Draw(Form("Ex:thetaCM >> hExAng"),  "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "colz");
+      hExAngSum->Draw();
    }
     /**///======================================================== RDT
    if (doRDT) {

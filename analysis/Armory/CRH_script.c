@@ -61,7 +61,7 @@ for (int i=k;i<k+30;i++) {
         } else {
             tree->Draw(Form("Exp>>hEx%d%s",i,AB),Form("coinTime < 15 && x > 0 && x > -1 && x < 1 && thetaCM>5 && detID == %d && e[%d]>1",i,i),"");
             h[2*i+j]->Rebin();
-            fitNGauss(h[2*i+j],50);
+            //fitNGauss(h[2*i+j],50);
         }
         hSum->Add(h[2*i+j]);
     }
