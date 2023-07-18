@@ -482,7 +482,7 @@ void Cali_e_trace::Init(TTree *tree)
    if( file.is_open() ){
       double a, b;
       int i = 0;
-      ind d;
+      int d;
       while( file >> d >> a >> b){
          if( i >= numDet) break;
          eCorr2[d][0] = 1./a;  // 1/a1
