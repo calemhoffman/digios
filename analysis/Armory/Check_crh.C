@@ -20,10 +20,11 @@
 // int nPeakss = 16;
 //TTree *tr = NULL;
 
-bool doEZ=false;
+bool doEZ=true;
 bool doEx=true;
 bool doRDT=true;
 bool doEx2d=true;
+bool doAngs=true;
 
 bool RDTCUT=false;
 bool RINGCUT=true;
@@ -201,7 +202,7 @@ p[4][0] = 1.005909; p[4][1] = -0.1299;
          TString detIDGate;
          detIDGate.Form("detID >= %d && detID < %d && ",i*5,i*5+5);
          hEZ[i] = new TH2F(Form("hEZ%d",i), Form("e:z [det %d - %d]; z [mm]; e [MeV]",i*5,i*5+5), zRange[0], zRange[1], zRange[2], eRange[0], eRange[1], eRange[2]);
-         tree->Draw(Form("e:z >> hEZ%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate + thetaGate  , drawOption);
+         tree->Draw(Form("e/%f-%f:z >> hEZ%d",p[i*5+1][0],p[i*5+1][1],i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate + thetaGate  , drawOption);
       
          if( showFx ) {
             TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
@@ -213,6 +214,7 @@ p[4][0] = 1.005909; p[4][1] = -0.1299;
       }
       cCheck1->Update();
    }
+
 
       /**///======================================================== Ex2d
    if (doEx2d) {
@@ -253,12 +255,14 @@ p[4][0] = 1.005909; p[4][1] = -0.1299;
          cCheck2->cd(i+1);
          TString detIDGate;
          detIDGate.Form("detID == %d &&",i);
-         hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
-         tree->Draw(Form("Ex*%f+%f >> hEx%d",p[i][0],p[i][1],i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
-         hExSum->Add(hEx[i]);
+
          hExAng[i] = new TH2F(Form("hExAng%d",i), Form("ExAng%d [sum]; Ex [MeV] ; Ang [deta]",i), 500,0,60,700,-1,13); //20 keV/ch
          tree->Draw(Form("Ex*%f+%f:thetaCM >> hExAng%d",p[i][0],p[i][1],i),  "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "colz");
          hExAngSum->Add(hExAng[i]);
+
+         hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
+         tree->Draw(Form("Ex*%f+%f >> hEx%d",p[i][0],p[i][1],i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
+         hExSum->Add(hEx[i]);
          }
       // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
       // cCheck2->Clear(); cCheck2->Divide(3,2);
@@ -275,7 +279,23 @@ p[4][0] = 1.005909; p[4][1] = -0.1299;
 
       TCanvas * cCheck2c = new TCanvas("cCheck2c", "cCheck2c", 700, 50,  1000, 800);
       cCheck2c->Clear();
-      hExAngSum->Draw();
+      hExAngSum->Draw("colz");
+
+   /**///======================================================== Angular Distribution Stuff
+   if (doAngs) {
+   TCanvas * cAngs = new TCanvas("cAngs", "cAngs", 700, 50,  1800, 1600);
+      cAngs->ToggleEditor();cAngs->ToggleToolBar();
+      cAngs->SetGrid(); cAngs->Divide(3,2);
+
+   TH1F *hCols[5];
+   for (int i=0;i<5;i++) {
+      hCols[i] = new TH1F(Form("hCols%d",i),Form("hCols%d;Ex [MeV]",i),700,-1,13);
+      for (int j=0;j<6;j++){      hCols[i]->Add(hEx[j*5+i]); }
+      cAngs->cd(i+1);hCols[i]->Draw();
+   }
+cAngs->cd(6); hExAngSum->Draw("colz");
+}
+
    }
     /**///======================================================== RDT
    if (doRDT) {
@@ -283,7 +303,7 @@ p[4][0] = 1.005909; p[4][1] = -0.1299;
       cCheck3->ToggleToolBar();cCheck3->Divide(2,2);
       TH2F * hRDT[8];
       TH2F * hRDTg[8];
-      TString exGate("&& Ex<6.0");
+      TString exGate("&& Ex<6.6");
       for (int i=0;i<4;i++) {
          cCheck3->cd(i+1);
          hRDT[i] = new TH2F(Form("hRDT%d",2*i+1), Form("RDT  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,500,0,2000);

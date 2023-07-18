@@ -482,11 +482,12 @@ void Cali_e_trace::Init(TTree *tree)
    if( file.is_open() ){
       double a, b;
       int i = 0;
-      while( file >> a >> b){
+      ind d;
+      while( file d >> >> a >> b){
          if( i >= numDet) break;
-         eCorr2[i][0] = a;  // 1/a1
-         eCorr2[i][1] = b;  //  a0 , e' = e * a1 + a0
-         //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
+         eCorr2[d][0] = 1./a;  // 1/a1
+         eCorr2[d][1] = -1.0*b;  //  a0 , e' = e * a1 + a0
+         printf("\n%2d, e0: %9.4f, e1: %9.4f", d, eCorr[i][0], eCorr[i][1]);
          i = i + 1;
       }
       printf("................ done.\n");
@@ -562,16 +563,16 @@ void Cali_e_trace::Init(TTree *tree)
          int i = 0;
          while( file >>  d >> a0 >> a1 >> a2 >> a3 >> a4 >> a5 >> a6 >> a7 >> a8){
             if( i >= numDet) break;
-            cTCorr[i][0] = a0;
-            cTCorr[i][1] = a1;
-            cTCorr[i][2] = a2;
-            cTCorr[i][3] = a3;
-            cTCorr[i][4] = a4;
-            cTCorr[i][5] = a5;
-            cTCorr[i][6] = a6;
-            cTCorr[i][7] = a7;
-            cTCorr[i][8] = a8; // this is the offset find by fitting the 1-D plot
-            //printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", i, cTCorr[i][0], cTCorr[i][1], cTCorr[i][7]);
+            cTCorr[d][0] = a0;
+            cTCorr[d][1] = a1;
+            cTCorr[d][2] = a2;
+            cTCorr[d][3] = a3;
+            cTCorr[d][4] = a4;
+            cTCorr[d][5] = a5;
+            cTCorr[d][6] = a6;
+            cTCorr[d][7] = a7;
+            cTCorr[d][8] = a8; // this is the offset find by fitting the 1-D plot
+            printf("\n%2d, a0: %6.2f, a1: %6.2f .... a7: %6.2f", d, cTCorr[d][0], cTCorr[d][1], cTCorr[d][7]);
             i = i + 1;
          }
          printf(".... done.\n");
