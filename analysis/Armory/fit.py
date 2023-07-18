@@ -547,7 +547,7 @@ dets = ['det0','det15','det20']
 dets = ['det1','det6','det11','det16','det21','det26']
 dets = ['det7','det12','det17','det22','det27']
 dets = ['det3','det13','det23','det28']
-dets = ['det4','det14','det19','det24','det29']
+#dets = ['det4','det14','det19','det24','det29']
 
 
 for i in range(len(dets)):
