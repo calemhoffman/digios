@@ -196,12 +196,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      ///====== Calibrations go here
      if( isTraceDataExist  && useTraceToReplaceArrayEnergy ){
        eC[idet] = te[idet]/eCorr[idet][0] + eCorr[idet][1];
-       //eC[idet] = (te[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
+       eC[idet] = (te[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
        eC_t[idet] = e_t[idet] - 100 + te_t[idet];
        e[idet] = te[idet];
      }else{
        eC[idet]   = e[idet]/eCorr[idet][0] + eCorr[idet][1];  
-       //eC[idet] = (e[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
+       eC[idet] = (e[idet]/eCorr[idet][0] + eCorr[idet][1])*eCorr2[idet][0]+eCorr2[idet][1];
        eC_t[idet] = e_t[idet]; 
      }
      
