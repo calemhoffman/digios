@@ -483,7 +483,7 @@ void Cali_e_trace::Init(TTree *tree)
       double a, b;
       int i = 0;
       ind d;
-      while( file d >> >> a >> b){
+      while( file >> d >> a >> b){
          if( i >= numDet) break;
          eCorr2[d][0] = 1./a;  // 1/a1
          eCorr2[d][1] = -1.0*b;  //  a0 , e' = e * a1 + a0
