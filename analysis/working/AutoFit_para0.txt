@@ -1,6 +1,6 @@
 # for n-Gauss fit, can use "#", or "//" to comment out whole line
 # peak    low    high   fixed?  sigma_Max    fixed?  hight
-0.0     -0.1    0.35      0        0.1     0       10
+0.0     -0.2    0.35      0        0.15     0       10
 0.75     0.5    1.0      0        0.1     0       100
 #1.69    1.55    1.78    0       0.1    1   10
 2.32    2.2     2.45    0       0.07    1   10

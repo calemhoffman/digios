@@ -361,13 +361,25 @@ def objective(x, m, b):
 
 col0 = [0.0,0.752,2.788,3.133,3.533,4.382,None,None]
 col1 = [0.0,0.752,2.788,3.133,3.533,4.382,5.281,5.44]
+col27p = [0.0,0.752,None,3.133,3.533,4.261,4.382,5.281]
 col3 = [None,None,None,3.133,3.533,5.281,5.44,8.0]
+col3p = [0.0,0.75,3.133,3.533,5.281,5.44,6.584,8.1]
+col13p = [None,3.133,3.533,4.719,5.281,5.44,6.584,8.1]
+col23p = [0.0,0.75,3.133,3.533,5.281,5.44,6.584,8.1]
+col28p = [0.0,0.75,3.133,3.533,4.719,5.44,6.584,8.1]
 col4 = [None,None,None,3.133,3.533,5.281,5.44,9.2]
+col29p = [None,3.133,3.533,4.719,5.281,5.44,6.584,9.2]
 
 df = pd.DataFrame(col0,columns=['e0'])
 df['e1'] = col1
 df['e3'] = col3
+df['e3p'] = col3p
+df['e13p'] = col13p
+df['e23p'] = col23p
+df['e28p'] = col28p
+df['e27p'] = col27p
 df['e4'] = col4
+df['e29p'] = col29p
 
 det0 = [-0.0279,0.7561,2.7906,3.1734,3.5859,4.4157,None,None]
 det15 = [0.0672,
@@ -465,34 +477,22 @@ det22 = [  0.0095,0.8104,
   4.2979,
   5.2653,
   5.4615]
-det27 = [ -0.1000,
-  0.6173,
-  2.7000,
-  3.0400,
-  3.4051,
-  4.2261,
-  5.2055,
-  5.4000]
-det3 = [None,None,None,3.2414,
+det27 = [ -0.1500, 0.6173, None, 2.977,
+  3.3751,4.2261,4.37,5.2055]
+#col3p
+det3 = [0.031,0.922,3.2414,
   3.6626,
-  5.3981,
+  5.4081,
   5.5793,
+  6.72,
   8.2908]
-det13 = [None,None,None,3.1443,
-  3.5259,
-  5.3689,
-  5.5458,
-  8.1361]
-det23 = [None,None,None,3.1463,
-  3.5492,
+det13 = [None,3.1443,3.5259, 4.77,5.3689,5.5458,6.678,8.1361]
+det23 = [0.003,0.785,3.1463,3.5492,
   5.3080,
   5.4845,
+  6.619,
   8.1248]
-det28 = [None,None,None,3.0612,
-  3.4724,
-  5.2188,
-  5.4056,
-  8.1466]
+det28 = [-0.044,0.66,3.0612,3.4724,4.65,5.34,6.4,8.1466]
 det4 = [None,None,None,3.1836,
   3.6512,
   5.4000,
@@ -513,10 +513,12 @@ det24 = [None,None,None,3.0743,
   5.2500,
   5.4440,
   9.1794]
-det29 = [None,None,None,3.0835,
+det29 = [None,3.0835,
   3.5059,
+  4.69,
   5.2772,
   5.4807,
+  6.62,
   9.0770]
 df['det0'] = det0
 df['det15'] = det15
@@ -548,12 +550,13 @@ dets = ['det1','det6','det11','det16','det21','det26']
 dets = ['det7','det12','det17','det22','det27']
 dets = ['det3','det13','det23','det28']
 #dets = ['det4','det14','det19','det24','det29']
-
+dets = ['det29']
+ename='e29p'
 
 for i in range(len(dets)):
 	x1 = df[dets[i]].to_numpy()#
 	x1 = x1[~np.isnan(x1)]
-	y1 = df['e4'].to_numpy()#
+	y1 = df[ename].to_numpy()#
 	y1 = y1[~np.isnan(y1)]
 	popt1, errt1 = curve_fit(objective, x1, y1)
 	m, b = popt1
@@ -561,11 +564,12 @@ for i in range(len(dets)):
 	bb = math.sqrt(errt1[1][1])
 	print('%s = %.6f(%.6f)*x + %.4f(%.4f)' % (dets[i], m, mm, b, bb))
 	print('p[%d][0] = %.6f; p[%d][1] = %.4f;' % (i,m,i,b))
+	print('%d %.6f %.4f' % (i,m,b))
 	x_line = arange(0, 11, 1)
 	y_line1 = objective(x_line, m, b)
 	fig = go.Figure()
 	fig.add_trace(go.Scatter(x=x_line,y=y_line1,mode='lines'))
-	fig.add_trace(go.Scatter(x=df[dets[i]],y=df['e4'],
+	fig.add_trace(go.Scatter(x=df[dets[i]],y=df[ename],
                          mode='markers'))
 	fig.show()
 # %%
