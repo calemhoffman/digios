@@ -23,7 +23,7 @@
 bool doEZ=true;
 bool doEx=true;
 bool doRDT=true;
-bool doEx2d=false;
+bool doEx2d=true;
 bool doAngs=true;
 
 bool RDTCUT=true;
@@ -242,11 +242,11 @@ void Check_crh(TString rootfile){
       // for (int i=0;i<30;i++) {
       //    if (i<5) {cCheck->cd(1); hEx[i]-Draw("same")}
       // }
-      // TCanvas * cCheck2b = new TCanvas("cCheck2b", "cCheck2b", 700, 50,  1000, 800);
-      // cCheck2b->Clear();
+      TCanvas * cCheck2b = new TCanvas("cCheck2b", "cCheck2b", 700, 50,  1000, 800);
+      cCheck2b->Clear();
       
       // // tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + timeGate , drawOption);
-      // hExSum->Draw();
+      hExSum->Draw();
       // tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate, "same");
       // cCheck2b->Update();
 
@@ -264,7 +264,7 @@ void Check_crh(TString rootfile){
       for (int i=0;i<5;i++) {
          hCols[i] = new TH1F(Form("hCols%d",i),Form("hCols%d;Ex [MeV]",i),700,-1,13);
          for (int j=0;j<6;j++){      hCols[i]->Add(hEx[j*5+i]); }
-         cAngs->cd(i+1);hCols[i]->Draw();
+         cAngs->cd(i+1);hCols[i]->Rebin(); hCols[i]->Draw();
          TString fit_name("AutoFit_para0.txt");
          if (i==0) fitNGauss(hCols[i],100,fit_name);
       }
