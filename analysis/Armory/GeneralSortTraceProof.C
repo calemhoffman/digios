@@ -620,8 +620,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                }
                if (j<70) base += ftrace[j];
                if (j<60) {
-                  sumBefore+=(Float_t)ftrace[j+10]/60.;
-                  sumAfter+=(Float_t)ftrace[j+200]/60.;
+                  sumBefore=sumBefore + (Float_t)ftrace[j+10];
+                  sumAfter=sumAfter + (Float_t)ftrace[j+200];
                }
             } //first loop ends
             base = base/70.;
@@ -726,7 +726,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
-               trdt[rdtTemp]   = (sumAfter - sumBefore); //TMath::Abs(gFit->GetParameter(0));
+               trdt[rdtTemp]   = (sumAfter - sumBefore)/60.; //TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);
             }
