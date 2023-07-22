@@ -619,10 +619,6 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   trace[i][j] = 16384 - trace[i][j];
                }
                if (j<70) base += ftrace[j];
-               if (j<60) {
-                  sumBefore=sumBefore + (Float_t)ftrace[j+10];
-                  sumAfter=sumAfter + (Float_t)ftrace[j+200];
-               }
             } //first loop ends
             base = base/70.;
 
@@ -644,7 +640,10 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   }
                int temp=j-5;
                if (j>5) tcfd[j] = frac * (tSmooth[temp] - base) + (tSmooth[j] - base);
-
+               if (j<60) {
+                  sumBefore=sumBefore + (Float_t)ftrace[j+10];
+                  sumAfter=sumAfter + (Float_t)ftrace[j+200];
+               }
                gSmooth->SetPoint(j, j, tcfd[j]);
                //gSmooth->SetPoint(j, j, tcfd[j]);
                gTrace->SetPoint(j, j, ftrace[j]);
@@ -726,7 +725,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
-               trdt[rdtTemp]   = 100.; //(sumAfter - sumBefore)/60.; //TMath::Abs(gFit->GetParameter(0));
+               trdt[rdtTemp]   = (sumAfter - sumBefore)/60.; //TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
                trdt_r[rdtTemp] = gFit->GetParameter(2);
             }
