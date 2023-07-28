@@ -205,7 +205,8 @@ void Check_crh(TString rootfile){
          cCheckEx2d->cd(i+3);
          // hExRDTde[i] = new TH2F(Form("hExRDTde%d",i), Form("ExRDTde [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,0,2200,700,-1,13); //20 keV/ch
          // tree->Draw(Form("Ex:rdt[%d] >> hExRDTde%d",2*i+1,i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
-         hExRDT[i] = new TH2F(Form("hExRdT%d",i), Form("ExRDT [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,2000,6000,700,-1,13); //20 keV/ch
+         hExRDT[i] = new TH2F(Form("hExRdT%d",i), Form("ExRDT [rdt %d]; TOTE[]; Ex [MeV]",i), 1000,0,6000,700,-1,13); //20 keV/ch
+         // tree->Draw(Form("Ex:rdt[%d] >> hExRdT%d",2*i+1,i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
          tree->Draw(Form("Ex:((rdt[%d]*%f+rdt[%d])+%f) >> hExRdT%d",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
       }
       cCheckEx2d->Update();
@@ -288,6 +289,8 @@ void Check_crh(TString rootfile){
          hRDTg[i] = new TH2F(Form("hRDT%dg",2*i+1), Form("RDTg  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,500,0,2000);
          tree->Draw(Form("rdt[%d]:(rdt[%d]*%f+rdt[%d])+%f >> hRDTg%d",2*i+1,2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],2*i+1),  "hitID>=0 && " + detGate + timeGate + exGate, "same");
          if (RDTCUT) cut[i]->Draw("same");
+
+         
       }
       // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
       // cCheck3->Clear(); cCheck3->Divide(3,2);
