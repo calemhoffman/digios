@@ -13,7 +13,7 @@
 
 bool rejZeroHit = true; /// when no hit on array, don't save that event
 
-bool useTraceToReplaceArrayEnergy = false;
+bool useTraceToReplaceArrayEnergy = true;
 
 
 //####################################################################
