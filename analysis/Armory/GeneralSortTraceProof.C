@@ -716,7 +716,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
             
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = (sumAfter - sumBefore)/80.;//TMath::Abs(gFit->GetParameter(0));
+               te[idDet]   = TMath::Abs(gFit->GetParameter(0));
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
                te_cfd[idDet] = cfdTime;
