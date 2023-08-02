@@ -645,8 +645,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                int temp=j-5;
                if (j>5) tcfd[j] = frac * (tSmooth[temp] - base) + (tSmooth[j] - base);
                if (j<5) {
-                  postSlope1=postSlope1+(Float_t)ftrace[j+225];
-                  postSlope2=postSlope2+(Float_t)ftrace[j+290];
+                  postSlope1=postSlope1+(Float_t)ftrace[j+200];
+                  postSlope2=postSlope2+(Float_t)ftrace[j+280];
                }
                if (j<80) {
                   sumBefore=sumBefore + (Float_t)ftrace[j+0];
@@ -737,7 +737,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                int rdtTemp = idDet-100;
                trdt[rdtTemp]   = (sumAfter - sumBefore)/80.; //TMath::Abs(gFit->GetParameter(0));
                trdt_t[rdtTemp] = gFit->GetParameter(1);
-               trdt_r[rdtTemp] = maxSlope; //(postSlope1 - postSlope2)/5.;//gFit->GetParameter(2);
+               trdt_r[rdtTemp] = (postSlope1 - postSlope2)/5.;//gFit->GetParameter(2);
             }
             
             if( NELUM + 200 > idDet && idDet >= 200 ) {
