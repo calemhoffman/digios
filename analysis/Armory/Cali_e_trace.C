@@ -345,7 +345,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
    
    //if( rejZeroHit && multiHit == 0 ) return kTRUE;
-   if (multiHit < 1) return kTRUE;
+   //if (multiHit < 1) return kTRUE; //commented CRH
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
    newTree->Fill();
