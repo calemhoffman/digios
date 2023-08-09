@@ -16,7 +16,7 @@ cc0->Clear(); cc0->Divide(2,2); cc0->cd();
 //                   173,175,177,181,183,
 //                   185,187,189,191,195};
 int runList[2] = {133,175};
-for (Int_t run=0;run<1;run++) {
+for (Int_t run=0;run<2;run++) {
     //cc[runList[run]] = new TCanvas(Form("cc%d",run),Form("rdt%d",run));
     f[runList[run]] = new TFile(Form("../root_data/h066_31Si_trace_run%d.root",runList[run]));
     TTree *tree = (TTree*)f[runList[run]]->Get("tree");
@@ -27,11 +27,11 @@ for (Int_t run=0;run<1;run++) {
     for (Int_t i=0;i<4;i++) {
         cc0->cd(i+1);
         hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),1000,1000,5600);
-        for (int j=0;j<1;j++) {
             TString draw_string(Form("rdt[%d]+rdt[%d]>>hrdtTOTE%d",2*i+1,2*i,i));
+            if (run<1)
             tree->Draw(draw_string,"","");
-            fit2GaussP1(hrdtTOTE0,4250,40,3650,40,3900,4500);
-        }
+            if (run>0) tree->Draw(draw_string,"","same");
+            // fit2GaussP1(hrdtTOTE0,4250,40,3650,40,3900,4500);
     }
 }
     
