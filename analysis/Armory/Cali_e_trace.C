@@ -288,12 +288,15 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
    
    //=============================== Recoil
+   Float_t trdtCorr[8][2] = {{0,1},{0,1},{0,1},{0,1},{0,1},{0,1},{0,1},{0,1}};
    for(int i = 0 ; i < NRDT ; i++){
       if( TMath::IsNaN(rdt[i]) ) continue;
       if( isTraceDataExist ){
-         trdt[i]   = rdtCorr[i][0] * trdt[i] + rdtCorr[i][1];
+         //New RDT CAL
+         trdt[i]   = (trdt[i] - trdt_r[i]*trdtCorr[i][0]) * trdtCorr[i][1];
          trdt_t[i] = trdt_t[i]; 
       }
+      //New RDT CAL
       rdtC[i]   = rdtCorr[i][0] * rdt[i] + rdtCorr[i][1];
       rdtC_t[i] = rdt_t[i]; 
 
