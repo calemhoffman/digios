@@ -33,7 +33,7 @@ for (Int_t run=0;run<1;run++) {
             TString draw_string2(Form("trdt[%d]+trdt[%d]>>hrdtTOTE2%d",2*i+1,2*i,i));
             cc0->cd(i+1);
             if (run<1)   tree->Draw(draw_string,"","");
-            cc0->cd(4*i+5);
+            cc0->cd(i+5);
             if (run < 1) tree->Draw(draw_string2,"","");
             // if (run>0) tree->Draw(draw_string,"","same");
             // fit2GaussP1(hrdtTOTE0,4250,40,3650,40,3900,4500);
