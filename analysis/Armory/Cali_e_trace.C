@@ -288,7 +288,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
    
    //=============================== Recoil
-   Float_t trdtCorr[8][2] = {{0,1},{0,1},{0,1},{0,1},{0,1},{0,1},{0,1},{0,1}};
+   Float_t trdtCorr[8][2] = {{0.4,1.0},{0.0,1.5},{-1.0,1.0},{0.0,0.75},{0.45,1.0},{0.0,1.3},{0.1,1.0},{0.0,1.3}};
    for(int i = 0 ; i < NRDT ; i++){
       if( TMath::IsNaN(rdt[i]) ) continue;
       if( isTraceDataExist ){
