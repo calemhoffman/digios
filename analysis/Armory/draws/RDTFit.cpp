@@ -2,6 +2,7 @@
 TFile *f[200];
 TCanvas *cc0;
 cc0 = new TCanvas("cc0","rdt0",2200,1400);
+cc0->ToggleEditor();cc0->ToggleToolBar();
 cc0->Clear(); cc0->Divide(2,4); cc0->cd();
 // TCanvas *cc1 = new TCanvas("cc1","rdt1",2200,1400);
 // cc1->Clear(); cc1->Divide(6,5); cc1->cd();
@@ -26,8 +27,8 @@ for (Int_t run=0;run<1;run++) {
     TH1F *hrdtTOTE[4];
     TH1F *hrdtTOTE2[4];
     for (Int_t i=0;i<4;i++) {
-        hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),1000,1000,5600);
-        hrdtTOTE2[i] = new TH1F(Form("hrdtTOTE2%d",i),Form("hrdtTOTE2%d_%d",i,runList[run]),1000,1000,5600);
+        hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),1000,3500,5600);
+        hrdtTOTE2[i] = new TH1F(Form("hrdtTOTE2%d",i),Form("hrdtTOTE2%d_%d",i,runList[run]),1000,3500,5600);
             TString draw_string(Form("rdt[%d]+rdt[%d]>>hrdtTOTE%d",2*i+1,2*i,i));
             TString draw_string2(Form("trdt[%d]+trdt[%d]>>hrdtTOTE2%d",2*i+1,2*i,i));
             cc0->cd(i+1);
