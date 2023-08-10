@@ -16,10 +16,10 @@ cc0->Clear(); cc0->Divide(2,4); cc0->cd();
 //                   163,165,167,169,171,
 //                   173,175,177,181,183,
 //                   185,187,189,191,195};
-int runList[2] = {175,133};
+int runList[2] = {123};
 for (Int_t run=0;run<1;run++) {
     //cc[runList[run]] = new TCanvas(Form("cc%d",run),Form("rdt%d",run));
-    f[runList[run]] = new TFile(Form("../root_data/h066_31Si_trace_run%d.root",runList[run]));
+    f[runList[run]] = new TFile(Form("h066_31Si_trace_run%d.root",runList[run]));
     TTree *tree = (TTree*)f[runList[run]]->Get("tree");
     TH2F *hrdt[4];
     TH1F *hrdtDE[4];
