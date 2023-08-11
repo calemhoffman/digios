@@ -555,8 +555,9 @@ void Cali_e_trace::Init(TTree *tree)
    printf("loading rdt etot correction.");
    file.open("correction_etot.dat");
    if( file.is_open() ){
-      double a, b, c, d;
+      double b, c, d;
       int i = 0;
+      int a =0;
       while( file >> i >> a >> b >> c >> d){
          etotCorr[i][a][3] = b;  // 
          etotCorr[i][a][3] = c;  // 
