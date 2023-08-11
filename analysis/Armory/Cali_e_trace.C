@@ -302,6 +302,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
       //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
    }
+   for (int i = 0 ; i < 4 ; i++) {
+      if( isTraceDataExist ){
+         trdte[i] = (trdt[i+1]+trdt[i]);
+      }
+      rdte[i] = (rdtC[i+1]+rdtC[i]);
+   }
    //double check below - ok, except maybe could be > E not just NaN ??
    for( int i = 0; i< NRDT/2 ; i++){
       if( /* !TMath::IsNaN(rdt[2*i]) &&*/ !TMath::IsNaN(rdt[2*i+1]) ) {
