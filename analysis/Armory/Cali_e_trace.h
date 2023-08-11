@@ -48,6 +48,7 @@ public :
    ULong64_t       ring_t[100];
    Float_t         rdt[50];
    ULong64_t       rdt_t[50];
+   Float_t         rdte[4];
    Float_t         tac[10];
    ULong64_t       tac_t[10];
    Float_t         elum[50];
@@ -62,6 +63,7 @@ public :
    Float_t         te_cfd[100];
    Float_t         te_rise[100];
    Float_t         trdt[50];
+   Float_t         trdte[4];
    Float_t         trdt_t[50];
    Float_t         trdt_r[50];
 
@@ -175,6 +177,7 @@ public :
    double eCorr[30][2]; // e-correction
    double eCorr2[30][2]; // e-correction
    double rdtCorr[NRDT][2]; //rdt-correction
+   double etotCorr[300][4];
    
    double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
@@ -548,6 +551,23 @@ void Cali_e_trace::Init(TTree *tree)
       }
    }
    file.close();
+
+   printf("loading rdt etot correction.");
+   file.open("correction_etot.dat");
+   if( file.is_open() ){
+      double a, b, c, d;
+      int i = 0;
+      while( file >> i >> a >> b >> c >> d){
+         etotCorr[i][0] = a;  // 
+         etotCorr[i][1] = b;  // 
+         etotCorr[i][2] = c;  // 
+         etotCorr[i][3] = d;  // 
+      }
+      printf("..................... done.\n");
+      TMacro cali_rdt("correction_etot.dat");
+      cali_rdt.Write("correction_etot");
+   }
+   file.close();
    
    //========================================= coinTime correction
    if( isTraceDataExist ){
@@ -704,6 +724,7 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("rdt", rdtC, Form("rdtC[%d]/F",NRDT));
    newTree->Branch("rdt_t", rdtC_t, Form("rdtC_t[%d]/l", NRDT));
    newTree->Branch("rdtID", &rdtID, "rdtID/I");
+   newTree->Branch("rdte", rdte, "rdte[4]");
    newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
    
    if( isEBISExist ) newTree->Branch("ebis_t", &EBIS_t, "EBIS_t/l");
@@ -735,6 +756,7 @@ void Cali_e_trace::Init(TTree *tree)
       // newTree->Branch("te_cfd",         te_cfd,  Form("Trace_Energy_CFD[%d]/F", numDet));
       // newTree->Branch("te_rise",         te_rise,  Form("Trace_Energy_Rise[%d]/F", numDet));
       newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
+      newTree->Branch("trdte", trdte, "trdte[4]");
       newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
       newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
    }
