@@ -177,7 +177,7 @@ public :
    double eCorr[30][2]; // e-correction
    double eCorr2[30][2]; // e-correction
    double rdtCorr[NRDT][2]; //rdt-correction
-   double etotCorr[300][4];
+   double etotCorr[300][8][3];
    
    double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
@@ -558,10 +558,9 @@ void Cali_e_trace::Init(TTree *tree)
       double a, b, c, d;
       int i = 0;
       while( file >> i >> a >> b >> c >> d){
-         etotCorr[i][0] = a;  // 
-         etotCorr[i][1] = b;  // 
-         etotCorr[i][2] = c;  // 
-         etotCorr[i][3] = d;  // 
+         etotCorr[i][a][3] = b;  // 
+         etotCorr[i][a][3] = c;  // 
+         etotCorr[i][a][3] = d;  // 
       }
       printf("..................... done.\n");
       TMacro cali_rdt("correction_etot.dat");
