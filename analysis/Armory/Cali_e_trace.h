@@ -559,9 +559,9 @@ void Cali_e_trace::Init(TTree *tree)
       int i = 0;
       int a =0;
       while( file >> i >> a >> b >> c >> d){
-         etotCorr[i][a][3] = b;  // 
-         etotCorr[i][a][3] = c;  // 
-         etotCorr[i][a][3] = d;  // 
+         etotCorr[i][a][0] = b;  // 
+         etotCorr[i][a][1] = c;  // 
+         etotCorr[i][a][2] = d;  // 
       }
       printf("..................... done.\n");
       TMacro cali_rdt("correction_etot.dat");
