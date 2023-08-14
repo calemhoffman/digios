@@ -291,8 +291,8 @@ void Check_crh(TString rootfile){
    if (doRDT) {
       TCanvas * cCheck3 = new TCanvas("cCheck3", "cCheck3", 700, 50,  1800, 1600);
       cCheck3->ToggleToolBar();cCheck3->Divide(2,2);
-      TCanvas * cCheck3b = new TCanvas("cCheck3b", "cCheck3b", 70, 50,  1800, 1600);
-      cCheck3b->ToggleToolBar();cCheck3b->Divide(2,4);
+      // TCanvas * cCheck3b = new TCanvas("cCheck3b", "cCheck3b", 70, 50,  1800, 1600);
+      // cCheck3b->ToggleToolBar();cCheck3b->Divide(2,4);
       TH2F * hRDT[8];
       TH2F * hRDTg[8];
       TH2F * hRDTr[8];
@@ -304,6 +304,8 @@ void Check_crh(TString rootfile){
          hRDTe[i] = new TH1F(Form("hRDTe%d",i), Form("RDTe %d; ETOT [ch]",i), 500,3500,4200);
          hRDTte[i] = new TH1F(Form("hRDTte%d",i), Form("RDTte %d; ETOT [ch]",i), 500,3500,4200);
          tree->Draw(Form("rdte[%d]>>hRDTe%d",i,i));
+         TLine *line1 = new TLine(3900,0,4000,1e4); line1->Draw("same");
+         TLine *line2 = new TLine(4000,0,4000,1e4); line2->Draw("same");
          tree->Draw(Form("trdte[%d]>>hRDTte%d",i,i),"","same");
       }
       // for (int i=0;i<4;i++) {
