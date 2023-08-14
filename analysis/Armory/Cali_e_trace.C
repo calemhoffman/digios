@@ -309,7 +309,11 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
                   163,165,167,169,171,
                   173,175,177,181,183,
                   185,187,189,191,195};
-   for (int i=0;i<30;i++){
+   
+   int numCalRuns = 10;
+   int calRuns[30] = {123,127,129,131,133,
+                  135,145,163,173,185};
+   for (int i=0;i<numCalRuns;i++){
       if (run > calRuns[i]) {
          runTemp = calRuns[i];
       }
