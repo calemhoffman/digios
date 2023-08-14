@@ -307,12 +307,12 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       if( isTraceDataExist ){
          trdte[i] = (trdt[2*i+1]+trdt[2*i]);
          if (etotCorr[run][i+4][0] < etotCorr[run][i+4][1]) {jj = 1;}
-         trdte[i] = (-etotCorr[run][i+4][jj] + trdte[i])*etotCorr[run][i+4][2] + 4000.;
+         trdte[i] = (-etotCorr[run][i+4][jj] + trdte[i])*etotCorr[run][i+4][2]*1.25 + 4000.;
       }
       jj=0;
       if (etotCorr[run][i][0] < etotCorr[run][i][1]) {jj = 1;}
       rdte[i] = (rdtC[2*i+1]+rdtC[2*i]);
-      rdte[i] = (-etotCorr[run][i][jj] + rdte[i])*etotCorr[run][i][2] + 4000.;
+      rdte[i] = (-etotCorr[run][i][jj] + rdte[i])*etotCorr[run][i][2]*1.25 + 4000.;
 
    }
    //double check below - ok, except maybe could be > E not just NaN ??
