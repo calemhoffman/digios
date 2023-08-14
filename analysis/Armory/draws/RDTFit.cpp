@@ -29,8 +29,8 @@ for (Int_t run=0;run<1;run++) {
     TSpectrum *s = new TSpectrum(4);
    
     for (Int_t i=0;i<4;i++) {
-        hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),250,3650,4900);
-        hrdtTOTE2[i] = new TH1F(Form("hrdtTOTE2%d",i),Form("hrdtTOTE2%d_%d",i,runList[run]),250,3650,4900);
+        hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),220,3650,4900);
+        hrdtTOTE2[i] = new TH1F(Form("hrdtTOTE2%d",i),Form("hrdtTOTE2%d_%d",i,runList[run]),220,3650,4900);
             TString draw_string(Form("rdt[%d]+rdt[%d]>>hrdtTOTE%d",2*i+1,2*i,i));
             TString draw_string2(Form("trdt[%d]+trdt[%d]>>hrdtTOTE2%d",2*i+1,2*i,i));
             cc0->cd(i+1);
