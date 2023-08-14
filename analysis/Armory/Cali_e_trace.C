@@ -302,17 +302,34 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
       //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
    }
+   int runTemp = 0;
+   int calRuns[30] = {123,127,129,131,133,
+                  135,137,139,141,143,
+                  145,153,157,159,161,
+                  163,165,167,169,171,
+                  173,175,177,181,183,
+                  185,187,189,191,195};
+   for (int i=0;i<30;i++){
+      if (run > calRuns[i]) {
+         runTemp = calRuns[i];
+      }
+      if (run == calRuns[i]){
+         runTemp = calRuns[i];
+         i=31;
+      }
+   } //hopefully sets cal file run number correctly ...
+   
    for (int i = 0 ; i < 4 ; i++) {
       int jj=0;
       if( isTraceDataExist ){
          trdte[i] = (trdt[2*i+1]+trdt[2*i]);
-         if (etotCorr[run][i+4][0] < etotCorr[run][i+4][1]) {jj = 1;}
-         trdte[i] = (-etotCorr[run][i+4][jj] + trdte[i])*etotCorr[run][i+4][2]*1.25 + 4000.;
+         if (etotCorr[runTemp][i+4][0] < etotCorr[runTemp][i+4][1]) {jj = 1;}
+         trdte[i] = (-etotCorr[runTemp][i+4][jj] + trdte[i])*etotCorr[runTemp][i+4][2]*1.25 + 4000.;
       }
       jj=0;
-      if (etotCorr[run][i][0] < etotCorr[run][i][1]) {jj = 1;}
+      if (etotCorr[runTemp][i][0] < etotCorr[runTemp][i][1]) {jj = 1;}
       rdte[i] = (rdtC[2*i+1]+rdtC[2*i]);
-      rdte[i] = (-etotCorr[run][i][jj] + rdte[i])*etotCorr[run][i][2]*1.25 + 4000.;
+      rdte[i] = (-etotCorr[runTemp][i][jj] + rdte[i])*etotCorr[runTemp][i][2]*1.25 + 4000.;
 
    }
    //double check below - ok, except maybe could be > E not just NaN ??
