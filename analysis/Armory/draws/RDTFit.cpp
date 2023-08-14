@@ -16,7 +16,7 @@ cc0->Clear(); cc0->Divide(2,4); cc0->cd();
 //                   163,165,167,169,171,
 //                   173,175,177,181,183,
 //                   185,187,189,191,195};
- int runList[200] = {173,163,145,135,133,131,129,127,123};
+ int runList[200] = {185,173,163,145,135,133,131,129,127,123};
 for (Int_t run=0;run<1;run++) {
     //cc[runList[run]] = new TCanvas(Form("cc%d",run),Form("rdt%d",run));
     f[runList[run]] = new TFile(Form("h066_31Si_trace_run%d.root",runList[run]));
@@ -29,8 +29,8 @@ for (Int_t run=0;run<1;run++) {
     TSpectrum *s = new TSpectrum(4);
    
     for (Int_t i=0;i<4;i++) {
-        hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),200,3650,4900);
-        hrdtTOTE2[i] = new TH1F(Form("hrdtTOTE2%d",i),Form("hrdtTOTE2%d_%d",i,runList[run]),200,3650,4900);
+        hrdtTOTE[i] = new TH1F(Form("hrdtTOTE%d",i),Form("hrdtTOTE%d_%d",i,runList[run]),250,3650,4900);
+        hrdtTOTE2[i] = new TH1F(Form("hrdtTOTE2%d",i),Form("hrdtTOTE2%d_%d",i,runList[run]),250,3650,4900);
             TString draw_string(Form("rdt[%d]+rdt[%d]>>hrdtTOTE%d",2*i+1,2*i,i));
             TString draw_string2(Form("trdt[%d]+trdt[%d]>>hrdtTOTE2%d",2*i+1,2*i,i));
             cc0->cd(i+1);
