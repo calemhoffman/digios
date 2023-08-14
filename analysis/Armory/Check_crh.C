@@ -20,11 +20,11 @@
 // int nPeakss = 16;
 //TTree *tr = NULL;
 
-bool doEZ=true;
-bool doEx=true;
+bool doEZ=false;
+bool doEx=false;
 bool doRDT=true;
-bool doEx2d=true;
-bool doAngs=true;
+bool doEx2d=false;
+bool doAngs=false;
 
 bool RDTCUT=false;
 bool RINGCUT=true;
