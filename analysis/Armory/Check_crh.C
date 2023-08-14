@@ -301,8 +301,8 @@ void Check_crh(TString rootfile){
       TString exGate("&& Ex<6.6");
       for (int i=0;i<4;i++) {
          cCheck3->cd(i+1);
-         hRDTe[i] = new TH1F(Form("hRDTe%d",i), Form("RDTe %d; ETOT [ch]",i), 1000,2500,4500);
-         hRDTte[i] = new TH1F(Form("hRDTte%d",i), Form("RDTte %d; ETOT [ch]",i), 1000,2500,4500);
+         hRDTe[i] = new TH1F(Form("hRDTe%d",i), Form("RDTe %d; ETOT [ch]",i), 500,3500,4200);
+         hRDTte[i] = new TH1F(Form("hRDTte%d",i), Form("RDTte %d; ETOT [ch]",i), 500,3500,4200);
          tree->Draw(Form("rdte[%d]>>hRDTe%d",i,i));
          tree->Draw(Form("trdte[%d]>>hRDTte%d",i,i),"","same");
       }
