@@ -35,14 +35,14 @@ for (Int_t run=0;run<1;run++) {
             TString draw_string2(Form("trdt[%d]+trdt[%d]>>hrdtTOTE2%d",2*i+1,2*i,i));
             cc0->cd(i+1);
             if (run<1)   tree->Draw(draw_string,"","");
-            Int_t nfound = s->Search(hrdtTOTE[i],2,"",0.3);
+            Int_t nfound = s->Search(hrdtTOTE[i],2,"",0.2);
             // printf("Found %d candidate peaks to fit at %d\n",nfound,i);
             Double_t *xpeaks;
             xpeaks = s->GetPositionX();
             printf("%d %d %.3f %.3f %.5f\n",runList[run],i,xpeaks[0],xpeaks[1],TMath::Abs(80./(xpeaks[1]-xpeaks[0])));
             cc0->cd(i+5);
             if (run < 1) tree->Draw(draw_string2,"","");
-            nfound = s->Search(hrdtTOTE2[i],2,"",0.3);
+            nfound = s->Search(hrdtTOTE2[i],2,"",0.2);
             xpeaks = s->GetPositionX();
             printf("%d %d %.3f %.3f %.5f\n",runList[run],i+4,xpeaks[0],xpeaks[1],TMath::Abs(80./(xpeaks[1]-xpeaks[0])));
             // if (run>0) tree->Draw(draw_string,"","same");
