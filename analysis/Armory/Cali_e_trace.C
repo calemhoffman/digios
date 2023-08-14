@@ -176,7 +176,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       }
    }
 // uncomment for recoil coincidence
-  //if( coinFlag == false ) return kTRUE;
+  if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    
