@@ -24,9 +24,9 @@ bool doEZ=false;
 bool doEx=true;
 bool doRDT=true;
 bool doEx2d=true;
-bool doAngs=false;
+bool doAngs=true;
 
-bool RDTCUT=false;
+bool RDTCUT=true;
 bool RINGCUT=true;
 bool XCUT=true;
 bool TIMECUT=true;
@@ -100,7 +100,7 @@ void Check_crh(TString rootfile){
    }
    TString timeGate = "";
    if (TIMECUT) {
-      timeGate = " && coinTime > -25 && coinTime < 20";
+      timeGate = " && coinTime > -22 && coinTime < 22";
    }
 
    TString thetaGate = "";
@@ -202,9 +202,10 @@ void Check_crh(TString rootfile){
       cCheckEx2db->SetGrid(); cCheckEx2db->Divide(2,2);
       TH2F * hExCoinT;
       TH2F * hExRDT[4];
+      TH2F * hExRDTg[4];
       TH2F * hExtRDT[4];
       TH2F * hExRDTde[4];
-
+      TString exGate("&& Ex<6.6");
       cCheckEx2d->cd(1);
       hExCoinT = new TH2F("hExCoinT","hExCoinT; Ex; coinTime",100,-100,100,700,-1,13);
       tree->Draw("Ex:coinTime>>hExCoinT","hitID>=0 && " + detGate + gate_RDT, "colz");
@@ -214,6 +215,9 @@ void Check_crh(TString rootfile){
          // tree->Draw(Form("Ex:rdt[%d] >> hExRDTde%d",2*i+1,i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
          hExRDT[i] = new TH2F(Form("hExRDT%d",i), Form("ExRDT [rdt %d]; TOTE; Ex [MeV]",i), 1000,2500,5000,700,-1,13); //20 keV/ch
          tree->Draw(Form("Ex:rdte[%d] >> hExRDT%d",i,i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
+         hExRDTg[i] = new TH2F(Form("hExRDTg%d",i), Form("ExRDTg [rdt %d]; TOTE; Ex [MeV]",i), 1000,2500,5000,700,-1,13); //20 keV/ch
+         tree->Draw(Form("Ex:rdte[%d] >> hExRDTg%d",i,i), "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate , "same");
+         hExRDTg[i]->SetMarkerStyle(7); hExRDTg[i]->Draw("same");
          cCheckEx2db->cd(i+1);
          hExtRDT[i] = new TH2F(Form("hExtRDT%d",i), Form("ExtRDT [rdt %d]; tRDT; Ex [MeV]",i), 1000,2500,5000,700,-1,13); //20 keV/ch
          tree->Draw(Form("Ex:trdte[%d]>> hExtRDT%d",i,i), "hitID>=0 && " + detGate + timeGate+ thetaGate, drawOption);
@@ -292,8 +296,8 @@ void Check_crh(TString rootfile){
    if (doRDT) {
       TCanvas * cCheck3 = new TCanvas("cCheck3", "cCheck3", 700, 50,  1800, 1600);
       cCheck3->ToggleToolBar();cCheck3->Divide(2,2);
-      // TCanvas * cCheck3b = new TCanvas("cCheck3b", "cCheck3b", 70, 50,  1800, 1600);
-      // cCheck3b->ToggleToolBar();cCheck3b->Divide(2,4);
+      TCanvas * cCheck3b = new TCanvas("cCheck3b", "cCheck3b", 70, 50,  1800, 1600);
+      cCheck3b->ToggleToolBar();cCheck3b->Divide(2,2);
       TH2F * hRDT[8];
       TH2F * hRDTg[8];
       TH2F * hRDTr[8];
@@ -311,24 +315,18 @@ void Check_crh(TString rootfile){
       }
       for (int i=0;i<4;i++) {
          cCheck3->cd(i+1);
-         hRDT[i] = new TH2F(Form("hRDT%d",2*i+1), Form("RDT  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,500,0,2000);
-         tree->Draw(Form("rdt[%d]-trdt_r[%d]*%f:((rdt[%d]-trdt_r[%d]*%f)*%f+(rdt[%d]-trdt_r[%d]*%f))+%f >> hRDT%d",
-         2*i+1,2*i+1,rdtrCorr[2*i+1],2*i+1,2*i+1,rdtrCorr[2*i+1],rdtCorr[2*i+1],2*i,2*i,rdtrCorr[2*i],rdtOff[2*i+1],2*i+1),  "hitID>=0", drawOption);
-         hRDTg[i] = new TH2F(Form("hRDT%dg",2*i+1), Form("RDTg  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,500,0,2000);
-         tree->Draw(Form("rdt[%d]:(rdt[%d]*%f+rdt[%d])+%f >> hRDTg%d",2*i+1,2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1],2*i+1),  "hitID>=0 && " + detGate + timeGate + exGate, "same");
-         if (RDTCUT) cut[i]->Draw("same");
+         hRDT[i] = new TH2F(Form("hRDT%d",i), Form("RDT  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,1000,0,2200);
+         tree->Draw(Form("rdt[%d]:rdte[%d] >> hRDT%d",2*i+1,i,i),  "hitID>=0", drawOption);
+         hRDTg[i] = new TH2F(Form("hRDT%dg",2*i+1), Form("RDTg  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,1000,0,2200);
+         tree->Draw(Form("rdt[%d]:rdte[%d]>> hRDTg%d",2*i+1,i,i),  "hitID>=0 && " + detGate + timeGate + exGate, "same");
+         hRDTg[i]->SetMarkerStyle(7);hRDTg[i]->Draw("same");
       }
 
-      // for (int i=0;i<4;i++) {
-      //    cCheck3b->cd(2*i+1);
-      //    hRDTr[2*i] = new TH2F(Form("hRDTr%d",2*i), Form("hRDTr%d; trdtr [MeV]; DE/E [MeV]",2*i), 400,-100,100,1000,0,5000);
-      //    // hRDTr[2*i] = new TH2F(Form("hRDTr%d",2*i), Form("hRDTr%d; trdtr [MeV]; DE/E [MeV]",2*i), 100,0,200,1000,0,5000);
-      //    tree->Draw(Form("trdt[%d] - (trdt_r[%d]*%f):trdt_r[%d] >> hRDTr%d",2*i,2*i,rdtrCorr[2*i],2*i,2*i),  "hitID>=0 && " + detGate + timeGate + exGate, drawOption);
-      //    cCheck3b->cd(2*i+2);
-      //    hRDTr[2*i+1] = new TH2F(Form("hRDTr%d",2*i+1), Form("hRDTr%d; trdtr [MeV]; DE/E [MeV]",2*i+1), 400,-100,100,500,0,5000);
-      //    // hRDTr[2*i+1] = new TH2F(Form("hRDTr%d",2*i+1), Form("hRDTr%d; trdtr [MeV]; DE/E [MeV]",2*i+1), 100,0,200,500,0,5000);
-      //    tree->Draw(Form("rdt[%d]-(trdt_r[%d]*%f):trdt_r[%d] >> hRDTr%d",2*i+1,2*i+1,rdtrCorr[2*i+1],2*i+1,2*i+1),  "hitID>=0 && " + detGate + timeGate + exGate, drawOption);
-      // }
+      for (int i=0;i<4;i++) {
+         cCheck3b->cd(i+1);
+         hRDTr[i] = new TH2F(Form("hRDTr%d",i), Form("TRDT  [de=%d, e=%d]; ETOT [MeV]; DE [MeV]",2*i+1,2*i), 500,1500,5500,1000,0,2200);
+         tree->Draw(Form("trdt[%d]:trdte[%d] >> hRDTr%d",2*i+1,i,i),  "hitID>=0", drawOption);
+      }
       // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
       // cCheck3->Clear(); cCheck3->Divide(3,2);
       // for (int i=0;i<30;i++) {

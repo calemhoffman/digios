@@ -86,10 +86,10 @@ void RDTCutCreator(TString dataList,
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
       if( useTrace ){   
-         varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
+         varX.Form("trdte[%d]",i); varY.Form("trdt[%d]",2*i+1);
       }else{
          ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-         varX.Form("(rdt[%d]*%f+rdt[%d])+%f",2*i+1,rdtCorr[2*i+1],2*i,rdtOff[2*i+1]); varY.Form("rdt[%d]",2*i+1);
+         varX.Form("rdte[%d]",i); varY.Form("rdt[%d]",2*i+1);
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 3000, eRange, 1000, 500, deRange);
