@@ -27,7 +27,7 @@ bool doEx2d=true;
 bool doAngs=true;
 
 bool RDTCUT=true;
-bool RINGCUT=true;
+bool RINGCUT=false;
 bool XCUT=true;
 bool TIMECUT=true;
 bool THETACUT=true;
@@ -91,9 +91,9 @@ void Check_crh(TString rootfile){
       }
    }
    
-   TString detGate = "";
+   TString detGate = "x>-10";
    if (RINGCUT) {
-      detGate = detGate + "ring > -100 && ring < 100";
+      detGate = detGate + "&& ring > -100 && ring < 100";
    }
    if (XCUT) {
       detGate = detGate + " && x>=-0.98 && x<=0.98";
