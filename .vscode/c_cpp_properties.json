@@ -8,10 +8,22 @@
             ],
             "defines": [],
             "macFrameworkPath": [],
-            "compilerPath": "/usr/local/bin/gcc-11",
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "macos-gcc-x64"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${ROOTSYS}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

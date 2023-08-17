@@ -1,5 +1,7 @@
 #========= Input for Cleopatra
 #===== # for comment line, must be at the beginning of line
+# This is a simplified input for creating Ptolmey in-file.
+# Ptolemy has many control parameters for specific situation. Use with caution or ask Ben Kay.
 #===== the potential contain two words
 # one for incoming
 # one for outgoing
