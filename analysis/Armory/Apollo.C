@@ -67,6 +67,16 @@ double nextZ(double thetab, double phib, double rho, double z, double theta, dou
    return z - f0(thetab, phib, rho, z, theta, phi )/f1(thetab, phib, rho,  z, theta, phi);
 }
 
+double g0(double thetab, double rho, double z){
+   return rho * rho * (2 - 2 * TMath::Cos( TMath::Tan(thetab) * z / rho)) + (z - zOffset) * (z - zOffset) - innerR * innerR;
+}
+double g1(double thetab, double rho, double z){
+   return 2 * rho * TMath::Tan(thetab) * TMath::Sin( TMath::Tan(thetab) * z / rho) + 2 * (z - zOffset);
+}
+double nextG(double thetab, double rho, double z ){
+   return z - g0(thetab, rho, z)/g1(thetab, rho,  z);
+}
+
 double rhoMin;
 double xHit, yHit, zHit; // these are hit z, y, z 
 int iHit, jHit;
@@ -80,6 +90,22 @@ double FindZHit(double a0, double thetab, double phib, double rho, double theta,
       da = abs(a1-a0);
       //printf("--------- %d | %.3f, %.3f, %.3f \n", count, a0, a1, da);
       count++;
+      a0 = a1;
+   }while( da > 0.001 && count < 500);
+
+   return a0;
+}
+
+double FindZHitR(double a0, double thetab, double rho){
+   //============ Newton method;
+   double da ;
+   int count = 0;
+   do{
+      double a1 = nextG(thetab,  rho, a0);
+      da = abs(a1-a0);
+      count++;
+      //printf("--------- %d | %.3f, %.3f, %.3f \n", count, a0, a1, da);
+      if( a1 < 0 ){ a1 = rho/TMath::Tan(thetab)/8 ;}
       a0 = a1;
    }while( da > 0.001 && count < 500);
 
@@ -194,11 +220,13 @@ Bool_t Apollo::Process(Long64_t entry){
    //if( Tb < 1.0 ) return kTRUE;
    processed ++;
    //if( processed > 10 ) return kTRUE;
+   if( processed % 10000 == 0) printf("processed : %lld \n", processed);
 
    //printf("######################## thetab %f deg, phib %f deg, E: %f MeV\n", thetab, phib, Tb);
    thetab = thetab * TMath::DegToRad();
    phib = phib * TMath::DegToRad();
 
+   pRho = calRho(Tb, thetab);
    bool OK = ApolloAcceptance(thetab, Tb, phib);
 
    if( OK ){
@@ -215,23 +243,40 @@ Bool_t Apollo::Process(Long64_t entry){
       jH = jHit;
 
       //save tree
-      saveFile->cd();
-      newTree->Fill();
+      //saveFile->cd();
+      //newTree->Fill();
 
    }else{
       xH = 0;
       yH = 0;
       zH = 0;
 
-      //printf("(%7f, %7f, %7f)\n",  thetab *TMath::RadToDeg(), phib*TMath::RadToDeg(), Tb );
-
       iH = -1;
       jH = -1;
+
+      //=========== calculate the hit point on a sphere with radius innerR
+      if( pRho > rhoMin) {
+         double z0 = TMath::TwoPi() * pRho/ TMath::Tan(thetab);
+         zH = FindZHitR(z0/4, thetab, pRho);
+         xH = XPos(zH, thetab, phib,  pRho, -1);
+         yH = YPos(zH, thetab, phib,  pRho, -1);
+         //printf("(%f , %f, %f) \n", xH, yH, zH);
+         //printf("(%7f, %7f, %7f)\n",  thetab *TMath::RadToDeg(), phib*TMath::RadToDeg(), Tb );
+
+         double RRR = TMath::Sqrt((zH-zOffset)*(zH-zOffset) + xH*xH + yH*yH);
+         if( abs(RRR -innerR ) > 1 ) {
+            printf("%f \n", RRR);
+            iH = -3;
+         }
+
+      }else{
+         iH = -2;
+      }
    }
 
    //save tree
-   //saveFile->cd();
-   //newTree->Fill();
+   saveFile->cd();
+   newTree->Fill();
 
 
 

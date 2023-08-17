@@ -506,7 +506,7 @@ void Monitors::LoadRDTCorr(){
       double a, b;
       int i = 0;
       while( file >> a >> b){
-         if( i >= 8) break;
+         if( i >= NRDT ) break;
          rdtCorr[i][0] = a;  //  a1
          rdtCorr[i][1] = b;  //  a0 , e' = e * a1 + a0
          i = i + 1;
@@ -515,7 +515,7 @@ void Monitors::LoadRDTCorr(){
       
    }else{
       printf("............ fail.\n");
-      for( int i = 0; i < 8 ; i++){
+      for( int i = 0; i < NRDT ; i++){
          rdtCorr[i][0] = 1.;
          rdtCorr[i][1] = 0.;
       }
