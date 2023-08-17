@@ -261,8 +261,8 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
   double uOld = 0;
   double uOld2 = 0;
 
-  if( 1 < A && A < 40 ) maxL = 3;
-  if( 1 < N && (N < 20 || Z < 20) ) maxL = 2;
+  if( 1 < A && A < 40 ) maxL = 7;
+  if( 1 < N && (N < 20 || Z < 20) ) maxL = 3;
 
   double KEstart = V0 + 2.; ///assume the 1st eigen state is 2 MeV above the well depth
 

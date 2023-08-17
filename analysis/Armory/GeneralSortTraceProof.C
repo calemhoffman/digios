@@ -9,7 +9,7 @@
 bool isTraceON = true;
 bool isSaveTrace = true;
 bool isSaveFitTrace = true;
-int traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid
+int traceMethod = 3; //0 = no process; 1 = fit; 2 = trapezoid; 3 offset-different
 float delayChannel = 100.; //initial guess of the time
 
 // Also go to line 146 to set the trace analysis gate
@@ -117,8 +117,7 @@ TGraph * GeneralSortTraceProof::TrapezoidFilter(TGraph * trace){
    
 }
 
-void GeneralSortTraceProof::Begin(TTree */*tree*/)
-{
+void GeneralSortTraceProof::Begin(TTree */*tree*/){
 
    TString option = GetOption();
 
@@ -699,6 +698,77 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                int rdtTemp = idDet-100;
                trdt[rdtTemp]   = yyy;
                trdt_t[rdtTemp] = xxx - 30;
+               trdt_r[rdtTemp] = 0;
+            }
+
+         }
+
+         ///Offset-Difference
+         if( traceMethod == 3){
+            
+            int offset = 30;
+
+            TH1F * jaja = new TH1F();
+            jaja->Clear();
+            jaja->Reset();
+            jaja->SetBins(gTrace->GetN()-offset, 0, gTrace->GetN() - offset);
+
+            for( int k = 0; k < gTrace->GetN() - offset; k++){
+               double a = gTrace->GetPointY(k+offset);
+               double b = gTrace->GetPointY(k);
+               jaja->Fill(k, (a -b) + offset);
+               jaja->SetBinError(k, 0);
+            }
+
+            //========= moving average
+            TH1F * specS = (TH1F*) jaja->Clone();
+            specS->Rebin(4);
+
+            int nPeaks = 0;
+            std::vector<double> tPos, height;
+            {
+               TSpectrum * peak = new TSpectrum(10);
+
+               printf("============= estimating background...\n");
+               TH1 * h1 = peak->Background(specS, 30);
+               //h1->Draw("same");
+               printf("============= substracting the linear background...\n");
+               //specS->Sumw2();
+               specS->Add(h1, -1.);
+               
+               delete peak;
+               peak = new TSpectrum(10);
+               int nPeaks = peak->Search(specS, 5, "", 0.2);
+               double * xpos = peak->GetPositionX();
+               double * ypos = peak->GetPositionY();
+
+               int * inX = new int[nPeaks];
+               TMath::Sort(nPeaks, xpos, inX, 0 );
+               
+               for( int j = 0; j < nPeaks; j++){
+                  tPos.push_back(xpos[inX[j]]);
+                  height.push_back(ypos[inX[j]]);
+               }
+               // for( int j = 0; j < nPeaks; j++){
+               //    printf(" position : %f , %f \n", energy[j], height[j]);
+               // }
+
+               delete peak;
+            }
+
+            delete jaja;
+            delete specS;
+
+            if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
+               te[idDet]   = height[0];
+               te_t[idDet] = tPos[0];
+               te_r[idDet] = 0;
+            }
+            
+            if( NRDT + 100 > idDet && idDet >= 100 ) {
+               int rdtTemp = idDet-100;
+               trdt[rdtTemp]   = height[0];
+               trdt_t[rdtTemp] = tPos[0];
                trdt_r[rdtTemp] = 0;
             }
 
