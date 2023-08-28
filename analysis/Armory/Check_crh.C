@@ -21,10 +21,11 @@
 //TTree *tr = NULL;
 
 bool doEZ=false;
-bool doEx=true;
-bool doRDT=true;
-bool doEx2d=true;
-bool doAngs=true;
+bool doEx=false;
+bool doRDT=false;
+bool doEx2d=false;
+bool doAngs=false;
+bool doCoinT=true;
 
 bool RDTCUT=true;
 bool RINGCUT=false;
@@ -190,7 +191,28 @@ void Check_crh(TString rootfile){
       }
       cCheck1->Update();
    }
+   /**///======================================================== CoinT
 
+   if (doCoinT) {
+      TH2F *hCoinTx[30];
+      TCanvas * cCheckCoinT = new TCanvas("cCheckCoinT", "cCheckCoinT", 100, 0,  1800, 1600);
+      cCheckCoinT->ToggleEditor();cCheckCoinT->ToggleToolBar();
+      cCheckCoinT->SetGrid(); cCheckCoinT->Divide(3,2);
+
+      for (int i=0;i<30;i++) {
+         // cCheckCoinT->cd(i+1);
+         TString detIDGate;
+         // for (int j=0;j<5;j++) {
+            detIDGate.Form("detID==%d &&",i);
+         // }
+         hCoinTx[i] = new TH2F(Form("hCoinTx%d",i),Form("hCoinTx%d",i),100,-1,1,100,-50,50);
+         tree->Draw(Form("coinTime:x>>hCoinTx%d",i),detIDGate+detGate,"");
+      }
+
+      for (int j=0;j<5;j++) {
+
+      }
+   }
 
       /**///======================================================== Ex2d
    if (doEx2d) {
