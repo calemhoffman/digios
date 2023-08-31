@@ -726,6 +726,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             int nPeaks = 0;
             std::vector<double> tPos, height;
+            double t1 = 0, t2 = 0;
+
             {
                TSpectrum * peak = new TSpectrum(10);
 
@@ -754,6 +756,39 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                // }
 
                delete peak;
+
+               //get the FWHM of the first peak
+               int b0 = specS->FindBin(tPos[0]);
+               int b = b0;
+               do{
+                  b = b - 1;
+                  double y = specS->GetBinContent(b);
+                  double t = specS->GetBinCenter(b);
+
+                  if( y < height[0]/2. ) {
+
+                     double yy = specS->GetBinContent(b+1);
+                     double tt = specS->GetBinCenter(b+1);
+
+                     t1 = t + (tt-t) * (height[0]/2 - y)/(yy-y);
+                     break;
+                  }
+               }while(b > 0);
+               b = b0;
+               do{
+                  b = b + 1;
+                  double y = specS->GetBinContent(b);
+                  double t = specS->GetBinCenter(b);
+
+                  if( y < height[0]/2. ) {
+                     double yy = specS->GetBinContent(b-1);
+                     double tt = specS->GetBinCenter(b-1);
+
+                     t2 = t + (tt-t) * (height[0]/2 - y)/(yy-y);
+                     break;
+                  }
+               }while(b < 2*b0);
+
             }
 
             delete jaja;
@@ -762,14 +797,14 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
                te[idDet]   = height[0];
                te_t[idDet] = tPos[0];
-               te_r[idDet] = 0;
+               te_r[idDet] = t2-t1;
             }
             
             if( NRDT + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
                trdt[rdtTemp]   = height[0];
                trdt_t[rdtTemp] = tPos[0];
-               trdt_r[rdtTemp] = 0;
+               trdt_r[rdtTemp] = t2-t1;
             }
 
          }
