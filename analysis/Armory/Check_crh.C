@@ -21,10 +21,10 @@
 //TTree *tr = NULL;
 
 bool doEZ=false;
-bool doEx=false;
+bool doEx=true;
 bool doRDT=false;
 bool doEx2d=false;
-bool doAngs=false;
+bool doAngs=true;
 bool doCoinT=true;
 
 bool RDTCUT=true;
