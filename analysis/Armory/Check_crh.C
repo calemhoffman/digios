@@ -20,12 +20,12 @@
 // int nPeakss = 16;
 //TTree *tr = NULL;
 
-bool doEZ=false;
+bool doEZ=true;
 bool doEx=true;
 bool doRDT=false;
-bool doEx2d=false;
+bool doEx2d=true;
 bool doAngs=true;
-bool doCoinT=true;
+bool doCoinT=false;
 
 bool RDTCUT=true;
 bool RINGCUT=false;
@@ -119,6 +119,7 @@ void Check_crh(TString rootfile){
    
    TFile *file0 = new TFile (rootfile, "read"); 
    TTree *tree = (TTree*)file0->Get(treeName);
+   tree->Print();
    printf("=====> /// %20s //// is loaded. Total #Entry: %10lld \n", rootfile.Data(),  tree->GetEntries());
    
    TFile *file1 = new TFile (simfile, "read"); 
@@ -178,8 +179,10 @@ void Check_crh(TString rootfile){
          cCheck1->cd(i+1);
          TString detIDGate;
          detIDGate.Form("detID >= %d && detID < %d && ",i*5,i*5+5);
-         hEZ[i] = new TH2F(Form("hEZ%d",i), Form("te:z [det %d - %d]; z [mm]; e [MeV]",i*5,i*5+5), zRange[0], zRange[1], zRange[2], eRange[0], eRange[1], eRange[2]);
-         tree->Draw(Form("te:z >> hEZ%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate + thetaGate  , drawOption);
+         hEZ[i] = new TH2F(Form("hEZ%d",i), Form("e:z [det %d - %d]; z [mm]; e [MeV]",i*5,i*5+5), zRange[0], zRange[1], zRange[2], eRange[0], eRange[1], eRange[2]);
+         hEZ[i]->SetMarkerStyle(7);hEZ[i]->SetMarkerSize(5);
+         tree->Draw(Form("e:z >> hEZ%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate + thetaGate  , drawOption);
+         hEZ[i]->Draw();
       
          if( showFx ) {
             TObjArray * fxList = (TObjArray*) file1->FindObjectAny("fxList");
