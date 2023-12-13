@@ -35,15 +35,15 @@
 # f = Bassani and Picard, 1969(FIXED)|    24 < E < 31  |      A = 90              | https://doi.org/10.1016/0375-9474(69)90601-0
 #=======================================================================
 #reaction          gs-spin  orbital  spin-pi(Ex)  Ex      ELab        Potentials
-30Si(d,p)31Si      0        0d3/2    3/2+         0.000   10.67MeV/u   AK
-30Si(d,p)31Si      0        1s1/2    1/2+         0.752   10.67MeV/u   AK
-30Si(d,p)31Si      0        0d5/2    5/2+         1.695   10.67MeV/u   AK
-30Si(d,p)31Si      0        0d3/2    3/2+         2.316   10.67MeV/u   AK
-30Si(d,p)31Si      0        0d5/2    5/2+         2.788   10.67MeV/u   AK
-30Si(d,p)31Si      0        0f7/2    7/2-         3.133   10.67MeV/u   AK
-30Si(d,p)31Si      0        1p3/2    3/2-         3.533   10.67MeV/u   AK
-30Si(d,p)31Si      0        0d3/2    3/2+         4.262   10.67MeV/u   AK
-30Si(d,p)31Si      0        1p3/2    3/2-         4.382   10.67MeV/u   AK
-30Si(d,p)31Si      0        1p3/2    3/2-         5.281   10.67MeV/u   AK
-30Si(d,p)31Si      0        0f7/2    7/2-         5.442   10.67MeV/u   AK
-30Si(d,p)31Si      0        0d3/2    3/2+         6.241   10.67MeV/u   AK
+30Si(d,p)31Si      0        0d3/2    3/2+         0.000   10.20MeV/u   AK
+30Si(d,p)31Si      0        1s1/2    1/2+         0.752   10.20MeV/u   AK
+30Si(d,p)31Si      0        0d5/2    5/2+         1.695   10.20MeV/u   AK
+30Si(d,p)31Si      0        0d3/2    3/2+         2.316   10.20MeV/u   AK
+30Si(d,p)31Si      0        0d5/2    5/2+         2.788   10.20MeV/u   AK
+30Si(d,p)31Si      0        0f7/2    7/2-         3.133   10.20MeV/u   AK
+30Si(d,p)31Si      0        1p3/2    3/2-         3.533   10.20MeV/u   AK
+30Si(d,p)31Si      0        0d3/2    3/2+         4.262   10.20MeV/u   AK
+30Si(d,p)31Si      0        1p3/2    3/2-         4.382   10.20MeV/u   AK
+30Si(d,p)31Si      0        1p3/2    3/2-         5.281   10.20MeV/u   AK
+30Si(d,p)31Si      0        0f7/2    7/2-         5.442   10.20MeV/u   AK
+30Si(d,p)31Si      0        0d3/2    3/2+         6.241   10.20MeV/u   AK
