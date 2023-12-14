@@ -16,18 +16,20 @@
 #include <TCutG.h>
 
 #include "../Armory/AnalysisLibrary.h"
+using namespace std;
 
 // int nPeakss = 16;
 //TTree *tr = NULL;
 
 bool doEZ=true;
-bool doEx=true;
+bool doEx=false;
 bool doRDT=false;
-bool doEx2d=true;
-bool doAngs=true;
+bool doEx2d=false;
+bool doAngs=false;
 bool doCoinT=false;
+bool doCSV=true;
 
-bool RDTCUT=true;
+bool RDTCUT=false;
 bool RINGCUT=false;
 bool XCUT=true;
 bool TIMECUT=true;
@@ -162,7 +164,18 @@ void Check_crh(TString rootfile){
 
 
 /**///======================================================== Analysis
-/**///======================================================== e vs z
+// #include <iostream>
+// #include <fstream>
+// using namespace std;
+
+// int main() {
+//   ofstream myfile;
+//   myfile.open ("example.txt");
+//   myfile << "Writing this to a file.\n";
+//   myfile.close();
+//   return 0;
+// }
+/**///======================================================== csv
    gStyle->SetOptStat("i");
    gStyle->SetStatY(0.9);
    gStyle->SetStatX(0.35);
@@ -170,6 +183,31 @@ void Check_crh(TString rootfile){
    gStyle->SetStatH(0.10);
    gStyle->SetLabelSize(0.035, "XY");
    gStyle->SetTitleFontSize(0.035);
+
+
+   ofstream myfile;
+   myfile.open ("evz_data.csv");
+   float e[30];
+   float z[30];
+   float x[30];
+   float coinTime = 0;
+   float thetaCM = 0;
+   tree->SetBranchAddress("e", e);
+   tree->SetBranchAddress("z", z);
+   tree->SetBranchAddress("x", x);
+   tree->SetBranchAddress("coinTime",&coinTime);
+   tree->SetBranchAddress("thetaCM",&thetaCM);
+   myfile << "z,e\n";
+   if (doCSV) {
+      for (int k=0;k<tree->GetEntries()-1;k++) {
+         tree->GetEntry(k);
+         if (e[0] > 2.5 && e[0]<7.4 && coinTime>-22 && coinTime<22 && thetaCM > 10. && x[0]>=-0.98 && x[0]<=0.98) {
+            // printf("%f %f\n",z[0],e[0]);
+            myfile << z[0] << "," << e[0] << endl;
+         }
+      }
+   }
+   /**///======================================================== e vs z
    if (doEZ) {
       TCanvas * cCheck1 = new TCanvas("cCheck1", "cCheck1", 700, 50,  1800, 1400);
       cCheck1->ToggleEditor();cCheck1->ToggleToolBar();
