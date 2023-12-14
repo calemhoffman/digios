@@ -43,13 +43,40 @@ def cleo(x,stateID):
 # %%
 df_data = pd.read_csv("evz_data.csv")
 df_data
+
+# %% calculate score from data to lines
+# get single point from data, get diff to each calc line, find index of minimum, use that value as part of sum (absolute sum)
+# perhpas should use a weight based on proximity to the line??
+m = 1.00
+b = 0.00
+stateID = 0
+diff = 1000.
+diffSum = 0
+diffSumStart = 130.1528485495266
+df_data['eprime'] = df_data['e']*m + b
+print(df_data)
+for i in range(df_data.shape[0]): #all points
+    diff = 1000.
+    for index in range(6): #all possible states
+        temp = abs(df_data['eprime'].loc[i] - cleo(df_data['z'].loc[i],index))
+        # print("{} {}".format(index,temp))
+        if temp < diff:
+            diff = temp
+            stateID = index
+    # print("{} {}".format(stateID,diff))
+    diffSum += diff
+if diffSum < diffSumStart:
+    diffSumStart = diffSum
+print(diffSum)
+        
 #%%
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
+fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['eprime'],mode='markers'))
 for i in range(len(states)):
     fig.add_trace(go.Scatter(x=df_cleo['z'],y=df_cleo[states[i]],mode='lines'))
 fig.update_xaxes(range=[-470,-400])
 fig.update_yaxes(range=[2,8])
 fig.show()
-# %%
 
+# %%
