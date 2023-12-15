@@ -64,8 +64,8 @@ diff = 0.
 diffSum = 0
 diffSumStart = 0.
 
-mlist = arange(1.0, 1.02, 0.001)
-blist = arange(-0.1,0.0,0.002)
+mlist = arange(0.965, 0.971, 0.0002)
+blist = arange(,0.4,0.02)
 clist = arange(-0.001,0.001,0.0002)
 # mlist = [1.0]
 # blist = [0.0]
@@ -97,20 +97,19 @@ for mi in mlist:
             counterDiff[stateID] = counterDiff[stateID] + diff
             counterID[stateID] = counterID[stateID] + 1
         # diffs.append(diffSum/df_data.shape[0])
-        for ii in range(4):
-            ave += counterDiff[ii]/counterID[ii]
+        # for ii in range(4):
+            # ave += counterDiff[ii]/counterID[ii]
         diffs.append(diffSum)
         # print(diffSum/df_data.shape[0])
-
-#%%
+        
 fig = go.Figure()
 fig = go.Figure(data =
      go.Contour(x = ms, y = bs, z = diffs))
 fig.show()
         
 #%%
-m = 1.003
-b = -0.03
+m = 0.97
+b = 0.02
 df_data['eprime'] = df_data['e']*m + b
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
