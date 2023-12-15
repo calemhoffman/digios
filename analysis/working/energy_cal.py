@@ -28,9 +28,9 @@ pio.templates.default = "mycolor"
 
 df_cleo = pd.read_csv("cleo_si30dp_320MeV.csv")
 states = ['0','1','2','3','4','5','6']
-states = ['0','1','5','6']
+states = ['0','1','5','6','7','9']
 statesint = [0,1,5,6]
-df_cleo =df_cleo[['z','0','1','5','6']]
+df_cleo =df_cleo[['z','0','1','5','6','7','9']]
 df_cleo
 #%%
 num_cleo = df_cleo.shape[1] - 1
@@ -51,17 +51,24 @@ df_data
 # perhpas should use a weight based on proximity to the line??
 m = 1.00
 b = 0.00
+c = 0.00
 ms = []
 bs = []
+cs = []
 diffs = []
 it = []
-stateID = 0
+stateID = 0.
+counterID = [0,0,0,0,0,0]
+counterDiff = [0.,0.,0.,0.,0.,0.]
 diff = 0.
 diffSum = 0
 diffSumStart = 0.
 
-mlist = arange(0.98, 1.02, 0.005)
-blist = arange(0.0,0.2,0.01)
+mlist = arange(0.990, 1.000, 0.0005)
+blist = arange(0.1,0.16,0.002)
+clist = arange(-0.001,0.001,0.0002)
+# mlist = [1.0]
+# blist = [0.0]
 print(mlist,blist)
 
 #%%
@@ -69,7 +76,9 @@ iter=0
 for mi in mlist:
      for bi in blist:
         diffSum=0
+        ave=0.
         iter=iter+1
+        stateID = -1
         ms.append(mi)
         bs.append(bi)
         it.append(iter)
@@ -85,7 +94,12 @@ for mi in mlist:
                     stateID = index
             # print("{} {}".format(stateID,diff))
             diffSum += diff
-        diffs.append(diffSum/df_data.shape[0])
+            counterDiff[stateID] = counterDiff[stateID] + diff
+            counterID[stateID] = counterID[stateID] + 1
+        # diffs.append(diffSum/df_data.shape[0])
+        for ii in range(4):
+            ave += counterDiff[ii]/counterID[ii]
+        diffs.append(diffSum)
         # print(diffSum/df_data.shape[0])
 
 #%%
@@ -95,16 +109,17 @@ fig = go.Figure(data =
 fig.show()
         
 #%%
-m = 0.995
-b = -0.045
+m = 0.9975
+b = 0.114
 df_data['eprime'] = df_data['e']*m + b
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['eprime'],mode='markers'))
 for i in range(len(states)):
     fig.add_trace(go.Scatter(x=df_cleo['z'],y=df_cleo[states[i]],mode='lines'))
-fig.update_xaxes(range=[-470,-400])
-fig.update_yaxes(range=[2,8])
+fig.update_xaxes(range=[-470,-120])
+fig.update_yaxes(range=[1,10])
+fig.update_layout(height=800,width=1200)
 fig.show()
 
 # %%

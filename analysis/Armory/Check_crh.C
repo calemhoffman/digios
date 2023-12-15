@@ -198,12 +198,13 @@ void Check_crh(TString rootfile){
    tree->SetBranchAddress("coinTime",&coinTime);
    tree->SetBranchAddress("thetaCM",&thetaCM);
    myfile << "z,e\n";
+   int DETID = 6;
    if (doCSV) {
       for (int k=0;k<tree->GetEntries()-1;k++) {
          tree->GetEntry(k);
-         if (e[0] > 2.5 && e[0]<7.4 && coinTime>-22 && coinTime<22 && thetaCM > 10. && x[0]>=-0.98 && x[0]<=0.98) {
+         if (e[DETID] > 1.5 && e[DETID]<8.5 && coinTime>-22 && coinTime<22 && thetaCM > 10. && x[DETID]>=-0.98 && x[DETID]<=0.98) {
             // printf("%f %f\n",z[0],e[0]);
-            myfile << z[0] << "," << e[0] << endl;
+            myfile << z[DETID] << "," << e[DETID] << endl;
          }
       }
    }
