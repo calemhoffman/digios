@@ -64,8 +64,8 @@ diff = 0.
 diffSum = 0
 diffSumStart = 0.
 
-mlist = arange(0.990, 1.000, 0.0005)
-blist = arange(0.1,0.16,0.002)
+mlist = arange(1.0, 1.02, 0.001)
+blist = arange(-0.1,0.0,0.002)
 clist = arange(-0.001,0.001,0.0002)
 # mlist = [1.0]
 # blist = [0.0]
@@ -109,8 +109,8 @@ fig = go.Figure(data =
 fig.show()
         
 #%%
-m = 0.9975
-b = 0.114
+m = 1.003
+b = -0.03
 df_data['eprime'] = df_data['e']*m + b
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
