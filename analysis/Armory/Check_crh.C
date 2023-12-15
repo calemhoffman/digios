@@ -22,10 +22,10 @@ using namespace std;
 //TTree *tr = NULL;
 
 bool doEZ=true;
-bool doEx=false;
+bool doEx=true;
 bool doRDT=false;
 bool doEx2d=false;
-bool doAngs=false;
+bool doAngs=true;
 bool doCoinT=false;
 bool doCSV=true;
 
@@ -198,11 +198,11 @@ void Check_crh(TString rootfile){
    tree->SetBranchAddress("coinTime",&coinTime);
    tree->SetBranchAddress("thetaCM",&thetaCM);
    myfile << "z,e\n";
-   int DETID = 21;
+   int DETID = 26;
    if (doCSV) {
       for (int k=0;k<tree->GetEntries()-1;k++) {
          tree->GetEntry(k);
-         if (e[DETID] > 1.5 && e[DETID]<8.5 && coinTime>-22 && coinTime<22 && thetaCM > 10. && x[DETID]>=-0.98 && x[DETID]<=0.98) {
+         if (e[DETID] > 4 && e[DETID]<8.5 && coinTime>-22 && coinTime<22 && thetaCM > 10. && x[DETID]>=-0.98 && x[DETID]<=0.98) {
             // printf("%f %f\n",z[0],e[0]);
             myfile << z[DETID] << "," << e[DETID] << endl;
          }
@@ -348,7 +348,7 @@ void Check_crh(TString rootfile){
          for (int j=0;j<6;j++){      hCols[i]->Add(hEx[j*5+i]); }
          cAngs->cd(i+1);hCols[i]->Rebin(); hCols[i]->Draw();
          TString fit_name("AutoFit_para0.txt");
-         if (i==0) fitNGauss(hCols[i],100,fit_name);
+         if (i==1) fitNGauss(hCols[i],100,fit_name);
       }
 
       cAngs->cd(6);tree->Draw("Ex:thetaCM >> hExAngSum", "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate ,"colz");
