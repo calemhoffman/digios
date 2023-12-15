@@ -198,7 +198,7 @@ void Check_crh(TString rootfile){
    tree->SetBranchAddress("coinTime",&coinTime);
    tree->SetBranchAddress("thetaCM",&thetaCM);
    myfile << "z,e\n";
-   int DETID = 6;
+   int DETID = 21;
    if (doCSV) {
       for (int k=0;k<tree->GetEntries()-1;k++) {
          tree->GetEntry(k);
