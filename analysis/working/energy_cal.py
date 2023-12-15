@@ -28,6 +28,9 @@ pio.templates.default = "mycolor"
 
 df_cleo = pd.read_csv("cleo_si30dp_320MeV.csv")
 states = ['0','1','2','3','4','5','6']
+states = ['0','1','5','6']
+statesint = [0,1,5,6]
+df_cleo =df_cleo[['z','0','1','5','6']]
 df_cleo
 #%%
 num_cleo = df_cleo.shape[1] - 1
@@ -39,9 +42,7 @@ for i in range(len(states)):
     
 def cleo(x,stateID):
 	return splev(x, tck[stateID], der=0)
-#print(cleo(-104.5,0))
 
-# %%
 df_data = pd.read_csv("evz_data.csv")
 df_data
 
@@ -55,13 +56,15 @@ bs = []
 diffs = []
 it = []
 stateID = 0
-diff = 1000.
+diff = 0.
 diffSum = 0
-diffSumStart = 130.1528485495266
+diffSumStart = 0.
 
-mlist = arange(0.99, 1.01, 0.001)
-blist = arange(-0.2,0.2,0.02)
+mlist = arange(0.98, 1.02, 0.005)
+blist = arange(0.0,0.2,0.01)
 print(mlist,blist)
+
+#%%
 iter=0
 for mi in mlist:
      for bi in blist:
@@ -73,19 +76,17 @@ for mi in mlist:
         df_data['eprime'] = df_data['e']*mi + bi
         #print(df_data)
         for i in range(df_data.shape[0]): #all points
-            diff = 1000.
-            for index in range(6): #all possible states
-                temp = abs(df_data['eprime'].loc[i] - cleo(df_data['z'].loc[i],index))
+            diff = 0.
+            for index in range(len(states)): #all possible states
+                temp = 1./(abs(df_data['eprime'].loc[i] - cleo(df_data['z'].loc[i],index)))
                 # print("{} {}".format(index,temp))
-                if temp < diff:
+                if temp > diff:
                     diff = temp
                     stateID = index
             # print("{} {}".format(stateID,diff))
             diffSum += diff
-        if diffSum < diffSumStart:
-            diffSumStart = diffSum
-        diffs.append(diffSum)
-        #print(diffSum)
+        diffs.append(diffSum/df_data.shape[0])
+        # print(diffSum/df_data.shape[0])
 
 #%%
 fig = go.Figure()
@@ -94,8 +95,8 @@ fig = go.Figure(data =
 fig.show()
         
 #%%
-m = 0.99
-b = 0.15
+m = 0.995
+b = -0.045
 df_data['eprime'] = df_data['e']*m + b
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
