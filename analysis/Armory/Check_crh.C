@@ -22,10 +22,10 @@ using namespace std;
 //TTree *tr = NULL;
 
 bool doEZ=true;
-bool doEx=true;
+bool doEx=false;
 bool doRDT=false;
 bool doEx2d=false;
-bool doAngs=true;
+bool doAngs=false;
 bool doCoinT=false;
 bool doCSV=true;
 
@@ -198,11 +198,12 @@ void Check_crh(TString rootfile){
    tree->SetBranchAddress("coinTime",&coinTime);
    tree->SetBranchAddress("thetaCM",&thetaCM);
    myfile << "z,e\n";
-   int DETID = 26;
+   int DETID = 27;
    if (doCSV) {
       for (int k=0;k<tree->GetEntries()-1;k++) {
          tree->GetEntry(k);
-         if (e[DETID] > 4 && e[DETID]<8.5 && coinTime>-22 && coinTime<22 && thetaCM > 10. && x[DETID]>=-0.98 && x[DETID]<=0.98) {
+         float tempp = (0.7/50.*(340. + z[DETID]) + 4.0);//2.8);
+         if ((e[DETID] > tempp) && e[DETID]<9 && coinTime>-18 && coinTime<18 && thetaCM > 15. && x[DETID]>=-0.98 && x[DETID]<=0.98) {
             // printf("%f %f\n",z[0],e[0]);
             myfile << z[DETID] << "," << e[DETID] << endl;
          }
