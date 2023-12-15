@@ -6,6 +6,7 @@ from plotly.graph_objs import Scatter
 from plotly.subplots import make_subplots
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import arange
 import pandas as pd
 import plotly.io as pio
 import math
@@ -49,27 +50,53 @@ df_data
 # perhpas should use a weight based on proximity to the line??
 m = 1.00
 b = 0.00
+ms = []
+bs = []
+diffs = []
+it = []
 stateID = 0
 diff = 1000.
 diffSum = 0
 diffSumStart = 130.1528485495266
-df_data['eprime'] = df_data['e']*m + b
-print(df_data)
-for i in range(df_data.shape[0]): #all points
-    diff = 1000.
-    for index in range(6): #all possible states
-        temp = abs(df_data['eprime'].loc[i] - cleo(df_data['z'].loc[i],index))
-        # print("{} {}".format(index,temp))
-        if temp < diff:
-            diff = temp
-            stateID = index
-    # print("{} {}".format(stateID,diff))
-    diffSum += diff
-if diffSum < diffSumStart:
-    diffSumStart = diffSum
-print(diffSum)
+
+mlist = arange(0.99, 1.01, 0.001)
+blist = arange(-0.2,0.2,0.02)
+print(mlist,blist)
+iter=0
+for mi in mlist:
+     for bi in blist:
+        diffSum=0
+        iter=iter+1
+        ms.append(mi)
+        bs.append(bi)
+        it.append(iter)
+        df_data['eprime'] = df_data['e']*mi + bi
+        #print(df_data)
+        for i in range(df_data.shape[0]): #all points
+            diff = 1000.
+            for index in range(6): #all possible states
+                temp = abs(df_data['eprime'].loc[i] - cleo(df_data['z'].loc[i],index))
+                # print("{} {}".format(index,temp))
+                if temp < diff:
+                    diff = temp
+                    stateID = index
+            # print("{} {}".format(stateID,diff))
+            diffSum += diff
+        if diffSum < diffSumStart:
+            diffSumStart = diffSum
+        diffs.append(diffSum)
+        #print(diffSum)
+
+#%%
+fig = go.Figure()
+fig = go.Figure(data =
+     go.Contour(x = ms, y = bs, z = diffs))
+fig.show()
         
 #%%
+m = 0.99
+b = 0.15
+df_data['eprime'] = df_data['e']*m + b
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['eprime'],mode='markers'))
