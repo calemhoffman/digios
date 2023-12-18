@@ -64,8 +64,8 @@ diff = 0.
 diffSum = 0
 diffSumStart = 0.
 
-mlist = arange(0.965, 0.971, 0.0002)
-blist = arange(,0.4,0.02)
+mlist = arange(0.98, 1.02, 0.002)
+blist = arange(-0.1,0.1,0.02)
 clist = arange(-0.001,0.001,0.0002)
 # mlist = [1.0]
 # blist = [0.0]
@@ -108,17 +108,17 @@ fig = go.Figure(data =
 fig.show()
         
 #%%
-m = 0.97
-b = 0.02
+m = 1.008
+b = -0.1
 df_data['eprime'] = df_data['e']*m + b
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['e'],mode='markers'))
 fig.add_trace(go.Scatter(x=df_data['z'],y=df_data['eprime'],mode='markers'))
 for i in range(len(states)):
     fig.add_trace(go.Scatter(x=df_cleo['z'],y=df_cleo[states[i]],mode='lines'))
-fig.update_xaxes(range=[-470,-120])
+fig.update_xaxes(range=[-350,-120])
 fig.update_yaxes(range=[1,10])
-fig.update_layout(height=800,width=1200)
+fig.update_layout(height=600,width=800)
 fig.show()
 
 # %%
