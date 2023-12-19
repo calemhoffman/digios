@@ -48,7 +48,7 @@ void RDTCutCreator(TString dataList,
                    int deRange=2000, 
                    bool isLogz = false,
                    TString gate = "", 
-                   TString treeName = "gen_tree", 
+                   TString treeName = "tree", 
                    bool useTrace = false
                    ){
    

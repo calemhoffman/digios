@@ -103,7 +103,7 @@ void Check_crh(TString rootfile){
    }
    TString timeGate = "";
    if (TIMECUT) {
-      timeGate = " && coinTime > -22 && coinTime < 22";
+      timeGate = " && coinTime > -18 && coinTime < 18";
    }
 
    TString thetaGate = "";
