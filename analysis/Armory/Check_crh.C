@@ -329,7 +329,9 @@ void Check_crh(TString rootfile){
       cCheck2b->Clear();
       
       // // tree->Draw(Form("Ex >> hExSum"),  "hitID>=0 && " + detGate + timeGate , drawOption);
-      hExSum->Draw();
+      hExSum->Draw();hExSum->Rebin();
+      TString fit_name("AutoFit_para_si31.txt");
+      fitNGauss(hExSum,100,fit_name);
       // tree->Draw(Form("Ex >> hExSum2"),  "hitID>=0 && " + detGate + gate_RDT + timeGate, "same");
       // cCheck2b->Update();
 
@@ -348,8 +350,8 @@ void Check_crh(TString rootfile){
          hCols[i] = new TH1F(Form("hCols%d",i),Form("hCols%d;Ex [MeV]",i),700,-1,13);
          for (int j=0;j<6;j++){      hCols[i]->Add(hEx[j*5+i]); }
          cAngs->cd(i+1);hCols[i]->Rebin(); hCols[i]->Draw();
-         TString fit_name("AutoFit_para0.txt");
-         if (i==1) fitNGauss(hCols[i],100,fit_name);
+         // TString fit_name("AutoFit_para0.txt");
+         // if (i==1) fitNGauss(hCols[i],100,fit_name);
       }
 
       cAngs->cd(6);tree->Draw("Ex:thetaCM >> hExAngSum", "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate ,"colz");
