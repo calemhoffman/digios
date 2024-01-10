@@ -97,6 +97,8 @@ public:
   void PrintEnergyLevels();
   void PrintWaveFunction();
 
+  vector<double> CalWaveFunction(int ID, double scale = 1, double offsetY = 0);
+
   void SaveWaveFunction(string saveFileName);
   void SavePotential(string saveFileName);
 
@@ -261,8 +263,8 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
   double uOld = 0;
   double uOld2 = 0;
 
-  if( 1 < A && A < 40 ) maxL = 3;
-  if( 1 < N && (N < 20 || Z < 20) ) maxL = 2;
+  if( 1 < A && A < 40 ) maxL = 7;
+  if( 1 < N && (N < 20 || Z < 20) ) maxL = 3;
 
   double KEstart = V0 + 2.; ///assume the 1st eigen state is 2 MeV above the well depth
 
@@ -529,6 +531,54 @@ void WoodsSaxon::PrintWaveFunction(){
   
   }
 
+}
+
+vector<double> WoodsSaxon::CalWaveFunction(int ID, double scale, double offsetY){
+
+  vector<double> haha;
+
+  if( ID < 0 || ID >= orbString.size() ) return haha;
+
+  sol.clear();
+  SetEnergy(energy[ID]);
+  SetAngularMomentum(Lvalue[ID], Jvalue[ID]);
+
+  LS = (J*(J+1) - L*(L+1) - 0.5*(1.5))/2.;
+
+  SolveRK4(false);
+
+  double norm = 0;
+  bool setZero = false;
+  for( int j = 0; j < nStep; j++) {
+    double r = rStart + (j ) * dr;
+    if( !setZero ) {
+      haha.push_back(sol[j]/r);
+    }else{
+      haha.push_back(0);
+    }
+    
+    if( dr*j < 15.  ) { /// wave function for > 15 fm should zero
+      norm += pow(haha[j] * r, 2);
+    }else{
+      if( abs(haha[j-1]) > abs(haha[j]) ) {
+        norm += pow(haha[j] * r, 2);
+      }else{
+        setZero = true;
+      }
+    }
+  }
+  if( L == 0 ) {
+    haha[0] = haha[1];
+  }else{
+    haha[0] = 0;
+  }
+  norm = sqrt(norm*dr);
+
+  for( int j = 0; j < nStep; j++) {
+    haha[j] = scale*haha[j]/norm + offsetY;
+  }
+
+  return haha;
 }
 
 void WoodsSaxon::SaveWaveFunction(string saveFileName){

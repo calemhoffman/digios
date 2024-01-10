@@ -51,11 +51,12 @@ int main(int argc, char *argv[]){
   }
 
   printf("================== method : \n");
-  string optMsg[3];
+  string optMsg[4];
   optMsg[0] = "increase A (no asymmetry term in V0 )";
   optMsg[1] = "increase N , fixed Z";
   optMsg[2] = "increase Z , fixed N";
-  for( int i = 0 ; i < 3 ; i++){
+  optMsg[3] = "increase A, approx. stable nuclei";
+  for( int i = 0 ; i < 4 ; i++){
     printf(" %d) %s \n", i+1, optMsg[i].c_str());
   }
   printf("---------- Your choice is [1, 2, 3] :");
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]){
   int range[2];
   int NZfixed = 0;
 
-  if( opt == 1 ){
+  if( opt == 1 || opt == 4 ){
     printf(" minimum A ? ");
     temp = scanf("%d", &range[0]);
     printf(" maximum A ? ");
@@ -191,9 +192,10 @@ int main(int argc, char *argv[]){
   for( float ANZ = range[0] ; ANZ <= range[1] ; ANZ  += 1.0){
 
     if( opt == 1 ){ /// change in A, ANZ = A
-      ws.SetNucleus ( ANZ, 0 );
+      ws.SetNucleus ( ANZ, 0);
       ws.CalRadius();
       ws.SetV0( V0 );
+      //ws.SetV0 ( V0 * ( 1 +  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
     }
 
     if( opt == 2 ){ /// change in N, ANZ = N
@@ -209,6 +211,13 @@ int main(int argc, char *argv[]){
 
       ws.SetV0 ( V0 * ( 1 +  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
     }
+
+    if( opt == 4 ){ /// approx stable nuclei
+      ws.SetNucleus ( ANZ, 0.008 + 0.495 * ANZ - 0.00076 * ANZ *ANZ + 1.4e-6 * ANZ * ANZ * ANZ); // aproximate stable vallage
+      ws.CalRadius();
+
+      ws.SetV0 ( V0 * ( 1 +  kappa * ( 2.0* ws.GetN() - ws.GetA() ) / ws.GetA() ) ); 
+    }
   
     double reducedMass = 931.5 * (ws.GetA() )/(1.008664 + ws.GetA());
     ws.SetMass(reducedMass);
@@ -216,9 +225,8 @@ int main(int argc, char *argv[]){
     ws.ClearVector();
     ws.PrintWSParas();
 
-    ws.CalWSEnergies();
+    ws.CalWSEnergies(false, 7, 500, 1e-7, 400, 0.2, false);
 
-  
     //print all energy
     ws.PrintEnergyLevels();
 

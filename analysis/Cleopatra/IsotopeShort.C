@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <stdlib.h>
+#include <cstring>
 #include "Isotope.h"
 
 using namespace std;
@@ -38,6 +39,14 @@ int main (int argc, char *argv[]) {
     A= atoi(argv[1]);
     Z= atoi(argv[2]);
     iso1.SetIso(A, Z);
+  }
+
+  if( strcmp(argv[1],"4n") == 0){
+    iso1.A = 4;
+    iso1.Z = 0;
+    iso1.Name = "4n";
+    iso1.Mass = 3758.26168208;
+    iso1.Symbol = "4n";
   }
 
   //iso1.Print();
