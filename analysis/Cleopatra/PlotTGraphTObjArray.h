@@ -21,6 +21,7 @@
 #include <TCanvas.h>
 #include <TObjArray.h>
 #include <TGraph.h>
+#include <TStyle.h>
 #include <TF1.h>
 #include <TAxis.h>
 #include <TH1F.h>
@@ -46,13 +47,16 @@ void PlotTGraphTObjArray(TString rootFileName, bool isSavePNG = false){
   
   TGraph * gr[n];
 
+  const std::vector<int> color = {kBlack, kRed, kOrange+7, kYellow+1, kGreen+2, kGreen+3, kBlue, kBlue+3, kMagenta, kMagenta+2, kGray+2, kRed+2, kYellow+3 };
+  short nColor = color.size();
+
   //Get minimum, maximum Y
   double maxY = 0;
   double minY = 10000000;
   for ( int i = 0; i < n ; i++){
     
     gr[i] = (TGraph *) gList->At(i);
-    gr[i]->SetLineColor(i+1);
+    gr[i]->SetLineColor(color[ i % nColor]);
     gr[i]->GetXaxis()->SetTitle("#theta_{CM} [deg]");
     gr[i]->GetYaxis()->SetTitle("d#sigma/d#Omega [mb/sr]");
     
@@ -68,8 +72,6 @@ void PlotTGraphTObjArray(TString rootFileName, bool isSavePNG = false){
     if( maxy > maxY ) maxY = maxy;
   }
   
-  
-  
   for ( int i = 0; i < n ; i++){
     gr[i]->Draw("same");
     
@@ -82,6 +84,8 @@ void PlotTGraphTObjArray(TString rootFileName, bool isSavePNG = false){
   }
   legend->Draw();
   
+  cPlots->SetGrid(1,1);
+
   cPlots->Update();
   cPlots->Draw();
 

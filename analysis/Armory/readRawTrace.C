@@ -1,6 +1,9 @@
 #include <TROOT.h>
 #include <TChain.h>
+#include <TSystem.h>
 #include <TFile.h>
+#include <TLatex.h>
+#include <TStyle.h>
 #include <TSelector.h>
 #include <TCanvas.h>
 #include <TGraph.h>
@@ -8,10 +11,14 @@
 #include <TBenchmark.h>
 #include <TMath.h>
 #include <TF1.h>
+#include <TH1.h>
 #include <TLine.h>
+#include <TSpectrum.h>
 #include <iostream>
 
 #include "../working/GeneralSortMapping.h"
+
+#include "AutoFit.C"
 
 void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
 
@@ -28,8 +35,8 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 300);
-   cRead->Divide(1,1);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1000, 800, 600);
+   cRead->Divide(1,2);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
    }
@@ -55,10 +62,14 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
    
    bool breakFlag = false;  
    bool lastEvFlag = false; 
-   vector<int> oldEv;
+   std::vector<int> oldEv;
    int evPointer = 0;
 
    TGraph * g = new TGraph();
+
+   TH1F * jaja = new TH1F();
+   jaja->SetName("jaja");
+   jaja->SetTitle("jaja");
    
    for( int ev = 0; ev < totnumEntry; ev++){
       
@@ -93,21 +104,72 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
             }else{
                g->SetPoint(k, k, base);
             }
-            //printf("%4d, %5d |", k, trace[j][k]);
+            //printf("%4d, %5d \n", k, base);
             //if( k % 10 ==0 ) printf("\n");
          }         
          
          g->SetTitle(Form("ev: %d, nHit : %d, id : %d, idKind : %d, trace Length : %u\n", ev, j, idDet, idKind, traceLength[j]));
+
+         ///===== using offset-different method 
+         int offset = 30;
+
+         jaja->Clear();
+         jaja->Reset();
+         jaja->SetBins(traceLength[j]-offset, 0, traceLength[j] - offset);
+
+         for( int k = 0; k < g->GetN() - offset; k++){
+            double a = g->GetPointY(k+offset);
+            double b = g->GetPointY(k);
+            jaja->Fill(k, (a -b) + offset);
+            jaja->SetBinError(k, 0);
+         }
+
+         //========= moving average
+         TH1F * specS = (TH1F*) jaja->Clone();
+         specS->Rebin(4);
+
+         {
+            TSpectrum * peak = new TSpectrum(10);
+
+            printf("============= estimating background...\n");
+            TH1 * h1 = peak->Background(specS, 30);
+            //h1->Draw("same");
+            printf("============= substracting the linear background...\n");
+            //specS->Sumw2();
+            specS->Add(h1, -1.);
+            
+            delete peak;
+            peak = new TSpectrum(10);
+            int nPeaks = peak->Search(specS, 5, "", 0.2);
+            double * xpos = peak->GetPositionX();
+            double * ypos = peak->GetPositionY();
+
+            int * inX = new int[nPeaks];
+            TMath::Sort(nPeaks, xpos, inX, 0 );
+            std::vector<double> energy, height;
+            for( int j = 0; j < nPeaks; j++){
+               energy.push_back(xpos[inX[j]]);
+               height.push_back(ypos[inX[j]]);
+            }
+            for( int j = 0; j < nPeaks; j++){
+               printf(" position : %f , %f \n", energy[j], height[j]);
+            }
+
+            delete peak;
+         }
+
          
+         // cRead->Clear();
          cRead->cd(1);
-         cRead->Clear();
          g->Draw("Al");
          //g->GetXaxis()->SetRangeUser(0, g->GetN());
          //g->GetYaxis()->SetRangeUser(7500, 35000);
-         
-         cRead->Update();         
+         cRead->cd(2);
+         //jaja->Draw();
+         specS->Draw("");
+      
+         cRead->Update();              
          gSystem->ProcessEvents();
-         
          
          char s[80];
          fgets(s, sizeof s, stdin); 
