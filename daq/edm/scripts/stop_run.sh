@@ -72,11 +72,13 @@ fi
 ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 
-source ~/Slack_Elog_Notification.sh
+#source ~/Slack_Elog_Notification.sh
+source ~/Discord_webhooks.sh
 slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
 auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
 
-curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
+#curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
+curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${auxMsg}\"}" $WEBHOOK_DAQ_URL
 
 
 echo wait 2 seconds before closing the IOCs
