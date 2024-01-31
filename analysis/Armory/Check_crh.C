@@ -21,12 +21,12 @@ using namespace std;
 // int nPeakss = 16;
 //TTree *tr = NULL;
 
-bool doEZ=true;
+bool doEZ=false;
 bool doEx=true;
-bool doRDT=false;
+bool doRDT=true;
 bool doEx2d=true;
 bool doAngs=true;
-bool doCoinT=false;
+bool doCoinT=true;
 bool doCSV=false;
 
 bool RDTCUT=true;
