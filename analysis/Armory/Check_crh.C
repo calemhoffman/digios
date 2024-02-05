@@ -23,13 +23,13 @@ using namespace std;
 
 bool doEZ=false;
 bool doEx=true;
-bool doRDT=true;
-bool doEx2d=true;
+bool doRDT=false;
+bool doEx2d=false;
 bool doAngs=true;
-bool doCoinT=true;
+bool doCoinT=false;
 bool doCSV=false;
 
-bool RDTCUT=true;
+bool RDTCUT=false;
 bool RINGCUT=false;
 bool XCUT=true;
 bool TIMECUT=true;
@@ -344,7 +344,9 @@ void Check_crh(TString rootfile){
    TCanvas * cAngs = new TCanvas("cAngs", "cAngs", 700, 50,  1800, 1600);
       cAngs->ToggleEditor();cAngs->ToggleToolBar();
       cAngs->SetGrid(); cAngs->Divide(3,2);
-
+      double counts[10][6]; //states angles
+      int numEx = 2;
+      float exrange[2][2] = {{2.9,3.35},{3.35,3.75}};
       TH1F *hCols[5];
       for (int i=0;i<5;i++) {
          hCols[i] = new TH1F(Form("hCols%d",i),Form("hCols%d;Ex [MeV]",i),700,-1,13);
@@ -352,6 +354,15 @@ void Check_crh(TString rootfile){
          cAngs->cd(i+1);hCols[i]->Rebin(); hCols[i]->Draw();
          // TString fit_name("AutoFit_para0.txt");
          // if (i==1) fitNGauss(hCols[i],100,fit_name);
+      }
+
+   for (int j=0;j<numEx;j++) {
+      for (int i=0;i<5;i++) {      
+         int xlow = hCols[i]->FindFixBin(exrange[j][0]);
+         int xhigh = hCols[i]->FindFixBin(exrange[j][1]);
+         counts[j][i] = hCols[i]->Integral(xlow,xhigh);
+         printf("...counts %f\n",counts[j][i]);
+         }
       }
 
       cAngs->cd(6);tree->Draw("Ex:thetaCM >> hExAngSum", "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate ,"colz");
