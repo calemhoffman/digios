@@ -341,13 +341,22 @@ void Check_crh(TString rootfile){
 
    /**///======================================================== Angular Distribution Stuff
    if (doAngs) {
-   TCanvas * cAngs = new TCanvas("cAngs", "cAngs", 700, 50,  1800, 1600);
+      TCanvas * cAngs = new TCanvas("cAngs", "cAngs", 700, 50,  1800, 1600);
       cAngs->ToggleEditor();cAngs->ToggleToolBar();
       cAngs->SetGrid(); cAngs->Divide(3,2);
-      double counts[10][6]; //states angles
+      ofstream myfile;
+      myfile.open ("example.txt");
+   
+      double counts[10][5]; //states angles
       int numEx = 2;
+      float excents[10] = {3100,3500};
       float exrange[2][2] = {{2.9,3.35},{3.35,3.75}};
+      float exangle[10][5] = {{18.,23,28,33,36},{17.,22,27,32,35}};
+      float corrMissing[5] = {1.,1.,1.,1.,1}; //for missing detectors
+      float corrSolid[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1}}; //solid angle/ex/angle
+      float corrMisc[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1}}; // misc corrections
       TH1F *hCols[5];
+
       for (int i=0;i<5;i++) {
          hCols[i] = new TH1F(Form("hCols%d",i),Form("hCols%d;Ex [MeV]",i),700,-1,13);
          for (int j=0;j<6;j++){      hCols[i]->Add(hEx[j*5+i]); }
@@ -356,14 +365,26 @@ void Check_crh(TString rootfile){
          // if (i==1) fitNGauss(hCols[i],100,fit_name);
       }
 
-   for (int j=0;j<numEx;j++) {
-      for (int i=0;i<5;i++) {      
-         int xlow = hCols[i]->FindFixBin(exrange[j][0]);
-         int xhigh = hCols[i]->FindFixBin(exrange[j][1]);
-         counts[j][i] = hCols[i]->Integral(xlow,xhigh);
-         printf("...counts %f\n",counts[j][i]);
-         }
+      for (int j=0;j<numEx;j++) {
+         myfile << "a" << excents[j] << "," << excents[j] << ",";
       }
+      myfile << "\n";
+
+
+      for (int i=0;i<5;i++) {  
+         for (int j=0;j<numEx;j++) {    
+            int xlow = hCols[i]->FindFixBin(exrange[j][0]);
+            int xhigh = hCols[i]->FindFixBin(exrange[j][1]);
+            counts[j][i] = hCols[i]->Integral(xlow,xhigh);
+            // printf("...counts %f\n",counts[j][i]);
+
+            //apply corrections
+            counts[j][i] = counts[j][i] / corrMissing[i] / corrMissing[j][i] / corrMisc[j][i];
+            myfile << exangle[j][i] << ","<< counts[j][i] << ",";
+         }
+         myfile << "\n";
+      }
+      myfile.close();
 
       cAngs->cd(6);tree->Draw("Ex:thetaCM >> hExAngSum", "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate ,"colz");
       hExAngSum->Draw("colz");
