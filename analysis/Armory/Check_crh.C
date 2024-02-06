@@ -345,15 +345,15 @@ void Check_crh(TString rootfile){
       cAngs->ToggleEditor();cAngs->ToggleToolBar();
       cAngs->SetGrid(); cAngs->Divide(3,2);
       ofstream myfile;
-      myfile.open ("example.txt");
+      myfile.open ("angdist_feb6.csv");
    
       double counts[10][5]; //states angles
       int numEx = 2;
       float excents[10] = {3100,3500};
       float exrange[2][2] = {{2.9,3.35},{3.35,3.75}};
       float exangle[10][5] = {{18.,23,28,33,36},{17.,22,27,32,35}};
-      float corrMissing[5] = {1.,1.,1.,1.,1}; //for missing detectors
-      float corrSolid[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1}}; //solid angle/ex/angle
+      float corrMissing[5] = {0.5,1.0,0.83,0.67,1.0}; //for missing detectors
+      float corrSolid[10][5] = {{0.5,1.,1.,1.,1},{0.5,1.,1.,1.,1}}; //solid angle/ex/angle
       float corrMisc[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1}}; // misc corrections
       TH1F *hCols[5];
 
@@ -379,7 +379,7 @@ void Check_crh(TString rootfile){
             // printf("...counts %f\n",counts[j][i]);
 
             //apply corrections
-            counts[j][i] = counts[j][i] / corrMissing[i] / corrMissing[j][i] / corrMisc[j][i];
+            counts[j][i] = counts[j][i] / corrMissing[i] / corrSolid[j][i] / corrMisc[j][i];
             myfile << exangle[j][i] << ","<< counts[j][i] << ",";
          }
          myfile << "\n";
