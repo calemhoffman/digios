@@ -20,10 +20,10 @@ pio.templates["mycolor"] = go.layout.Template(layout_colorway=color)
 pio.templates.default = "mycolor"
 fig = go.Figure()
 for i in range(len(color)):
-    fig.add_trace(go.Scatter(x=[i],y=[i],marker_color=color[i],marker_size=100))
+    fig.add_trace(go.Scatter(x=[i],y=[i],marker_color=color[i],marker_size=20))
 fig.show()
 # %%
-data_file_name='example.txt'
+data_file_name='angdist_feb6.csv'
 df_data = pd.read_csv(data_file_name,sep=',')
 names = df_data.columns
 print(len(names))
@@ -43,6 +43,9 @@ fig.update_yaxes(title="<i>d&#963;/d&#x3A9;</i> [arb. units]",range=[0.8,2.1],mi
                  tickson="boundaries",ticklen=10,showline=True,zeroline=True,type="log",
                 ticktext=['10<sup>0 </sup> ','10<sup>1 </sup> ','10<sup>2 </sup> ','10<sup>3 </sup> ','10<sup>4 </sup> '],
                 tickvals=[1,10,100,1000,10000],showgrid=False)
-fig.update_xaxes(title="",range=[10,45],row=1,col=1)
-fig.update_xaxes(title="&#x1D703;<sub><i>cm</i></sub> [deg.]",range=[10,45],row=2,col=1)
+fig.update_xaxes(title="",range=[10,45],mirror=True,ticks="inside",
+                 tickson="boundaries",ticklen=10,showline=True,zeroline=True,showgrid=False,row=1,col=1)
+fig.update_xaxes(title="&#x1D703;<sub><i>cm</i></sub> [deg.]",range=[10,45],mirror=True,ticks="inside",
+                 tickson="boundaries",ticklen=10,showline=True,zeroline=True,showgrid=False,row=2,col=1)
 fig.show()
+# %%
