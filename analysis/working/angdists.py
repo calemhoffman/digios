@@ -39,7 +39,7 @@ for i in range(numex):
             row=i+1,col=1)
 fig.update_layout(width=700,height=600,showlegend=False,margin=dict(t=100,b=100,l=150,r=20),
                   font=dict(size=18, family='times'))
-fig.update_yaxes(title="<i>d&#963;/d&#x3A9;</i> [arb. units]",range=[0.8,2.1],mirror=False,ticks="inside",
+fig.update_yaxes(title="<i>d&#963;/d&#x3A9;</i> [arb. units]",range=[0.8,2.5],mirror=True,ticks="inside",
                  tickson="boundaries",ticklen=10,showline=True,zeroline=True,type="log",
                 ticktext=['10<sup>0 </sup> ','10<sup>1 </sup> ','10<sup>2 </sup> ','10<sup>3 </sup> ','10<sup>4 </sup> '],
                 tickvals=[1,10,100,1000,10000],showgrid=False)
