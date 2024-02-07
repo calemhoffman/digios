@@ -300,13 +300,17 @@ void Check_crh(TString rootfile){
       cCheck2->ToggleEditor();cCheck2->ToggleToolBar();
       cCheck2->SetGrid(); cCheck2->Divide(5,6);
       TH1F * hEx[30];
+      TH1F * hExA[30];
+      TH1F * hExB[30];
       TH1F * hExSum;
       TH1F * hExSum2;
       TH2F * hExAng[30];
       TH2F * hExAngSum;
+      TH2F * hExZSum;
       hExSum = new TH1F(Form("hExSum"), Form("Ex [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
       hExSum2 = new TH1F(Form("hExSum2"), Form("Ex2 [sum]; Ex [MeV]"), 700,-1,13); //20 keV/ch
-      hExAngSum = new TH2F(Form("hExAngSum"), Form("ExAngSum [sum]; Ex [MeV] ; Ang [deta]"), 500,0,60,700,-1,13); //20 keV/ch
+      hExAngSum = new TH2F(Form("hExAngSum"), Form("ExAngSum [sum]; Ex [MeV] ; Ang [deg]"), 500,0,60,700,-1,13); //20 keV/ch
+      hExZSum = new TH2F(Form("hExZSum"), Form("ExZSum [sum]; Ex [MeV] ; Z [mm]"), zRange[0],zRange[1],zRange[2],700,-1,13); //20 keV/ch
       for (int i=0;i<30;i++) {
          cCheck2->cd(i+1);
          TString detIDGate;
@@ -317,8 +321,12 @@ void Check_crh(TString rootfile){
          // hExAngSum->Add(hExAng[i]);
 
          hEx[i] = new TH1F(Form("hEx%d",i), Form("Ex [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
+         hExA[i] = new TH1F(Form("hExA%d",i), Form("ExA [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
+         hExB[i] = new TH1F(Form("hExB%d",i), Form("ExB [det %d]; Ex [MeV]",i), 700,-1,13); //20 keV/ch
          tree->Draw(Form("Ex >> hEx%d",i),  "hitID>=0 && " + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
          hExSum->Add(hEx[i]);
+         tree->Draw(Form("Ex >> hExA%d",i),  "hitID>=0 && x < 0 &&" + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
+         tree->Draw(Form("Ex >> hExB%d",i),  "hitID>=0 && x >= 0 &&" + detIDGate + detGate + gate_RDT + timeGate+ thetaGate , drawOption);
          }
       // draw / cut by x < 0.5 < x for angles / columns (SUM & IND)
       // cCheck2->Clear(); cCheck2->Divide(3,2);
@@ -350,16 +358,25 @@ void Check_crh(TString rootfile){
       double counts[10][5]; //states angles
       int numEx = 2;
       float excents[10] = {3100,3500};
-      float exrange[2][2] = {{2.9,3.35},{3.35,3.75}};
-      float exangle[10][5] = {{18.,23,28,33,36},{17.,22,27,32,35}};
+      float exrange[2][2] = {{2.9,3.3},{3.35,3.75}};
+      float exangle[10][5] = {{18.5,24.1,28.8,33.0,36.6},{16.2,22.0,28,32.2,36.0}};
       float corrMissing[5] = {0.5,1.0,0.83,0.67,1.0}; //for missing detectors
-      float corrSolid[10][5] = {{0.5,1.,1.,1.,1},{0.5,1.,1.,1.,1}}; //solid angle/ex/angle
+      float corrSolid[10][5] = {{0.5,1.,1.,1.,1},{0.4,1.,1.,1.,1}}; //solid angle/ex/angle
       float corrMisc[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1}}; // misc corrections
       TH1F *hCols[5];
+      TH1F *hColsA[5];
+      TH1F *hColsB[5];
 
       for (int i=0;i<5;i++) {
          hCols[i] = new TH1F(Form("hCols%d",i),Form("hCols%d;Ex [MeV]",i),700,-1,13);
-         for (int j=0;j<6;j++){      hCols[i]->Add(hEx[j*5+i]); }
+         hColsA[i] = new TH1F(Form("hColsA%d",i),Form("hColsA%d;Ex [MeV]",i),700,-1,13);
+         hColsB[i] = new TH1F(Form("hColsB%d",i),Form("hColsB%d;Ex [MeV]",i),700,-1,13);
+
+         for (int j=0;j<6;j++){      
+            hCols[i]->Add(hEx[j*5+i]); 
+            hColsA[i]->Add(hExA[j*5+i]); 
+            hColsB[i]->Add(hExB[j*5+i]); 
+         }
          cAngs->cd(i+1);hCols[i]->Rebin(); hCols[i]->Draw();
          // TString fit_name("AutoFit_para0.txt");
          // if (i==1) fitNGauss(hCols[i],100,fit_name);
@@ -369,7 +386,6 @@ void Check_crh(TString rootfile){
          myfile << "a" << excents[j] << "," << excents[j] << ",";
       }
       myfile << "\n";
-
 
       for (int i=0;i<5;i++) {  
          for (int j=0;j<numEx;j++) {    
@@ -387,7 +403,14 @@ void Check_crh(TString rootfile){
       myfile.close();
 
       cAngs->cd(6);tree->Draw("Ex:thetaCM >> hExAngSum", "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate ,"colz");
+      cAngs->cd(6);tree->Draw("Ex:z >> hExZSum", "hitID>=0 && " + detGate + gate_RDT + timeGate+ thetaGate ,"colz");
       hExAngSum->Draw("colz");
+
+      TCanvas * cExZ = new TCanvas("cExZ", "cExZ", 100, 50,  1000, 1000);
+      cExZ->ToggleEditor();cExZ->ToggleToolBar();
+      cExZ->SetGrid(); //cAngs->Divide(3,2);
+      cExZ->cd(1);
+      hExZSum->Draw("colz");
    }
 
    }
