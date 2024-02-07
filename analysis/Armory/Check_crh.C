@@ -362,7 +362,7 @@ void Check_crh(TString rootfile){
       float exangle[10][5] = {{18.5,24.1,28.8,33.0,36.6},{16.2,22.0,28,32.2,36.0}};
       float corrMissing[5] = {0.5,1.0,0.83,0.67,1.0}; //for missing detectors
       float corrSolid[10][5] = {{0.5,1.,1.,1.,1},{0.4,1.,1.,1.,1}}; //solid angle/ex/angle
-      float corrMisc[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1}}; // misc corrections
+      float corrMisc[10][5] = {{0.75,1.,1.,1.,1},{0.75,1.,1.,1.,1}}; // misc corrections
       TH1F *hCols[5];
       TH1F *hColsA[5];
       TH1F *hColsB[5];
