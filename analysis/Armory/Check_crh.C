@@ -353,16 +353,17 @@ void Check_crh(TString rootfile){
       cAngs->ToggleEditor();cAngs->ToggleToolBar();
       cAngs->SetGrid(); cAngs->Divide(3,2);
       ofstream myfile;
-      myfile.open ("angdist_feb6.csv");
+      myfile.open ("angdist_feb7.csv");
+      // myfile2.open ("angdist_feb6.csv");
    
       double counts[10][5]; //states angles
-      int numEx = 2;
-      float excents[10] = {3100,3500};
-      float exrange[2][2] = {{2.9,3.3},{3.35,3.75}};
-      float exangle[10][5] = {{18.5,24.1,28.8,33.0,36.6},{16.2,22.0,28,32.2,36.0}};
+      int numEx = 5;
+      float excents[10] = {0,750,2800,3100,3500};
+      float exrange[10][2] = {{-0.2,0.2},{0.5,1.0},{2.5,2.95},{2.95,3.35},{3.35,3.65}};
+      float exangle[10][5] = {{28.,31.6,36,38,41.5},{25.,30,34,38,41},{19.6,25.6,30,34,37},{18.5,24.1,28.8,33.0,36.6},{16.2,22.0,28,32.2,36.0}};
       float corrMissing[5] = {0.5,1.0,0.83,0.67,1.0}; //for missing detectors
-      float corrSolid[10][5] = {{0.5,1.,1.,1.,1},{0.4,1.,1.,1.,1}}; //solid angle/ex/angle
-      float corrMisc[10][5] = {{0.75,1.,1.,1.,1},{0.75,1.,1.,1.,1}}; // misc corrections
+      float corrSolid[10][5] = {{1.,1.,1.,1.,1},{1.,1.,1.,1.,1},{0.6,1.,1.,1.,1},{0.5,1.,1.,1.,1},{0.4,1.,1.,1.,1}}; //solid angle/ex/angle
+      float corrMisc[10][5] = {{0.75,1.,1.,1.,1},{0.75,1.,1.,1.,1},{0.75,1.,1.,1.,1},{0.75,1.,1.,1.,1},{0.75,1.,1.,1.,1}}; // misc corrections
       TH1F *hCols[5];
       TH1F *hColsA[5];
       TH1F *hColsB[5];
@@ -392,8 +393,6 @@ void Check_crh(TString rootfile){
             int xlow = hCols[i]->FindFixBin(exrange[j][0]);
             int xhigh = hCols[i]->FindFixBin(exrange[j][1]);
             counts[j][i] = hCols[i]->Integral(xlow,xhigh);
-            // printf("...counts %f\n",counts[j][i]);
-
             //apply corrections
             counts[j][i] = counts[j][i] / corrMissing[i] / corrSolid[j][i] / corrMisc[j][i];
             myfile << exangle[j][i] << ","<< counts[j][i] << ",";
