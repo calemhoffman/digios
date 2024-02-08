@@ -30,7 +30,7 @@ for i in range(len(color)):
     fig.add_trace(go.Scatter(x=[i],y=[i],marker_color=color[i],marker_size=20))
 fig.show()
 # %%
-data_file_name='angdist_feb7b.csv'
+data_file_name='angdist_feb8.csv'
 df_data = pd.read_csv(data_file_name,sep=',')
 names = df_data.columns
 print(len(names))
@@ -47,20 +47,20 @@ for i in range(num_dwba):
     y = df_dwba[i+1].to_numpy()
     tck.append(splrep(x, y, s=0))
 # %%
-numex = 4
-c2s = [2.,1.,1.5,2.,4.]
-dwbanum = [1,6,6,6,7]
+numex = 5
+c2s = [2.,2.,3.5,5,4.]
+dwbanum = [1,2,5,6,7]
 ymin=0.1
-ymax=2.2
+ymax=2.5
 fig = make_subplots(rows=5, cols=1, shared_xaxes=True, shared_yaxes=True, 
-                    horizontal_spacing=0.0,vertical_spacing=0.05)
+                    horizontal_spacing=0.0,vertical_spacing=0.01)
 for i in range(numex):
     fig.add_trace(go.Scatter(x = df_dwba[0],y=c2s[i]*df_dwba[dwbanum[i]]),row=i+1,col=1)
-    fig.add_trace(go.Scatter(x = df_data[names[2*i]], y = df_data[names[2*i+1]],
-            name=names[2*i+1],text=df_data[names[2*i+1]],error_y=dict(type='data', array=np.sqrt(df_data[names[2*i+1]])),
+    fig.add_trace(go.Scatter(x = df_data[names[3*i]], y = df_data[names[3*i+1]],
+            name=names[3*i+1],text=df_data[names[3*i+1]],error_y=dict(type='data', array=df_data[names[3*i+2]]),
             mode='markers',marker_color=color[i],marker_size=10),
             row=i+1,col=1)
-fig.update_layout(width=700,height=1600,showlegend=False,margin=dict(t=100,b=100,l=150,r=20),
+fig.update_layout(width=500,height=1200,showlegend=False,margin=dict(t=100,b=100,l=150,r=20),
                   font=dict(size=18, family='times'))
 fig.update_yaxes(title="<i>d&#963;/d&#x3A9;</i> [arb. units]",range=[ymin,ymax],mirror=True,ticks="inside",
                  tickson="boundaries",ticklen=10,showline=True,zeroline=True,type="log",
