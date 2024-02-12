@@ -8,6 +8,7 @@
  *          = 3XX ; EZERO
  *          = 4XX ; TAC & RF-Timing
  *          = 5XX ; Circular Recoil
+ *          = 6XX ; APOLLO
  * 
 ***********************************************************************/
 
@@ -20,10 +21,17 @@
 #define NEZERO  0
 #define NTAC    0
 #define NCRDT   0
+#define NAPOLLO 0
 
-#define POLARITY_RDT +1
+#define POLARITY_RDT    +1
+#define POLARITY_ELUM   +1
+#define POLARITY_EZERO  +1
+#define POLARITY_CRDT   +1
+#define POLARITY_APOLLO +1
 
-#define MWIN 100 //M value for energy filter from digi setting
+///TODO, trigger time for trace analysis, that is the initial guess for the fit
+
+#define MWIN 100 ///M value for energy filter from digi setting
 
 Int_t idConst = 1010;
 

@@ -80,7 +80,6 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
       PrintDetGeo(detGeo);
 
       length = detGeo.detLength;
-      jDet = detGeo.mDet;
       pos = detGeo.detPos;
       
       printf("... done.\n");
@@ -89,7 +88,7 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
       Terminate();
    }
       
-   numDet = iDet * jDet;
+   numDet = detGeo.nDet * detGeo.mDet;
    
    //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
@@ -111,7 +110,7 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
       printf("... fail.\n");
       
       for(int i = 0; i < numDet; i++){
-	xnCorr[i] = 1;
+         xnCorr[i] = 1;
       }
    }
    file.close();

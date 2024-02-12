@@ -23,6 +23,7 @@
 #include "TClonesArray.h"
 
 #include "../Armory/AnalysisLibrary.h"
+#include "../working/GeneralSortMapping.h"
 
 // Headers needed by this particular selector
 
@@ -45,8 +46,8 @@ public :
    ULong64_t       xn_t[100];
    Float_t         ring[100];
    ULong64_t       ring_t[100];
-   Float_t         rdt[8];
-   ULong64_t       rdt_t[8];
+   Float_t         rdt[50];
+   ULong64_t       rdt_t[50];
    Float_t         tac[10];
    ULong64_t       tac_t[10];
    Float_t         elum[50];
@@ -58,9 +59,9 @@ public :
    Float_t         te[100];
    Float_t         te_r[100];
    Float_t         te_t[100];
-   Float_t         trdt[8];
-   Float_t         trdt_t[8];
-   Float_t         trdt_r[8];
+   Float_t         trdt[50];
+   Float_t         trdt_t[50];
+   Float_t         trdt_r[50];
 
    // List of branches
    TBranch        *b_runID; //!
@@ -139,8 +140,8 @@ public :
    Float_t Ex;   
    Float_t thetaLab;
    
-   Float_t rdtC[8];
-   ULong64_t rdtC_t[8];
+   Float_t rdtC[NRDT];
+   ULong64_t rdtC_t[NRDT];
    int rdtID; // rdt hit ID
    int rdtdEMultiHit;
 
@@ -171,7 +172,7 @@ public :
    
    double eCorr[30][2]; // e-correction
    double eCorr2[30][2]; // e-correction
-   double rdtCorr[8][2]; //rdt-correction
+   double rdtCorr[NRDT][2]; //rdt-correction
    
    double cTCorr[30][9]; // coinTime correction
    TF1 ** f7 ; //!
@@ -390,6 +391,7 @@ void Cali_e_trace::Init(TTree *tree)
       pos = detGeo.detPos;
       
       printf("... done.\n");
+      haha->Write("detectorGeo");
    }else{
       printf("... fail\n");
       Terminate();
@@ -525,7 +527,7 @@ void Cali_e_trace::Init(TTree *tree)
       double a, b;
       int i = 0;
       while( file >> a >> b){
-         if( i >= 8) break;
+         if( i >= NRDT) break;
          rdtCorr[i][0] = a;  // a1
          rdtCorr[i][1] = b;  // a2, e' = e * a1 + a0 
          i = i + 1;
@@ -535,7 +537,7 @@ void Cali_e_trace::Init(TTree *tree)
       cali_rdt.Write("correction_rdt");
    }else{
       printf("..................... fail.\n");
-      for( int i = 0; i < numDet ; i++){
+      for( int i = 0; i < NRDT ; i++){
          rdtCorr[i][0] = 1.;
          rdtCorr[i][1] = 0.;
       }
@@ -617,7 +619,7 @@ void Cali_e_trace::Init(TTree *tree)
       printf("................. done.\n");
 
       isReaction = true;
-      alpha = 299.792458 * Bfield * q / TMath::TwoPi()/1000.;
+      alpha = 299.792458 * abs(Bfield) * q / TMath::TwoPi()/1000.;
       gamma = 1./TMath::Sqrt(1-beta*beta);
       G = alpha * gamma * beta * perpDist ;
       printf("============\n");
@@ -694,8 +696,8 @@ void Cali_e_trace::Init(TTree *tree)
    
    newTree->Branch("e_t", eC_t, Form("e_t[%d]/l", numDet) );
    
-   newTree->Branch("rdt", rdtC, "rdtC[8]/F");
-   newTree->Branch("rdt_t", rdtC_t, "rdtC_t[8]/l");
+   newTree->Branch("rdt", rdtC, Form("rdtC[%d]/F",NRDT));
+   newTree->Branch("rdt_t", rdtC_t, Form("rdtC_t[%d]/l", NRDT));
    newTree->Branch("rdtID", &rdtID, "rdtID/I");
    newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
    
@@ -725,9 +727,9 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F", numDet) );
       newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", numDet));
       newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F", numDet));
-      newTree->Branch("trdt",         trdt,  "Trace_RDT[8]/F");
-      newTree->Branch("trdt_t",     trdt_t,  "Trace_RDT_Time[8]/F");
-      newTree->Branch("trdt_r",     trdt_r,  "Trace_RDT_RiseTime[8]/F");
+      newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
+      newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
+      newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
    }
 
    printf("Is EBIS  exist : %d\n", isEBISExist);
