@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "Cali_e_trace.C": "cpp",
+        "GeneralSortTraceProof.C": "cpp",
+        "GeneralSortTrace.C": "cpp",
+        "GeneralSort.C": "cpp",
+        "haha.C": "cpp",
+        "runsCheck2.C": "cpp",
+        "readRawTrace.C": "cpp",
+        "readCaliResult.C": "cpp",
+        "readTrace.C": "cpp",
+        "testFit.C": "cpp",
+        "testTraceFit.C": "cpp",
+        "AutoCalibrationTrace.C": "cpp",
+        "ChainMonitors.C": "cpp",
+        "Monitors.C": "cpp",
+        "Simulation_Helper.C": "cpp",
+        "rootlogon.C": "cpp",
+        "SaveTH1IntoText.C": "cpp"
+    }
+}

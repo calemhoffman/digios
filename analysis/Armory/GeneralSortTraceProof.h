@@ -134,6 +134,14 @@ public :
    float trdt[NRDT];
    float trdt_t[NRDT];
    float trdt_r[NRDT];
+
+   //h081_17ODP
+   int multi0;
+   float trdt0[20];
+   float trdt_t0[20];
+   int multi1;
+   float trdt1[20];
+   float trdt_t1[20];
       
    float tcrdt[NCRDT];
    float tcrdt_t[NCRDT];

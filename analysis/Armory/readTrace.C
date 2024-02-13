@@ -8,6 +8,9 @@
 #include <TBenchmark.h>
 #include <TMath.h>
 #include <TF1.h>
+#include <TStyle.h>
+#include <TLatex.h>
+#include <TSystem.h>
 #include <TLine.h>
 #include <iostream>
 
@@ -47,7 +50,7 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
    
    bool breakFlag = false;  
    bool lastEvFlag = false; 
-   vector<int> oldEv;
+   std::vector<int> oldEv;
    int evPointer = 0;
    
    for( int ev = 0; ev < totnumEntry; ev++){

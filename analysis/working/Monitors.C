@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
+int     rdtDERange[2] = {     0,     160}; 
+int      rdtERange[2] = {     0,     160};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -46,7 +46,7 @@ int   thetaCMRange[2] = {0, 80};
 
 double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
-int  coinTimeRange[2] = { -200, 200};
+int  coinTimeRange[2] = { -100, 100};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
 
 int  icRange [3] = {1000, 1000, 500}; /// max of IC0,1,2 
@@ -56,19 +56,19 @@ bool isUseRDTTrace = true;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
-double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
+int timeGate[2]       = {-20, 20};             /// min, max, 1 ch = 10 ns
+double eCalCut[2]     = {2, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {11, 16, 23} ;//{2,  11, 17}
+double xGate          = 0.99;                  ///cut out the edge
+vector<int> skipDetID = {11} ;//{2,  11, 17}
 double ExGate[2]      = {-6, 16};    /// min, max
 
-TString rdtCutFile1 = "rdtCutsTest29.root";
-TString rdtCutFile2 = "rdtCutsTest33.root";//"";
+TString rdtCutFile1 = "rdtCuts.root";
+TString rdtCutFile2 = "";//"";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -840,6 +840,7 @@ Bool_t Monitors::Process(Long64_t entry)
           hArrayRDTMatrix->Fill(detID, j); 
    
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
+         //  if( !(isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1]) ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
             if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
             //if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]);
@@ -1128,7 +1129,7 @@ void Monitors::Terminate()
    Draw2DHist(hrdt2D[0]);
 //      Draw2DHist(hrdt2Dsum[0]);
 
-   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
+   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->SetLineColor(2); cutG->Draw("same");}
    if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
 
 

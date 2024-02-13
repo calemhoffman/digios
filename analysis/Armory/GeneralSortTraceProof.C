@@ -12,6 +12,10 @@ bool  isSaveFitTrace = true;
 int   traceMethod = 3; //0 = no process; 1 = fit; 2 = trapezoid; 3 offset-different
 float delayChannel = 100.; //initial guess of the time
 
+//for traceMode == 3
+const int offset = 30;
+const double peakPos = 100; 
+
 // Also go to line 146 to set the trace analysis gate
 
 //############# fit function definition
@@ -146,9 +150,10 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/){
    case 2: traceMethodName = "trapezoid"; break;
    case 3: traceMethodName = "offset-diff."; break;
    }
-   printf( "  Trace  : %s , Method: %s, Save: %s \n",
+   printf( "  Trace    : %s , Method: %s, PeakPos: %.0f, Save: %s \n",
                isTraceON ?  "On" : "Off",
                traceMethodName.Data(),
+               peakPos,
                isSaveTrace? "Yes": "No:");
    printf( "=====================================================\n");
    //printf("                    file : %s \n", tree->GetDirectory()->GetName());
@@ -301,7 +306,7 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
          arrTrapezoid->BypassStreamer();
       }
 
-      if( traceMethod > 0 ){
+      if( 3 > traceMethod && traceMethod > 0 ){
          gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
          newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
@@ -327,8 +332,35 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
             newTree->Branch("tcrdt_t", tcrdt_t,  Form("Trace_CRDT_Time[%d]/l", NCRDT));
             newTree->Branch("tcrdt_r", tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/l", NCRDT));
          }
-
       }
+
+      // for h081_17ODP
+      if( traceMethod == 3 ){
+
+         gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
+         newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
+         newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
+         newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
+
+         if( isRecoil ){
+            newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
+            newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F",     NRDT));
+            newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+         }
+
+         if( isRecoil ){
+            newTree->Branch("multi0",    &multi0,  "multi0/I");
+            newTree->Branch("trdt0",       trdt0, "Trace_RDT0[multi0]/F");
+            newTree->Branch("trdt_t0",   trdt_t0, "Trace_RDT_Time0[multi0]/F");
+
+            newTree->Branch("multi1",    &multi1, "multi1/I");
+            newTree->Branch("trdt1",       trdt1, "Trace_RDT1[multi1]/F");
+            newTree->Branch("trdt_t1",   trdt_t1, "Trace_RDT_Time1[multi1]/F");
+
+         }
+      }
+
+
    }
 
 }
@@ -527,6 +559,16 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
       arr->Clear("C");
 
+      //h081_17ODP
+      multi0 = 0;
+      multi1 = 0;
+      for( int i = 0; i < 20 ; i++){
+         trdt0[i] = TMath::QuietNaN();
+         trdt1[i] = TMath::QuietNaN();
+         trdt_t0[i] = 0;
+         trdt_t1[i] = 0;
+      }
+
       for(Int_t i = 0; i < NumHits ; i++) {
          Int_t idTemp   = id[i] - idConst;
          idDet  = idDetMap[idTemp];
@@ -708,8 +750,6 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
          ///Offset-Difference
          if( traceMethod == 3){
 
-            int offset = 30;
-
             TH1F * jaja = new TH1F();
             jaja->Clear();
             jaja->Reset();
@@ -729,6 +769,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             int nPeaks = 0;
             std::vector<double> tPos, height;
             double t1 = 0, t2 = 0;
+            int peakID = -1;
 
             {
                TSpectrum * peak = new TSpectrum(10);
@@ -759,20 +800,28 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
                delete peak;
 
+               // Find the peak at position 100
+               for( int j = 0 ; j < nPeaks; j++){
+                  if( TMath::Abs( tPos[j] - peakPos) < 40) {
+                     peakID = j;
+                     break;
+                  }
+               }
+
                //get the FWHM of the first peak
-               int b0 = specS->FindBin(tPos[0]);
+               int b0 = specS->FindBin(tPos[peakID]);
                int b = b0;
                do{
                   b = b - 1;
                   double y = specS->GetBinContent(b);
                   double t = specS->GetBinCenter(b);
 
-                  if( y < height[0]/2. ) {
+                  if( y < height[peakID]/2. ) {
 
                      double yy = specS->GetBinContent(b+1);
                      double tt = specS->GetBinCenter(b+1);
 
-                     t1 = t + (tt-t) * (height[0]/2 - y)/(yy-y);
+                     t1 = t + (tt-t) * (height[peakID]/2 - y)/(yy-y);
                      break;
                   }
                }while(b > 0);
@@ -782,11 +831,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                   double y = specS->GetBinContent(b);
                   double t = specS->GetBinCenter(b);
 
-                  if( y < height[0]/2. ) {
+                  if( y < height[peakID]/2. ) {
                      double yy = specS->GetBinContent(b-1);
                      double tt = specS->GetBinCenter(b-1);
 
-                     t2 = t + (tt-t) * (height[0]/2 - y)/(yy-y);
+                     t2 = t + (tt-t) * (height[peakID]/2 - y)/(yy-y);
                      break;
                   }
                }while(b < 2*b0);
@@ -797,16 +846,34 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             delete specS;
 
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
-               te[idDet]   = height[0];
-               te_t[idDet] = tPos[0];
+               te[idDet]   = height[peakID];
+               te_t[idDet] = tPos[peakID];
                te_r[idDet] = t2-t1;
             }
 
             if( NRDT + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
-               trdt[rdtTemp]   = height[0];
-               trdt_t[rdtTemp] = tPos[0];
+
+               trdt[rdtTemp]   = height[peakID];
+               trdt_t[rdtTemp] = tPos[peakID];
                trdt_r[rdtTemp] = t2-t1;
+
+               //h081_17ODP
+               if( rdtTemp == 0 ){
+                  multi0 = tPos.size();
+                  for( int w = 0; w < multi0; w ++){
+                     trdt0[w] = height[w];
+                     trdt_t0[w] = tPos[w];
+                  }
+               }
+               if( rdtTemp == 1 ){
+                  multi1 = tPos.size();
+                  for( int w = 0; w < multi1; w ++){
+                     trdt1[w] = height[w];
+                     trdt_t1[w] = tPos[w];
+                  }
+               }
+
             }
 
          }

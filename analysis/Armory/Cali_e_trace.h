@@ -161,7 +161,7 @@ public :
    DetGeo detGeo;
    
    int numDet;
-   vector<double> pos;
+   std::vector<double> pos;
    double Bfield;
    double perpDist;
    double length;
@@ -280,7 +280,7 @@ void Cali_e_trace::Init(TTree *tree)
    }
    
    isTraceDataExist = false;
-   br = (TBranch *) fChain->GetListOfBranches()->FindObject("te_t");
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("trdt");
    if( br == NULL ){
       printf(" WARNING! cannot find trace data -> proceed without trace. \n");
    }else{
