@@ -51,8 +51,10 @@ for i in range(num_dwba):
 stateID=0
 c2s = []
 c2serr = []
-dwbanum = [1,2,5,6,7]
-numex = 5
+# dwbanum = [1,2,5,6,7]
+# numex = 5
+dwbanum = [5,6,6,6]
+numex = 4
 
 for i in range(numex):
     stateID = dwbanum[i]-1
