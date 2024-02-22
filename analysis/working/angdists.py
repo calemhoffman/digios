@@ -36,6 +36,7 @@ names = df_data.columns
 print(len(names))
 df_data
 
+#%%
 dwba_file_name='si30dp306MeV.Xsec.txt'
 df_dwba = pd.read_fwf(dwba_file_name,header=None,skiprows=1)
 df_dwba = df_dwba[:][:180]
@@ -46,15 +47,42 @@ for i in range(num_dwba):
     x = df_dwba[0].to_numpy()
     y = df_dwba[i+1].to_numpy()
     tck.append(splrep(x, y, s=0))
-# %%
-numex = 5
-c2s = [2.,2.,3.5,5,4.]
+#%%
+stateID=0
+c2s = []
+c2serr = []
 dwbanum = [1,2,5,6,7]
-ymin=0.1
+numex = 5
+
+for i in range(numex):
+    stateID = dwbanum[i]-1
+    x1 = df_data[names[3*i]].to_numpy()#
+    x1 = x1[~np.isnan(x1)]
+    print(x1)
+    y1 = df_data[names[3*i+1]].to_numpy()#
+    y1 = y1[~np.isnan(y1)]
+    print(y1)
+    y1sig = df_data[names[3*i+2]]
+    y1sig.to_numpy()
+    y1sig = y1sig[~np.isnan(y1sig)]   
+    if y1.size > 0:
+        popt, errt, info, b, c = curve_fit(spfit, x1, y1, p0=None, full_output=True, sigma=y1sig)
+        err = np.sqrt(np.diag(errt))
+        chi2 = np.sum(info['fvec']**2)/df_data[names[3*i+2]].iloc[2]/df_data[names[3*i+2]].iloc[2]/len(x1)
+        print("chi2: {}".format(chi2))
+    c2s.append(popt[0])
+    print(popt[0])
+    c2serr.append(math.sqrt(errt[0]))
+# print('%s c2s =  %.4f (%.4f)' % (names[2],c2s[i],c2serr[i]))
+#%%
+# c2s = [2.,2.,3.5,5,4.]
+#31Si g.s. 0.7, 700 keV 0.25, 2800 0.04, 3100 0.6, 3500 0.4
+ymin=-1
 ymax=2.5
 fig = make_subplots(rows=5, cols=1, shared_xaxes=True, shared_yaxes=True, 
                     horizontal_spacing=0.0,vertical_spacing=0.01)
 for i in range(numex):
+    print(c2s[i]/c2s[0])
     fig.add_trace(go.Scatter(x = df_dwba[0],y=c2s[i]*df_dwba[dwbanum[i]]),row=i+1,col=1)
     fig.add_trace(go.Scatter(x = df_data[names[3*i]], y = df_data[names[3*i+1]],
             name=names[3*i+1],text=df_data[names[3*i+1]],error_y=dict(type='data', array=df_data[names[3*i+2]]),
