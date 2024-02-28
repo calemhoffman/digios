@@ -22,12 +22,12 @@ using namespace std;
 //TTree *tr = NULL;
 
 bool doEZ=false;
-bool doEx=true;
+bool doEx=false;
 bool doRDT=false;
 bool doEx2d=false;
-bool doAngs=true;
+bool doAngs=false;
 bool doCoinT=false;
-bool doCSV=false;
+bool doCSV=true;
 
 bool RDTCUT=true;
 bool RINGCUT=false;
@@ -186,26 +186,42 @@ void Check_crh(TString rootfile){
 
 
    ofstream myfile;
-   myfile.open ("evz_data.csv");
+   myfile.open ("all_data.csv");
+   int detID = -1;
+   float Ex = 0.0;
    float e[30];
    float z[30];
    float x[30];
    float coinTime = 0;
    float thetaCM = 0;
+   int rdtID;
+   float rdt[8];
+   float rdte[4];
+   float trdt[8];
+   float trdte[4];
+   tree->SetBranchAddress("detID",&detID);
    tree->SetBranchAddress("e", e);
    tree->SetBranchAddress("z", z);
    tree->SetBranchAddress("x", x);
+   tree->SetBranchAddress("Ex", &Ex);
    tree->SetBranchAddress("coinTime",&coinTime);
    tree->SetBranchAddress("thetaCM",&thetaCM);
-   myfile << "z,e\n";
-   int DETID = 14;
+   tree->SetBranchAddress("rdtID",&rdtID);
+   tree->SetBranchAddress("rdt",rdt);
+   tree->SetBranchAddress("rdte",rdte);
+   tree->SetBranchAddress("trdt",trdt);
+   tree->SetBranchAddress("trdte",trdte);
+
    if (doCSV) {
+      myfile << "detID,e,z,Ex,rdtID,de,e,rdte,tde,te,trdte" << endl;
       for (int k=0;k<tree->GetEntries()-1;k++) {
          tree->GetEntry(k);
-         float tempp = (0.7/50.*(280. + z[DETID]) + 5);//2.8);
-         if ((e[DETID] > tempp) && e[DETID]<9 && coinTime>-18 && coinTime<18 && thetaCM > 15. && x[DETID]>=-0.98 && x[DETID]<=0.98) {
+         // float tempp = (0.7/50.*(280. + z[DETID]) + 5);//2.8);
+         if ((e[detID] > 0) && e[detID]<9 && coinTime>-40 && coinTime<40 && thetaCM > 15. && x[detID]>=-1 && x[detID]<=1) {
             // printf("%f %f\n",z[0],e[0]);
-            myfile << z[DETID] << "," << e[DETID] << endl;
+            float ID = (float)rdtID / 2. - 0.5; int rdteID = (int)ID;
+            // printf(" %d\n",rdteID);
+            myfile << detID << "," << e[detID] << "," << z[detID] << "," << Ex << "," << rdtID << "," << rdt[rdtID] << ","  << rdt[rdtID-1] << "," << rdte[rdteID] << "," << trdt[rdtID] << ","  << trdt[rdtID-1] << ","  << trdte[rdteID] <<endl;
          }
       }
    }
@@ -353,7 +369,7 @@ void Check_crh(TString rootfile){
       cAngs->ToggleEditor();cAngs->ToggleToolBar();
       cAngs->SetGrid(); cAngs->Divide(3,2);
       ofstream myfile;
-      myfile.open ("angdist_feb8.csv");
+      myfile.open ("angdist_feb28.csv");
       // myfile2.open ("angdist_feb6.csv");
    
       double counts[10][5]; //states angles
