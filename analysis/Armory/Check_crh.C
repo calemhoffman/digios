@@ -72,11 +72,23 @@ void Check_crh(TString rootfile){
 
 
    TFile * fileCut = new TFile("rdtCuts.root");
+   TFile * fileCut1 = new TFile("rdtCuts_si30.root");
+   TFile * fileCut2 = new TFile("rdtCuts_si31.root");
+   TFile * fileCut3 = new TFile("rdtCuts_si30low.root");
    
    TObjArray * cutList = NULL;
+   TObjArray * cutList1 = NULL;
+   TObjArray * cutList2 = NULL;
+   TObjArray * cutList3 = NULL;
    TCutG ** cut = NULL;
+   TCutG ** cut1 = NULL;
+   TCutG ** cut2 = NULL;
+   TCutG ** cut3 = NULL;
    
    TString gate_RDT = "";
+   TString gate_RDT1 = "";
+   TString gate_RDT2 = "";
+   TString gate_RDT3 = "";
    
    if( fileCut->IsOpen() ){
       
@@ -92,6 +104,30 @@ void Check_crh(TString rootfile){
       if (RDTCUT){
          gate_RDT = "&& ((cut0) || (cut1) || (cut2) || (cut3))";
       }
+   }
+
+   if( fileCut1->IsOpen() && fileCut2->IsOpen() && fileCut3->IsOpen() ){
+      
+      TObjArray * cutList1 = (TObjArray*) fileCut1->FindObjectAny("cutList");
+      TObjArray * cutList2 = (TObjArray*) fileCut2->FindObjectAny("cutList");
+      TObjArray * cutList3 = (TObjArray*) fileCut3->FindObjectAny("cutList");
+      
+      const int numCut = cutList1->GetEntries();
+      cut1 = new TCutG * [numCut];
+      cut2 = new TCutG * [numCut];
+      cut3 = new TCutG * [numCut];
+      printf(" ======== found %d cuts in %s \n", numCut, fileCut1->GetName());
+      for( int i = 0 ; i < numCut; i++){
+         cut1[i] = (TCutG* ) cutList1->At(i); cut1[i]->SetName(Form("cut1%d",i));
+         cut2[i] = (TCutG* ) cutList2->At(i);cut2[i]->SetName(Form("cut2%d",i));
+         cut3[i] = (TCutG* ) cutList3->At(i);cut3[i]->SetName(Form("cut3%d",i));
+         printf("cut name: %s , VarX: %s, VarY: %s\n", cut1[i]->GetName(), cut1[i]->GetVarX(), cut1[i]->GetVarY()); 
+         printf("cut name: %s , VarX: %s, VarY: %s\n", cut2[i]->GetName(), cut2[i]->GetVarX(), cut2[i]->GetVarY()); 
+         printf("cut name: %s , VarX: %s, VarY: %s\n", cut3[i]->GetName(), cut3[i]->GetVarX(), cut3[i]->GetVarY()); 
+      }
+      gate_RDT1 = "&& ((cut10) || (cut11) || (cut12) || (cut13))";
+      gate_RDT2 = "&& ((cut20) || (cut21) || (cut22) || (cut23))";
+      gate_RDT3 = "&& ((cut30) || (cut31) || (cut32) || (cut33))";
    }
    
    TString detGate = "x>-10";
