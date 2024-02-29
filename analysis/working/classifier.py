@@ -15,9 +15,9 @@ fig.update_layout(title='Ex vs rdte', xaxis_title='rdte', yaxis_title='Ex')
 fig.show()
 # %%
 from sklearn.model_selection import train_test_split
-
-X = df['Ex'] #df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
-y = df['rdte']
+# df['new_column'] = np.where(df['column_name'] > 0, 0, 1)
+X = df['Ex'] #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
+y = df['rdte'] #0,1,2 label
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 # %%
