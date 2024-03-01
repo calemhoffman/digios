@@ -44,8 +44,8 @@ void LoadRDTCorr2(){
 
 void RDTCutCreator(TString dataList, 
                    TString saveFileName = "rdtCuts.root", 
-                   int eRange=6000, 
-                   int deRange=2000, 
+                   int eRange=5000, 
+                   int deRange=3500, 
                    bool isLogz = false,
                    TString gate = "", 
                    TString treeName = "tree", 
@@ -92,7 +92,7 @@ void RDTCutCreator(TString dataList,
          varX.Form("rdte[%d]",i); varY.Form("rdt[%d]",2*i+1);
       }
 
-      h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 3000, eRange, 1000, 500, deRange);
+      h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 500, eRange, 1000, 100, deRange);
 
       expression[i].Form("%s:%s>>h%d", 
                          varY.Data(),varX.Data(),i);
