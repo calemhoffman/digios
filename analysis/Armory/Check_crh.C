@@ -250,24 +250,28 @@ void Check_crh(TString rootfile){
    int target = 0;
 
    if (doCSV) {
-      myfile << "detID,e,z,Ex,rdtID,de,e,rdte,tde,te,trdte,target" << endl;
+      myfile << "detID,e,z,Ex,rdtID,de,e,rdte,tde,te,trdte,coinTime,thetaCM,target" << endl;
       for (int k=0;k<tree->GetEntries()-1;k++) {
          target = 0;
          tree->GetEntry(k);
          // float tempp = (0.7/50.*(280. + z[DETID]) + 5);//2.8);
-         if ((e[detID] > 0) && e[detID]<9 && coinTime>-40 && coinTime<40 && thetaCM > 15. && x[detID]>=-1 && x[detID]<=1) {
+         if ((e[detID] > 0) && e[detID]<9 && coinTime>-40 && coinTime<40 && thetaCM > 10. && x[detID]>=-1 && x[detID]<=1) {
             // printf("%f %f\n",z[0],e[0]);
             float ID = (float)rdtID / 2. - 0.5; int rdteID = (int)ID;
             // printf(" %d\n",rdteID);
-            if ((cut1[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[3]->IsInside(rdte[rdteID],rdt[rdtID])) ) {
-               target = 1;
-            } else if ((cut2[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[3]->IsInside(rdte[rdteID],rdt[rdtID])) ) {
-               target = 2;
-            } else if (((cut3[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[3]->IsInside(rdte[rdteID],rdt[rdtID])) )) {
-               target = 3;
-            } else { target = 0;}
+            if ((e[detID] > 0) && e[detID]<9 && coinTime>-18 && coinTime<18 && thetaCM > 15. && x[detID]>=-0.98 && x[detID]<=0.98) {
+               if ((cut1[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[3]->IsInside(rdte[rdteID],rdt[rdtID])) ) {
+                  target = 1;
+               } else if ((cut2[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[3]->IsInside(rdte[rdteID],rdt[rdtID])) ) {
+                  target = 2;
+               } else if (((cut3[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[3]->IsInside(rdte[rdteID],rdt[rdtID])) )) {
+                  target = 3;
+               } else { target = 0;}
+            }
 
-            myfile << detID << "," << e[detID] << "," << z[detID] << "," << Ex << "," << rdtID << "," << rdt[rdtID] << ","  << rdt[rdtID-1] << "," << rdte[rdteID] << "," << trdt[rdtID] << ","  << trdt[rdtID-1] << ","  << trdte[rdteID] <<","<< target <<endl;
+            myfile << detID << "," << e[detID] << "," << z[detID] << "," << Ex << "," << rdtID << "," << rdt[rdtID] << ","  
+            << rdt[rdtID-1] << "," << rdte[rdteID] << "," << trdt[rdtID] << ","  << trdt[rdtID-1] << ","  << trdte[rdteID] 
+            <<","<< coinTime<<","<<thetaCM<< "," << target<<endl;
          }
       }
    }
