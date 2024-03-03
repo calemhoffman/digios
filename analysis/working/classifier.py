@@ -6,7 +6,7 @@ df = pd.read_csv('all_data.csv')
 print(df.size)
 df = df.dropna()
 print(df.size)
-df = df[df['target']>0] 
+# df = df[df['target']>0] 
 import plotly.graph_objects as go
 
 
@@ -39,8 +39,8 @@ print(score)
 print(y_test,y_pred)
 
 # %%
-df_o = df[df['target']==1]
-df_p = df[df['pred']==1]
+df_o = df[df['target']==2]
+df_p = df[df['pred']==2]
 print("o {}, p {}",df_o.size,df_p.size)
 
 fig = go.Figure(data=go.Histogram(x=df_o['Ex'],xbins=dict(start=-0.5, end=10.5, size=11./210.)))
