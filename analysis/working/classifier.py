@@ -7,8 +7,17 @@ print(df.size)
 df = df.dropna()
 print(df.size)
 # df = df[df['target']>0] 
-import plotly.graph_objects as go
+df = df[df['coinTime']>-20]
+df = df[df['coinTime']<20]
+# df = df[df['rdte']<3900]
+# df = df[df['rdte']>3750]
 
+
+import plotly.graph_objects as go
+fig = go.Figure(data=go.Histogram(x=df[df['target']==2].Ex,xbins=dict(start=-1, end=9, size=0.05)))
+fig.show()
+fig = go.Figure(data=go.Scatter(x=df.rdte,y=df.Ex,mode='markers',marker_color=df.target))
+fig.show()
 
 # %%
 from sklearn.model_selection import train_test_split
