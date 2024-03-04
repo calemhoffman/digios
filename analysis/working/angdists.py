@@ -15,7 +15,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import chisquare
 #color = px.colors.sequential.Plotly3
 color = ['#E97371','#2C6A6A','#865740','#70808F','#B93E36','#F99183','#44938E','#B87843','#0E3A33']
-colorgrad = ['#e97371','#b5706f','#816e6d']
+colorgrad = [color[0],color[1],color[2]]
 pio.templates["mycolor"] = go.layout.Template(layout_colorway=color)
 pio.templates.default = "mycolor"
 stateID=0

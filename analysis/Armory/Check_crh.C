@@ -22,7 +22,7 @@ using namespace std;
 //TTree *tr = NULL;
 
 bool doEZ=false;
-bool doEx=true;
+bool doEx=false;
 bool doRDT=false;
 bool doEx2d=false;
 bool doAngs=false;
@@ -250,7 +250,7 @@ void Check_crh(TString rootfile){
    int target = 0;
 
    if (doCSV) {
-      myfile << "detID,e,z,Ex,rdtID,de,e,rdte,tde,te,trdte,coinTime,thetaCM,target" << endl;
+      myfile << "detID,e,z,x,Ex,rdtID,de,e,rdte,tde,te,trdte,coinTime,thetaCM,target" << endl;
       for (int k=0;k<tree->GetEntries()-1;k++) {
          target = 0;
          tree->GetEntry(k);
@@ -269,7 +269,7 @@ void Check_crh(TString rootfile){
                } else { target = 0;}
             }
 
-            myfile << detID << "," << e[detID] << "," << z[detID] << "," << Ex << "," << rdtID << "," << rdt[rdtID] << ","  
+            myfile << detID << "," << e[detID] << "," << z[detID] << "," << x[detID] << "," << Ex << "," << rdtID << "," << rdt[rdtID] << ","  
             << rdt[rdtID-1] << "," << rdte[rdteID] << "," << trdt[rdtID] << ","  << trdt[rdtID-1] << ","  << trdte[rdteID] 
             <<","<< coinTime<<","<<thetaCM<< "," << target<<endl;
          }
