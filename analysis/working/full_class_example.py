@@ -1,8 +1,6 @@
-# Code source: Gaël Varoquaux
-#              Andreas Müller
-# Modified for documentation by Jaques Grobler
-# License: BSD 3 clause
+
 #%%
+#setup and load data
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -26,14 +24,17 @@ from sklearn.tree import DecisionTreeClassifier
 
 df = pd.read_csv('all_data.csv')
 df = df.dropna()
-X = df[['Ex','rdte']].__array__ #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
+df = df[df['target']>0]
+df=df[df['target']<3]
+X = df[['rdte','Ex']]#x,y of 2D
 y = df['target'] #0,1,2 label
-print(X[:,0])
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-# scaler = StandardScaler()
-# X_train_scaled = scaler.fit_transform(X_train)
-# X_test_scaled = scaler.transform(X_test)
-# X_scaled = scaler.transform(X) #all data scaled
+X = X[:500]
+y = y[:500]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+X_scaled = scaler.transform(X) #all data scaled
 # X_orig_scaled = scaler.transform(X_orig) #all data scaled
 #%%
 names = [
@@ -64,38 +65,24 @@ classifiers = [
     QuadraticDiscriminantAnalysis(),
 ]
 
-# X, y = make_classification(
-#     n_features=2, n_redundant=0, n_informative=2, random_state=1, n_clusters_per_class=1
-# )
-# rng = np.random.RandomState(2)
-# X += 2 * rng.uniform(size=X.shape)
-# linearly_separable = (X, y)
-
-# datasets = [
-#     make_moons(noise=0.3, random_state=0),
-#     make_circles(noise=0.2, factor=0.5, random_state=1),
-#     linearly_separable,
-# ]
-
-figure = plt.figure(figsize=(27, 9))
+#%%
+figure = plt.figure(figsize=(36, 9))
 i = 1
 # iterate over datasets
 ds_cnt = 0
 for ds in range(1):
-    ds_cnt+=1
     # preprocess dataset, split into training and test part
     # X, y = ds
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.4, random_state=42
-    )
-
-    x_min, x_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5
-    y_min, y_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
+    # X_train, X_test, y_train, y_test = train_test_split(
+    #     X, y, test_size=0.4, random_state=42
+    # )
+    x_min, x_max = X_scaled[:, 0].min() - 0.5, X_scaled[:, 0].max() + 0.5
+    y_min, y_max = X_scaled[:, 1].min() - 0.5, X_scaled[:, 1].max() + 0.5
 
     # just plot the dataset first
     cm = plt.cm.RdBu
     cm_bright = ListedColormap(["#FF0000", "#0000FF"])
-    ax = plt.subplot(len(datasets), len(classifiers) + 1, i)
+    ax = plt.subplot(1, len(classifiers) + 1, i)
     if ds_cnt == 0:
         ax.set_title("Input data")
     # Plot the training points
@@ -109,16 +96,18 @@ for ds in range(1):
     ax.set_xticks(())
     ax.set_yticks(())
     i += 1
-
+    print("here1")
     # iterate over classifiers
     for name, clf in zip(names, classifiers):
-        ax = plt.subplot(len(datasets), len(classifiers) + 1, i)
+        ax = plt.subplot(1, len(classifiers) + 1, i)
 
         clf = make_pipeline(StandardScaler(), clf)
+        print("fitting {}".format(clf))
         clf.fit(X_train, y_train)
         score = clf.score(X_test, y_test)
+        print(score)
         DecisionBoundaryDisplay.from_estimator(
-            clf, X, cmap=cm, alpha=0.8, ax=ax, eps=0.5
+            clf, X_scaled, cmap=cm, alpha=0.8, ax=ax, eps=0.5
         )
 
         # Plot the training points
@@ -149,7 +138,8 @@ for ds in range(1):
             horizontalalignment="right",
         )
         i += 1
-
+        ds_cnt+=1
+    ds_cnt+=1
 plt.tight_layout()
 plt.show()
 # %%
