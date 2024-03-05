@@ -45,9 +45,9 @@ void LoadRDTCorr2(){
 void RDTCutCreator(TString dataList, 
                    TString saveFileName = "rdtCuts.root", 
                    int eRange=5000, 
-                   int deRange=3500, 
+                   int deRange=3000, 
                    bool isLogz = false,
-                   TString gate = "", 
+                   TString gate = "Ex>0 && Ex<7", 
                    TString treeName = "tree", 
                    bool useTrace = false
                    ){
@@ -86,10 +86,12 @@ void RDTCutCreator(TString dataList,
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
       if( useTrace ){   
-         varX.Form("trdte[%d]",i); varY.Form("trdt[%d]",2*i+1);
+         // varX.Form("trdte[%d]",i); varY.Form("trdt[%d]",2*i+1);
+         varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
          ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-         varX.Form("rdte[%d]",i); varY.Form("rdt[%d]",2*i+1);
+         // varX.Form("rdte[%d]",i); varY.Form("rdt[%d]",2*i+1);
+         varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 1000, 500, eRange, 1000, 100, deRange);
@@ -99,7 +101,7 @@ void RDTCutCreator(TString dataList,
                          
       ///printf("%s \n", expression[i].Data());
 
-      chain->Draw(expression[i], gate, "col");
+      chain->Draw(expression[i], gate, "");
       
       if( h[i]->Integral() < 1000 ) {
          h[i]->SetMarkerStyle(20);
