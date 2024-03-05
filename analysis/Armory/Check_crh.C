@@ -260,11 +260,11 @@ void Check_crh(TString rootfile){
             float ID = (float)rdtID / 2. - 0.5; int rdteID = (int)ID;
             // printf(" %d\n",rdteID);
             if ((e[detID] > 0) && e[detID]<9 && coinTime>-18 && coinTime<18 && thetaCM > 15. && x[detID]>=-0.98 && x[detID]<=0.98) {
-               if ((cut1[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut1[3]->IsInside(rdte[rdteID],rdt[rdtID])) ) {
+               if ((cut1[0]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut1[1]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut1[2]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut1[3]->IsInside(rdt[rdtID-1],rdt[rdtID])) ) {
                   target = 1;
-               } else if ((cut2[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut2[3]->IsInside(rdte[rdteID],rdt[rdtID])) ) {
+               } else if ((cut2[0]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut2[1]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut2[2]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut2[3]->IsInside(rdt[rdtID-1],rdt[rdtID])) ) {
                   target = 2;
-               } else if (((cut3[0]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[1]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[2]->IsInside(rdte[rdteID],rdt[rdtID])) || (cut3[3]->IsInside(rdte[rdteID],rdt[rdtID])) )) {
+               } else if (((cut3[0]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut3[1]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut3[2]->IsInside(rdt[rdtID-1],rdt[rdtID])) || (cut3[3]->IsInside(rdt[rdtID-1],rdt[rdtID])) )) {
                   target = 3;
                } else { target = 0;}
             }

@@ -83,8 +83,7 @@ for ds in range(1):
     cm = plt.cm.RdBu
     cm_bright = ListedColormap(["#FF0000", "#0000FF"])
     ax = plt.subplot(1, len(classifiers) + 1, i)
-    if ds_cnt == 0:
-        ax.set_title("Input data")
+    ax.set_title("Input data")
     # Plot the training points
     ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=cm_bright, edgecolors="k")
     # Plot the testing points
@@ -96,7 +95,6 @@ for ds in range(1):
     ax.set_xticks(())
     ax.set_yticks(())
     i += 1
-    print("here1")
     # iterate over classifiers
     for name, clf in zip(names, classifiers):
         ax = plt.subplot(1, len(classifiers) + 1, i)
@@ -128,8 +126,7 @@ for ds in range(1):
         ax.set_ylim(y_min, y_max)
         ax.set_xticks(())
         ax.set_yticks(())
-        if ds_cnt == 0:
-            ax.set_title(name)
+        ax.set_title(name)
         ax.text(
             x_max - 0.3,
             y_min + 0.3,
