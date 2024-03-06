@@ -27,8 +27,8 @@ df = df.dropna()
 print(df)
 df_orig = df
 # df = df[df['target']>0] 
-df = df[df['coinTime']>-18]
-df = df[df['coinTime']<18]
+df = df[df['coinTime']>-30]
+df = df[df['coinTime']<30]
 df = df[df['x']<0.98]
 df = df[df['x']>-0.98]
 # df = df[df['rdte']<3900]
@@ -57,9 +57,10 @@ fig_orig.show()
 # prepare data for learning / training
 # df['new_column'] = np.where(df['column_name'] > 0, 0, 1) use if One V All
 df = df[df['target']>=0]
-X = df[['Ex','rdte','coinTime','x','e']] #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
+names = ['Ex','rdte','coinTime','x','e','rdtID','detID','z','thetaCM']
+X = df[names] #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
 y = df['target'] #0,1,2 label
-X_orig = df_orig[['Ex','rdte','coinTime','x','e']]
+X_orig = df_orig[names]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 scaler = StandardScaler()
@@ -72,13 +73,13 @@ X_orig_scaled = scaler.transform(X_orig) #all data scaled
 
 from sklearn.neural_network import MLPClassifier
 clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                    hidden_layer_sizes=(5, 2), random_state=1,max_iter=1000)
+                    hidden_layer_sizes=(10, 3), random_state=1,max_iter=1000)
 
 clf.fit(X_train_scaled, y_train)
 print(clf.score(X_test_scaled,y_test))
-
-
-
+X['pred'] = clf.predict(X_scaled)
+X['target'] = y
+X
 #%%
 #Decision Tree Classifier [dtc]
 from sklearn.tree import DecisionTreeClassifier
@@ -102,6 +103,7 @@ df_orig['pred'] = y_orig_pred#append to full df (make sure df is not modified he
 # %%
 #numerical evaluations
 df = df_orig
+df = X
 for type in range(4):
     df_o = df[df['target']==type]
     df_p = df[df['pred']==type]
@@ -110,11 +112,11 @@ for type in range(4):
 #%%
 fig_orig = make_subplots(rows=2, cols=1)
 
-fig_orig.add_trace(go.Histogram(x=df_orig[df_orig['target']==2].Ex,
+fig_orig.add_trace(go.Histogram(x=df_orig[df_orig['target']==1].Ex,
                                        xbins=dict(start=-1.0,
                                                   end=9.0,
                                                   size=0.05)),row=1,col=1)
-fig_orig.add_trace(go.Histogram(x=df[df['target']==2].Ex,
+fig_orig.add_trace(go.Histogram(x=df[df['pred']==1].Ex,
                                        xbins=dict(start=-1.0,
                                                   end=9.0,
                                                   size=0.05)),row=1,col=1)
