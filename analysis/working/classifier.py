@@ -26,43 +26,43 @@ df = pd.read_csv('all_data.csv')
 df = df.dropna()
 print(df)
 df_orig = df
-# df = df[df['target']>0] 
+
 df = df[df['coinTime']>-30]
 df = df[df['coinTime']<30]
 df = df[df['x']<0.98]
 df = df[df['x']>-0.98]
-# df = df[df['rdte']<3900]
-# df = df[df['rdte']>3750]
+df = df[df['rdte']<4100]
+df = df[df['rdte']>3500]
+
 #plot originals
-fig_orig = make_subplots(rows=2, cols=1)
+fig_orig = make_subplots(rows=4, cols=2)
+for i in range(2):
+    fig_orig.add_trace(go.Histogram(x=df_orig[df_orig['target']==(i+1)].Ex,
+                                        xbins=dict(start=-1.0,
+                                                    end=11.0,
+                                                    size=0.1),marker=dict(color=color[0],opacity=0.5, line=dict(width=0))),row=1,col=i+1)
+    fig_orig.add_trace(go.Histogram(x=df[df['target']==(i+1)].Ex,
+                                        xbins=dict(start=-1.0,
+                                                    end=11.0,
+                                                    size=0.1),marker=dict(color=color[1],opacity=0.5,line=dict(width=0))),row=2,col=i+1)
+    fig_orig.update_xaxes(range=[2,10],row=1,col=i+1)
+    fig_orig.update_xaxes(range=[2,10],row=2,col=i+1)
 
-fig_orig.add_trace(go.Histogram(x=df_orig[df_orig['target']==2].Ex,
-                                       xbins=dict(start=-1.0,
-                                                  end=9.0,
-                                                  size=0.05)),row=1,col=1)
-fig_orig.add_trace(go.Histogram(x=df[df['target']==2].Ex,
-                                       xbins=dict(start=-1.0,
-                                                  end=9.0,
-                                                  size=0.05)),row=1,col=1)
-fig_orig.update_xaxes(range=[4,9],row=1,col=1)
-
-fig_orig.add_trace(go.Scatter(x=df.rdte,y=df.Ex,
-                                     mode='markers',marker_color=df.target),row=2,col=1)
-fig_orig.update_xaxes(range=[2700,4100],row=2,col=1)
-
-fig_orig.update_layout(width=600,height=800,barmode='overlay')
+fig_orig.update_layout(width=1000,height=800,barmode='overlay')
 fig_orig.show()
 
 # %%
 # prepare data for learning / training
 # df['new_column'] = np.where(df['column_name'] > 0, 0, 1) use if One V All
 df = df[df['target']>=0]
-names = ['Ex','rdte','coinTime','x','e','rdtID','detID','z','thetaCM']
-X = df[names] #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
-y = df['target'] #0,1,2 label
+num_class = np.unique(df['target'])
+names = ['Ex','rdte','coinTime','x','e','e.1','rdtID','detID','z','thetaCM']
+X = df[names] #x,y, ...
+y = df['target'] #0,1,2 labelled data
 X_orig = df_orig[names]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
@@ -70,29 +70,103 @@ X_scaled = scaler.transform(X) #all data scaled
 X_orig_scaled = scaler.transform(X_orig) #all data scaled
 
 #%%
-
+loss_values = []
+scores = []
+#################################################################### MLPC
 from sklearn.neural_network import MLPClassifier
-clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                    hidden_layer_sizes=(10, 3), random_state=1,max_iter=1000)
+clf = MLPClassifier(activation='relu', solver='adam',
+                    alpha=1e-4,learning_rate='constant',
+                    hidden_layer_sizes=(20, 10), random_state=1,
+                    max_iter=5000)
 
-clf.fit(X_train_scaled, y_train)
-print(clf.score(X_test_scaled,y_test))
+for i in range(120):
+    clf.partial_fit(X_train_scaled, y_train, classes=num_class)
+    print(clf.score(X_test_scaled,y_test))
+    scores.append(clf.score(X_test_scaled,y_test))
+    print(clf.loss_)
+    loss_values.append(clf.loss_)
+
+# Plot the loss curve
+plt.figure()
+plt.plot(scores, label='Score Curve')
+plt.plot(loss_values, label='Loss Curve')
+plt.xlabel('Epoch')
+plt.ylabel('Loss / Score')
+plt.title('MLPClassifier Loss / Score Curve')
+plt.legend()
+plt.show()
+
 X['pred'] = clf.predict(X_scaled)
 X['target'] = y
-X
+df_orig['pred'] = clf.predict(X_orig_scaled)
+
+#%%
+#Compare results from MLPC
+for type in range(4):
+    df_o = df_orig[df_orig['target']==type]
+    df_p = df_orig[df_orig['pred']==type]
+    print("Type: {}, Orig: {}, Pred: {}".format(type,df_o.shape[0],df_p.shape[0]))
+
+fig_pred = make_subplots(rows=2, cols=2)
+for i in range(2):
+    fig_pred.add_trace(go.Scatter(x=[9.2,9.2], y=[0, 40],
+                         mode='lines', name='Mean', line=dict(color=color[6], width=3)),row=1,col=i+1)
+    fig_pred.add_trace(go.Scatter(x=[8.76,8.76], y=[0, 40],
+                         mode='lines', name='Mean', line=dict(color=color[7], width=3)),row=1,col=i+1)
+    fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['target']==(i+1)].Ex,
+                                        xbins=dict(start=-1.0,
+                                        end=11.0,
+                                        size=0.1),marker=dict(color=color[0],opacity=0.5, line=dict(width=0))),
+                       row=1,col=i+1)
+    fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['pred']==(i+1)].Ex,
+                                        xbins=dict(start=-1.0,
+                                        end=11.0,
+                                        size=0.1),marker=dict(color=color[1],opacity=0.5,line=dict(width=0))),
+                       row=1,col=i+1)
+    fig_pred.update_xaxes(range=[2,10],row=1,col=i+1)
+fig_pred.update_layout(width=1000,height=800,barmode='overlay')
+
+fig_pred.show()
 #%%
 #Decision Tree Classifier [dtc]
+#################################################################### DTC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.inspection import DecisionBoundaryDisplay
+skip = 1
+if skip > 0:
+    dtc = DecisionTreeClassifier(max_depth=5,random_state=42)#set
+    dtc.fit(X_train_scaled, y_train)#fit
+    score = dtc.score(X_test_scaled, y_test)#score
+    print(score)
+    y_pred = dtc.predict(X_scaled)#predict
+    y_orig_pred = dtc.predict(X_orig_scaled)#predict
+    df_orig['pred'] = y_orig_pred#append to full df (make sure df is not modified here)
 
-dtc = DecisionTreeClassifier(max_depth=5, random_state=42)#set
-dtc.fit(X_train_scaled, y_train)#fit
-score = dtc.score(X_test_scaled, y_test)#score
-print(score)
-y_pred = dtc.predict(X_scaled)#predict
-y_orig_pred = dtc.predict(X_orig_scaled)#predict
-df_orig['pred'] = y_orig_pred#append to full df (make sure df is not modified here)
+for type in range(4):
+    df_o = df_orig[df_orig['target']==type]
+    df_p = df_orig[df_orig['pred']==type]
+    print("Type: {}, Orig: {}, Pred: {}".format(type,df_o.shape[0],df_p.shape[0]))
 
+# fig_pred = make_subplots(rows=2, cols=2)
+for i in range(2):
+    fig_pred.add_trace(go.Scatter(x=[9.2,9.2], y=[0, 40],
+                         mode='lines', name='Mean', line=dict(color=color[6], width=3),showlegend=False),row=2,col=i+1)
+    fig_pred.add_trace(go.Scatter(x=[8.76,8.76], y=[0, 40],
+                         mode='lines', name='Mean', line=dict(color=color[7], width=3),showlegend=False),row=2,col=i+1)
+    fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['target']==(i+1)].Ex,
+                                        xbins=dict(start=-1.0,
+                                        end=11.0,
+                                        size=0.1),marker=dict(color=color[0],opacity=0.5, line=dict(width=0)),showlegend=False),
+                       row=2,col=i+1)
+    fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['pred']==(i+1)].Ex,
+                                        xbins=dict(start=-1.0,
+                                        end=11.0,
+                                        size=0.1),marker=dict(color=color[1],opacity=0.5,line=dict(width=0)),showlegend=False),
+                       row=2,col=i+1)
+    fig_pred.update_xaxes(range=[2,10],row=2,col=i+1)
+fig_pred.update_layout(width=1000,height=800,barmode='overlay')
+
+fig_pred.show()
 #%%
 # Other Classifier
 
@@ -101,13 +175,7 @@ df_orig['pred'] = y_orig_pred#append to full df (make sure df is not modified he
 
 
 # %%
-#numerical evaluations
-df = df_orig
-df = X
-for type in range(4):
-    df_o = df[df['target']==type]
-    df_p = df[df['pred']==type]
-    print("Type: {}, Orig: {}, Pred: {}".format(type,df_o.size,df_p.size))
+
 
 #%%
 fig_orig = make_subplots(rows=2, cols=1)
