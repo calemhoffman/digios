@@ -57,9 +57,9 @@ fig_orig.show()
 # prepare data for learning / training
 # df['new_column'] = np.where(df['column_name'] > 0, 0, 1) use if One V All
 df = df[df['target']>=0]
-X = df[['Ex','rdte']] #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
+X = df[['Ex','rdte','coinTime','x','e']] #x,y of 2D df.drop('Ex', axis=1)  # Replace 'target_column_name' with the actual target column name
 y = df['target'] #0,1,2 label
-X_orig = df_orig[['Ex','rdte']]
+X_orig = df_orig[['Ex','rdte','coinTime','x','e']]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 scaler = StandardScaler()
@@ -67,6 +67,17 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 X_scaled = scaler.transform(X) #all data scaled
 X_orig_scaled = scaler.transform(X_orig) #all data scaled
+
+#%%
+
+from sklearn.neural_network import MLPClassifier
+clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+                    hidden_layer_sizes=(5, 2), random_state=1,max_iter=1000)
+
+clf.fit(X_train_scaled, y_train)
+print(clf.score(X_test_scaled,y_test))
+
+
 
 #%%
 #Decision Tree Classifier [dtc]
