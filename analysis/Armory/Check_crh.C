@@ -255,7 +255,7 @@ void Check_crh(TString rootfile){
          target = 0;
          tree->GetEntry(k);
          // float tempp = (0.7/50.*(280. + z[DETID]) + 5);//2.8);
-         if ((e[detID] > 0) && e[detID]<9 && coinTime>-40 && coinTime<40 && thetaCM > 10. && x[detID]>=-1 && x[detID]<=1) {
+         if ((e[detID] > 0) && e[detID]<9 && coinTime>-40 && coinTime<40 && thetaCM > 10. && x[detID]>=-1 && x[detID]<=1 && Ex < 8.0) {
             // printf("%f %f\n",z[0],e[0]);
             float ID = (float)rdtID / 2. - 0.5; int rdteID = (int)ID;
             // printf(" %d\n",rdteID);

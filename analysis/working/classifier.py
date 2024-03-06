@@ -33,6 +33,7 @@ df = df[df['x']<0.98]
 df = df[df['x']>-0.98]
 df = df[df['rdte']<4100]
 df = df[df['rdte']>3500]
+df = df[df['Ex']<8.0]
 
 #plot originals
 fig_orig = make_subplots(rows=4, cols=2)
