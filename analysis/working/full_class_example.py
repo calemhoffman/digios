@@ -33,15 +33,18 @@ pio.templates.default = "mycolor"
 
 df = pd.read_csv('all_data.csv')
 df = df.dropna()
-X_orig = df[['rdte','Ex']]#x,y of 2D
-y_orig = df['target'] #0,1,2 label
-df_orig = df
-df = df[df['target']>0]
-df=df[df['target']<3]
-df = df[df['Ex']<8.0]
-X = X_orig[:100]
-y = y_orig[:100]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+df_orig = df[((df['target']==0) | (df['target']==2)) & ((df['rdte']>3500) & (df['rdte']<4100))]
+X_orig = df_orig[['rdte','Ex']]#x,y of 2D
+y_orig = df_orig['target'] #0,1,2 label
+
+df=df[((df['target']==0) | (df['target']==2)) & ((df['rdte']>3500) & (df['rdte']<4100))]
+df = df[df['Ex']<10.0]
+X = df[['rdte','Ex']]#x,y of 2D
+y = df['target'] #0,1,2 label
+X = X[:500]
+y = y[:500]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
@@ -106,9 +109,10 @@ ax.set_xticks(())
 ax.set_yticks(())
 i += 1
 # iterate over classifiers
+j=1
+fig_pred = make_subplots(rows=len(classifiers)+1, cols=2)
 for name, clf in zip(names, classifiers):
     ax = plt.subplot(1, len(classifiers) + 1, i)
-
     clf = make_pipeline(StandardScaler(), clf)
     print("fitting {}".format(clf))
     clf.fit(X_train, y_train)
@@ -146,28 +150,31 @@ for name, clf in zip(names, classifiers):
         horizontalalignment="right",
     )
     i += 1
-    fig_pred = make_subplots(rows=1, cols=2)
-    for i in range(2):
+    
+    for ii in range(2):
         fig_pred.add_trace(go.Scatter(x=[9.2,9.2], y=[0, 40],
-                            mode='lines', name='Mean', line=dict(color=color[6], width=3)),row=1,col=i+1)
+                            mode='lines', name='Mean', line=dict(color=color[6], width=3)),
+                            row=j,col=ii+1)
         fig_pred.add_trace(go.Scatter(x=[8.76,8.76], y=[0, 40],
-                            mode='lines', name='Mean', line=dict(color=color[7], width=3)),row=1,col=i+1)
-        fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['target']==(i+1)].Ex,
+                            mode='lines', name='Mean', line=dict(color=color[7], width=3)),
+                            row=j,col=ii+1)
+        fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['target']==(ii+1)].Ex,
                                             xbins=dict(start=-1.0,
                                             end=11.0,
                                             size=0.1),marker=dict(color=color[0],opacity=0.5, line=dict(width=0))),
-                        row=1,col=i+1)
-        fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['pred']==(i+1)].Ex,
+                        row=j,col=ii+1)
+        fig_pred.add_trace(go.Histogram(x=df_orig[df_orig['pred']==(ii+1)].Ex,
                                             xbins=dict(start=-1.0,
                                             end=11.0,
                                             size=0.1),marker=dict(color=color[1],opacity=0.5,line=dict(width=0))),
-                        row=1,col=i+1)
-        fig_pred.update_xaxes(range=[2,10],row=1,col=i+1)
-    fig_pred.update_layout(width=600,height=600,barmode='overlay')
-    fig_pred.show()
+                        row=j,col=ii+1)
+        fig_pred.update_xaxes(range=[2,10],row=j,col=ii+1)
+    fig_pred.update_layout(width=600,height=2000,barmode='overlay')
+    j+=1
 ds_cnt+=1
-plt.tight_layout()
-plt.show()
+# plt.tight_layout()
+# plt.show()
+fig_pred.show()
 
 
 
