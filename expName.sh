@@ -1,4 +1,4 @@
 #!/bin/bash -l
-expName=22511Brown
+expName=S008_29Mg
 daqDataPath=/media/DIGIOSDATA5
-LastRunNum=36
+LastRunNum=0
