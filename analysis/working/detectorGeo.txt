@@ -5,7 +5,7 @@
 10.0     //width_of_detector_[mm]
 50       //length_of_detector_[mm]
 1000      //recoil_position_+_for_downstream_[mm]
-10.0     //inner_radius_of_recoil_detector_[mm]
+9.0     //inner_radius_of_recoil_detector_[mm]
 40.2     //outter_radius_of_recoil_detector_[mm]
 false    //is_coincident_with_recoil
 0        //Recoil_1_position_[mm]_when_0_disable_tree_branch
@@ -13,7 +13,7 @@ false    //is_coincident_with_recoil
 0.00   //Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
 0.00   //Elum_2_position_[mm]_when_Elum=0_disable_tree_branch
 0       //support_length_[mm]
--121     //first_position_-_for_upstream_[mm]
+-100     //first_position_-_for_upstream_[mm]
 0.03     //energy_resolution_of_PSD_array_[MeV]
 1.00     //position_resolution_of_PSD_array_[mm]
 Out           //detector_facing_Out_or_In
