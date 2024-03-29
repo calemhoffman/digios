@@ -1,16 +1,27 @@
 {
-    "files.associations": {
-        "Transfer.C": "cpp",
-        "Apollo.C": "cpp",
-        "readTrace.C": "cpp",
-        "GeneralSortTraceProof.C": "cpp",
-        "generateHistogram.C": "cpp",
-        "Analyzer.C": "cpp",
-        "readRawTrace.C": "cpp",
-        "AutoFit.C": "cpp",
-        "vector": "cpp",
-        "process_run.C": "cpp"
-    },
+  "files.associations": {
+    "Transfer.C": "cpp",
+    "Apollo.C": "cpp",
+    "readTrace.C": "cpp",
+    "GeneralSortTraceProof.C": "cpp",
+    "generateHistogram.C": "cpp",
+    "Analyzer.C": "cpp",
+    "readRawTrace.C": "cpp",
+    "AutoFit.C": "cpp",
+    "vector": "cpp",
+    "process_run.C": "cpp",
+    "ChainMonitors.C": "cpp",
+    "Monitors.C": "cpp",
+    "Monitors_Util.C": "cpp",
+    "Cali_e_trace.C": "cpp",
+    "Cali_e_trace_Proof.C": "cpp",
+    "Cali_littleTree_trace.C": "cpp",
+    "Check_e_x.C": "cpp",
+    "Check_rdtGate.C": "cpp",
+    "AutoCalibrationTrace.C": "cpp"
+  },
+  "C_Cpp.default.enableConfigurationSquiggles": true,
+  "C_Cpp.errorSquiggles": "enabled",
   "better-comments.multilineComments": true,
   "better-comments.tags" : [
     {

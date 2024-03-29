@@ -98,7 +98,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       rejRDT4 = false;
    }
    
-   //printf("%d, %d, %d, %d \n", rejRDT1, rejRDT2, rejRDT3, rejRDT4 ); 
+   // printf("%d, %d, %d, %d \n", rejRDT1, rejRDT2, rejRDT3, rejRDT4 ); 
 
    if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
    
@@ -154,19 +154,19 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       }*/
       
       if( abs(xTemp) > 0.9 ) continue;
-         
-      //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
-      //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
+
+      //have no idea why det12 to 17 flipped. ad hoc fix
+      // if( 17 >= idet && idet >= 12 ) xTemp = -xTemp;   
       
       //========= calculate z
-      
       int detID = idet%iDet;
+
       if( pos[detID] < 0 ){
          zTemp = pos[detID] - (-xTemp + 1.)*length/2 ; 
       }else{
          zTemp = pos[detID] + (-xTemp + 1.)*length/2 ; 
       }
-      
+
       if( !TMath::IsNaN(zTemp) ) {
          multiHit++;
          detIDTemp = idet;
@@ -178,7 +178,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    }//end of idet-loop
    
    
-   //printf(" ----%d \n", multiHit);
+   // printf(" ----%d \n", multiHit);
    
    //if( multiHit != 1 ) return kTRUE;
    
@@ -188,7 +188,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    Float_t trdtTime = 0.;
    int rdtIDtemp = -1;
    rdtdEMultiHit = 0;
-   for( int i = 0; i< 4 ; i++){
+   for( int i = 0; i < 4 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
          rdtTime = rdt_t[2*i+1];
