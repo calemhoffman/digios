@@ -76,13 +76,17 @@ echo "pushing to elog for started a run"
 
 if [ ${expName} == "ARR01" ]; then
     elogName="ARR01"
-else
+elif [ ${expName:0:1} == "h" ]; then
     elogName="H"${expName:1}
+else
+    elogName=$expName
 fi
 
 #### need to do this because the elog in DAQ is outdated.
-scp ${elogFile} heliosdigios@192.168.1.164:~/elog.txt
-ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh start ${elogName} ${RUN}"
+#source DatabaseAddress.sh
+macAddress=192.168.1.164
+scp ${elogFile} heliosdigios@${macAddress}:~/elog.txt
+ssh heliosdigios@${macAddress} "/Users/heliosdigios/digios/daq/push2Elog.sh start ${elogName} ${RUN}"
 
 echo "wait 3 sec for Mac2020 reply elog ID"
 sleep 3

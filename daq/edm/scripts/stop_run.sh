@@ -63,14 +63,15 @@ echo "$COMMENT <br />" >> ${elogContext}
 
 scp ${elogContext} heliosdigios@192.168.1.164:~/.
 
-# tell Mac2020 run push2elog script
-if [ $expName = "ARR01" ]; then
-  elogName=$expName
+if [ ${expName} == "ARR01" ]; then
+    elogName="ARR01"
+elif [ ${expName:0:1} == "h" ]; then
+    elogName="H"${expName:1}
 else
-  elogName="H"${expName:1}
+    elogName=$expName
 fi
-ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
+ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 #source ~/Slack_Elog_Notification.sh
 source ~/Discord_webhooks.sh
