@@ -16,6 +16,8 @@ if [ ${flag} == "start" ]; then
    echo "elogName = ${elogName}, RunNo = ${RunNo}"
 
    IDStr=$(elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogTxt})
+   #IDStr=$(elog -p 8080 -h localhost -l ${elogName} -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogTxt})
+
 
    echo "-----"
    echo ${IDStr} 
@@ -37,9 +39,10 @@ if [ ${flag} == "stop" ]; then
  
 # the following code is for editing elog entry, but the new elog server fail to do so.  
    source ${elogIDTxt}
-   echo "elogID = "${ID}
+   echo "elogID = |"${ID}"|"
 
    elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -w ${ID} > ${elogTxt}
+   #elog -p 8080 -h localhost -l ${elogName} -w ${ID} > ${elogTxt}
 
    cutLineNum=$(grep -n "==============" ${elogTxt} | cut -b 1,2)
    #echo "cut Line Number : "${cutLineNum}
@@ -54,7 +57,9 @@ if [ ${flag} == "stop" ]; then
    #append elogEnnRun.txt
    cat ${elogEndTxt} >> ${elogTxt}
 
-   elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
+   #elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
+   elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt}
+   #elog -p 8080 -h localhost -l ${elogName} -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
 
 #  elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Stop Run ${RunNo}" -n 2 -m ${elogEndTxt} -f ${grafanaElog}
 

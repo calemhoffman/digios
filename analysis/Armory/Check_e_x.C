@@ -25,7 +25,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    TTree *tree = (TTree*)file0->Get(treeName);
    printf("=====> /// %15s //// is loaded. Total #Entry: %10lld \n", rootFile.Data(),  tree->GetEntries());
    
-   Int_t Div[2] = {5,6};  //x,y
+   Int_t Div[2] = {6,4};  //x,y
    Int_t size[2] = {200,230}; //x,y
    
    TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
