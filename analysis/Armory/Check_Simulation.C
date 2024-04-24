@@ -235,11 +235,15 @@ void Check_Simulation(TString filename = "transfer.root",
    //=================================== calculate Ranges
    
    //eRange by zRange and exList
-   double QQ = (Et*Et + mass*mass - (massB-exList[0])*(massB-exList[0]))/2/Et;
-   double intercept = QQ/gamm - mass;   
+   double kcm = sqrt((Et*Et - pow(mass + massB + exList[0],2))*(Et*Et - pow(mass - massB - exList[0],2)))/2/Et;
+   double E_light_cm = sqrt(kcm*kcm+mass*mass);
+   double intercept = E_light_cm/gamm - mass;  
    eRange[1] = intercept + zRange[2] * slope;
-   ///printf("intercept of 0 MeV : %f MeV \n", intercept); 
-   ///printf("eRange 0 MeV : %f MeV \n", eRange[1]); 
+   // printf("kcm : %f MeV/c \n", kcm);
+   // printf("Ecm_light : %f MeV \n", E_light_cm);
+   // printf("intercept of 0 MeV : %f MeV \n", intercept); 
+   // printf("eRange 0 MeV : %f MeV \n", eRange[1]); 
+
    
    //thetaCMRange
    ///double momentum = sqrt(( Et*Et - pow(mass + massB - exList[0],2)) * ( Et*Et - pow(mass - massB + exList[0],2)))/2/Et;
