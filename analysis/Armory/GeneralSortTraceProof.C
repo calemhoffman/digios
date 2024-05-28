@@ -9,7 +9,7 @@
 bool  isTraceON = true;
 bool  isSaveTrace = true;
 bool  isSaveFitTrace = true;
-int   traceMethod = 3; //0 = no process; 1 = fit; 2 = trapezoid; 3 offset-different
+int   traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid; 3 offset-different
 float delayChannel = 100.; //initial guess of the time
 
 // Also go to line 146 to set the trace analysis gate

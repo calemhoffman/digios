@@ -14,12 +14,17 @@ void process_run(Int_t RUNNUM=5, int isTrace=0){
 
     TTree *t1 = (TTree*)f.Get("tree");
 
+    if( t1 == nullptr){
+        printf("!!!!!!!!!!!!!!!!!!!!!!!!!! cannot find tree in ../root_data/run%03d.root\n", RUNNUM);
+        return;
+    }
+
     isTrace = abs(isTrace);
 
     TString processCmd;
     if( isTrace == 1 ) {
         processCmd.Form("../Armory/GeneralSort.C++");
-        t1->Process(processCmd);
+        if( t1 != nullptr) t1->Process(processCmd);
         f.Close();
         //}else if(isTrace == 1){
         //processCmd.Form("../Armory/GeneralSortTrace.C+");
