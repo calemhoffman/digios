@@ -36,10 +36,10 @@ ULong64_t maxNumberEvent = 1000000000;
 int rawEnergyRange[2] = {   100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
 int     rdtDERange[2] = {  2000,    9000}; 
-int      rdtERange[2] = {     0,     5000};  
+int      rdtERange[2] = {     0,     9000};  
 int    apolloRange[2] = {     0,     1000};
 int      crdtRange[2] = {     0,     8000};
-int      elumRange[2] = {     0,     4000};
+int      elumRange[2] = {     0,     16000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
@@ -67,11 +67,11 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.96;                  ///cut out the edge
 vector<int> skipDetID = {11, 2} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "rdtCuts_2.root";
+TString rdtCutFile1 = "rdtCuts_mg_tight1.root"; //_mg //_mg_tight
 TString rdtCutFile2 = "" ; //rdtCuts_2.root";
 TString ezCutFile   = "";//"ezCut.root";
 
-TString elumCutFile = "";
+//TODO TString elumCutFile = ""; 
 
 //hard code for S008_29Mg Elum Cuts
 TCutG * cutElum12C = nullptr;
