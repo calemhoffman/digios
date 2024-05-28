@@ -17,9 +17,11 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     //chain->Add("../root_data/gen_run032.root"); // alpha
     
     //chain->Add("../root_data/gen_run03[7-9].root"); //250 ud CD2 
-    chain->Add("../root_data/gen_run04[0-9].root"); //215 ud CD2 
-    chain->Add("../root_data/gen_run05[0-9].root"); //215 ud CD2 
-    chain->Add("../root_data/gen_run06[0-9].root"); //215 ud CD2 
+    //chain->Add("../root_data/gen_run04[0-9].root"); //215 ud CD2 29Si
+    //chain->Add("../root_data/gen_run05[0-9].root"); //215 ud CD2 29Si
+    
+    chain->Add("../root_data/gen_run063.root"); //315 ud CD2 **29Mg**
+    chain->Add("../root_data/gen_run066.root"); //315 ud CD2 **29Mg**
 
     // chain->Add("../root_data/trace_run04[0-9].root"); //215 ud CD2 
     // chain->Add("../root_data/trace_run05[0-6].root"); //215 ud CD2 
