@@ -33,21 +33,22 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {   100,     3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
-int    apolloRange[2] = {     0,    1000};
-int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {   200,    4000};
+int     rdtDERange[2] = {  2000,    9000}; 
+int      rdtERange[2] = {     0,     5000};  
+int    apolloRange[2] = {     0,     1000};
+int      crdtRange[2] = {     0,     8000};
+int      elumRange[2] = {     0,     4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  10,    -2,     15};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
+int  timeUnit = 60; // in min. i.e. the binning
 
 int  icRange [3] = {1000, 1000, 500}; /// max of IC0,1,2 
 
@@ -63,12 +64,18 @@ int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {11, 16, 23} ;//{2,  11, 17}
+double xGate          = 0.96;                  ///cut out the edge
+vector<int> skipDetID = {11, 2} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
-TString rdtCutFile2 = "";
+TString rdtCutFile1 = "rdtCuts_2.root";
+TString rdtCutFile2 = "" ; //rdtCuts_2.root";
 TString ezCutFile   = "";//"ezCut.root";
+
+TString elumCutFile = "";
+
+//hard code for S008_29Mg Elum Cuts
+TCutG * cutElum12C = nullptr;
+TCutG * cutElumD   = nullptr;
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -213,6 +220,8 @@ TH2F* hcrdtPolar;
 TH1F* helum[NELUM];
 TH2F* helumID;
 
+TH2F* helumEVX;
+
 TH1F* helum4D; // elum rate for (d,d)
 TH1F* helum4C; // elum rate for (12C, 12C)
 
@@ -261,13 +270,14 @@ bool isReaction;
 int padID = 0;
 
 TLatex text;
+int timeRange[2];
 
 #include "Monitors.h"
 
 /***************************
  ***************************/
-void Monitors::Begin(TTree *tree)
-{
+void Monitors::Begin(TTree *tree){
+
    TString option = GetOption();
    numCol = numDet/numRow;
    NumEntries = tree->GetEntries();
@@ -369,9 +379,8 @@ void Monitors::Begin(TTree *tree)
    printf("  end time : %llu = %.1f sec = %.0f min\n",  endTime, endTime/1e8, endTime/1e8/60.);
    printf("  Duration : %llu = %.1f sec = %.0f min\n",  endTime - startTime, (endTime-startTime)/1e8, runTime);
    
-   int timeRange[2];
-   timeRange[0] = TMath::Max((int) TMath::Floor(startTime/1e8/60.), timeRangeUser[0]);
-   timeRange[1] = TMath::Min((int) TMath::Ceil(endTime/1e8/60.)   , timeRangeUser[1]);
+   timeRange[0] = TMath::Max((int) TMath::Floor(startTime/1e8/60./timeUnit), timeRangeUser[0]);
+   timeRange[1] = TMath::Min((int) TMath::Ceil(endTime/1e8/60./timeUnit)   , timeRangeUser[1]);
    
    int dTime = timeRange[1] - timeRange[0];
    
@@ -430,7 +439,7 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<=NRDT;i++) {
+   for (Int_t i = 0; i < NRDT; i++) {
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
@@ -448,10 +457,10 @@ void Monitors::Begin(TTree *tree)
    
    hrdtMatrix = new TH2F("hrdtMatrix", "RDT ID vs RDT ID", 16 , 0, 8, 16, 0, 8);
    
-   hrdtRate1 = new TH1F("hrdtRate1", "recoil rate 1 / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
+   hrdtRate1 = new TH1F("hrdtRate1", Form("recoil rate 1 / %d min; %d min; count / %d min", timeUnit, timeUnit, timeUnit), timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
    hrdtRate1->SetLineColor(2);
    
-   hrdtRate2 = new TH1F("hrdtRate2", "recoil rate 2 / min; min; count / 1 min", timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
+   hrdtRate2 = new TH1F("hrdtRate2", Form("recoil rate 2 / %d min; %d min; count / %d min", timeUnit, timeUnit, timeUnit), timeRange[1] - timeRange[0], timeRange[0], timeRange[1]);
    hrdtRate2->SetLineColor(4);
 
    //===================== APOLLO
@@ -525,10 +534,36 @@ void Monitors::Begin(TTree *tree)
    }
    helumID = new TH2F("helumID", "Elum vs ID", NELUM, 0 , NELUM, 500, elumRange[0], elumRange[1]);
 
-   helum4D = new TH1F("helum4d", "Elum rate for Z = 1; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
-   helum4C = new TH1F("helum4C", "Elum rate for carbon; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (12C, 12C)
-   hBIC = new TH1F("hBIC", "BIC rate ; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
+   helumEVX = new TH2F("helumEVX", "Elum, E vs X", 400, -1, 1, 400, elumRange[0], elumRange[1]);
+
+   helum4D = new TH1F("helum4d", Form("Elum rate for Z = 1; time [%d min]; count / %d min" , timeUnit, timeUnit), timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
+   helum4C = new TH1F("helum4C", Form("Elum rate for carbon; time [%d min]; count / %d min", timeUnit, timeUnit), timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (12C, 12C)
+   hBIC = new TH1F("hBIC", Form("BIC rate ; time [%d min]; count / %d min", timeUnit, timeUnit), timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
    
+   cutElum12C = new TCutG("Cut12C",9);
+   cutElumD   = new TCutG("cutD",9);
+
+   cutElum12C->SetPoint(0,0.701754,3700);
+   cutElum12C->SetPoint(1,0.432331,2960.87);
+   cutElum12C->SetPoint(2,-0.184837,2239.13);
+   cutElum12C->SetPoint(3,-0.739348,1952.17);
+   cutElum12C->SetPoint(4,-0.755013,1700);
+   cutElum12C->SetPoint(5,0.0469925,2117.39);
+   cutElum12C->SetPoint(6,0.535714,2743.48);
+   cutElum12C->SetPoint(7,0.77381,3665.22);
+   cutElum12C->SetPoint(8,0.701754,3700);
+
+
+   cutElumD->SetPoint(0,0.924185,2543.48);
+   cutElumD->SetPoint(1,0.667293,1717.39);
+   cutElumD->SetPoint(2,0.275689,1126.09);
+   cutElumD->SetPoint(3,0,952.174);
+   cutElumD->SetPoint(4,0.00313283,691.304);
+   cutElumD->SetPoint(5,0.4198,1021.74);
+   cutElumD->SetPoint(6,0.770677,1508.7);
+   cutElumD->SetPoint(7,0.946115,2230.43);
+   cutElumD->SetPoint(8,0.924185,2543.48);
+
    //===================== EZERO
    hic0 = new TH1F("hic0", "IC0; IC-0 [ch]; count", 500,  0, icRange[0]);
    hic1 = new TH1F("hic1", "IC1; IC-1 [ch]; count", 500,  0, icRange[1]);
@@ -629,31 +664,43 @@ Bool_t Monitors::Process(Long64_t entry)
        lastRunID = runID;
     }
     
-    /*********** initization ******************************************/
-    for( int i = 0 ; i < numDet; i++){
-       z[i] = TMath::QuietNaN();
-       x[i] = TMath::QuietNaN();
-       xcal[i] = TMath::QuietNaN();
-       eCal[i] = TMath::QuietNaN();
-    }
+   /*********** initization ******************************************/
+   for( int i = 0 ; i < numDet; i++){
+      z[i] = TMath::QuietNaN();
+      x[i] = TMath::QuietNaN();
+      xcal[i] = TMath::QuietNaN();
+      eCal[i] = TMath::QuietNaN();
+   }
     
-    double rdtot[4] = {TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN()};
+   double rdtot[4] = {TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN()};
     
-    /*********** TAC **************************************************/ 
-    htac->Fill(tac[2]);
+   /*********** TAC **************************************************/ 
+   htac->Fill(tac[2]);
+
+   //if( TMath::IsNaN(tac[0]) ) return kTRUE;
+   //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
    
-    //if( TMath::IsNaN(tac[0]) ) return kTRUE;
-    //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
-    
-    /*********** ELUM *************************************************/
-    for( int i = 0; i < NELUM; i++){
-       helum[i]->Fill(elum[i]);
-       helumID->Fill(i, elum[i]);
-    }
+   /*********** ELUM *************************************************/
+   for( int i = 0; i < NELUM; i++){
+      helum[i]->Fill(elum[i]);
+      helumID->Fill(i, elum[i]);
+   }
+
+   //Calculate Elum X
+   if( NELUM >= 3){
+
+      if( !TMath::IsNaN(elum[0])  ){
+         double elumX = (elum[1] - elum[2])/(elum[1]+elum[2]);
+         helumEVX->Fill( elumX, elum[0]);
+         if( cutElum12C->IsInside(elumX, elum[0])) helum4C->Fill(elum_t[0]/1e8/60./timeUnit);
+         if( cutElumD->IsInside(elumX, elum[0])) helum4D->Fill(elum_t[0]/1e8/60./timeUnit);
+      }
+
+   }
       
-    if( 800 < elum[0]  && elum[0] < 1200 ) helum4D->Fill(elum_t[0]/1e8/60.); 
+   //  if( 800 < elum[0]  && elum[0] < 1200 ) helum4D->Fill(elum_t[0]/1e8/60.); 
     
-    if( !TMath::IsNaN(elum[1]) ) hBIC->Fill(elum_t[1]/1e8/60.);
+   //  if( !TMath::IsNaN(elum[1]) ) hBIC->Fill(elum_t[1]/1e8/60.);
     
     int tac2 = tac_t[1]-elum_t[0];        
     htac2->Fill(tac2);
@@ -769,7 +816,6 @@ Bool_t Monitors::Process(Long64_t entry)
             cutG = (TCutG *)cutList1->At(i) ;
             if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
             // if(cutG->IsInside(rdt[2*i] + rdt[2*i+1],rdt[2*i+1])) {
-
             rdtgate1= true;
             break; /// only one is enough
           }
@@ -1031,8 +1077,9 @@ void Monitors::Terminate()
 
    //############################################ User is free to edit this section
    //--- Canvas Size
-   int canvasXY[2] = {1200 , 800} ;// x, y
-   int canvasDiv[2] = {3,2};
+   int canvasDiv[2] = {4,3};
+   int canvasSize = 400;
+   int canvasXY[2] = {canvasDiv[0] * canvasSize , canvasDiv[1] * canvasSize} ;// x, y
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
@@ -1076,35 +1123,42 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 5
    padID++; cCanvas->cd(padID); 
-   
-   //Draw2DHist(hExThetaCM);
-   //heVIDG->Draw();
-   //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
    Draw2DHist(hrdt2D[0]);
-//      Draw2DHist(hrdt2Dsum[0]);
 
    if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
    if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
 
-
-   //helum4D->Draw();
-   //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
-   
    ///----------------------------------- Canvas - 6
-   PlotRDT(0,0);
+   padID++; cCanvas->cd(padID); 
    
-  // padID++; cCanvas->cd(padID); 
- //  Draw2DHist(hrdtExGated);
+   Draw2DHist(hrdt2D[1]);
+
+   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(1) ; cutG->Draw("same");}
+   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(1) ; cutG->Draw("same");}
    
-   //padID++; cCanvas->cd(padID); 
-   //Draw2DHist(htacEx);
-   
-   ///------------------------------------- Canvas - 7
-   //PlotRDT(0, 0);
+   // /------------------------------------- Canvas - 7
+   padID++; cCanvas->cd(padID); 
+
+   Draw2DHist(helumEVX);
+
+   cutElum12C->Draw("same");
+   cutElumD->Draw("same");
    
    ///----------------------------------- Canvas - 8
-   //PlotRDT(1, 0);
+   padID++; cCanvas->cd(padID); 
+   
+
+   TH1F * helumDC = new TH1F("helumDC", Form("elum(d)/elum(C); time [%d min]; count/ %d min", timeUnit, timeUnit), timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
+   helumDC = (TH1F*) helum4D->Clone();
+   helumDC->SetTitle(Form("elum(d)/elum(C); time [%d min]; count/ %d min", timeUnit, timeUnit));
+   helumDC->SetName("helumDC");
+   helumDC->SetLineColor(2);
+   helumDC->Divide(helum4C);
+
+   helumDC->Draw();
+   text.DrawLatex(0.15, 0.5, Form("Elum(D) / BIC \n"));
+
 
    ///yMax = hic2->GetMaximum()*1.2;
    ///hic2->GetYaxis()->SetRangeUser(0, yMax);
@@ -1121,39 +1175,32 @@ void Monitors::Terminate()
    ///text.SetTextColor(4); text.DrawLatex(0.6, 0.45, "14C");
    ///text.SetTextColor(2);
    ///----------------------------------- Canvas - 9
-   //padID++; cCanvas->cd(padID);  
+   padID++; cCanvas->cd(padID); 
    
-   //Draw2DHist(hic01);
+   Draw2DHist(hrdt2D[3]);
+   
+   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(3) ; cutG->Draw("same");}
+   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(3) ; cutG->Draw("same");}
+
+
 
    ///----------------------------------- Canvas - 10
-   //PlotRDT(3,0);
+   padID++; cCanvas->cd(padID); 
+
+   Draw2DHist(hrdt2D[2]);
+
+   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(2) ; cutG->Draw("same");}
+   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(2) ; cutG->Draw("same");}
    
-   //TH1F * helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
-   //helumDBIC = (TH1F*) helum4D->Clone();
-   //helumDBIC->SetTitle("elum(d)/BIC; time [min]; count/min");
-   //helumDBIC->SetName("helumDBIC");
-   //helumDBIC->SetLineColor(2);
-   
-   //helumDBIC->Divide(hBIC);
-   
-   //yMax = helumDBIC->GetMaximum();
-   //if( yMax < hBIC->GetMaximum() ) yMax = hBIC->GetMaximum();
-   
-   //helumDBIC->SetMaximum(yMax * 1.2);
-   //hBIC->SetMaximum(yMax * 1.2);
-   
-   //hBIC->Draw();
-   //helumDBIC->Draw("same");
-   
-   //text.DrawLatex(0.15, 0.5, Form("Elum(D) / BIC \n"));
    
    ///----------------------------------- Canvas - 11
-   //PlotRDT(2,0);
+   padID++; cCanvas->cd(padID); 
+   helum4C->Draw();
+
    
    ///----------------------------------- Canvas - 12
-   //padID++; cCanvas->cd(padID);
-   //htac->Draw();
-
+   padID++; cCanvas->cd(padID); 
+   helum4D->Draw();
    
    /*
    ///----------------------------------- Canvas - 13

@@ -133,6 +133,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    bool rejRDT3 = true; 
    bool rejRDT4 = true; 
 
+   isRDTCutExist = false; //Force not use RDT cut
+
    if( isRDTCutExist ){
       if ( isTraceDataExist ){
          if(cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
@@ -298,7 +300,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    
    //================================= for coincident time bewteen array and rdt
    //if( multiHit == 1 && rdtdEMultiHit == 1) {
-   if( multiHit ==1 && rdtdEMultiHit > 1 ){ 
+   if( multiHit == 1 && rdtdEMultiHit >= 1 ){ 
       ///===== no Trace data
       ULong64_t eTime = e_t[det];
 

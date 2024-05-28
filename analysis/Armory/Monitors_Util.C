@@ -334,7 +334,7 @@ void recoils(bool isLogz = false) {
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
   if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),600, 0, 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
-  for( int i = 0; i < 8; i ++){
+  for( int i = 0; i < NRDT; i ++){
     crdtS->cd(i+1);
     if( isLogz ) crdtS->cd(i+1)->SetLogy(); 
     hrdt[i]->Draw("");
