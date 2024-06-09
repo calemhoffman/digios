@@ -10,7 +10,10 @@
       "AutoFit.C": "cpp",
       "vector": "cpp",
       "process_run.C": "cpp",
-      "Monitors.C": "cpp"
+      "Monitors.C": "cpp",
+      "Cali_e_trace.C": "cpp",
+      "GeneralSort.C": "cpp",
+      "ChainMonitors.C": "cpp"
     },
   "better-comments.multilineComments": true,
   "better-comments.tags" : [
