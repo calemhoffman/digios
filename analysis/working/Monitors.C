@@ -1032,13 +1032,13 @@ void Monitors::Terminate()
    //############################################ User is free to edit this section
    //--- Canvas Size
    int canvasXY[2] = {1200 , 800} ;// x, y
-   int canvasDiv[2] = {3,2};
+   int canvasDiv[2] = {2,2};
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
 
    gStyle->SetOptStat("neiou");
-      
+   
    text.SetNDC();
    text.SetTextFont(82);
    text.SetTextSize(0.04);
