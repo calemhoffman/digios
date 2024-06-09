@@ -80,9 +80,10 @@ else
     elogName="H"${expName:1}
 fi
 
-#### need to do this because the elog in DAQ is outdated.
-scp ${elogFile} heliosdigios@192.168.1.164:~/elog.txt
-ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh start ${elogName} ${RUN}"
+#### need to do this because the selog in DAQ is outdated.
+
+scp ${elogFile} heliosdigios@${mac2020IP}:~/elog.txt
+ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh start ${elogName} ${RUN}"
 
 echo "wait 3 sec for Mac2020 reply elog ID"
 sleep 3

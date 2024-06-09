@@ -28,6 +28,7 @@ for line in fexp:
         pos=line.find("=")
         dataBaseAddress=line[pos+1:-1]
         print("dataBaseAddress = %s" % dataBaseAddress)
+        break
 fexp.close()
 
 #DB_BashCommand='curl -sS -i -XPOST "http://heliosdb.onenet:8086/write?db=testing" --data-binary @${HELIOSSYS}/daq/tempDB.txt --speed-time 5 --speed-limit 1000'
