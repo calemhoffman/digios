@@ -303,11 +303,11 @@ Bool_t GeneralSort::Process(Long64_t entry)
             psd.EnergyTimestamp[idDet] = event_timestamp[i];
             break;
           case 1: // XF
-            psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+            psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_XFXN;
             psd.XFTimestamp[idDet] = event_timestamp[i];
             break;
           case 2: // XN
-            psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+            psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_XFXN;
             psd.XNTimestamp[idDet] = event_timestamp[i];
             break;
           case 3: // Ring

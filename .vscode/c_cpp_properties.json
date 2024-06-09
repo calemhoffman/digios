@@ -4,7 +4,9 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/Applications/root_v6.28.02/**"
+                "/Users/heliosdigios/digios/analysis/**",
+                "/Users/heliosdigios/digios/analysis/Armory/**",
+                "/Applications/root_v6.30.04/**"
             ],
             "defines": [],
             "macFrameworkPath": [],
