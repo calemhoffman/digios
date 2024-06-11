@@ -295,10 +295,14 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          rdtID = 2*i+1; //dE
       }
    }
+
+   rdtdEMultiHit = 1;
+   rdtID = 0; // for H084_48Ca_aj, only dE for recoil.
+   
    
    //================================= for coincident time bewteen array and rdt
-   //if( multiHit == 1 && rdtdEMultiHit == 1) {
-   if( multiHit ==1 && rdtdEMultiHit > 1 ){ 
+   if( multiHit == 1 && rdtdEMultiHit == 1) {
+   //if( multiHit ==1 && rdtdEMultiHit > 1 ){ 
       ///===== no Trace data
       ULong64_t eTime = e_t[det];
 
