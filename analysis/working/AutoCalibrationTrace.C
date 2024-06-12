@@ -37,7 +37,7 @@ int PrintManual(){
    printf(" ================================================== \n");
    printf(" ========= Auto Calibration w/ Trace ============== \n");
    printf(" ================================================== \n");
-   printf(" \e[31m     Please Edit runsList.txt  \e[0m\n");
+   printf(" \e[31m     Please Edit ChainMonitors.C  \e[0m\n");
    printf(" ================================================== \n");
    printf(" 0 = alpha source calibration for e and xf - xn.\n");
    printf(" 1 = xf+xn to e calibration. \n");
