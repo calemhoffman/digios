@@ -15,12 +15,13 @@
 
 #include "../Armory/AnalysisLibrary.h"
 #include "../Armory/AutoFit.C"
+#include "../working/GeneralSortMapping.h"
 
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input
    
    const int rowDet = 4;
-   const int colDet = 6;
+   const int colDet = NARRAY/rowDet;
    
    int energyRange[3] = {400, 1000, 2600}; // bin, min, max
    double threshold = 0.2;
