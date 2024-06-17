@@ -52,7 +52,7 @@ screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
 ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh' #this is in mac2017
 scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
 # send the screenshot to Mac2020 for elog
-scp ${screenShot} heliosdigios@192.168.1.164:~/grafanaElog.jpg
+scp ${screenShot} heliosdigios@${mac2020IP}:~/grafanaElog.jpg
 
 elogContext=${HELIOSSYS}/analysis/working/elogEndRun.txt
 echo "         stop at ${currentDate} <br />" > ${elogContext}
@@ -61,7 +61,7 @@ echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
 echo "-----------------------------------------------</p>" >> ${elogContext}
 echo "$COMMENT <br />" >> ${elogContext}
 
-scp ${elogContext} heliosdigios@192.168.1.164:~/.
+scp ${elogContext} heliosdigios@${mac2020IP}:~/.
 
 # tell Mac2020 run push2elog script
 if [ $expName = "ARR01" ]; then
@@ -69,7 +69,7 @@ if [ $expName = "ARR01" ]; then
 else
   elogName="H"${expName:1}
 fi
-ssh heliosdigios@192.168.1.164 "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
+ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 
 #source ~/Slack_Elog_Notification.sh

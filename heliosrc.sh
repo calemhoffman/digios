@@ -91,8 +91,9 @@ alias gotoRawData='cd ${daqDataPath}/${expName}; pwd'
 alias gotoExp='cd ${HELIOSSYS}; pwd'
 alias gotoDaq='cd ${HELIOSDAQ}; pwd'
 alias gotoAna='cd ${HELIOSANA}; pwd'
-alias sshMac='ssh -XY heliosdigios@192.168.1.164'  #iMac2020
+alias sshMac2020='ssh -XY heliosdigios@192.168.1.164'  #iMac2020
 alias sshDB='ssh -XY heliosdigios@mac2017' #iMac2017
+alias sshMac2017='ssh -XY heliosdigios@192.168.1.193' 
 
 
 alias Helios_Database='${HELIOSSYS}/daq/edm/scripts/helios_database'
