@@ -9,7 +9,7 @@
 bool  isTraceON = true;
 bool  isSaveTrace = true;
 bool  isSaveFitTrace = true;
-int   traceMethod = 3; //0 = no process; 1 = fit; 2 = trapezoid; 3 offset-different
+int   traceMethod = 1; //0 = no process; 1 = fit; 2 = trapezoid; 3 offset-different
 float delayChannel = 100.; //initial guess of the time
 
 // Also go to line 146 to set the trace analysis gate
@@ -452,11 +452,11 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
                psd.EnergyTimestamp[idDet] = event_timestamp[i];
                break;
             case 1: /// XF
-               psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+               psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_XFXN;
                psd.XFTimestamp[idDet] = event_timestamp[i];
                break;
             case 2: /// XN
-               psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+               psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_XFXN;
                psd.XNTimestamp[idDet] = event_timestamp[i];
                break;
             case 3: /// Ring
