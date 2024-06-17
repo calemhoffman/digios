@@ -27,19 +27,20 @@
 using namespace std;
 
 //############################################ User setting
-const int numDet = 24;
 const int numRow = 4;  
+const int numDet = NARRAY;
+
 
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
+int     rdtDERange[2] = {  -100000,     1000}; 
+int      rdtERange[2] = {  0,     6000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {   200,    4000};
+int      elumRange[2] = {   -1000,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
@@ -56,7 +57,7 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-50,50};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -797,7 +798,8 @@ Bool_t Monitors::Process(Long64_t entry)
    
           int tdiff = rdt_t[j] - e_t[detID];
    
-          if( j%2 == 1) {
+          //if( j%2 == 1) { // use E for time 
+          if( j%2 == 0) { // use dE for time
              hrtac[j/2]->Fill(detID,tdiff);
              htdiff->Fill(tdiff);
              htacTdiff->Fill( tac[0], tdiff);
@@ -1076,13 +1078,15 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 5
    padID++; cCanvas->cd(padID); 
+   hrdt[0]->Draw();
+
    
    //Draw2DHist(hExThetaCM);
    //heVIDG->Draw();
    //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
-   Draw2DHist(hrdt2D[0]);
-//      Draw2DHist(hrdt2Dsum[0]);
+   //Draw2DHist(hrdt2D[0]);
+   //      Draw2DHist(hrdt2Dsum[0]);
 
    if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
    if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
@@ -1092,10 +1096,10 @@ void Monitors::Terminate()
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
    
    ///----------------------------------- Canvas - 6
-   PlotRDT(0,0);
+   //PlotRDT(0,0);
    
-  // padID++; cCanvas->cd(padID); 
- //  Draw2DHist(hrdtExGated);
+   // padID++; cCanvas->cd(padID); 
+   //  Draw2DHist(hrdtExGated);
    
    //padID++; cCanvas->cd(padID); 
    //Draw2DHist(htacEx);
