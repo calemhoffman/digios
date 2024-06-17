@@ -15,14 +15,25 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
      //chain->Add("../root_data/gen_run010.root"); //alpha
      //chain->Add("../root_data/gen_run01[1-6].root"); //early beam runs (nonsense)
      //chain->Add("../root_data/gen_run019.root"); //new setup //run 17 noisy junk, run 18 - 1hour on a cup
-     //chain->Add("../root_data/gen_run02[0-9].root"); // run 19 and 20 is the 319 ug/cm2 target, run 21 is the 127 ug/cm2 tgt with approx x15 more beam
+     //chain->Add("../root_data/gen_run019.root"); 319 ug/cm2
+     //chain->Add("../root_data/gen_run020.root"); 319 ug/cm2
+     //chain->Add("../root_data/gen_run021.root"); 127 ug/cm2
+     //chain->Add("../root_data/gen_run022.root"); 127 ug/cm2
+     //chain->Add("../root_data/gen_run023.root"); 120 ug/cm2
+     //chain->Add("../root_data/gen_run024.root"); 120 ug/cm2
+     //chain->Add("../root_data/gen_run025.root"); 120 ug/cm2
+     //chain->Add("../root_data/gen_run026.root"); 120 ug/cm2
+     //chain->Add("../root_data/gen_run027.root"); 119 ug/cm2
+     //chain->Add("../root_data/gen_run028.root");
+     //chain->Add("../root_data/gen_run02[0-9].root"); // run 19 and 20 is the 319 ug/cm2 target
+     // run 21 is the 127 ug/cm2 tgt with approx x15 more beam
 
 
-//Trace sorting
+//Trace sorting 
 
      //chain->Add("../root_data/trace_run019.root"); //new setup //run 17 noisy junk, run 18 - 1hour on a cup
      chain->Add("../root_data/trace_run019.root"); //thick tgt
-     chain->Add("../root_data/trace_run020.root"); //thick tgt
+     chain->Add("../root_data/trace_run02[0-9].root"); //thick tgt
      //chain->Add("../root_data/trace_run02[0-9].root"); // run 19 and 20 is the 319 ug/cm2 target, runs 21,22 is the 127 ug/cm2 tgt with approx x15 more beam, run 23 with 120 ug/cm2
   
     ///********** end Marker for AutoCalibration.
