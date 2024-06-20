@@ -35,10 +35,10 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
+int     rdtDERange[2] = {     0,     500}; 
 int      rdtERange[2] = {     0,     80};  
 int    apolloRange[2] = {     0,    1000};
-int      crdtRange[2] = {     0,    8000};
+int      crdtRange[2] = {     20,   1000};
 int      elumRange[2] = {   200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
@@ -208,6 +208,7 @@ TH1F* hrdtRate2;
 TH2F* hcrdtID;
 TH1F* hcrdt[16];
 TH2F* hcrdtPolar;
+TH2F* hcrdtIDVe;
 
 //======= ELUM
 TH1F* helum[NELUM];
@@ -431,10 +432,8 @@ void Monitors::Begin(TTree *tree)
 
    //===================== Recoils
    for (Int_t i=0;i<=NRDT;i++) {
-      if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
-      if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
-      if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
-      if( i % 2 == 1 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil DE(ch=%d) gated; DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
+      hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
+      hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
       
       ///dE vs E      
       if( i % 2 == 0 ) {
@@ -460,8 +459,9 @@ void Monitors::Begin(TTree *tree)
    }
    
    //===================== Circular Recoil
-   hcrdtID = new TH2F("hcrdtID", "Circular Recoil ID; Angular ID; Radial ID;", 8, 0, 8, 8, 0, 8);
-   hcrdtPolar = new TH2F("hcrdtPolar", "Polar ID", 8, -TMath::Pi(), TMath::Pi(),8, 10, 50);
+   hcrdtID = new TH2F("hcrdtID", "Circular Recoil ID; Angular ID; Radial ID;", 16, 0, 16, 16, 0, 16);
+   hcrdtPolar = new TH2F("hcrdtPolar", "Polar ID", 8, -50, 50,8, -50, 50);
+   hcrdtIDVe = new TH2F("crdtIDVe","ID vs e", 16,0,16, 2000,0,500);
 
    for( int i = 0; i < 16; i++){
       hcrdt[i] = new TH1F(Form("hcrdt%d", i), Form("Raw Circular Recoil-%d", i), 500, crdtRange[0], crdtRange[1] );
@@ -664,6 +664,7 @@ Bool_t Monitors::Process(Long64_t entry)
     
     for( int i = 0 ; i < NRDT; i++){
        rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
+       if (i == 2) rdt[i] = TMath::Abs(rdt[i]);
     }
     
     /*********** Array ************************************************/ 
@@ -896,17 +897,39 @@ Bool_t Monitors::Process(Long64_t entry)
    ///======= 0 -  7 is angular 
    ///======= 8 - 15 is radial
    
+   for(int i=0; i<16 ; i++){
+      if( TMath::IsNaN(crdt[i]) ) continue;
+      hcrdt[i]->Fill(TMath::Abs(crdt[i]));
+      hcrdtIDVe->Fill(i, TMath::Abs(crdt[i]));
+      }
+
+   //   for (int j=i+1; j<16;j++){
+   //      if( TMath::IsNaN(crdt[j]) ) continue;
+   //      hcrdtID->Fill(i,j);
+   //      double rho = TMath::QuietNaN();
+   //      double theta = TMath::QuietNaN();
+
+   //      if(i <=7 && j>7){
+   //         rho = 10. + (j-8)*5;
+   //         theta = i*45*TMath::DegToRad();
+   //      }
+   //   hcrdtPolar->Fill(theta-TMath::Pi(), rho);
+   //   }
+   //}
+
    for( int i = 0; i < 8 ; i++){
-     if( TMath::IsNaN(crdt[i]) ) continue;
-     hcrdt[i]->Fill(crdt[i]);
-     
      for( int j = 8; j < 16; j++){
-      hcrdtID->Fill(i, j);
+      if( TMath::IsNaN(crdt[i]) ) continue;
+      //if( TMath::IsNaN(crdt[j]) ) continue;
+      hcrdtID->Fill(i,j-8);
 
-      double theta = -TMath::Pi() + 2*TMath::Pi()/8.*(i+0.5);
-      double rho   = 10.+40./8.*(j+0.5);
+      double rho = 10. + (i)*5.;
+      double theta = (j-8)*45.*TMath::DegToRad();
 
-      hcrdtPolar->Fill( theta, rho );
+      //double theta = -TMath::Pi() + 2*TMath::Pi()/8.*(i+0.5);
+      //double rho   = 10.+40./8.*(j+0.5);
+
+      hcrdtPolar->Fill( theta-TMath::Pi(), rho );
     }
    }
    

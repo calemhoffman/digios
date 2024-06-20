@@ -29,6 +29,8 @@ void listDraws(void) {
   printf("  eCalVxCal() - Cal \033[0;31me\033[0m vs. \033[0;31mx\033[0m for all %d detectors\n", numDet);
   printf("-----------------------------------------------------\n");
   printf("    recoils() - Raw DE vs. E Recoil spectra\n");
+  printf("    cRecoils() - Circular E Recoil spectra\n");
+  // printf("    quadDE() - DE Recoil spectra\n");
   printf("       elum() - Luminosity Energy Spectra\n");
   printf("         ic() - Ionization Chamber Spectra\n");
   printf("-----------------------------------------------------\n");
@@ -303,17 +305,16 @@ void apollo(void) {
     hApollo[i]->Draw("");
   }
 }
-  
-  
+
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
   if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);
   crdt->Clear();crdt->Divide(2,2);
 
-  if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col");  
-  if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
-  if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  
-  if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
+  // if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col");  
+  // if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
+  // if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  
+  // if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
 
 
   //TCanvas *crdtSum =  (TCanvas *) gROOT->FindObjectAny("crdtSum");
@@ -353,6 +354,22 @@ void recoils(bool isLogz = false) {
   //}
   
 }
+  
+void crecoils(bool isLogz = false) {
+  TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw CRDT | %s", canvasTitle.Data()),1700, 0, 1200,1000);
+  crdt->Clear();crdt->Divide(4,4);
+
+    for (int i=1 ;i<17;i++) {
+      if( isLogz ) crdt->cd(i)->SetLogz(); 
+      crdt->cd(i); hcrdt[i-1]->Draw("col");
+    } 
+
+  TCanvas *crdt2 =  (TCanvas *) gROOT->FindObjectAny("crdt2");
+  if( crdt2 == NULL ) crdt2 = new TCanvas("crdt2",Form("raw CRDT 2D | %s", canvasTitle.Data()),1700, 0, 1000,1000);
+  crdt2->Clear();crdt2->cd();
+  hcrdtIDVe->Draw("col");
+  }
 
 void eCalVz(void) {
   TCanvas *cecalVz =  (TCanvas *) gROOT->FindObjectAny("cecalVz");

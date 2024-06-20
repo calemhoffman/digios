@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "Monitors.C": "cpp",
+        "ChainMonitors.C": "cpp",
+        "Monitors_Util.C": "cpp"
+    }
+}
