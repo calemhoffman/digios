@@ -27,5 +27,5 @@ screenShot=~/grafanaElog.jpg
 #--- when back to ANL
 screencapture -D2 ${screenShot}
 echo "============ push to anl web"
-scp -rp ${screenShot} ttang@wwwdev.phy.anl.gov:/var/www/html/live/helios/. && echo "============ success."
+scp -o ConnectTimeout=3 -rp ${screenShot} ttang@wwwdev.phy.anl.gov:/var/www/html/live/helios/. && echo "============ success."
 #echo -e "\033[1;31m Push to websrv1 is disabled. Please edit mac2017:~/digios/daq/GrafanaWeb.sh\033[m"
