@@ -35,10 +35,10 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     500}; 
-int      rdtERange[2] = {     0,     80};  
+int     rdtDERange[2] = {     -1000,     5000}; 
+int      rdtERange[2] = {     -1000,     5000};  
 int    apolloRange[2] = {     0,    1000};
-int      crdtRange[2] = {     20,   1000};
+int      crdtRange[2] = {     20,   3000};
 int      elumRange[2] = {   200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
@@ -56,7 +56,7 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-20, 20};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -64,7 +64,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {11, 16, 23} ;//{2,  11, 17}
+vector<int> skipDetID = {2, 10, 11, 16} ;//{2,  11, 17}
 
 TString rdtCutFile1 = "";
 TString rdtCutFile2 = "";
@@ -179,7 +179,7 @@ TH2F* htacEx;
 TH2F* htac2Ex;
 
 TH1I* htacArray[numDet];
-TH2F* hrtac[4];
+TH2F* hrtac[5];
 
 TH2F* htacTdiff;
 TH2F* htacTdiffg;
@@ -396,7 +396,7 @@ void Monitors::Begin(TTree *tree)
    hxfVID   = new TH2F("hxfVID",   "Raw xf vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxnVID   = new TH2F("hxnVID",   "Raw xn vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
 
-   for(Int_t j=0;j<4;j++){
+   for(Int_t j=0;j<5;j++){
      hrtac[j]=new TH2F(Form("hrtac%d",j),Form("Array-Recoil tac for recoil %d",j),numDet,0,numDet,500,-500,500);
    }
 
@@ -460,8 +460,8 @@ void Monitors::Begin(TTree *tree)
    
    //===================== Circular Recoil
    hcrdtID = new TH2F("hcrdtID", "Circular Recoil ID; Angular ID; Radial ID;", 16, 0, 16, 16, 0, 16);
-   hcrdtPolar = new TH2F("hcrdtPolar", "Polar ID", 8, -50, 50,8, -50, 50);
-   hcrdtIDVe = new TH2F("crdtIDVe","ID vs e", 16,0,16, 2000,0,500);
+   hcrdtPolar = new TH2F("hcrdtPolar", "Polar ID", 8, -TMath::Pi(), TMath::Pi(),8, 10, 50);
+   hcrdtIDVe = new TH2F("crdtIDVe","ID vs e", 16,0,16, 2000,0,3000);
 
    for( int i = 0; i < 16; i++){
       hcrdt[i] = new TH1F(Form("hcrdt%d", i), Form("Raw Circular Recoil-%d", i), 500, crdtRange[0], crdtRange[1] );
@@ -663,8 +663,8 @@ Bool_t Monitors::Process(Long64_t entry)
     /*********** Apply Recoil correction here *************************/
     
     for( int i = 0 ; i < NRDT; i++){
-       rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
-       if (i == 2) rdt[i] = TMath::Abs(rdt[i]);
+      //  rdt[i] = rdt[i]; ///*rdtCorr[i][0] + rdtCorr[i][1];
+       if (i == 2) rdt[i] = -1.0*rdt[i];
     }
     
     /*********** Array ************************************************/ 
@@ -793,26 +793,27 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //================ coincident with Recoil when z is calculated.
       if( !TMath::IsNaN(z[detID]) ) { 
-        for( int j = 0; j < NRDT ; j++){
+        for( int j = 0; j < NRDT ; j++){ //CRH could change this to be just ch 2 (back of DE)
+        /// but start like this for now, i.e. all DE channels contribute to the tdiff
           if( TMath::IsNaN(rdt[j]) ) continue; 
    
           int tdiff = rdt_t[j] - e_t[detID];
    
-          if( j%2 == 1) {
-             hrtac[j/2]->Fill(detID,tdiff);
-             htdiff->Fill(tdiff);
-             htacTdiff->Fill( tac[0], tdiff);
-             if((rdtgate1 || rdtgate2) && (eCalCut[1] > eCal[detID] && eCal[detID]>eCalCut[0])) {
-                htdiffg->Fill(tdiff);
-                htacTdiffg->Fill( tac[0], tdiff);
+         //  if( j%2 == 1) {
+            hrtac[j]->Fill(detID,tdiff);
+            htdiff->Fill(tdiff);
+            htacTdiff->Fill( tac[0], tdiff);
+            if((rdtgate1 || rdtgate2) && (eCalCut[1] > eCal[detID] && eCal[detID]>eCalCut[0])) {
+               htdiffg->Fill(tdiff);
+               htacTdiffg->Fill( tac[0], tdiff);
              }
-          }
+         //  }
 
           hArrayRDTMatrix->Fill(detID, j); 
    
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
-            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+            // if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
             ///if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]); /// x=dE, y=E
             hArrayRDTMatrixG->Fill(detID, j); 
             ///if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
@@ -865,10 +866,10 @@ Bool_t Monitors::Process(Long64_t entry)
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
       
-      for( int j = 0; j < NRDT ; j++){
-         if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
-      }
-      
+      // for( int j = 0; j < NRDT ; j++){
+      //    if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
+      // }
+      //CRH needs to be changed!! 6-20
       if( i % 2 == 0  ){        
         if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
          recoilMulti++; // when both dE and E are hit
@@ -917,21 +918,21 @@ Bool_t Monitors::Process(Long64_t entry)
    //   }
    //}
 
-   for( int i = 0; i < 8 ; i++){
-     for( int j = 8; j < 16; j++){
+      for( int i = 0; i < 8; i ++ ){
       if( TMath::IsNaN(crdt[i]) ) continue;
-      //if( TMath::IsNaN(crdt[j]) ) continue;
-      hcrdtID->Fill(i,j-8);
+      for( int j = 8; j < 16; j++){
+        if( TMath::IsNaN(crdt[j]) ) continue;
 
-      double rho = 10. + (i)*5.;
-      double theta = (j-8)*45.*TMath::DegToRad();
+        hcrdtID->Fill(i, j-8);
 
-      //double theta = -TMath::Pi() + 2*TMath::Pi()/8.*(i+0.5);
-      //double rho   = 10.+40./8.*(j+0.5);
+        double rho = 10. + 5*(8-i);
+        double theta = (j-8)*45.*TMath::DegToRad();
 
-      hcrdtPolar->Fill( theta-TMath::Pi(), rho );
+
+        hcrdtPolar->Fill( theta-TMath::Pi(), rho);
+
+      }
     }
-   }
    
    /******************* Multi-hit *************************************/
    hmultEZ->Fill(multiEZ);

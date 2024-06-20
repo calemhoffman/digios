@@ -356,19 +356,28 @@ void recoils(bool isLogz = false) {
 }
   
 void crecoils(bool isLogz = false) {
-  TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
-  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw CRDT | %s", canvasTitle.Data()),1700, 0, 1200,1000);
-  crdt->Clear();crdt->Divide(4,4);
+ TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
+ if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw CRDT | %s", canvasTitle.Data()),1700, 0, 1200,1000);
+ crdt->Clear();crdt->Divide(4,4);
 
-    for (int i=1 ;i<17;i++) {
-      if( isLogz ) crdt->cd(i)->SetLogz(); 
-      crdt->cd(i); hcrdt[i-1]->Draw("col");
-    } 
+   for (int i=1 ;i<17;i++) {
+     if( isLogz ) crdt->cd(i)->SetLogz(); 
+     crdt->cd(i); hcrdt[i-1]->Draw("col");
+   } 
 
-  TCanvas *crdt2 =  (TCanvas *) gROOT->FindObjectAny("crdt2");
-  if( crdt2 == NULL ) crdt2 = new TCanvas("crdt2",Form("raw CRDT 2D | %s", canvasTitle.Data()),1700, 0, 1000,1000);
-  crdt2->Clear();crdt2->cd();
-  hcrdtIDVe->Draw("col");
+ TCanvas *crdt2 =  (TCanvas *) gROOT->FindObjectAny("crdt2");
+ if( crdt2 == NULL ) crdt2 = new TCanvas("crdt2",Form("raw CRDT 2D | %s", canvasTitle.Data()),1700, 0, 1000,1000);
+ crdt2->Clear();crdt2->cd();
+ hcrdtIDVe->Draw("col");
+
+  TCanvas * crdt3 = new TCanvas("canvas", "canvas", 1000, 500);
+  crdt3->Divide(2,1);
+  crdt3->cd(1);
+  hcrdtID->Draw("colz");
+    crdt3->cd(2)->DrawFrame(-50, -50, 50, 50);
+    crdt3->cd(2)->SetLogz(true);
+  hcrdtPolar->Draw("same colz pol");
+
   }
 
 void eCalVz(void) {
