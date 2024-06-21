@@ -76,6 +76,14 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          trdt[i] = TMath::QuietNaN();
          trdt_t[i] = TMath::QuietNaN();
          trdt_r[i] = TMath::QuietNaN();
+      }      
+      
+      if( isCRDTExist ){
+         for(int i = 0; i < NCRDT; i++){
+            tcrdt[i] = TMath::QuietNaN();
+            tcrdt_t[i] = TMath::QuietNaN();
+            tcrdt_r[i] = TMath::QuietNaN();
+         }
       }
    }
    
@@ -91,8 +99,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
    b_RING->GetEntry(entry,0);
-   b_RDT->GetEntry(entry,0);
    b_EnergyTimestamp->GetEntry(entry,0);
+   b_RDT->GetEntry(entry,0);
    b_RDTTimestamp->GetEntry(entry,0);
    
    if( isEBISExist ) b_EBISTimestamp->GetEntry(entry,0);
@@ -108,6 +116,10 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       b_TAC->GetEntry(entry,0);
       b_TACTimestamp->GetEntry(entry,0);
    }
+   if( isCRDTExist ) {
+      b_CRDT->GetEntry(entry,0);
+      b_CRDTTimestamp->GetEntry(entry,0);
+   }
    if ( isTraceDataExist ){
       b_Trace_Energy->GetEntry(entry,0);
       b_Trace_Energy_Time->GetEntry(entry,0);
@@ -116,16 +128,22 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       b_Trace_RDT->GetEntry(entry,0);
       b_Trace_RDT_Time->GetEntry(entry,0);
       b_Trace_RDT_RiseTime->GetEntry(entry,0);
+
+      if( isCRDTExist ){
+         b_Trace_CRDT->GetEntry(entry,0);
+         b_Trace_CRDT_Time->GetEntry(entry,0);
+         b_Trace_CRDT_RiseTime->GetEntry(entry,0);
+      }
    }
 
    //#################################################################### gate
     
    ///============ Simple RDT gate base on energy
-///   bool rdt_energy = false;
-///   for( int rID = 0; rID < 8; rID ++){
-///      if( rdt[rID] > 5000 ) rdt_energy = true; 
-///   }
-///   if( !rdt_energy ) return kTRUE;
+   ///   bool rdt_energy = false;
+   ///   for( int rID = 0; rID < 8; rID ++){
+   ///      if( rdt[rID] > 5000 ) rdt_energy = true; 
+   ///   }
+   ///   if( !rdt_energy ) return kTRUE;
 
    ///============================= RDT TCutG gate
    bool rejRDT1 = true; 
