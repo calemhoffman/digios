@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     -1000,     10000}; 
-int      rdtERange[2] = {     -1000,     2500};  
+int     rdtDERange[2] = {     50,     10000}; 
+int      rdtERange[2] = {     50,     2500};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     20,   3000};
 int      elumRange[2] = {   200,    4000};
@@ -668,7 +668,7 @@ Bool_t Monitors::Process(Long64_t entry)
     /*********** Apply Recoil correction here *************************/
     
     for( int i = 0 ; i < NRDT; i++){
-      //  rdt[i] = rdt[i]; ///*rdtCorr[i][0] + rdtCorr[i][1];
+      //  rdt[i] = rdt[i]; //*rdtCorr[i][0] + rdtCorr[i][1];
        if (i == 2) rdt[i] = -1.0*rdt[i];
     }
     
@@ -919,9 +919,10 @@ Bool_t Monitors::Process(Long64_t entry)
 
       for (int j=0; j < 8; j++) {
          recoilMulti++; // does not mean anything right now
-         if (rdt[i] > 100 && crdt[j] > 100) hrdt2D[i]->Fill(crdt[j],rdt[i]); //  E-dE
-         if (rdt[i] > 100 && crdt[j+8] > 100) hrdt2D[i+5]->Fill(crdt[j+8],rdt[i]); //  E-dE
+         if (rdt[i] > 100 && crdt[j] > 100) hrdt2D[i]->Fill(crdt[j],rdt[i]); //  E-dE Wedges Summed
+         if (rdt[i] > 100 && crdt[15-j] > 100) hrdt2D[i+5]->Fill(crdt[15-j],rdt[i]); //  E-dE RINGS BUT NOT WORKING
       }
+      ///hrdt2D[2] is best as back vs. Wedge Summed
      
       //   if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
       rdtot[i/2] = rdt[i]+rdt[i+1];
@@ -1064,8 +1065,9 @@ void Monitors::Terminate()
    }
 
    //############################################ User is free to edit this section
+   /// General PoPuP
    //--- Canvas Size
-   int canvasXY[2] = {1200 , 800} ;// x, y
+   int canvasXY[2] = {1600 , 1200} ;// x, y
    int canvasDiv[2] = {3,2};
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
@@ -1115,7 +1117,7 @@ void Monitors::Terminate()
    //heVIDG->Draw();
    //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
-   Draw2DHist(hrdt2D[0]);
+   Draw2DHist(hrdt2D[2]);
 //      Draw2DHist(hrdt2Dsum[0]);
 
    if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
@@ -1126,112 +1128,8 @@ void Monitors::Terminate()
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
    
    ///----------------------------------- Canvas - 6
-   PlotRDT(0,0);
-   
-  // padID++; cCanvas->cd(padID); 
- //  Draw2DHist(hrdtExGated);
-   
-   //padID++; cCanvas->cd(padID); 
-   //Draw2DHist(htacEx);
-   
-   ///------------------------------------- Canvas - 7
-   //PlotRDT(0, 0);
-   
-   ///----------------------------------- Canvas - 8
-   //PlotRDT(1, 0);
-
-   ///yMax = hic2->GetMaximum()*1.2;
-   ///hic2->GetYaxis()->SetRangeUser(0, yMax);
-   ///hic2->Draw();
-   ///TBox * box14N = new TBox (-10, 0, -2, yMax);
-   ///box14N->SetFillColorAlpha(2, 0.1);
-   ///box14N->Draw();
-   ///
-   ///TBox * box14C = new TBox (8, 0, 16, yMax);
-   ///box14C->SetFillColorAlpha(4, 0.1);
-   ///box14C->Draw();
-   ///
-   ///text.SetTextColor(2); text.DrawLatex(0.38, 0.50, "14N");
-   ///text.SetTextColor(4); text.DrawLatex(0.6, 0.45, "14C");
-   ///text.SetTextColor(2);
-   ///----------------------------------- Canvas - 9
-   //padID++; cCanvas->cd(padID);  
-   
-   //Draw2DHist(hic01);
-
-   ///----------------------------------- Canvas - 10
-   //PlotRDT(3,0);
-   
-   //TH1F * helumDBIC = new TH1F("helumDBIC", "elum(d)/BIC; time [min]; count/min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]);
-   //helumDBIC = (TH1F*) helum4D->Clone();
-   //helumDBIC->SetTitle("elum(d)/BIC; time [min]; count/min");
-   //helumDBIC->SetName("helumDBIC");
-   //helumDBIC->SetLineColor(2);
-   
-   //helumDBIC->Divide(hBIC);
-   
-   //yMax = helumDBIC->GetMaximum();
-   //if( yMax < hBIC->GetMaximum() ) yMax = hBIC->GetMaximum();
-   
-   //helumDBIC->SetMaximum(yMax * 1.2);
-   //hBIC->SetMaximum(yMax * 1.2);
-   
-   //hBIC->Draw();
-   //helumDBIC->Draw("same");
-   
-   //text.DrawLatex(0.15, 0.5, Form("Elum(D) / BIC \n"));
-   
-   ///----------------------------------- Canvas - 11
-   //PlotRDT(2,0);
-   
-   ///----------------------------------- Canvas - 12
-   //padID++; cCanvas->cd(padID);
-   //htac->Draw();
-
-   
-   /*
-   ///----------------------------------- Canvas - 13
-   padID++; cCanvas->cd(padID);
-   
-   ///hicT14N->Draw("");
-   ///hicT14C->Draw("same");
-   ///
-   ///text.SetTextColor(2); text.DrawLatex(0.15, 0.60, "14N");
-   ///text.SetTextColor(4); text.DrawLatex(0.15, 0.25, "14C");
-   ///text.SetTextColor(2);
-   
-   ///----------------------------------- Canvas - 14
-   padID++; cCanvas->cd(padID);
-   
-   ///hrdtRate1->Draw("");
-   ///hrdtRate2->Draw("same");
-   
-   ///----------------------------------- Canvas - 15
-   padID++; cCanvas->cd(padID);  
-      
-   ///----------------------------------- Canvas - 16
    padID++; cCanvas->cd(padID); 
-   
-
-
-   ///----------------------------------- Canvas - 17
-   padID++; cCanvas->cd(padID);    
-   
-
-   ///----------------------------------- Canvas - 18
-   padID++; cCanvas->cd(padID);
-
-
-   ///----------------------------------- Canvas - 19
-   padID++; cCanvas->cd(padID);
-   
-
-   
-   ///----------------------------------- Canvas - 20
-   padID++; cCanvas->cd(padID);
-   
-   htac->Draw();
-   */
+   // PlotRDT(0,0);
    
    /************************************/
    gStyle->GetAttDate()->SetTextSize(0.02);

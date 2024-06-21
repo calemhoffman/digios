@@ -333,13 +333,13 @@ void DrawBox(TH1* hist, double x1, double x2, Color_t color, float alpha){
 
 void Monitors::Draw2DHist(TH2F * hist){
    
-   if( hist->Integral() < 3000 ){
+   // if( hist->Integral() < 3000 ){
       hist->SetMarkerStyle(20);
       hist->SetMarkerSize(0.3);
       hist->Draw("");
-   }else{
-      hist->Draw("colz"); 
-   }
+   // }else{
+      // hist->Draw("colz"); 
+   // }
 }
 
 void Monitors::SlaveBegin(TTree * /*tree*/){
@@ -596,7 +596,7 @@ void Monitors::PlotEZ(bool isRaw){
    padID++; cCanvas->cd(padID);
 
    if( isRaw ) {
-      Draw2DHist(heCalVz);
+      heCalVz->Draw();
       heCalVz->SetTitle("E vs Z | " + canvasTitle + " | " + rdtCutFile1);
       if( skipDetID.size() > 0 ){
          text.DrawLatex(0.15, 0.3, "skipped Detector:");
@@ -609,7 +609,7 @@ void Monitors::PlotEZ(bool isRaw){
       if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
 
    }else{
-      Draw2DHist(heCalVzGC);
+      heCalVzGC->Draw();
    
       if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.8, "with Recoil gate");
       if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
