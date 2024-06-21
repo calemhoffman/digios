@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     -1000,     5000}; 
-int      rdtERange[2] = {     -1000,     5000};  
+int     rdtDERange[2] = {     -1000,     10000}; 
+int      rdtERange[2] = {     -1000,     2500};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     20,   3000};
 int      elumRange[2] = {   200,    4000};
@@ -195,9 +195,9 @@ TH2F* hrdtID;
 TH1F* hrdt[NRDT]; // single recoil
 TH1F* hrdtg[NRDT]; 
 
-TH2F* hrdt2D[4];
-TH2F* hrdt2Dsum[4];
-TH2F* hrdt2Dg[4];
+TH2F* hrdt2D[10];
+TH2F* hrdt2Dsum[10];
+TH2F* hrdt2Dg[10];
 
 TH2F* hrdtMatrix; // coincident between rdt
 
@@ -431,18 +431,23 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<=NRDT;i++) {
+   for (Int_t i=0;i<=NRDT*2;i++) {
+      if (i < NRDT) {
       hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
       hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
-      
+      }
       ///dE vs E      
-      if( i % 2 == 0 ) {
-         int tempID = i / 2;
-         hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i),             500,rdtERange[0],rdtERange[1],500,rdtDERange[0],rdtDERange[1]);
+      
+         int tempID = i;
+         hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i),             1500,rdtERange[0],rdtERange[1],1500,rdtDERange[0],rdtDERange[1]);
          hrdt2Dsum[tempID] = new TH2F(Form("hrdt2Dsum%d",tempID), Form("Raw Recoil DE vs Eres+DE (dE=%d, E=%d); Eres+DE (channel); DE (channel)", i+1, i), 500,rdtERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0],rdtDERange[1]);
          hrdt2Dg[tempID] = new TH2F(Form("hrdt2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i),      500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]);
-      }
+         tempID = i+5;
+         hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i),             1500,rdtERange[0],rdtERange[1],1500,rdtDERange[0],rdtDERange[1]);
+         hrdt2Dsum[tempID] = new TH2F(Form("hrdt2Dsum%d",tempID), Form("Raw Recoil DE vs Eres+DE (dE=%d, E=%d); Eres+DE (channel); DE (channel)", i+1, i), 500,rdtERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0],rdtDERange[1]);
+         hrdt2Dg[tempID] = new TH2F(Form("hrdt2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i),      500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]); 
    }
+
    hrdtID = new TH2F("hrdtID", "RDT vs ID; ID; energy [ch]", 8, 0, 8, 500, TMath::Min(rdtERange[0], rdtDERange[0]), TMath::Max(rdtERange[1], rdtDERange[1])); 
    
    hrdtMatrix = new TH2F("hrdtMatrix", "RDT ID vs RDT ID", 16 , 0, 8, 16, 0, 8);
@@ -860,39 +865,7 @@ Bool_t Monitors::Process(Long64_t entry)
          hecalVzRow[i] -> Fill( z[k], eCal[k]);
       }
     }
-    
-   /*********** RECOILS ***********************************************/    
-   for( int i = 0; i < NRDT ; i++){
-      hrdtID->Fill(i, rdt[i]);
-      hrdt[i]->Fill(rdt[i]);
-      
-      // for( int j = 0; j < NRDT ; j++){
-      //    if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
-      // }
-      //CRH needs to be changed!! 6-20
-      if( i % 2 == 0  ){        
-        if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
-         recoilMulti++; // when both dE and E are hit
-         rdtot[i/2] = rdt[i]+rdt[i+1];
-         htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
-         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
-         hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
 
-         htacRecoil[i]->Fill(tac[0],rdt[i]);
-         htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
-      }
-   }
-   
-   /*********** Apollo ***********************************************/    
-   
-   for( int i = 0; i < NAPOLLO ; i++){
-      hApollo[i]->Fill(apollo[i]);
-   }
-   
-   ///if( rdt_t[4] > 0 ){
-   ///   if( abs(rdt[4] - 1658) < 40) hrdtRate1->Fill(rdt_t[4]/1e8/60.);
-   ///   if( abs(rdt[4] - 1783) < 40) hrdtRate2->Fill(rdt_t[4]/1e8/60.);
-   ///}
 
    /******************* Circular Recoil *******************************/
    ///======= 0 -  7 is angular 
@@ -903,7 +876,7 @@ Bool_t Monitors::Process(Long64_t entry)
       hcrdt[i]->Fill(TMath::Abs(crdt[i]));
       hcrdtIDVe->Fill(i, TMath::Abs(crdt[i]));
       }
-
+      
    //   for (int j=i+1; j<16;j++){
    //      if( TMath::IsNaN(crdt[j]) ) continue;
    //      hcrdtID->Fill(i,j);
@@ -934,6 +907,43 @@ Bool_t Monitors::Process(Long64_t entry)
       }
     }
    
+    
+   /*********** RECOILS ***********************************************/    
+   for( int i = 0; i < NRDT ; i++){
+      hrdtID->Fill(i, rdt[i]);
+      hrdt[i]->Fill(rdt[i]);
+      
+      // for( int j = 0; j < NRDT ; j++){
+      //    if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
+      // }
+
+      for (int j=0; j < 8; j++) {
+         recoilMulti++; // does not mean anything right now
+         if (rdt[i] > 100 && crdt[j] > 100) hrdt2D[i]->Fill(crdt[j],rdt[i]); //  E-dE
+         if (rdt[i] > 100 && crdt[j+8] > 100) hrdt2D[i+5]->Fill(crdt[j+8],rdt[i]); //  E-dE
+      }
+     
+      //   if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
+      rdtot[i/2] = rdt[i]+rdt[i+1];
+      htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
+      hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
+
+         // htacRecoil[i]->Fill(tac[0],rdt[i]);
+         // htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
+    
+   }
+   
+   /*********** Apollo ***********************************************/    
+   
+   for( int i = 0; i < NAPOLLO ; i++){
+      hApollo[i]->Fill(apollo[i]);
+   }
+   
+   ///if( rdt_t[4] > 0 ){
+   ///   if( abs(rdt[4] - 1658) < 40) hrdtRate1->Fill(rdt_t[4]/1e8/60.);
+   ///   if( abs(rdt[4] - 1783) < 40) hrdtRate2->Fill(rdt_t[4]/1e8/60.);
+   ///}
+
    /******************* Multi-hit *************************************/
    hmultEZ->Fill(multiEZ);
    hmult->Fill(recoilMulti,arrayMulti);

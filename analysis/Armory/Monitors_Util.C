@@ -308,8 +308,11 @@ void apollo(void) {
 
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
-  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);
-  crdt->Clear();crdt->Divide(2,2);
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1200,1200);
+  crdt->Clear();crdt->Divide(5,2);
+  for (int i=0;i<10;i++) {
+    if( isLogz ) crdt->cd(i+1)->SetLogz(); crdt->cd(i+1); hrdt2D[i]->Draw("col");  
+  }
 
   // if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col");  
   // if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
@@ -334,8 +337,8 @@ void recoils(bool isLogz = false) {
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
   if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),600, 0, 1000, 1000);
-  crdtS->Clear(); crdtS->Divide(2,4);
-  for( int i = 0; i < 8; i ++){
+  crdtS->Clear(); crdtS->Divide(2,3);
+  for( int i = 0; i < NRDT; i ++){
     crdtS->cd(i+1);
     if( isLogz ) crdtS->cd(i+1)->SetLogy(); 
     hrdt[i]->Draw("");
