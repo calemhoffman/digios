@@ -48,6 +48,8 @@ public :
    ULong64_t       ring_t[100];
    Float_t         rdt[50];
    ULong64_t       rdt_t[50];
+   Float_t         crdt[50];
+   ULong64_t       crdt_t[50];
    Float_t         tac[10];
    ULong64_t       tac_t[10];
    Float_t         elum[50];
@@ -62,6 +64,9 @@ public :
    Float_t         trdt[50];
    Float_t         trdt_t[50];
    Float_t         trdt_r[50];
+   Float_t         tcrdt[50];
+   Float_t         tcrdt_t[50];
+   Float_t         tcrdt_r[50];
 
    // List of branches
    TBranch        *b_runID; //!
@@ -76,6 +81,8 @@ public :
    TBranch        *b_RINGTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
+   TBranch        *b_CRDT;   //!
+   TBranch        *b_CRDTTimestamp;   //!
    TBranch        *b_TAC;   //!
    TBranch        *b_TACTimestamp;   //!
    TBranch        *b_ELUM;   //!
@@ -90,12 +97,17 @@ public :
    TBranch        *b_Trace_RDT;  //!
    TBranch        *b_Trace_RDT_Time;  //!
    TBranch        *b_Trace_RDT_RiseTime;  //!
+
+   TBranch        *b_Trace_CRDT;  //!
+   TBranch        *b_Trace_CRDT_Time;  //!
+   TBranch        *b_Trace_CRDT_RiseTime;  //!
    
    bool isRunIDExist;
    bool isEBISExist;
    bool isTACExist;
    bool isELUMExist;
    bool isEZEROExist;
+   bool isCRDTExist;
    bool isTraceDataExist; // if b_Trace_** exist
 
    Cali_e_trace(TTree * /*tree*/ =0) : fChain(0) { }
@@ -161,7 +173,7 @@ public :
    DetGeo detGeo;
    
    int numDet;
-   vector<double> pos;
+   std::vector<double> pos;
    double Bfield;
    double perpDist;
    double length;
@@ -279,6 +291,16 @@ void Cali_e_trace::Init(TTree *tree)
       fChain->SetBranchAddress("ezero_t", ezero_t, &b_EZEROTimestamp);
    }
    
+   isCRDTExist = false;
+   br = (TBranch *) fChain->GetListOfBranches()->FindObject("crdt");
+   if( br == NULL ){
+      printf(" ++++++++ no crdt data.\n");
+   }else{
+      isCRDTExist = true;
+      fChain->SetBranchAddress("crdt", crdt, &b_CRDT);
+      fChain->SetBranchAddress("crdt_t", crdt_t, &b_CRDTTimestamp);
+   }
+
    isTraceDataExist = false;
    br = (TBranch *) fChain->GetListOfBranches()->FindObject("te_t");
    if( br == NULL ){
@@ -293,17 +315,23 @@ void Cali_e_trace::Init(TTree *tree)
       fChain->SetBranchAddress("trdt",   trdt,   &b_Trace_RDT);
       fChain->SetBranchAddress("trdt_t", trdt_t, &b_Trace_RDT_Time);
       fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
+
+      if( isCRDTExist ){
+         fChain->SetBranchAddress("tcrdt",   tcrdt,   &b_Trace_CRDT);
+         fChain->SetBranchAddress("tcrdt_t", tcrdt_t, &b_Trace_CRDT_Time);
+         fChain->SetBranchAddress("tcrdt_r", tcrdt_r, &b_Trace_CRDT_RiseTime);
+      }
    }
    
    //================================ load expName
-   string expNameFile = "../../expName.sh";
+   std::string expNameFile = "../../expName.sh";
    printf("======================= loading expName files : %s.", expNameFile.c_str());
-   ifstream file;
+   std::ifstream file;
    file.open(expNameFile.c_str());
    TString expName = "";
    int i = 0;
    if( file.is_open()){
-      string x;
+      std::string x;
       while( file >> x){
          if( x.substr(0,1) == "#" )  continue;
          if( i == 1  )  expName = x;
@@ -374,7 +402,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    //========================================= detector Geometry
    printf("======================= loading parameters files .... \n");
-   string detGeoFileName = "detectorGeo.txt";
+   std::string detGeoFileName = "detectorGeo.txt";
    printf("loading detector geometery : %s.", detGeoFileName.c_str());
 
    TMacro * haha = new TMacro();
@@ -605,7 +633,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.open("reaction.dat");
    isReaction = false;
    if( file.is_open() ){
-      string x;
+      std::string x;
       int i = 0;
       while( file >> x ){
          if( x.substr(0,2) == "//" )  continue;
@@ -717,6 +745,11 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("tac", tac, "tac[10]/F");
       newTree->Branch("tac_t", tac_t, "tac_t[10]/l");
    }
+
+   if( isCRDTExist ){
+      newTree->Branch("crdt", crdt, Form("crdt[%d]/F",NCRDT));
+      newTree->Branch("crdt_t", crdt_t, Form("crdt_t[%d]/l", NCRDT));
+   }
    
    newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
    
@@ -730,6 +763,13 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
       newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
       newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+
+      if( isCRDTExist ){
+         newTree->Branch("tcrdt",         tcrdt,  Form("Trace_CRDT[%d]/F", NCRDT));
+         newTree->Branch("tcrdt_t",     tcrdt_t,  Form("Trace_CRDT_Time[%d]/F", NCRDT));
+         newTree->Branch("tcrdt_r",     tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/F", NCRDT));
+
+      }
    }
 
    printf("Is EBIS  exist : %d\n", isEBISExist);
@@ -737,6 +777,7 @@ void Cali_e_trace::Init(TTree *tree)
    printf("Is EZero exist : %d\n", isEZEROExist);
    printf("Is TAC   exist : %d\n", isTACExist);
    printf("Is Trace exist : %d\n", isTraceDataExist);
+   printf("Is CRDT  exist : %d\n", isCRDTExist);
    //=== clock
    clock.Reset();
    clock.Start("timer");
