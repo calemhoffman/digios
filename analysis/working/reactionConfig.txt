@@ -1,4 +1,4 @@
-34             //beam_A1
+32             //beam_A1
 16             //beam_Z
 2               //target_A
 1               //target_Z
