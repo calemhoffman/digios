@@ -56,7 +56,7 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 20};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-18, 2};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -798,11 +798,11 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //================ coincident with Recoil when z is calculated.
       if( !TMath::IsNaN(z[detID]) ) { 
+         if( TMath::IsNaN(rdt[2]) ) continue; 
+         int tdiff = rdt_t[2] - e_t[detID];
         for( int j = 0; j < NRDT ; j++){ //CRH could change this to be just ch 2 (back of DE)
         /// but start like this for now, i.e. all DE channels contribute to the tdiff
-          if( TMath::IsNaN(rdt[j]) ) continue; 
-   
-          int tdiff = rdt_t[j] - e_t[detID];
+          
    
          //  if( j%2 == 1) {
             hrtac[j]->Fill(detID,tdiff);
