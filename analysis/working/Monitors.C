@@ -66,7 +66,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
 vector<int> skipDetID = {2, 10, 11, 16} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
+TString rdtCutFile1 = "rdtCuts.root";
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -435,7 +435,8 @@ void Monitors::Begin(TTree *tree)
       if (i < NRDT) {
       hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
       hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
-      }
+      
+
       ///dE vs E      
       
          int tempID = i;
@@ -446,6 +447,7 @@ void Monitors::Begin(TTree *tree)
          hrdt2D[tempID] = new TH2F(Form("hrdt2D%d",tempID), Form("Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)", i+1, i),             1500,rdtERange[0],rdtERange[1],1500,rdtDERange[0],rdtDERange[1]);
          hrdt2Dsum[tempID] = new TH2F(Form("hrdt2Dsum%d",tempID), Form("Raw Recoil DE vs Eres+DE (dE=%d, E=%d); Eres+DE (channel); DE (channel)", i+1, i), 500,rdtERange[0],rdtERange[1]+rdtDERange[1],500,rdtDERange[0],rdtDERange[1]);
          hrdt2Dg[tempID] = new TH2F(Form("hrdt2Dg%d",tempID), Form("Gated Raw Recoil DE vs Eres (dE=%d, E=%d); Eres (channel); DE (channel)",i+1, i),      500,rdtERange[0],rdtERange[1],500,rdtDERange[0], rdtDERange[1]); 
+      }
    }
 
    hrdtID = new TH2F("hrdtID", "RDT vs ID; ID; energy [ch]", 8, 0, 8, 500, TMath::Min(rdtERange[0], rdtDERange[0]), TMath::Max(rdtERange[1], rdtDERange[1])); 
@@ -773,7 +775,7 @@ Bool_t Monitors::Process(Long64_t entry)
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
         for(int i = 0 ; i < numCut1 ; i++ ){
             cutG = (TCutG *)cutList1->At(i) ;
-            if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+            if(cutG->IsInside(-crdt[8+i],rdt[2])) {
             // if(cutG->IsInside(rdt[2*i] + rdt[2*i+1],rdt[2*i+1])) {
 
             rdtgate1= true;
@@ -972,6 +974,8 @@ Bool_t Monitors::Process(Long64_t entry)
      if( TMath::IsNaN(z[detID]) ) continue ;
      if( eCal[detID] <  eCalCut[0] ) continue ;
      if( eCal[detID] >  eCalCut[1] ) continue ;
+   //   if ( (rdt[2] > 3500) && (rdt[2] < 4400) ) continue;
+   //   if (rdt[2] < 3200) continue;
 
      if( isReaction ){
        ///======== Ex calculation by Ryan 

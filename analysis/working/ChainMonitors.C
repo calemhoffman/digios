@@ -14,8 +14,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
      //chain->Add("../root_data/gen_run01[5-9].root"); //good data on 32S(d,p) with ~300 ug/cm2
      //chain->Add("../root_data/gen_run02[0-8].root");
 
-     chain->Add("../root_data/gen_run029.root");
-     chain->Add("../root_data/gen_run03[0-9].root");
+     chain->Add("../root_data/gen_run03[3-9].root");
 
      //chain->Add("../root_data/trace_run01[5-9].root");
      //chain->Add("../root_data/trace_run02[0-9].root");
