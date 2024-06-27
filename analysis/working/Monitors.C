@@ -38,13 +38,13 @@ int    energyRange[2] = {     0,      10};       /// in the E-Z plot
 int     rdtDERange[2] = {     50,     10000}; 
 int      rdtERange[2] = {     50,     2500};  
 int    apolloRange[2] = {     0,    1000};
-int      crdtRange[2] = {     20,   3000};
+int      crdtRange[2] = {   -3000,   3000};
 int      elumRange[2] = {   200,    4000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  150,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -66,7 +66,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
 vector<int> skipDetID = {2, 10, 11, 16} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "rdtCuts.root";
+TString rdtCutFile1 = "rdtCuts_rings163.root"; //"rdtCuts_rings.root";
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -776,8 +776,6 @@ Bool_t Monitors::Process(Long64_t entry)
         for(int i = 0 ; i < numCut1 ; i++ ){
             cutG = (TCutG *)cutList1->At(i) ;
             if(cutG->IsInside(-crdt[8+i],rdt[2])) {
-            // if(cutG->IsInside(rdt[2*i] + rdt[2*i+1],rdt[2*i+1])) {
-
             rdtgate1= true;
             break; /// only one is enough
           }
@@ -820,7 +818,7 @@ Bool_t Monitors::Process(Long64_t entry)
    
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
-            // if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+            hrdt2Dg[j]->Fill(crdt[14],rdt[2]); /// x=E, y=dE
             ///if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]); /// x=dE, y=E
             hArrayRDTMatrixG->Fill(detID, j); 
             ///if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
@@ -875,8 +873,13 @@ Bool_t Monitors::Process(Long64_t entry)
    
    for(int i=0; i<16 ; i++){
       if( TMath::IsNaN(crdt[i]) ) continue;
-      hcrdt[i]->Fill(TMath::Abs(crdt[i]));
-      hcrdtIDVe->Fill(i, TMath::Abs(crdt[i]));
+      if (i < 8) {
+         hcrdt[i]->Fill(crdt[i]);
+         hcrdtIDVe->Fill(i, crdt[i]);
+      } else {
+         hcrdt[i]->Fill(-1.0*crdt[i]);
+         hcrdtIDVe->Fill(i, -1.0*crdt[i]);
+      }
       }
       
    //   for (int j=i+1; j<16;j++){
