@@ -19,7 +19,7 @@
 #define NRDT    5
 #define NELUM   0
 #define NEZERO  0
-#define NTAC    0
+#define NTAC    1
 #define NCRDT   16
 #define NAPOLLO 0
 
@@ -54,7 +54,7 @@ Int_t idDetMap[160] = { -1, 100, 101, 102, 103, 104,  -1,  -1,  -1,  -1,   //VME
                         19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
                         21,  20,  19,  18,  23,  22,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
                         23,  22,  21,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
-                        -1, -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};  //12, VME4-DIG4, Recoil
+                        -1, 400,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};  //12, DE back TAC
 
 
 Int_t idKindMap[160] = { 0,   0,   0,   0,   0,   0,   0,   0,  -1,  -1,
