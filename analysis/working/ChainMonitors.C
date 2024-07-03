@@ -19,10 +19,11 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
      //chain->Add("../root_data/gen_run03[8-9].root"); thick target
      //chain->Add("../root_data/gen_run04[0-2].root"); - 24 hours
 
-      chain->Add("../root_data/gen_run049.root"); //thin target 24 hours
-      chain->Add("../root_data/gen_run05[0-9].root"); //
-      chain->Add("../root_data/gen_run06[0-9].root"); //
-      chain->Add("../root_data/gen_run07[0-9].root"); // if runs does not exist, it is ok.
+      // chain->Add("../root_data/gen_run049.root"); //thin target 24 hours
+      // chain->Add("../root_data/gen_run05[0-9].root"); //
+      // chain->Add("../root_data/gen_run06[0-9].root"); //
+      // chain->Add("../root_data/gen_run07[0-9].root"); // if runs does not exist, it is ok.
+      chain->Add("../root_data/gen_run08[3-9].root"); //
 
      //chain->Add("../root_data/trace_run01[5-9].root");
      //chain->Add("../root_data/trace_run02[0-9].root");
