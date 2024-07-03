@@ -40,8 +40,8 @@ int      rdtERange[2] = {     50,     2500};
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {   -3000,   3000};
 int      elumRange[2] = {   200,    4000};
-int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
-int      TAC2Range[3] = { 100,    400,    500};
+int       TACRange[3] = { 500,   -10000,   10000};  /// #bin, min, max
+int      TAC2Range[3] = { 500,    -10000,    10000};
 int   thetaCMRange[2] = {0, 80};
 
 double     exRange[3] = {  150,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
@@ -56,7 +56,7 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-18, 2};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-30, 2};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -66,7 +66,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
 vector<int> skipDetID = {2, 10, 11, 16} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "rdtCuts_rings163.root"; //"rdtCuts_rings.root";
+TString rdtCutFile1 = ""; //"rdtCuts_rings.root";
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -647,7 +647,7 @@ Bool_t Monitors::Process(Long64_t entry)
     double rdtot[4] = {TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN(), TMath::QuietNaN()};
     
     /*********** TAC **************************************************/ 
-    htac->Fill(tac[2]);
+    htac->Fill(tac[0]);
    
     //if( TMath::IsNaN(tac[0]) ) return kTRUE;
     //if( !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) {isTACGate=true; return kTRUE;}
@@ -662,7 +662,7 @@ Bool_t Monitors::Process(Long64_t entry)
     
     if( !TMath::IsNaN(elum[1]) ) hBIC->Fill(elum_t[1]/1e8/60.);
     
-    int tac2 = tac_t[1]-elum_t[0];        
+    int tac2 = tac_t[0]-elum_t[0];        
     htac2->Fill(tac2);
     
     ///if( 4000 < elum[0]  && elum[0] < 6000 ) helum4C->Fill(elum_t[0]/1e8/60.); 
@@ -773,13 +773,17 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //=================== Recoil Gate
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
-        for(int i = 0 ; i < numCut1 ; i++ ){
+        for(int i = 0 ; i < 5 ; i++ ){
             cutG = (TCutG *)cutList1->At(i) ;
             if(cutG->IsInside(-crdt[8+i],rdt[2])) {
-            rdtgate1= true;
-            break; /// only one is enough
-          }
-        }
+         // if (rdt[2]>2700 && rdt[2]<3400) 
+            rdtgate1= true; //works
+         // if (i!=2) {
+         //    if (rdt[i]>5500 && rdt[i]<6500) rdtgate1= true; //works
+               break; /// only one is enough
+         // }
+            }
+         }
         
         for(int i = 0 ; i < numCut2 ; i++ ){
           cutG = (TCutG *)cutList2->At(i) ;
@@ -1027,8 +1031,8 @@ Bool_t Monitors::Process(Long64_t entry)
        thetaCM = TMath::QuietNaN();
      }
      
-     htacEx->Fill(tac[2], Ex);
-     htac2Ex->Fill(tac_t[1]-e_t[detID], Ex);
+     htacEx->Fill(tac[0], Ex);
+     htac2Ex->Fill(tac_t[0]-e_t[detID], Ex);
      
      if( thetaCM > thetaCMGate ) {
 
