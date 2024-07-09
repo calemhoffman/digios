@@ -232,57 +232,57 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
    newTree->SetDirectory(saveFile);
    newTree->AutoSave();
 
-   newTree->Branch("eventID", &psd.eventID, "eventID/I");
+   newTree->Branch("evID", &psd.eventID, "evID/l");
    newTree->Branch("runID", &psd.runID, "runID/I");
 
-   newTree->Branch("e",     psd.Energy,          Form("Energy[%d]/F", NARRAY));
-   newTree->Branch("e_t",   psd.EnergyTimestamp, Form("EnergyTimestamp[%d]/l",NARRAY));
-   newTree->Branch("ring",  psd.Ring,            Form("Ring[%d]/F", NARRAY));
-   newTree->Branch("ring_t",psd.RingTimestamp,   Form("RingTimestamp[%d]/l",NARRAY));
-   newTree->Branch("xf",    psd.XF,              Form("XF[%d]/F", NARRAY));
-   newTree->Branch("xf_t",  psd.XFTimestamp,     Form("XFTimestamp[%d]/l", NARRAY));
-   newTree->Branch("xn",    psd.XN,              Form("XN[%d]/F", NARRAY));
-   newTree->Branch("xn_t",  psd.XNTimestamp,     Form("XNTimestamp[%d]/l", NARRAY));
+   newTree->Branch("e",     psd.Energy,          Form("e[%d]/F", NARRAY));
+   newTree->Branch("e_t",   psd.EnergyTimestamp, Form("e_t[%d]/l",NARRAY));
+   newTree->Branch("ring",  psd.Ring,            Form("ring[%d]/F", NARRAY));
+   newTree->Branch("ring_t",psd.RingTimestamp,   Form("ring_t[%d]/l",NARRAY));
+   newTree->Branch("xf",    psd.XF,              Form("xf[%d]/F", NARRAY));
+   newTree->Branch("xf_t",  psd.XFTimestamp,     Form("xf_t[%d]/l", NARRAY));
+   newTree->Branch("xn",    psd.XN,              Form("xn[%d]/F", NARRAY));
+   newTree->Branch("xn_t",  psd.XNTimestamp,     Form("xn_t[%d]/l", NARRAY));
    newTree->Branch("x",     psd.x,               Form("x[%d]/F", NARRAY));
 
    if( isRecoil){
-      newTree->Branch("rdt"  ,psd.RDT,          Form("RDT[%d]/F",NRDT));
-      newTree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT));
+      newTree->Branch("rdt"  ,psd.RDT,          Form("rdt[%d]/F",NRDT));
+      newTree->Branch("rdt_t",psd.RDTTimestamp, Form("rdt_t[%d]/l", NRDT));
    }else{
       printf(" -----  no recoil.\n");
    }
 
    if( isTACRF ){
-      newTree->Branch("tac"  ,psd.TAC,         Form("TAC[%d]/F", NTAC));
-      newTree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC));
+      newTree->Branch("tac"  ,psd.TAC,         Form("tac[%d]/F", NTAC));
+      newTree->Branch("tac_t",psd.TACTimestamp,Form("tac_t[%d]/l", NTAC));
    }else{
       printf(" -----  no TAC.\n");
    }
 
    if( isElum ) {
-      newTree->Branch("elum"  ,psd.ELUM,         Form("ELUM[%d]/F", NELUM));
-      newTree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM));
+      newTree->Branch("elum"  ,psd.ELUM,         Form("elum[%d]/F", NELUM));
+      newTree->Branch("elum_t",psd.ELUMTimestamp,Form("elum_t[%d]/l",NELUM));
    }else{
       printf(" -----  no elum\n");
    }
 
    if( isEZero ){
-      newTree->Branch("ezero"  ,psd.EZERO,         Form("EZERO[%d]/F", NEZERO));
-      newTree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO));
+      newTree->Branch("ezero"  ,psd.EZERO,         Form("ezero[%d]/F", NEZERO));
+      newTree->Branch("ezero_t",psd.EZEROTimestamp,Form("ezero_t[%d]/l", NEZERO));
    }else{
       printf(" -----  no ezero.\n");
    }
 
    if( isCRDT ){
-      newTree->Branch("crdt"  ,psd.CRDT,         Form("CRDT[%d]/F", NCRDT));
-      newTree->Branch("crdt_t",psd.CRDTTimestamp,Form("CRDTTimestamp[%d]/l", NCRDT));
+      newTree->Branch("crdt"  ,psd.CRDT,         Form("crdt[%d]/F", NCRDT));
+      newTree->Branch("crdt_t",psd.CRDTTimestamp,Form("crdt_t[%d]/l", NCRDT));
    }else{
       printf(" -----  no crdt.\n");
    }
 
    if( isAPOLLO ){
-      newTree->Branch("apollo"  ,psd.APOLLO,         Form("APOLLO[%d]/F", NAPOLLO));
-      newTree->Branch("apollo_t",psd.APOLLOTimestamp,Form("APOLLOTimestamp[%d]/l", NAPOLLO));
+      newTree->Branch("apollo"  ,psd.APOLLO,         Form("apollo[%d]/F", NAPOLLO));
+      newTree->Branch("apollo_t",psd.APOLLOTimestamp,Form("apollo_t[%d]/l", NAPOLLO));
    }else{
       printf(" -----  no crdt.\n");
    }
@@ -303,29 +303,29 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
 
       if( traceMethod > 0 ){
          gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
-         newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F",          NARRAY));
-         newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", NARRAY));
-         newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F",     NARRAY));
+         newTree->Branch("te",             te,  Form("te[%d]/F",          NARRAY));
+         newTree->Branch("te_r",         te_r,  Form("te_r[%d]/F", NARRAY));
+         newTree->Branch("te_t",         te_t,  Form("te_t[%d]/F",     NARRAY));
 
          if( isRecoil ){
-            newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F",          NRDT));
-            newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F",     NRDT));
-            newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+            newTree->Branch("trdt",         trdt,  Form("trdt[%d]/F",          NRDT));
+            newTree->Branch("trdt_t",     trdt_t,  Form("trdt_t[%d]/F",     NRDT));
+            newTree->Branch("trdt_r",     trdt_r,  Form("trdt_r[%d]/F", NRDT));
          }
          if ( isEZero ) {
-            newTree->Branch("tezero",       tezero,    Form("Trace_ezero[%d]/F",         NEZERO));
-            newTree->Branch("tezero_t",     tezero_t,  Form("Trace_ezero_Time[%d]/F",    NEZERO));
-            newTree->Branch("tezero_r",     tezero_r,  Form("Trace_ezero_RiseTime[%d]/F",NEZERO));
+            newTree->Branch("tezero",       tezero,    Form("tezero[%d]/F",         NEZERO));
+            newTree->Branch("tezero_t",     tezero_t,  Form("tezero_t[%d]/F",    NEZERO));
+            newTree->Branch("tezero_r",     tezero_r,  Form("tezero_r[%d]/F",NEZERO));
          }
          if ( isElum ) {
-            newTree->Branch("telum",       telum,    Form("Trace_elum[%d]/F",         NELUM));
-            newTree->Branch("telum_t",     telum_t,  Form("Trace_elum_Time[%d]/F",    NELUM));
-            newTree->Branch("telum_r",     telum_r,  Form("Trace_elum_RiseTime[%d]/F",NELUM));
+            newTree->Branch("telum",       telum,    Form("telum[%d]/F",         NELUM));
+            newTree->Branch("telum_t",     telum_t,  Form("telum_t[%d]/F",    NELUM));
+            newTree->Branch("telum_r",     telum_r,  Form("telum_r[%d]/F",NELUM));
          }
          if ( isCRDT ){
-            newTree->Branch("tcrdt"  , tcrdt,    Form("Trace_CRDT[%d]/F", NCRDT));
-            newTree->Branch("tcrdt_t", tcrdt_t,  Form("Trace_CRDT_Time[%d]/l", NCRDT));
-            newTree->Branch("tcrdt_r", tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/l", NCRDT));
+            newTree->Branch("tcrdt"  , tcrdt,    Form("tcrdt[%d]/F", NCRDT));
+            newTree->Branch("tcrdt_t", tcrdt_t,  Form("tcrdt_t[%d]/l", NCRDT));
+            newTree->Branch("tcrdt_r", tcrdt_r,  Form("tcrdt_r[%d]/l", NCRDT));
          }
 
       }
@@ -578,7 +578,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             }
          }
 
-         gTrace->SetTitle(Form("ev=%d, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
+         gTrace->SetTitle(Form("ev=%llu, id=%d, nHit=%d, length=%d", psd.eventID, idDet, i, traceLength ));
 
          ///===================== fitting , find time
          if( traceMethod == 1){

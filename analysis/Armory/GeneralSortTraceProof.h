@@ -152,7 +152,7 @@ public :
    
    //PSD struct
    typedef struct {
-      Int_t   eventID;
+      ULong64_t   eventID;
       Int_t   runID;
       Float_t Energy[NARRAY];
       Float_t XF[NARRAY];
