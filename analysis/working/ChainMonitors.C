@@ -37,8 +37,13 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
      //chain->Add("../root_data/trace_run05[0-9].root"); // good run **** 204 torr 100ug /cm2
     //  chain->Add("../root_data/gen_run053.root"); // alpha run with source at 30 cm 
 
-    chain->Add("../root_data/trace_run033.root"); 
-    // chain->Add("../root_data/trace_run050.root"); // alpha run with source at 30 cm 
+    // chain->Add("../root_data/trace_run026.root"); 
+    // chain->Add("../root_data/trace_run02[8-9].root"); 
+    // chain->Add("../root_data/trace_run03[1-3].root");
+
+    chain->Add("../root_data/trace_run03[4-9].root"); 
+    chain->Add("../root_data/trace_run041.root"); 
+    chain->Add("../root_data/trace_run04[3-5].root"); 
   
     ///********** end Marker for AutoCalibration.
     

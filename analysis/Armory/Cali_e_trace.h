@@ -44,8 +44,6 @@ public :
    ULong64_t       xf_t[100];
    Float_t         xn[100];
    ULong64_t       xn_t[100];
-   Float_t         ring[100];
-   ULong64_t       ring_t[100];
    Float_t         rdt[50];
    ULong64_t       rdt_t[50];
    Float_t         tac[10];
@@ -63,6 +61,15 @@ public :
    Float_t         trdt_t[50];
    Float_t         trdt_r[50];
 
+   //-------- 
+   Int_t    mutli0;
+   Float_t  trdt0[10];
+   Float_t  trdt_t0[10];
+
+   Int_t    mutli1;
+   Float_t  trdt1[10];
+   Float_t  trdt_t1[10];
+
    // List of branches
    TBranch        *b_runID; //!
    TBranch        *b_Energy;   //!
@@ -72,8 +79,6 @@ public :
    TBranch        *b_XFTimestamp;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_XNTimestamp;   //!
-   TBranch        *b_RING;   //!
-   TBranch        *b_RINGTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
    TBranch        *b_TAC;   //!
@@ -90,6 +95,14 @@ public :
    TBranch        *b_Trace_RDT;  //!
    TBranch        *b_Trace_RDT_Time;  //!
    TBranch        *b_Trace_RDT_RiseTime;  //!
+   
+   TBranch        *b_multi0; //!
+   TBranch        *b_trdt0; //!
+   TBranch        *b_trdt_t0; //!
+   
+   TBranch        *b_multi1; //!
+   TBranch        *b_trdt1; //!
+   TBranch        *b_trdt_t1; //!
    
    bool isRunIDExist;
    bool isEBISExist;
@@ -136,6 +149,11 @@ public :
    int hitID[30]; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
    
+   float recoil0;
+   float recoil_t0;
+   float recoil1;
+   float recoil_t1;
+
    Float_t thetaCM;
    Float_t Ex;   
    Float_t thetaLab;
@@ -190,9 +208,6 @@ public :
 
 };
 
-#endif
-
-#ifdef Cali_e_trace_cxx
 void Cali_e_trace::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
@@ -219,9 +234,7 @@ void Cali_e_trace::Init(TTree *tree)
 
    fChain->SetBranchAddress("e", e, &b_Energy);
    fChain->SetBranchAddress("xf", xf, &b_XF);
-   fChain->SetBranchAddress("xn", xn, &b_XN);
-   fChain->SetBranchAddress("ring", ring, &b_RING);
- 
+   fChain->SetBranchAddress("xn", xn, &b_XN); 
    
    fChain->SetBranchAddress("e_t", e_t, &b_EnergyTimestamp);
    fChain->SetBranchAddress("rdt", rdt, &b_RDT);
@@ -293,17 +306,25 @@ void Cali_e_trace::Init(TTree *tree)
       fChain->SetBranchAddress("trdt",   trdt,   &b_Trace_RDT);
       fChain->SetBranchAddress("trdt_t", trdt_t, &b_Trace_RDT_Time);
       fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
+
+      fChain->SetBranchAddress("multi0", &mutli0, &b_multi0);
+      fChain->SetBranchAddress("trdt0",   trdt0, &b_trdt0);
+      fChain->SetBranchAddress("trdt_t0", trdt_t0, &b_trdt_t0);
+
+      fChain->SetBranchAddress("multi1", &mutli1, &b_multi1);
+      fChain->SetBranchAddress("trdt1",   trdt1, &b_trdt1);
+      fChain->SetBranchAddress("trdt_t1", trdt_t1, &b_trdt_t1);
    }
    
    //================================ load expName
-   string expNameFile = "../../expName.sh";
+   std::string expNameFile = "../../expName.sh";
    printf("======================= loading expName files : %s.", expNameFile.c_str());
-   ifstream file;
+   std::ifstream file;
    file.open(expNameFile.c_str());
    TString expName = "";
    int i = 0;
    if( file.is_open()){
-      string x;
+      std::string x;
       while( file >> x){
          if( x.substr(0,1) == "#" )  continue;
          if( i == 1  )  expName = x;
@@ -374,7 +395,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    //========================================= detector Geometry
    printf("======================= loading parameters files .... \n");
-   string detGeoFileName = "detectorGeo.txt";
+   std::string detGeoFileName = "detectorGeo.txt";
    printf("loading detector geometery : %s.", detGeoFileName.c_str());
 
    TMacro * haha = new TMacro();
@@ -605,7 +626,7 @@ void Cali_e_trace::Init(TTree *tree)
    file.open("reaction.dat");
    isReaction = false;
    if( file.is_open() ){
-      string x;
+      std::string x;
       int i = 0;
       while( file >> x ){
          if( x.substr(0,2) == "//" )  continue;
@@ -683,7 +704,6 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("e" ,      eC, Form("e[%d]/F" , numDet) );
    newTree->Branch("xf",     xfC, Form("xf[%d]/F", numDet) );
    newTree->Branch("xn",     xnC, Form("xn[%d]/F", numDet) );
-   newTree->Branch("ring",  ring, Form("xn[%d]/F", numDet) );
    newTree->Branch("x" ,       x, Form("x[%d]/F" , numDet) );
    newTree->Branch("z" ,       z, Form("z[%d]/F" , numDet) );
    newTree->Branch("detID", &det, "det/I");
@@ -724,12 +744,18 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("tcoin_t", &tcoin_t, "tcoin_t/F");
       newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUnCalibrated_ns/F");
       newTree->Branch("coinTime", &coinTime, "coinTime_ns/F");
-      newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F", numDet) );
-      newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", numDet));
-      newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F", numDet));
-      newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
-      newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
-      newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+      // newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F", numDet) );
+      // newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", numDet));
+      // newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F", numDet));
+      // newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
+      // newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
+      // newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+      
+      newTree->Branch("recoil0",     &recoil0,  "recoil0/F");
+      newTree->Branch("recoil_t0", &recoil_t0,  "recoil_t0/F");
+      newTree->Branch("recoil1",     &recoil1,  "recoil1/F");
+      newTree->Branch("recoil_t1", &recoil_t1,  "recoil_t1/F");
+
    }
 
    printf("Is EBIS  exist : %d\n", isEBISExist);
@@ -741,7 +767,6 @@ void Cali_e_trace::Init(TTree *tree)
    clock.Reset();
    clock.Start("timer");
    shown = 0;
-   
    
    
 }

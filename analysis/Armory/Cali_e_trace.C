@@ -90,7 +90,6 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    b_Energy->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
-   b_RING->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
    b_EnergyTimestamp->GetEntry(entry,0);
    b_RDTTimestamp->GetEntry(entry,0);
@@ -116,16 +115,24 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       b_Trace_RDT->GetEntry(entry,0);
       b_Trace_RDT_Time->GetEntry(entry,0);
       b_Trace_RDT_RiseTime->GetEntry(entry,0);
+
+      b_multi0->GetEntry(entry);
+      b_trdt0->GetEntry(entry);
+      b_trdt_t0->GetEntry(entry);
+
+      b_multi1->GetEntry(entry);
+      b_trdt1->GetEntry(entry);
+      b_trdt_t1->GetEntry(entry);
    }
 
    //#################################################################### gate
     
    ///============ Simple RDT gate base on energy
-///   bool rdt_energy = false;
-///   for( int rID = 0; rID < 8; rID ++){
-///      if( rdt[rID] > 5000 ) rdt_energy = true; 
-///   }
-///   if( !rdt_energy ) return kTRUE;
+   ///   bool rdt_energy = false;
+   ///   for( int rID = 0; rID < 8; rID ++){
+   ///      if( rdt[rID] > 5000 ) rdt_energy = true; 
+   ///   }
+   ///   if( !rdt_energy ) return kTRUE;
 
    ///============================= RDT TCutG gate
    bool rejRDT1 = true; 
@@ -177,7 +184,32 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
-   
+   /*********** RECOILS ***********************************************/    
+   recoil_t0 = TMath::QuietNaN();
+   recoil1 = TMath::QuietNaN();
+   recoil_t1 = TMath::QuietNaN();
+   recoil0 = TMath::QuietNaN();
+
+   rdtdEMultiHit = 0;
+   rdtID = 0;
+
+   for( int i = 0; i < mutli0; i++){
+      if( 80 < trdt_t0[i] && trdt_t0[i] < 120 ) {
+         recoil0 = trdt0[i];
+         recoil_t0 = trdt_t0[i];
+         rdtdEMultiHit = 1;
+         break;
+      }
+   }
+
+   for( int i = 0; i < mutli1; i++){
+      if( 80 < trdt_t1[i] && trdt_t1[i] < 120 ) {
+         recoil1 = trdt1[i];
+         recoil_t1 = trdt_t1[i];
+         break;
+      }
+   }
+
    //========================== Array
    int uniqeDetID = -1;
    for(int idet = 0 ; idet < numDet; idet++){
@@ -185,7 +217,6 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      hitID[idet] = 0; /// hitID = 1 for only xf, hitID = 2 for only xn, hitID = 3 for both xf and xn
      ///======= Basic array gate
      if( TMath::IsNaN(e[idet])) continue;
-     if( ring[idet] < -100 || ring[idet] > 100 ) continue;
      if( !TMath::IsNaN(xf[idet]) ) hitID[idet] += 1;
      if( !TMath::IsNaN(xn[idet]) ) hitID[idet] += 2;
      if( hitID[idet] == 0 ) continue;
@@ -277,24 +308,24 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    }
    
    //=============================== Recoil
-   for(int i = 0 ; i < NRDT ; i++){
-      if( TMath::IsNaN(rdt[i]) ) continue;
-      if( isTraceDataExist ){
-         trdt[i]   = rdtCorr[i][0] * trdt[i] + rdtCorr[i][1];
-         trdt_t[i] = trdt_t[i]; 
-      }
-      rdtC[i]   = rdtCorr[i][0] * rdt[i] + rdtCorr[i][1];
-      rdtC_t[i] = rdt_t[i]; 
+   // for(int i = 0 ; i < NRDT ; i++){
+   //    if( TMath::IsNaN(rdt[i]) ) continue;
+   //    if( isTraceDataExist ){
+   //       trdt[i]   = rdtCorr[i][0] * trdt[i] + rdtCorr[i][1];
+   //       trdt_t[i] = trdt_t[i]; 
+   //    }
+   //    rdtC[i]   = rdtCorr[i][0] * rdt[i] + rdtCorr[i][1];
+   //    rdtC_t[i] = rdt_t[i]; 
 
-      //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
-   }
+   //    //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
+   // }
    
-   for( int i = 0; i< NRDT/2 ; i++){
-      if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
-         rdtdEMultiHit ++;
-         rdtID = 2*i+1; //dE
-      }
-   }
+   // for( int i = 0; i< NRDT/2 ; i++){
+   //    if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
+   //       rdtdEMultiHit ++;
+   //       rdtID = 2*i+1; //dE
+   //    }
+   // }
    
    //================================= for coincident time bewteen array and rdt
    //if( multiHit == 1 && rdtdEMultiHit == 1) {
@@ -311,7 +342,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       if( isTraceDataExist ) {
          
          Float_t teTime = te_t[det];
-         Float_t trdtTime =  trdt_t[rdtID];
+         //Float_t trdtTime =  trdt_t[rdtID];
+         Float_t trdtTime =  recoil_t0;
          
          tcoin_t = teTime - trdtTime; // trace trigger time 
          
