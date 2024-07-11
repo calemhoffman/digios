@@ -36,8 +36,6 @@ public :
    ULong64_t       xf_t[NARRAY];
    Float_t         xn[NARRAY];
    ULong64_t       xn_t[NARRAY];
-   Float_t         ring[NARRAY];
-   ULong64_t       ring_t[NARRAY];
    Float_t         rdt[NRDT];
    ULong64_t       rdt_t[NRDT];
    Float_t         tac[NTAC];
@@ -48,6 +46,15 @@ public :
    ULong64_t       ezero_t[NEZERO];
    Float_t         crdt  [NCRDT];
    ULong64_t       crdt_t[NCRDT];
+
+   //-------- 
+   Int_t    mutli0;
+   Float_t  trdt0[10];
+   Float_t  trdt_t0[10];
+
+   Int_t    mutli1;
+   Float_t  trdt1[10];
+   Float_t  trdt_t1[10];
    
    // List of branches
    TBranch        *b_runID;   //!
@@ -57,8 +64,6 @@ public :
    TBranch        *b_XFTimestamp;   //!
    TBranch        *b_XN;   //!
    TBranch        *b_XNTimestamp;   //!
-   TBranch        *b_Ring;   //!
-   TBranch        *b_RingTimestamp;   //!
    TBranch        *b_RDT;   //!
    TBranch        *b_RDTTimestamp;   //!
    TBranch        *b_TAC;   //!
@@ -70,6 +75,13 @@ public :
    TBranch        *b_CRDT;   //!
    TBranch        *b_CRDTTimestamp;   //!
    
+   TBranch        *b_multi0; //!
+   TBranch        *b_trdt0; //!
+   TBranch        *b_trdt_t0; //!
+   
+   TBranch        *b_multi1; //!
+   TBranch        *b_trdt1; //!
+   TBranch        *b_trdt_t1; //!
 
    // trace analysis data
    Float_t         te[NARRAY];
@@ -174,8 +186,6 @@ void Monitors::Init(TTree *tree)
    fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
    fChain->SetBranchAddress("xn", xn, &b_XN);
    fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
-   fChain->SetBranchAddress("ring", ring, &b_Ring);
-   fChain->SetBranchAddress("ring_t", ring_t, &b_RingTimestamp);
 
    TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("rdt");
    if( br == NULL ){
@@ -257,6 +267,15 @@ void Monitors::Init(TTree *tree)
       }
       fChain->SetBranchAddress("trdt_t", trdt_t, &b_Trace_RDT_Time);
       fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
+      
+      fChain->SetBranchAddress("multi0", &mutli0, &b_multi0);
+      fChain->SetBranchAddress("trdt0",   trdt0, &b_trdt0);
+      fChain->SetBranchAddress("trdt_t0", trdt_t0, &b_trdt_t0);
+
+      fChain->SetBranchAddress("multi1", &mutli1, &b_multi1);
+      fChain->SetBranchAddress("trdt1",   trdt1, &b_trdt1);
+      fChain->SetBranchAddress("trdt_t1", trdt_t1, &b_trdt_t1);
+
    }
    
    startTime = 0;

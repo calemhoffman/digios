@@ -16,6 +16,10 @@
         "Monitors.C": "cpp",
         "Simulation_Helper.C": "cpp",
         "rootlogon.C": "cpp",
-        "SaveTH1IntoText.C": "cpp"
-    }
+        "SaveTH1IntoText.C": "cpp",
+        "Cali_e_trace_Proof.C": "cpp",
+        "Analyzer.C": "cpp",
+        "Monitors_Util.C": "cpp"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }

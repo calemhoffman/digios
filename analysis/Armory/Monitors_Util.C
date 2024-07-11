@@ -12,7 +12,6 @@ void listDraws(void) {
   printf("-----------------------------------------------------\n");
   printf("      rawID() - Raw \033[0;31me\033[0m, \033[0;31mring\033[0m, \033[0;31mxf\033[0m, \033[0;31mxn\033[0m vs detID\n");
   printf("       rawe() - Raw \033[0;31me\033[0m for all %d detectors\n", numDet);
-  printf("    rawring() - Raw \033[0;31mring\033[0m for all %d detectors\n", numDet);
   printf("      rawxf() - Raw \033[0;31mxf\033[0m for all %d detectors\n", numDet);
   printf("      rawxn() - Raw \033[0;31mxn\033[0m for all %d detectors\n", numDet);
   printf("     eVring() - Raw \033[0;31me\033[0m vs. \033[0;31mring\033[0m for all %d detectors\n", numDet);
@@ -79,7 +78,6 @@ void rawID(){
   if( cRawID == NULL ) cRawID = new TCanvas("cRawID", Form("Raw e, Ring, xf, xn vs ID | %s", canvasTitle.Data()), canvasSize[0], canvasSize[1]);
   cRawID->Clear();cRawID->Divide(2,2);
   cRawID->cd(1);  cRawID->cd(1)->SetGrid(); heVID->Draw("colz");
-  cRawID->cd(2);  cRawID->cd(2)->SetGrid(); hringVID->Draw("colz");
   cRawID->cd(3);  cRawID->cd(3)->SetGrid(); hxfVID->Draw("colz");
   cRawID->cd(4);  cRawID->cd(4)->SetGrid(); hxnVID->Draw("colz");
 }
@@ -93,18 +91,6 @@ void rawe(Bool_t isLogy = false) {
     cRawE->cd(i+1)->SetGrid();
     if( isLogy ) cRawE->cd(i+1)->SetLogy();
     he[i]->Draw("");
-  }
-}
-
-void rawring(Bool_t isLogy = false) {
-  TCanvas *cRawRing = (TCanvas *) gROOT->FindObjectAny("cRawRing");
-  if( cRawRing == NULL ) cRawRing = new TCanvas("cRawRing",Form("Ring raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawRing->Clear();cRawRing->Divide(numCol,numRow);
-  for (Int_t i=0; i<numDet; i++) {
-    cRawRing->cd(i+1); 
-    cRawRing->cd(i+1)->SetGrid();
-    if( isLogy ) cRawRing->cd(i+1)->SetLogy();
-    hring[i]->Draw("");
   }
 }
 
@@ -129,17 +115,6 @@ void rawxn(Bool_t isLogy = false) {
     cRawXn->cd(i+1)->SetGrid();
     if( isLogy ) cRawXn->cd(i+1)->SetLogy();
     hxn[i]->Draw("");
-  }
-}
-
-void eVring(void) {
-  TCanvas *cRawERing = (TCanvas *) gROOT->FindObjectAny("cRawERing");
-  if( cRawERing == NULL ) cRawERing = new TCanvas("cRawERing",Form("e vs. ring | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawERing->Clear(); cRawERing->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
-    cRawERing->cd(i+1); 
-    cRawERing->cd(i+1)->SetGrid(); 
-    heVring[i]->Draw("col");
   }
 }
 

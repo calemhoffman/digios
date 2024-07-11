@@ -99,13 +99,13 @@ void AutoCalibrationTrace(){
    //======== experimental sorted data
    TChain * chain = new TChain("gen_tree");
    
-   string dataList="ChainMonitors.C";
+   std::string dataList="ChainMonitors.C";
    printf(" ..... loading %s..", dataList.c_str());
-   ifstream file;
+   std::ifstream file;
    file.open(dataList.c_str());
    
    if( file.is_open() ){
-      string line;
+      std::string line;
       bool startFlag = false;
       while( std::getline(file,line)){
 

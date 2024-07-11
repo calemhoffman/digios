@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     160}; 
-int      rdtERange[2] = {     0,     160};  
+int     rdtDERange[2] = {   -10,     160}; 
+int      rdtERange[2] = {   -10,     160};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -130,11 +130,9 @@ Bool_t isEZCutFileOpen;
 *******************************************************************/
 //======== raw data
 TH1F* he[numDet];
-TH1F* hring[numDet];
 TH1F* hxf[numDet];
 TH1F* hxn[numDet];
 
-TH2F* heVring[numDet];
 TH2F* hxfVxn[numDet];
 TH2F* heVxs[numDet];
 
@@ -142,7 +140,6 @@ TH1F* hMultiHit; //TODO
 
 TH2F* heVID;
 TH2F* heVIDG; //gated
-TH2F* hringVID;
 TH2F* hxfVID;
 TH2F* hxnVID;
 
@@ -402,7 +399,6 @@ void Monitors::Begin(TTree *tree)
    
    heVID    = new TH2F("heVID",    "Raw e vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    heVIDG   = new TH2F("heVIDG",   "Raw e vs channel (gated)", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
-   hringVID = new TH2F("hringVID", "Raw Ring vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxfVID   = new TH2F("hxfVID",   "Raw xf vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
    hxnVID   = new TH2F("hxnVID",   "Raw xn vs channel", numDet, 0, numDet, 500, rawEnergyRange[0], rawEnergyRange[1]);
 
@@ -413,10 +409,8 @@ void Monitors::Begin(TTree *tree)
    for (Int_t i=0;i<numDet;i++) {//array loop
       
       he[i]      = new TH1F(Form("he%d", i),     Form("Raw e (ch=%d); e (channel); count", i),                    2000, rawEnergyRange[0], rawEnergyRange[1]);
-      hring[i]   = new TH1F(Form("hring%d", i),  Form("Raw ring (ch=%d); ring (channel); count", i),              200, rawEnergyRange[0], rawEnergyRange[1]);
       hxf[i]     = new TH1F(Form("hxf%d", i),    Form("Raw xf (ch=%d); xf (channel); count", i),                  200, rawEnergyRange[0], rawEnergyRange[1]);
       hxn[i]     = new TH1F(Form("hxn%d", i),    Form("Raw xn (ch=%d); xn (channel); count", i),                  200, rawEnergyRange[0], rawEnergyRange[1]);
-      heVring[i] = new TH2F(Form("heVring%d",i), Form("Raw e vs. ring (ch=%d);ring (channel);e (channel)",i),     500, rawEnergyRange[0], rawEnergyRange[1], 500, rawEnergyRange[0], rawEnergyRange[1]);
       hxfVxn[i]  = new TH2F(Form("hxfVxn%d",i),  Form("Raw xf vs. xn (ch=%d);xf (channel);xn (channel)",i),       500,                 0, rawEnergyRange[1], 500,                 0, rawEnergyRange[1]);
       heVxs[i]   = new TH2F(Form("heVxs%d", i),  Form("Raw e vs xf+xn (ch=%d); xf+xn (channel); e (channel)", i), 500, rawEnergyRange[0], rawEnergyRange[1], 500, rawEnergyRange[0], rawEnergyRange[1]);
       
@@ -584,7 +578,6 @@ Bool_t Monitors::Process(Long64_t entry)
    b_Energy->GetEntry(entry);
    b_XF->GetEntry(entry);
    b_XN->GetEntry(entry);
-   b_Ring->GetEntry(entry);
    b_EnergyTimestamp->GetEntry(entry);
 
    if( isRDTExist ){
@@ -622,6 +615,15 @@ Bool_t Monitors::Process(Long64_t entry)
       ///b_Trace_RDT->GetEntry(entry); 
       b_Trace_RDT_Time->GetEntry(entry);
       b_Trace_RDT_RiseTime->GetEntry(entry);
+
+      b_multi0->GetEntry(entry);
+      b_trdt0->GetEntry(entry);
+      b_trdt_t0->GetEntry(entry);
+
+      b_multi1->GetEntry(entry);
+      b_trdt1->GetEntry(entry);
+      b_trdt_t1->GetEntry(entry);
+      
    }
 
    /*********** forming canvas Title **********************************/ 
@@ -681,6 +683,52 @@ Bool_t Monitors::Process(Long64_t entry)
        rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
     }
     
+
+   /*********** RECOILS ***********************************************/    
+
+   float recoil0 = TMath::QuietNaN();
+   float recoil1 = TMath::QuietNaN();
+
+   for( int i = 0; i < mutli0; i++){
+      if( 80 < trdt_t0[i] && trdt_t0[i] < 120 ) {
+         recoil0 = trdt0[i];
+         hrdtID->Fill( 0.F, recoil0);
+         hrdt[0]->Fill(recoil0);
+         break;
+      }
+   }
+
+   for( int i = 0; i < mutli1; i++){
+      if( 80 < trdt_t1[i] && trdt_t1[i] < 120 ) {
+         recoil1 = trdt1[i];
+         hrdtID->Fill( 1.F, recoil1);
+         hrdt[1]->Fill(recoil1);
+         break;
+      }
+   }
+
+   hrdt2D[0]->Fill(recoil0,recoil1); //E-dE
+
+   // for( int i = 0; i < 8 ; i++){
+   //    hrdtID->Fill(i, rdt[i]);
+   //    hrdt[i]->Fill(rdt[i]);
+      
+   //    for( int j = 0; j < 8 ; j++){
+   //       if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
+   //    }
+      
+   //    if( i % 2 == 0  ){        
+   //      if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
+   //       recoilMulti++; // when both dE and E are hit
+   //       rdtot[i/2] = rdt[i]+rdt[i+1];
+   //       htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
+   //       hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
+   //       hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
+
+   //       htacRecoil[i]->Fill(tac[0],rdt[i]);
+   //       htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
+   //    }
+   // }
     
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
@@ -697,15 +745,12 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //================== Filling raw data
       he[detID]->Fill(e[detID]);
-      hring[detID]->Fill(ring[detID]);
       hxf[detID]->Fill(xf[detID]);
       hxn[detID]->Fill(xn[detID]);
-      heVring[detID]->Fill(ring[detID],e[detID]);
       hxfVxn[detID]->Fill(xf[detID],xn[detID]);
       heVxs[detID]->Fill(xf[detID]+xn[detID], e[detID]);
       
       heVID->Fill(detID, e[detID]);
-      hringVID->Fill(detID, ring[detID]);
       hxfVID->Fill(detID, xf[detID]);
       hxnVID->Fill(detID, xn[detID]);
       
@@ -760,16 +805,6 @@ Bool_t Monitors::Process(Long64_t entry)
       if  (  TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 1.0 - xncal[detID]/ e[detID];
       ///if  (  TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) xcal[detID] = TMath::QuietNaN();
       
-      /**
-      if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) {
-        if (xfcal[detID]>0.5*e[detID]) {
-          xcal[detID] = xfcal[detID]/e[detID];
-        }else if {
-          xcal[detID] = 1.0 - xncal[detID]/e[detID];
-        }
-      }**/
-   
-      
       //======= Scale xcal from (0,1)      
       xcal[detID] = (xcal[detID]-0.5)/xScale[detID] + 0.5; /// if include this scale, need to also inclused in Cali_littleTree
       
@@ -787,7 +822,6 @@ Bool_t Monitors::Process(Long64_t entry)
 
       //=================== Array fill
       heVx[detID]->Fill(x[detID],e[detID]);
-      hringVx[detID]->Fill(x[detID],ring[detID]);
      
       heCalVxCal[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
       heCalVz->Fill(z[detID],eCal[detID]);
@@ -842,7 +876,10 @@ Bool_t Monitors::Process(Long64_t entry)
           if( isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1] ) {
          //  if( !(isTimeGateOn && timeGate[0] < tdiff && tdiff < timeGate[1]) ) {
             if (isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1])) continue;
-            if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+            // if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j],rdt[j+1]); /// x=E, y=dE
+
+            hrdt2Dg[0]->Fill(recoil0, recoil1);
+
             //if(j % 2 == 0 ) hrdt2Dg[j/2]->Fill(rdt[j+1],rdt[j]);
             hArrayRDTMatrixG->Fill(detID, j); 
             //if( rdtgate1) hArrayRDTMatrixG->Fill(detID, j); 
@@ -891,37 +928,12 @@ Bool_t Monitors::Process(Long64_t entry)
          hecalVzRow[i] -> Fill( z[k], eCal[k]);
       }
     }
-    
-   /*********** RECOILS ***********************************************/    
    
-   for( int i = 0; i < 8 ; i++){
-      hrdtID->Fill(i, rdt[i]);
-      hrdt[i]->Fill(rdt[i]);
-      
-      for( int j = 0; j < 8 ; j++){
-         if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
-      }
-      
-      if( i % 2 == 0  ){        
-        if ( isTACGate && !(tacGate[0] < tac[0] &&  tac[0] < tacGate[1]) ) continue;        
-         recoilMulti++; // when both dE and E are hit
-         rdtot[i/2] = rdt[i]+rdt[i+1];
-         htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
-         hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
-         hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
-
-         htacRecoil[i]->Fill(tac[0],rdt[i]);
-         htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
-      }
-   }
-   
-   
-   
-      /*********** Apollo ***********************************************/    
+   /*********** Apollo ***********************************************/    
    
    for( int i = 0; i <20 ; i++){
       hApollo[i]->Fill(-tac[i]);
-   
+
    }
    
    ///if( rdt_t[4] > 0 ){
