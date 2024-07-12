@@ -44,8 +44,8 @@ void LoadRDTCorr2(){
 
 void RDTCutCreator(TString dataList, 
                    TString saveFileName = "rdtCuts.root", 
-                   int eRange=6000, 
-                   int deRange=2000, 
+                   int eRange=10000, 
+                   int deRange=10000, 
                    bool isLogz = false,
                    TString gate = "", 
                    TString treeName = "gen_tree", 
@@ -76,10 +76,10 @@ void RDTCutCreator(TString dataList,
 
    TString expression[10];
 
-   TH2F * h[4];
+   TH2F * h[8];
 
    int count = 0;
-   for (Int_t i = 0; i < 4; i++) {
+   for (Int_t i = 0; i < 8; i++) {
 
       printf("======== make a graphic cut on the plot (double click to stop), %d-th cut: ", i );
 
@@ -87,7 +87,7 @@ void RDTCutCreator(TString dataList,
          varX.Form("trdt[%d]",2*i); varY.Form("trdt[%d]",2*i+1);
       }else{
          ///varX.Form("rdt[%d]",i+4); varY.Form("rdt[%d]",i); // dE grouped
-         varX.Form("rdt[%d]",2*i); varY.Form("rdt[%d]",2*i+1);
+         varX.Form("crdt[%d+8]",i); varY.Form("-rdt[%d]",2);
       }
 
       h[i] = new TH2F(Form("h%d", i), Form("%s - %s", varY.Data(), varX.Data()), 500, 0, eRange, 500, 0, deRange);
@@ -99,7 +99,7 @@ void RDTCutCreator(TString dataList,
                          
       ///printf("%s \n", expression[i].Data());
 
-      chain->Draw(expression[i], gate, "col");
+      chain->Draw(expression[i], gate, "SCAT");
       
       if( h[i]->Integral() < 1000 ) {
          h[i]->SetMarkerStyle(20);
