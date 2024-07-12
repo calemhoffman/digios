@@ -13,7 +13,11 @@
       "ChainMonitors.C": "cpp",
       "Monitors_Util.C": "cpp",
       "Monitors.C": "cpp",
-      "script.C": "cpp"
+      "script.C": "cpp",
+      "GeneralSort.C": "cpp",
+      "CutCreator.C": "cpp",
+      "RDTCutCreator.C": "cpp",
+      "rootlogon.C": "cpp"
     },
   "better-comments.multilineComments": true,
   "better-comments.tags" : [
