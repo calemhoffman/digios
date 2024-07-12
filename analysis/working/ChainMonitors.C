@@ -11,9 +11,25 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
-  
+    //  chain->Add("../root_data/gen_run01[5-9].root"); /
+    //  chain->Add("../root_data/gen_run02[0-8].root");//good data on 32S(d,p) with ~300 ug/cm2
+
+    //  chain->Add("../root_data/gen_run03[3-9].root");
+
+     //chain->Add("../root_data/gen_run03[8-9].root"); thick target
+     //chain->Add("../root_data/gen_run04[0-2].root"); - 24 hours
+
+      // chain->Add("../root_data/gen_run049.root"); //thin target 24 hours
+      // chain->Add("../root_data/gen_run05[0-9].root"); //
+      // chain->Add("../root_data/gen_run06[0-9].root"); //
+      // chain->Add("../root_data/gen_run07[0-9].root"); // if runs does not exist, it is ok.
+      //chain->Add("../root_data/gen_run08[3-9].root"); //
+      // chain->Add("../root_data/gen_run08[7-9].root"); //
+      // chain->Add("../root_data/gen_run09[0-9].root"); //
+      // chain->Add("../root_data/gen_run10[0-9].root"); //
+      // chain->Add("../root_data/gen_run110.root"); //
+     //chain->Add("../root_data/trace_run01[5-9].root");
+     chain->Add("../root_data/trace_run087.root");
     ///********** end Marker for AutoCalibration.
     
     
