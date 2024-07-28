@@ -81,58 +81,58 @@ void GeneralSort::Begin(TTree * tree)
 
   gen_tree->Branch("runID", &psd.runID,"runID/I");
 
-  gen_tree->Branch("e",psd.Energy,           Form("Energy[%d]/F", NARRAY));
-  gen_tree->Branch("e_t",psd.EnergyTimestamp,Form("EnergyTimestamp[%d]/l",NARRAY));
+  gen_tree->Branch("e",psd.Energy,           Form("e[%d]/F", NARRAY));
+  gen_tree->Branch("e_t",psd.EnergyTimestamp,Form("e_t[%d]/l",NARRAY));
   
-  gen_tree->Branch("ring",psd.Ring,           Form("Ring[%d]/F", NARRAY));
-  gen_tree->Branch("ring_t",psd.RingTimestamp,Form("RingTimestamp[%d]/l",NARRAY));
+  gen_tree->Branch("ring",psd.Ring,           Form("ring[%d]/F", NARRAY));
+  gen_tree->Branch("ring_t",psd.RingTimestamp,Form("ring_t[%d]/l",NARRAY));
 
-  gen_tree->Branch("xf",psd.XF,           Form("XF[%d]/F", NARRAY));
-  gen_tree->Branch("xf_t",psd.XFTimestamp,Form("XFTimestamp[%d]/l", NARRAY));
+  gen_tree->Branch("xf",psd.XF,           Form("xf[%d]/F", NARRAY));
+  gen_tree->Branch("xf_t",psd.XFTimestamp,Form("xf_t[%d]/l", NARRAY));
  
-  gen_tree->Branch("xn",psd.XN,           Form("XN[%d]/F", NARRAY));
-  gen_tree->Branch("xn_t",psd.XNTimestamp,Form("XNTimestamp[%d]/l", NARRAY)); 
+  gen_tree->Branch("xn",psd.XN,           Form("xn[%d]/F", NARRAY));
+  gen_tree->Branch("xn_t",psd.XNTimestamp,Form("xn_t[%d]/l", NARRAY)); 
   
   gen_tree->Branch("x",psd.x, Form("x[%d]/F", NARRAY));
 
   if( NRDT > 0 ){
-    gen_tree->Branch("rdt"  ,psd.RDT,          Form("RDT[%d]/F",NRDT));
-    gen_tree->Branch("rdt_t",psd.RDTTimestamp, Form("RDTTimestamp[%d]/l", NRDT)); 
+    gen_tree->Branch("rdt"  ,psd.RDT,          Form("rdt[%d]/F",NRDT));
+    gen_tree->Branch("rdt_t",psd.RDTTimestamp, Form("rdt_t[%d]/l", NRDT)); 
   }else{
     printf(" -----  no recoil.\n"); 
   }
   
   if( NTAC > 0 ){
-    gen_tree->Branch("tac"  ,psd.TAC,         Form("TAC[%d]/F", NTAC));
-    gen_tree->Branch("tac_t",psd.TACTimestamp,Form("TACTimestamp[%d]/l", NTAC)); 
+    gen_tree->Branch("tac"  ,psd.TAC,         Form("tac[%d]/F", NTAC));
+    gen_tree->Branch("tac_t",psd.TACTimestamp,Form("tac_t[%d]/l", NTAC)); 
   }else{
     printf(" -----  no TAC.\n"); 
   }
   
   if( NELUM > 0 ){
-    gen_tree->Branch("elum"  ,psd.ELUM,         Form("ELUM[%d]/F", NELUM));
-    gen_tree->Branch("elum_t",psd.ELUMTimestamp,Form("ELUMTimestamp[%d]/l",NELUM)); 
+    gen_tree->Branch("elum"  ,psd.ELUM,         Form("elum[%d]/F", NELUM));
+    gen_tree->Branch("elum_t",psd.ELUMTimestamp,Form("elum_t[%d]/l",NELUM)); 
   }else{
     printf(" -----  no elum\n"); 
   }
   
   if( NEZERO > 0 ){
-    gen_tree->Branch("ezero"  ,psd.EZERO,         Form("EZERO[%d]/F", NEZERO));
-    gen_tree->Branch("ezero_t",psd.EZEROTimestamp,Form("EZEROTimestamp[%d]/l", NEZERO)); 
+    gen_tree->Branch("ezero"  ,psd.EZERO,         Form("ezero[%d]/F", NEZERO));
+    gen_tree->Branch("ezero_t",psd.EZEROTimestamp,Form("ezero_t[%d]/l", NEZERO)); 
   }else{
     printf(" -----  no ezero.\n"); 
   }
 
   if( NCRDT > 0 ){
-    gen_tree->Branch("crdt"  ,psd.CRDT,         Form("CRDT[%d]/F", NCRDT));
-    gen_tree->Branch("crdt_t",psd.CRDTTimestamp,Form("CRDTTimestamp[%d]/l", NCRDT)); 
+    gen_tree->Branch("crdt"  ,psd.CRDT,         Form("crdt[%d]/F", NCRDT));
+    gen_tree->Branch("crdt_t",psd.CRDTTimestamp,Form("crdt_t[%d]/l", NCRDT)); 
   }else{
     printf(" -----  no crdt.\n"); 
   }
   
   if( NAPOLLO > 0 ){
-    gen_tree->Branch("apollo"  ,psd.APOLLO,         Form("APOLLO[%d]/F", NAPOLLO));
-    gen_tree->Branch("apollo_t",psd.APOLLOTimestamp,Form("APOLLOTimestamp[%d]/l", NAPOLLO)); 
+    gen_tree->Branch("apollo"  ,psd.APOLLO,         Form("apollo[%d]/F", NAPOLLO));
+    gen_tree->Branch("apollo_t",psd.APOLLOTimestamp,Form("apollo_t[%d]/l", NAPOLLO)); 
   }else{
     printf(" -----  no APOLLO.\n"); 
   }
