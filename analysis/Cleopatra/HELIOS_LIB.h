@@ -483,7 +483,7 @@ public:
    double RPos(double Zpos, double theta, double phi, double rho, int sign){
       double x =  XPos(Zpos, theta, phi, rho, sign) ;
       double y =  YPos(Zpos, theta, phi, rho, sign) ;
-      return sqrt(x*x+y*y);
+      return TMath::Sqrt(x*x+y*y);
    }
    
    double GetXPos(double ZPos){ return XPos( ZPos, orbitb.theta, orbitb.phi, orbitb.rho, sign); }
@@ -651,13 +651,13 @@ int HELIOS::DetAcceptance(){
    if( firstPos > 0 && orbitb.z < 0 ) return -1;
 
    // -11 ======== rho is too small
-   if(  2 * orbitb.rho < perpDist ) return -11; 
+   if( orbitb.rho <= perpDist ) return -11; 
    
    // -15 ========= if detRowID == -1, should be (2 * orbitb.rho < perpDist)
    if( orbitb.detRowID == -1 ) return -15;
    
    // -10 =========== when rho is too big . 
-   if( bore < 2 * orbitb.rho) return -10; 
+   if( isFromOutSide && bore < 2 * orbitb.rho) return -10; 
    
    // -14 ========== check particle-B hit radius on recoil dectector
    if( isCoincidentWithRecoil && orbitB.R > rhoRecoilout  ) return -14;
@@ -672,7 +672,7 @@ int HELIOS::DetAcceptance(){
    if( orbitb.loop > 3 ) return -13;
    
    // -2 ========= calculate the "y"-distance from detector center
-   if( sqrt(orbitb.R*orbitb.R - perpDist*perpDist)> width/2 ) return -2; 
+   if( TMath::Sqrt(orbitb.R*orbitb.R - perpDist*perpDist)> width/2 ) return -2; 
    
    // -3 ==== when zPos further the range of whole array, more loop would not save
    if( firstPos < 0 && orbitb.z < pos[0] - length ) return -3; 
@@ -776,7 +776,7 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
    CalTrajectoryPara(Pb, Zb, 0);
    
    int targetLoop = 1;
-   int inOut = isFromOutSide == true ? 1: 0; //1 = from Outside, 0 = from inside
+   int inOut = (isFromOutSide == true ? 1: 0); //1 = from Outside, 0 = from inside
    
    bool debug = false;
    
