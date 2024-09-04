@@ -1,15 +1,10 @@
 {
     "files.associations": {
-        "Transfer.C": "cpp",
-        "Apollo.C": "cpp",
-        "readTrace.C": "cpp",
-        "GeneralSortTraceProof.C": "cpp",
-        "generateHistogram.C": "cpp",
-        "Analyzer.C": "cpp",
-        "readRawTrace.C": "cpp",
-        "AutoFit.C": "cpp",
-        "vector": "cpp",
-        "process_run.C": "cpp"
+        "*.C": "cpp",
+        "DWBA": "shellscript",
+        "detectorGeo.txt": "shellscript",
+        "reactionConfig.txt": "shellscript",
+        "Ex.txt": "shellscript"
     },
   "better-comments.multilineComments": true,
   "better-comments.tags" : [
