@@ -9,6 +9,7 @@
 #include "Cali_e_trace_Proof.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <string>
 
 TString saveFileName = "A_sortedTrace.root";
 
@@ -37,10 +38,10 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
    newTree->Branch("eventID",&eventID,"eventID/I"); 
    newTree->Branch("run",&run,"run/I"); 
    
-   newTree->Branch("e" ,  eC, "eC[24]/F");
+   newTree->Branch("e" ,  eC, "e[24]/F");
    newTree->Branch("x" ,   x, "x[24]/F");
    newTree->Branch("z" ,   z, "z[24]/F");
-   newTree->Branch("detID", &det, "det/I");
+   newTree->Branch("detID", &det, "detID/I");
    newTree->Branch("hitID", &hitID, "hitID/I");
    newTree->Branch("multiHit", &multiHit, "multiHit/I");
    
@@ -50,8 +51,8 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
    
    newTree->Branch("e_t", eC_t, "e_t[24]/l");
    
-   newTree->Branch("rdt", rdtC, "rdtC[8]/F");
-   newTree->Branch("rdt_t", rdtC_t, "rdtC_t[8]/l");
+   newTree->Branch("rdt", rdtC, "rdt[8]/F");
+   newTree->Branch("rdt_t", rdtC_t, "rdt_t[8]/l");
    
    newTree->Branch("coin_t", &coin_t, "coin_t/I");
    
@@ -59,17 +60,17 @@ void Cali_e_trace_Proof::SlaveBegin(TTree * /*tree*/)
    newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUC/F");
    newTree->Branch("coinTime", &coinTime, "coinTime/F");
     
-   newTree->Branch("te",     &teS,     "teS/F");
-   newTree->Branch("te_t",   &te_tS,   "te_tS/F");
-   newTree->Branch("te_r",   &te_rS,   "te_rS/F");
-   newTree->Branch("trdt",   &trdtS,   "trdtS/F");
-   newTree->Branch("trdt_t", &trdt_tS, "trdt_tS/F");
-   newTree->Branch("trdt_r", &trdt_rS, "trdt_rS/F");
+   newTree->Branch("te",     &teS,     "te/F");
+   newTree->Branch("te_t",   &te_tS,   "te_t/F");
+   newTree->Branch("te_r",   &te_rS,   "te_r/F");
+   newTree->Branch("trdt",   &trdtS,   "trdt/F");
+   newTree->Branch("trdt_t", &trdt_tS, "trdt_t/F");
+   newTree->Branch("trdt_r", &trdt_rS, "trdt_r/F");
    
    
    //===================================================== loading parameter
    //========================================= detector Geometry
-   string detGeoFileName = "detectorGeo.txt";
+   std::string detGeoFileName = "detectorGeo.txt";
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
 
    TMacro * haha = new TMacro();
