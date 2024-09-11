@@ -66,6 +66,8 @@ scp ${elogContext} heliosdigios@${mac2020IP}:~/.
 # tell Mac2020 run push2elog script
 if [ $expName = "ARR01" ]; then
   elogName=$expName
+elif [  ${expName} == "h087_Tritium" ]; then
+  elogName="H087_Tritium"
 else
   elogName="H"${expName:1}
 fi
