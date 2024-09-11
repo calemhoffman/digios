@@ -148,7 +148,7 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
       if( !TMath::IsNaN(dudu) && !TMath::IsNaN(haha) ){
         px.push_back(dudu);
         py.push_back(haha);
-        printf("%d | %f  %f \n", i, px.back(), py.back());
+        // printf("%d | %f  %f \n", i, px.back(), py.back());
       }
    }
 
@@ -177,7 +177,7 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    tx->SetName(Form("tx"));
    tx->SetLineColor(4);
 
-   tx->Draw("AC*");
+  //  tx->Draw("AC*");
    
    /**///========================================================= result
       
