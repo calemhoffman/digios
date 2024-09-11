@@ -38,8 +38,8 @@ public:
   void SetNucleus(float A, float Z);
   void SetA(float A);
   void SetZ(float Z);
-  void IsNeutron(){ this->mu = mn; isNeutron = true;}
-  void IsProton() { this->mu = mp; isNeutron = false;}
+  void IsNeutron(){ this->mu = mn * A / (A+1); isNeutron = true;}
+  void IsProton() { this->mu = mp * A / (A+1); isNeutron = false;}
   void SetWSPars(double V0, double r0, double a0, double VSO, double rSO, double aSO, double rc);
 
   void SetEnergy(double en) { this->T = en; }
@@ -263,8 +263,10 @@ int WoodsSaxon::CalWSEnergies(bool useBarrier = false, int maxL = 7, double uTor
   double uOld = 0;
   double uOld2 = 0;
 
-  if( 1 < A && A < 40 ) maxL = 7;
-  if( 1 < N && (N < 20 || Z < 20) ) maxL = 3;
+  // if( 1 < A && A < 40 ) maxL = 7;
+  // if( 1 < N && (N < 20 || Z < 20) ) maxL = 3;
+
+  printf("max-L : %d, uTorr : %.0f, eTorr : %.3e, maxLoop : %d, dKE : %.2f\n", maxL, uTorr, eTorr, maxLoop, dKE);
 
   double KEstart = V0 + 2.; ///assume the 1st eigen state is 2 MeV above the well depth
 
