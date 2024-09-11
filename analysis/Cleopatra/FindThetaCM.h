@@ -129,10 +129,10 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
          midPos.push_back(pos[i]-length/2.);
       }
    }
-   
+
    //calculate a TGraph for thetaCM vs z
-   double px[100];
-   double py[100];
+   std::vector<double> px;
+   std::vector<double> py;
    
    double mb = reaction.GetMass_b();
    double kCM = reaction.GetMomentumbCM();
@@ -143,12 +143,17 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    for(int i = 0; i < 100; i++){
       double thetacm = (i + 5.) * TMath::DegToRad();
       double temp = TMath::TwoPi() * slope / beta / kCM * a / TMath::Sin(thetacm); 
-      px[i] = beta /slope * (gamma * beta * q - gamma * kCM * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
-      py[i] = thetacm * TMath::RadToDeg();   
+      double dudu = beta /slope * (gamma * beta * q - gamma * kCM * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
+      double haha = thetacm * TMath::RadToDeg();
+      if( !TMath::IsNaN(dudu) && !TMath::IsNaN(haha) ){
+        px.push_back(dudu);
+        py.push_back(haha);
+        printf("%d | %f  %f \n", i, px.back(), py.back());
+      }
    }
 
    //find minimum z position
-   TGraph * xt = new TGraph(100, py, px);
+   TGraph * xt = new TGraph(px.size(), &py[0], &px[0]);
    xt->SetName("xt");
    ///double zMin0 = xt->Eval(0);
    ///printf("z for thetaCM = 0 : %f mm \n", zMin0);
@@ -168,11 +173,11 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    printf(" z min %f mm at thetaCM %f deg \n", zMin0, tMin0);
 
 
-   TGraph * tx = new TGraph(100, px, py);
+   TGraph * tx = new TGraph(px.size(), &px[0], &py[0]);
    tx->SetName(Form("tx"));
    tx->SetLineColor(4);
 
-   //tx->Draw("AC*");
+   tx->Draw("AC*");
    
    /**///========================================================= result
       
