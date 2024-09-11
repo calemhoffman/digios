@@ -76,6 +76,8 @@ echo "pushing to elog for started a run"
 
 if [ ${expName} == "ARR01" ]; then
     elogName="ARR01"
+elif [  ${expName} == "h087_Tritium" ]; then
+    elogName="H087_Tritium"
 else
     elogName="H"${expName:1}
 fi

@@ -13,11 +13,12 @@ heliosPath=os.environ["HELIOSSYS"]
 
 fexp=open("%s/daq/edm/scripts/DataBaseAddress.sh" % heliosPath, 'r')
 line=fexp.readline() #this line is bashscript header
-line=fexp.readline() #this line is dataBaseAddress
+#line=fexp.readline() #this line is dataBaseAddress
 pos=line.find("=")
 dataBaseAddress=line[pos+1:-1]
 fexp.close()
-    
+
+print(dataBaseAddress)    
 
 while 1:
 

@@ -18,8 +18,8 @@
 #include <TStopwatch.h>
 #include <TMacro.h>
 
-#include "Woods-Saxon/RK4.h"
-#include "Woods-Saxon/WS.h"
+#include "../Woods-Saxon/RK4.h"
+#include "../Woods-Saxon/WS.h"
 #include "../Armory/AnalysisLibrary.h"
 
 using namespace std;
