@@ -33,13 +33,13 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
-int    apolloRange[2] = {     0,    1000};
-int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {   200,    4000};
+int rawEnergyRange[2] = {   100,     3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     0,       15};       /// in the E-Z plot
+int     rdtDERange[2] = {   300,    10000}; 
+int      rdtERange[2] = {   300,    10000};  
+int    apolloRange[2] = {     0,     1000};
+int      crdtRange[2] = {     0,     8000};
+int      elumRange[2] = {    150,   10000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
@@ -218,6 +218,7 @@ TH1F* helum4C; // elum rate for (12C, 12C)
 
 TH1F* hBIC; // BIC, beam integrated current
 
+TH2F * helum_3; //This is elum3 energy vs X position plot
 //======= EZero, or IonChamber when recoil also use
 TH1F* hic0; //ionChamber ch0
 TH1F* hic1;
@@ -529,6 +530,8 @@ void Monitors::Begin(TTree *tree)
    helum4C = new TH1F("helum4C", "Elum rate for carbon; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (12C, 12C)
    hBIC = new TH1F("hBIC", "BIC rate ; time [min]; count / min", timeRange[1]-timeRange[0], timeRange[0], timeRange[1]); // elum rate for (d,d)
    
+   helum_3 = new TH2F("helum_3", "elum 3 ; X [a.u] ; energy [ch]", 400, -2, 4, 400, 0, 9000);
+
    //===================== EZERO
    hic0 = new TH1F("hic0", "IC0; IC-0 [ch]; count", 500,  0, icRange[0]);
    hic1 = new TH1F("hic1", "IC1; IC-1 [ch]; count", 500,  0, icRange[1]);
@@ -859,7 +862,7 @@ Bool_t Monitors::Process(Long64_t entry)
       }
     }
     
-   /*********** RECOILS ***********************************************/    
+   /*********** RECOILS ***********************************************/       
    for( int i = 0; i < NRDT ; i++){
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
@@ -880,6 +883,8 @@ Bool_t Monitors::Process(Long64_t entry)
          htacRecoil[i+1]->Fill(tac[0],rdt[i+1]);
       }
    }
+
+   helum_3->Fill( (rdt[1]-rdt[0])/rdt[2], rdt[2]);
    
    /*********** Apollo ***********************************************/    
    
@@ -1031,7 +1036,7 @@ void Monitors::Terminate()
 
    //############################################ User is free to edit this section
    //--- Canvas Size
-   int canvasXY[2] = {1200 , 800} ;// x, y
+   int canvasXY[2] = {1800 , 1200} ;// x, y
    int canvasDiv[2] = {3,2};
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
@@ -1081,18 +1086,22 @@ void Monitors::Terminate()
    //heVIDG->Draw();
    //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
-   Draw2DHist(hrdt2D[0]);
-//      Draw2DHist(hrdt2Dsum[0]);
+//    Draw2DHist(hrdt2D[0]);
+// //      Draw2DHist(hrdt2Dsum[0]);
 
-   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
-   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
+//    if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
+//    if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
 
+
+   helum_3->Draw("");
 
    //helum4D->Draw();
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
    
    ///----------------------------------- Canvas - 6
-   PlotRDT(0,0);
+   // PlotRDT(0,0);
+   padID++; cCanvas->cd(padID); 
+   helumID->Draw("colz");
    
   // padID++; cCanvas->cd(padID); 
  //  Draw2DHist(hrdtExGated);
