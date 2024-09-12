@@ -172,11 +172,18 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    }   
    printf(" z min %f mm at thetaCM %f deg \n", zMin0, tMin0);
 
+   /// remove py < tMin0;
+   for( int i = py.size() - 1 ; i >= 0; --i ){
+      // printf("%d\n", i);
+      if( py[i] < tMin0 ){
+        py.erase(py.begin() + i );
+        px.erase(px.begin() + i );
+      }
+   }
 
    TGraph * tx = new TGraph(px.size(), &px[0], &py[0]);
    tx->SetName(Form("tx"));
-   tx->SetLineColor(4);
-
+  //  tx->SetLineColor(4);
   //  tx->Draw("AC*");
    
    /**///========================================================= result
