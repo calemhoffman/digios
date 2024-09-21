@@ -130,8 +130,8 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       if( e[idet] == 0 ) continue;
       if( xf[idet] == 0 && xn[idet] == 0 ) continue;
    
-      double xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
-      double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
+      double xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] /2 ;
+      double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] /2;
       
       eTemp = e[idet];
       

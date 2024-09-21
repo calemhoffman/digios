@@ -724,8 +724,8 @@ void Cali_e_trace::Init(TTree *tree)
    
    newTree->Branch("e_t", eC_t, Form("e_t[%d]/l", numDet) );
    
-   newTree->Branch("rdt", rdtC, Form("rdtC[%d]/F",NRDT));
-   newTree->Branch("rdt_t", rdtC_t, Form("rdtC_t[%d]/l", NRDT));
+   newTree->Branch("rdt", rdtC, Form("rdt[%d]/F",NRDT));
+   newTree->Branch("rdt_t", rdtC_t, Form("rdt_t[%d]/l", NRDT));
    newTree->Branch("rdtID", &rdtID, "rdtID/I");
    newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
    
@@ -751,23 +751,23 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("crdt_t", crdt_t, Form("crdt_t[%d]/l", NCRDT));
    }
    
-   newTree->Branch("coin_t", &coin_t, "coincident_time_from_digitizer/I");
+   newTree->Branch("coin_t", &coin_t, "coin_t/I");
    
    if( isTraceDataExist ){
       newTree->Branch("tcoin_t", &tcoin_t, "tcoin_t/F");
-      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUnCalibrated_ns/F");
-      newTree->Branch("coinTime", &coinTime, "coinTime_ns/F");
-      newTree->Branch("te",             te,  Form("Trace_Energy[%d]/F", numDet) );
-      newTree->Branch("te_r",         te_r,  Form("Trace_Energy_RiseTime[%d]/F", numDet));
-      newTree->Branch("te_t",         te_t,  Form("Trace_Energy_Time[%d]/F", numDet));
-      newTree->Branch("trdt",         trdt,  Form("Trace_RDT[%d]/F", NRDT));
-      newTree->Branch("trdt_t",     trdt_t,  Form("Trace_RDT_Time[%d]/F", NRDT));
-      newTree->Branch("trdt_r",     trdt_r,  Form("Trace_RDT_RiseTime[%d]/F", NRDT));
+      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUn/F");
+      newTree->Branch("coinTime", &coinTime, "coinTime/F");
+      newTree->Branch("te",             te,  Form("te[%d]/F", numDet) );
+      newTree->Branch("te_r",         te_r,  Form("te_r[%d]/F", numDet));
+      newTree->Branch("te_t",         te_t,  Form("te_t[%d]/F", numDet));
+      newTree->Branch("trdt",         trdt,  Form("trdt[%d]/F", NRDT));
+      newTree->Branch("trdt_t",     trdt_t,  Form("trdt_t[%d]/F", NRDT));
+      newTree->Branch("trdt_r",     trdt_r,  Form("trdt_r[%d]/F", NRDT));
 
       if( isCRDTExist ){
-         newTree->Branch("tcrdt",         tcrdt,  Form("Trace_CRDT[%d]/F", NCRDT));
-         newTree->Branch("tcrdt_t",     tcrdt_t,  Form("Trace_CRDT_Time[%d]/F", NCRDT));
-         newTree->Branch("tcrdt_r",     tcrdt_r,  Form("Trace_CRDT_RiseTime[%d]/F", NCRDT));
+         newTree->Branch("tcrdt",         tcrdt,  Form("tcrdt[%d]/F", NCRDT));
+         newTree->Branch("tcrdt_t",     tcrdt_t,  Form("tcrdt[%d]/F", NCRDT));
+         newTree->Branch("tcrdt_r",     tcrdt_r,  Form("tcrdt[%d]/F", NCRDT));
 
       }
    }

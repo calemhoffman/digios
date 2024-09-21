@@ -350,8 +350,8 @@ Bool_t Cali_e_trace_Proof::Process(Long64_t entry)
       }
             
       double xfC = 0, xnC = 0;
-      if( xf[idet] > 0) xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
-      if( xn[idet] > 0) xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
+      if( xf[idet] > 0) xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0]/2 ;
+      if( xn[idet] > 0) xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0]/2;
    
       //========= calculate x
       if(xf[idet] > 0  && xn[idet] > 0 ) {
