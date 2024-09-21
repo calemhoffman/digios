@@ -294,6 +294,7 @@ void elum(void) {
   helumID->Draw("colz");
   
 }
+
 void apollo(void) {
   TCanvas *capollo = (TCanvas *) gROOT->FindObjectAny("capollo");
   if( capollo == NULL )  capollo = new TCanvas("capollo",Form("APOLLO | %s", canvasTitle.Data()),1000,1000);
@@ -314,6 +315,15 @@ void recoils(bool isLogz = false) {
   if( isLogz ) crdt->cd(2)->SetLogz(); crdt->cd(2); hrdt2D[1]->Draw("col");  
   if( isLogz ) crdt->cd(3)->SetLogz(); crdt->cd(3); hrdt2D[3]->Draw("col");  
   if( isLogz ) crdt->cd(4)->SetLogz(); crdt->cd(4); hrdt2D[2]->Draw("col");  
+
+  TCanvas *crdtg =  (TCanvas *) gROOT->FindObjectAny("crdtg");
+  if( crdtg == NULL ) crdtg = new TCanvas("crdtg",Form("raw RDT (time gated) | %s", canvasTitle.Data()),1700, 0, 1000,1000);
+  crdtg->Clear();crdtg->Divide(2,2);
+
+  if( isLogz ) crdtg->cd(1)->SetLogz(); crdtg->cd(1); hrdtg[0]->Draw("");  
+  if( isLogz ) crdtg->cd(2)->SetLogz(); crdtg->cd(2); hrdtg[2]->Draw("");  
+  if( isLogz ) crdtg->cd(3)->SetLogz(); crdtg->cd(3); hrdtg[4]->Draw("");  
+  if( isLogz ) crdtg->cd(4)->SetLogz(); crdtg->cd(4); hrdtg[6]->Draw("");  
 
 
   //TCanvas *crdtSum =  (TCanvas *) gROOT->FindObjectAny("crdtSum");

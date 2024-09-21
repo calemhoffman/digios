@@ -11,8 +11,12 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
+    // chain->Add("../root_data/gen_run00[4,5].root"); // alpha
+    
+    // chain->Add("../root_data/trace_run01[2-8].root"); // > 150 x 1000 pps runs
+
+    chain->Add("../root_data/gen_run01[9].root"); //  ~ 200 x 1000 pps, remove dE attenuation
+    chain->Add("../root_data/gen_run02[0-9].root"); //  ~ 200 x 1000 pps, remove dE attenuation
   
     ///********** end Marker for AutoCalibration.
     

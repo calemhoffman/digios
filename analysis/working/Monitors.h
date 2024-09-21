@@ -333,10 +333,10 @@ void DrawBox(TH1* hist, double x1, double x2, Color_t color, float alpha){
 
 void Monitors::Draw2DHist(TH2F * hist){
    
-   if( hist->Integral() < 3000 ){
-      hist->SetMarkerStyle(20);
-      hist->SetMarkerSize(0.3);
-      hist->Draw("");
+   if( hist->Integral() < 5000 ){
+      // hist->SetMarkerStyle(20);
+      // hist->SetMarkerSize(0.5);
+      hist->Draw("colz box");
    }else{
       hist->Draw("colz"); 
    }
