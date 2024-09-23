@@ -3192,18 +3192,26 @@ topShadowColor index 79
 botShadowColor index 79
 font "helvetica-bold-r-18.0"
 buttonLabel "Start AutoRun"
-numCmds 4
+numCmds 8
 commandLabel {
-  0 "60 mins"
-  1 "30 mins"
-  2 "120 mins"
-  3 "360 mins"
+  0 "60 mins repeat"
+  1 "30 mins repeat"
+  2 "120 mins repeat"
+  3 "360 mins repeat"
+  4 "60 mins single"
+  5 "120 mins single"
+  6 "360 mins single"
+  7 "3 mins single"
 }
 command {
   0 "$EDMSCRIPTS/open_r.sh 60"
   1 "$EDMSCRIPTS/open_r.sh 30"
   2 "$EDMSCRIPTS/open_r.sh 120"
   3 "$EDMSCRIPTS/open_r.sh 360"
+  4 "$EDMSCRIPTS/open_r.sh -60"
+  5 "$EDMSCRIPTS/open_r.sh -120"
+  6 "$EDMSCRIPTS/open_r.sh -360"
+  7 "$EDMSCRIPTS/open_r.sh -3"
 }
 endObjectProperties
 

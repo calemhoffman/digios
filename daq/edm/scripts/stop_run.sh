@@ -74,6 +74,8 @@ fi
 ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 
+echo ">>>>>>>>>>>>>>> push to Discord"
+
 #source ~/Slack_Elog_Notification.sh
 source ~/Discord_webhooks.sh
 slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
