@@ -99,7 +99,7 @@ void RDTCutCreator(TString dataList,
                          
       ///printf("%s \n", expression[i].Data());
 
-      chain->Draw(expression[i], gate, "col");
+      chain->Draw(expression[i], gate, "col box");
       
       if( h[i]->Integral() < 1000 ) {
          // h[i]->SetMarkerStyle(20);

@@ -139,7 +139,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    //*********** h088 recale rdt for run 12 - 18 *************************/
     
    if( 12 <= runID && runID <= 18 ){
-      rdt[1] = rdt[1] * 4.5;
+      rdt[1] = rdt[1] * 4.6;
       rdt[3] = rdt[3] * 4.8;
       rdt[5] = rdt[5] * 4.7;
       rdt[7] = rdt[7] * 4.5;

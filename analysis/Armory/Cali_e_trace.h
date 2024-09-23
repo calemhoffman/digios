@@ -714,7 +714,7 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("ring",  ring, Form("xn[%d]/F", numDet) );
    newTree->Branch("x" ,       x, Form("x[%d]/F" , numDet) );
    newTree->Branch("z" ,       z, Form("z[%d]/F" , numDet) );
-   newTree->Branch("detID", &det, "det/I");
+   newTree->Branch("detID", &det, "detID/I");
    newTree->Branch("hitID", hitID, Form("hitID[%d]/I", numDet) );
    newTree->Branch("multiHit", &multiHit, "multiHit/I");
    

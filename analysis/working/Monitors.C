@@ -66,7 +66,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
 vector<int> skipDetID = {2, 10, 11, 16} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "rdtCuts_2.root";
+TString rdtCutFile1 = "rdtCuts_4.root";
 TString rdtCutFile2 = "rdtCuts_alpha_2.root";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -674,7 +674,7 @@ Bool_t Monitors::Process(Long64_t entry){
     //*********** h088 recale rdt for run 12 - 18 *************************/
     
     if( 12 <= runID && runID <= 18 ){
-      rdt[1] = rdt[1] * 4.5;
+      rdt[1] = rdt[1] * 4.6;
       rdt[3] = rdt[3] * 4.8;
       rdt[5] = rdt[5] * 4.7;
       rdt[7] = rdt[7] * 4.5;
@@ -685,6 +685,13 @@ Bool_t Monitors::Process(Long64_t entry){
       if( rdt[6] < 2000 && TMath::IsNaN(rdt[7]) ) rdt[7] = 400;
 
     }
+
+    // if( 19 <= runID  ){
+    //   if( rdt[0] < 1000 && TMath::IsNaN(rdt[1]) ) rdt[1] = 200;
+    //   if( rdt[2] < 1000 && TMath::IsNaN(rdt[3]) ) rdt[3] = 300;
+    //   if( rdt[4] < 1000 && TMath::IsNaN(rdt[5]) ) rdt[5] = 200;
+    //   if( rdt[6] < 1000 && TMath::IsNaN(rdt[7]) ) rdt[7] = 600;
+    // }
 
     //*********** Array ************************************************/ 
     //Do calculations and fill histograms
