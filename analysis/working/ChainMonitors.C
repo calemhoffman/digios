@@ -13,11 +13,25 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
 
     // chain->Add("../root_data/gen_run00[4,5].root"); // alpha
     
-    // chain->Add("../root_data/trace_run01[2-8].root"); // > 150 x 1000 pps runs
+    chain->Add("../root_data/trace_run01[2-8].root"); // > 150 x 1000 pps runs
 
-    chain->Add("../root_data/gen_run01[9].root"); //  ~ 200 x 1000 pps, remove dE attenuation
-    chain->Add("../root_data/gen_run02[0-9].root"); //  ~ 200 x 1000 pps, remove dE attenuation
+    chain->Add("../root_data/trace_run01[9].root"); //  ~ 200 x 1000 pps, remove dE attenuation
+    // chain->Add("../root_data/trace_run02[0-9].root"); //  ~ 200 x 1000 pps, remove dE attenuation
+    // chain->Add("../root_data/trace_run030.root"); //  ~ 200 x 1000 pps, remove dE attenuation 
+    // chain->Add("../root_data/trace_run03[2-9].root"); //  ~ 200 x 1000 pps, remove dE attenuation 
+    
+
+    chain->Add("../root_data/gen_run02[0-9].root"); //  ~ 200 x 1000 pps, remove dE attenuation 
+    chain->Add("../root_data/gen_run030.root"); //  ~ 200 x 1000 pps, remove dE attenuation 
+    // chain->Add("../root_data/gen_run031.root"); // beam changed?
+    chain->Add("../root_data/gen_run03[2-3].root"); //  ~ 200 x 1000 pps, remove dE attenuation 
+    chain->Add("../root_data/gen_run03[4-6].root"); // 476 ug target
+    // chain->Add("../root_data/gen_run037.root"); // beam changed?
+    chain->Add("../root_data/gen_run03[8-9].root"); // 476 ug target
+    chain->Add("../root_data/gen_run040.root"); // 476 ug target, last 11C run
   
+
+
     ///********** end Marker for AutoCalibration.
     
     
