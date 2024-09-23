@@ -16,8 +16,8 @@
 #define MAPPING
 
 #define NARRAY  24
-#define NRDT    1
-#define NELUM   0
+#define NRDT    8
+#define NELUM   3
 #define NEZERO  0
 #define NTAC    0
 #define NCRDT   0
@@ -36,10 +36,10 @@
 
 Int_t idConst = 1010;
 
-Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG1
+Int_t idDetMap[160] = {101, 100, 103, 102, 105, 104, 107, 106,  -1,  -1,   //VME1-DIG1 //recoils
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG2
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG3
-                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG4
+                        -1,  -1,  -1, 200, 201, 202,  -1,  -1,  -1,  -1,   //VME1-DIG4
                    
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,   // 1, VME2-DIG1, array
                          3,   2,   1,   0,   5,   4,   3,   2,  -1,  -1,   // 2, VME2-DIG2, array
@@ -54,7 +54,7 @@ Int_t idDetMap[160] = { -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME
                         19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
                         21,  20,  19,  18,  23,  22,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
                         23,  22,  21,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
-                       100, -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};  //12, VME4-DIG4, Recoil
+                       100,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};  //12, VME4-DIG4, Recoil
 
 
 Int_t idKindMap[160] = { 0,   0,   0,   0,   0,   0,   0,   0,  -1,  -1,

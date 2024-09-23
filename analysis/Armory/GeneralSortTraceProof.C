@@ -17,7 +17,7 @@ float delayChannel = 100.; //initial guess of the time
 //############# fit function definition
 //=== Don't forget to set fit parameter at line ~ 550
 const int numPara = 6;
-const float fitRange[2] = {0, 250};
+const float fitRange[2] = {0, 900};
 
 double fitFunc(double * x, double * par){
 

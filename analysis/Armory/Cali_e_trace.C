@@ -136,6 +136,21 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       }
    }
 
+   //*********** h088 recale rdt for run 12 - 18 *************************/
+    
+   if( 12 <= runID && runID <= 18 ){
+      rdt[1] = rdt[1] * 4.6;
+      rdt[3] = rdt[3] * 4.8;
+      rdt[5] = rdt[5] * 4.7;
+      rdt[7] = rdt[7] * 4.5;
+
+      if( rdt[0] < 2000 && TMath::IsNaN(rdt[1]) ) rdt[1] = 120;
+      if( rdt[2] < 2000 && TMath::IsNaN(rdt[3]) ) rdt[3] = 200;
+      if( rdt[4] < 2000 && TMath::IsNaN(rdt[5]) ) rdt[5] = 300;
+      if( rdt[6] < 2000 && TMath::IsNaN(rdt[7]) ) rdt[7] = 400;
+
+   }
+
    //#################################################################### gate
     
    ///============ Simple RDT gate base on energy
@@ -221,8 +236,8 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
        eC_t[idet] = e_t[idet]; 
      }
        
-     xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
-     xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
+     xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0]/2 ;
+     xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] /2;
       
      ///========= calculate x, range (-1,1)   
      if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
@@ -310,7 +325,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    for( int i = 0; i< NRDT/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
-         rdtID = 2*i+1; //dE
+         rdtID = 2*i; //E
       }
    }
    
