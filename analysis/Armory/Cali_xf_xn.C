@@ -88,6 +88,10 @@ void Cali_xf_xn(TTree * tree){
       //gate[i].Form("!TMath::IsNaN(xf[%d]) && !TMath::IsNaN(xn[%d])", i, i);
       //gate[i].Form("e[%d] > 0", i);
       
+      if( i == 2 ){
+         expression.Form("xf[%d]+xn[%d] >> q%d" ,i, i, i);
+      }
+
       cAlpha->cd(i+1);
       tree->Draw(expression, gate[i] , "");
       cAlpha->Update();
@@ -286,6 +290,9 @@ void Cali_xf_xn(TTree * tree){
     
     TString expression;
     expression.Form("e * %.8f + %.8f : Iteration$ >> p%d", a1[i], a0[i], i);
+    if( i == 2 ){
+       expression.Form("(xf + xn) * %.8f + %.8f : Iteration$ >> p%d", a1[i], a0[i], i);
+    }
     gate[i].Form("Iteration$ == %d", i);
     tree->Draw(expression, gate[i] , "colz");
     

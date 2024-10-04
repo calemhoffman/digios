@@ -173,13 +173,15 @@ void Cali_scale_x(TTree *tree){
             continue; // when e is invalid, nothing need to do
          }
          
-         if( eC < 1.5 ) continue;
+         if( eC < 1 ) continue;
+
+         if( xf[idet] < 700 || xn[idet] < 700 ) continue;
           
-         if( !TMath::IsNaN(xf[idet]) || xf[idet] > 0) xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
-         if( !TMath::IsNaN(xn[idet]) || xn[idet] > 0) xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
+         if( !TMath::IsNaN(xf[idet]) || xf[idet] > 0) xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0]/2 ;
+         if( !TMath::IsNaN(xn[idet]) || xn[idet] > 0) xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0]/2;
          
          //========= calculate x
-         if(xf[idet] > 0  && xn[idet] > 0 ) {
+         if(xf[idet] > 200  && xn[idet] > 200 ) {
             x = (xfC-xnC)/(xfC+xnC);
             
          }else if((xf[idet] == 0 || TMath::IsNaN(xf[idet])) && ( xn[idet] > 0 || !TMath::IsNaN(xn[idet])) ){

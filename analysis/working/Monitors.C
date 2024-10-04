@@ -63,7 +63,7 @@ int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.9;                  ///cut out the edge
+double xGate          = 1.1;                  ///cut out the edge
 vector<int> skipDetID = {2, 10, 11, 16} ;//{2,  11, 17}
 
 TString rdtCutFile1 = "rdtCuts_4.root";
