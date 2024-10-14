@@ -7,6 +7,9 @@
 #include <TClonesArray.h>
 #include <TBenchmark.h>
 #include <TMath.h>
+#include <TStyle.h>
+#include <TSystem.h>
+#include <TLatex.h>
 #include <TF1.h>
 #include <TLine.h>
 #include <iostream>
@@ -21,7 +24,7 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1500, 800, 300);
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 1400, 600);
    cRead->Divide(1,1);
    for( int i = 1; i <= 2 ; i++){
       cRead->cd(i)->SetGrid();
@@ -41,13 +44,13 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
    
    TLatex text ;
    text.SetNDC();
-   text.SetTextFont(62);
-   text.SetTextSize(0.06);
+   text.SetTextFont(40);
+   text.SetTextSize(0.03);
    text.SetTextColor(2);
    
    bool breakFlag = false;  
    bool lastEvFlag = false; 
-   vector<int> oldEv;
+   std::vector<int> oldEv;
    int evPointer = 0;
    
    for( int ev = 0; ev < totnumEntry; ev++){
@@ -86,31 +89,34 @@ void readTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool isG
          TString kTitle; 
          
          if( gFit != NULL ){ 
-            double base, time = 0, riseTime, energy, chiSq;
+            double base, time = 0, riseTime, energy, chiSq, decay;
             energy   = gFit->GetParameter(0);
             time     = gFit->GetParameter(1);
             riseTime = gFit->GetParameter(2);
             base     = gFit->GetParameter(3);
+            decay    = gFit->GetParameter(4);
             chiSq    = gFit->GetChisquare()/gFit->GetNDF();
             int kind = gFit->GetLineColor();
             int det  = gFit->GetLineStyle();
+            gFit->SetNpx(1000);
             
             ///if( !(minDetID <= det && det <= maxDetID ) ) continue;
             
             if( isGoodOnly){
-              if( abs(energy) < 1.5* g->GetRMS(2) ) continue;
+            //   if( abs(energy) < 1.5* g->GetRMS(2) ) continue;
               if( time > gFit->GetXmax() || time < gFit->GetXmin()) continue;
               if( time > 200 || time < 20) continue;
               if( riseTime > gFit->GetXmax()/7. || riseTime < 0 ) continue;
+              if( energy < 200 ) continue;
+              if( kind != 1 ) continue;
             }
             
             //if( energy < 400 ) continue;
                         
-            kTitle = Form("(%3d,%d), base: %8.1f, rise: %6.2f, time: %6.1f, energy: %8.1f | chi2: %8.1f, RMS: %6.1f",
-                     det, kind, base, riseTime, time, energy, chiSq, g->GetRMS(2));
+            kTitle = Form("(%3d,%d), base: %8.1f, rise: %6.2f, time: %6.1f, energy: %8.1f, decay: %.1f | chi2: %8.1f, RMS: %6.1f",
+                     det, kind, base, riseTime, time, energy, decay, chiSq, g->GetRMS(2));
             
             printf("%s |(q = break, w = last one)", kTitle.Data());
-
            
             timeVLine.SetX1(time);
             timeVLine.SetX2(time);

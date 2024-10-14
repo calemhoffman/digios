@@ -16,8 +16,8 @@ float delayChannel = 100.; //initial guess of the time
 
 //############# fit function definition
 //=== Don't forget to set fit parameter at line ~ 550
-const int numPara = 6;
-const float fitRange[2] = {0, 900};
+const int numPara = 4;
+float fitRange[2] = {0, 900};
 
 double fitFunc(double * x, double * par){
 
@@ -31,6 +31,17 @@ double fitFunc(double * x, double * par){
    if( x[0] < par[1] ) return  par[3] + par[5] * (x[0]-par[1]);
 
    return par[3] + par[0] * (1 - TMath::Exp(- (x[0] - par[1]) / par[2]) ) * TMath::Exp(- (x[0] - par[1]) / par[4]);
+}
+
+double fitFuncSimple(double *x, double * par){
+
+   /// par[0] = A
+   /// par[1] = t0
+   /// par[2] = rise time
+   /// par[3] = baseline
+
+   return par[0]/(1 + TMath::Exp(-(x[0] - par[1]) / par[2])) + par[3];
+
 }
 
 
@@ -302,7 +313,8 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       }
 
       if( traceMethod > 0 ){
-         gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
+         // gFit  = new TF1("gFit", fitFunc, fitRange[0], fitRange[1], numPara);
+         gFit  = new TF1("gFit", fitFuncSimple, fitRange[0], fitRange[1], numPara);
          newTree->Branch("te",             te,  Form("te[%d]/F",          NARRAY));
          newTree->Branch("te_r",         te_r,  Form("te_r[%d]/F", NARRAY));
          newTree->Branch("te_t",         te_t,  Form("te_t[%d]/F",     NARRAY));
@@ -598,21 +610,26 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             gFit->SetLineColor(lineColor);
             gFit->SetRange(0, traceLength);
 
-            base = gTrace->Eval(1);
-            double fileNameTemp = gTrace->Eval(delayChannel*1.5) - base;
+            //base = gTrace->Eval(1);
+            base = 8200;
+            double energyEst = gTrace->Eval(delayChannel*1.5) - base;
 
-            gFit->SetParameter(0, fileNameTemp); ///energy
+            gFit->SetParameter(0, energyEst); ///energy
             gFit->SetParameter(1, delayChannel); /// time
             gFit->SetParameter(2, 1);            ///riseTime
             gFit->SetParameter(3, base);
-            gFit->SetParameter(4, 100);
-            gFit->SetParameter(5, -1);
+            // gFit->SetParameter(4, 2000);   // decay
+            // gFit->SetParameter(5, -1);
 
             gFit->SetParLimits(1, 85, 110);
-            gFit->SetParLimits(5, -2, 0);
+            // gFit->SetParLimits(4, 800, 99999999999);
+            // gFit->SetParLimits(5, -2, 0);
 
             //if( gTrace->Eval(120) < base ) gFit->SetRange(0, 100); //sometimes, the trace will drop
             //if( gTrace->Eval(20) < base) gFit->SetParameter(1, 5); //sometimes, the trace drop after 5 ch
+
+            if( isPSD ) fitRange[1] = 300;
+            if( isRDT ) fitRange[1] = 900;
 
             if( isSaveFitTrace ) {
                gTrace->Fit("gFit", "QR", "", fitRange[0], fitRange[1]);

@@ -38,6 +38,7 @@ double gamm;
 double G;
 
 TCutG * cut[4];
+TGraph * tDiffFineCorr[24];
 
 void CalExTheta(Hit & hit);
 void LoadDetGeoAndReactionConfigFile();
@@ -108,12 +109,15 @@ void script(){
   TTreeReaderArray<ULong64_t> rdt_t = {reader, "rdt_t"};
   TTreeReaderArray<ULong64_t>   e_t = {reader, "e_t"};
   
+  TTreeReaderArray<float>    te   = {reader, "te"};
   TTreeReaderArray<float>    te_t = {reader, "te_t"};
   TTreeReaderArray<float>    te_r = {reader, "te_r"};
   
   TTreeReaderArray<float>    trdt   = {reader, "trdt"};
   TTreeReaderArray<float>    trdt_t = {reader, "trdt_t"};
   TTreeReaderArray<float>    trdt_r = {reader, "trdt_r"};
+
+  // TTreeReaderValue<TClonesArray>   trace = {reader, "trace"}; // very slow
 
   //*###################################################
 
@@ -124,8 +128,9 @@ void script(){
   LoadECorr();
   LoadReactionPars();
 
-  //*###################################################
+  //*################################################### RDT Cut
 
+  //@=============== 12C cut
   cut[0] = new TCutG("rdtCut0",7);
   cut[0]->SetPoint(0,4422.68,1760.71);
   cut[0]->SetPoint(1,4158.67,1750.79);
@@ -158,18 +163,159 @@ void script(){
   cut[3]->SetPoint(3,4540.01,3555.2);
   cut[3]->SetPoint(4,3444.89,3862.55);
 
+  //*################################################### tDiffFine correction
+
+  for( int i = 0; i < 24; i++ ){
+    tDiffFineCorr[i] = new TGraph();
+  }
+
+  tDiffFineCorr[0]->AddPoint(0.0, -3.22);
+  tDiffFineCorr[0]->AddPoint(0.1, -3.22);
+  tDiffFineCorr[0]->AddPoint(0.3, -2.08);
+  tDiffFineCorr[0]->AddPoint(0.5, -0.07);
+  tDiffFineCorr[0]->AddPoint(0.7, -1.70);
+  tDiffFineCorr[0]->AddPoint(0.9, -4.00);
+  tDiffFineCorr[0]->AddPoint(1.0, -4.50);
+
+  tDiffFineCorr[1]->AddPoint(0.0, -3.06);
+  tDiffFineCorr[1]->AddPoint(0.2, -2.00);
+  tDiffFineCorr[1]->AddPoint(0.4, -0.00);
+  tDiffFineCorr[1]->AddPoint(0.5,  0.27);
+  tDiffFineCorr[1]->AddPoint(0.64, 0.12);
+  tDiffFineCorr[1]->AddPoint(0.68, -1.08);
+  tDiffFineCorr[1]->AddPoint(0.8, -2.20);
+  tDiffFineCorr[1]->AddPoint(1.0, -3.00);
+  
+  tDiffFineCorr[4]->AddPoint(0.0, -3.09);
+  tDiffFineCorr[4]->AddPoint(0.2, -2.70);
+  tDiffFineCorr[4]->AddPoint(0.4, -0.69);
+  tDiffFineCorr[4]->AddPoint(0.5,  0.42);
+  tDiffFineCorr[4]->AddPoint(0.6, -0.83);
+  tDiffFineCorr[4]->AddPoint(0.8, -3.05);
+  tDiffFineCorr[4]->AddPoint(1.0, -3.37);
+
+  tDiffFineCorr[5]->AddPoint(0.0, -3.00);
+  tDiffFineCorr[5]->AddPoint(0.2, -2.60);
+  tDiffFineCorr[5]->AddPoint(0.4, -1.29);
+  tDiffFineCorr[5]->AddPoint(0.5,  0.56);
+  tDiffFineCorr[5]->AddPoint(0.6, -0.79);
+  tDiffFineCorr[5]->AddPoint(0.8, -2.20);
+  tDiffFineCorr[5]->AddPoint(1.0, -4.00);
+  
+
+
+  tDiffFineCorr[6]->AddPoint(0.0,  0.00);
+  tDiffFineCorr[6]->AddPoint(0.2,  1.00);
+  tDiffFineCorr[6]->AddPoint(0.4,  1.50);
+  tDiffFineCorr[6]->AddPoint(0.5,  1.50);
+  tDiffFineCorr[6]->AddPoint(0.6,  1.50);
+  tDiffFineCorr[6]->AddPoint(0.7,  1.30);
+  tDiffFineCorr[6]->AddPoint(0.8,  0.90);
+  tDiffFineCorr[6]->AddPoint(1.0,  0.20);
+    
+  tDiffFineCorr[7]->AddPoint(0.0, -0.72);
+  tDiffFineCorr[7]->AddPoint(0.2,  0.00);
+  tDiffFineCorr[7]->AddPoint(0.4,  0.50);
+  tDiffFineCorr[7]->AddPoint(0.5,  0.60);
+  tDiffFineCorr[7]->AddPoint(0.6,  0.47);
+  tDiffFineCorr[7]->AddPoint(0.8,  0.12);
+  tDiffFineCorr[7]->AddPoint(1.0, -0.50);    
+
+
+  tDiffFineCorr[12]->AddPoint(0.0, -1.00);
+  tDiffFineCorr[12]->AddPoint(0.2,  0.40);
+  tDiffFineCorr[12]->AddPoint(0.4,  0.92);
+  tDiffFineCorr[12]->AddPoint(0.5,  1.11);
+  tDiffFineCorr[12]->AddPoint(0.6,  1.12);
+  tDiffFineCorr[12]->AddPoint(0.7,  0.90);
+  tDiffFineCorr[12]->AddPoint(0.8,  0.45);
+  tDiffFineCorr[12]->AddPoint(1.0,  0.18);
+
+  tDiffFineCorr[13]->AddPoint(0.0,  0.22);
+  tDiffFineCorr[13]->AddPoint(0.2,  1.00);
+  tDiffFineCorr[13]->AddPoint(0.4,  1.67);
+  tDiffFineCorr[13]->AddPoint(0.6,  1.67);
+  tDiffFineCorr[13]->AddPoint(0.8,  1.00);
+  tDiffFineCorr[13]->AddPoint(1.0,  0.60);
+
+  tDiffFineCorr[16]->AddPoint(0.0, -0.94);
+  tDiffFineCorr[16]->AddPoint(0.2,  0.00);
+  tDiffFineCorr[16]->AddPoint(0.4,  1.30);
+  tDiffFineCorr[16]->AddPoint(0.6,  0.85);
+  tDiffFineCorr[16]->AddPoint(0.8, -1.10);
+  tDiffFineCorr[16]->AddPoint(1.0,  0.00);
+
+  tDiffFineCorr[17]->AddPoint(0.0, -0.38);
+  tDiffFineCorr[17]->AddPoint(0.2, -0.38);
+  tDiffFineCorr[17]->AddPoint(0.4,  1.40);
+  tDiffFineCorr[17]->AddPoint(0.5,  2.20);
+  tDiffFineCorr[17]->AddPoint(0.6,  1.70);
+  tDiffFineCorr[17]->AddPoint(0.8, -0.78);
+  tDiffFineCorr[17]->AddPoint(1.0,  0.00);
+
+
+
+  tDiffFineCorr[18]->AddPoint(0.0, -4.26);
+  tDiffFineCorr[18]->AddPoint(0.2, -3.30);
+  tDiffFineCorr[18]->AddPoint(0.4, -2.00);
+  tDiffFineCorr[18]->AddPoint(0.5, -1.14);
+  tDiffFineCorr[18]->AddPoint(0.6, -1.43);
+  tDiffFineCorr[18]->AddPoint(0.8, -3.30);
+  tDiffFineCorr[18]->AddPoint(1.0, -3.26);
+
+  tDiffFineCorr[19]->AddPoint(0.0, -3.40);
+  tDiffFineCorr[19]->AddPoint(0.2, -2.89);
+  tDiffFineCorr[19]->AddPoint(0.4, -0.76);
+  tDiffFineCorr[19]->AddPoint(0.6, -1.06);
+  tDiffFineCorr[19]->AddPoint(0.8, -2.35);
+  tDiffFineCorr[19]->AddPoint(1.0, -3.67);
+  tDiffFineCorr[19]->AddPoint(1.2, -3.67);
+
+  tDiffFineCorr[22]->AddPoint(-0.2, -3.26);
+  tDiffFineCorr[22]->AddPoint(0.0, -2.87);
+  tDiffFineCorr[22]->AddPoint(0.2, -2.58);
+  tDiffFineCorr[22]->AddPoint(0.4, -1.25);
+  tDiffFineCorr[22]->AddPoint(0.6, -1.40);
+  tDiffFineCorr[22]->AddPoint(0.8, -3.92);
+  tDiffFineCorr[22]->AddPoint(1.0, -3.60);
+  tDiffFineCorr[22]->AddPoint(1.2, -3.60);
+
+  tDiffFineCorr[23]->AddPoint(0.0, -3.47);
+  tDiffFineCorr[23]->AddPoint(0.2, -3.08);
+  tDiffFineCorr[23]->AddPoint(0.4, -1.24);
+  tDiffFineCorr[23]->AddPoint(0.6, -1.47);
+  tDiffFineCorr[23]->AddPoint(0.8, -3.08);
+  tDiffFineCorr[23]->AddPoint(1.0, -3.78);
+  tDiffFineCorr[23]->AddPoint(1.2, -3.78);
+
 
   //*###################################################
   printf("===================================================== Create histograms...\n");
 
+  double ExRange[2] = {3, 20};
+  double resol = 0.1;
+  int ExBin = (ExRange[1] - ExRange[0])/resol;
+
+
   // TH2F * heCal_xCal[24];
   // TH1F * heCal[24];
   // TH1F * heCalg[24];
-  // for( int i = 0; i < numDet; i++){
+  TH1F * hEx_id[24];
+  TH2F * hTrace_ee[24];
+  TH2F * hdudu[24];
+  TH1F * htCorr[24];
+  TH2F * hEx_tCorr[24];
+  for( int i = 0; i < numDet; i++){
   //   heCal_xCal[i] = new TH2F(Form("heCal_xCal%02d", i), Form("det-%02d;xCal;eCal", i), 400, -0.5, 1.5, 400, 0, 13);
   //   heCal[i]  = new TH1F(Form("heCal%02d", i), Form("det-%02d;eCal", i), 400, 0, 10);
   //   heCalg[i] = new TH1F(Form("heCalg%02d", i), Form("det-%02d (gate);eCal; count / 10 keV ", i), 600, 0, 10);
-  // }
+    hEx_id[i] = new TH1F(Form("hEx_ID%02d", i), Form("det-%02d (gate);Ex; count / %.0f keV ", i, resol * 1000), ExBin, ExRange[0], ExRange[1]); 
+    hdudu[i] = new TH2F(Form("hdudu%02d", i), "tDiffFine vs x; x ; tDiffFine", 400, -0.5, 1.5, 400, -10, 10);
+    htCorr[i] = new TH1F(Form("htCorr%02d", i), Form("det-%02d (gate);tDiffFine [1 = 10 ns];", i), 50, -2, 3); 
+    hEx_tCorr[i] = new TH2F(Form("hEx_tCorr%02d", i), Form("det-%02d (gate);tDiffFine [1 = 10 ns];Ex", i), 80, -2, 6, ExBin, ExRange[0], ExRange[1]); 
+   
+    hTrace_ee[i] = new TH2F(Form("hTrace_ee%02d", i), "te vs e; e ; te", 400, -1, 12, 400, -1, 12);
+  }
   TH1F * hArrayMulti = new TH1F("hArrayMulti", "Array Multi", 5, 0, 5);
 
   TH2F * hez = new TH2F("hez", "e-z; z [mm]; e [MeV]", 400, zRange[0], zRange[1], 400, 0, 14);
@@ -187,15 +333,30 @@ void script(){
   }
   TH1F * hRDTMulti = new TH1F("hRDTMulti", "RDT Multi", 5, 0, 5);
   
-  double ExRange[2] = {3, 20};
-  double resol = 0.1;
-  int ExBin = (ExRange[1] - ExRange[0])/resol;
+  TH2F * hArrayRDT = new TH2F("hArrayRDT", "Array - RDT; array; RDT", 24, 0, 24, 4, 0, 4);
+
   TH1F * hEx  = new TH1F("hEx",  Form("Ex; Ex [MeV]; count / %.0f keV", resol* 1000), ExBin, ExRange[0], ExRange[1]); 
   TH1F * hExg = new TH1F("hExg", Form("Ex (gate); Ex [MeV]; count / %.0f keV", resol * 1000), ExBin, ExRange[0], ExRange[1]); 
   hExg->SetLineColor(kRed);
 
   TH2F * hEx_EE = new TH2F("hEx_EE", ";Ex ; EE", ExBin, ExRange[0], ExRange[1], 400, 0, 6000);
   TH2F * hEx_dE = new TH2F("hEx_dE", ";Ex ; dE", ExBin, ExRange[0], ExRange[1], 400, 0, 5000);
+
+  int tDiffRange[2] = {-50, 50};
+  int tDiffBin = (tDiffRange[1] - tDiffRange[0])/0.1;
+  TH1F * hTDiff  = new TH1F("hTDiff",  "array_t - dE_t", tDiffBin, tDiffRange[0], tDiffRange[1]);
+  TH1F * hTDiffg = new TH1F("hTDiffg", "array_t - dE_t (gated)", tDiffBin, tDiffRange[0], tDiffRange[1]);
+
+  TH2F * hEx_tDiff = new TH2F("hEx_tDiff", ";tDiff;Ex", tDiffBin, tDiffRange[0], tDiffRange[1], ExBin, ExRange[0], ExRange[1]);
+
+  TH2F * hRDT_tDiff = new TH2F("hRDT_tDiff", ";tDiff;rdt ID", tDiffBin, tDiffRange[0], tDiffRange[1], 4, 0, 4);
+
+
+  TH2F * hTDiff_z[4];
+  for( int i = 0; i < 4; i++ ){
+    hTDiff_z[i] = new TH2F(Form("hTDiff_z%d", i), Form("TDiff vs z (%d); z; TDiff", i),  400, zRange[0], zRange[1], 200, -20, 30);
+  }
+
 
 
   //*###################################################
@@ -236,31 +397,21 @@ void script(){
       }
 
       if( i == 2 ) e[i] = xfcal + xncal;
-      // e[i] = xfcal + xncal;
 
       if  ( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hit.x = 0.5 + 0.5 * (xfcal - xncal ) / e[i];
-      // if  ( !TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hit.x = 0.5 + 0.5 * (xfcal - xncal ) / (xfcal + xncal);
       if  ( !TMath::IsNaN(xf[i]) &&  TMath::IsNaN(xn[i]) ) hit.x = xfcal/ e[i];
       if  (  TMath::IsNaN(xf[i]) && !TMath::IsNaN(xn[i]) ) hit.x = 1.0 - xncal/ e[i];
       
       hit.x = (hit.x-0.5)/xScale[i] + 0.5; 
 
-      // if( detGeo.firstPos > 0 ) {
-      //   hit.z = detGeo.detLength*(1.0-hit.x) + detGeo.detPos[i%numCol];
-      // }else{
       hit.z = detGeo.detLength*(hit.x-1.0) + detGeo.detPos[i%numCol];
-      // }
+      hit.detID = i;
+      hit.e_t = e_t[i];
+      hit.te_t = te_t[i];
+      hit.te_r = te_r[i];
+      hit.te   = te[i] / eCorr[i][0] + eCorr[i][1];
 
       hitList.push_back(hit);
-
-      // heCal[i]->Fill(hit.e);
-      // heCal_xCal[i]->Fill(hit.x, hit.e);
-      // hez->Fill(hit.z, hit.e);
-
-      // @================ gate
-      // if( abs(hit.x - 0.5) > 1.0/2. ) continue;
-      // heCalg[i]->Fill(hit.e);
-      // hezg->Fill(hit.z, hit.e);
   
     }
 
@@ -283,43 +434,93 @@ void script(){
     if( rdt[4] < 1300 && TMath::IsNaN(rdt[5]) ) rdt[5] = 300 ; //+ gRandom->Gaus(0, 20);
     if( rdt[6] < 1300 && TMath::IsNaN(rdt[7]) ) rdt[7] = 400 ; //+ gRandom->Gaus(0, 20);
 
-    //~================ fill Hit
     for( int i = 0; i < 8 ; i++ ){
       if( TMath::IsNaN(rdt[i] ) ) continue;
 
       for( size_t k = 0; k < hitList.size(); k++ ){
-        if( i % 2 == 0 ) hitList[k].EE[i/2] = rdt[i]; 
-        if( i % 2 == 1 ) hitList[k].dE[i/2] = rdt[i]; 
+        if( i % 2 == 0 ) {
+          hitList[k].EE[i/2] = rdt[i]; 
+          hitList[k].EE_t[i/2] = rdt_t[i]; 
+          hitList[k].tEE_t[i/2] = trdt_t[i]; 
+        }
+        if( i % 2 == 1 ) {
+          hitList[k].dE[i/2] = rdt[i]; 
+          hitList[k].dE_t[i/2] = rdt_t[i]; 
+          hitList[k].tdE_t[i/2] = trdt_t[i]; 
+        }
       }
     }
 
     ///##################################################################### Array & RDT
     for( size_t k = 0; k < hitList.size(); k++ ){ 
+
+      //&============= deduce the RDt multipicity
       hitList[k].CalRDTMultiplicity();
 
+      //&============= Calculate Ex and ThetaCM, also tDiffFine
       CalExTheta(hitList[k]);
 
+      int sizeID = hitList[k].detID / 6;
+      hTDiff_z[sizeID]->Fill( hitList[k].z, hitList[k].tDiffFine);
+
+      //&============= tDiffFine correction
+      if( tDiffFineCorr[hitList[k].detID]->GetN() > 1 ){
+        hitList[k].tDiffFineC = hitList[k].tDiffFine - tDiffFineCorr[hitList[k].detID]->Eval(hitList[k].x);
+      }
+
       for( int i = 0; i < 4; i++ ){
+        //@================== gate
+        if(  (( hitList[k].detID / 6) + 1 ) % 4 != i ) continue;
+
         hrdt2D[i]->Fill( hitList[k].EE[i], hitList[k].dE[i] );
         
+        //@================== gate
         if( hitList[k].dE[i] > 0  && hitList[k].EE[i] > 0  )  {
           hdE[i]->Fill(hitList[k].EE[i]);
-          hez->Fill( hitList[k].z, hitList[k].e );
+          hTDiff->Fill(hitList[k].tDiffFine);
+          hTrace_ee[hitList[k].detID]->Fill( hitList[k].e, hitList[k].te);
         }
 
-        // if( TMath::IsNaN(hitList[k].dE[i]) && hitList[k].EE[i] > 0 )  {
-        //   hdEs[i]->Fill(hitList[k].EE[i]);
-        //   hezg->Fill( hitList[k].z, hitList[k].e );
-        // }
-        // if( 14.7 < hitList[k].Ex && hitList[k].Ex < 15.7 ) {
-        //   hrdt2Ds[i]->Fill( hitList[k].EE[i], hitList[k].dE[i] );
-        // } 
+        //@================== gate
+        if( cut[i]->IsInside(hitList[k].EE[i], hitList[k].dE[i] ) ) {
+
+          hEx_id[hitList[k].detID]->Fill(hitList[k].Ex);
+
+          hArrayRDT->Fill(hitList[k].detID , i );
+
+          hTDiffg->Fill(hitList[k].tDiffFine);
+          hEx_tDiff->Fill(hitList[k].tDiffFine, hitList[k].Ex);
+          hRDT_tDiff->Fill(hitList[k].tDiffFine, i);
+
+          hEx->Fill( hitList[k].Ex);
+          hez->Fill( hitList[k].z, hitList[k].e );
+          
+          if( hitList[k].detID % 6 <= 1 &&  abs(hitList[k].Ex - 4.5) < 0.3){
+            hdudu[hitList[k].detID]->Fill( hitList[k].e, hitList[k].te_t);
+          }
+
+          if( hitList[k].detID % 6 >= 3 &&  abs(hitList[k].Ex - 15.3) < 0.3){
+            hdudu[hitList[k].detID]->Fill( hitList[k].x, hitList[k].tDiffFine);
+          }
+
+          hEx_tCorr[hitList[k].detID]->Fill(hitList[k].tDiffFineC, hitList[k].Ex);
+          htCorr[hitList[k].detID]->Fill(hitList[k].tDiffFineC);
+
+          //@=============== gate
+          if( -15 < hitList[k].tDiff && hitList[k].tDiff < 20 ) {
+
+            hezg->Fill( hitList[k].z, hitList[k].e );
+            hExg->Fill( hitList[k].Ex);
+
+          } 
+
+        }
       
       }
 
       hRDTMulti->Fill(hitList[k].nRDT);
 
-      hEx->Fill( hitList[k].Ex );
+      // hEx->Fill( hitList[k].Ex );
 
       // int ID = 2;
       // if( cut[ID]->IsInside(hitList[k].EE[ID], hitList[k].dE[ID] ) ) {
@@ -330,15 +531,6 @@ void script(){
       //   hEx_dE->Fill( hitList[k].Ex, hitList[k].dE[ID]);
 
       // }
-
-      for( int ID = 0; ID < 4; ID ++ ){
-
-        if( cut[ID]->IsInside(hitList[k].EE[ID], hitList[k].dE[ID] ) ) {
-          hExg->Fill( hitList[k].Ex);
-          hezg->Fill( hitList[k].z, hitList[k].e );
-        }
-
-      }
 
     }
 
@@ -373,26 +565,44 @@ void script(){
 
   };
 
-  //*###################################################
+  //*################################################### Draw hist
 
   int padSize = 400;
-  // TCanvas * canvas = new TCanvas("canvas", "canvas", numCol * padSize, numSide * padSize);
-  // canvas->Divide(numCol, numSide);
+  TCanvas * canvas = new TCanvas("canvas", "canvas", numCol * padSize, numSide * padSize);
+  canvas->Divide(numCol, numSide);
+
+  for( int i = 0; i < numDet; i++){
+    canvas->cd(i+1);
+    // heCal_xCal[i]->Draw("colz");
+
+    // heCal[i]->Draw("");
+    // heCalg[i]->SetLineColor(kRed);
+    // heCalg[i]->Draw("same");
+    // hEx_id[i]->Draw("");
+    hTrace_ee[i]->Draw("colz box");
+    // hdudu[i]->Draw("same box");
+
+    // if( tDiffFineCorr[i]->GetN() > 1 ){
+    //   tDiffFineCorr[i]->Draw("same");
+    // }
+  }
+
+  // TCanvas * canvasA = new TCanvas("canvasA", "canvasA", numCol * padSize, numSide * padSize);
+  // canvasA->Divide(numCol, numSide);
 
   // for( int i = 0; i < numDet; i++){
-  //   canvas->cd(i+1);
-  //   heCal_xCal[i]->Draw("colz");
-
-  //   // heCal[i]->Draw("");
-  //   // heCalg[i]->SetLineColor(kRed);
-  //   // heCalg[i]->Draw("same");
+  //   canvasA->cd(i+1);
+  //   // htCorr[i]->Draw("");
+  //   hEx_tCorr[i]->Draw("colz box");
   // }
+
 
   TCanvas * canvas1 = new TCanvas("canvas1", "canvas1", 500, 0, 1000, 500);
   // hArrayMulti->Draw();
   // hRDTMulti->Draw();
-  // hEx->Draw();
-  hExg->Draw("");
+  hEx->Draw();
+  hExg->Draw("same");
+  // hExg->Draw("");
 
   
   TCanvas * canvas2 = new TCanvas("canvas2", "canvas2", 500, 600, 2000, 1000);
@@ -430,8 +640,25 @@ void script(){
   // canvas5->cd(2); hEx_dE->Draw("colz box");
 
   TCanvas * canvas6 = new TCanvas("canvas6", "canvas6", 100, 0, 1200, 600);
-  hArrayMulti->Draw();
+  // hArrayMulti->Draw();
+  // hArrayRDT->Draw("colz");
 
+  hTDiff->Draw();
+  hTDiffg->SetLineColor(kRed);
+  hTDiffg->Draw("same");
+
+
+  // TCanvas * canvas7 = new TCanvas("canvas7", "canvas7", 2000, 0, 600, 600);
+  // hEx_tDiff->Draw("colz");
+  // hRDT_tDiff->Draw("colz");
+
+  // TCanvas * canvas8 = new TCanvas("canvas8", "canvas8", 2000, 0, 1200, 1200);
+  // canvas8->Divide(2,2);
+  // for( int i = 0; i < 4; i++){
+  //   canvas8->cd(i+1);
+  //   hTDiff_z[i]->Draw("colz");
+  // }
+  
 }
 
 //^=================================================
