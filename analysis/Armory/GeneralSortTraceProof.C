@@ -639,6 +639,8 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
             if( NARRAY > idDet && idDet >= 0 && idKind == 0 ) {
                te[idDet]   = gFit->GetParameter(0);
+               // double riseTime = gFit->GetParameter(2);
+               // te_t[idDet] = gFit->GetParameter(1) + riseTime * 0.105360516; // 10% rise time
                te_t[idDet] = gFit->GetParameter(1);
                te_r[idDet] = gFit->GetParameter(2);
             }
@@ -646,7 +648,9 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
             if( NRDT + 100 > idDet && idDet >= 100 ) {
                int rdtTemp = idDet-100;
                trdt[rdtTemp]   = TMath::Abs(gFit->GetParameter(0));
-               trdt_t[rdtTemp] = gFit->GetParameter(1);
+               // double riseTime = gFit->GetParameter(2);
+               // trdt_t[rdtTemp] = gFit->GetParameter(1) + riseTime * 0.105360516; // 10% rise time
+               trdt_t[rdtTemp] = gFit->GetParameter(1); 
                trdt_r[rdtTemp] = gFit->GetParameter(2);
             }
 

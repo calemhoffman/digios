@@ -28,7 +28,9 @@ public:
   unsigned long long dE_t[4];
   unsigned long long EE_t[4];
   float tdE_t[4];
+  float tdE_r[4];
   float tEE_t[4];
+  float tEE_r[4];
   unsigned short nRDT;
 
   double tDiff;
@@ -65,6 +67,8 @@ inline void Hit::Clear(){
     EE_t[i] = 0;
     tdE_t[i] = std::nan("");
     tEE_t[i] = std::nan("");
+    tdE_r[i] = std::nan("");
+    tEE_r[i] = std::nan("");
   }
 
   Ex = std::nan("");
@@ -94,7 +98,9 @@ inline void Hit::CalRDTMultiplicity(){
       tDiff = (dE_t[ID] - e_t)*(-1.);
     }
 
-    tDiffFine = tDiff + (te_t - tdE_t[ID]);
+    // double traceTime = tdE_t[ID]+ tdE_r[ID]*TMath::Log(100./(100.-50.));
+    double traceTime = tdE_t[ID];
+    tDiffFine = tDiff + (te_t - traceTime);
     tDiffFineC = tDiffFine;
 
   }
