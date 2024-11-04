@@ -34,9 +34,9 @@ ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     80}; 
-int      rdtERange[2] = {     0,     80};  
+int    energyRange[2] = {     0,      12};       /// in the E-Z plot
+int     rdtDERange[2] = {     50,    12000}; 
+int      rdtERange[2] = {     50,    12000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -44,7 +44,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  50,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -64,10 +64,11 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {11, 16, 23} ;//{2,  11, 17}
+vector<int> skipDetID = {2, 8, 10, 11} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
-TString rdtCutFile2 = "";
+TString rdtCutFile1 = "rdt_o_deg.C";//rdt_17f.C //rdt_17o.C // rdt_n.C (called the 17o1 incorrect) rdt_o.C
+TString rdtCutFile2 = ""; //rdt_n.C
+TString rdtCutFile3 = ""; //rdt_o.C
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -96,6 +97,10 @@ int numCut1;
 TObjArray * cutList2;
 Bool_t isCutFileOpen2;
 int numCut2;
+
+TObjArray * cutList3;
+Bool_t isCutFileOpen3;
+int numCut3;
 
 //======= Other Cuts
 TCutG* EZCut;
@@ -168,9 +173,12 @@ TH2F* hExVxCal[numDet];
 TH1F* hExc[numDet/numRow];
 
 TH2F* hExThetaCM;
+TH2F* hExThetaCM2;
+TH2F* hExThetaCM3;
 
 TH1F* hExCut1;
 TH1F* hExCut2;
+TH1F* hExCut3;
 
 //====== TAC
 TH1F* htac;   // by TAC
@@ -338,6 +346,27 @@ void Monitors::Begin(TTree *tree)
             ((TCutG*)cutList2->At(i))->GetN());
       }
    }
+
+   TFile * fCut3 = new TFile(rdtCutFile3);
+   isCutFileOpen3 = fCut3->IsOpen();
+   if(!isCutFileOpen3) {
+      printf( "Failed to open rdt-cutfile 3: %s\n" , rdtCutFile3.Data());
+      rdtCutFile3 = "";
+   }
+   numCut3 = 0 ;
+   if( isCutFileOpen3 ){
+      cutList3 = (TObjArray *) fCut3->FindObjectAny("cutList");
+      numCut3 = cutList3->GetEntries();
+      printf("=========== found %d cutG in %s \n", numCut2, fCut3->GetName());
+
+      for(int i = 0; i < numCut3 ; i++){
+         printf("cut name : %s , VarX: %s, VarY: %s, numPoints: %d \n",
+            cutList3->At(i)->GetName(),
+            ((TCutG*)cutList3->At(i))->GetVarX(),
+            ((TCutG*)cutList3->At(i))->GetVarY(),
+            ((TCutG*)cutList3->At(i))->GetN());
+      }
+   }
    
    //================  Get EZ cuts;
    TFile * fCutez = new TFile(ezCutFile);
@@ -430,7 +459,7 @@ void Monitors::Begin(TTree *tree)
    }
 
    //===================== Recoils
-   for (Int_t i=0;i<=NRDT;i++) {
+   for (Int_t i=0;i<NRDT;i++) {
       if( i % 2 == 0 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil E(ch=%d); E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 0 ) hrdtg[i] = new TH1F(Form("hrdt%dg",i),Form("Raw Recoil E(ch=%d) gated; E (channel)",i), 500,rdtERange[0],rdtERange[1]);
       if( i % 2 == 1 ) hrdt[i] = new TH1F(Form("hrdt%d",i),Form("Raw Recoil DE(ch=%d); DE (channel)",i), 500,rdtDERange[0],rdtDERange[1]);
@@ -509,6 +538,9 @@ void Monitors::Begin(TTree *tree)
    hExCut2  = new TH1F("hExCut2",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    hExCut2->SetLineColor(4);
    
+   hExCut3  = new TH1F("hExCut3",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   hExCut3->SetLineColor(6);
+   
    for(int i = 0 ; i < numDet; i++){
       hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    }
@@ -518,6 +550,8 @@ void Monitors::Begin(TTree *tree)
    }
 
    hExThetaCM = new TH2F("hExThetaCM", "Ex vs ThetaCM; ThetaCM [deg]; Ex [MeV]", 200, thetaCMRange[0], thetaCMRange[1],  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   hExThetaCM2 = new TH2F("hExThetaCM2", "Ex vs ThetaCM gate 2; ThetaCM [deg]; Ex [MeV]", 200, thetaCMRange[0], thetaCMRange[1],  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   hExThetaCM3 = new TH2F("hExThetaCM3", "Ex vs ThetaCM gate 3; ThetaCM [deg]; Ex [MeV]", 200, thetaCMRange[0], thetaCMRange[1],  (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
 
    //===================== ELUM
    for( int i = 0; i < NELUM; i++){
@@ -662,9 +696,9 @@ Bool_t Monitors::Process(Long64_t entry)
     
     /*********** Apply Recoil correction here *************************/
     
-    for( int i = 0 ; i < NRDT; i++){
-       rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
-    }
+    //for( int i = 0 ; i < NRDT; i++){
+    //   rdt[i] = rdt[i]*rdtCorr[i][0] + rdtCorr[i][1];
+    //}
     
     /*********** Array ************************************************/ 
     //Do calculations and fill histograms
@@ -673,6 +707,7 @@ Bool_t Monitors::Process(Long64_t entry)
     Int_t multiEZ = 0;
     bool rdtgate1 = false;
     bool rdtgate2 = false;
+    bool rdtgate3 = false;
     bool coinFlag = false;
     bool ezGate = false;
     bool isGoodEventFlag = false;
@@ -784,10 +819,21 @@ Bool_t Monitors::Process(Long64_t entry)
             break; /// only one is enough
           }
         }
+
+        for(int i = 0 ; i < numCut3 ; i++ ){
+          cutG = (TCutG *)cutList3->At(i) ;
+          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+          //if(cutG->IsInside(rdt[2*i]+ rdt[2*i+1],rdt[2*i+1])) {
+
+            rdtgate3= true;
+            break; /// only one is enough
+          }
+        }
         
       }else{
         rdtgate1 = true;
         rdtgate2 = true;
+        rdtgate3 = true;
       }
       
       //================ coincident with Recoil when z is calculated.
@@ -801,7 +847,7 @@ Bool_t Monitors::Process(Long64_t entry)
              hrtac[j/2]->Fill(detID,tdiff);
              htdiff->Fill(tdiff);
              htacTdiff->Fill( tac[0], tdiff);
-             if((rdtgate1 || rdtgate2) && (eCalCut[1] > eCal[detID] && eCal[detID]>eCalCut[0])) {
+             if((rdtgate1 || rdtgate2 || rdtgate3) && (eCalCut[1] > eCal[detID] && eCal[detID]>eCalCut[0])) {
                 htdiffg->Fill(tdiff);
                 htacTdiffg->Fill( tac[0], tdiff);
              }
@@ -836,7 +882,7 @@ Bool_t Monitors::Process(Long64_t entry)
          ezGate = true;
       }
       
-      if( coinFlag && (rdtgate1 || rdtgate2) && ezGate){ 
+      if( coinFlag && (rdtgate1 || rdtgate2 || rdtgate3) && ezGate){ 
          heCalVzGC->Fill( z[detID] , eCal[detID] );
         
          heCalVxCalG[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
@@ -992,7 +1038,7 @@ Bool_t Monitors::Process(Long64_t entry)
 
          hEx->Fill(Ex);
 
-         hExThetaCM->Fill(thetaCM, Ex);
+         //hExThetaCM->Fill(thetaCM, Ex);
          
          if( rdtgate1 ) {
             hExCut1->Fill(Ex);
@@ -1000,7 +1046,11 @@ Bool_t Monitors::Process(Long64_t entry)
          }
          if( rdtgate2 ) {
             hExCut2->Fill(Ex);
-            hExThetaCM->Fill(thetaCM, Ex);
+            hExThetaCM2->Fill(thetaCM, Ex);
+         }
+         if( rdtgate3 ) {
+            hExCut3->Fill(Ex);
+            hExThetaCM3->Fill(thetaCM, Ex);
          }
          
          hExi[detID]->Fill(Ex);
@@ -1031,8 +1081,8 @@ void Monitors::Terminate()
 
    //############################################ User is free to edit this section
    //--- Canvas Size
-   int canvasXY[2] = {1200 , 800} ;// x, y
-   int canvasDiv[2] = {3,2};
+   int canvasXY[2] = {1500 , 1500} ;// x, y
+   int canvasDiv[2] = {3,3};
    cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
@@ -1067,6 +1117,7 @@ void Monitors::Terminate()
    //hEx->Draw();
    hExCut1->Draw("");
    hExCut2->Draw("same");
+   hExCut3->Draw("same");
    DrawLine(hEx, Sn);
    DrawLine(hEx, Sa);
    
@@ -1075,24 +1126,26 @@ void Monitors::Terminate()
    if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.7, "with recoil gated"); 
 
    ///----------------------------------- Canvas - 5
-   padID++; cCanvas->cd(padID); 
+   //padID++; cCanvas->cd(padID); 
+
+   PlotRDT(0,0);
    
    //Draw2DHist(hExThetaCM);
    //heVIDG->Draw();
    //text.DrawLatex(0.15, 0.75, Form("#theta_{cm} > %.1f deg", thetaCMGate));
 
-   Draw2DHist(hrdt2D[0]);
+   //Draw2DHist(hrdt2D[0]);
 //      Draw2DHist(hrdt2Dsum[0]);
 
-   if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
-   if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
+   //if( isCutFileOpen1 && numCut1 > 0 ) {cutG = (TCutG *)cutList1->At(0) ; cutG->Draw("same");}
+   //if( isCutFileOpen2 && numCut2 > 0 ) {cutG = (TCutG *)cutList2->At(0) ; cutG->Draw("same");}
 
 
    //helum4D->Draw();
    //text.DrawLatex(0.25, 0.3, Form("gated from 800 to 1200 ch\n"));
    
    ///----------------------------------- Canvas - 6
-   PlotRDT(0,0);
+   PlotRDT(1,0);
    
   // padID++; cCanvas->cd(padID); 
  //  Draw2DHist(hrdtExGated);
@@ -1102,9 +1155,14 @@ void Monitors::Terminate()
    
    ///------------------------------------- Canvas - 7
    //PlotRDT(0, 0);
+   padID++; cCanvas->cd(padID);
+
+   hEx->Draw();
+   DrawLine(hEx, Sn);
+   DrawLine(hEx, Sa);
    
    ///----------------------------------- Canvas - 8
-   //PlotRDT(1, 0);
+   PlotRDT(3, 0);
 
    ///yMax = hic2->GetMaximum()*1.2;
    ///hic2->GetYaxis()->SetRangeUser(0, yMax);
@@ -1124,6 +1182,9 @@ void Monitors::Terminate()
    //padID++; cCanvas->cd(padID);  
    
    //Draw2DHist(hic01);
+
+   PlotRDT(2,0);
+
 
    ///----------------------------------- Canvas - 10
    //PlotRDT(3,0);

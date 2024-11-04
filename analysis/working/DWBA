@@ -44,3 +44,6 @@
 #32Si(t,p)34Si     0        0L=0     0+           0.000   8MeV/u      lA                #two-nucleon_transfer
 #36Ar(d,a)34Cl     0        4L=2     3+           0.000   8MeV/u    As    # (d,a) reaction
 
+17O(d,p)18O     5/2+     0d5/2    4+     3.554      10.12MeV/u   AK
+17O(d,p)18O     5/2+     1s1/2    2+     1.982      10.12MeV/u   AK
+17O(d,p)18O     5/2+     1p1/2    3-     1.982      10.12MeV/u   AK
