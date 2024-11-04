@@ -71,7 +71,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    eventID += 1;
    
    b_Energy->GetEntry(entry,0);
-   b_Ring->GetEntry(entry,0);
+   //b_Ring->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
@@ -109,7 +109,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       for( int j = 0; j < 8 ; j++){
          if( TMath::IsNaN(rdt[j]) ) continue; 
          int tdiff = rdt_t[j] - e_t[i];
-         if( -20 < tdiff && tdiff < 20 )  {
+         if( -30 < tdiff && tdiff < 30 )  {
             coinFlag = true;
          }
       }
@@ -141,7 +141,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
       
       xTemp = xTemp/xScale[idet];
-      
+
       /*
       if(xfC > eTemp/2.){
          xTemp = 2*xfC/eTemp - 1. ;
@@ -157,31 +157,27 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
          
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
       //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
-      
-      //========= calculate z
-      
-      int detID = idet%iDet;
+
+      //========= calculate z      
+      int detID = idet%detGeo.nDet;
       if( pos[detID] < 0 ){
-         zTemp = pos[detID] - (-xTemp + 1.)*length/2 ; 
+         zTemp = pos[detID] - (-1.0 * xTemp + 1.)*length/2 ; 
       }else{
-         zTemp = pos[detID] + (-xTemp + 1.)*length/2 ; 
+         zTemp = pos[detID] + (-1.0 * xTemp + 1.)*length/2 ; 
       }
-      
       if( !TMath::IsNaN(zTemp) ) {
          multiHit++;
          detIDTemp = idet;
          eTime  = e_t[idet];
          if( isTraceDataExist ) teTime = te_t[idet];         
       }
-   
 
    }//end of idet-loop
    
    
    //printf(" ----%d \n", multiHit);
    
-   //if( multiHit != 1 ) return kTRUE;
-   
+   //if( multiHit != 1 ) return kTRUE;   
    
    //========= for recoil
    ULong64_t rdtTime = 0;
@@ -200,7 +196,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    //printf("===== %d \n", rdtdEMultiHit);
    
    //if ( rdtdEMultiHit != 1 ) return kTRUE;
-   
+
    //for coincident time bewteen array and rdt
    if( multiHit == 1 && rdtdEMultiHit == 1 ){
       int coin_t = (int) eTime - rdtTime;

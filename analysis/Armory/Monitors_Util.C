@@ -416,6 +416,54 @@ void excite(void) {
   
 }
 
+void excite_cut(int i=-1, bool write=false){
+  TCanvas *cex_cut = (TCanvas *) gROOT->FindObjectAny("cex_cut");
+  if(cex_cut == NULL) cex_cut = new TCanvas("cex_cut",Form("Ex: %s",canvasTitle.Data()),500,0,1600,1000);
+  gStyle->SetOptStat("neiou");
+  hExCut1->SetLineWidth(4);
+  hExCut2->SetLineWidth(4);
+  hExCut3->SetLineWidth(4);
+  if(i==1)
+    hExCut1->Draw("");
+  else if(i==2)
+    hExCut2->Draw("");
+  else if(i==3)
+    hExCut3->Draw("");
+  else{
+    hExCut1->Draw("");
+    hExCut2->Draw("same");
+    hExCut3->Draw("same");
+  }
+  TH1F *hOff = new TH1F("hoff","hoff",hEx->GetNbinsX(),hEx->GetBinLowEdge(1)+0.841,hEx->GetBinLowEdge(hEx->GetNbinsX())+hEx->GetBinWidth(1)+0.841);
+  for(int i=1;i<=hEx->GetNbinsX();i++)
+    hOff->SetBinContent(i,hEx->GetBinContent(i));
+  if(write){
+    TFile *outfile = new TFile("ExcitationSpectra_17O.root","RECREATE");
+    hEx->Write();
+    hExCut1->Write();
+    hExCut2->Write();
+    hExCut3->Write();
+    hOff->Write();
+    outfile->Close();
+  }
+}
+
+
+void ExThetaCM3(void) {
+  TCanvas *cExThetaCM3 =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM3");
+  if( cExThetaCM3 == NULL ) cExThetaCM3 = new TCanvas("cExThetaCM3",Form("EX rdt-3 - ThetaCM | %s", canvasTitle.Data()),650,650);
+  cExThetaCM3->Clear();
+  gStyle->SetOptStat("neiou");
+  hExThetaCM3->Draw("colz");
+}
+
+void ExThetaCM2(void) {
+  TCanvas *cExThetaCM2 =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM2");
+  if( cExThetaCM2 == NULL ) cExThetaCM2 = new TCanvas("cExThetaCM2",Form("EX rdt-2 - ThetaCM | %s", canvasTitle.Data()),650,650);
+  cExThetaCM2->Clear();
+  gStyle->SetOptStat("neiou");
+  hExThetaCM2->Draw("colz");
+}
 
 void ExThetaCM(void) {
   TCanvas *cExThetaCM =  (TCanvas *) gROOT->FindObjectAny("cExThetaCM");

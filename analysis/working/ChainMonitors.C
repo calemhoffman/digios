@@ -11,8 +11,22 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
+     //chain->Add("../root_data/gen_run01[0-9].root");
+     //chain->Add("../root_data/gen_run02[2-9].root"); //17F thin
+     //chain->Add("../root_data/gen_run03[0-9].root"); //17F thin
+     //chain->Add("../root_data/gen_run04[0-9].root"); //17F thin
+     //chain->Add("../root_data/gen_run05[0-2].root"); //17F thin //note run 53 does not exist due to Matt Williams, run 54 is junk
+
+     //chain->Add("../root_data/gen_run05[5-9].root"); //17O thin
+     //chain->Add("../root_data/gen_run06[0-6].root"); //17O thin
+     
+     //chain->Add("../root_data/trace_run02[2-9].root"); //17F thin
+     //chain->Add("../root_data/trace_run03[0-9].root"); //17F thin
+     //chain->Add("../root_data/trace_run04[0-9].root"); //17F thin
+     //chain->Add("../root_data/trace_run05[0-2].root"); //17F thin
+
+     chain->Add("../root_data/trace_run05[5-9].root"); //17O thin
+     chain->Add("../root_data/trace_run06[0-6].root"); //17O thin
   
     ///********** end Marker for AutoCalibration.
     
