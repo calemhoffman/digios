@@ -78,7 +78,7 @@ void PlotKELines() {
 
 TChain *chain = nullptr;
 
-void script() {
+void script_12C() {
   transfer = new TFile("transfer.root");
   if (transfer->IsOpen()) {
     gList = (TObjArray *)transfer->FindObjectAny("gList");
@@ -580,17 +580,14 @@ void script() {
   TH2F *hEx_tDiff = new TH2F("hEx_tDiff", ";tDiff;Ex", tDiffBin, tDiffRange[0], tDiffRange[1], ExBin, ExRange[0], ExRange[1]);
   TH2F *hRDT_tDiff = new TH2F("hRDT_tDiff", ";tDiff;rdt ID", tDiffBin, tDiffRange[0], tDiffRange[1], 4, 0, 4);
 
-  TH2F * hExThetaCM = new TH2F("hExThetaCM", "Ex-Theta; Ex; ThetaCM", ExBin, ExRange[0], ExRange[1], 100, 0, 50);
-
   TH2F *hTDiff_z[4];
   TH2F *hTDiff_zg[4];
-  TH1F *hExRDT[4];
   for (int i = 0; i < 4; i++) {
     hTDiff_z[i] = new TH2F(Form("hTDiff_z%d", i), Form("TDiff vs z (%d); z; TDiff", i), 150, zRange[0], zRange[1], 150, -20, 30);
     hTDiff_zg[i] = new TH2F(Form("hTDiff_zg%d", i), Form("TDiff vs z (%d) (gated); z; TDiff", i), 150, zRange[0], zRange[1], 150, -20, 30);
-
-    hExRDT[i] = new TH1F(Form("hExRDT%d", i), Form("Ex (%d)", i), ExBin, ExRange[0], ExRange[1]);
   }
+
+  TH2F * hExThetaCM = new TH2F("hExThetaCM", "Ex-Theta; Ex; ThetaCM", ExBin, ExRange[0], ExRange[1], 100, 0, 50);
 
   //*###################################################
   printf("===================================================== Processing....\n");
@@ -815,24 +812,24 @@ void script() {
 
   int padSize = 400;
 
-  // TCanvas *canvas = new TCanvas("canvas", "canvas", numCol * padSize, numSide * padSize);
-  // canvas->Divide(numCol, numSide);
+  TCanvas *canvas = new TCanvas("canvas", "canvas", numCol * padSize, numSide * padSize);
+  canvas->Divide(numCol, numSide);
 
-  // for (int i = 0; i < numDet; i++) {
-  //   canvas->cd(i + 1);
-  //   // heCal_xCal[i]->Draw("colz");
+  for (int i = 0; i < numDet; i++) {
+    canvas->cd(i + 1);
+    // heCal_xCal[i]->Draw("colz");
 
-  //   // heCal[i]->Draw("");
-  //   // heCalg[i]->SetLineColor(kRed);
-  //   // heCalg[i]->Draw("same");
-  //   hEx_id[i]->Draw("");
-  //   // hTrace_ee[i]->Draw("colz box");
-  //   // hdudu[i]->Draw("colz");
+    // heCal[i]->Draw("");
+    // heCalg[i]->SetLineColor(kRed);
+    // heCalg[i]->Draw("same");
+    hEx_id[i]->Draw("");
+    // hTrace_ee[i]->Draw("colz box");
+    // hdudu[i]->Draw("colz");
 
-  //   // if( tDiffFineCorr[i]->GetN() > 1 ){
-  //   //   tDiffFineCorr[i]->Draw("same");
-  //   // }
-  // }
+    // if( tDiffFineCorr[i]->GetN() > 1 ){
+    //   tDiffFineCorr[i]->Draw("same");
+    // }
+  }
 
   // TCanvas *canvasA = new TCanvas("canvasA", "canvasA", numCol * padSize, numSide * padSize);
   // canvasA->Divide(numCol, numSide);
@@ -847,33 +844,32 @@ void script() {
   //   }
   // }
 
-  TCanvas *canvasB = new TCanvas("canvasB", "canvasB", numCol * padSize, padSize);
-  canvasB->Divide(numCol, 1);
+  // TCanvas *canvasB = new TCanvas("canvasB", "canvasB", numCol * padSize, padSize);
+  // canvasB->Divide(numCol, 1);
 
-  for (int i = 0; i < numDet; i++) {
-    canvasB->cd( i % 6 + 1) ;
-    // htCorr[i]->Draw("");
-    if( i / 6 == 0 ) { 
+  // for (int i = 0; i < numDet; i++) {
+  //   canvasB->cd( i % 6 + 1) ;
+  //   // htCorr[i]->Draw("");
+  //   if( i / 6 == 0 ) { 
 
-      double yMax = 0;
-      for( int j = 0; j < 4; j++ ){
-        double haha = hEx_id[i + 6*j]->GetMaximum();
-        if( haha > yMax ) yMax = haha;
-      }
-      hEx_id[i]->SetMaximum(yMax*1.5);
+  //     double yMax = 0;
+  //     for( int j = 0; j < 4; j++ ){
+  //       double haha = hEx_id[i + 6*j]->GetMaximum();
+  //       if( haha > yMax ) yMax = haha;
+  //     }
+  //     hEx_id[i]->SetMaximum(yMax*1.5);
 
-      if( i < 2 ) hEx_id[i]->GetXaxis()->SetRangeUser(3.8, 5.0);
-      if( i > 2 ) hEx_id[i]->GetXaxis()->SetRangeUser(14.7, 15.65);
+  //     if( i < 2 ) hEx_id[i]->GetXaxis()->SetRangeUser(3.8, 5.0);
+  //     if( i > 2 ) hEx_id[i]->GetXaxis()->SetRangeUser(14.7, 15.65);
 
-      hEx_id[i]->Draw(""); 
-    }else{
-      if( i/6 == 1 ) hEx_id[i]->SetLineColor(kRed);
-      if( i/6 == 2 ) hEx_id[i]->SetLineColor(kBlue);
-      if( i/6 == 3 ) hEx_id[i]->SetLineColor(kGreen + 2);
-      hEx_id[i]->Draw("same"); 
-    }
-
-  }
+  //     hEx_id[i]->Draw(""); 
+  //   }else{
+  //     if( i/6 == 1 ) hEx_id[i]->SetLineColor(kRed);
+  //     if( i/6 == 2 ) hEx_id[i]->SetLineColor(kBlue);
+  //     if( i/6 == 3 ) hEx_id[i]->SetLineColor(kGreen + 2);
+  //     hEx_id[i]->Draw("same"); 
+  //   }
+  // }
 
   TCanvas *canvas1 = new TCanvas("canvas1", "canvas1", 500, 0, 1000, 500);
   // hArrayMulti->Draw();
