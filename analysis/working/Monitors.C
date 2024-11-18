@@ -44,7 +44,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  125,    -2,     14};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -57,7 +57,7 @@ bool isUseRDTTrace = false;
 //---Gate
 bool isTimeGateOn     = true;
 int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
-double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
+double eCalCut[2]     = {0, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
@@ -66,8 +66,8 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
 vector<int> skipDetID = {} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
-TString rdtCutFile2 = "";
+TString rdtCutFile1 = "cl34.root"; ///cl34.root
+TString rdtCutFile2 = "s34.root"; ///s34.root
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off

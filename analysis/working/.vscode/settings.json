@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "ChainMonitors.C": "cpp",
+        "Monitors.C": "cpp",
+        "AutoCalibrationTrace.C": "cpp",
+        "Monitors_Util.C": "cpp"
+    }
+}

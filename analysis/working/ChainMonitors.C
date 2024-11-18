@@ -11,9 +11,28 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
-  
+     ///chain->Add("../root_data/gen_run005.root"); //long alpha run for calib
+     
+     chain->Add("../root_data/gen_run00[8-9].root"); //(d,p) good runs
+     chain->Add("../root_data/gen_run01[0-5].root"); //(d,p) good runs
+     chain->Add("../root_data/gen_run02[0-2].root"); //(d,p) good runs
+     chain->Add("../root_data/gen_run02[5-9].root"); //(d,p) good runs
+     chain->Add("../root_data/gen_run03[0-9].root"); //(d,p) good runs
+     chain->Add("../root_data/gen_run04[0-9].root"); //(d,p) good runs
+     chain->Add("../root_data/gen_run05[0-9].root"); //(d,p) good runs
+     
+     //chain->Add("../root_data/gen_run03[0-9].root"); //(d,p)
+     //chain->Add("../root_data/gen_run022.root"); //(d,p)
+     //chain->Add("../root_data/gen_run023.root"); //(d,p)
+
+     
+     //chain->Add("../root_data/trace_run00[8-9].root"); //(d,p) good runs
+     //chain->Add("../root_data/trace_run01[0-9].root"); //(d,p) good runs
+     //chain->Add("../root_data/trace_run02[0-2].root"); //(d,p) good runs
+     //chain->Add("../root_data/trace_run02[5-9].root"); //(d,p) good runs
+     //chain->Add("../root_data/trace_run03[0-9].root"); //(d,p) good runs
+     //chain->Add("../root_data/trace_run04[0-9].root"); //(d,p) good runs
+
     ///********** end Marker for AutoCalibration.
     
     
