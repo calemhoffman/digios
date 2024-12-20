@@ -88,9 +88,9 @@ else
 fi
 
 echo -e "${YELLOW}"
-du -hsc $DATADIR/${expName}_run_$RUN*
+du -hsc $DATADIR/${expName}*run_$RUN*
 
-count=`ls -1 ${DATADIR}/${expName}_run_$RUN* 2>/dev/null | wc -l`
+count=`ls -1 ${DATADIR}/${expName}*run_$RUN* 2>/dev/null | wc -l`
 echo -e "========== Number of Files : ${count}${NC}"
 if [ ${count} -eq 0 ]; then
     echo "============================================"
