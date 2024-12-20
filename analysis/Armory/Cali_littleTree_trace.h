@@ -207,6 +207,8 @@ void Cali_littleTree_trace::Init(TTree *tree)
       a = detGeo.detPerpDist;
       length = detGeo.detLength;
       firstPos = detGeo.firstPos;
+
+      pos = detGeo.detPos;
       
       printf("... done.\n");
    }else{

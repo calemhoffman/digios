@@ -496,6 +496,9 @@ void Cali_compareF(TTree *expTree, TFile *refFile,
       cScript->Draw();
       
       gSystem->ProcessEvents();
+
+
+      cScript->SaveAs(Form("KECal_%02d.root", idet));
    
    } // end of loop idet  
 /**///======================================================== save result

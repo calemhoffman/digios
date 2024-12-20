@@ -54,7 +54,6 @@ void Cali_littleTree_trace::SlaveBegin(TTree * /*tree*/)
 
 Bool_t Cali_littleTree_trace::Process(Long64_t entry)
 {
-   
    //#################################################################### initialization
    eTemp    = TMath::QuietNaN();
    xTemp    = TMath::QuietNaN();
@@ -71,7 +70,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    eventID += 1;
    
    b_Energy->GetEntry(entry,0);
-   b_Ring->GetEntry(entry,0);
+   // b_Ring->GetEntry(entry,0);
    b_XF->GetEntry(entry,0);
    b_XN->GetEntry(entry,0);
    b_RDT->GetEntry(entry,0);
@@ -129,7 +128,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       
       if( e[idet] == 0 ) continue;
       if( xf[idet] == 0 && xn[idet] == 0 ) continue;
-   
+
       double xfC = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
       double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
@@ -141,7 +140,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
       
       xTemp = xTemp/xScale[idet];
-      
+
       /*
       if(xfC > eTemp/2.){
          xTemp = 2*xfC/eTemp - 1. ;
@@ -156,17 +155,18 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       if( abs(xTemp) > 0.9 ) continue;
          
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
-      //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
+      // printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
       
       //========= calculate z
       
       int detID = idet%iDet;
+
       if( pos[detID] < 0 ){
          zTemp = pos[detID] - (-xTemp + 1.)*length/2 ; 
       }else{
          zTemp = pos[detID] + (-xTemp + 1.)*length/2 ; 
       }
-      
+
       if( !TMath::IsNaN(zTemp) ) {
          multiHit++;
          detIDTemp = idet;
@@ -178,9 +178,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    }//end of idet-loop
    
    
-   //printf(" ----%d \n", multiHit);
-   
-   //if( multiHit != 1 ) return kTRUE;
+   if( multiHit != 1 ) return kTRUE;
    
    
    //========= for recoil

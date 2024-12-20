@@ -49,7 +49,7 @@ else
 fi
 
 
-RUN=$(printf '%03d' ${RUN})
+# RUN=$(printf '%03d' ${RUN})
 
 echo "PC Name :" $PCName "|" ${PCName:0:5}"|" 
 
