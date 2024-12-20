@@ -11,8 +11,13 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
+    // chain->Add("../root_data/gen_run039.root"); // alpha source 
+    
+    chain->Add("../root_data/gen_run104.root"); // run  47 min
+    chain->Add("../root_data/gen_run105.root"); // run, 30 min
+    chain->Add("../root_data/gen_run106.root"); // run, 82 min
+    chain->Add("../root_data/gen_run107.root"); // run, 83 min
+    chain->Add("../root_data/gen_run110.root"); // run, 32 min
   
     ///********** end Marker for AutoCalibration.
     

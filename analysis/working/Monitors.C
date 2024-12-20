@@ -35,8 +35,8 @@ ULong64_t maxNumberEvent = 1000000000;
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     3000}; 
-int      rdtERange[2] = {     0,     5000};  
+int     rdtDERange[2] = {     0,    8000}; 
+int      rdtERange[2] = {     0,    3000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -44,7 +44,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  25,    -1,     7};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -56,17 +56,17 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
-double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
+int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
+double eCalCut[2]     = {1.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {} ;//{2,  11, 17}
+double xGate          = 0.95;                  ///cut out the edge
+vector<int> skipDetID = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 21, 22, 23} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
+TString rdtCutFile1 = "rdtCuts.root";
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -157,6 +157,7 @@ TH1F* heCal[numDet];
 TH2F* heCalID; // e vs detID
 TH2F* hxfCalVxnCal[numDet]; 
 
+TH2F* heVz;
 TH2F* heCalVz;
 TH2F* heCalVzGC;
 TH2F* hecalVzRow[numRow];
@@ -422,6 +423,7 @@ void Monitors::Begin(TTree *tree)
    heCalID = new TH2F("heCalID", "Corrected E vs detID; detID; E / 10 keV", numDet, 0, numDet, 2000, energyRange[0], energyRange[1]);
    
    //====================== E-Z plot
+   heVz      = new TH2F("heVz",  "E raw vs. Z;Z (mm);E (ch.)"     , 400, zRange[0], zRange[1], 400, rawEnergyRange[0], rawEnergyRange[1]);
    heCalVz   = new TH2F("heCalVz",  "E vs. Z;Z (mm);E (MeV)"      , 400, zRange[0], zRange[1], 400, energyRange[0], energyRange[1]);
    heCalVzGC = new TH2F("heCalVzGC","E vs. Z gated;Z (mm);E (MeV)", 400, zRange[0], zRange[1], 400, 0, energyRange[1]);
    
@@ -762,6 +764,7 @@ Bool_t Monitors::Process(Long64_t entry)
      
       heCalVxCal[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
       heCalVz->Fill(z[detID],eCal[detID]);
+      heVz->Fill(z[detID],e[detID]);
 
       //=================== Recoil Gate
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){

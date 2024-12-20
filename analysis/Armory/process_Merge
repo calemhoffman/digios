@@ -19,7 +19,7 @@ else
     RUN=$(printf '%d' $RUN)
 fi
 
-RUN=$(printf '%03d' ${RUN})
+RUN3=$(printf '%03d' ${RUN})
 
 #######################################
 #################### Merge
@@ -64,7 +64,7 @@ if [ $isMerge -eq 1 ]; then
             echo -e "${NC}"
         fi
         echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
-        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}*run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+        ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN3}.gtd `ls ${DATADIR}/${expName}*run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
         echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
 
         if [ ${expName} == "h072_16N" ]; then
@@ -93,7 +93,7 @@ if [ $isMerge -eq -1 ]; then # force merge
 
     echo -e "${RED}=================== RUN $RUN: GEBMerge started at `date`${NC}"
     echo -e "${YELLOW} >>>>>>>>>>>>> force merge by user ${NC}"
-    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN}.gtd `ls ${DATADIR}/${expName}*run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
+    ${GEBDIR}/GEBMerge ${MERGECHAT}  ${MERGDIR}/GEBMerged_run${RUN3}.gtd `ls ${DATADIR}/${expName}*run_$RUN.gtd*` > ${MERGDIR}/GEBMerge_run${RUN}.log
     echo -e "${RED}====================== RUN $RUN: GEBMerge DONE at `date`${NC}"
 
     if [ ${expName} == "h072_16N" ]; then

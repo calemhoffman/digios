@@ -19,7 +19,7 @@
 #define NRDT    8
 #define NELUM   0
 #define NEZERO  0
-#define NTAC    0
+#define NTAC    5
 #define NCRDT   0
 #define NAPOLLO 0
 
@@ -40,7 +40,7 @@ Int_t idDetMap[160] = {
                          7,   6,  11,  10,   9,   8,   7,   6,  -1,  -1,   // 4, VME3-DIG1, array
                         15,  14,  13,  12,  11,  10,   9,   8,  -1,  -1,   // 5, VME3-DIG2, array
                         17,  16,  15,  14,  13,  12,  17,  16,  -1,  -1,   // 6, VME3-DIG3, array
-                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG4
+                       101, 103, 105, 107, 100, 102, 104, 106,  -1,  -1,   //VME1-DIG4
 
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,   // 1, VME2-DIG1, array
                          3,   2,   1,   0,   5,   4,   3,   2,  -1,  -1,   // 2, VME2-DIG2, array
@@ -55,7 +55,7 @@ Int_t idDetMap[160] = {
                         19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
                         21,  20,  19,  18,  23,  22,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
                         23,  22,  21,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
-                       100, 101, 102, 103, 104, 105, 106, 107,  -1,  -1  //12, VME4-DIG4, Recoil
+                        -1,  -1,  -1,  -1,  -1, 400, 401, 402, 403, 404  //12, VME4-DIG4, Recoil
 };
 
 Int_t idKindMap[160] = { 
