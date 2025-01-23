@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "ChainMonitors.C": "cpp",
+        "Monitors.C": "cpp",
+        "Cali_e_trace.C": "cpp",
+        "GeneralSort.C": "cpp",
+        "Monitors_Util.C": "cpp",
+        "RDTCutCreator.C": "cpp",
+        "macro.C": "cpp",
+        "cut1.C": "cpp",
+        "cut0.C": "cpp",
+        "cut7.C": "cpp",
+        "cut3.C": "cpp",
+        "cut2.C": "cpp",
+        "cut4.C": "cpp",
+        "cut5.C": "cpp",
+        "cut6.C": "cpp",
+        "cut8.C": "cpp",
+        "cut9.C": "cpp",
+        "cut10.C": "cpp",
+        "cut13.C": "cpp",
+        "cut15.C": "cpp",
+        "rec1b.C": "cpp",
+        "rec1a.C": "cpp",
+        "rec1.C": "cpp",
+        "rec4C.C": "cpp",
+        "rec4b.C": "cpp"
+    }
+}

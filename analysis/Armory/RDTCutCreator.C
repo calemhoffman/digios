@@ -44,11 +44,11 @@ void LoadRDTCorr2(){
 
 void RDTCutCreator(TString dataList, 
                    TString saveFileName = "rdtCuts.root", 
-                   int eRange=6000, 
-                   int deRange=2000, 
+                   int eRange=7000, 
+                   int deRange=7000, 
                    bool isLogz = false,
                    TString gate = "", 
-                   TString treeName = "gen_tree", 
+                   TString treeName = "tree", 
                    bool useTrace = false
                    ){
    
