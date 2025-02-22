@@ -20,6 +20,7 @@ void listDraws(void) {
   printf("       eVxs() - Raw \033[0;31me\033[0m vs. Raw \033[0;31mxs = xf + xn\033[0m for all %d detectors\n", numDet);
   printf("        eVx() - Raw \033[0;31me\033[0m vs. RAW \033[0;31mx\033[0m for all %d detectors\n", numDet);
   printf("     ringVx() - Raw \033[0;31mring\033[0m vs. RAW \033[0;31mx\033[0m for all %d detectors\n", numDet);
+  printf("       stub() - Raw \033[0;31mstub\033[0m  \033[0;31me\033[0m, \033[0;31mxf\033[0m, \033[0;31mxn\033[0m for all 8 stub detectors\n");
   printf("-----------------------------------------------------\n");
   printf("    eVxsCal() - Raw \033[0;31me\033[0m vs. Corrected \033[0;31mxs\033[0m for all %d detectors\n", numDet);
   printf("       ecal() - Calibrated \033[0;31me\033[0m for all %d detectors\n", numDet);
@@ -94,6 +95,21 @@ void rawe(Bool_t isLogy = false) {
     if( isLogy ) cRawE->cd(i+1)->SetLogy();
     he[i]->Draw("");
   }
+}
+
+void stub(Bool_t isLogy = false){
+  TCanvas * cccCanvas = new TCanvas("cccCanvas", Form("Stub | %s", canvasTitle.Data()), canvasSize[0],canvasSize[1]);
+  cccCanvas->Clear();cccCanvas->Divide(8,4);
+  for(int i=0;i<8;i++){
+      cccCanvas->cd(i+1);
+      he[i]->Draw();
+      cccCanvas->cd(i+9);
+      hxn[i]->Draw();
+      cccCanvas->cd(i+17);
+      hxf[i]->Draw();
+      //cccCanvas->cd(i+25);
+      //hxfxnNorm[i]->Draw();
+   }
 }
 
 void rawring(Bool_t isLogy = false) {
