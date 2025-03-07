@@ -68,6 +68,8 @@ if [ $expName = "ARR01" ]; then
   elogName=$expName
 elif [  ${expName} == "h087_Tritium" ]; then
   elogName="H087_Tritium"
+elif [ ${expName} == "h092_48Ca2_dp" ]; then
+  elogName="H092_48Ca2_aj"
 else
   elogName="H"${expName:1}
 fi
