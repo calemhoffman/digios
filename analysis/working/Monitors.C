@@ -34,9 +34,9 @@ ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     3000}; 
-int      rdtERange[2] = {     0,     5000};  
+int    energyRange[2] = {     0,      16};       /// in the E-Z plot
+int     rdtDERange[2] = {     -500,     3000}; 
+int      rdtERange[2] = {     -500,     5000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -46,7 +46,7 @@ int   thetaCMRange[2] = {0, 80};
 
 double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
-int  coinTimeRange[2] = { -200, 200};
+int  coinTimeRange[2] = { -200, 400};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
 
 int  icRange [3] = {1000, 1000, 500}; /// max of IC0,1,2 
@@ -56,7 +56,7 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-10, 20};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -64,10 +64,10 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {} ;//{2,  11, 17}
+vector<int> skipDetID = {2, 5, 11} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
-TString rdtCutFile2 = "";
+TString rdtCutFile1 = "rdt_dt1";
+TString rdtCutFile2 = "rdt_dt4.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -748,9 +748,9 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //==================== calculate Z
       if( detGeo.firstPos > 0 ) {
-        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[detID%numCol];
+        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[5-detID%numCol];
       }else{
-        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[detID%numCol];
+        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[5-detID%numCol];
       }
 
       //===================== multiplicity
@@ -797,7 +797,7 @@ Bool_t Monitors::Process(Long64_t entry)
    
           int tdiff = rdt_t[j] - e_t[detID];
    
-          if( j%2 == 1) {
+          if( j%2 == 0) { // it is plotting dE now, was 1 and E
              hrtac[j/2]->Fill(detID,tdiff);
              htdiff->Fill(tdiff);
              htacTdiff->Fill( tac[0], tdiff);
