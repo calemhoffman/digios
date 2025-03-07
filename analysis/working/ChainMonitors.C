@@ -11,9 +11,20 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
-  
+     //chain->Add("../root_data/gen_run011.root"); //alpha on (d,t) array 228Th
+     //chain->Add("../root_data/gen_run013.root"); //alpha on (d,p) array Gd-Cm
+
+     //chain->Add("../root_data/gen_run02[0-9].root"); //first good (d,t) (d,p) run with 223 ug/cm2 target
+     //chain->Add("../root_data/gen_run03[0-9].root"); //good (d,t) (d,p) run with 223 ug/cm2 target
+
+     chain->Add("../root_data/trace_run02[0-9].root"); //first good (d,t) (d,p) run with 223 ug/cm2 target
+     chain->Add("../root_data/trace_run03[0-9].root"); //good (d,t) (d,p) run with 223 ug/cm2 target
+     chain->Add("../root_data/trace_run04[0-9].root");
+     chain->Add("../root_data/trace_run05[0-9].root");
+     chain->Add("../root_data/trace_run06[0-9].root");
+     chain->Add("../root_data/trace_run07[0-9].root");
+     chain->Add("../root_data/trace_run08[0-9].root");
+     chain->Add("../root_data/trace_run090.root")
     ///********** end Marker for AutoCalibration.
     
     

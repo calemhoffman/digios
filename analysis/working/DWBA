@@ -44,3 +44,18 @@
 #32Si(t,p)34Si     0        0L=0     0+           0.000   8MeV/u      lA                #two-nucleon_transfer
 #36Ar(d,a)34Cl     0        4L=2     3+           0.000   8MeV/u    As    # (d,a) reaction
 
+
+#48Ca(d,t)47Ca     0        0f7/2     7/2-        0.000   7MeV/u      Ap
+48Ca(d,t)47Ca     0        0f7/2     7/2-        0.000   8MeV/u      Ap
+48Ca(d,t)47Ca     0        0f7/2     7/2-        0.000   9MeV/u      Ap
+48Ca(d,t)47Ca     0        0f7/2     7/2-        0.000   10MeV/u     Ap
+
+#48Ca(d,t)47Ca     0        1d3/2     3/2+        2.500   7MeV/u      Ap
+48Ca(d,t)47Ca     0        1d3/2     3/2+        2.500   8MeV/u      Ap
+48Ca(d,t)47Ca     0        1d3/2     3/2+        2.500   9MeV/u      Ap
+48Ca(d,t)47Ca     0        1d3/2     3/2+        2.500   10MeV/u     Ap
+
+#48Ca(d,t)47Ca     0        2s1/2     1/2+        2.500   7MeV/u      Ap
+48Ca(d,t)47Ca     0        2s1/2     1/2+        2.500   8MeV/u      Ap
+48Ca(d,t)47Ca     0        2s1/2     1/2+        2.500   9MeV/u      Ap
+48Ca(d,t)47Ca     0        2s1/2     1/2+        2.500   10MeV/u     Ap
