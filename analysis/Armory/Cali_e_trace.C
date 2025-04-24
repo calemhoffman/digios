@@ -224,7 +224,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-   ///========= calculate x, range (-1,1)   
+     ///========= calculate x, range (-1,1)   
      if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
      //Nate's bypass to fix 
      //if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
@@ -232,7 +232,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       
      x[idet] = x[idet] / xCorr[idet];
 
-   ///========= Calculate z
+     ///========= Calculate z
      int detID = idet%detGeo.nDet;
      int numCol = 6;
      if( pos[detID] > 0 ){
@@ -312,7 +312,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    for( int i = 0; i< NRDT/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
-         rdtID = 2*i + 1; //dE
+         rdtID = 2*i+1; //dE
       }
    }
    
@@ -325,7 +325,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       /// for dE detector only
       ULong64_t rdtTime = rdt_t[rdtID];
 
-      coin_t = (int) eTime - rdtTime; // digitizer timeStamp
+      coin_t = (int) rdtTime - eTime; // digitizer timeStamp
      
       ///======== with trace data
       if( isTraceDataExist ) {
@@ -333,7 +333,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          Float_t teTime = te_t[det];
          Float_t trdtTime =  trdt_t[rdtID];
          
-         tcoin_t = teTime - trdtTime; // trace trigger time 
+         tcoin_t = trdtTime - teTime; // trace trigger time 
          
          //Ad-hoc solution 
          double rdtCorrAux = 0;
