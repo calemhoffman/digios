@@ -98,6 +98,8 @@ public :
    int hitID; // is e, xf, xn are all fired.
    int multiHit; // multipicity of z
    int rdtdEMultiHit; // multipicity of recoil-dE
+   int numCol;
+   int numRow = 4;
    
    Float_t coinTimeUC; 
    Float_t coinTime;
@@ -131,6 +133,10 @@ public :
    //============ RDT cut
    bool isRDTCutExist;
    TCutG ** cut = NULL;
+   TObjArray * cutList = NULL;
+   int numCut;
+   TCutG * cutG;
+   int rdtID;
    
 };
 
@@ -324,15 +330,14 @@ void Cali_littleTree_trace::Init(TTree *tree)
    }
    
    //====================================== load RDT cut
-   TFile * fileCut = new TFile("rdtCuts.root");   
-   TObjArray * cutList = NULL;
+   TFile * fileCut = new TFile("rdt_dt4.root");   
    isRDTCutExist = false;
    if( fileCut->IsOpen() ){
       TObjArray * cutList = (TObjArray*) fileCut->FindObjectAny("cutList");
       
       if( cutList != NULL){
          isRDTCutExist = true;
-         const int numCut = cutList->GetEntries();
+         numCut = cutList->GetEntries();
          cut = new TCutG * [numCut];
          printf("=========== found %d cuts in %s \n", numCut, fileCut->GetName());
          for( int i = 0 ; i < numCut; i++){

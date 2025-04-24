@@ -66,6 +66,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    coinTimeUC = TMath::QuietNaN(); //uncorrected
    coinTime = TMath::QuietNaN();
+   bool rdtgate1 = false;
    
    //#################################################################### Get Tree
    eventID += 1;
@@ -85,36 +86,28 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    }
    
    //=========== gate
-   
-   bool rejRDT1 = true; if( isRDTCutExist && cut[0]->IsInside( rdt[0], rdt[1] )) rejRDT1 = false;
-   bool rejRDT2 = true; if( isRDTCutExist && cut[1]->IsInside( rdt[2], rdt[3] )) rejRDT2 = false;
-   bool rejRDT3 = true; if( isRDTCutExist && cut[2]->IsInside( rdt[4], rdt[5] )) rejRDT3 = false;
-   bool rejRDT4 = true; if( isRDTCutExist && cut[3]->IsInside( rdt[6], rdt[7] )) rejRDT4 = false;
+  
+   //=================== Recoil Gate
+      if( isRDTCutExist){
+        for(int i = 0 ; i < numCut; i++ ){
+            if(cut[i]->IsInside(rdt[2*i],rdt[2*i+1])) {
+
+            rdtgate1= true;
+            break; /// only one is enough
+          }
+        }
+      }
    
    if( !isRDTCutExist ){
-      rejRDT1 = false;
-      rejRDT2 = false;
-      rejRDT3 = false;
-      rejRDT4 = false;
+      rdtgate1 = false;
    }
    
    //printf("%d, %d, %d, %d \n", rejRDT1, rejRDT2, rejRDT3, rejRDT4 ); 
 
-   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; //######### rdt gate
+   if(rdtgate1) return kTRUE; //######### rdt gate
    
    //for( int i = 0; i < 4; i ++) printf("%d | %f, %f \n", i, trdt[2*i], trdt[2*i+1]);
-   
-   bool coinFlag = false;
-   for( int i = 0; i < numDet ; i++){
-      for( int j = 0; j < 8 ; j++){
-         if( TMath::IsNaN(rdt[j]) ) continue; 
-         int tdiff = rdt_t[j] - e_t[i];
-         if( -20 < tdiff && tdiff < 20 )  {
-            coinFlag = true;
-         }
-      }
-   }
-   if( coinFlag == false ) return kTRUE;
+    //printf("============HERE==============\n");
    
    //#################################################################### processing
    ULong64_t eTime = -2000; //this will be the time for Ex valid
@@ -134,13 +127,18 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
       double xnC = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
       eTemp = e[idet];
+
+      if (idet%6 == 5 && eTemp > 1150) continue;
+      if (idet%6 == 4 && eTemp > 1600) continue;
+      if (idet%6 == 3 && eTemp > 2300) continue;
+
+//===================== calculate X
+      /// range of x is (0, 1)
+      if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp = 0.5 + 0.5 * (xfC - xnC ) / e[idet];
+      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp = xfC/ e[idet];
+      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp = 1.0 - xnC/ e[idet];
       
-      /// range (-1,1)      
-      if  ( !TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= (xfC - xnC ) / eTemp;
-      if  ( !TMath::IsNaN(xfC) &&  TMath::IsNaN(xnC) ) xTemp= 2* xfC/ eTemp - 1;
-      if  (  TMath::IsNaN(xfC) && !TMath::IsNaN(xnC) ) xTemp= 1.0 - 2* xnC/ eTemp;
-      
-      xTemp = xTemp/xScale[idet];
+      xTemp = (xTemp-0.5)/xScale[idet]+0.5;
       
       /*
       if(xfC > eTemp/2.){
@@ -153,19 +151,35 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
          xTemp = TMath::QuietNaN();
       }*/
       
-      if( abs(xTemp) > 0.9 ) continue;
+      if( abs(xTemp-0.5) > 0.8/2. ) continue;
          
       //if( idet >= 17 && e[idet] > 0) printf("%d, %d , %f, %f \n", eventID, idet, eC[idet], e[idet]);
       //printf("%d, %d , %f , %f\n", eventID, idet, e[idet], xTemp);
       
-      //========= calculate z
       
-      int detID = idet%iDet;
-      if( pos[detID] < 0 ){
-         zTemp = pos[detID] - (-xTemp + 1.)*length/2 ; 
+   //==================== calculate Z
+      numCol = numDet/numRow;
+      if( detGeo.firstPos > 0 ) {
+        zTemp = detGeo.detLength*(1.0-xTemp) + detGeo.detPos[5-idet%numCol];
       }else{
-         zTemp = pos[detID] + (-xTemp + 1.)*length/2 ; 
+        zTemp = detGeo.detLength*(xTemp-1.0) + detGeo.detPos[5-idet%numCol];
       }
+
+   bool coinFlag = false;
+
+    //================ coincident with Recoil when z is calculated.
+      if( !TMath::IsNaN(zTemp) ) { 
+        for( int j = 0; j < 8 ; j++){
+          if( TMath::IsNaN(rdt[j]) ) continue; 
+
+          int tdiff = rdt_t[j] - e_t[idet];
+
+         if( -20 < tdiff && tdiff < 40 )  {
+            coinFlag = true;
+         }
+      }
+   }
+   if( coinFlag == false ) return kTRUE;
       
       if( !TMath::IsNaN(zTemp) ) {
          multiHit++;
@@ -180,7 +194,7 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    
    //printf(" ----%d \n", multiHit);
    
-   //if( multiHit != 1 ) return kTRUE;
+   if( multiHit != 1 ) return kTRUE;
    
    
    //========= for recoil
@@ -188,23 +202,26 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    Float_t trdtTime = 0.;
    int rdtIDtemp = -1;
    rdtdEMultiHit = 0;
-   for( int i = 0; i< 4 ; i++){
+
+    for( int i = 0; i< 8/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
-         rdtTime = rdt_t[2*i+1];
-         rdtIDtemp = i;
-         if( isTraceDataExist ) trdtTime = trdt_t[2*i+1];
+         rdtID = 2*i; //dE
       }
    }
    
    //printf("===== %d \n", rdtdEMultiHit);
    
-   //if ( rdtdEMultiHit != 1 ) return kTRUE;
+   if ( rdtdEMultiHit < 1) return kTRUE;
    
    //for coincident time bewteen array and rdt
-   if( multiHit == 1 && rdtdEMultiHit == 1 ){
-      int coin_t = (int) eTime - rdtTime;
-      float tcoin_t = teTime - trdtTime;
+   if( multiHit == 1 && rdtdEMultiHit >= 1 ){
+
+      ULong64_t rdtTime = rdt_t[rdtID];
+      Float_t trdtTime =  trdt_t[rdtID];
+
+      int coin_t = (int) rdtTime - eTime;
+      float tcoin_t = trdtTime - teTime;
       
       coinTimeUC = 10.0 * (coin_t + tcoin_t) ; // in nano-sec
       
@@ -225,9 +242,9 @@ Bool_t Cali_littleTree_trace::Process(Long64_t entry)
    }
    //printf("%f \n", coinTime);
    
-   if ( abs(coinTime - 19 ) > 30 ) return kTRUE;
+   //if ( abs(coinTime) > 50) return kTRUE;
    
-   //printf("==========================\n");
+   //printf("============HERE==============\n");
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
