@@ -224,19 +224,21 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
      xfC[idet] = xf[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0] ;
      xnC[idet] = xn[idet] * xnCorr[idet] * xfxneCorr[idet][1] + xfxneCorr[idet][0];
       
-     ///========= calculate x, range (-1,1)   
+   ///========= calculate x, range (-1,1)   
      if( hitID[idet] == 3 ) x[idet] = (xfC[idet]-xnC[idet])/e[idet];
-     if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
-     if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
+     //Nate's bypass to fix 
+     //if( hitID[idet] == 1 ) x[idet] = 2.0*xfC[idet]/e[idet] - 1.0;
+     //if( hitID[idet] == 2 ) x[idet] = 1.0 - 2.0 * xnC[idet]/e[idet];
       
      x[idet] = x[idet] / xCorr[idet];
 
-     ///========= Calculate z
+   ///========= Calculate z
      int detID = idet%detGeo.nDet;
-     if( pos[detID] < 0 ){
-       z[idet] = pos[detID] - (-x[idet] + 1.)*length/2 ; 
+     int numCol = 6;
+     if( pos[detID] > 0 ){
+       z[idet] = pos[5-detID%numCol] + (1.0-x[idet])*length/2; 
      }else{
-       z[idet] = pos[detID] + (-x[idet] + 1.)*length/2 ; 
+       z[idet] = pos[5-detID%numCol] + (x[idet]-1.0)*length/2; 
      }
 
      ///========= multiplicity the 2 array detectors are hit.
@@ -310,7 +312,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    for( int i = 0; i< NRDT/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
          rdtdEMultiHit ++;
-         rdtID = 2*i+1; //dE
+         rdtID = 2*i + 1; //dE
       }
    }
    

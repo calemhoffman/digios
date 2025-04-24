@@ -11,8 +11,31 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
+     //chain->Add("../root_data/gen_run010.root");
+     //chain->Add("../root_data/gen_run010.root");
+     //chain->Add("../root_data/gen_run011.root");
+     //chain->Add("../root_data/gen_run014.root");
+     //chain->Add("../root_data/gen_run015.root");
+     
+     
+     chain->Add("../root_data/gen_run016.root"); //run 16-39 considered good (645 ug/cm2)
+     chain->Add("../root_data/gen_run017.root");
+     chain->Add("../root_data/gen_run018.root");
+     chain->Add("../root_data/gen_run019.root");
+     chain->Add("../root_data/gen_run02[0-9].root");
+     chain->Add("../root_data/gen_run03[0-9].root");
+     chain->Add("../root_data/gen_run021.root");
+
+     //chain->Add("../root_data/gen_run040.root");
+     
+     //chain->Add("../root_data/trace_run014.root");
+     //chain->Add("../root_data/trace_run015.root");
+     //chain->Add("../root_data/trace_run016.root");
+     //chain->Add("../root_data/trace_run017.root");
+     //chain->Add("../root_data/trace_run018.root");
+     //chain->Add("../root_data/trace_run019.root");
+     //chain->Add("../root_data/trace_run02[0-9].root");
+     //chain->Add("../root_data/trace_run021.root");
   
     ///********** end Marker for AutoCalibration.
     

@@ -34,8 +34,8 @@ ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
 int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     3000}; 
+int    energyRange[2] = {     2,     20};       /// in the E-Z plot
+int     rdtDERange[2] = {     0,     800}; 
 int      rdtERange[2] = {     0,     5000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
@@ -44,7 +44,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  200,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -56,17 +56,17 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-20, 5};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {} ;//{2,  11, 17}
+double xGate          = 0.8;                  ///cut out the edge
+vector<int> skipDetID = {0,1,2,3,4,5,16} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
+TString rdtCutFile1 = "crh_cut.root"; //"o19_2.root"; //"crh_cut_2.root";//"crh_cut.root";//"cut_test1.root";//o20.root, o20a.root, f21.root
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -748,9 +748,9 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //==================== calculate Z
       if( detGeo.firstPos > 0 ) {
-        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[detID%numCol];
+        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[5-detID%numCol];
       }else{
-        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[detID%numCol];
+        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[5-detID%numCol];
       }
 
       //===================== multiplicity
@@ -861,9 +861,14 @@ Bool_t Monitors::Process(Long64_t entry)
     
    /*********** RECOILS ***********************************************/    
    for( int i = 0; i < NRDT ; i++){
+      // if (i % 2 == 0) {
       hrdtID->Fill(i, rdt[i]);
       hrdt[i]->Fill(rdt[i]);
-      
+      // }
+      // else {
+      //    hrdtID->Fill(i, rdt[i]);
+      // hrdt[i]->Fill(rdt[i]);
+      // }
       for( int j = 0; j < NRDT ; j++){
          if( rdt[i] > 0 && rdt[j] > 0 )  hrdtMatrix->Fill(i, j);
       }
