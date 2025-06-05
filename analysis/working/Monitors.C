@@ -33,10 +33,10 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     0,      10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     3000}; 
-int      rdtERange[2] = {     0,     5000};  
+int rawEnergyRange[2] = {   -2100,    3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     2,     20};       /// in the E-Z plot
+int     rdtDERange[2] = {     0,     800}; 
+int      rdtERange[2] = {     0,     4500};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -44,7 +44,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  100,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  200,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -56,17 +56,17 @@ bool isUseRDTTrace = false;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-20, 12};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-30, 20};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.9;                  ///cut out the edge
-vector<int> skipDetID = {} ;//{2,  11, 17}
+double xGate          = 0.8;                  ///cut out the edge
+vector<int> skipDetID = {}; // {0,1,2,3,4,5,6,7,8,9,10,11} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";
+TString rdtCutFile1 = "";//cut_test1.root";//o20.root, o20a.root, f21.root
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -748,9 +748,9 @@ Bool_t Monitors::Process(Long64_t entry)
       
       //==================== calculate Z
       if( detGeo.firstPos > 0 ) {
-        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[detID%numCol];
+        z[detID] = detGeo.detLength*(1.0-xcal[detID]) + detGeo.detPos[5-detID%numCol];
       }else{
-        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[detID%numCol];
+        z[detID] = detGeo.detLength*(xcal[detID]-1.0) + detGeo.detPos[5-detID%numCol];
       }
 
       //===================== multiplicity
@@ -797,7 +797,7 @@ Bool_t Monitors::Process(Long64_t entry)
    
           int tdiff = rdt_t[j] - e_t[detID];
    
-          if( j%2 == 1) {
+          if( j%2 == 0) { // it is plotting dE now, was 1 and E
              hrtac[j/2]->Fill(detID,tdiff);
              htdiff->Fill(tdiff);
              htacTdiff->Fill( tac[0], tdiff);
@@ -1039,7 +1039,7 @@ void Monitors::Terminate()
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
 
    gStyle->SetOptStat("neiou");
-      
+   
    text.SetNDC();
    text.SetTextFont(82);
    text.SetTextSize(0.04);
@@ -1055,13 +1055,13 @@ void Monitors::Terminate()
    //TODO, Module each plot
    ///----------------------------------- Canvas - 1
    PlotEZ(1); /// raw EZ
-      
+
    ///----------------------------------- Canvas - 2
    PlotEZ(0); ///gated EZ
 
    ///----------------------------------- Canvas - 3
    PlotTDiff(1, 1); ///with Gated Tdiff, isLog
-   
+
    ///----------------------------------- Canvas - 4
    padID++; cCanvas->cd(padID); 
    
@@ -1084,7 +1084,7 @@ void Monitors::Terminate()
 
    ///----------------------------------- Canvas - 6
    PlotRDT(1, 1);
-   
+
    ///----------------------------------- Canvas - 7
    padID++; cCanvas->cd(padID);
 
@@ -1094,20 +1094,19 @@ void Monitors::Terminate()
 
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
-      
+
    ///----------------------------------- Canvas - 8
    PlotRDT(3, 1);
    
    ///----------------------------------- Canvas - 9
    PlotRDT(2, 1);
    
-   
    /************************************/
    gStyle->GetAttDate()->SetTextSize(0.02);
    gStyle->SetOptDate(1);
    gStyle->SetDateX(0);
    gStyle->SetDateY(0);
-   
+
    /************************************/
    StpWatch.Start(kFALSE);
    
