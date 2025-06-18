@@ -1,10 +1,10 @@
 {
     "files.associations": {
-        "*.C": "cpp",
-        "DWBA": "shellscript",
-        "detectorGeo.txt": "shellscript",
-        "reactionConfig.txt": "shellscript",
-        "Ex.txt": "shellscript"
+      "*.C": "cpp",
+      "DWBA": "shellscript",
+      "detectorGeo.txt": "shellscript",
+      "reactionConfig.txt": "shellscript",
+      "Ex.txt": "shellscript",
     },
   "better-comments.multilineComments": true,
   "better-comments.tags" : [
