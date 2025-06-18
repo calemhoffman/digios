@@ -59,3 +59,6 @@ daq/save/trigger.txt
 DB_*.txt
 
 slurm-*.out
+
+run_30*
+EventBuilder
