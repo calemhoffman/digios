@@ -6,13 +6,19 @@ void test(){
   
   haha.Open("run_30.gtd02_000_0106");
 
-  haha.Scan(true);
+  haha.Scan(false);
 
   size_t memSize = haha.GetMemoryUsageBytes();
   printf("Memory %zu bytes = %.3f MB\n", memSize, memSize / (1024.0 * 1024.0));  
 
+  // haha.GetHit(0).Print();
 
-  // haha.GetHit(0).header.Print();
+  Hit hit = haha.GetHit(0);
+
+  Event event = hit.DecodePayload();
+
+  event.Print();
+
 
   // GEBHeader header;
 
@@ -32,7 +38,6 @@ void test(){
   //   word = haha.read<uint32_t>();
   //   printf("%3d | 0x%08X\n", i, word);
   // }
-
 
 
 }
