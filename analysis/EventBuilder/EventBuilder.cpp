@@ -6,6 +6,12 @@
 #include "TString.h"
 #include "TMacro.h"
 
+#define FULL_OUTPUT false
+#define MAX_MULTI 200
+#define MAX_TRACE_LEN 1250 
+#define MAX_READ_HITS 100000 // Maximum hits to read at a time
+
+
 #include <sys/time.h> /** struct timeval, select() */
 inline unsigned int getTime_us(){
   unsigned int time_us;
@@ -15,20 +21,28 @@ inline unsigned int getTime_us(){
   time_us = (t1.tv_sec) * 1000 * 1000 + t1.tv_usec;
   return time_us;
 }
-
-
-#define MAX_MULTI 200
-#define MAX_TRACE_LEN 1250 
-#define MAX_READ_HITS 100000 // Maximum hits to read at a time
   
 //unsigned long long                        evID = 0;
 unsigned int                            numHit = 0;
 unsigned short                   id[MAX_MULTI] = {0}; 
-unsigned short      pre_rise_energy[MAX_MULTI] = {0};  
-unsigned short     post_rise_energy[MAX_MULTI] = {0};  
+unsigned int        pre_rise_energy[MAX_MULTI] = {0};  
+unsigned int       post_rise_energy[MAX_MULTI] = {0};  
 unsigned long long        timestamp[MAX_MULTI] = {0};
 unsigned int               traceLen[MAX_MULTI] = {0};
 unsigned short trace[MAX_MULTI][MAX_TRACE_LEN] = {0};
+#if FULL_OUTPUT
+  uint32_t                      baseline[MAX_MULTI] = {0};
+  unsigned short                geo_addr[MAX_MULTI] = {0};
+  unsigned short                   flags[MAX_MULTI] = {0}; // bit 0 : external disc, bit 1 : peak valid, bit 2 : offset, bit 3 : sync error, bit 4 : general error, bit 5 : pileup only, bit 6 : pileup
+  unsigned long long last_disc_timestamp[MAX_MULTI] = {0}; // Last discriminator timestamp
+  unsigned int            peak_timestamp[MAX_MULTI] = {0}; // Peak timestamp
+  unsigned int           m1_begin_sample[MAX_MULTI] = {0}; // M1 begin sample
+  unsigned int             m1_end_sample[MAX_MULTI] = {0}; // M1 end sample
+  unsigned int           m2_begin_sample[MAX_MULTI] = {0}; // M2 begin sample
+  unsigned int             m2_end_sample[MAX_MULTI] = {0}; // M2 end sample
+  unsigned int               peak_sample[MAX_MULTI] = {0}; // Peak sample
+  unsigned int               base_sample[MAX_MULTI] = {0}; // Base sample
+#endif
 
 //^============================================
 int main(int argc, char* argv[]) {
@@ -111,14 +125,14 @@ int main(int argc, char* argv[]) {
   // outTree->SetAutoFlush(1000000); // auto-flush every 1 million bytes 
   outTree->SetDirectory(outFile);
 
-  outTree->Branch(          "numHit",          &numHit, "numHit/i");
-  outTree->Branch(              "id",               id, "id[numHit]/s");
-  outTree->Branch( "pre_rise_energy",  pre_rise_energy, "pre_rise_energy[numHit]/s");
-  outTree->Branch("post_rise_energy", post_rise_energy, "post_rise_energy[numHit]/s");
-  outTree->Branch(       "timestamp",        timestamp, "timestamp[numHit]/l");
+  outTree->Branch(         "NumHits",          &numHit, "NumHits/i");
+  outTree->Branch(              "id",               id, "id[NumHits]/s");
+  outTree->Branch( "pre_rise_energy",  pre_rise_energy, "pre_rise_energy[NumHits]/i");
+  outTree->Branch("post_rise_energy", post_rise_energy, "post_rise_energy[NumHits]/i");
+  outTree->Branch( "event_timestamp",        timestamp, "event_timestamp[NumHits]/l");
   if( saveTrace ){
-    outTree->Branch("traceLen", traceLen, "traceLen[numHit]/i");
-    outTree->Branch("   trace",    trace, Form("trace[numHit][%d]/s", MAX_TRACE_LEN));
+    outTree->Branch("trace_length", traceLen, "trace_length[NumHits]/i");
+    outTree->Branch(       "trace",    trace, Form("trace[NumHits][%d]/s", MAX_TRACE_LEN));
   } 
 
   //*=============== read n data from each file
@@ -161,7 +175,7 @@ int main(int argc, char* argv[]) {
       const Hit * hits = readers[fileID[digID]]->GetHits();
       
       if( timeWindow < 0 ) {
-        events.push_back(hits[hitID[digID]].DecodePayload()); // Decode the hit payload and store it in the events vector
+        events.push_back(hits[hitID[digID]].DecodePayload(saveTrace)); // Decode the hit payload and store it in the events vector
         hitProcessed ++;
         hitID[digID]++; // Move to the next hit
         break;
@@ -193,10 +207,9 @@ int main(int argc, char* argv[]) {
         pre_rise_energy[i] = events[i].pre_rise_energy; // Pre-rise energy
         post_rise_energy[i] = events[i].post_rise_energy; // Post-rise energy
         timestamp[i] = events[i].timestamp; // Timestamp
-        // printf("EventID %u, Hit ID %d, Timestamp %llu, pre_rise_energy %u\n", eventID, i, timestamp[i], pre_rise_energy[i]);
         if( saveTrace ){
           traceLen[i] = events[i].traceLength; // Trace length
-          for( int j = 0 ; j < traceLen[i]; j++){
+          for( int j = 0 ; j < traceLen[i] && j < MAX_TRACE_LEN; j++){
             trace[i][j] = events[i].trace[j]; // Trace data
           }
         }

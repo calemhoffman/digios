@@ -45,10 +45,10 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
    gStyle->SetOptFit(0);
    
 /**///==============================================================   
-   Short_t   id[200];
-   Int_t      numHit;
-   Short_t trace[200][1024];
-   UShort_t  traceLength[200];
+   UShort_t   id[200];
+   UInt_t      numHit;
+   UShort_t trace[200][1024];
+   UInt_t  traceLength[200];
    tree->SetBranchAddress("id", id);
    tree->SetBranchAddress("NumHits", &numHit);
    tree->SetBranchAddress("trace", trace);
@@ -79,7 +79,6 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
       }
       tree->GetEntry(ev);
       
-
       int countJ = 0;
       
       for( int j = 0; j <  numHit ; j++){
@@ -87,7 +86,6 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
          int idDet  = idDetMap[idTemp];
          int idKind = idKindMap[idTemp];
          
-
          if( !(minDetID <=  idDet &&  idDet <= maxDetID ) ) continue;
 
          if( countJ == 0 )  printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d\n", ev, evPointer, numHit);
@@ -124,7 +122,7 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
             jaja->SetBinError(k, 0);
          }
 
-         //========= moving average
+         // //========= moving average
          TH1F * specS = (TH1F*) jaja->Clone();
          specS->Rebin(4);
 

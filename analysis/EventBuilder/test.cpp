@@ -4,9 +4,12 @@ BinaryReader haha(10000);
 
 void test(){
   
-  haha.Open("run_30.gtd03_000_0109");
+  // haha.Open("run_30.gtd04_000_0113");
+  haha.Open("merged_file_000_000");
 
   haha.Scan(false);
+
+  printf(" hit count: %d \n", haha.GetNumData());
 
   haha.ReadNextNHitsFromFile(true);
 
@@ -16,9 +19,13 @@ void test(){
   // haha.GetHit(0).Print();
 
 
-  for( int i = 0; i < 20 ; i++){
+  for( int i = 0; i < 1 ; i++){
     Hit hit = haha.GetHit(i);
-    printf(" %3d | %lu \n", i,   hit.header.timestamp);
+    printf("0x%08X \n", ntohl(hit.payload[7]));
+    printf("0x%08X \n", ntohl(hit.payload[8]));
+    Event event = hit.DecodePayload();
+    event.Print();
+    // printf(" %3d | %lu | %d | %d %d\n", i,   hit.header.timestamp, event.channel, event.pre_rise_energy, event.post_rise_energy);
   }
 
   

@@ -62,3 +62,4 @@ slurm-*.out
 
 run_30*
 /analysis/EventBuilder/EventBuilder
+/analysis/EventBuilder/merged*
