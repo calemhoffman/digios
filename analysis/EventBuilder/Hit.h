@@ -82,7 +82,7 @@ public:
     }
   }
 
-  Event DecodePayload() const {
+  Event DecodePayload(bool skipTrace = false) const {
     // Implement payload decoding logic here if needed
     // For now, just printing the payload size
     // printf("Decoding payload of size: %zu words\n", payload.size());
@@ -170,11 +170,13 @@ public:
 
     }
   
-    event.traceLength = (packet_length - 13)*2;
-    for( int i = 13; i < payload.size(); i++){
-      uint32_t word = ntohl(payload[i]);
-      event.trace.push_back(word & 0xFFFF);
-      event.trace.push_back(word >> 16);
+    if( skipTrace ){  
+      event.traceLength = (packet_length - 13)*2;
+      for( int i = 13; i < payload.size(); i++){
+        uint32_t word = ntohl(payload[i]);
+        event.trace.push_back(word & 0xFFFF);
+        event.trace.push_back(word >> 16);
+      }
     }
 
     return event;
