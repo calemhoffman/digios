@@ -33,6 +33,10 @@ public:
   
   void Scan(bool quick = false, bool debug = false);  // Scan the file to count data blocks
   unsigned int GetNumData() const { return totalNumHits; }  // Get number of data blocks found
+  
+  
+  void ReadNextNHitsFromFile(unsigned int n, bool debug = false);
+  unsigned int GetHitSize() const { return hits.size(); }  // Get the size of the hits vector
   const std::vector<Hit>& GetHits() const { return hits; }  // Get vector of hits
   Hit GetHit(unsigned int index) const {
     if (index < hits.size()) {
@@ -45,7 +49,6 @@ public:
   void ClearHits() { hits.clear(); }  // Clear the hits vector
   size_t GetMemoryUsageBytes();
 
-  void ReadNextNHitsFromFile(unsigned int n);
 
 private:
   std::ifstream file;
@@ -116,9 +119,9 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
 
 }
 
-inline void BinaryReader::ReadNextNHitsFromFile(unsigned int n) {
+inline void BinaryReader::ReadNextNHitsFromFile(unsigned int n, bool debug) {
 
-  printf("Reading next %u hits from file: %s |", n, fileName.c_str());
+  if( debug ) printf("Reading next %u hits from file: %s |", n, fileName.c_str());
   hits.clear();  // Clear previous hits
   uint64_t old_timestamp = 0;
   unsigned int timestamp_error_counter = 0;
@@ -127,9 +130,9 @@ inline void BinaryReader::ReadNextNHitsFromFile(unsigned int n) {
     hit.header = Read<GEBHeader>();
 
     if( hit.header.timestamp < old_timestamp) {
-      printf("timestamp error at Data ID : %d \n", i);
-      printf("old timestamp : %16lu \n", old_timestamp);
-      printf("new timestamp : %16lu \n", hit.header.timestamp);
+      if( debug ) printf("timestamp error at Data ID : %d \n", i);
+      if( debug ) printf("old timestamp : %16lu \n", old_timestamp);
+      if( debug ) printf("new timestamp : %16lu \n", hit.header.timestamp);
       timestamp_error_counter++;
     }
     old_timestamp = hit.header.timestamp;
@@ -142,17 +145,23 @@ inline void BinaryReader::ReadNextNHitsFromFile(unsigned int n) {
 
   //sort hits by timestamp
   if( timestamp_error_counter > 0 ) {
-    printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
+    if( debug ) printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
     std::sort(hits.begin(), hits.end(), [](const Hit& a, const Hit& b) {
       return a.header.timestamp < b.header.timestamp;
     });
   }
   hitID += n;  // Update the hitID to the next position
 
-  printf(" first timestamp: %lu, last timestamp: %lu, total hits read: %zu\n", 
-         hits.front().header.timestamp, 
-         hits.back().header.timestamp, 
-         hits.size());
+  if( debug ){
+    if( hits.empty()) {
+      printf(" No hits to read\n");
+    }else{
+      printf(" first timestamp: %lu, last timestamp: %lu, total hits read: %zu\n", 
+          hits.front().header.timestamp, 
+          hits.back().header.timestamp, 
+          hits.size());
+    }
+  }
 }
 
 inline size_t BinaryReader::GetMemoryUsageBytes() {
