@@ -82,7 +82,7 @@ public:
     }
   }
 
-  Event DecodePayload(bool skipTrace = false) const {
+  Event DecodePayload(bool saveTrace = false) const {
     // Implement payload decoding logic here if needed
     // For now, just printing the payload size
     // printf("Decoding payload of size: %zu words\n", payload.size());
@@ -170,7 +170,7 @@ public:
 
     }
   
-    if( skipTrace ){  
+    if( saveTrace ){  
       event.traceLength = (packet_length - 13)*2;
       for( int i = 13; i < payload.size(); i++){
         uint32_t word = ntohl(payload[i]);
