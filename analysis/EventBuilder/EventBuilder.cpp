@@ -17,11 +17,10 @@ inline unsigned int getTime_us(){
 }
 
 
-#define MAX_MULTI 64
-#define MAX_TRACE_LEN 1250 ///  = 10 us
+#define MAX_MULTI 200
+#define MAX_TRACE_LEN 1250 
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
   
-
 //unsigned long long                        evID = 0;
 unsigned int                            numHit = 0;
 unsigned short                   id[MAX_MULTI] = {0}; 
@@ -101,31 +100,29 @@ int main(int argc, char* argv[]) {
     }
   }
   
-  printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
   printf("================= Total number of hits: %lu\n", totalNumHits);
+  printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
 
   //*=============== create output file and setup TTree
-  // TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
+  TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
   
-  // TTree * outTree = new TTree("tree", outFileName.Data());
+  TTree * outTree = new TTree("tree", outFileName.Data());
   // outTree->SetAutoSave(10000000); // autosave every 10 million bytes
   // outTree->SetAutoFlush(1000000); // auto-flush every 1 million bytes 
-  // outTree->SetDirectory(outFile);
+  outTree->SetDirectory(outFile);
 
-  // outTree->Branch("numHit", &numHit, "numHit/i");
-  // outTree->Branch("id", id, "id[numHit]/s");
-  // outTree->Branch("pre_rise_energy", pre_rise_energy, "pre_rise_energy[numHit]/s");
-  // outTree->Branch("post_rise_energy", post_rise_energy, "post_rise_energy[numHit]/s");
-  // outTree->Branch("timestamp", timestamp, "timestamp[numHit]/l");
-  // if( saveTrace ){
-  //   outTree->Branch("traceLen", traceLen, "traceLen[numHit]/i");
-  //   outTree->Branch("   trace",    trace, "trace[numHit][traceLen[numHit]]/s");
-  // } 
-
+  outTree->Branch(          "numHit",          &numHit, "numHit/i");
+  outTree->Branch(              "id",               id, "id[numHit]/s");
+  outTree->Branch( "pre_rise_energy",  pre_rise_energy, "pre_rise_energy[numHit]/s");
+  outTree->Branch("post_rise_energy", post_rise_energy, "post_rise_energy[numHit]/s");
+  outTree->Branch(       "timestamp",        timestamp, "timestamp[numHit]/l");
+  if( saveTrace ){
+    outTree->Branch("traceLen", traceLen, "traceLen[numHit]/i");
+    outTree->Branch("   trace",    trace, Form("trace[numHit][%d]/s", MAX_TRACE_LEN));
+  } 
 
   //*=============== read n data from each file
 
-  
   uint64_t earlistTime = UINT64_MAX; 
   int earlistDigID = -1; // Earliest DigID with the earliest timestamp
   std::map<unsigned short, unsigned int> hitID; // store the hit ID for the current reader for each DigID
@@ -139,7 +136,7 @@ int main(int argc, char* argv[]) {
     fileID[digID] = 0; 
 
     BinaryReader* reader = readers[0];
-    reader->ReadNextNHitsFromFile(true); // Read 10,000 hits at a time
+    reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
     if( reader->GetHit(0).header.timestamp < earlistTime ) {
       earlistTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
@@ -147,15 +144,15 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  
   //*=============== event building
   std::vector<Event> events; // Vector to store events
   unsigned int eventID = 0;
   
+  unsigned int hitProcessed = 0; // Number of hits processed
+  double last_precentage = 0.0; // Last percentage printed
+
   do{
-
     // printf("##### Earliest timestamp: %lu from DigID %03d\n", earlistTime, earlistDigID);
-
     for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
       unsigned short digID = group.first; // DigID
       if( fileID[digID] < 0 ) continue; // Skip if no more files for this DigID
@@ -165,7 +162,7 @@ int main(int argc, char* argv[]) {
       
       if( timeWindow < 0 ) {
         events.push_back(hits[hitID[digID]].DecodePayload()); // Decode the hit payload and store it in the events vector
-        numHit++;
+        hitProcessed ++;
         hitID[digID]++; // Move to the next hit
         break;
       }
@@ -174,8 +171,8 @@ int main(int argc, char* argv[]) {
         // uint64_t diff = hits[hitID[digID]].header.timestamp - earlistTime;
         // printf("Processing DigID %03d, Hit ID %u, file ID %d, Timestamp %lu | diff %lu\n", digID, hitID[digID], fileID[digID], hits[hitID[digID]].header.timestamp, diff );
         if( hits[i].header.timestamp - earlistTime  <= timeWindow) {
-          events.push_back(hits[i].DecodePayload()); // Decode the hit payload and store it in the events vector
-          numHit++;
+          events.push_back(hits[i].DecodePayload(saveTrace)); // Decode the hit payload and store it in the events vector
+          hitProcessed ++;
           hitID[digID]++; // Move to the next hit
         }else{
           // printf("----- break\n");
@@ -186,18 +183,37 @@ int main(int argc, char* argv[]) {
 
     // if( eventID % 10000 == 0 ) printf("EventID : %u, Number of Hits in this event : %zu| Total hits read: %u\n", eventID, events.size(), numHit);
 
-    //TODO save to TTree
     if( events.size() > 0 ) {
       std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
       });
+      numHit = events.size(); 
+      for( int i = 0; i <  events.size(); i++) {
+        id[i] = events[i].board * 10 + events[i].channel; // Channel ID
+        pre_rise_energy[i] = events[i].pre_rise_energy; // Pre-rise energy
+        post_rise_energy[i] = events[i].post_rise_energy; // Post-rise energy
+        timestamp[i] = events[i].timestamp; // Timestamp
+        // printf("EventID %u, Hit ID %d, Timestamp %llu, pre_rise_energy %u\n", eventID, i, timestamp[i], pre_rise_energy[i]);
+        if( saveTrace ){
+          traceLen[i] = events[i].traceLength; // Trace length
+          for( int j = 0 ; j < traceLen[i]; j++){
+            trace[i][j] = events[i].trace[j]; // Trace data
+          }
+        }
+      }
+      outTree->Fill(); // Fill the TTree with the current event
     }
 
-
+    
+    double percentage = hitProcessed * 100/ totalNumHits;
+    if( percentage >= last_precentage ) {
+      printf("Processed : %u, %.0f%% | %u/%lu | ", eventID, percentage, hitProcessed, totalNumHits);
+      printf(" \n\033[A\r");
+      last_precentage = percentage + 1.0;
+    }
+    
     // prepare for the next event
     eventID ++;
-
-    // printf("------ preparing for next event\n");
     events.clear(); // Clear the events vector for the next event
 
     // find the next earliest timestamp
@@ -223,7 +239,7 @@ int main(int argc, char* argv[]) {
           readers[fileID[digID]]->ReadNextNHitsFromFile(); // Read more hits from the next file
           hitID[digID] = 0; // Reset hitID for this DigID
         } else {
-          printf("\033[31m====== No more files for DigID %03d\033[0m\n", digID);
+          // printf("\033[31m====== No more files for DigID %03d\033[0m\n", digID);
           fileID[digID] = -1; // Mark that there are no more files for this DigID
           continue; // No more files to read for this DigID
         }
@@ -254,12 +270,21 @@ int main(int argc, char* argv[]) {
 
   //summary
   printf("=======================================================\n");
-  printf("===          Event Builder finished                  ===\n");
+  printf("===          Event Builder finished                 ===\n");
   printf("=======================================================\n");
   unsigned int runEndTime = getTime_us();
   printf("              Total time taken: %.3f s = %.3f min\n", (runEndTime - runStartTime) / 1000000.0, (runEndTime - runStartTime) / 1000000.0 / 60.0);
-  printf("Total number of hits processed: %u (%lu)\n", numHit, totalNumHits);
+  printf("Total number of hits processed: %u (%lu)\n", hitProcessed, totalNumHits);
   printf("  Total number of events built: %u\n", eventID);
-  
+  printf("     Number of entries in tree: %lld\n", outTree->GetEntries());
+  //clean up
+  outFile->Write();
+  outFile->Close();
+  for( int i = 0 ; i < nFile ; i++){
+    delete reader[i]; // Delete each BinaryReader
+  }
+  delete[] reader; // Delete the array of BinaryReader pointers
+  printf("Output file \033[31m%s\033[0m created successfully.\n", outFileName.Data());
+
   return 0;
 }
