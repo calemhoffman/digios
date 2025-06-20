@@ -19,7 +19,7 @@ inline unsigned int getTime_us(){
 
 #define MAX_MULTI 64
 #define MAX_TRACE_LEN 1250 ///  = 10 us
-#define MAX_READ_HITS 100 // Maximum hits to read at a time
+#define MAX_READ_HITS 100000 // Maximum hits to read at a time
   
 
 //unsigned long long                        evID = 0;
@@ -71,38 +71,37 @@ int main(int argc, char* argv[]) {
   //*=============== setup reader
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
-  BinaryReader * reader = new BinaryReader[nFile];
+  BinaryReader ** reader = new BinaryReader *[nFile];
   for( int i = 0 ; i < nFile ; i++){
-    reader[i].Open(inFileName[i].Data());
-    reader[i].Scan(true);
-    totalNumHits += reader[i].GetNumData();
-    printf("  %2d| %5.1f MB| %s \n", i, reader[i].GetFileSize()/1024./1024., inFileName[i].Data());
-    totFileSize += reader[i].GetFileSize();
-    // printf("File %s has %u hits\n", inFileName[i].Data(), reader[i].GetNumData());
+    reader[i] = new BinaryReader((MAX_READ_HITS)); 
+    reader[i]->Open(inFileName[i].Data());
+    reader[i]->Scan(true);
+    totalNumHits += reader[i]->GetNumData();
+    totFileSize += reader[i]->GetFileSize();
   }
-  printf("Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
   
   //*=============== group files by DigID and sort the fileIndex
   std::map<unsigned short, std::vector<BinaryReader*>> fileGroups;
   for( int i = 0 ; i < nFile ; i++){
-    unsigned short digID = reader[i].GetDigID();
+    unsigned short digID = reader[i]->GetDigID();
     if (!fileGroups.count(digID) ) {
       fileGroups[digID] = std::vector<BinaryReader*>();
     }
-    fileGroups[digID].push_back(&reader[i]);
+    fileGroups[digID].push_back(reader[i]);
   }
-  printf("Found %zu DigIDs\n", fileGroups.size());
-
+  // printf("Found %zu DigIDs\n", fileGroups.size());
+  
   // printf out the file groups
   for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
     unsigned short digID = group.first; // DigID
     const auto& readers = group.second; // Vector of BinaryReader pointers
     printf("----- DigID %03d has %zu files\n", digID, readers.size());
     for (size_t j = 0; j < readers.size(); j++) {
-      printf("  File %zu: %s | num. of hit : %d\n", j, readers[j]->GetFileName().c_str(), readers[j]->GetNumData());
+      printf("  File %zu: %s | %5.1f MB | num. of hit : %d\n", j, readers[j]->GetFileName().c_str(), readers[j]->GetFileSize()/1024./1024., readers[j]->GetNumData());
     }
   }
-
+  
+  printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
   printf("================= Total number of hits: %lu\n", totalNumHits);
 
   //*=============== create output file and setup TTree
@@ -140,7 +139,7 @@ int main(int argc, char* argv[]) {
     fileID[digID] = 0; 
 
     BinaryReader* reader = readers[0];
-    reader->ReadNextNHitsFromFile(MAX_READ_HITS); // Read 10,000 hits at a time
+    reader->ReadNextNHitsFromFile(true); // Read 10,000 hits at a time
 
     if( reader->GetHit(0).header.timestamp < earlistTime ) {
       earlistTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
@@ -162,7 +161,7 @@ int main(int argc, char* argv[]) {
       if( fileID[digID] < 0 ) continue; // Skip if no more files for this DigID
       const std::vector<BinaryReader*>& readers = group.second; // Vector of BinaryReader pointers
 
-      const std::vector<Hit> hits = readers[fileID[digID]]->GetHits();
+      const Hit * hits = readers[fileID[digID]]->GetHits();
       
       if( timeWindow < 0 ) {
         events.push_back(hits[hitID[digID]].DecodePayload()); // Decode the hit payload and store it in the events vector
@@ -171,7 +170,7 @@ int main(int argc, char* argv[]) {
         break;
       }
       
-      for (int i = hitID[digID]; i < hits.size(); i++) {  
+      for (int i = hitID[digID]; i < readers[fileID[digID]]->GetHitSize(); i++) {  
         // uint64_t diff = hits[hitID[digID]].header.timestamp - earlistTime;
         // printf("Processing DigID %03d, Hit ID %u, file ID %d, Timestamp %lu | diff %lu\n", digID, hitID[digID], fileID[digID], hits[hitID[digID]].header.timestamp, diff );
         if( hits[i].header.timestamp - earlistTime  <= timeWindow) {
@@ -185,7 +184,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    if( eventID % 1000 == 0 ) printf("EventID : %u, Number of Hits in this event : %zu| Total hits read: %u\n", eventID, events.size(), numHit);
+    // if( eventID % 10000 == 0 ) printf("EventID : %u, Number of Hits in this event : %zu| Total hits read: %u\n", eventID, events.size(), numHit);
 
     //TODO save to TTree
     if( events.size() > 0 ) {
@@ -214,14 +213,14 @@ int main(int argc, char* argv[]) {
       
       if( hitID[digID] >= reader->GetHitSize() ) {
         // printf("\033[31mHit ID %u exceeds the number of hits in file for DigID %03d. Reading more hits...\033[0m\n", hitID[digID], digID);
-        readers[0]->ReadNextNHitsFromFile(MAX_READ_HITS); // Read more hits if needed
+        readers[0]->ReadNextNHitsFromFile(); // Read more hits if needed
         hitID[digID] = 0; // Reset hitID for this DigID
       }
 
       if( reader->GetHitSize() == 0 ) { // load next file if no hits
         if( fileID[digID] < readers.size() - 1 ) {
           fileID[digID]++;
-          readers[fileID[digID]]->ReadNextNHitsFromFile(MAX_READ_HITS); // Read more hits from the next file
+          readers[fileID[digID]]->ReadNextNHitsFromFile(); // Read more hits from the next file
           hitID[digID] = 0; // Reset hitID for this DigID
         } else {
           printf("\033[31m====== No more files for DigID %03d\033[0m\n", digID);

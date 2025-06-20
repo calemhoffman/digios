@@ -1,17 +1,20 @@
 #include "BinaryReader.h"
 
-BinaryReader haha;
+BinaryReader haha(10000);
 
 void test(){
   
-  haha.Open("run_30.gtd04_000_0113");
+  haha.Open("run_30.gtd03_000_0109");
 
   haha.Scan(false);
+
+  haha.ReadNextNHitsFromFile(true);
 
   size_t memSize = haha.GetMemoryUsageBytes();
   printf("Memory %zu bytes = %.3f MB\n", memSize, memSize / (1024.0 * 1024.0));  
 
   // haha.GetHit(0).Print();
+
 
   for( int i = 0; i < 20 ; i++){
     Hit hit = haha.GetHit(i);
