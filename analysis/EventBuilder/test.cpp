@@ -4,7 +4,7 @@ BinaryReader haha;
 
 void test(){
   
-  haha.Open("run_30.gtd02_000_0106");
+  haha.Open("run_30.gtd04_000_0113");
 
   haha.Scan(false);
 
@@ -13,11 +13,17 @@ void test(){
 
   // haha.GetHit(0).Print();
 
-  Hit hit = haha.GetHit(0);
+  for( int i = 0; i < 20 ; i++){
+    Hit hit = haha.GetHit(i);
+    printf(" %3d | %lu \n", i,   hit.header.timestamp);
+  }
 
-  Event event = hit.DecodePayload();
+  
 
-  event.Print();
+
+  // Event event = hit.DecodePayload();
+
+  // event.Print();
 
 
   // GEBHeader header;

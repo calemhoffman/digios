@@ -61,4 +61,4 @@ DB_*.txt
 slurm-*.out
 
 run_30*
-EventBuilder/EventBuilder
+/analysis/EventBuilder/EventBuilder
