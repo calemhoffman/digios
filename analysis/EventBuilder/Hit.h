@@ -28,7 +28,7 @@ public:
   uint32_t pre_rise_energy;  // Pre-rise energy
   uint32_t post_rise_energy;  // Post-rise energy
   
-  uint32_t traceLength;  // trace length in samples
+  uint16_t traceLength;  // trace length in samples
   std::vector<uint16_t> trace;  // Trace data
   
   // not very useful, but kept for compatibility

@@ -28,7 +28,7 @@ unsigned short                   id[MAX_MULTI] = {0};
 unsigned int        pre_rise_energy[MAX_MULTI] = {0};  
 unsigned int       post_rise_energy[MAX_MULTI] = {0};  
 unsigned long long        timestamp[MAX_MULTI] = {0};
-unsigned int               traceLen[MAX_MULTI] = {0};
+unsigned short             traceLen[MAX_MULTI] = {0};
 unsigned short trace[MAX_MULTI][MAX_TRACE_LEN] = {0};
 #if FULL_OUTPUT
   uint32_t                      baseline[MAX_MULTI] = {0};
@@ -130,8 +130,21 @@ int main(int argc, char* argv[]) {
   outTree->Branch( "pre_rise_energy",  pre_rise_energy, "pre_rise_energy[NumHits]/i");
   outTree->Branch("post_rise_energy", post_rise_energy, "post_rise_energy[NumHits]/i");
   outTree->Branch( "event_timestamp",        timestamp, "event_timestamp[NumHits]/l");
+#if FULL_OUTPUT
+  outTree->Branch(           "baseline",            baseline, "baseline[NumHits]/i");
+  outTree->Branch(           "geo_addr",            geo_addr, "geo_addr[NumHits]/s");
+  outTree->Branch(              "flags",               flags, "flags[NumHits]/s"); 
+  outTree->Branch("last_disc_timestamp", last_disc_timestamp, "last_disc_timestamp[NumHits]/l"); 
+  outTree->Branch(     "peak_timestamp",      peak_timestamp, "peak_timestamp[NumHits]/i"); 
+  outTree->Branch(    "m1_begin_sample",     m1_begin_sample, "m1_begin_sample[NumHits]/i"); 
+  outTree->Branch(      "m1_end_sample",       m1_end_sample, "m1_end_sample[NumHits]/i"); 
+  outTree->Branch(    "m2_begin_sample",     m2_begin_sample, "m2_begin_sample[NumHits]/i");
+  outTree->Branch(      "m2_end_sample",       m2_end_sample, "m2_end_sample[NumHits]/i");
+  outTree->Branch(        "peak_sample",         peak_sample, "peak_sample[NumHits]/i");
+  outTree->Branch(        "base_sample",         base_sample, "base_sample[NumHits]/i");
+#endif
   if( saveTrace ){
-    outTree->Branch("trace_length", traceLen, "trace_length[NumHits]/i");
+    outTree->Branch("trace_length", traceLen, "trace_length[NumHits]/s");
     outTree->Branch(       "trace",    trace, Form("trace[NumHits][%d]/s", MAX_TRACE_LEN));
   } 
 
@@ -203,10 +216,23 @@ int main(int argc, char* argv[]) {
       });
       numHit = events.size(); 
       for( int i = 0; i <  events.size(); i++) {
-        id[i] = events[i].board * 10 + events[i].channel; // Channel ID
-        pre_rise_energy[i] = events[i].pre_rise_energy; // Pre-rise energy
+        id[i]               = events[i].board * 10 + events[i].channel; // Channel ID
+        pre_rise_energy[i]  = events[i].pre_rise_energy; // Pre-rise energy
         post_rise_energy[i] = events[i].post_rise_energy; // Post-rise energy
-        timestamp[i] = events[i].timestamp; // Timestamp
+        timestamp[i]        = events[i].timestamp; // Timestamp
+#if FULL_OUTPUT
+        baseline[i]            = events[i].baseline; // Baseline value
+        geo_addr[i]            = events[i].geo_addr; // Geo address
+        flags[i]               = events[i].flags; // Flags, bit 0 : external disc, bit 1 : peak valid, bit 2 : offset, bit 3 : sync error, bit 4 : general error, bit 5 : pileup only, bit 6 : pileup
+        last_disc_timestamp[i] = events[i].last_disc_timestamp; // Last discriminator timestamp
+        peak_timestamp[i]      = events[i].peak_timestamp; // Peak timestamp
+        m1_begin_sample[i]     = events[i].m1_begin_sample; // M1 begin sample
+        m1_end_sample[i]       = events[i].m1_end_sample; // M1 end sample
+        m2_begin_sample[i]     = events[i].m2_begin_sample; // M2 begin sample
+        m2_end_sample[i]       = events[i].m2_end_sample; // M2 end sample
+        peak_sample[i]         = events[i].peak_sample; // Peak sample
+        base_sample[i]         = events[i].base_sample; // Base sample
+#endif
         if( saveTrace ){
           traceLen[i] = events[i].traceLength; // Trace length
           for( int j = 0 ; j < traceLen[i] && j < MAX_TRACE_LEN; j++){
