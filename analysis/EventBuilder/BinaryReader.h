@@ -10,10 +10,20 @@
 
 class BinaryReader {
 public:
-  BinaryReader(){ Init(); }
-  BinaryReader(const std::string& filename) { Init(); Open(filename); }
+  BinaryReader(unsigned int maxHitSize){ // Constructor with hit size
+    Init(); 
+    hits = new Hit[maxHitSize]; 
+    this->maxHitSize = maxHitSize;
+  }  
+  BinaryReader(const std::string& filename, unsigned int maxHitSize) {  // Constructor with filename and hit size
+    Init(); 
+    Open(filename); 
+    hits = new Hit[maxHitSize]; 
+    this->maxHitSize = maxHitSize;
+  } 
   ~BinaryReader() {
     if (file.is_open()) file.close();
+    DeleteHits();
   }
 
   void Open(const std::string& filename);
@@ -35,18 +45,23 @@ public:
   unsigned int GetNumData() const { return totalNumHits; }  // Get number of data blocks found
   
   
-  void ReadNextNHitsFromFile(unsigned int n, bool debug = false);
-  unsigned int GetHitSize() const { return hits.size(); }  // Get the size of the hits vector
-  const std::vector<Hit>& GetHits() const { return hits; }  // Get vector of hits
+  void ReadNextNHitsFromFile(bool debug = false);
+  unsigned int GetMaxHitSize() const { return maxHitSize; }  // Get the maximum size of the hits vector
+  unsigned int GetHitSize() const { return hitSize; }  // Get the size of the hits vector
+  const Hit * GetHits() const { return hits; }  // Get vector of hits
   Hit GetHit(unsigned int index) const {
-    if (index < hits.size()) {
+    if (index < maxHitSize) {
       return hits[index];  // Return the hit at the specified index
     } else {
       throw std::out_of_range("Index out of range ");
     }
   }
 
-  void ClearHits() { hits.clear(); }  // Clear the hits vector
+  void DeleteHits() { 
+    delete[] hits;  // Delete the hits array
+    hits = nullptr;  // Set hits to nullptr
+    maxHitSize = 0;  // Reset hit size
+  } 
   size_t GetMemoryUsageBytes();
 
 
@@ -60,7 +75,11 @@ private:
   unsigned int totalNumHits;
   unsigned int hitID; // current hit ID
 
-  std::vector<Hit> hits; // Vector to store hits
+  // std::vector<Hit> hits; // Vector to store hits
+
+  Hit * hits;
+  unsigned int maxHitSize; // Size of the hits array
+  unsigned int hitSize; // Number of hits read from the file
 
   void Init(){
     fileSize = 0;
@@ -68,7 +87,9 @@ private:
     fileIndex = 0;
     totalNumHits = 0;
     hitID = 0;
-    hits.clear();
+    hits = nullptr;
+    maxHitSize = 0;
+    hitSize = 0;
   }
 };
 
@@ -106,7 +127,6 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
       file.seekg( hit.header.payload_lenght_byte, std::ios::cur );
     }else {
       hit.payload = ReadArray<uint32_t>(hit.header.payload_lenght_byte / sizeof(uint32_t));
-      hits.push_back(hit); // Store the hit in the vector
     }
 
     totalNumHits ++;
@@ -119,57 +139,59 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
 
 }
 
-inline void BinaryReader::ReadNextNHitsFromFile(unsigned int n, bool debug) {
+inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
 
-  if( debug ) printf("Reading next %u hits from file: %s |", n, fileName.c_str());
-  hits.clear();  // Clear previous hits
+  if( debug ) printf("Reading next %u hits from file: %s |", maxHitSize, fileName.c_str());
   uint64_t old_timestamp = 0;
   unsigned int timestamp_error_counter = 0;
-  for (unsigned int i = 0; i < n && Tell() < fileSize; ++i) {
-    Hit hit;
-    hit.header = Read<GEBHeader>();
+  hitSize = 0; // Reset hit size before reading new hits
+  for (unsigned int i = 0; i < maxHitSize && Tell() < fileSize; ++i) {
+    hits[i].header = Read<GEBHeader>();
 
-    if( hit.header.timestamp < old_timestamp) {
+    if( hits[i].header.timestamp < old_timestamp) {
       if( debug ) printf("timestamp error at Data ID : %d \n", i);
       if( debug ) printf("old timestamp : %16lu \n", old_timestamp);
-      if( debug ) printf("new timestamp : %16lu \n", hit.header.timestamp);
+      if( debug ) printf("new timestamp : %16lu \n", hits[i].header.timestamp);
       timestamp_error_counter++;
     }
-    old_timestamp = hit.header.timestamp;
+    old_timestamp = hits[i].header.timestamp;
 
-    if (hit.header.payload_lenght_byte > 0) {
-      hit.payload = ReadArray<uint32_t>(hit.header.payload_lenght_byte / sizeof(uint32_t));
-      hits.push_back(hit);  // Store the hit in the vector
+    if (hits[i].header.payload_lenght_byte > 0) {
+      hits[i].payload = ReadArray<uint32_t>(hits[i].header.payload_lenght_byte / sizeof(uint32_t));
     }
+    hitSize++;  // Increment hit size for each hit read
+    hitID ++;  // Update the hitID to the next position
   }
 
   //sort hits by timestamp
-  if( timestamp_error_counter > 0 ) {
-    if( debug ) printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
-    std::sort(hits.begin(), hits.end(), [](const Hit& a, const Hit& b) {
+  if( hitSize > 0 && timestamp_error_counter > 0 && debug ) {
+    printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
+
+    //sort the hits by timestamp
+    std::sort(hits, hits + hitSize, [](const Hit& a, const Hit& b) {
       return a.header.timestamp < b.header.timestamp;
     });
   }
-  hitID += n;  // Update the hitID to the next position
+
 
   if( debug ){
-    if( hits.empty()) {
+    if( hitSize == 0 ) {
       printf(" No hits to read\n");
     }else{
-      printf(" first timestamp: %lu, last timestamp: %lu, total hits read: %zu\n", 
-          hits.front().header.timestamp, 
-          hits.back().header.timestamp, 
-          hits.size());
+      printf(" first timestamp: %lu, last timestamp: %lu, hits read: %u\n", 
+          hits[0].header.timestamp, 
+          hits[maxHitSize-1].header.timestamp, 
+          hitSize);
     }
   }
 }
 
 inline size_t BinaryReader::GetMemoryUsageBytes() {
   size_t total = sizeof(BinaryReader);
-  total += hits.capacity() * sizeof(Hit);
-  for (const auto& hit : hits) {
+  total += maxHitSize * sizeof(Hit);
+  for (int i = 0; i < maxHitSize; ++i) {
       total += sizeof(GEBHeader);
-      total += hit.payload.capacity() * sizeof(uint32_t);
+      total += hits[i].payload.capacity() * sizeof(uint32_t);
   }
   return total;
 }
