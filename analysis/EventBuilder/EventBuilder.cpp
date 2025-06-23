@@ -151,8 +151,11 @@ int main(int argc, char* argv[]) {
 
   //*=============== read n data from each file
 
-  uint64_t earlistTime = UINT64_MAX; 
-  int earlistDigID = -1; // Earliest DigID with the earliest timestamp
+  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
+  uint64_t globalLastTime = 0; // Global last timestamp
+
+  uint64_t earliestTime = UINT64_MAX; 
+  int earliestDigID = -1; // Earliest DigID with the earliest timestamp
   std::map<unsigned short, unsigned int> hitID; // store the hit ID for the current reader for each DigID
   std::map<unsigned short, short> fileID; // store the file ID for each DigID
   
@@ -166,11 +169,13 @@ int main(int argc, char* argv[]) {
     BinaryReader* reader = readers[0];
     reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
-    if( reader->GetHit(0).header.timestamp < earlistTime ) {
-      earlistTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
-      earlistDigID = digID; // Update the earliest DigID
+    if( reader->GetHit(0).header.timestamp < earliestTime ) {
+      earliestTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
+      earliestDigID = digID; // Update the earliest DigID
     }
   }
+
+  globalEarliestTime = earliestTime; // Set the global earliest time
 
   //*=============== event building
   std::vector<Event> events; // Vector to store events
@@ -180,7 +185,7 @@ int main(int argc, char* argv[]) {
   double last_precentage = 0.0; // Last percentage printed
 
   do{
-    // printf("##### Earliest timestamp: %lu from DigID %03d\n", earlistTime, earlistDigID);
+    // printf("##### Earliest timestamp: %lu from DigID %03d\n", earliestTime, earliestDigID);
     for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
       unsigned short digID = group.first; // DigID
       if( fileID[digID] < 0 ) continue; // Skip if no more files for this DigID
@@ -196,9 +201,9 @@ int main(int argc, char* argv[]) {
       }
       
       for (int i = hitID[digID]; i < readers[fileID[digID]]->GetHitSize(); i++) {  
-        // uint64_t diff = hits[hitID[digID]].header.timestamp - earlistTime;
+        // uint64_t diff = hits[hitID[digID]].header.timestamp - earliestTime;
         // printf("Processing DigID %03d, Hit ID %u, file ID %d, Timestamp %lu | diff %lu\n", digID, hitID[digID], fileID[digID], hits[hitID[digID]].header.timestamp, diff );
-        if( hits[i].header.timestamp - earlistTime  <= timeWindow) {
+        if( hits[i].header.timestamp - earliestTime  <= timeWindow) {
           events.push_back(hits[i].DecodePayload(saveTrace)); // Decode the hit payload and store it in the events vector
           hitProcessed ++;
           hitID[digID]++; // Move to the next hit
@@ -244,6 +249,7 @@ int main(int argc, char* argv[]) {
       outTree->Fill(); // Fill the TTree with the current event
     }
 
+    globalLastTime = events.back().timestamp; // Update the global last time
     
     double percentage = hitProcessed * 100/ totalNumHits;
     if( percentage >= last_precentage ) {
@@ -257,8 +263,8 @@ int main(int argc, char* argv[]) {
     events.clear(); // Clear the events vector for the next event
 
     // find the next earliest timestamp
-    earlistTime = UINT64_MAX;
-    earlistDigID = -1; // Reset the earliest DigID
+    earliestTime = UINT64_MAX;
+    earliestDigID = -1; // Reset the earliest DigID
     for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
       unsigned short digID = group.first; // DigID
       const auto& readers = group.second; // Vector of BinaryReader pointers    
@@ -291,17 +297,17 @@ int main(int argc, char* argv[]) {
       }
 
       if( hitID[digID] < reader->GetNumData() ) {
-        if( reader->GetHit(hitID[digID]).header.timestamp < earlistTime ) {
-          earlistTime = reader->GetHit(hitID[digID]).header.timestamp; // Update the earliest timestamp
-          earlistDigID = digID; // Update the earliest DigID
+        if( reader->GetHit(hitID[digID]).header.timestamp < earliestTime ) {
+          earliestTime = reader->GetHit(hitID[digID]).header.timestamp; // Update the earliest timestamp
+          earliestDigID = digID; // Update the earliest DigID
         }
       } else {
         if( fileID[digID] < readers.size() - 1 ) {
           fileID[digID]++;
           reader = readers[fileID[digID]];
-          if( reader->GetHit(0).header.timestamp < earlistTime ) {
-            earlistTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
-            earlistDigID = digID; // Update the earliest DigID
+          if( reader->GetHit(0).header.timestamp < earliestTime ) {
+            earliestTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
+            earliestDigID = digID; // Update the earliest DigID
           }
         }else{
           fileID[digID] = -1; // Mark that there are no more files for this DigID
@@ -309,8 +315,15 @@ int main(int argc, char* argv[]) {
       }
     }
 
-  }while( earlistDigID >= 0);
-  
+  }while( earliestDigID >= 0);
+
+  //Save the global earliest and last timestamps as a TMacro
+  TMacro macro("info", "Earliest and Last Timestamps");
+  macro.AddLine(Form("globalEarliestTime = %lu", globalEarliestTime));
+  macro.AddLine(Form("globalLastTime = %lu", globalLastTime));
+  macro.AddLine(Form("totalNumHits = %lu", totalNumHits));
+  macro.AddLine(Form("totFileSizeMB = %.1f", totFileSize / (1024.0 * 1024.0))); // Convert to MB
+  macro.Write("info");
 
   //summary
   printf("=======================================================\n");
@@ -321,6 +334,7 @@ int main(int argc, char* argv[]) {
   printf("Total number of hits processed: %10u (%lu)\n", hitProcessed, totalNumHits);
   printf("  Total number of events built: %10u\n", eventID);
   printf("     Number of entries in tree: %10lld\n", outTree->GetEntries());
+  printf("                Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
   //clean up
   outFile->Write();
   outFile->Close();

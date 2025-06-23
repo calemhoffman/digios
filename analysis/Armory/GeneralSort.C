@@ -6,9 +6,7 @@
 #include <TMacro.h>
 #include <TBenchmark.h>
 
-ULong64_t MaxProcessedEntries=1000000000;
 ULong64_t NumEntries = 0;
-int EffEntries;
 ULong64_t ProcessedEntries = 0;
 
 #include "../working/GeneralSortMapping.h"
@@ -61,7 +59,6 @@ void GeneralSort::Begin(TTree * tree)
    
   TString option = GetOption();
   NumEntries = tree->GetEntries();
-  EffEntries = TMath::Min(MaxProcessedEntries, NumEntries);
 
   saveFileName = tree->GetDirectory()->GetName();
   int findslat = saveFileName.Last('/');
@@ -73,13 +70,12 @@ void GeneralSort::Begin(TTree * tree)
   printf("=============================================================\n");
   printf("                    file : %s \n", tree->GetDirectory()->GetName());
   printf("          Number of Event: %llu\n", NumEntries);
-  printf("Effective Number of Event: %d <= %llu\n", EffEntries, MaxProcessedEntries);  
 
   oFile = new TFile(saveFileName,"RECREATE");
 
   gen_tree = new TTree("gen_tree","PSD Tree");
 
-  gen_tree->Branch("runID", &psd.runID,"runID/I");
+  // gen_tree->Branch("runID", &psd.runID,"runID/I");
 
   gen_tree->Branch("e",psd.Energy,           Form("e[%d]/F", NARRAY));
   gen_tree->Branch("e_t",psd.EnergyTimestamp,Form("e_t[%d]/l",NARRAY));
@@ -221,182 +217,181 @@ Bool_t GeneralSort::Process(Long64_t entry)
       }
       runIDPresent = fileNum.Atoi();
    } 
-   psd.runID = runIDPresent; 
+  //  psd.runID = runIDPresent; 
 
   
   ProcessedEntries++;
-  if (ProcessedEntries<MaxProcessedEntries) {
 
-    ///=============================== Zero struct
-    for (Int_t i=0; i < NARRAY; i++) {
-      psd.Energy[i]=TMath::QuietNaN();
-      psd.XF[i]=TMath::QuietNaN();
-      psd.XN[i]=TMath::QuietNaN();
-      psd.x[i]=TMath::QuietNaN();
-      psd.Ring[i]=0.;
+  ///=============================== Zero struct
+  for (Int_t i=0; i < NARRAY; i++) {
+    psd.Energy[i]=TMath::QuietNaN();
+    psd.XF[i]=TMath::QuietNaN();
+    psd.XN[i]=TMath::QuietNaN();
+    psd.x[i]=TMath::QuietNaN();
+    psd.Ring[i]=0.;
+    
+    psd.EnergyTimestamp[i] = 0;
+    psd.XFTimestamp[i]     = 0; 
+    psd.XNTimestamp[i]     = 0; 
+    psd.RingTimestamp[i]   = 0;
+  }
+  
+  for (Int_t i=0; i < NRDT; i++) {
+    psd.RDT[i]=TMath::QuietNaN();
+    psd.RDTTimestamp[i]	 = 0; 
+  }
+  
+  for (Int_t i=0; i < NTAC; i++) {
+    psd.TAC[i]=TMath::QuietNaN();
+    psd.TACTimestamp[i]	 = 0; 
+  }
+  
+  for (Int_t i=0; i < NELUM; i++) {
+    psd.ELUM[i]=TMath::QuietNaN();
+    psd.ELUMTimestamp[i] = 0;
+  }
+  
+  for (Int_t i=0; i < NEZERO; i++) {
+    psd.EZERO[i]=TMath::QuietNaN();
+    psd.EZEROTimestamp[i]= 0;
+  }
+  
+  for (Int_t i=0; i < NCRDT; i++) {
+    psd.CRDT[i]=TMath::QuietNaN();
+    psd.CRDTTimestamp[i]= 0;
+  }
+  
+  for (Int_t i=0; i < NAPOLLO; i++) {    
+    psd.APOLLO[i]=TMath::QuietNaN();
+    psd.APOLLOTimestamp[i]= 0;
+  }
+
+  ///=============================== Pull needed entries
+  b_NumHits->GetEntry(entry);
+  b_id->GetEntry(entry);
+  b_pre_rise_energy->GetEntry(entry);
+  b_post_rise_energy->GetEntry(entry);
+  //   b_base_sample->GetEntry(entry);
+  //   b_baseline->GetEntry(entry);
+  b_event_timestamp->GetEntry(entry);
+
+  //ID PSD Channels
+  Int_t idKind = -1;
+  Int_t idDet  = -1; // Detector number
+    
+  ///==============================================================
+  /** --------------------- Loop over NumHits ------------------ */
+  ///==============================================================
+  for (Int_t i=0;i<NumHits;i++) {
+    Int_t idTemp = id[i] - idConst;
+    idDet = idDetMap[idTemp];
+    idKind = idKindMap[idTemp];
+    
+    CheckTime(event_timestamp[i], entry);
+    
+    ///=============================== PSD
+    if ( 0 <= idDet && idDet < NARRAY && 0 <= idKind && idKind <= 3 ) {         
+      switch(idKind)
+        {
+        case 0: /* Energy signal */
+          psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+          psd.EnergyTimestamp[idDet] = event_timestamp[i];
+          break;
+        case 1: // XF
+          psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_XFXN;
+          psd.XFTimestamp[idDet] = event_timestamp[i];
+          break;
+        case 2: // XN
+          psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_XFXN;
+          psd.XNTimestamp[idDet] = event_timestamp[i];
+          break;
+        case 3: // Ring
+          psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+          psd.RingTimestamp[idDet] = event_timestamp[i];
+          break;
+        default:
+          ;
+          break;// 
+        }
+
+    }
       
-      psd.EnergyTimestamp[i] = 0;
-      psd.XFTimestamp[i]     = 0; 
-      psd.XNTimestamp[i]     = 0; 
-      psd.RingTimestamp[i]   = 0;
+    ///=============================== RECOIL
+    if ( idDet >= 100 && idDet <= 100 + NRDT ) {
+      Int_t rdtID = idDet-100;
+      psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_RDT ;
+      psd.RDTTimestamp[rdtID] = event_timestamp[i];
+    }
+
+    ///=============================== ELUM
+    if ( NELUM > 0 && idDet >= 200 && idDet <= 200 + NELUM ) {
+      Int_t elumID = idDet - 200;
+      psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_ELUM;
+      psd.ELUMTimestamp[elumID] = event_timestamp[i];
     }
     
-    for (Int_t i=0; i < NRDT; i++) {
-      psd.RDT[i]=TMath::QuietNaN();
-      psd.RDTTimestamp[i]	 = 0; 
+    ///=============================== EZERO
+    if ( NEZERO > 0 && idDet >= 300 && idDet <= 300 + NEZERO ) {
+      Int_t ezeroID = idDet - 300;
+      psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_EZERO;
+      psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
+    }
+
+    ///=============================== TAC & RF TIMING
+    if ( NTAC > 0 && idDet >= 400 && idDet <= 400 + NTAC ) {   
+      Int_t tacID = idDet - 400;
+      psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
+      psd.TACTimestamp[tacID] = event_timestamp[i];
+      if( event_timestamp[i] < timeBegin ) timeBegin = event_timestamp[i];
     }
     
-    for (Int_t i=0; i < NTAC; i++) {
-      psd.TAC[i]=TMath::QuietNaN();
-      psd.TACTimestamp[i]	 = 0; 
+    ///=============================== Circular-Recoil
+    if ( NCRDT > 0 && idDet >= 500 && idDet <= 500 + NCRDT ) {
+      Int_t crdtID = idDet - 500;
+      psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_CRDT;
+      psd.CRDTTimestamp[crdtID] = event_timestamp[i];
+    }
+
+    ///=============================== APOLLO
+    if ( NAPOLLO > 0 && idDet >= 600 && idDet <= 600 + NAPOLLO ) {
+      Int_t apolloID = idDet - 600;
+      psd.APOLLO[apolloID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_APOLLO;
+      psd.APOLLOTimestamp[apolloID] = event_timestamp[i];
     }
     
-    for (Int_t i=0; i < NELUM; i++) {
-      psd.ELUM[i]=TMath::QuietNaN();
-      psd.ELUMTimestamp[i] = 0;
-    }
+  } // End NumHits Loop
     
-    for (Int_t i=0; i < NEZERO; i++) {
-      psd.EZERO[i]=TMath::QuietNaN();
-      psd.EZEROTimestamp[i]= 0;
+  ///>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  CalculateX
+  for(int i = 0 ; i < NARRAY; i++){
+    psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
+  }
+
+  ///Progress display
+  /************************************************************************/
+  oFile->cd(); ///set focus on this file
+  gen_tree->Fill();  
+
+  gClock.Stop("timer");
+  Double_t time = gClock.GetRealTime("timer");
+  gClock.Start("timer");
+
+  if ( !shown ) {
+    if (fmod(time, 10) < 1 ){
+        printf( "%10lld[%2d%%]|%3.0f min %5.2f sec | expect:%5.2f min\n", 
+              entry, 
+              TMath::Nint((entry+1)*100./NumEntries),
+              TMath::Floor(time/60.), 
+              time - TMath::Floor(time/60.)*60.,
+              NumEntries*time/(entry+1.)/60.);
+        shown = 1;
+        gen_tree->Write();
     }
-    
-    for (Int_t i=0; i < NCRDT; i++) {
-      psd.CRDT[i]=TMath::QuietNaN();
-      psd.CRDTTimestamp[i]= 0;
+  }else{
+    if (fmod(time, 10) > 9 ){
+        shown = 0;
     }
-    
-    for (Int_t i=0; i < NAPOLLO; i++) {    
-      psd.APOLLO[i]=TMath::QuietNaN();
-      psd.APOLLOTimestamp[i]= 0;
-    }
+  }
 
-    ///=============================== Pull needed entries
-    b_NumHits->GetEntry(entry);
-    b_id->GetEntry(entry);
-    b_pre_rise_energy->GetEntry(entry);
-    b_post_rise_energy->GetEntry(entry);
-    //   b_base_sample->GetEntry(entry);
-    //   b_baseline->GetEntry(entry);
-    b_event_timestamp->GetEntry(entry);
-
-    //ID PSD Channels
-    Int_t idKind = -1;
-    Int_t idDet  = -1; // Detector number
-    
-    ///==============================================================
-    /** --------------------- Loop over NumHits ------------------ */
-    ///==============================================================
-    for (Int_t i=0;i<NumHits;i++) {
-      Int_t idTemp = id[i] - idConst;
-      idDet = idDetMap[idTemp];
-      idKind = idKindMap[idTemp];
-      
-      CheckTime(event_timestamp[i], entry);
-      
-      ///=============================== PSD
-      if ( 0 <= idDet && idDet < NARRAY && 0 <= idKind && idKind <= 3 ) {         
-        switch(idKind)
-          {
-          case 0: /* Energy signal */
-            psd.Energy[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
-            psd.EnergyTimestamp[idDet] = event_timestamp[i];
-            break;
-          case 1: // XF
-            psd.XF[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_XFXN;
-            psd.XFTimestamp[idDet] = event_timestamp[i];
-            break;
-          case 2: // XN
-            psd.XN[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_XFXN;
-            psd.XNTimestamp[idDet] = event_timestamp[i];
-            break;
-          case 3: // Ring
-            psd.Ring[idDet] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
-            psd.RingTimestamp[idDet] = event_timestamp[i];
-            break;
-          default:
-            ;
-            break;// 
-          }
-      }
-       
-      ///=============================== RECOIL
-      if ( idDet >= 100 && idDet <= 100 + NRDT ) {
-        Int_t rdtID = idDet-100;
-        psd.RDT[rdtID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN* POLARITY_RDT ;
-        psd.RDTTimestamp[rdtID] = event_timestamp[i];
-      }
-
-      ///=============================== ELUM
-      if ( NELUM > 0 && idDet >= 200 && idDet <= 200 + NELUM ) {
-        Int_t elumID = idDet - 200;
-        psd.ELUM[elumID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN * POLARITY_ELUM;
-        psd.ELUMTimestamp[elumID] = event_timestamp[i];
-      }
-      
-      ///=============================== EZERO
-      if ( NEZERO > 0 && idDet >= 300 && idDet <= 300 + NEZERO ) {
-        Int_t ezeroID = idDet - 300;
-        psd.EZERO[ezeroID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_EZERO;
-        psd.EZEROTimestamp[ezeroID] = event_timestamp[i];
-      }
-
-      ///=============================== TAC & RF TIMING
-      if ( NTAC > 0 && idDet >= 400 && idDet <= 400 + NTAC ) {   
-        Int_t tacID = idDet - 400;
-        psd.TAC[tacID] = ((float)(post_rise_energy[i])-(float)(pre_rise_energy[i]))/MWIN;
-        psd.TACTimestamp[tacID] = event_timestamp[i];
-        if( event_timestamp[i] < timeBegin ) timeBegin = event_timestamp[i];
-      }
-      
-      ///=============================== Circular-Recoil
-      if ( NCRDT > 0 && idDet >= 500 && idDet <= 500 + NCRDT ) {
-        Int_t crdtID = idDet - 500;
-        psd.CRDT[crdtID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_CRDT;
-        psd.CRDTTimestamp[crdtID] = event_timestamp[i];
-      }
-
-      ///=============================== APOLLO
-      if ( NAPOLLO > 0 && idDet >= 600 && idDet <= 600 + NAPOLLO ) {
-        Int_t apolloID = idDet - 600;
-        psd.APOLLO[apolloID] = ((float)(post_rise_energy[i]) -(float)(pre_rise_energy[i]))/MWIN * POLARITY_APOLLO;
-        psd.APOLLOTimestamp[apolloID] = event_timestamp[i];
-      }
-      
-    } // End NumHits Loop
-    
-    ///>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  CalculateX
-    for(int i = 0 ; i < NARRAY; i++){
-      psd.x[i] = (psd.XF[i] - psd.XN[i])/(psd.XF[i] + psd.XN[i]);
-    }
-
-    ///Progress display
-    /************************************************************************/
-    oFile->cd(); ///set focus on this file
-    gen_tree->Fill();  
-
-    gClock.Stop("timer");
-    Double_t time = gClock.GetRealTime("timer");
-    gClock.Start("timer");
-
-    if ( !shown ) {
-      if (fmod(time, 10) < 1 ){
-         printf( "%10lld[%2d%%]|%3.0f min %5.2f sec | expect:%5.2f min\n", 
-               entry, 
-               TMath::Nint((entry+1)*100./EffEntries),
-               TMath::Floor(time/60.), 
-               time - TMath::Floor(time/60.)*60.,
-               EffEntries*time/(entry+1.)/60.);
-         shown = 1;
-         gen_tree->Write();
-      }
-    }else{
-      if (fmod(time, 10) > 9 ){
-         shown = 0;
-      }
-    }
-
-  }  
   return kTRUE;
 }
 
@@ -410,20 +405,21 @@ void GeneralSort::Terminate()
   gen_tree->Write();
   int savedEntries = gen_tree->GetEntries();
   
-  TMacro timing;
-  timing.AddLine(Form("%llu", timeBegin));
-  timing.AddLine(Form("%llu", timeEnd));
-  timing.AddLine(Form("%d", savedEntries));
-  timing.Write("timing");
+  TMacro info;
+  info.AddLine(Form("%llu", timeBegin));
+  info.AddLine(Form("%llu", timeEnd));
+  info.AddLine(Form("%d", savedEntries));
+  info.AddLine(Form("%d", runIDPresent));
+  info.Write("info");
   
   oFile->Close();
   
   printf("=======================================================\n");
-  printf(" Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",EffEntries/1000.0, NumEntries/1000., EffEntries*100./NumEntries);
+  printf(" Total processed entries : %3.1f k/%3.1f k [%4.1f%%] \n",NumEntries/1000.0, NumEntries/1000., NumEntries*100./NumEntries);
   gClock.Stop("timer");
   Double_t time = gClock.GetRealTime("timer");
   printf(" Total run time  : %6.0f sec \n", time);
-  printf(" Sorting rate    : %6.3f k/sec\n",EffEntries/time/1000.0);
+  printf(" Sorting rate    : %6.3f k/sec\n",NumEntries/time/1000.0);
   printf(" Start TimeStamp : %llu = %.3f sec \n", timeBegin, timeBegin/1e8);
   printf(" End   TimeStamp : %llu = %.3f sec \n", timeEnd, timeEnd/1e8);
   printf(" Run duration    : %.3f sec = %.3f min \n", (timeEnd - timeBegin)/1e8, (timeEnd - timeBegin)/1e8/60.);

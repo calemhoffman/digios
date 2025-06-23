@@ -1,9 +1,8 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run [RunNum] [Merge] [EventBuild] [GeneralSort] [Monitor]"
+  echo "$./process_run [RunNum] [EventBuild] [GeneralSort] [Monitor]"
   echo "     RunNum = run number / \"lastRun\" "
-  echo "      Merge =   1/0/-1      || 1 = merge, 0 = not merge, -1 = force merge "  
   echo "   EventBld = 2/1/0/-1/-2   || 2 = with Trace"  
   echo " GenralSort = n/1/0/-1/-n   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
   echo "   Monitors = 2/1/0         || 1 = single run,  2 = using the list in ChainMonitors.C"
@@ -16,31 +15,22 @@ fi;
 
 RUN=$1
 
-isMerge=1
-isSort=1
+isBuildEvents=1
 isGeneralSort=1
 isMonitor=1
 
-if [ $# -ge 2 ]; then isMerge=$2; fi
-if [ $# -ge 3 ]; then isSort=$3; fi
-if [ $# -ge 4 ]; then isGeneralSort=$4; fi
-if [ $# -ge 5 ]; then isMonitor=$5; OverRideMonitor="" ; fi
+if [ $# -ge 2 ]; then isBuildEvents=$2; fi
+if [ $# -ge 3 ]; then isGeneralSort=$3; fi
+if [ $# -ge 4 ]; then isMonitor=$4; OverRideMonitor="" ; fi
 
-GEBSort=GEBSort_nogeb
-GEBSortMsg="using EventBuilder"
 GeneralSortMsg="no trace"
 
-if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isBuildEvents -gt 1 ] || [ $isBuildEvents -lt -1 ]; then
   isTrace=1
-  GEBSortMsg="using EventBuilder_trace"
-  GEBSort=GEBSort_nogeb_trace
   if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then GeneralSortMsg="trace with ${isGeneralSort} core"; fi
-  
-  #isMonitor=0
-  #OverRideMonitor="overrided by GeneralSortTrace."
 fi
 
-if [ ${RUN} == "lastRun" ]; then 
+if [ "${RUN}" == "lastRun" ]; then 
   source ../Armory/process_PathSetting
   IP=192.168.1.2
   rsync -avuht --progress "helios@${IP}:${daqDir}/expName.sh" ${AnalysisDir}/../.
@@ -62,8 +52,7 @@ echo "============================================="
 echo "============ RUN $runID ========================"
 echo "============================================="
 
-echo "Merge       : ${isMerge}"
-echo "Sort        : ${isSort}  ${GEBSortMsg}"  
+echo "Sort        : ${isBuildEvents}"
 echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
 echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
 echo "============================================="
@@ -77,27 +66,22 @@ fi
 
 #######################################
 ####################  Download raw data
-if [ $isMerge -ne 0 ]; then
-  ../Armory/process_Download $RUN
-fi
-#######################################
-#################### Merge
-../Armory/process_Merge $RUN $isMerge 
+../Armory/process_Download $RUN
 
 #######################################
-#################### Sort and GeneralSort
-../Armory/process_Sort $RUN $isSort $isGeneralSort 
+#################### EventBuild and GeneralSort
+../Armory/process_Sort $RUN $isBuildEvents $isGeneralSort 
 
 ########################################
 #################### Monitor
-if [ ${isSort} -eq 1 ] || [ $isSort -eq -1 ] || [ $isSort -eq 0 ] ; then
+if [ ${isBuildEvents} -eq 1 ] || [ $isBuildEvents -eq -1 ] || [ $isBuildEvents -eq 0 ] ; then
   traceFlag=false
 else
   traceFlag=true
 fi
 
 if [ $isMonitor -eq 1 ] ; then
-  root -l "ChainMonitors.C(${RUN}, -1, false, ${traceFlag})" # single run
+  root -l "ChainMonitors.C($RUN, -1, false, ${traceFlag})" # single run
 elif [ $isMonitor -eq 2 ] ; then
   root -l "ChainMonitors.C(-1,-1, false, ${traceFlag})"  #all runs listed 
 elif [ $isMonitor -eq 20 ] ; then
