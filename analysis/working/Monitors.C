@@ -30,8 +30,6 @@ using namespace std;
 const int numDet = 24;
 const int numRow = 4;  
 
-ULong64_t maxNumberEvent = 1000000000;
-
 //---histogram setting
 int rawEnergyRange[2] = {   -2100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     2,     20};       /// in the E-Z plot
@@ -357,6 +355,7 @@ void Monitors::Begin(TTree *tree)
    }
    
    //=============== Get Time stamp range
+   //TODO use the info macro
    TString branch = FindStartEndTime(tree, "e_t");
    if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "rdt_t");
    if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "ezero_t");
@@ -549,7 +548,6 @@ void Monitors::Begin(TTree *tree)
 Bool_t Monitors::Process(Long64_t entry)
 {
 
-   if( ProcessedEntries > maxNumberEvent ) return kTRUE;
    ProcessedEntries++;
    
    /*********** Progress Bar ******************************************/ 
@@ -557,9 +555,9 @@ Bool_t Monitors::Process(Long64_t entry)
       TString msg; msg.Form("%llu", NumEntries/1000);
       int len = msg.Sizeof();
       printf(" %3.0f%% (%*llu/%llu k) processed in %6.1f sec | expect %6.1f sec\n",
-               Frac*100, len, ProcessedEntries/1000,NumEntries/1000,StpWatch.RealTime(), StpWatch.RealTime()/Frac);
-      StpWatch.Start(kFALSE);
-      Frac+=0.1;
+         Frac*100, len, ProcessedEntries/1000,NumEntries/1000,StpWatch.RealTime(), StpWatch.RealTime()/Frac);
+         StpWatch.Start(kFALSE);
+         Frac+=0.1;
    }
 
    b_runID->GetEntry(entry);
@@ -568,12 +566,12 @@ Bool_t Monitors::Process(Long64_t entry)
    b_XN->GetEntry(entry);
    b_Ring->GetEntry(entry);
    b_EnergyTimestamp->GetEntry(entry);
-
+   
    if( isRDTExist ){
       b_RDT->GetEntry(entry);
       b_RDTTimestamp->GetEntry(entry);
    }
-
+   
    if( isCRDTExist ){
       b_CRDT->GetEntry(entry);
       b_CRDTTimestamp->GetEntry(entry);
@@ -610,7 +608,7 @@ Bool_t Monitors::Process(Long64_t entry)
       b_Trace_RDT_Time->GetEntry(entry);
       b_Trace_RDT_RiseTime->GetEntry(entry);
    }
-
+   
    /*********** forming canvas Title **********************************/ 
     if( entry == 0 ) {
        if( runID == lastRunID + 1 ) {

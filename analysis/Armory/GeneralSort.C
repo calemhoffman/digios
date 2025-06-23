@@ -75,7 +75,7 @@ void GeneralSort::Begin(TTree * tree)
 
   gen_tree = new TTree("gen_tree","PSD Tree");
 
-  // gen_tree->Branch("runID", &psd.runID,"runID/I");
+  gen_tree->Branch("runID", &psd.runID,"runID/I");
 
   gen_tree->Branch("e",psd.Energy,           Form("e[%d]/F", NARRAY));
   gen_tree->Branch("e_t",psd.EnergyTimestamp,Form("e_t[%d]/l",NARRAY));
@@ -217,7 +217,7 @@ Bool_t GeneralSort::Process(Long64_t entry)
       }
       runIDPresent = fileNum.Atoi();
    } 
-  //  psd.runID = runIDPresent; 
+   psd.runID = runIDPresent; 
 
   
   ProcessedEntries++;
@@ -409,7 +409,6 @@ void GeneralSort::Terminate()
   info.AddLine(Form("%llu", timeBegin));
   info.AddLine(Form("%llu", timeEnd));
   info.AddLine(Form("%d", savedEntries));
-  info.AddLine(Form("%d", runIDPresent));
   info.Write("info");
   
   oFile->Close();
