@@ -1,9 +1,8 @@
 #!/bin/bash
 
-if [ $# -lt 3 ] || [ $1 == "-help"  ]; then
-  echo "$./process_Sort [RunNum] [Build] [GeneralSort]"
+if [ $# -lt 2 ] || [ $1 == "-help"  ]; then
+  echo "$./process_Sort [RunNum] [GeneralSort]"
   echo "    RunNum  = run number"
-  echo "     Build  = 2/1/0/-1/-2 ||  2 is with trace, 1 is no tarce, negative == force"  
   echo " GenralSort = n/2/1/0/neg ||  1 = GeneralSort.C, 2 = GeneralSortTrace.C, n = GeneralSortTraceProof.C with n-worker"
   echo "                       |"
   echo "                       +---- negative for force"
@@ -14,13 +13,10 @@ source ${HELIOSSYS}/analysis/Armory/process_PathSetting
 
 RUN=$1
 runID=$1
-isSort=$2
-isGeneralSort=$3
+isGeneralSort=$2
 isTrace=0
 
-GeneralSortMsg="no trace"
-
-if [ ${isGeneralSort} -ge 2 ] || [  $isSort -eq 2 ] || [ $isSort -eq -2 ] ; then
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then
   isTrace=1
 fi
 
@@ -47,9 +43,9 @@ source $ROOTSYS/bin/thisroot.sh
 #################### Sort
 echo -e "${RED}######################### EventBuilder started sorting run $RUN${NC}"
 
-if [ $isSort -eq 0 ]; then 
+if [ $isGeneralSort -eq 0 ]; then 
     echo -e "${YELLOW} >>>>>> skipped by user${NC}" 
-elif [ $isSort -gt 0 ]; then
+elif [ $isGeneralSort -gt 0 ]; then
 
     #==== check raw data timeStamp
     if [ ${Arch} == "Linux" ]; then
@@ -85,7 +81,7 @@ elif [ $isSort -gt 0 ]; then
         echo -e "${BLUE}Root data are newer than raw data. No need to do again.${NC}"
         echo -e "${GREEN}You can Force event buidling using option -1, ${ORANGE} see ./process_run.sh -help${NC}"
     fi
-elif [ $isSort -lt 0 ]; then # force Sort
+elif [ $isGeneralSort -lt 0 ]; then # force Sort
     echo -e "${RED}=================== RUN $RUN: EventBuilder started at `date`${NC}"
     echo -e "${YELLOW} >>>>>>>>>>>>> force sort by user ${NC}"
     
