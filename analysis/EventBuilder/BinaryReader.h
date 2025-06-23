@@ -12,14 +12,12 @@ class BinaryReader {
 public:
   BinaryReader(unsigned int maxHitSize){ // Constructor with hit size
     Init(); 
-    hits = new Hit[maxHitSize]; 
-    this->maxHitSize = maxHitSize;
+    CreateHits(maxHitSize);
   }  
   BinaryReader(const std::string& filename, unsigned int maxHitSize) {  // Constructor with filename and hit size
     Init(); 
     Open(filename); 
-    hits = new Hit[maxHitSize]; 
-    this->maxHitSize = maxHitSize;
+    CreateHits(maxHitSize);
   } 
   ~BinaryReader() {
     if (file.is_open()) file.close();
@@ -55,6 +53,15 @@ public:
     } else {
       throw std::out_of_range("Index out of range ");
     }
+  }
+
+  void CreateHits(unsigned int size) {
+    if (hits != nullptr) {
+      delete[] hits;  // Delete the existing hits array
+    }
+    hits = new Hit[size];  // Create a new hits array with the specified size
+    maxHitSize = size;  // Update the maximum hit size
+    hitSize = 0;  // Reset hit size
   }
 
   void DeleteHits() { 

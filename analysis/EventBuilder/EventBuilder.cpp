@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
     reader[i]->Scan(true);
     totalNumHits += reader[i]->GetNumData();
     totFileSize += reader[i]->GetFileSize();
+    printf("%3d: %s | %6.1f MB | # hit : %10d\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData());
   }
   
   //*=============== group files by DigID and sort the fileIndex
@@ -105,14 +106,14 @@ int main(int argc, char* argv[]) {
   // printf("Found %zu DigIDs\n", fileGroups.size());
   
   // printf out the file groups
-  for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
-    unsigned short digID = group.first; // DigID
-    const auto& readers = group.second; // Vector of BinaryReader pointers
-    printf("----- DigID %03d has %zu files\n", digID, readers.size());
-    for (size_t j = 0; j < readers.size(); j++) {
-      printf("  File %zu: %s | %5.1f MB | num. of hit : %d\n", j, readers[j]->GetFileName().c_str(), readers[j]->GetFileSize()/1024./1024., readers[j]->GetNumData());
-    }
-  }
+  // for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
+  //   unsigned short digID = group.first; // DigID
+  //   const auto& readers = group.second; // Vector of BinaryReader pointers
+  //   printf("----- DigID %03d has %zu files\n", digID, readers.size());
+  //   for (size_t j = 0; j < readers.size(); j++) {
+  //     printf("  File %zu: %s | %6.1f MB | num. of hit : %10d\n", j, readers[j]->GetFileName().c_str(), readers[j]->GetFileSize()/1024./1024., readers[j]->GetNumData());
+  //   }
+  // }
   
   printf("================= Total number of hits: %lu\n", totalNumHits);
   printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
@@ -267,23 +268,27 @@ int main(int argc, char* argv[]) {
       BinaryReader* reader = readers[fileID[digID]];
       
       if( hitID[digID] >= reader->GetHitSize() ) {
-        // printf("\033[31mHit ID %u exceeds the number of hits in file for DigID %03d. Reading more hits...\033[0m\n", hitID[digID], digID);
-        readers[0]->ReadNextNHitsFromFile(); // Read more hits if needed
-        hitID[digID] = 0; // Reset hitID for this DigID
+        // printf("\033[33mHit ID %u exceeds the number of hits in file for DigID %03d. Reading more hits...\033[0m\n", hitID[digID], digID);
+        reader->ReadNextNHitsFromFile(); // Read more hits if needed
+        if( reader->GetHitSize() > 0 ) {
+          hitID[digID] = 0; // Reset hitID for this DigID
+        }
       }
 
       if( reader->GetHitSize() == 0 ) { // load next file if no hits
         if( fileID[digID] < readers.size() - 1 ) {
+          reader->DeleteHits(); // Delete the hits from the current reader, free memory
           fileID[digID]++;
-          readers[fileID[digID]]->ReadNextNHitsFromFile(); // Read more hits from the next file
+          // printf("\033[34m====== No hits in current file for DigID %03d, loading next file...%s\033[0m\n", digID, readers[fileID[digID]]->GetFileName().c_str());
           hitID[digID] = 0; // Reset hitID for this DigID
+          reader = readers[fileID[digID]];
+          reader->ReadNextNHitsFromFile(); // Read more hits from the next file
         } else {
           // printf("\033[31m====== No more files for DigID %03d\033[0m\n", digID);
           fileID[digID] = -1; // Mark that there are no more files for this DigID
           continue; // No more files to read for this DigID
         }
       }
-
 
       if( hitID[digID] < reader->GetNumData() ) {
         if( reader->GetHit(hitID[digID]).header.timestamp < earlistTime ) {
@@ -313,9 +318,9 @@ int main(int argc, char* argv[]) {
   printf("=======================================================\n");
   unsigned int runEndTime = getTime_us();
   printf("              Total time taken: %.3f s = %.3f min\n", (runEndTime - runStartTime) / 1000000.0, (runEndTime - runStartTime) / 1000000.0 / 60.0);
-  printf("Total number of hits processed: %u (%lu)\n", hitProcessed, totalNumHits);
-  printf("  Total number of events built: %u\n", eventID);
-  printf("     Number of entries in tree: %lld\n", outTree->GetEntries());
+  printf("Total number of hits processed: %10u (%lu)\n", hitProcessed, totalNumHits);
+  printf("  Total number of events built: %10u\n", eventID);
+  printf("     Number of entries in tree: %10lld\n", outTree->GetEntries());
   //clean up
   outFile->Write();
   outFile->Close();

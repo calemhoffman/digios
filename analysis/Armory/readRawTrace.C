@@ -48,7 +48,7 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
    UShort_t   id[200];
    UInt_t      numHit;
    UShort_t trace[200][1024];
-   UInt_t  traceLength[200];
+   UShort_t  traceLength[200];
    tree->SetBranchAddress("id", id);
    tree->SetBranchAddress("NumHits", &numHit);
    tree->SetBranchAddress("trace", trace);
