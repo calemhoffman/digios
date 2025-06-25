@@ -33,16 +33,20 @@ public:
   
   // not very useful, but kept for compatibility
   uint32_t baseline;  // Baseline value
-  unsigned geo_addr;  // Geo address
+  unsigned short geo_addr;  // Geo address
   unsigned short flags;  // Flags, bit 0 : external disc, bit 1 : peak valid, bit 2 : offset, bit 3 : sync error, bit 4 : general error, bit 5 : pileup only, bit 6 : pileup
   uint64_t last_disc_timestamp;  // Last discriminator timestamp
   uint32_t peak_timestamp;  // Peak timestamp
-  unsigned m1_begin_sample;  // M1 begin sample
-  unsigned m1_end_sample;  // M1 end sample
-  unsigned m2_begin_sample;  // M2 begin sample  
-  unsigned m2_end_sample;  // M2 end sample
-  unsigned peak_sample;  // Peak sample
-  unsigned base_sample;  // Base sample
+  unsigned short m1_begin_sample;  // M1 begin sample
+  unsigned short m1_end_sample;  // M1 end sample
+  unsigned short m2_begin_sample;  // M2 begin sample  
+  unsigned short m2_end_sample;  // M2 end sample
+  unsigned short peak_sample;  // Peak sample
+  unsigned short base_sample;  // Base sample
+
+  unsigned short cfd_sample_0;
+  unsigned short cfd_sample_1;
+  unsigned short cfd_sample_2;
 
   void Print() const {
 
@@ -102,7 +106,87 @@ public:
     unsigned short event_type    = (word >> 22) & 0xF;
     unsigned short header_length = (word >> 26) & 0x3F;
 
-    if( header_type == 2 ){
+    //^====================== Original LED header (Compatibility mode)
+    if( header_type == 0 ){ 
+
+      word = ntohl(payload[3]);
+      bool external_disc_flag     = 0 ;
+      bool pileup_only_flag       = 0 ;
+      bool peak_valid_flag        = ((word & 0x00000200) >> 9);                               // Word 3: 9
+      bool offset_flag            = ((word & 0x00000400) >> 10);                              // Word 3: 10
+      bool sync_error_flag        = ((word & 0x00001000) >> 12);                              // Word 3: 12
+      bool general_error_flag     = ((word & 0x00002000) >> 13);                              // Word 3: 13
+      bool pileup_flag            = ((word & 0x00008000) >> 15);                              // Word 3: 15
+
+
+      event.flags = external_disc_flag | 
+                    (peak_valid_flag << 1) | 
+                    (offset_flag << 2) | 
+                    (sync_error_flag << 3) | 
+                    (general_error_flag << 4) | 
+                    (pileup_only_flag << 5) | 
+                    (pileup_flag << 6);
+                    
+      event.last_disc_timestamp    = (((unsigned long long int)(word & 0xFFFF0000)) >> 16 );   // Word 3: 31..16 & 
+      event.last_disc_timestamp   += (((unsigned long long int)(ntohl(payload[4]) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0  
+      
+      event.baseline               = ((ntohl(payload[5]) & 0x00FFFFFF) >> 0);                               // Word 5: 23..0
+      event.pre_rise_energy        = ((ntohl(payload[7]) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
+      event.post_rise_energy       = ((ntohl(payload[7]) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
+                                     ((ntohl(payload[8]) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
+      event.peak_timestamp         = (((unsigned long long int)(ntohl(payload[8]) & 0xFFFF0000)) >> 16 )|   // Word 8: 31..16 & 
+                                     (((unsigned long long int)(ntohl(payload[9]) & 0xFFFFFFFF)) << 16);    // Word 9 :31..0  
+      event.m1_begin_sample        = ((ntohl(payload[10]) & 0x00003FFF) >> 0);                              // Word 10:13..0
+      event.m1_end_sample          = ((ntohl(payload[10]) & 0x3FFF0000) >> 16);                             // Word 10:29..16
+      event.m2_begin_sample        = ((ntohl(payload[11]) & 0x00003FFF) >> 0);                              // Word 11:13..0
+      event.m2_end_sample          = ((ntohl(payload[11]) & 0x3FFF0000) >> 16);                             // Word 11:29..16
+      event.peak_sample            = ((ntohl(payload[12]) & 0x00003FFF) >> 0);                              // Word 12:13..0
+      event.base_sample            = ((ntohl(payload[12]) & 0x3FFF0000) >> 16);                             // Word 12:29..16
+      
+    }
+
+    //^====================== LED header
+    if( header_type == 1 ){ 
+      bool timestamp_match_flag   = 0;
+      bool cfd_valid_flag         = 0;
+                        
+      word = ntohl(payload[3]);
+      bool external_disc_flag     = ((word & 0x00000100) >> 8);                               // Word 3: 8
+      bool peak_valid_flag        = ((word & 0x00000200) >> 9);                               // Word 3: 9
+      bool offset_flag            = ((word & 0x00000400) >> 10);                              // Word 3: 10
+      bool sync_error_flag        = ((word & 0x00001000) >> 12);                              // Word 3: 12
+      bool general_error_flag     = ((word & 0x00002000) >> 13);                              // Word 3: 13
+      bool pileup_only_flag       = ((word & 0x00004000) >> 14);                              // Word 3: 14
+      bool pileup_flag            = ((word & 0x00008000) >> 15);                              // Word 3: 15  
+      
+      event.flags = external_disc_flag | 
+                    (peak_valid_flag << 1) | 
+                    (offset_flag << 2) | 
+                    (sync_error_flag << 3) | 
+                    (general_error_flag << 4) | 
+                    (pileup_only_flag << 5) | 
+                    (pileup_flag << 6);
+
+      event.last_disc_timestamp    = (((unsigned long long int)(word & 0xFFFF0000)) >> 16 );   // Word 3: 31..16 & 
+      event.last_disc_timestamp   += (((unsigned long long int)(ntohl(payload[4]) & 0xFFFFFFFF)) << 16);    // Word 4 :31..0  
+
+      event.baseline               = ((ntohl(payload[5]) & 0x00FFFFFF) >> 0);                               // Word 5: 23..0
+      event.pre_rise_energy        = ((ntohl(payload[7]) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
+      event.post_rise_energy       = ((ntohl(payload[7]) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
+                                    ((ntohl(payload[8]) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
+      event.peak_timestamp         = (((unsigned long long int)(ntohl(payload[8]) & 0xFFFF0000)) >> 16 )|   // Word 8: 31..16 & 
+                                    (((unsigned long long int)(ntohl(payload[9]) & 0xFFFFFFFF)) << 16);    // Word 9 :31..0  
+      event.m1_begin_sample        = ((ntohl(payload[10]) & 0x00003FFF) >> 0);                              // Word 10:13..0
+      event.m1_end_sample          = ((ntohl(payload[10]) & 0x3FFF0000) >> 16);                             // Word 10:29..16
+      event.m2_begin_sample        = ((ntohl(payload[11]) & 0x00003FFF) >> 0);                              // Word 11:13..0
+      event.m2_end_sample          = ((ntohl(payload[11]) & 0x3FFF0000) >> 16);                             // Word 11:29..16
+      event.peak_sample            = ((ntohl(payload[12]) & 0x00003FFF) >> 0);                              // Word 12:13..0
+      event.base_sample            = ((ntohl(payload[12]) & 0x3FFF0000) >> 16);                             // Word 12:29..16
+
+    }
+
+    //^====================== CFD
+    if( header_type == 2 ){ 
       word = ntohl(payload[3]);
       bool timestamp_match_flag = (word >> 7) & 0x1;
       bool external_disc_flag   = (word >>  8) & 0x1;
@@ -123,23 +207,37 @@ public:
                     (timestamp_match_flag << 7);
 
 
-      event.last_disc_timestamp = (word & 0xFFFF0000) >> 16; 
-      word = ntohl(payload[4]);
-      event.last_disc_timestamp |= (static_cast<uint64_t>(word) << 16);
+      event.last_disc_timestamp  = (word & 0xFFFF0000) >> 16; 
+      event.last_disc_timestamp |= (static_cast<uint64_t>(ntohl(payload[4])) << 16);
 
-      //not Complete
+      event.cfd_sample_0           = ((ntohl(payload[4]) & 0x3FFF0000) >> 16);                              // Word 4: 29..16
+      event.baseline               = ((ntohl(payload[5]) & 0x00FFFFFF) >> 0);                               // Word 5: 23..0
+      event.cfd_sample_1           = ((ntohl(payload[6]) & 0x00003FFF) >> 0);                               // Word 6: 13..0
+      event.cfd_sample_2           = ((ntohl(payload[6]) & 0x3FFF0000) >> 16);                              // Word 6: 29..16
+      event.pre_rise_energy        = ((ntohl(payload[7]) & 0x00FFFFFF) >> 0);                               // Word 7: 23..0
+      event.post_rise_energy       = ((ntohl(payload[7]) & 0xFF000000) >> 28) |                             // Word 7: 31..24 & 
+                                         ((ntohl(payload[8]) & 0x0000FFFF) << 8);                               // Word 8: 15..0 
+
+      event.peak_timestamp         = (((unsigned long long int)(ntohl(payload[8]) & 0xFFFF0000)) >> 16 )|   // Word 8: 31..16 & 
+      (((unsigned long long int)(ntohl(payload[9]) & 0xFFFFFFFF)) << 16);    // Word 9 :31..0  
+      event.m1_begin_sample        = ((ntohl(payload[10]) & 0x00003FFF) >> 0);                              // Word 10:13..0
+      event.m1_end_sample          = ((ntohl(payload[10]) & 0x3FFF0000) >> 16);                             // Word 10:29..16
+      event.m2_begin_sample        = ((ntohl(payload[11]) & 0x00003FFF) >> 0);                              // Word 11:13..0
+      event.m2_end_sample          = ((ntohl(payload[11]) & 0x3FFF0000) >> 16);                             // Word 11:29..16
+      event.peak_sample            = ((ntohl(payload[12]) & 0x00003FFF) >> 0);                              // Word 12:13..0
+      event.base_sample            = ((ntohl(payload[12]) & 0x3FFF0000) >> 16);                             // Word 12:29..16
 
     }
 
-    if( header_type == 3 ){
-  
+    //^====================== HELIOS 2015/16 LED 
+    if( header_type == 3 ){ 
       word = ntohl(payload[3]);
       bool external_disc_flag = (word >>  8) & 0x1;
       bool peak_valid_flag    = (word >>  9) & 0x1;
       bool offset_flag        = (word >> 10) & 0x1;
       bool sync_error_flag    = (word >> 12) & 0x1;
       bool general_error_flag = (word >> 13) & 0x1;
-      bool pileip_only_flag   = (word >> 14) & 0x1;
+      bool pileup_only_flag   = (word >> 14) & 0x1;
       bool pileup_flag        = (word >> 15) & 0x1;
       
       event.flags = external_disc_flag | 
@@ -147,7 +245,7 @@ public:
                     (offset_flag << 2) | 
                     (sync_error_flag << 3) | 
                     (general_error_flag << 4) | 
-                    (pileip_only_flag << 5) | 
+                    (pileup_only_flag << 5) | 
                     (pileup_flag << 6);
       
       event.last_disc_timestamp = (word & 0xFFFF0000) >> 16; 

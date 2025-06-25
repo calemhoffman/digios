@@ -6,7 +6,7 @@ ROOTFLAG=`root-config --cflags --glibs`
 pLIBS = $(shell pkg-config --libs arrow parquet)
 pINCLUDE = $(shell pkg-config --cflags arrow parquet)
 
-all: EventBuilder PP
+all: EventBuilder 
 
 EventBuilder: EventBuilder.cpp BinaryReader.h Hit.h
 	$(CC) $(CFLAG) EventBuilder.cpp -o EventBuilder ${ROOTFLAG}
