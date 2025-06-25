@@ -80,7 +80,11 @@ public:
 
   void Print() const {
     header.Print();
-    printf("Payload size: %zu words\n", payload.size());
+    printf("  Payload size: %zu words\n", payload.size());
+    unsigned short header_type   = (ntohl(payload[2]) >> 16) & 0xF; // for data type
+    uint16_t packet_length = (ntohl(payload[0]) >> 16) & 0x7FF;
+    printf("  header type : %u\n", header_type);
+    printf("packet length : %u words\n", packet_length);
     for (size_t i = 0; i < payload.size(); ++i) {
       printf("%3zu: 0x%08X\n", i, ntohl(payload[i]));
     }
@@ -96,9 +100,9 @@ public:
     event.timestamp = header.timestamp; // Use the timestamp from the header
 
     unsigned int word = ntohl(payload[0]);
-    event.channel       = word & 0xF; 
-    event.board         = (word >> 4) & 0xFFF;
-    event.geo_addr      = (word >> 27) & 0x1F;
+    event.channel          = word & 0xF; 
+    event.board            = (word >> 4) & 0xFFF;
+    event.geo_addr         = (word >> 27) & 0x1F;
     uint16_t packet_length = (word >> 16) & 0x7FF;
     
     word = ntohl(payload[2]);
