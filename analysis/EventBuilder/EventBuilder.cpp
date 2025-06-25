@@ -241,8 +241,10 @@ int main(int argc, char* argv[]) {
 #endif
         if( saveTrace ){
           traceLen[i] = events[i].traceLength; // Trace length
+          // if( events.size() > 1 && eventID == 1 ) printf(" %d |%d | Trace length: %d, id %d, timestamp %llu| ", eventID, i, traceLen[i], id[i], timestamp[i]);
           for( int j = 0 ; j < traceLen[i] && j < MAX_TRACE_LEN; j++){
             trace[i][j] = events[i].trace[j]; // Trace data
+            // if( events.size() > 1 && eventID == 1) printf(" %d | %d\n", j, trace[i][j]);
           }
         }
       }
