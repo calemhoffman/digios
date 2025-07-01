@@ -1,9 +1,10 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run [RunNum] [Method] [Monitor]"
+  echo "$./process_run [RunNum] [EventBuild] [Sort] [Monitor]"
   echo "     RunNum = run number / \"lastRun\" "
-  echo "     Method = n/1/0/-1/-n   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo " EventBuild = 0/1/2         ||  0 = no EventBld, 1 = EventBld, 2 = EventBld with trace"
+  echo "       Sort = n/1/0/-1/-n   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
   echo "   Monitors = 2/1/0         || 1 = single run,  2 = using the list in ChainMonitors.C"
   echo "                              10 = single run and post to websrv, 20 = list runs and post to websrv"
   echo ""
@@ -14,13 +15,21 @@ fi;
 
 RUN=$1
 
-isGeneralSort=1
-isMonitor=1
+isBuild=0
+isGeneralSort=0
+isMonitor=0
 
 traceFlag=false
 
-if [ $# -ge 2 ]; then isGeneralSort=$2; fi
-if [ $# -ge 3 ]; then isMonitor=$3; OverRideMonitor="" ; fi
+if [ $# -ge 2 ]; then isBuild=$2; fi
+if [ $# -ge 3 ]; then isGeneralSort=$3; fi
+if [ $# -ge 4 ]; then isMonitor=$4; OverRideMonitor="" ; fi
+
+if [ $# -eq 1 ]; then
+  isBuild=1
+  isGeneralSort=1
+  isMonitor=1
+fi
 
 GeneralSortMsg="no trace"
 
@@ -69,7 +78,7 @@ fi
 
 #######################################
 #################### EventBuild and GeneralSort
-../Armory/process_Sort $RUN $isGeneralSort 
+../Armory/process_Sort $RUN $isBuild $isGeneralSort 
 
 ########################################
 #################### Monitor
