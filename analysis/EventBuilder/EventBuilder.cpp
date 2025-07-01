@@ -11,6 +11,14 @@
 #define MAX_TRACE_LEN 1250 
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
 
+//todo 
+// In-Memory Sorting of All Hits
+// * Issue: The logic for finding the next hit to process involves iterating through every file group in every single event cycle to find the one with the minimum timestamp. While this works and is efficient in terms of
+//   memory, it's not the most CPU-efficient algorithm for merging N sorted streams.
+// * Suggestion: A more advanced approach would be to use a min-priority queue (like std::priority_queue). You would store one hit from each active file in the priority queue, ordered by timestamp. To get the next hit,
+//   you simply pop the queue's top element. When you pop a hit from file X, you read the next hit from file X and push it onto the queue. This avoids the need to repeatedly scan all files to find the minimum.
+
+
 
 #include <sys/time.h> /** struct timeval, select() */
 inline unsigned int getTime_us(){
@@ -169,7 +177,7 @@ int main(int argc, char* argv[]) {
     BinaryReader* reader = readers[0];
     reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
-    if( reader->GetHit(0).header.timestamp < earliestTime ) {
+    if( reader->GetHitSize() > 0 && reader->GetHit(0).header.timestamp < earliestTime ) {
       earliestTime = reader->GetHit(0).header.timestamp; // Update the earliest timestamp
       earliestDigID = digID; // Update the earliest DigID
     }
@@ -220,7 +228,15 @@ int main(int argc, char* argv[]) {
       std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
       });
-      numHit = events.size(); 
+      
+      if( events.size() > MAX_MULTI ) {
+        printf("\033[31mWarning: More than %d hits in one event, truncating to %d hits.\033[0m\n", MAX_MULTI, MAX_MULTI);
+        //events.resize(MAX_MULTI); // Truncate to MAX_MULTI hits
+        numHit = MAX_MULTI; // Set numHit to MAX_MULTI
+      }else{
+        numHit = events.size(); 
+      }
+
       for( int i = 0; i <  events.size(); i++) {
         id[i]               = events[i].board * 10 + events[i].channel; // Channel ID
         pre_rise_energy[i]  = events[i].pre_rise_energy; // Pre-rise energy
@@ -249,9 +265,8 @@ int main(int argc, char* argv[]) {
         }
       }
       outTree->Fill(); // Fill the TTree with the current event
+      globalLastTime = events.back().timestamp; // Update the global last time
     }
-
-    globalLastTime = events.back().timestamp; // Update the global last time
     
     double percentage = hitProcessed * 100/ totalNumHits;
     if( percentage >= last_precentage ) {
