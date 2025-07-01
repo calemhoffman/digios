@@ -87,6 +87,7 @@ private:
   Hit * hits;
   unsigned int maxHitSize; // Size of the hits array
   unsigned int hitSize; // Number of hits read from the file
+  uint64_t lastTimestampOfHits; // Last timestamp of hits read from the file
 
   void Init(){
     fileSize = 0;
@@ -97,6 +98,7 @@ private:
     hits = nullptr;
     maxHitSize = 0;
     hitSize = 0;
+    lastTimestampOfHits = 0; 
   }
 };
 
@@ -178,6 +180,14 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
     std::sort(hits, hits + hitSize, [](const Hit& a, const Hit& b) {
       return a.header.timestamp < b.header.timestamp;
     });
+
+    uint64_t firstTimestamp = hits[0].header.timestamp; // First timestamp of hits
+    if( firstTimestamp < lastTimestampOfHits ){
+      printf("033[31mWarning: First timestamp (%lu) of this read is less than the last timestamp (%lu) of the last read. \033[0m\n", 
+             firstTimestamp, lastTimestampOfHits);
+    }
+
+    lastTimestampOfHits = hits[hitSize - 1].header.timestamp; // Update the last timestamp of hits
   }
 
 
