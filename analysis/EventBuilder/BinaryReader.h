@@ -165,6 +165,7 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
     }
     old_timestamp = hits[i].header.timestamp;
 
+
     if (hits[i].header.payload_lenght_byte > 0) {
       hits[i].payload = ReadArray<uint32_t>(hits[i].header.payload_lenght_byte / sizeof(uint32_t));
     }
@@ -173,8 +174,8 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
   }
 
   //sort hits by timestamp
-  if( hitSize > 0 && timestamp_error_counter > 0 && debug ) {
-    printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
+  if( hitSize > 0 && timestamp_error_counter > 0 ) {
+    if( debug ) printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
 
     //sort the hits by timestamp
     std::sort(hits, hits + hitSize, [](const Hit& a, const Hit& b) {
@@ -182,7 +183,7 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
     });
 
     uint64_t firstTimestamp = hits[0].header.timestamp; // First timestamp of hits
-    if( firstTimestamp < lastTimestampOfHits ){
+    if( firstTimestamp < lastTimestampOfHits){
       printf("033[31mWarning: First timestamp (%lu) of this read is less than the last timestamp (%lu) of the last read. \033[0m\n", 
              firstTimestamp, lastTimestampOfHits);
     }
