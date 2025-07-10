@@ -33,10 +33,10 @@ const int numRow = 4;
 ULong64_t maxNumberEvent = 1000000000;
 
 //---histogram setting
-int rawEnergyRange[2] = {   -2100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     2,     20};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     800}; 
-int      rdtERange[2] = {     0,     4500};  
+int rawEnergyRange[2] = {   0,    3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     0,     12};       /// in the E-Z plot
+int     rdtDERange[2] = {     0,     500}; 
+int      rdtERange[2] = {     0,     500};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -64,7 +64,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
-vector<int> skipDetID = {}; // {0,1,2,3,4,5,6,7,8,9,10,11} ;//{2,  11, 17}
+vector<int> skipDetID = {1,2,11}; // {0,1,2,3,4,5,6,7,8,9,10,11} ;//{2,  11, 17}
 
 TString rdtCutFile1 = "";//cut_test1.root";//o20.root, o20a.root, f21.root
 TString rdtCutFile2 = "";
