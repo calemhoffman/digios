@@ -1,3 +1,12 @@
+/*************************************** 
+ * 
+ * created by Ryan Tang 2025, July 10
+ * 
+ * Based on the EventBuidler.cpp,
+ * This event builder use priority queue to build events from multiple files.
+ * 
+****************************************/
+
 #include "BinaryReader.h"
 
 #include "TFile.h"
@@ -6,6 +15,17 @@
 #include "TString.h"
 #include "TMacro.h"
 #include <queue>
+
+#include <thread>
+#include <vector>
+
+// Function to scan a single reader
+void scanReader(BinaryReader* reader) {
+  reader->Scan(true);
+}
+
+// Create a vector of threads for parallel scanning
+std::vector<std::thread> threads;
 
 #define FULL_OUTPUT false
 #define MAX_MULTI 200
@@ -92,12 +112,19 @@ int main(int argc, char* argv[]) {
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
+
   for( int i = 0 ; i < nFile ; i++){
     reader[i] = new BinaryReader((MAX_READ_HITS)); 
     reader[i]->Open(inFileName[i].Data());
-    reader[i]->Scan(true);
+    threads.emplace_back(scanReader, reader[i]);
+    // reader[i]->Scan(true); // Remove this line to avoid race condition
     totalNumHits += reader[i]->GetNumData();
     totFileSize += reader[i]->GetFileSize();
+  }
+
+  // Wait for all threads to finish
+  for (int i = 0; i < threads.size(); ++i) {
+    threads[i].join();
     printf("%3d: %s | %6.1f MB | # hit : %10d\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData());
   }
   

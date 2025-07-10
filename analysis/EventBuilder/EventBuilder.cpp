@@ -1,5 +1,12 @@
-#include "BinaryReader.h"
+/*************************************** 
+ * 
+ * created by Ryan Tang 2025, July 10
+ * 
+ * This event builder do the job in memory.
+ * 
+****************************************/
 
+#include "BinaryReader.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
