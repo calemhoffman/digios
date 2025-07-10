@@ -6,15 +6,17 @@
 # ./EventBuilder test.root 1000 0 run_107.gtd04_000_0113 run_107.gtd04_001_0113
 
 # ./EventBuilder test_trace.root 1000 1 `\ls -1 ../data/*run_040*`
-./EventBuilder test_trace.root 100000000 1 ../data/h093_21F_d3He_run_040.gtd02_000_0105
+# ./EventBuilder test_trace.root 100000000 1 ../data/h093_21F_d3He_run_040.gtd02_000_0105
 
-exit
+# exit
 
 #======== GEB Merge and Sorte
-start=$(date +%s%N)
-../GEBSort/GEBMerge ../working/GEBMerge.chat  merged_file `\ls -1 ../data/*run_040*`
+RUN="004"
 
-../GEBSort/EventBuilder_trace -input disk merged_file_000 -rootfile  trace.root -chat ../working/GEBSort.chat
+start=$(date +%s%N)
+../GEBSort/GEBMerge ../working/GEBMerge.chat  merged_file `\ls -1 ../data/*run_${RUN}*`
+
+../GEBSort/EventBuilder -input disk merged_file_000 -rootfile  run${RUN}.root -chat ../working/GEBSort.chat
 
 end=$(date +%s%N)
 elapsed=$(( (end - start) / 1000 ))  # convert nanoseconds to microseconds
