@@ -104,6 +104,7 @@ int main(int argc, char* argv[]) {
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
+  printf(" Scaning input files...\n");
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
@@ -118,7 +119,7 @@ int main(int argc, char* argv[]) {
   // Wait for all threads to finish
   for (int i = 0; i < threads.size(); ++i) {
     threads[i].join();
-    printf("%3d: %s | %6.1f MB | # hit : %10d | max Hits in RAM : %d\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData(), reader[i]->GetMaxHitSize());
+    printf("%3d: %s | %6.1f MB | # hit : %10d (%d)\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData(), reader[i]->GetMaxHitSize());
     totalNumHits += reader[i]->GetNumData();
     totFileSize += reader[i]->GetFileSize();
   }
