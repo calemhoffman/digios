@@ -19,18 +19,13 @@
 #include <thread>
 #include <vector>
 
-// Function to scan a single reader
-void scanReader(BinaryReader* reader) {
-  reader->Scan(true);
-}
-
 // Create a vector of threads for parallel scanning
 std::vector<std::thread> threads;
 
 #define FULL_OUTPUT false
 #define MAX_MULTI 200
 #define MAX_TRACE_LEN 1250 
-#define MAX_READ_HITS 100000 // Maximum hits to read at a time
+unsigned int maxHitsRead = 100000; // Maximum hits to read at a time
 
 #include <sys/time.h> /** struct timeval, select() */
 inline unsigned int getTime_us(){
@@ -112,20 +107,20 @@ int main(int argc, char* argv[]) {
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
-
   for( int i = 0 ; i < nFile ; i++){
-    reader[i] = new BinaryReader((MAX_READ_HITS)); 
+    reader[i] = new BinaryReader((maxHitsRead)); 
     reader[i]->Open(inFileName[i].Data());
-    threads.emplace_back(scanReader, reader[i]);
-    // reader[i]->Scan(true); // Remove this line to avoid race condition
-    totalNumHits += reader[i]->GetNumData();
-    totFileSize += reader[i]->GetFileSize();
+    threads.emplace_back([](BinaryReader* reader) { 
+      reader->Scan(true); 
+    }, reader[i]);
   }
 
   // Wait for all threads to finish
   for (int i = 0; i < threads.size(); ++i) {
     threads[i].join();
-    printf("%3d: %s | %6.1f MB | # hit : %10d\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData());
+    printf("%3d: %s | %6.1f MB | # hit : %10d | max Hits in RAM : %d\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData(), reader[i]->GetMaxHitSize());
+    totalNumHits += reader[i]->GetNumData();
+    totFileSize += reader[i]->GetFileSize();
   }
   
   //*=============== group files by DigID and sort the fileIndex
@@ -201,7 +196,7 @@ int main(int argc, char* argv[]) {
     fileID[digID] = 0; 
 
     BinaryReader* reader = readers[0];
-    reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
+    reader->ReadNextNHitsFromFile();
 
     for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); // Decode the hit payload and push it to the event queue
 
@@ -242,8 +237,7 @@ int main(int argc, char* argv[]) {
             fileID[digID]++;
             // printf("\033[34m====== No hits in current file for DigID %03d, loading next file...%s\033[0m\n", digID, readers[fileID[digID]]->GetFileName().c_str());
             reader = fileGroups[digID][fileID[digID]];
-            reader->ReadNextNHitsFromFile(); // Read more hits from the next file
-
+            reader->ReadNextNHitsFromFile(); // Read more hits from the current file
             hitID[digID] = 0; // Reset hitID for this DigID
             for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
             
@@ -312,7 +306,7 @@ int main(int argc, char* argv[]) {
     double percentage = hitProcessed * 100/ totalNumHits;
     if( percentage >= last_precentage ) {
       size_t memoryUsage = sizeof(Event) * eventQueue.size();
-      printf("Processed : %u, %.0f%% | %u/%lu | %zu bytes", eventID, percentage, hitProcessed, totalNumHits, memoryUsage);
+      printf("Processed : %u, %.0f%% | %u/%lu | %.3f Mb", eventID, percentage, hitProcessed, totalNumHits, memoryUsage / (1024. * 1024.));
       printf(" \n\033[A\r");
       last_precentage = percentage + 1.0;
     }
