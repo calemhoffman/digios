@@ -5,10 +5,14 @@
 # ./EventBuilder test.root 1000 0 `\ls -1 run_107*`
 # ./EventBuilder test.root 1000 0 run_107.gtd04_000_0113 run_107.gtd04_001_0113
 
-./EventBuilder test1.root 1000 0 `\ls -1 ../data/*run_040*`
+# ./EventBuilder test1.root 1000 0 `\ls -1 ../data/*run_040*`
 # ./EventBuilder test_trace.root 100000000 1 ../data/h093_21F_d3He_run_040.gtd02_000_0105
 
-./EventBuilder_Q test2.root 1000 0 `\ls -1 ../data/*run_040*`
+./EventBuilder test2.root 1000 1  10 `\ls -1 ../data/*run_040*`
+# ./EventBuilder_Q_ca test2.root 1000 1 `\ls -1 ../data/*run_040*`
+# ./EventBuilder test2.root 1000 1 `\ls -1 ../data/*run_040*`
+
+# ./EventBuilder test2.root -1 1 `\ls -1 s008_29Mg_*`
 
 exit
 
