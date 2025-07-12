@@ -18,6 +18,7 @@
 #include "TF1.h"
 #include "TClonesArray.h"
 #include <queue>
+#include <thread>
 
 #define MAX_MULTI 200
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]) {
     printf("%s [outfile] [timeWindow] [trace Analysis] [file-1] [file-2] ... \n", argv[0]);
     printf("        outfile : output root file name\n");
     printf("     timeWindow : nano-sec; if < 0, no event build\n"); 
-    printf(" trace Analysis : \n");
+    printf("     Save Trace : 0 : no, 1 : yes\n");
     printf("         file-X : the input file(s)\n");
     return -1;
   }
@@ -103,11 +104,10 @@ int main(int argc, char* argv[]) {
 
   TString outFileName = argv[1];
   int timeWindow = atoi(argv[2]);
-  const bool traceAna = atoi(argv[3]);
+  const short saveTrace = atoi(argv[3]);
 
   TClonesArray * arr = nullptr;
   TGraph * gTrace = nullptr;
-  TF1 * fitFunction = nullptr;
 
   const int nFile = argc - 4;
   TString inFileName[nFile];
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
   }else{
     printf(" Event building time window : %d nsec \n", timeWindow);
   }
-  printf(" Trace Analysis ? %s \n", traceAna ? "Yes" : "No");
+  printf(" Trace Analysis ? %s %s\n", saveTrace ? "Yes" : "No", saveTrace > 0 ? "" : Form("(%d-core)", saveTrace));
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
@@ -129,14 +129,32 @@ int main(int argc, char* argv[]) {
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
+
+  std::vector<std::thread> threads;
+
   for( int i = 0 ; i < nFile ; i++){
     reader[i] = new BinaryReader((MAX_READ_HITS)); 
     reader[i]->Open(inFileName[i].Data());
-    reader[i]->Scan(true);
+    threads.emplace_back([](BinaryReader* reader) { 
+      reader->Scan(true); 
+      printf("%s | %6.1f MB | # hit : %10d (%d)\n", reader->GetFileName().c_str(), reader->GetFileSize()/1024./1024., reader->GetNumData(), reader->GetMaxHitSize());
+    }, reader[i]);
+  }
+
+  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
+  uint64_t globalLastTime = 0; // Global last timestamp
+
+  // Wait for all threads to finish
+  for (int i = 0; i < threads.size(); ++i) {
+    threads[i].join();
     totalNumHits += reader[i]->GetNumData();
     totFileSize += reader[i]->GetFileSize();
-    printf("%3d: %s | %6.1f MB | # hit : %10d (%d)\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData(), reader[i]->GetMaxHitSize());
+
+    if (reader[i]->GetGlobalEarliestTime() < globalEarliestTime) globalEarliestTime = reader[i]->GetGlobalEarliestTime();
+    if (reader[i]->GetGlobalLastTime() > globalLastTime) globalLastTime = reader[i]->GetGlobalLastTime();
   }
+
+  threads.clear();
   
   //*=============== group files by DigID and sort the fileIndex
   std::map<unsigned short, std::vector<BinaryReader*>> fileGroups;
@@ -161,6 +179,8 @@ int main(int argc, char* argv[]) {
   
   printf("================= Total number of hits: %lu\n", totalNumHits);
   printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
+  printf("                        Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
+
 
   //*=============== create output file and setup TTree
   TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
@@ -223,10 +243,8 @@ int main(int argc, char* argv[]) {
     printf(" -----  no APOLLO.\n");
   }
 
-  if( traceAna ){
+  if( saveTrace ){
     arr = new TClonesArray("TGraph");
-
-    fitFunction = new TF1("fitFunction", "[0] / (1 + exp(-(x-[1])/[2])) + [3]");
 
     outTree->Branch("trace", &arr, 16000, 0); // 16kB for trace
     outTree->Branch("te", te, Form("te[%d]/F", NARRAY));
@@ -282,14 +300,10 @@ int main(int argc, char* argv[]) {
 
 
   //*=============== read n data from each file
-
-  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
-  uint64_t globalLastTime = 0; // Global last timestamp
-
   std::map<unsigned short, unsigned int> hitID; // store the hit ID for the current reader for each DigID
   std::map<unsigned short, short> fileID; // store the file ID for each DigID
   
-  std::priority_queue<Event, std::vector<Event>, CompareEvent> eventQueue; // Priority queue to store events
+  std::priority_queue<Event, std::vector<Event>, CompareEvent> eventQueue; // Priority queue to store events for each thread
 
   for( const std::pair<const unsigned short, std::vector<BinaryReader*>>& group : fileGroups) { // looping through the map
     unsigned short digID = group.first; // DigID
@@ -301,11 +315,9 @@ int main(int argc, char* argv[]) {
     BinaryReader* reader = readers[0];
     reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
-    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); // Decode the hit payload and push it to the event queue
+    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); // Decode the hit payload and push it to the event queue
 
   }
-
-  globalEarliestTime = eventQueue.top().timestamp; // Set the global earliest time from the first event in the queue
 
   //*=============== event building
   std::vector<Event> events; // Vector to store events
@@ -330,7 +342,7 @@ int main(int argc, char* argv[]) {
           reader->ReadNextNHitsFromFile(); // Read more hits from the current file
           if( reader->GetHitSize() > 0 ) {
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); 
+            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
           }
         }
 
@@ -343,7 +355,7 @@ int main(int argc, char* argv[]) {
             reader->ReadNextNHitsFromFile(); // Read more hits from the next file
 
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); 
+            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
             
           } else {
             fileID[digID] = -1; // Mark that there are no more files for this DigID
@@ -386,7 +398,7 @@ int main(int argc, char* argv[]) {
         }
       }
 
-      if( traceAna ) arr->Clear(); // Clear the TClonesArray for the new event
+      if( saveTrace ) arr->Clear(); // Clear the TClonesArray for the new event
       
       for( int i = 0; i <  events.size(); i++) {
         int id               = events[i].board * 10 + events[i].channel - 1010;
@@ -456,7 +468,7 @@ int main(int argc, char* argv[]) {
           APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
         }
 
-        if( traceAna ){
+        if( saveTrace ){
 
           bool isArray = (0 <= idDet && idDet < NARRAY); 
           bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
@@ -478,39 +490,12 @@ int main(int argc, char* argv[]) {
                }
             }
 
-            //fitting the trace with function A/ (1 + Exp(-(x-time0)/riseTime)))
-
-            fitFunction->SetRange(0, traceLen - 1); // Set the range for the fit function
-            fitFunction->SetParameters(1000, 100.0, 1.0, 8000);  
-
-            gTrace->Fit(fitFunction, "QR");
-
-            // Optionally, you can retrieve the fit parameters
-            double A = fitFunction->GetParameter(0);
-            double time0 = fitFunction->GetParameter(1);
-            double riseTime = fitFunction->GetParameter(2);
-            double B = fitFunction->GetParameter(3);
-
-            if( isArray ) {
-              te[id] = A;
-              te_r[id] = riseTime;
-              te_t[id] = timestamp; 
-            }
-
-            if( isRDT ) {
-              trdt[idDet - 100] = A;
-              trdt_r[idDet - 100] = riseTime;
-              trdt_t[idDet - 100] = timestamp; 
-            }
-
           }
         }
 
       }
 
-
       outTree->Fill(); // Fill the TTree with the current event
-      globalLastTime = events.back().timestamp; // Update the global last time
     }
     
     double percentage = hitProcessed * 100/ totalNumHits;
@@ -544,7 +529,6 @@ int main(int argc, char* argv[]) {
   printf("Total number of hits processed: %10u (%lu)\n", hitProcessed, totalNumHits);
   printf("  Total number of events built: %10u\n", eventID);
   printf("     Number of entries in tree: %10lld\n", outTree->GetEntries());
-  printf("                Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
   //clean up
   outFile->Write();
   outFile->Close();
