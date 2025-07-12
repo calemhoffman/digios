@@ -374,7 +374,7 @@ int main(int argc, char* argv[]) {
 
 #if USE_SIMPLE_TRACE_ARRAY
   TMacro macro2("trace_info", "Maximum Trace Length"); //this macro is for read Raw trace
-  macro2.AddLine(Form("maxTraceLength = %d", MAX_TRACE_LEN));
+  macro2.AddLine(Form("%d", MAX_TRACE_LEN));
   macro2.Write("trace_info");
 #endif
 
