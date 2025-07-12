@@ -14,17 +14,22 @@
 #include "TMath.h"
 #include "TString.h"
 #include "TMacro.h"
-#include <queue>
+#include "TClonesArray.h"
+#include "TGraph.h"
 
+#include <queue>
 #include <thread>
 #include <vector>
 
-// Create a vector of threads for parallel scanning
-std::vector<std::thread> threads;
+#define USE_SIMPLE_TRACE_ARRAY true // use simple array of fixed size of TCloneArray, use of TClonearray result in large data file.
+#if USE_SIMPLE_TRACE_ARRAY
+  #define MAX_TRACE_LEN 1250 
+#else
+  #define REGULATE_TRACE true // when using TClonesArray, set this to true to regulate the trace
+#endif
 
 #define FULL_OUTPUT false
 #define MAX_MULTI 200
-#define MAX_TRACE_LEN 1250 
 unsigned int maxHitsRead = 100000; // Maximum hits to read at a time
 
 #include <sys/time.h> /** struct timeval, select() */
@@ -50,8 +55,15 @@ unsigned short                   id[MAX_MULTI] = {0};
 unsigned int        pre_rise_energy[MAX_MULTI] = {0};  
 unsigned int       post_rise_energy[MAX_MULTI] = {0};  
 unsigned long long        timestamp[MAX_MULTI] = {0};
+
+#if USE_SIMPLE_TRACE_ARRAY
 unsigned short             traceLen[MAX_MULTI] = {0};
 unsigned short trace[MAX_MULTI][MAX_TRACE_LEN] = {0};
+#else
+TClonesArray * arr = nullptr;
+TGraph * gTrace = nullptr;
+#endif
+
 #if FULL_OUTPUT
   uint32_t                      baseline[MAX_MULTI] = {0};
   unsigned short                geo_addr[MAX_MULTI] = {0};
@@ -108,6 +120,9 @@ int main(int argc, char* argv[]) {
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
+
+  std::vector<std::thread> threads; // Create a vector of threads for parallel scanning
+
   for( int i = 0 ; i < nFile ; i++){
     reader[i] = new BinaryReader((maxHitsRead)); 
     reader[i]->Open(inFileName[i].Data());
@@ -185,8 +200,14 @@ int main(int argc, char* argv[]) {
   outTree->Branch(        "base_sample",         base_sample, "base_sample[NumHits]/i");
 #endif
   if( saveTrace ){
+#if USE_SIMPLE_TRACE_ARRAY
     outTree->Branch("trace_length", traceLen, "trace_length[NumHits]/s");
     outTree->Branch(       "trace",    trace, Form("trace[NumHits][%d]/s", MAX_TRACE_LEN));
+#else
+    arr = new TClonesArray("TGraph");
+    // arr->BypassStreamer();
+    outTree->Branch("trace", &arr, 256000); 
+#endif
   } 
 
   //*=============== read n data from each file
@@ -297,12 +318,33 @@ int main(int argc, char* argv[]) {
         base_sample[i]         = events[i].base_sample; // Base sample
 #endif
         if( saveTrace ){
+#if USE_SIMPLE_TRACE_ARRAY
           traceLen[i] = events[i].traceLength; // Trace length
           // if( events.size() > 1 && eventID == 1 ) printf(" %d |%d | Trace length: %d, id %d, timestamp %llu| ", eventID, i, traceLen[i], id[i], timestamp[i]);
           for( int j = 0 ; j < traceLen[i] && j < MAX_TRACE_LEN; j++){
             trace[i][j] = events[i].trace[j]; // Trace data
             // if( events.size() > 1 && eventID == 1) printf(" %d | %d\n", j, trace[i][j]);
           }
+#else
+          gTrace = (TGraph*)arr->ConstructedAt(i); // Construct a new TGraph at index i
+          unsigned short traceLen = events[i].traceLength;
+          gTrace->SetTitle(Form("ev=%llu, id=%d, nHit=%d, length=%d", eventID, id, i, traceLen ));
+          gTrace->Set(traceLen); // Set the number of points in the TGraph
+
+    #if REGULATE_TRACE
+          uint16_t normalValue = 0;
+          for( int j = 0; j < traceLen; j++){
+            if( events[i].trace[j] < 16000){
+              normalValue = events[i].trace[j];
+              gTrace->SetPoint(j, j, normalValue);
+            }else{
+              gTrace->SetPoint(j, j, events[i].trace[j]);
+            }
+          }
+    #else
+          for( int j = 0; j < traceLen; j++) gTrace->SetPoint(j, j, events[i].trace[j]);
+    #endif
+#endif
         }
       }
       outTree->Fill(); // Fill the TTree with the current event
@@ -329,6 +371,12 @@ int main(int argc, char* argv[]) {
   macro.AddLine(Form("totalNumHits = %lu", totalNumHits));
   macro.AddLine(Form("totFileSizeMB = %.1f", totFileSize / (1024.0 * 1024.0))); // Convert to MB
   macro.Write("info");
+
+#if USE_SIMPLE_TRACE_ARRAY
+  TMacro macro2("trace_info", "Maximum Trace Length"); //this macro is for read Raw trace
+  macro2.AddLine(Form("maxTraceLength = %d", MAX_TRACE_LEN));
+  macro2.Write("trace_info");
+#endif
 
   //summary
   printf("=======================================================\n");
