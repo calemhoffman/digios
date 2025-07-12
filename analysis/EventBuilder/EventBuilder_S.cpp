@@ -19,8 +19,10 @@
 #include "TClonesArray.h"
 #include <queue>
 #include <thread>
+#include <mutex>
 
-#define MAX_MULTI 200
+#define MAX_TRACE_LEN 1250 
+#define MAX_TRACE_MULTI 200
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
 
 #include <sys/time.h> /** struct timeval, select() */
@@ -40,49 +42,267 @@ struct CompareEvent {
   }
 };
   
-//unsigned long long                        evID = 0;
-// unsigned int                            numHit = 0;
-// unsigned short                   id[MAX_MULTI] = {0}; 
-// unsigned int        pre_rise_energy[MAX_MULTI] = {0};  
-// unsigned int       post_rise_energy[MAX_MULTI] = {0};  
-// unsigned long long        timestamp[MAX_MULTI] = {0};
-// unsigned short             traceLen[MAX_MULTI] = {0};
-// unsigned short trace[MAX_MULTI][MAX_TRACE_LEN] = {0};
-
-
 #include "../working/GeneralSortMapping.h" // Include the mapping header file
 
-int runiD = 0;
+class Data {
+public:
+  int runiD = 0;
 
-float Energy[NARRAY];
-float XF[NARRAY];
-float XN[NARRAY];
-float Ring[NARRAY];
-float RDT[NRDT];
-float TAC[NTAC];
-float ELUM[NELUM];
-float EZERO[NEZERO];
-float CRDT[NCRDT];
-float APOLLO[NAPOLLO];
+  float Energy[NARRAY];
+  float XF[NARRAY];
+  float XN[NARRAY];
+  float Ring[NARRAY];
+  uint64_t EnergyTimestamp[NARRAY];
+  uint64_t XFTimestamp[NARRAY];
+  uint64_t XNTimestamp[NARRAY];
+  uint64_t RingTimestamp[NARRAY];
+  
+  // trace
+  unsigned short                            traceCount = 0; 
+  unsigned short           traceDetID[MAX_TRACE_MULTI] = {0};
+  unsigned short          traceKindID[MAX_TRACE_MULTI] = {0};
+  unsigned short             traceLen[MAX_TRACE_MULTI] = {0};
+  unsigned short trace[MAX_TRACE_MULTI][MAX_TRACE_LEN] = {0};
 
-uint64_t EnergyTimestamp[NARRAY];
-uint64_t XFTimestamp[NARRAY];
-uint64_t XNTimestamp[NARRAY];
-uint64_t RingTimestamp[NARRAY];
-uint64_t RDTTimestamp[NRDT];
-uint64_t TACTimestamp[NTAC];
-uint64_t ELUMTimestamp[NELUM];
-uint64_t EZEROTimestamp[NEZERO];
-uint64_t CRDTTimestamp[NCRDT];
-uint64_t APOLLOTimestamp[NAPOLLO];
+  // trace analysis
+  float tracePara[MAX_TRACE_MULTI][4]; // trace parameters, 0 = Amplitude, 1 = Rise time, 2 = Timestamp, 3 = Baseline
+  TF1 * fitFunc = nullptr; 
+  TGraph * graph = nullptr;
 
-float te[NARRAY]; // Energy trace
-float te_r[NARRAY]; // Energy trace (rise time)
-float te_t[NARRAY]; // Energy trace timestamp
+#if NRDT > 0
+  float RDT[NRDT];
+  uint64_t RDTTimestamp[NRDT];
+  float trdt[NRDT][5]; // Recoil trace
+#endif
+#if NTAC > 0
+  float TAC[NTAC];
+  uint64_t TACTimestamp[NTAC];
+#endif
+#if NELUM > 0
+  float ELUM[NELUM];
+  uint64_t ELUMTimestamp[NELUM];
+#endif
+#if NEZERO > 0
+  float EZERO[NEZERO];
+  uint64_t EZEROTimestamp[NEZERO];
+#endif
+#if NCRDT > 0
+  float CRDT[NCRDT];
+  uint64_t CRDTTimestamp[NCRDT];
+#endif
+#if NAPOLLO > 0
+  float APOLLO[NAPOLLO];
+  uint64_t APOLLOTimestamp[NAPOLLO];
+#endif
 
-float trdt[NRDT]; // Recoil trace
-float trdt_r[NRDT]; // Recoil trace (rise time)
-float trdt_t[NRDT]; // Recoil trace timestamp
+  Data(){}
+  ~Data(){}
+
+  void Reset() {
+    runiD = 0;
+
+    for (int i = 0; i < NARRAY; i++) {
+      Energy[i] = TMath::QuietNaN();
+      XF[i] = TMath::QuietNaN();
+      XN[i] = TMath::QuietNaN();
+      Ring[i] = TMath::QuietNaN();
+      EnergyTimestamp[i] = 0;
+      XFTimestamp[i] = 0;
+      XNTimestamp[i] = 0;
+      RingTimestamp[i] = 0;
+    }
+
+    traceCount = 0; 
+    for (int i = 0; i < MAX_TRACE_MULTI; i++) {
+      traceDetID[i] = 0;
+      traceKindID[i] = 0;
+      traceLen[i] = 0;
+      for (int j = 0; j < MAX_TRACE_LEN; j++) trace[i][j] = 0;
+      for (int j = 0; j < 4; j++) tracePara[i][j] = TMath::QuietNaN();
+    }
+
+#if NRDT > 0
+    for (int i = 0; i < NRDT; i++) {
+      RDT[i] = TMath::QuietNaN();
+      RDTTimestamp[i] = 0;
+      for (int j = 0; j < 5; j++) trdt[i][j] = TMath::QuietNaN();
+    }
+#endif
+#if NTAC > 0
+    for (int i = 0; i < NTAC; i++) {
+      TAC[i] = TMath::QuietNaN();
+      TACTimestamp[i] = 0;
+    }
+#endif
+#if NELUM > 0
+    for (int i = 0; i < NELUM; i++) {
+      ELUM[i] = TMath::QuietNaN();
+      ELUMTimestamp[i] = 0;
+    }
+#endif
+#if NEZERO > 0    
+    for (int i = 0; i < NEZERO; i++) {
+      EZERO[i] = TMath::QuietNaN();
+      EZEROTimestamp[i] = 0;
+    }
+#endif
+#if NCRDT > 0
+    for (int i = 0; i < NCRDT; i++) {
+      CRDT[i] = TMath::QuietNaN();
+      CRDTTimestamp[i] = 0;
+    }
+#endif
+#if NAPOLLO > 0
+    for (int i = 0; i < NAPOLLO; i++) {
+      APOLLO[i] = TMath::QuietNaN();
+      APOLLOTimestamp[i] = 0;
+    }
+#endif
+  }
+
+  void FillData(std::vector<Event> events, bool saveTrace){
+
+    for( int i = 0; i <  events.size(); i++) {
+        int id                    = events[i].board * 10 + events[i].channel - 1010;
+        uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
+        uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
+        uint64_t timestamp        = events[i].timestamp; // Timestamp
+
+        int idDet = idDetMap[id]; 
+        int idKind = idKindMap[id]; 
+
+        if( idDet < 0 ) continue;
+
+        float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
+
+        // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
+
+        if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
+          switch (idKind ){
+            case 0: // Energy signal
+              Energy[idDet] = eee; // Calculate energy
+              EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
+              break;
+            case 1: // XF
+              XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
+              XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
+              break;
+            case 2: // XN
+              XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
+              XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
+              break;
+            case 3: // Ring
+              Ring[idDet] = eee; // Calculate Ring
+              RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
+                break;
+              }
+            }
+
+    #if NRDT > 0
+        if( 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
+          int rdtID = idDet - 100; // Recoil ID
+          RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
+          RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
+        }
+    #endif
+
+    #if NELUM > 0 
+        if( 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
+          int elumID = idDet - 200; // ELUM ID
+          ELUM[elumID] = eee;
+          ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
+        }
+    #endif
+
+    #if NEZERO > 0
+        if( 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
+          int ezeroID = idDet - 300; // EZERO ID
+          EZERO[ezeroID] = eee;
+          EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
+        }
+    #endif
+
+    #if NTAC > 0
+        if( 400 <= idDet && idDet < 400 + NTAC ) { // TAC
+          int tacID = idDet - 400; // TAC ID
+          TAC[tacID] = eee;
+          TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
+        }
+    #endif
+
+    #if NCRDT > 0
+        if( 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
+          int crdtID = idDet - 500; // Circular Recoil ID
+          CRDT[crdtID] = eee;
+          CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
+        }
+    #endif
+
+    #if NAPOLLO > 0
+        if( 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
+          int apolloID = idDet - 600; // APOLLO ID
+          APOLLO[apolloID] = eee;
+          APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
+        }
+    #endif
+
+        if( saveTrace ){
+
+          bool isArray = (0 <= idDet && idDet < NARRAY); 
+          bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
+          if( isArray || isRDT ) { 
+
+            traceLen[traceCount] = events[i].traceLength;
+            traceDetID[traceCount] = idDet;
+            traceKindID[traceCount] = idKind;
+            uint16_t regulatedValue = 0;
+            for( int j = 0; j < traceLen[traceCount]; j++){
+              if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
+              trace[traceCount][j] = regulatedValue; 
+            }
+
+            traceCount++;
+          }
+        }
+
+      }
+
+  }
+
+  void SetTraceFunction(){
+    // fit trace[i] with  A/(1+exp(-(x - x0)/tau)) + B
+    // where A is the amplitude, x0 is the timestamp, tau is the rise time, and B is the baseline
+    fitFunc = new TF1("fitFunc", "[0] / (1 + exp(-(x - [1]) / [2])) + [3]"); 
+    graph = new TGraph(); 
+  }
+
+  void TraceAnalysis(){
+    if( traceCount <= 0 ) return; // No traces to analyze
+
+    for( int i = 0; i < traceCount; i++ ){
+      if( traceLen[i] <= 0 ) continue; // Skip if trace length is zero
+
+      // Prepare the fitting function
+      fitFunc->SetRange(0, traceLen[i] - 1); // Set the range for the fit function
+      fitFunc->SetParameters(100.0, 100, 1.0, 8000.0); // Initial parameters: A, x0, tau, B
+
+      // Create a TGraph for the trace data
+      graph->Clear(); 
+      for( int j = 0; j < traceLen[i]; j++ ) graph->SetPoint(j, j, trace[i][j]); // Set the x and y values for the graph
+      
+      graph->Fit(fitFunc, "QR"); 
+
+      // Store the results in the te array
+      tracePara[i][0] = fitFunc->GetParameter(0); // Amplitude
+      tracePara[i][1] = fitFunc->GetParameter(1); // Rise time
+      tracePara[i][2] = fitFunc->GetParameter(2); // Timestamp
+      tracePara[i][3] = fitFunc->GetParameter(3); // Baseline
+
+    }
+
+  }
+
+};
 
 //^============================================
 int main(int argc, char* argv[]) {
@@ -91,11 +311,12 @@ int main(int argc, char* argv[]) {
   printf("===          Event Builder  raw data --> root       ===\n");
   printf("=======================================================\n");  
 
-  if( argc <= 3){
-    printf("%s [outfile] [timeWindow] [trace Analysis] [file-1] [file-2] ... \n", argv[0]);
+  if( argc <= 4){
+    printf("%s [outfile] [timeWindow] [save Trace] [trace Analysis] [file-1] [file-2] ... \n", argv[0]);
     printf("        outfile : output root file name\n");
     printf("     timeWindow : nano-sec; if < 0, no event build\n"); 
     printf("     Save Trace : 0 : no, 1 : yes\n");
+    printf(" trace Analysis : 0 : no, 1 : yes (single core), >1 : multi-core\n");
     printf("         file-X : the input file(s)\n");
     return -1;
   }
@@ -104,15 +325,15 @@ int main(int argc, char* argv[]) {
 
   TString outFileName = argv[1];
   int timeWindow = atoi(argv[2]);
-  const short saveTrace = atoi(argv[3]);
+  const bool saveTrace = atoi(argv[3]);
+  const short traceAna = atoi(argv[4]);
 
-  TClonesArray * arr = nullptr;
-  TGraph * gTrace = nullptr;
+  Data data;
 
-  const int nFile = argc - 4;
+  const int nFile = argc - 5;
   TString inFileName[nFile];
   for( int i = 0 ; i < nFile ; i++){
-    inFileName[i] = argv[i+4];
+    inFileName[i] = argv[i+5];
   }
 
   printf(" out file : \033[1;33m%s\033[m\n", outFileName.Data());
@@ -121,7 +342,8 @@ int main(int argc, char* argv[]) {
   }else{
     printf(" Event building time window : %d nsec \n", timeWindow);
   }
-  printf(" Trace Analysis ? %s %s\n", saveTrace ? "Yes" : "No", saveTrace > 0 ? "" : Form("(%d-core)", saveTrace));
+  printf(" Save Trace ? %s\n", saveTrace ? "Yes" : "No");
+  printf(" Trace Analysis ? %s %s\n", traceAna ? "Yes" : "No", traceAna > 0 ? "" : Form("(%d-core)", traceAna));
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
@@ -188,76 +410,75 @@ int main(int argc, char* argv[]) {
   TTree * outTree = new TTree("tree", outFileName.Data());
   outTree->SetDirectory(outFile);
 
-  outTree->Branch("runID",   &runiD, "runID/I");
+  outTree->Branch("runID",   &data.runiD, "runID/I");
   
-  outTree->Branch("e",             Energy, Form("e[%d]/F", NARRAY));
-  outTree->Branch("e_t",  EnergyTimestamp, Form("e_t[%d]/l", NARRAY));
-  outTree->Branch("xf",                XF, Form("xf[%d]/F", NARRAY));
-  outTree->Branch("xf_t",     XFTimestamp, Form("xf_t[%d]/l", NARRAY));
-  outTree->Branch("xn",                XN, Form("xn[%d]/F", NARRAY));
-  outTree->Branch("xn_t",     XNTimestamp, Form("xn_t[%d]/l", NARRAY));
-  outTree->Branch("ring",            Ring, Form("ring[%d]/F", NARRAY));
-  outTree->Branch("ring_t", RingTimestamp, Form("ring_t[%d]/l", NARRAY));
+  outTree->Branch("e",             data.Energy, Form("e[%d]/F", NARRAY));
+  outTree->Branch("e_t",  data.EnergyTimestamp, Form("e_t[%d]/l", NARRAY));
+  outTree->Branch("xf",                data.XF, Form("xf[%d]/F", NARRAY));
+  outTree->Branch("xf_t",     data.XFTimestamp, Form("xf_t[%d]/l", NARRAY));
+  outTree->Branch("xn",                data.XN, Form("xn[%d]/F", NARRAY));
+  outTree->Branch("xn_t",     data.XNTimestamp, Form("xn_t[%d]/l", NARRAY));
+  outTree->Branch("ring",            data.Ring, Form("ring[%d]/F", NARRAY));
+  outTree->Branch("ring_t", data.RingTimestamp, Form("ring_t[%d]/l", NARRAY));
   
   printf(" -----  %d array det.\n", NARRAY);
 
-  if( NRDT > 0 ) {
-    outTree->Branch("rdt", RDT, Form("rdt[%d]/F", NRDT));
-    outTree->Branch("rdt_t", RDTTimestamp, Form("rdt_t[%d]/l", NRDT));
-  } else {
+#if NRDT > 0
+    outTree->Branch("rdt", data.RDT, Form("rdt[%d]/F", NRDT));
+    outTree->Branch("rdt_t", data.RDTTimestamp, Form("rdt_t[%d]/l", NRDT));
+#else
     printf(" -----  no recoil.\n");
-  }
+#endif
 
-  if( NTAC > 0 ) {
-    outTree->Branch("tac", TAC, Form("tac[%d]/F", NTAC));
-    outTree->Branch("tac_t", TACTimestamp, Form("tac_t[%d]/l", NTAC));
-  } else {
-    printf(" -----  no TAC.\n");
-  }
+#if NTAC > 0
+  outTree->Branch("tac", data.TAC, Form("tac[%d]/F", NTAC));
+  outTree->Branch("tac_t", data.TACTimestamp, Form("tac_t[%d]/l", NTAC));
+#else
+  printf(" -----  no TAC.\n");
+#endif
 
-  if( NELUM > 0 ) {
-    outTree->Branch("elum", ELUM, Form("elum[%d]/F", NELUM));
-    outTree->Branch("elum_t", ELUMTimestamp, Form("elum_t[%d]/l", NELUM));
-  } else {
-    printf(" -----  no ELUM.\n");
-  }
+#if NELUM > 0
+  outTree->Branch("elum", data.ELUM, Form("elum[%d]/F", NELUM));
+  outTree->Branch("elum_t", data.ELUMTimestamp, Form("elum_t[%d]/l", NELUM));
+#else
+  printf(" -----  no ELUM.\n");
+#endif
 
-  if( NEZERO > 0 ) {
-    outTree->Branch("ezero", EZERO, Form("ezero[%d]/F", NEZERO));
-    outTree->Branch("ezero_t", EZEROTimestamp, Form("ezero_t[%d]/l", NEZERO));
-  } else {
-    printf(" -----  no EZERO.\n");
-  }
+#if NEZERO > 0
+  outTree->Branch("ezero", data.EZERO, Form("ezero[%d]/F", NEZERO));
+  outTree->Branch("ezero_t", data.EZEROTimestamp, Form("ezero_t[%d]/l", NEZERO));
+#else
+  printf(" -----  no EZERO.\n");
+#endif
 
-  if( NCRDT > 0 ) {
-    outTree->Branch("crdt", CRDT, Form("crdt[%d]/F", NCRDT));
-    outTree->Branch("crdt_t", CRDTTimestamp, Form("crdt_t[%d]/l", NCRDT));
-  } else {
-    printf(" -----  no CRDT.\n");
-  }
+#if NCRDT > 0
+  outTree->Branch("crdt", data.CRDT, Form("crdt[%d]/F", NCRDT));
+  outTree->Branch("crdt_t", data.CRDTTimestamp, Form("crdt_t[%d]/l", NCRDT));
+#else
+  printf(" -----  no CRDT.\n");
+#endif
 
-  if( NAPOLLO > 0 ) {
-    outTree->Branch("apollo", APOLLO, Form("apollo[%d]/F", NAPOLLO));
-    outTree->Branch("apollo_t", APOLLOTimestamp, Form("apollo_t[%d]/l", NAPOLLO));
-  } else {
-    printf(" -----  no APOLLO.\n");
-  }
+#if NAPOLLO > 0
+  outTree->Branch("apollo", data.APOLLO, Form("apollo[%d]/F", NAPOLLO));
+  outTree->Branch("apollo_t", data.APOLLOTimestamp, Form("apollo_t[%d]/l", NAPOLLO));
+#else
+  printf(" -----  no APOLLO.\n");
+#endif
 
   if( saveTrace ){
-    arr = new TClonesArray("TGraph");
 
-    outTree->Branch("trace", &arr, 256000); 
-    outTree->Branch("te", te, Form("te[%d]/F", NARRAY));
-    outTree->Branch("te_r", te_r, Form("te_r[%d]/F", NARRAY));
-    outTree->Branch("te_t", te_t, Form("te_t[%d]/l", NARRAY));
-    
-    if( NRDT > 0 ){
-      outTree->Branch("trdt", trdt, Form("trdt[%d]/F", NRDT));
-      outTree->Branch("trdt_r", trdt_r, Form("trdt_r[%d]/F", NRDT));
-      outTree->Branch("trdt_t", trdt_t, Form("trdt_t[%d]/l", NRDT));
-    }
+    outTree->Branch("traceCount", &data.traceCount, "traceCount/s");
+    outTree->Branch("traceDetID",   data.traceDetID, "traceDetID[traceCount]/s");
+    outTree->Branch("traceKindID",  data.traceKindID, "traceKindID[traceCount]/s");
+    outTree->Branch("traceLength",   data.traceLen, "traceLength[traceCount]/s");
+    outTree->Branch(       "trace",     data.trace, Form("trace[traceCount][%d]/s", MAX_TRACE_LEN));
+
+  }
+  if( traceAna > 0 ){ 
+    outTree->Branch("tracePara", data.tracePara, Form("tracePara[%d][4]/F", NARRAY));
   }
 
+  //*=============== print ID map
   printf("======= ID-MAP: \n");
   printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
@@ -315,7 +536,7 @@ int main(int argc, char* argv[]) {
     BinaryReader* reader = readers[0];
     reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
-    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); // Decode the hit payload and push it to the event queue
+    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); // Decode the hit payload and push it to the event queue
 
   }
 
@@ -325,6 +546,13 @@ int main(int argc, char* argv[]) {
   
   unsigned int hitProcessed = 0; // Number of hits processed
   double last_precentage = 0.0; // Last percentage printed
+
+
+  
+
+
+  if( traceAna > 0 ) data.SetTraceFunction(); // Set the trace function for analysis
+
 
   do{
 
@@ -342,7 +570,7 @@ int main(int argc, char* argv[]) {
           reader->ReadNextNHitsFromFile(); // Read more hits from the current file
           if( reader->GetHitSize() > 0 ) {
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
+            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); 
           }
         }
 
@@ -355,7 +583,7 @@ int main(int argc, char* argv[]) {
             reader->ReadNextNHitsFromFile(); // Read more hits from the next file
 
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
+            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); 
             
           } else {
             fileID[digID] = -1; // Mark that there are no more files for this DigID
@@ -380,127 +608,15 @@ int main(int argc, char* argv[]) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
       });
       
-      for( int i = 0; i < NARRAY; i++) {
-        Energy[i] = TMath::QuietNaN(); // Reset energy array
-        XF[i] = TMath::QuietNaN(); // Reset XF array
-        XN[i] = TMath::QuietNaN(); // Reset XN array
-        Ring[i] = TMath::QuietNaN(); // Reset Ring array
-        EnergyTimestamp[i] = 0; // Reset energy timestamp
-        XFTimestamp[i] = 0; // Reset XF timestamp
-        XNTimestamp[i] = 0; // Reset XN timestamp
-        RingTimestamp[i] = 0; // Reset Ring timestamp
+      data.Reset(); 
+      data.FillData(events, saveTrace);
+
+      if (traceAna) {
+        data.TraceAnalysis(); // Perform trace analysis if enabled
+        outTree->Fill(); 
       }
 
-      if( NRDT > 0 ) {
-        for( int i = 0; i < NRDT; i++) {
-          RDT[i] = 0.0f; // Reset RDT array
-          RDTTimestamp[i] = 0; // Reset RDT timestamp
-        }
-      }
-
-      if( saveTrace ) arr->Clear(); // Clear the TClonesArray for the new event
       
-      int traceCount = 0;
-      for( int i = 0; i <  events.size(); i++) {
-        int id                    = events[i].board * 10 + events[i].channel - 1010;
-        uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
-        uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
-        uint64_t timestamp        = events[i].timestamp; // Timestamp
-
-        int idDet = idDetMap[id]; 
-        int idKind = idKindMap[id]; 
-
-        if( idDet < 0 ) continue;
-
-        float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
-
-        // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
-
-        if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
-          switch (idKind ){
-            case 0: // Energy signal
-              Energy[idDet] = eee; // Calculate energy
-              EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
-              break;
-            case 1: // XF
-              XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
-              XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
-              break;
-            case 2: // XN
-              XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
-              XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
-              break;
-            case 3: // Ring
-              Ring[idDet] = eee; // Calculate Ring
-              RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
-              break;
-          }
-        }
-
-        if( NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
-          int rdtID = idDet - 100; // Recoil ID
-          RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
-          RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
-        }
-
-        if( NELUM > 0 && 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
-          int elumID = idDet - 200; // ELUM ID
-          ELUM[elumID] = eee;
-          ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
-        }
-
-        if( NEZERO > 0 && 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
-          int ezeroID = idDet - 300; // EZERO ID
-          EZERO[ezeroID] = eee;
-          EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
-        }
-
-        if( NTAC > 0 &&  400 <= idDet && idDet < 400 + NTAC ) { // TAC
-          int tacID = idDet - 400; // TAC ID
-          TAC[tacID] = eee;
-          TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
-        }
-
-        if( NCRDT > 0 && 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
-          int crdtID = idDet - 500; // Circular Recoil ID
-          CRDT[crdtID] = eee;
-          CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
-        }
-
-        if( NAPOLLO > 0 && 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
-          int apolloID = idDet - 600; // APOLLO ID
-          APOLLO[apolloID] = eee;
-          APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
-        }
-
-        if( saveTrace ){
-
-          bool isArray = (0 <= idDet && idDet < NARRAY); 
-          bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
-          if( isArray || isRDT ) { 
-            gTrace = (TGraph*)arr->ConstructedAt(traceCount); // Construct a new TGraph at index i
-            traceCount++;
-
-            unsigned short traceLen = events[i].traceLength;
-            gTrace->SetName(Form("det_%d", idDet));
-            gTrace->SetTitle(Form("ev=%llu, id=%d, nHit=%d, length=%d", eventID, idDet, i, traceLen ));
-            gTrace->Set(traceLen); // Set the number of points in the TGraph
-            uint16_t normalValue = 0;
-            for( int j = 0; j < traceLen; j++){
-               if( events[i].trace[j] < 16000){
-                  normalValue = events[i].trace[j];
-                  gTrace->SetPoint(j, j, normalValue);
-               }else{
-                  gTrace->SetPoint(j, j, normalValue);
-               }
-            }
-
-          }
-        }
-
-      }
-
-      outTree->Fill(); // Fill the TTree with the current event
     }
     
     double percentage = hitProcessed * 100/ totalNumHits;
@@ -517,6 +633,8 @@ int main(int argc, char* argv[]) {
 
   }while(!eventQueue.empty()); 
 
+
+  //*=============== save some marco
   //Save the global earliest and last timestamps as a TMacro
   TMacro macro("info", "Earliest and Last Timestamps");
   macro.AddLine(Form("globalEarliestTime = %lu", globalEarliestTime));
@@ -525,7 +643,11 @@ int main(int argc, char* argv[]) {
   macro.AddLine(Form("totFileSizeMB = %.1f", totFileSize / (1024.0 * 1024.0))); // Convert to MB
   macro.Write("info");
 
-  //summary
+  TMacro macro2("trace_info", "Maximum Trace Length"); //this macro is for read Raw trace
+  macro2.AddLine(Form("%d", MAX_TRACE_LEN));
+  macro2.Write("trace_info");
+
+  //*=============== summary
   printf("=======================================================\n");
   printf("===          Event Builder finished                 ===\n");
   printf("=======================================================\n");
