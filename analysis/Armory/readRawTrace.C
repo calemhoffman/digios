@@ -10,6 +10,7 @@
 #include <TClonesArray.h>
 #include <TBenchmark.h>
 #include <TMath.h>
+#include <TMacro.h>
 #include <TF1.h>
 #include <TH1.h>
 #include <TLine.h>
@@ -35,6 +36,14 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
 
    TFile * f1 = new TFile (fileName, "read");
    TTree * tree = (TTree *) f1->Get("tree");
+
+   TMacro * macro = (TMacro *) f1->Get("trace_info");
+   TString traceLenStr;
+   if( macro != NULL ){
+      traceLenStr = macro->GetListOfLines()->At(0)->GetName();
+      printf("Max Trace Length : %s\n", traceLenStr.Data());
+   }
+   const int maxTraceLen = traceLenStr.Atoi();
    
    if( tree == NULL ) {
       printf("===== Are you using gen_runXXX.root ? please use runXXX.root\n");
@@ -56,7 +65,8 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
 /**///==============================================================   
    UShort_t   id[200];
    UInt_t      numHit;
-   UShort_t  trace[200][1250]; // need to match the tree
+   UShort_t  trace[200][maxTraceLen]; // need to match the tree
+
    UShort_t  traceLength[200];
    tree->SetBranchAddress("id", id);
    tree->SetBranchAddress("NumHits", &numHit);
