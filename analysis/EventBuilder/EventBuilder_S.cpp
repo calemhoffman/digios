@@ -270,6 +270,7 @@ public:
   }
 
   void SetTraceFunction(){
+    if( fitFunc ) return;
     // fit trace[i] with  A/(1+exp(-(x - x0)/tau)) + B
     // where A is the amplitude, x0 is the timestamp, tau is the rise time, and B is the baseline
     fitFunc = new TF1("fitFunc", "[0] / (1 + exp(-(x - [1]) / [2])) + [3]"); 
@@ -326,7 +327,7 @@ int main(int argc, char* argv[]) {
   TString outFileName = argv[1];
   int timeWindow = atoi(argv[2]);
   const bool saveTrace = atoi(argv[3]);
-  const short traceAna = atoi(argv[4]);
+  const short nWorkers = atoi(argv[4]);
 
   Data data;
 
@@ -343,7 +344,7 @@ int main(int argc, char* argv[]) {
     printf(" Event building time window : %d nsec \n", timeWindow);
   }
   printf(" Save Trace ? %s\n", saveTrace ? "Yes" : "No");
-  printf(" Trace Analysis ? %s %s\n", traceAna ? "Yes" : "No", traceAna > 0 ? "" : Form("(%d-core)", traceAna));
+  printf(" Trace Analysis ? %s %s\n", nWorkers ? "Yes" : "No", nWorkers > 0 ? "" : Form("(%d-core)", nWorkers));
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
@@ -474,7 +475,7 @@ int main(int argc, char* argv[]) {
     outTree->Branch(       "trace",     data.trace, Form("trace[traceCount][%d]/s", MAX_TRACE_LEN));
 
   }
-  if( traceAna > 0 ){ 
+  if( nWorkers > 0 ){ 
     outTree->Branch("tracePara", data.tracePara, Form("tracePara[%d][4]/F", NARRAY));
   }
 
@@ -536,7 +537,7 @@ int main(int argc, char* argv[]) {
     BinaryReader* reader = readers[0];
     reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
-    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); // Decode the hit payload and push it to the event queue
+    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(nWorkers)); // Decode the hit payload and push it to the event queue
 
   }
 
@@ -548,11 +549,15 @@ int main(int argc, char* argv[]) {
   double last_precentage = 0.0; // Last percentage printed
 
 
-  
-
-
-  if( traceAna > 0 ) data.SetTraceFunction(); // Set the trace function for analysis
-
+  std::mutex mtx; // Mutex for thread safety fro outTree->Fill()
+  if( nWorkers > 0 ) {
+    threads.reserve(nWorkers);
+  }
+  int busyThreadCount = 0; // Count of busy threads
+  bool workerBusy[nWorkers];
+  for (int i = 0; i < nWorkers; i++) {
+    workerBusy[i] = false; // Initialize all workers as not busy
+  }
 
   do{
 
@@ -570,7 +575,7 @@ int main(int argc, char* argv[]) {
           reader->ReadNextNHitsFromFile(); // Read more hits from the current file
           if( reader->GetHitSize() > 0 ) {
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); 
+            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(nWorkers)); 
           }
         }
 
@@ -583,7 +588,7 @@ int main(int argc, char* argv[]) {
             reader->ReadNextNHitsFromFile(); // Read more hits from the next file
 
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(traceAna)); 
+            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(nWorkers)); 
             
           } else {
             fileID[digID] = -1; // Mark that there are no more files for this DigID
@@ -608,12 +613,47 @@ int main(int argc, char* argv[]) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
       });
       
-      data.Reset(); 
-      data.FillData(events, saveTrace);
+      // data.Reset(); 
+      // data.FillData(events, saveTrace);
 
-      if (traceAna) {
-        data.TraceAnalysis(); // Perform trace analysis if enabled
-        outTree->Fill(); 
+      // if (nWorkers) {
+      //   data.TraceAnalysis(); // Perform trace analysis if enabled
+      //   outTree->Fill(); 
+      // }
+
+      if( nWorkers > 0 ) {
+        // Multi-threaded processing
+
+        Data threadData; // Create a local copy for thread processing
+        threadData.Reset(); 
+        threadData.FillData(events, saveTrace); 
+        // threadData.SetTraceFunction(); 
+
+        int threadID = eventID % nWorkers; // Get the thread ID based on the busy count
+
+        if( workerBusy[threadID] ) { // If the worker is busy, wait for it to finish
+          threads[threadID].join(); // Wait for the thread to finish
+        } 
+
+        threads[threadID] = std::thread([&data, threadData, &mtx, threadID, outTree, &workerBusy]() {
+          workerBusy[threadID] = true; // Mark this worker as busy
+          // workerData.TraceAnalysis(); // Perform trace analysis
+          printf("\033[32mThread %d is processing data...\033[0m\n", threadID);
+          for( int k = 0; k < 1e6 ; k++){};
+          // mtx.lock(); // Lock the mutex to ensure thread safety
+          // data = threadData;
+          // outTree->Fill(); // Fill the tree in a thread-safe manner
+          // mtx.unlock();
+          workerBusy[threadID] = false; // Mark this worker as not busy
+          printf("\033[33mThread %d finished processing data.\033[0m\n", threadID);
+        });
+        
+
+      } else {
+        // Single-threaded processing, o trace analysis
+        data.Reset();
+        data.FillData(events, saveTrace);
+        outTree->Fill(); // Fill the tree
       }
 
       
