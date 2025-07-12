@@ -113,15 +113,22 @@ int main(int argc, char* argv[]) {
     reader[i]->Open(inFileName[i].Data());
     threads.emplace_back([](BinaryReader* reader) { 
       reader->Scan(true); 
+      printf("%s | %6.1f MB | # hit : %10d (%d)\n", reader->GetFileName().c_str(), reader->GetFileSize()/1024./1024., reader->GetNumData(), reader->GetMaxHitSize());
     }, reader[i]);
   }
+
+  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
+  uint64_t globalLastTime = 0; // Global last timestamp
 
   // Wait for all threads to finish
   for (int i = 0; i < threads.size(); ++i) {
     threads[i].join();
-    printf("%3d: %s | %6.1f MB | # hit : %10d (%d)\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData(), reader[i]->GetMaxHitSize());
     totalNumHits += reader[i]->GetNumData();
     totFileSize += reader[i]->GetFileSize();
+
+    if (reader[i]->GetGlobalEarliestTime() < globalEarliestTime) globalEarliestTime = reader[i]->GetGlobalEarliestTime();    
+    if (reader[i]->GetGlobalLastTime() > globalLastTime) globalLastTime = reader[i]->GetGlobalLastTime();
+
   }
   
   //*=============== group files by DigID and sort the fileIndex
@@ -147,6 +154,9 @@ int main(int argc, char* argv[]) {
   
   printf("================= Total number of hits: %lu\n", totalNumHits);
   printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
+  printf("                        Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
+
+
 
   //*=============== create output file and setup TTree
   TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
@@ -181,9 +191,6 @@ int main(int argc, char* argv[]) {
 
   //*=============== read n data from each file
 
-  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
-  uint64_t globalLastTime = 0; // Global last timestamp
-
   std::map<unsigned short, unsigned int> hitID; // store the hit ID for the current reader for each DigID
   std::map<unsigned short, short> fileID; // store the file ID for each DigID
   
@@ -202,8 +209,6 @@ int main(int argc, char* argv[]) {
     for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); // Decode the hit payload and push it to the event queue
 
   }
-
-  globalEarliestTime = eventQueue.top().timestamp; // Set the global earliest time from the first event in the queue
 
   //*=============== event building
   std::vector<Event> events; // Vector to store events
@@ -301,7 +306,6 @@ int main(int argc, char* argv[]) {
         }
       }
       outTree->Fill(); // Fill the TTree with the current event
-      globalLastTime = events.back().timestamp; // Update the global last time
     }
     
     double percentage = hitProcessed * 100/ totalNumHits;
@@ -335,7 +339,6 @@ int main(int argc, char* argv[]) {
   printf("Total number of hits processed: %10u (%lu)\n", hitProcessed, totalNumHits);
   printf("  Total number of events built: %10u\n", eventID);
   printf("     Number of entries in tree: %10lld\n", outTree->GetEntries());
-  printf("                Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
   //clean up
   outFile->Write();
   outFile->Close();

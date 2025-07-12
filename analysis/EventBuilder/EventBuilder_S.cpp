@@ -246,7 +246,7 @@ int main(int argc, char* argv[]) {
   if( saveTrace ){
     arr = new TClonesArray("TGraph");
 
-    outTree->Branch("trace", &arr, 16000, 0); // 16kB for trace
+    outTree->Branch("trace", &arr, 256000); 
     outTree->Branch("te", te, Form("te[%d]/F", NARRAY));
     outTree->Branch("te_r", te_r, Form("te_r[%d]/F", NARRAY));
     outTree->Branch("te_t", te_t, Form("te_t[%d]/l", NARRAY));
@@ -381,10 +381,10 @@ int main(int argc, char* argv[]) {
       });
       
       for( int i = 0; i < NARRAY; i++) {
-        Energy[i] = 0.0f; // Reset energy array
-        XF[i] = 0.0f; // Reset XF array
-        XN[i] = 0.0f; // Reset XN array
-        Ring[i] = 0.0f; // Reset Ring array
+        Energy[i] = TMath::QuietNaN(); // Reset energy array
+        XF[i] = TMath::QuietNaN(); // Reset XF array
+        XN[i] = TMath::QuietNaN(); // Reset XN array
+        Ring[i] = TMath::QuietNaN(); // Reset Ring array
         EnergyTimestamp[i] = 0; // Reset energy timestamp
         XFTimestamp[i] = 0; // Reset XF timestamp
         XNTimestamp[i] = 0; // Reset XN timestamp
@@ -400,8 +400,9 @@ int main(int argc, char* argv[]) {
 
       if( saveTrace ) arr->Clear(); // Clear the TClonesArray for the new event
       
+      int traceCount = 0;
       for( int i = 0; i <  events.size(); i++) {
-        int id               = events[i].board * 10 + events[i].channel - 1010;
+        int id                    = events[i].board * 10 + events[i].channel - 1010;
         uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
         uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
         uint64_t timestamp        = events[i].timestamp; // Timestamp
@@ -409,62 +410,66 @@ int main(int argc, char* argv[]) {
         int idDet = idDetMap[id]; 
         int idKind = idKindMap[id]; 
 
-        int traceCount = 0;
+        if( idDet < 0 ) continue;
+
+        float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
+
+        // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
 
         if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
           switch (idKind ){
             case 0: // Energy signal
-              Energy[id] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate energy
-              EnergyTimestamp[id] = timestamp; // Set the timestamp for energy
+              Energy[idDet] = eee; // Calculate energy
+              EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
               break;
             case 1: // XF
-              XF[id] = (float)(post_rise_energy - pre_rise_energy) / MWIN * POLARITY_XFXN; // Calculate XF
-              XFTimestamp[id] = timestamp; // Set the timestamp for XF
+              XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
+              XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
               break;
             case 2: // XN
-              XN[id] = (float)(post_rise_energy - pre_rise_energy) / MWIN * POLARITY_XFXN; // Calculate XN
-              XNTimestamp[id] = timestamp; // Set the timestamp for XN
+              XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
+              XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
               break;
             case 3: // Ring
-              Ring[id] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate Ring
-              RingTimestamp[id] = timestamp; // Set the timestamp for Ring
+              Ring[idDet] = eee; // Calculate Ring
+              RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
               break;
           }
         }
 
         if( NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
           int rdtID = idDet - 100; // Recoil ID
-          RDT[rdtID] = (float)(post_rise_energy - pre_rise_energy) / MWIN * POLARITY_RDT; // Calculate RDT
+          RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
           RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
         }
 
         if( NELUM > 0 && 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
           int elumID = idDet - 200; // ELUM ID
-          ELUM[elumID] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate ELUM
+          ELUM[elumID] = eee;
           ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
         }
 
         if( NEZERO > 0 && 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
           int ezeroID = idDet - 300; // EZERO ID
-          EZERO[ezeroID] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate EZERO
+          EZERO[ezeroID] = eee;
           EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
         }
 
         if( NTAC > 0 &&  400 <= idDet && idDet < 400 + NTAC ) { // TAC
           int tacID = idDet - 400; // TAC ID
-          TAC[tacID] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate TAC
+          TAC[tacID] = eee;
           TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
         }
 
         if( NCRDT > 0 && 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
           int crdtID = idDet - 500; // Circular Recoil ID
-          CRDT[crdtID] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate CRDT
+          CRDT[crdtID] = eee;
           CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
         }
 
         if( NAPOLLO > 0 && 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
           int apolloID = idDet - 600; // APOLLO ID
-          APOLLO[apolloID] = (float)(post_rise_energy - pre_rise_energy) / MWIN; // Calculate APOLLO
+          APOLLO[apolloID] = eee;
           APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
         }
 

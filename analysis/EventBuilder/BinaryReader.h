@@ -50,6 +50,8 @@ public:
     lastTimestampOfHits = 0;  // Reset last timestamp of hits
   }
 
+  uint64_t GetGlobalEarliestTime() const { return globalEarliestTime; }  
+  uint64_t GetGlobalLastTime() const { return globalLastTime; } 
 
   void ReadNextNHitsFromFile(bool debug = false); 
   unsigned int GetMaxHitSize() const { return maxHitSize; }  // Get the maximum size of the hits vector
@@ -87,6 +89,9 @@ private:
   unsigned short DigID; // the last three digits of the file name, e.g. 001, 002, etc.
   unsigned short fileIndex; // the 2nd last three digits of the file name, e.g. 000, 001, etc. to indicate the next file from the same DigID.
 
+  uint64_t globalEarliestTime; // Earliest timestamp in the file
+  uint64_t globalLastTime; // Last timestamp in the file
+
   unsigned int totalNumHits;
   unsigned int hitID; // current hit ID
 
@@ -107,6 +112,8 @@ private:
     maxHitSize = 0;
     hitSize = 0;
     lastTimestampOfHits = 0; 
+    globalEarliestTime = UINT64_MAX; 
+    globalLastTime = 0; 
   }
 };
 
@@ -139,9 +146,13 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
     }
 
     timestampList.push_back(hit.header.timestamp); 
+ 
     if( timestampList.size() >= maxHitSize ){ // check the timestamp error every maxHitSize hits
       std::sort(timestampList.begin(), timestampList.end()); // Sort the timestamps for error checking
       last_timestamp = timestampList.back(); // Get the last timestamp in the sorted list
+      
+      if( timestampList.front() < globalEarliestTime) globalEarliestTime = timestampList.front(); // Update the global earliest time
+      if( timestampList.back() > globalLastTime) globalLastTime = timestampList.back(); // Update the global last time 
       
       if( count > 0 && timestampList.front() < old_timestamp) {
         maxHitSize *= 2;
@@ -168,6 +179,10 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
 
     totalNumHits ++;
   }while(Tell() < fileSize);
+
+  std::sort(timestampList.begin(), timestampList.end()); // Sort the timestamps for error checking
+  if( timestampList.front() < globalEarliestTime) globalEarliestTime = timestampList.front(); // Update the global earliest time
+  if( timestampList.back() > globalLastTime) globalLastTime = timestampList.back(); // Update the global last time  
 
   if( debug ) printf("number of Hit Found : %d \n", totalNumHits);
   if( timestamp_error_counter > 0 && debug) printf("%s : timestamp error found for %u times.\n", fileName.c_str(), timestamp_error_counter);
