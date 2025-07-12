@@ -24,7 +24,7 @@
 #define MAX_TRACE_LEN 1250 
 #define FULL_OUTPUT false
 #define MAX_MULTI 200
-unsigned int maxHitsRead = 100000; // Maximum hits to read at a time
+#define MAX_READ_HITS 100000 // Maximum hits to read at a time
 
 #include <sys/time.h> /** struct timeval, select() */
 inline unsigned int getTime_us(){
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
   std::vector<std::thread> threads; // Create a vector of threads for parallel scanning
 
   for( int i = 0 ; i < nFile ; i++){
-    reader[i] = new BinaryReader((maxHitsRead)); 
+    reader[i] = new BinaryReader((MAX_READ_HITS)); 
     reader[i]->Open(inFileName[i].Data());
     threads.emplace_back([](BinaryReader* reader) { 
       reader->Scan(true); 
@@ -134,6 +134,8 @@ int main(int argc, char* argv[]) {
     if (reader[i]->GetGlobalLastTime() > globalLastTime) globalLastTime = reader[i]->GetGlobalLastTime();
 
   }
+
+  //TODO there is potential time not sort for different files from the same DigID....
   
   //*=============== group files by DigID and sort the fileIndex
   std::map<unsigned short, std::vector<BinaryReader*>> fileGroups;
@@ -326,7 +328,7 @@ int main(int argc, char* argv[]) {
 
   }while(!eventQueue.empty()); 
 
-  //Save the global earliest and last timestamps as a TMacro
+  //*=============== save some marco
   TMacro macro("info", "Earliest and Last Timestamps");
   macro.AddLine(Form("globalEarliestTime = %lu", globalEarliestTime));
   macro.AddLine(Form("globalLastTime = %lu", globalLastTime));
@@ -338,7 +340,7 @@ int main(int argc, char* argv[]) {
   macro2.AddLine(Form("%d", MAX_TRACE_LEN));
   macro2.Write("trace_info");
 
-  //summary
+  //*=============== summary
   printf("=======================================================\n");
   printf("===          Event Builder finished                 ===\n");
   printf("=======================================================\n");
