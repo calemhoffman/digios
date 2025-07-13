@@ -20,6 +20,7 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #define MAX_TRACE_LEN 1250 
 #define MAX_TRACE_MULTI 200
@@ -97,6 +98,22 @@ public:
 
   Data(){}
   ~Data(){}
+
+  void Print(){
+    printf("Energy: ");
+    for (int i = 0; i < NARRAY; i++) {
+      if( Energy[i] > 0  ) printf("%d, %f ", i, Energy[i]);
+    }
+    printf("\nXF: ");
+    for (int i = 0; i < NARRAY; i++) {
+      if( XF[i] > 0 ) printf("%d, %f ", i, XF[i]);
+    }
+    printf("\nXN: ");
+    for (int i = 0; i < NARRAY; i++) {
+      if( XN[i] > 0 ) printf("%d, %f ", i, XN[i]);
+    }
+    printf("\n");
+  }
 
   void Reset() {
     runiD = 0;
@@ -305,6 +322,7 @@ public:
 
 };
 
+
 //^============================================
 int main(int argc, char* argv[]) {
 
@@ -467,16 +485,14 @@ int main(int argc, char* argv[]) {
 #endif
 
   if( saveTrace ){
-
     outTree->Branch("traceCount", &data.traceCount, "traceCount/s");
     outTree->Branch("traceDetID",   data.traceDetID, "traceDetID[traceCount]/s");
     outTree->Branch("traceKindID",  data.traceKindID, "traceKindID[traceCount]/s");
     outTree->Branch("traceLength",   data.traceLen, "traceLength[traceCount]/s");
     outTree->Branch(       "trace",     data.trace, Form("trace[traceCount][%d]/s", MAX_TRACE_LEN));
-
   }
   if( nWorkers > 0 ){ 
-    outTree->Branch("tracePara", data.tracePara, Form("tracePara[%d][4]/F", NARRAY));
+    outTree->Branch("tracePara", data.tracePara, "tracePara[traceCount][4]/F");
   }
 
   //*=============== print ID map
@@ -549,15 +565,76 @@ int main(int argc, char* argv[]) {
   double last_precentage = 0.0; // Last percentage printed
 
 
-  std::mutex mtx; // Mutex for thread safety fro outTree->Fill()
+  std::mutex fileMutex;
+  std::mutex queueMutex;
+  std::atomic<bool> done(false); // to flag all data is processed. to tell the threads to finish
+
+  std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
+  std::queue<Data> outputQueue;
+
   if( nWorkers > 0 ) {
-    threads.reserve(nWorkers);
+   
+    for( int i =0; i < nWorkers; i++){
+      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &done, &fileMutex]() {
+        std::vector<Data> localResults;
+
+        int count = 0;
+        while (true) {
+          Data data;
+          bool hasData = false;
+
+          // Try to get data from the queue
+          {
+            std::lock_guard<std::mutex> lock(queueMutex);
+            if (!dataQueue.empty()) {
+              data = dataQueue.front();
+              dataQueue.pop();
+              hasData = true;
+            } else if (done) {
+              break; // No more data and input is done
+            }
+          }
+
+          // Process data if available
+          if (hasData) {
+
+            for(int h = 0; h < 1e7; h++){};
+            // data.SetTraceFunction();
+            // data.TraceAnalysis(); // Perform trace analysis if enabled
+            for(int h = 0; h < 1e7; h++){}; // Simulate some processing time
+            localResults.push_back(data); // Store the processed data in local results
+            count++;
+            // if( count % 1000 == 0) printf("Worker %d processed %d data items\n", i, count);
+
+          } else {
+            std::this_thread::yield(); // Yield to avoid busy waiting
+          }
+
+          if( localResults.size() >= 2000 ) { // If we have enough results, write them to the file
+            // printf("Worker %d writing %zu data items to outputQueue\n", i, localResults.size());
+            std::lock_guard<std::mutex> lock(fileMutex);
+            for (const auto& result : localResults) {
+              outputQueue.push(result); // Push the data to the output queue             
+            }
+            localResults.clear(); // Clear local results after writing
+          }
+
+        }
+
+        // Thread-safe file writing
+        {
+          // printf("Worker %d finished processing %zu data to outputQueue\n", i, localResults.size());
+          std::lock_guard<std::mutex> lock(fileMutex);
+          for (const auto& result : localResults) {
+            outputQueue.push(result); // Push the data to the output queue         
+          }
+          localResults.clear(); // Clear local results after writing
+        }
+      });
+    }
+
   }
-  int busyThreadCount = 0; // Count of busy threads
-  bool workerBusy[nWorkers];
-  for (int i = 0; i < nWorkers; i++) {
-    workerBusy[i] = false; // Initialize all workers as not busy
-  }
+
 
   do{
 
@@ -613,41 +690,14 @@ int main(int argc, char* argv[]) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
       });
       
-      // data.Reset(); 
-      // data.FillData(events, saveTrace);
-
-      // if (nWorkers) {
-      //   data.TraceAnalysis(); // Perform trace analysis if enabled
-      //   outTree->Fill(); 
-      // }
-
       if( nWorkers > 0 ) {
         // Multi-threaded processing
-
-        Data threadData; // Create a local copy for thread processing
-        threadData.Reset(); 
-        threadData.FillData(events, saveTrace); 
-        // threadData.SetTraceFunction(); 
-
-        int threadID = eventID % nWorkers; // Get the thread ID based on the busy count
-
-        if( workerBusy[threadID] ) { // If the worker is busy, wait for it to finish
-          threads[threadID].join(); // Wait for the thread to finish
-        } 
-
-        threads[threadID] = std::thread([&data, threadData, &mtx, threadID, outTree, &workerBusy]() {
-          workerBusy[threadID] = true; // Mark this worker as busy
-          // workerData.TraceAnalysis(); // Perform trace analysis
-          printf("\033[32mThread %d is processing data...\033[0m\n", threadID);
-          for( int k = 0; k < 1e6 ; k++){};
-          // mtx.lock(); // Lock the mutex to ensure thread safety
-          // data = threadData;
-          // outTree->Fill(); // Fill the tree in a thread-safe manner
-          // mtx.unlock();
-          workerBusy[threadID] = false; // Mark this worker as not busy
-          printf("\033[33mThread %d finished processing data.\033[0m\n", threadID);
-        });
-        
+        data.Reset(); 
+        data.FillData(events, saveTrace); 
+        { 
+          std::lock_guard<std::mutex> lock(queueMutex); // Lock the queue mutex
+          dataQueue.push(data); 
+        }
 
       } else {
         // Single-threaded processing, o trace analysis
@@ -656,7 +706,6 @@ int main(int argc, char* argv[]) {
         outTree->Fill(); // Fill the tree
       }
 
-      
     }
     
     double percentage = hitProcessed * 100/ totalNumHits;
@@ -671,8 +720,34 @@ int main(int argc, char* argv[]) {
     eventID ++;
     events.clear(); // Clear the events vector for the next event
 
+    if ( nWorkers > 0 && outputQueue.size() >= 10000 ){
+      // If the output queue has more than 10,000 items, write them to the file
+      printf("Writing %zu data items to file from output queue\n", outputQueue.size());
+      std::lock_guard<std::mutex> lock(fileMutex); // Lock the file mutex
+      while (!outputQueue.empty()) {
+        data = outputQueue.front();
+        outputQueue.pop();
+        outTree->Fill(); // Fill the tree with the processed data
+      }
+    }
+
   }while(!eventQueue.empty()); 
 
+  done = true; // All data is processed, set the done flag to true
+
+  if ( nWorkers > 0 ){
+    for( int i = 0; i < nWorkers; i++) {
+      threads[i].join(); // Wait for all threads to finish
+    }
+    // If the output queue has more than 10,000 items, write them to the file
+    printf("Writing %zu data items to file from output queue\n", outputQueue.size());
+    std::lock_guard<std::mutex> lock(fileMutex); // Lock the file mutex
+    while (!outputQueue.empty()) {
+      data = outputQueue.front();
+      outputQueue.pop();
+      outTree->Fill(); // Fill the tree with the processed data
+    }
+  }
 
   //*=============== save some marco
   //Save the global earliest and last timestamps as a TMacro
