@@ -313,7 +313,7 @@ public:
 
   }
 
-  // int displayCount = 0;
+  int displayCount = 0;
 
   void TraceAnalysis(){
     if( traceCount <= 0 ) return; // No traces to analyze
@@ -359,8 +359,6 @@ public:
       tracePara[i][1] = gsl_vector_get(result, 1);
       tracePara[i][2] = gsl_vector_get(result, 2);
       tracePara[i][3] = gsl_vector_get(result, 3);
-
-
 
       gsl_multifit_nlinear_free(w);
       delete[] d.y;
@@ -421,7 +419,7 @@ int main(int argc, char* argv[]) {
     printf(" Event building time window : %d nsec \n", timeWindow);
   }
   printf(" Save Trace ? %s\n", saveTrace ? "Yes" : "No");
-  printf(" Trace Analysis ? %s %s\n", nWorkers ? "Yes" : "No", nWorkers > 0 ? "" : Form("(%d-core)", nWorkers));
+  printf(" Trace Analysis ? %s %s\n", nWorkers ? "Yes" : "No", nWorkers > 0 ? Form("(%d-core)", nWorkers) : "");
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
@@ -543,11 +541,11 @@ int main(int argc, char* argv[]) {
 #endif
 
   if( saveTrace ){
-    outTree->Branch("traceCount", &data.traceCount, "traceCount/s");
-    outTree->Branch("traceDetID",   data.traceDetID, "traceDetID[traceCount]/s");
+    outTree->Branch( "traceCount",  &data.traceCount, "traceCount/s");
+    outTree->Branch( "traceDetID",   data.traceDetID, "traceDetID[traceCount]/s");
     outTree->Branch("traceKindID",  data.traceKindID, "traceKindID[traceCount]/s");
-    outTree->Branch("traceLength",   data.traceLen, "traceLength[traceCount]/s");
-    outTree->Branch(       "trace",     data.trace, Form("trace[traceCount][%d]/s", MAX_TRACE_LEN));
+    outTree->Branch(   "traceLen",     data.traceLen, "traceLen[traceCount]/s");
+    outTree->Branch(      "trace",        data.trace, Form("trace[traceCount][%d]/s", MAX_TRACE_LEN));
   }
   if( nWorkers > 0 ){ 
     outTree->Branch("tracePara", data.tracePara, "tracePara[traceCount][4]/F");
@@ -611,7 +609,7 @@ int main(int argc, char* argv[]) {
     BinaryReader* reader = readers[0];
     reader->ReadNextNHitsFromFile(); // Read 10,000 hits at a time
 
-    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(nWorkers)); // Decode the hit payload and push it to the event queue
+    for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); // Decode the hit payload and push it to the event queue
 
   }
 
@@ -635,7 +633,7 @@ int main(int argc, char* argv[]) {
   std::thread outTreeThread;
 
 
-  if( nWorkers > 0 ) {
+  if( nWorkers > 1 ) {
 
     // Create a thread to write the output tree
     outTreeThread = std::thread([&]() {
@@ -692,7 +690,6 @@ int main(int argc, char* argv[]) {
             }
             localResults.clear(); // Clear local results after writing
             fileCv.notify_one(); // Notify the output tree thread to write data
-            if( count % 10000 == 0) printf("Worker %d processed %d data items, outQuene size : %ld\n", i, count, outputQueue.size());
           }
 
         }
@@ -721,7 +718,7 @@ int main(int argc, char* argv[]) {
           reader->ReadNextNHitsFromFile(); // Read more hits from the current file
           if( reader->GetHitSize() > 0 ) {
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(nWorkers)); 
+            for( int i = 0; i < reader->GetHitSize(); i++)  eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
           }
         }
 
@@ -734,7 +731,7 @@ int main(int argc, char* argv[]) {
             reader->ReadNextNHitsFromFile(); // Read more hits from the next file
 
             hitID[digID] = 0; // Reset hitID for this DigID
-            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(nWorkers)); 
+            for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); 
             
           } else {
             fileID[digID] = -1; // Mark that there are no more files for this DigID
@@ -760,7 +757,7 @@ int main(int argc, char* argv[]) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
       });
       
-      if( nWorkers > 0 ) {
+      if( nWorkers > 1 ) {
         // Multi-threaded processing
         data.Reset(); 
         data.FillData(events, saveTrace); 
@@ -770,10 +767,18 @@ int main(int argc, char* argv[]) {
         }
         cv.notify_one();
 
+      } else if( nWorkers == 1){
+        data.Reset();
+        data.FillData(events, saveTrace); // Fill data with the events
+        data.TraceAnalysis(); // Perform trace analysis if enabled
+
+        outTree->Fill(); // Fill the tree with the processed data
+        
       } else {
         // Single-threaded processing, o trace analysis
         data.Reset();
         data.FillData(events, saveTrace);
+
         outTree->Fill(); // Fill the tree
       }
 
@@ -792,30 +797,18 @@ int main(int argc, char* argv[]) {
     eventID ++;
     events.clear(); // Clear the events vector for the next event
 
-    // ///=============== write data to file
-    // if ( nWorkers > 0 && outputQueue.size() >= 10000 ){
-    //   // If the output queue has more than 10,000 items, write them to the file
-    //   printf("Writing %zu data items to file from output queue\n", outputQueue.size());
-    //   std::lock_guard<std::mutex> lock(outQueueMutex); // Lock the file mutex
-    //   while (!outputQueue.empty()) {
-    //     data = outputQueue.front();
-    //     outputQueue.pop();
-    //     outTree->Fill(); // Fill the tree with the processed data
-    //   }
-    // }
-
   }while(!eventQueue.empty()); 
-
-  done = true; // All data is processed, set the done flag to true
-  cv.notify_all();
-
-  if ( nWorkers > 0 ){
+  
+  if ( nWorkers > 1 ){
+    printf("Wait for all threads to finish processing...\n");
+    done = true; // All data is processed, set the done flag to true
+    cv.notify_all();
     for( int i = 0; i < nWorkers; i++) {
       threads[i].join(); // Wait for all threads to finish
     }
     printf("All trace analysis threads finished processing.\n");
     allEventProcessed = true;
-    fileCv.notify_one(); // Notify the output tree thread to finish writing data
+    fileCv.notify_all(); // Notify the output tree thread to finish writing data
     {
       std::unique_lock<std::mutex> lock(outQueueMutex);
       printf("outQueue size before finishing: %ld\n", outputQueue.size());
