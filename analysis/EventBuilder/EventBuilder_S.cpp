@@ -363,7 +363,6 @@ public:
 
 
       gsl_multifit_nlinear_free(w);
-      gsl_vector_free(x);
       delete[] d.y;
     }
   }
@@ -485,7 +484,6 @@ int main(int argc, char* argv[]) {
 
   //*=============== create output file and setup TTree
   TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
-  
   TTree * outTree = new TTree("tree", outFileName.Data());
   outTree->SetDirectory(outFile);
 
@@ -627,16 +625,44 @@ int main(int argc, char* argv[]) {
 
   std::mutex queueMutex;
   std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
-  std::mutex fileMutex; // Mutex for output queue and file writing
+  std::mutex outQueueMutex; // Mutex for output queue and file writing
   std::queue<Data> outputQueue;
   std::condition_variable cv; // Condition variable for thread synchronization
   std::atomic<bool> done(false); // to flag all data is processed. to tell the threads to finish
 
+  std::atomic<bool> allEventProcessed(false);
+  std::condition_variable fileCv; // Condition variable for file writing
+  std::thread outTreeThread;
+
 
   if( nWorkers > 0 ) {
+
+    // Create a thread to write the output tree
+    outTreeThread = std::thread([&]() {
+      int count = 0;
+      while (true) {
+        
+        std::unique_lock<std::mutex> lock(outQueueMutex);   
+        fileCv.wait(lock, [&] { return !outputQueue.empty() || allEventProcessed; });
+        if (allEventProcessed && outputQueue.empty()) {
+          printf("Writing data to output tree: %d items processed, out Queue size %ld\n", count, outputQueue.size());
+          break; // Exit if all data is processed and output queue is empty
+        }
+        data = outputQueue.front();
+        outputQueue.pop();
+        
+        // Write data to the output tree
+        // data.runiD = runID; // Set the run ID
+        outTree->Fill(); // Fill the tree with the data
+        outFile->cd(); // Ensure the output file is set as the current directory
+        count++;
+      }
+      outTree->Write(); // Write the tree to the output file
+      printf("Output tree written to file: %s. total processed event : %d\n", outFileName.Data(), count);
+    });
    
     for( int i =0; i < nWorkers; i++){
-      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &cv, &done, &fileMutex]() {
+      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &cv, &fileCv, &done, &outQueueMutex]() {
         std::vector<Data> localResults;
 
         int count = 0;
@@ -654,31 +680,24 @@ int main(int argc, char* argv[]) {
 
           // Process data
           data.TraceAnalysis(); // Perform trace analysis if enabled
-          if( count < 1 ) data.PrintTraceAnalysisResult(); // Print trace analysis results
+          // if( count < 1 ) data.PrintTraceAnalysisResult(); // Print trace analysis results
           localResults.push_back(data); // Store the processed data in local results
           count++;
-          // if( count % 1000 == 0) printf("Worker %d processed %d data items\n", i, count);
-
-          if( localResults.size() >= 2000 ) { // If we have enough results, write them to the file
+          
+          { // If we have enough results, write them to the file
             // printf("Worker %d writing %zu data items to outputQueue\n", i, localResults.size());
-            std::lock_guard<std::mutex> lock(fileMutex);
+            std::lock_guard<std::mutex> lock(outQueueMutex);
             for (const auto& result : localResults) {
               outputQueue.push(result); // Push the data to the output queue             
             }
             localResults.clear(); // Clear local results after writing
+            fileCv.notify_one(); // Notify the output tree thread to write data
+            if( count % 10000 == 0) printf("Worker %d processed %d data items, outQuene size : %ld\n", i, count, outputQueue.size());
           }
 
         }
 
-        // Thread-safe file writing
-        {
-          // printf("Worker %d finished processing %zu data to outputQueue\n", i, localResults.size());
-          std::lock_guard<std::mutex> lock(fileMutex);
-          for (const auto& result : localResults) {
-            outputQueue.push(result); // Push the data to the output queue         
-          }
-          localResults.clear(); // Clear local results after writing
-        }
+        printf("Trace worker %d finished processing. total processed event : %d\n", i, count);
       });
     }
 
@@ -773,17 +792,17 @@ int main(int argc, char* argv[]) {
     eventID ++;
     events.clear(); // Clear the events vector for the next event
 
-    ///=============== write data to file
-    if ( nWorkers > 0 && outputQueue.size() >= 10000 ){
-      // If the output queue has more than 10,000 items, write them to the file
-      printf("Writing %zu data items to file from output queue\n", outputQueue.size());
-      std::lock_guard<std::mutex> lock(fileMutex); // Lock the file mutex
-      while (!outputQueue.empty()) {
-        data = outputQueue.front();
-        outputQueue.pop();
-        outTree->Fill(); // Fill the tree with the processed data
-      }
-    }
+    // ///=============== write data to file
+    // if ( nWorkers > 0 && outputQueue.size() >= 10000 ){
+    //   // If the output queue has more than 10,000 items, write them to the file
+    //   printf("Writing %zu data items to file from output queue\n", outputQueue.size());
+    //   std::lock_guard<std::mutex> lock(outQueueMutex); // Lock the file mutex
+    //   while (!outputQueue.empty()) {
+    //     data = outputQueue.front();
+    //     outputQueue.pop();
+    //     outTree->Fill(); // Fill the tree with the processed data
+    //   }
+    // }
 
   }while(!eventQueue.empty()); 
 
@@ -794,14 +813,15 @@ int main(int argc, char* argv[]) {
     for( int i = 0; i < nWorkers; i++) {
       threads[i].join(); // Wait for all threads to finish
     }
-    // If the output queue has more than 10,000 items, write them to the file
-    printf("Writing %zu data items to file from output queue\n", outputQueue.size());
-    std::lock_guard<std::mutex> lock(fileMutex); // Lock the file mutex
-    while (!outputQueue.empty()) {
-      data = outputQueue.front();
-      outputQueue.pop();
-      outTree->Fill(); // Fill the tree with the processed data
+    printf("All trace analysis threads finished processing.\n");
+    allEventProcessed = true;
+    fileCv.notify_one(); // Notify the output tree thread to finish writing data
+    {
+      std::unique_lock<std::mutex> lock(outQueueMutex);
+      printf("outQueue size before finishing: %ld\n", outputQueue.size());
     }
+    outTreeThread.join(); // Wait for the output tree thread to finish
+    printf("Output tree thread finished writing to file.\n");
   }
 
   //*=============== save some marco
