@@ -553,7 +553,8 @@ int main(int argc, char* argv[]) {
   }
 
   //*=============== print ID map
-  printf("======= ID-MAP: \n");
+  for(int i = 0 ; i < 88; i++ ) printf("=");
+  printf(" ID-MAP:\n");
   printf("%11s|", ""); 
   for(int i = 0 ; i < 10; i++ ) printf("%7d|", i);
   printf("\n");
@@ -635,7 +636,7 @@ int main(int argc, char* argv[]) {
   std::thread outTreeThread;
 
   if( nWorkers > 1 ) {
-   
+       
     for( int i =0; i < nWorkers; i++){
       threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &trace_cv, &fileCv, &done, &outQueueMutex]() {
         Data localData;
@@ -700,8 +701,6 @@ int main(int argc, char* argv[]) {
 
   }
 
-  int countFilledDataQueue = 0;
-
   do{
 
     ///============================== forming events and check is need to load more hits from files
@@ -760,24 +759,27 @@ int main(int argc, char* argv[]) {
       
       if( nWorkers > 1 ) {
         // Multi-threaded processing
-        do{ 
-          std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
-          if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
-            {
-              std::unique_lock<std::mutex> lock2(dataMutex); // Lock the data mutex
-              data.Reset(); 
-              data.FillData(events, saveTrace); 
-              dataQueue.push(data); // Push the data to the queue for processing by worker threads
-            }
-            countFilledDataQueue ++;
-            lock.unlock(); // Unlock the queue mutex
-            break;
-          }
-          lock.unlock(); // Unlock the queue mutex 
-        }while(dataQueue.size() >= MAX_QUEUE_SIZE); // Wait until the queue size is below the limit
+        while(true){
 
-        // dataQueue.push(data); // Push the data to the queue for processing by worker threads
-        // trace_cv.notify_one(); // Notify one of the worker threads to start processing
+          {
+            std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
+            if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
+              data.Reset(); 
+              data.FillData(events, saveTrace); // Fill data with the events
+              dataQueue.push(data); // Push the data to the queue for processing by worker threads
+              lock.unlock(); // Unlock the queue mutex
+              trace_cv.notify_one(); // Notify one of the worker threads to start processing
+              break;
+            }
+            lock.unlock(); // Unlock the queue mutex 
+            if( dataQueue.size() >= MAX_QUEUE_SIZE ) {
+              //wait for 10 miniseconds before checking the queue again
+              std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Sleep for
+              continue;
+            }
+          }
+
+        }
 
       } else if( nWorkers == 1){
         data.Reset();
@@ -812,8 +814,6 @@ int main(int argc, char* argv[]) {
   }while(!eventQueue.empty()); 
   
   if ( nWorkers > 1 ){
-
-    printf("\nfilled dataQueue size: %d\n", countFilledDataQueue);
 
     printf("\nWait for all threads to finish processing...\n");
     {
