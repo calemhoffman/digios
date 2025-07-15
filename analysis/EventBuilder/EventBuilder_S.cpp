@@ -25,6 +25,7 @@
 #define MAX_TRACE_LEN 1250 
 #define MAX_TRACE_MULTI 200
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
+#define MAX_QUEUE_SIZE 10000 // Maximum size of the data queue
 
 #include <sys/time.h> /** struct timeval, select() */
 inline unsigned int getTime_us(){
@@ -620,75 +621,44 @@ int main(int argc, char* argv[]) {
   unsigned int hitProcessed = 0; // Number of hits processed
   double last_precentage = 0.0; // Last percentage printed
 
+  std::mutex dataMutex; // Mutex for "data"
 
   std::mutex queueMutex;
   std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
   std::mutex outQueueMutex; // Mutex for output queue and file writing
   std::queue<Data> outputQueue;
-  std::condition_variable cv; // Condition variable for thread synchronization
+  std::condition_variable trace_cv; // Condition variable for thread synchronization
   std::atomic<bool> done(false); // to flag all data is processed. to tell the threads to finish
 
   std::atomic<bool> allEventProcessed(false);
   std::condition_variable fileCv; // Condition variable for file writing
   std::thread outTreeThread;
 
-
   if( nWorkers > 1 ) {
-
-    // Create a thread to write the output tree
-    outTreeThread = std::thread([&]() {
-      int count = 0;
-      while (true) {
-        
-        std::unique_lock<std::mutex> lock(outQueueMutex);   
-        fileCv.wait(lock, [&] { return !outputQueue.empty() || allEventProcessed; });
-        if (allEventProcessed && outputQueue.empty()) {
-          printf("Writing data to output tree: %d items processed, out Queue size %ld\n", count, outputQueue.size());
-          break; // Exit if all data is processed and output queue is empty
-        }
-        data = outputQueue.front();
-        outputQueue.pop();
-        
-        // Write data to the output tree
-        // data.runiD = runID; // Set the run ID
-        outTree->Fill(); // Fill the tree with the data
-        outFile->cd(); // Ensure the output file is set as the current directory
-        count++;
-      }
-      outTree->Write(); // Write the tree to the output file
-      printf("Output tree written to file: %s. total processed event : %d\n", outFileName.Data(), count);
-    });
    
     for( int i =0; i < nWorkers; i++){
-      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &cv, &fileCv, &done, &outQueueMutex]() {
-        std::vector<Data> localResults;
+      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &trace_cv, &fileCv, &done, &outQueueMutex]() {
+        Data localData;
 
         int count = 0;
         while (true) {
-          Data data;
           {
             std::unique_lock<std::mutex> lock(queueMutex);
-            cv.wait(lock, [&] { return !dataQueue.empty() || done; });
-            if (done && dataQueue.empty()) {
-              break;
-            }
-            data = dataQueue.front();
+            trace_cv.wait(lock, [&] { return !dataQueue.empty() || done; });
+            if (dataQueue.empty() && done ) break;
+            localData = dataQueue.front();
             dataQueue.pop();
           }
 
           // Process data
-          data.TraceAnalysis(); // Perform trace analysis if enabled
+          localData.TraceAnalysis(); // Perform trace analysis if enabled
           // if( count < 1 ) data.PrintTraceAnalysisResult(); // Print trace analysis results
-          localResults.push_back(data); // Store the processed data in local results
           count++;
           
           { // If we have enough results, write them to the file
             // printf("Worker %d writing %zu data items to outputQueue\n", i, localResults.size());
             std::lock_guard<std::mutex> lock(outQueueMutex);
-            for (const auto& result : localResults) {
-              outputQueue.push(result); // Push the data to the output queue             
-            }
-            localResults.clear(); // Clear local results after writing
+            outputQueue.push(localData); // Push the data to the output queue             
             fileCv.notify_one(); // Notify the output tree thread to write data
           }
 
@@ -698,8 +668,39 @@ int main(int argc, char* argv[]) {
       });
     }
 
+    // Create a thread to write the output tree
+    outTreeThread = std::thread([&]() {
+      int count = 0;
+      while (true) {
+        
+        std::unique_lock<std::mutex> lock(outQueueMutex);   
+        fileCv.wait(lock, [&] { return !outputQueue.empty() || allEventProcessed; }); // Wait for data to be available in the output queue or all events are processed
+        if (allEventProcessed && outputQueue.empty()) {
+          printf("Writing data to output tree: %d items processed, out Queue size %ld\n", count, outputQueue.size());
+          break; // Exit if all data is processed and output queue is empty
+        }
+        Data temp_data = outputQueue.front();
+        outputQueue.pop();
+        lock.unlock(); // Release outQueueMutex as soon as possible
+
+        // Acquire dataMutex to update the global 'data' and fill the tree
+        std::unique_lock<std::mutex> data_lock(dataMutex);
+        data = temp_data;
+  
+        // data.runiD = runID; // Set the run ID
+        outTree->Fill(); // Fill the tree with the data
+        outFile->cd(); // Ensure the output file is set as the current directory
+        data_lock.unlock(); // Release dataMutex after filling the tree
+
+        count++;
+      }
+      outTree->Write(); // Write the tree to the output file
+      printf("Output tree written to file: %s. total processed event : %d\n", outFileName.Data(), count);
+    });
+
   }
 
+  int countFilledDataQueue = 0;
 
   do{
 
@@ -759,13 +760,24 @@ int main(int argc, char* argv[]) {
       
       if( nWorkers > 1 ) {
         // Multi-threaded processing
-        data.Reset(); 
-        data.FillData(events, saveTrace); 
-        { 
-          std::lock_guard<std::mutex> lock(queueMutex); // Lock the queue mutex
-          dataQueue.push(data); 
-        }
-        cv.notify_one();
+        do{ 
+          std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
+          if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
+            {
+              std::unique_lock<std::mutex> lock2(dataMutex); // Lock the data mutex
+              data.Reset(); 
+              data.FillData(events, saveTrace); 
+              dataQueue.push(data); // Push the data to the queue for processing by worker threads
+            }
+            countFilledDataQueue ++;
+            lock.unlock(); // Unlock the queue mutex
+            break;
+          }
+          lock.unlock(); // Unlock the queue mutex 
+        }while(dataQueue.size() >= MAX_QUEUE_SIZE); // Wait until the queue size is below the limit
+
+        // dataQueue.push(data); // Push the data to the queue for processing by worker threads
+        // trace_cv.notify_one(); // Notify one of the worker threads to start processing
 
       } else if( nWorkers == 1){
         data.Reset();
@@ -800,9 +812,16 @@ int main(int argc, char* argv[]) {
   }while(!eventQueue.empty()); 
   
   if ( nWorkers > 1 ){
-    printf("Wait for all threads to finish processing...\n");
+
+    printf("\nfilled dataQueue size: %d\n", countFilledDataQueue);
+
+    printf("\nWait for all threads to finish processing...\n");
+    {
+      std::unique_lock<std::mutex> lock(queueMutex);
+      printf("dataQueue size before finishing: %ld\n", dataQueue.size());
+    }
     done = true; // All data is processed, set the done flag to true
-    cv.notify_all();
+    trace_cv.notify_all();
     for( int i = 0; i < nWorkers; i++) {
       threads[i].join(); // Wait for all threads to finish
     }
@@ -837,6 +856,7 @@ int main(int argc, char* argv[]) {
   unsigned int runEndTime = getTime_us();
   printf("              Total time taken: %.3f s = %.3f min\n", (runEndTime - runStartTime) / 1000000.0, (runEndTime - runStartTime) / 1000000.0 / 60.0);
   printf("Total number of hits processed: %10u (%lu)\n", hitProcessed, totalNumHits);
+  printf("                  Events / sec: %10.2f\n", eventID / ((runEndTime - runStartTime) / 1000000.0));
   printf("  Total number of events built: %10u\n", eventID);
   printf("     Number of entries in tree: %10lld\n", outTree->GetEntries());
   //clean up
