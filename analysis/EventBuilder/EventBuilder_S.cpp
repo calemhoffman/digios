@@ -38,7 +38,7 @@ inline unsigned int getTime_us(){
 
 // Comparator for min-heap (smallest timestamp on top)
 struct CompareEvent {
-  bool operator()(const Event& a, const Event& b) {
+  bool operator()(const Event& a, const Event& b) const {
     return a.timestamp > b.timestamp;
   }
 };
@@ -97,7 +97,12 @@ public:
 #endif
 
   Data(){}
-  ~Data(){}
+  ~Data(){
+    if( fitFunc ) {
+      delete fitFunc;
+      delete graph;
+    }
+  }
 
   void Print(){
     printf("Energy: ");
@@ -565,50 +570,41 @@ int main(int argc, char* argv[]) {
   double last_precentage = 0.0; // Last percentage printed
 
 
-  std::mutex fileMutex;
   std::mutex queueMutex;
+  std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
+  std::mutex fileMutex; // Mutex for output queue and file writing
+  std::queue<Data> outputQueue;
+  std::condition_variable cv; // Condition variable for thread synchronization
   std::atomic<bool> done(false); // to flag all data is processed. to tell the threads to finish
 
-  std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
-  std::queue<Data> outputQueue;
 
   if( nWorkers > 0 ) {
    
     for( int i =0; i < nWorkers; i++){
-      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &done, &fileMutex]() {
+      threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &cv, &done, &fileMutex]() {
         std::vector<Data> localResults;
 
         int count = 0;
         while (true) {
           Data data;
-          bool hasData = false;
-
-          // Try to get data from the queue
           {
-            std::lock_guard<std::mutex> lock(queueMutex);
-            if (!dataQueue.empty()) {
-              data = dataQueue.front();
-              dataQueue.pop();
-              hasData = true;
-            } else if (done) {
-              break; // No more data and input is done
+            std::unique_lock<std::mutex> lock(queueMutex);
+            cv.wait(lock, [&] { return !dataQueue.empty() || done; });
+            if (done && dataQueue.empty()) {
+              break;
             }
+            data = dataQueue.front();
+            dataQueue.pop();
           }
 
-          // Process data if available
-          if (hasData) {
-
-            for(int h = 0; h < 1e7; h++){};
-            // data.SetTraceFunction();
-            // data.TraceAnalysis(); // Perform trace analysis if enabled
-            for(int h = 0; h < 1e7; h++){}; // Simulate some processing time
-            localResults.push_back(data); // Store the processed data in local results
-            count++;
-            // if( count % 1000 == 0) printf("Worker %d processed %d data items\n", i, count);
-
-          } else {
-            std::this_thread::yield(); // Yield to avoid busy waiting
-          }
+          // Process data
+          for(int h = 0; h < 1e7; h++){};
+          // data.SetTraceFunction();
+          // data.TraceAnalysis(); // Perform trace analysis if enabled
+          for(int h = 0; h < 1e7; h++){}; // Simulate some processing time
+          localResults.push_back(data); // Store the processed data in local results
+          count++;
+          // if( count % 1000 == 0) printf("Worker %d processed %d data items\n", i, count);
 
           if( localResults.size() >= 2000 ) { // If we have enough results, write them to the file
             // printf("Worker %d writing %zu data items to outputQueue\n", i, localResults.size());
@@ -698,6 +694,7 @@ int main(int argc, char* argv[]) {
           std::lock_guard<std::mutex> lock(queueMutex); // Lock the queue mutex
           dataQueue.push(data); 
         }
+        cv.notify_one();
 
       } else {
         // Single-threaded processing, o trace analysis
@@ -734,6 +731,7 @@ int main(int argc, char* argv[]) {
   }while(!eventQueue.empty()); 
 
   done = true; // All data is processed, set the done flag to true
+  cv.notify_all();
 
   if ( nWorkers > 0 ){
     for( int i = 0; i < nWorkers; i++) {
