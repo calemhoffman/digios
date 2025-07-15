@@ -36,6 +36,35 @@ inline unsigned int getTime_us(){
   return time_us;
 }
 
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_multifit_nlinear.h>
+
+struct trace_data {
+  size_t n;
+  double *y;
+};
+
+int fit_model(const gsl_vector * x, void *data, gsl_vector * f){
+  size_t n = ((struct trace_data *)data)->n;
+  double *y = ((struct trace_data *)data)->y;
+
+  double A        = gsl_vector_get(x, 0);
+  double T0       = gsl_vector_get(x, 1);
+  double riseTime = gsl_vector_get(x, 2);
+  double B        = gsl_vector_get(x, 3);
+
+  for (size_t i = 0; i < n; ++i){
+    double t = i;
+    double Yi = A / (1 + exp(-(t - T0) / riseTime)) + B;
+    gsl_vector_set(f, i, Yi - y[i]);
+  }
+
+  return GSL_SUCCESS;
+}
+
+
 // Comparator for min-heap (smallest timestamp on top)
 struct CompareEvent {
   bool operator()(const Event& a, const Event& b) const {
@@ -67,8 +96,6 @@ public:
 
   // trace analysis
   float tracePara[MAX_TRACE_MULTI][4]; // trace parameters, 0 = Amplitude, 1 = Rise time, 2 = Timestamp, 3 = Baseline
-  TF1 * fitFunc = nullptr; 
-  TGraph * graph = nullptr;
 
 #if NRDT > 0
   float RDT[NRDT];
@@ -97,12 +124,7 @@ public:
 #endif
 
   Data(){}
-  ~Data(){
-    if( fitFunc ) {
-      delete fitFunc;
-      delete graph;
-    }
-  }
+  ~Data(){}
 
   void Print(){
     printf("Energy: ");
@@ -291,38 +313,71 @@ public:
 
   }
 
-  void SetTraceFunction(){
-    if( fitFunc ) return;
-    // fit trace[i] with  A/(1+exp(-(x - x0)/tau)) + B
-    // where A is the amplitude, x0 is the timestamp, tau is the rise time, and B is the baseline
-    fitFunc = new TF1("fitFunc", "[0] / (1 + exp(-(x - [1]) / [2])) + [3]"); 
-    graph = new TGraph(); 
-  }
+  // int displayCount = 0;
 
   void TraceAnalysis(){
     if( traceCount <= 0 ) return; // No traces to analyze
-
+    
     for( int i = 0; i < traceCount; i++ ){
       if( traceLen[i] <= 0 ) continue; // Skip if trace length is zero
-
-      // Prepare the fitting function
-      fitFunc->SetRange(0, traceLen[i] - 1); // Set the range for the fit function
-      fitFunc->SetParameters(100.0, 100, 1.0, 8000.0); // Initial parameters: A, x0, tau, B
-
-      // Create a TGraph for the trace data
-      graph->Clear(); 
-      for( int j = 0; j < traceLen[i]; j++ ) graph->SetPoint(j, j, trace[i][j]); // Set the x and y values for the graph
       
-      graph->Fit(fitFunc, "QR"); 
+      // set the trace_data 
+      struct trace_data d = { (size_t)traceLen[i], new double[traceLen[i]] };
+      for( int j = 0; j < traceLen[i]; j++) d.y[j] = trace[i][j];
+      
+      gsl_multifit_nlinear_fdf f;
+      f.f = &fit_model;
+      f.df = NULL;   // Use finite differences
+      f.n = d.n;
+      f.p = 4;
+      f.params = &d;
+      
+      gsl_vector *x = gsl_vector_alloc(4);
+      gsl_vector_set(x, 0, 100.0); // Initial guess for A
+      gsl_vector_set(x, 1, 100.0); // Initial guess for T0
+      gsl_vector_set(x, 2, 1.0);   // Initial guess for rise time
+      gsl_vector_set(x, 3, 8000.0); // Initial guess for baseline
+      
+      const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
+      gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
+      gsl_multifit_nlinear_workspace *w = gsl_multifit_nlinear_alloc(T, &fdf_params, d.n, 4);
+      gsl_multifit_nlinear_init(x, &f, w);
 
-      // Store the results in the te array
-      tracePara[i][0] = fitFunc->GetParameter(0); // Amplitude
-      tracePara[i][1] = fitFunc->GetParameter(1); // Rise time
-      tracePara[i][2] = fitFunc->GetParameter(2); // Timestamp
-      tracePara[i][3] = fitFunc->GetParameter(3); // Baseline
+      // Solve the system using iteration
+      int status;
+      size_t iter = 0, max_iter = 100;
+      do {
+        status = gsl_multifit_nlinear_iterate(w);
+        if (status) break;
+        status = gsl_multifit_test_delta(w->dx, w->x, 1e-5, 1e-5);
+        iter++;
+      } while (status == GSL_CONTINUE && iter < max_iter);
 
+      // Store the results
+      gsl_vector *result = gsl_multifit_nlinear_position(w);
+      tracePara[i][0] = gsl_vector_get(result, 0);
+      tracePara[i][1] = gsl_vector_get(result, 1);
+      tracePara[i][2] = gsl_vector_get(result, 2);
+      tracePara[i][3] = gsl_vector_get(result, 3);
+
+
+
+      gsl_multifit_nlinear_free(w);
+      gsl_vector_free(x);
+      delete[] d.y;
     }
-
+  }
+  
+  void PrintTraceAnalysisResult(){
+    for( int i = 0; i < traceCount; i++ ){
+      if( traceLen[i] <= 0 ) continue; // Skip if trace length is zero
+      
+      for(int j = 0; j < traceLen[i]; j++) {
+        printf("Trace[%d]| %3d %5u\n", i, j, trace[i][j]);
+      }
+      printf("======== Trace: %d A = %.2f, T0 = %.2f, Rise time = %.2f, Baseline = %.2f\n", 
+            i, tracePara[i][0], tracePara[i][1], tracePara[i][2], tracePara[i][3]);
+    }
   }
 
 };
@@ -598,10 +653,8 @@ int main(int argc, char* argv[]) {
           }
 
           // Process data
-          for(int h = 0; h < 1e7; h++){};
-          // data.SetTraceFunction();
-          // data.TraceAnalysis(); // Perform trace analysis if enabled
-          for(int h = 0; h < 1e7; h++){}; // Simulate some processing time
+          data.TraceAnalysis(); // Perform trace analysis if enabled
+          if( count < 1 ) data.PrintTraceAnalysisResult(); // Print trace analysis results
           localResults.push_back(data); // Store the processed data in local results
           count++;
           // if( count % 1000 == 0) printf("Worker %d processed %d data items\n", i, count);
@@ -634,6 +687,7 @@ int main(int argc, char* argv[]) {
 
   do{
 
+    ///============================== forming events and check is need to load more hits from files
     do{
 
       events.push_back(eventQueue.top()); 
@@ -681,6 +735,7 @@ int main(int argc, char* argv[]) {
 
     }while(!eventQueue.empty()); // Loop until the event queue is empty
 
+    ///============================== process the events
     if( events.size() > 0 ) {
       std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
         return a.timestamp < b.timestamp; // Sort events by timestamp
@@ -705,6 +760,7 @@ int main(int argc, char* argv[]) {
 
     }
     
+    ///=============== print progress
     double percentage = hitProcessed * 100/ totalNumHits;
     if( percentage >= last_precentage ) {
       size_t memoryUsage = sizeof(Event) * eventQueue.size();
@@ -717,6 +773,7 @@ int main(int argc, char* argv[]) {
     eventID ++;
     events.clear(); // Clear the events vector for the next event
 
+    ///=============== write data to file
     if ( nWorkers > 0 && outputQueue.size() >= 10000 ){
       // If the output queue has more than 10,000 items, write them to the file
       printf("Writing %zu data items to file from output queue\n", outputQueue.size());
