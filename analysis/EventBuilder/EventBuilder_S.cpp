@@ -23,7 +23,7 @@
 #include <atomic>
 
 #define MAX_TRACE_LEN 1250 
-#define MAX_TRACE_MULTI 200
+#define MAX_TRACE_MULTI 40
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
 #define MAX_QUEUE_SIZE 10000 // Maximum size of the data queue
 
@@ -293,20 +293,25 @@ public:
 
         if( saveTrace ){
 
-          bool isArray = (0 <= idDet && idDet < NARRAY); 
-          bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
-          if( isArray || isRDT ) { 
+          if( traceCount >= MAX_TRACE_MULTI ) {
+            printf("\033[31mWarning: More than %d traces, truncating to %d traces.\033[0m\n", MAX_TRACE_MULTI, MAX_TRACE_MULTI);
+          }else{
 
-            traceLen[traceCount] = events[i].traceLength;
-            traceDetID[traceCount] = idDet;
-            traceKindID[traceCount] = idKind;
-            uint16_t regulatedValue = 0;
-            for( int j = 0; j < traceLen[traceCount]; j++){
-              if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
-              trace[traceCount][j] = regulatedValue; 
+            bool isArray = (0 <= idDet && idDet < NARRAY); 
+            bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
+            if( isArray || isRDT ) { 
+
+              traceLen[traceCount] = events[i].traceLength;
+              traceDetID[traceCount] = idDet;
+              traceKindID[traceCount] = idKind;
+              uint16_t regulatedValue = 0;
+              for( int j = 0; j < traceLen[traceCount]; j++){
+                if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
+                trace[traceCount][j] = regulatedValue; 
+              }
+
+              traceCount++;
             }
-
-            traceCount++;
           }
         }
 
@@ -419,8 +424,14 @@ int main(int argc, char* argv[]) {
   }else{
     printf(" Event building time window : %d nsec \n", timeWindow);
   }
-  printf(" Save Trace ? %s\n", saveTrace ? "Yes" : "No");
-  printf(" Trace Analysis ? %s %s\n", nWorkers ? "Yes" : "No", nWorkers > 0 ? Form("(%d-core)", nWorkers) : "");
+  printf("       Save Trace ? %s\n", saveTrace ? "Yes" : "No");
+  printf("   Trace Analysis ? %s %s\n", nWorkers ? "Yes" : "No", nWorkers > 0 ? Form("(%d-core)", nWorkers) : "");
+  if( saveTrace ){
+    printf("  MAX Trace Length : %d\n", MAX_TRACE_LEN);
+    printf("   MAX Trace Multi : %d\n", MAX_TRACE_MULTI);
+  }
+  printf("     MAX Hits read : %d\n", MAX_READ_HITS);
+  printf("    MAX Queue Size : %d\n", MAX_QUEUE_SIZE);
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
