@@ -622,8 +622,6 @@ int main(int argc, char* argv[]) {
   unsigned int hitProcessed = 0; // Number of hits processed
   double last_precentage = 0.0; // Last percentage printed
 
-  std::mutex dataMutex; // Mutex for "data"
-
   std::mutex queueMutex;
   std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
   std::mutex outQueueMutex; // Mutex for output queue and file writing
@@ -634,6 +632,8 @@ int main(int argc, char* argv[]) {
   std::atomic<bool> allEventProcessed(false);
   std::condition_variable fileCv; // Condition variable for file writing
   std::thread outTreeThread;
+
+  Data tempData; // used for multi-threaded processing
 
   if( nWorkers > 1 ) {
        
@@ -685,13 +685,11 @@ int main(int argc, char* argv[]) {
         lock.unlock(); // Release outQueueMutex as soon as possible
 
         // Acquire dataMutex to update the global 'data' and fill the tree
-        std::unique_lock<std::mutex> data_lock(dataMutex);
         data = temp_data;
   
         // data.runiD = runID; // Set the run ID
         outTree->Fill(); // Fill the tree with the data
         outFile->cd(); // Ensure the output file is set as the current directory
-        data_lock.unlock(); // Release dataMutex after filling the tree
 
         count++;
       }
@@ -764,9 +762,9 @@ int main(int argc, char* argv[]) {
           {
             std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
             if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
-              data.Reset(); 
-              data.FillData(events, saveTrace); // Fill data with the events
-              dataQueue.push(data); // Push the data to the queue for processing by worker threads
+              tempData.Reset(); 
+              tempData.FillData(events, saveTrace); // Fill data with the events
+              dataQueue.push(tempData); // Push the data to the queue for processing by worker threads
               lock.unlock(); // Unlock the queue mutex
               trace_cv.notify_one(); // Notify one of the worker threads to start processing
               break;
@@ -774,7 +772,7 @@ int main(int argc, char* argv[]) {
             lock.unlock(); // Unlock the queue mutex 
             if( dataQueue.size() >= MAX_QUEUE_SIZE ) {
               //wait for 10 miniseconds before checking the queue again
-              std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Sleep for
+              std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Sleep for
               continue;
             }
           }
