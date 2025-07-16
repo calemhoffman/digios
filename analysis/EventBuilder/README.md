@@ -9,6 +9,16 @@ There are many information in the payload, but only the **id** (board_id * 10 + 
 The **EventBuilder** can also save the trace and it outputs CERN ROOT TTree. 
 
 
+## EventBuilder
+
+
+## EventBuilder_Q
+
+
+## EventBuilder_S
+
+
+
 # Experimental Parquet format (not implemented)
 
 parquet format is also coulomb wise 
