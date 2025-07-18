@@ -77,7 +77,9 @@ struct CompareEvent {
 
 class Data {
 public:
-  int runiD = 0;
+  // int runiD = 0;
+
+  unsigned int evID = 0 ;
 
   float Energy[NARRAY];
   float XF[NARRAY];
@@ -98,10 +100,18 @@ public:
   // trace analysis
   float tracePara[MAX_TRACE_MULTI][4]; // trace parameters, 0 = Amplitude, 1 = Rise time, 2 = Timestamp, 3 = Baseline
 
+  float te[NARRAY]; // trace energy
+  float te_t[NARRAY]; // trace energy timestamp
+  float te_r[NARRAY]; // trace energy rise time
+
+  
 #if NRDT > 0
   float RDT[NRDT];
   uint64_t RDTTimestamp[NRDT];
-  float trdt[NRDT][5]; // Recoil trace
+  
+  float trdt[NRDT];
+  float trdt_t[NRDT];
+  float trdt_r[NRDT];
 #endif
 #if NTAC > 0
   float TAC[NTAC];
@@ -144,7 +154,7 @@ public:
   }
 
   void Reset() {
-    runiD = 0;
+    // runiD = 0;
 
     for (int i = 0; i < NARRAY; i++) {
       Energy[i] = TMath::QuietNaN();
@@ -155,6 +165,10 @@ public:
       XFTimestamp[i] = 0;
       XNTimestamp[i] = 0;
       RingTimestamp[i] = 0;
+
+      te[i] = TMath::QuietNaN();
+      te_t[i] = TMath::QuietNaN();
+      te_r[i] = TMath::QuietNaN();
     }
 
     traceCount = 0; 
@@ -170,7 +184,10 @@ public:
     for (int i = 0; i < NRDT; i++) {
       RDT[i] = TMath::QuietNaN();
       RDTTimestamp[i] = 0;
-      for (int j = 0; j < 5; j++) trdt[i][j] = TMath::QuietNaN();
+      
+      trdt[i] = TMath::QuietNaN();
+      trdt_t[i] = TMath::QuietNaN();
+      trdt_r[i] = TMath::QuietNaN();
     }
 #endif
 #if NTAC > 0
@@ -366,6 +383,19 @@ public:
       tracePara[i][2] = gsl_vector_get(result, 2);
       tracePara[i][3] = gsl_vector_get(result, 3);
 
+      if( 0 <= traceDetID[i] && traceDetID[i] < NARRAY ){
+        te[traceDetID[i]] = tracePara[i][0]; // Amplitude
+        te_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+        te_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+      }
+
+      if( 100 <= traceDetID[i] && traceDetID[i] < 100 + NRDT ){
+        int rdtID = traceDetID[i] - 100; // Recoil ID
+        trdt[rdtID] = tracePara[i][0]; // Amplitude
+        trdt_t[rdtID] = tracePara[i][1]; // Timestamp
+        trdt_r[rdtID] = tracePara[i][2]; // Rise time
+      }
+
       gsl_multifit_nlinear_free(w);
       delete[] d.y;
     }
@@ -497,7 +527,8 @@ int main(int argc, char* argv[]) {
   TTree * outTree = new TTree("tree", outFileName.Data());
   outTree->SetDirectory(outFile);
 
-  outTree->Branch("runID",   &data.runiD, "runID/I");
+  // outTree->Branch("runID",   &data.runiD, "runID/I");
+  outTree->Branch("evID",   &data.evID, "evID/i");
   
   outTree->Branch("e",             data.Energy, Form("e[%d]/F", NARRAY));
   outTree->Branch("e_t",  data.EnergyTimestamp, Form("e_t[%d]/l", NARRAY));
@@ -561,6 +592,17 @@ int main(int argc, char* argv[]) {
   }
   if( nWorkers > 0 ){ 
     outTree->Branch("tracePara", data.tracePara, "tracePara[traceCount][4]/F");
+
+    outTree->Branch("te", data.te, Form("te[%d]/F", NARRAY));
+    outTree->Branch("te_t", data.te_t, Form("te_t[%d]/l", NARRAY));
+    outTree->Branch("te_r", data.te_r, Form("te_r[%d]/F", NARRAY));
+
+#if NRDT > 0
+    outTree->Branch("trdt", data.trdt, Form("trdt[%d]/F", NRDT));
+    outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/l", NRDT));
+    outTree->Branch("trdt_r", data.trdt_r, Form("trdt_r[%d]/F", NRDT));
+#endif
+
   }
 
   //*=============== print ID map
@@ -774,6 +816,7 @@ int main(int argc, char* argv[]) {
             std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
             if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
               tempData.Reset(); 
+              tempData.evID = eventID; // Set the event ID
               tempData.FillData(events, saveTrace); // Fill data with the events
               dataQueue.push(tempData); // Push the data to the queue for processing by worker threads
               lock.unlock(); // Unlock the queue mutex
@@ -792,6 +835,7 @@ int main(int argc, char* argv[]) {
 
       } else if( nWorkers == 1){
         data.Reset();
+        data.evID = eventID; // Set the event ID
         data.FillData(events, saveTrace); // Fill data with the events
         data.TraceAnalysis(); // Perform trace analysis if enabled
 
@@ -800,6 +844,7 @@ int main(int argc, char* argv[]) {
       } else {
         // Single-threaded processing, o trace analysis
         data.Reset();
+        data.evID = eventID; // Set the event ID
         data.FillData(events, saveTrace);
 
         outTree->Fill(); // Fill the tree
