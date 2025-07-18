@@ -594,12 +594,12 @@ int main(int argc, char* argv[]) {
     outTree->Branch("tracePara", data.tracePara, "tracePara[traceCount][4]/F");
 
     outTree->Branch("te", data.te, Form("te[%d]/F", NARRAY));
-    outTree->Branch("te_t", data.te_t, Form("te_t[%d]/l", NARRAY));
+    outTree->Branch("te_t", data.te_t, Form("te_t[%d]/F", NARRAY));
     outTree->Branch("te_r", data.te_r, Form("te_r[%d]/F", NARRAY));
 
 #if NRDT > 0
     outTree->Branch("trdt", data.trdt, Form("trdt[%d]/F", NRDT));
-    outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/l", NRDT));
+    outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/F", NRDT));
     outTree->Branch("trdt_r", data.trdt_r, Form("trdt_r[%d]/F", NRDT));
 #endif
 
