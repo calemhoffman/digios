@@ -1,14 +1,12 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run [RunNum] [EventBuild] [Sort] [Monitor]"
+  echo "$./process_run [RunNum] [EventBuild] [Monitor] <SaveTrace>"
   echo "     RunNum = run number / \"lastRun\" "
-  echo " EventBuild = 0/1/2         ||  0 = no EventBld, 1 = EventBld, 2 = EventBld with trace"
-  echo "       Sort = n/1/0/-1/-n   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
-  echo "   Monitors = 2/1/0         || 1 = single run,  2 = using the list in ChainMonitors.C"
+  echo " EventBuild = 0/1/n/100  ||    0 = no EventBld, 1 = EventBld, n > 1 = EventBld with trace"
+  echo "   Monitors = 0/1/2      ||    1 = single run,  2 = using the list in ChainMonitors.C"
   echo "                              10 = single run and post to websrv, 20 = list runs and post to websrv"
-  echo ""
-  echo "       **** When feeding trace data to Monitors, the EventBld flag must be 2 or -2."
+  echo " SaveTrace = 0/1         ||    0 = no trace, 1 = save trace. with trace analysis trace always saved disregard this option"
   echo ""
   exit 1
 fi;
@@ -16,27 +14,55 @@ fi;
 RUN=$1
 
 isBuild=0
-isGeneralSort=0
 isMonitor=0
+isSaveTrace=0
 
 traceFlag=false
 
-if [ $# -ge 2 ]; then isBuild=$2; fi
-if [ $# -ge 3 ]; then isGeneralSort=$3; fi
-if [ $# -ge 4 ]; then isMonitor=$4; OverRideMonitor="" ; fi
+buildMsg=", default event buiding with no trace analysis"
+monitorMsg=", default with monitoring"
+saveTraceMsg=", default with no trace saving"
+
+if [ $# -ge 2 ]; then 
+  isBuild=$2; 
+  isMonitor=1;
+fi
+
+if [ $# -ge 3 ]; then 
+  isMonitor=$3; 
+  monitorMsg=", with monitoring (manually))";
+fi
+if [ $# -ge 4 ]; then isSaveTrace=$4; fi
 
 if [ $# -eq 1 ]; then
   isBuild=1
-  isGeneralSort=1
   isMonitor=1
+  isSaveTrace=0
 fi
 
-GeneralSortMsg="no trace"
+if [ ${isBuild} -eq -1 ]; then
+  buildMsg=", force event building by user (no trace analysis)"
+fi
 
-if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then
-  isTrace=1
-  GeneralSortMsg="trace with ${isGeneralSort} core"
+if [ ${isSaveTrace} -eq 1 ]; then
+  saveTraceMsg=", trace is saved"
+fi
+
+if [ ${isBuild} -ge 2 ] || [ ${isBuild} -le -2 ] ; then
+  isSaveTrace=1
   traceFlag=true
+  buildMsg=", with trace analysis"
+  if [ ${isBuild} -le -2 ]; then
+    buildMsg=", force event building with trace analysis "
+  fi
+  saveTraceMsg=", overrided with trace analysis"
+fi
+
+if [ ${isMonitor} -eq 0 ]; then monitorMsg=", no monitoring"; fi
+if [ ${isMonitor} -eq 10 ]; then
+  monitorMsg=", with monitoring and post to websrv"
+elif [ ${isMonitor} -eq 20 ]; then
+  monitorMsg=", with monitoring and post to websrv for all runs"
 fi
 
 if [ "${RUN}" == "lastRun" ]; then 
@@ -57,20 +83,15 @@ fi
 
 runID=$(printf '%03d' $RUN)
 
-echo "============================================="
-echo "============ RUN $runID ========================"
+echo -e "\033[1;31m============================================================================"
+echo -e "=============================== RUN $runID ===================================="
+echo -e "============================================================================\033[0m"
+
+echo "isBuild     : ${isBuild}${buildMsg}"
+echo "isMonitor   : ${isMonitor}${monitorMsg}"
+echo "isSaveTrace : ${isSaveTrace}${saveTraceMsg}"
 echo "============================================="
 
-echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
-echo "isMonitor   : ${isMonitor} ${OverRideMonitor}"
-echo "============================================="
-
-
-if [ ${isGeneralSort} -ne -1 ] || [ ${isGeneralSort} -ne 1 ]; then
- echo -e "\033[1;31m##########################################################\033[0m"
- echo -e "\033[1;33m Please check GeneralSortTraceProof.C to enable detectors \033[0m"
- echo -e "\033[1;31m##########################################################\033[0m"
-fi
 
 #######################################
 ####################  Download raw data
@@ -78,7 +99,7 @@ fi
 
 #######################################
 #################### EventBuild and GeneralSort
-../Armory/process_Sort $RUN $isBuild $isGeneralSort 
+../Armory/process_Sort $RUN $isBuild $isSaveTrace
 
 ########################################
 #################### Monitor

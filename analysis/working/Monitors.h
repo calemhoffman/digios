@@ -29,7 +29,7 @@ public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
-   Int_t           runID;
+   UShort_t        runID;
    Float_t         e[NARRAY];
    ULong64_t       e_t[NARRAY];
    Float_t         xf[NARRAY];

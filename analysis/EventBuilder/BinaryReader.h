@@ -26,6 +26,7 @@ public:
 
   void Open(const std::string& filename);
   std::string GetFileName() const { return fileName; }  // Get the file name
+  unsigned short GetRunID() const { return runID; }  // Get the run ID
   unsigned short GetDigID() const { return DigID; }  // Get the last three digits of the file name
   unsigned short GetFileIndex() const { return fileIndex; }  // Get the second last three digits of the file name
   size_t GetFileSize() const { return fileSize; }  // Get size of the file in bytes
@@ -86,6 +87,7 @@ private:
   std::ifstream file;
   std::string fileName;
   size_t fileSize; // Size of the file in bytes
+  unsigned short runID;
   unsigned short DigID; // the last three digits of the file name, e.g. 001, 002, etc.
   unsigned short fileIndex; // the 2nd last three digits of the file name, e.g. 000, 001, etc. to indicate the next file from the same DigID.
 
@@ -104,6 +106,7 @@ private:
 
   void Init(){
     fileSize = 0;
+    runID = 0;
     DigID = 0;
     fileIndex = 0;
     totalNumHits = 0;
@@ -277,6 +280,15 @@ inline void BinaryReader::Open(const std::string& filename){
   std::string baseName = filename.substr(filename.find_last_of("/\\") + 1);
   if (baseName.length() >= 6) {
     try {
+
+      // find position of "run_" in the filename
+      size_t runPos = baseName.find("run_");
+      if (runPos != std::string::npos) {
+        runID = std::stoi(baseName.substr(runPos + 4, 3));
+      } else {
+        runID = 0; // Default value if "run_" is not found
+      }
+
       DigID = std::stoi(baseName.substr(baseName.length() - 3, 3));
       fileIndex = std::stoi(baseName.substr(baseName.length() - 7, 3));
     } catch (const std::invalid_argument & e) {
