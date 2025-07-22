@@ -95,6 +95,9 @@ public :
    TBranch        *b_Trace_CRDT_Time;   //!
    TBranch        *b_Trace_CRDT_RiseTime;   //!
    
+   int numCol; // number of detector in same side
+   int numRow; // number of sides
+
    bool isArrayTraceExist;
    bool isRDTTraceExist;
 
@@ -286,7 +289,7 @@ TString Monitors::FindStartEndTime(TTree * tree, TString BranchName){
    for( int ev = 0; ev < totEnetries; ev ++ ){
       tree->GetEntry(ev);
       bool breakFlag = false;
-      for( int id = 0; id < numDet; id ++){
+      for( int id = 0; id < NARRAY; id ++){
          if( timeStamp[id] > 0 ) {
             startTime = timeStamp[id];
             breakFlag = true;
@@ -299,7 +302,7 @@ TString Monitors::FindStartEndTime(TTree * tree, TString BranchName){
    for( int ev =  totEnetries - 1 ; ev > 0 ;  ev -- ){
       tree->GetEntry(ev);
       bool breakFlag = false;
-      for( int id = 0; id < numDet; id ++){
+      for( int id = 0; id < NARRAY; id ++){
          if( timeStamp[id] > 0 ) {
             endTime = timeStamp[id];
             breakFlag = true;
@@ -363,29 +366,28 @@ double solid_angle( double th ) {
 void Monitors::LoadDetGeoAndReactionConfigFile(){
 
   string detGeoFileName = "detectorGeo.txt";
-  printf("=======================\n");
   printf(" loading detector geometery : %s.", detGeoFileName.c_str());
   TMacro * haha = new TMacro();
   if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
     detGeo = LoadDetectorGeo(haha);
+    printf("... done.\n");
     PrintDetGeo(detGeo);
-
     zRange[0] = detGeo.zMin - 50 ;
     zRange[1] = detGeo.zMax + 50 ;
-    
-    printf("... done.\n");
+
+    numCol = detGeo.nDet;
+    numRow = detGeo.mDet;
   }else{
     printf("... fail\n");
   }
 
   string reactionConfigFileName = "reactionConfig.txt";
-  printf("=======================\n");
   printf(" loading reaction config : %s.", reactionConfigFileName.c_str());
   TMacro * kaka = new TMacro();
   if( kaka->ReadFile(reactionConfigFileName.c_str()) > 0 ) {
     reactionConfig  = LoadReactionConfig(kaka);
-    PrintReactionConfig(reactionConfig);
     printf("..... done.\n");
+    PrintReactionConfig(reactionConfig);
   }else{
     printf("..... fail\n");
   }
@@ -401,7 +403,7 @@ void Monitors::LoadXFXNCorr(){
       double a;
       int i = 0;
       while( file >> a ){
-         if( i >= numDet) break;
+         if( i >= NARRAY) break;
          xnCorr[i] = a;
          i = i + 1;
       }
@@ -410,7 +412,7 @@ void Monitors::LoadXFXNCorr(){
    }else{
       printf(".......... fail.\n");
       
-      for(int i = 0; i < numDet; i++){
+      for(int i = 0; i < NARRAY; i++){
          xnCorr[i] = 1;
       }
    }
@@ -427,7 +429,7 @@ void Monitors::LoadXFXN2ECorr(){
       double a, b;
       int i = 0;
       while( file >> a >> b){
-         if( i >= numDet) break;
+         if( i >= NARRAY) break;
          xfxneCorr[i][0] = a;
          xfxneCorr[i][1] = b;
          i = i + 1;
@@ -435,7 +437,7 @@ void Monitors::LoadXFXN2ECorr(){
       printf("........ done.\n");
    }else{
       printf("........ fail.\n");
-      for(int i = 0; i < numDet; i++){
+      for(int i = 0; i < NARRAY; i++){
          xfxneCorr[i][0] = 0;
          xfxneCorr[i][1] = 1;
       }
@@ -452,7 +454,7 @@ void Monitors::LoadXScaleCorr(){
       double a, b;
       int i = 0;
       while( file >> a ){
-         if( i >= numDet) break;
+         if( i >= NARRAY) break;
          xScale[i] = a;  
          i = i + 1;
       }
@@ -460,7 +462,7 @@ void Monitors::LoadXScaleCorr(){
       
    }else{
       printf("........ fail.\n");
-      for( int i = 0; i < numDet ; i++){
+      for( int i = 0; i < NARRAY ; i++){
          xScale[i] = 1.;
       }
    }
@@ -478,7 +480,7 @@ void Monitors::LoadECorr(){
       double a, b;
       int i = 0;
       while( file >> a >> b){
-         if( i >= numDet) break;
+         if( i >= NARRAY) break;
          eCorr[i][0] = a;  // 1/a1
          eCorr[i][1] = b;  //  a0 , e' = e * a1 + a0
          //printf("\n%2d, e0: %9.4f, e1: %9.4f", i, eCorr[i][0], eCorr[i][1]);
@@ -488,7 +490,7 @@ void Monitors::LoadECorr(){
       
    }else{
       printf(".............. fail.\n");
-      for( int i = 0; i < numDet ; i++){
+      for( int i = 0; i < NARRAY ; i++){
          eCorr[i][0] = 1.;
          eCorr[i][1] = 0.;
       }

@@ -1,32 +1,42 @@
-#ifndef Utilities
-#define Utilities
+#ifndef Monitor_Utilities
+#define Monitor_Utilities
 
 //This file runs after on Monitor.C
 //This file is parasite on Monitor.C
 
+#include <iostream>
+#include "TCanvas.h"
+#include "TString.h"
+#include "TMath.h"
+
+#include "../working/GeneralSortMapping.h"
+
+#include "../working/Monitors.C"
+
 int canvasSize[2] = {2000, 1200};
+#define NCOL  (NARRAY / NROW) // 12 detectors, 3 rows
 
 void listDraws(void) {
   printf("------------------- List of Plots -------------------\n");
   printf("  newCanvas() - Create a new Canvas\n");
   printf("-----------------------------------------------------\n");
   printf("      rawID() - Raw \033[0;31me\033[0m, \033[0;31mring\033[0m, \033[0;31mxf\033[0m, \033[0;31mxn\033[0m vs detID\n");
-  printf("       rawe() - Raw \033[0;31me\033[0m for all %d detectors\n", numDet);
-  printf("    rawring() - Raw \033[0;31mring\033[0m for all %d detectors\n", numDet);
-  printf("      rawxf() - Raw \033[0;31mxf\033[0m for all %d detectors\n", numDet);
-  printf("      rawxn() - Raw \033[0;31mxn\033[0m for all %d detectors\n", numDet);
-  printf("     eVring() - Raw \033[0;31me\033[0m vs. \033[0;31mring\033[0m for all %d detectors\n", numDet);
-  printf("      xfVxn() - Raw \033[0;31mxf\033[0m vs. \033[0;31mxn\033[0m for all %d detectors\n", numDet);
-  printf("       eVxs() - Raw \033[0;31me\033[0m vs. Raw \033[0;31mxs = xf + xn\033[0m for all %d detectors\n", numDet);
-  printf("        eVx() - Raw \033[0;31me\033[0m vs. RAW \033[0;31mx\033[0m for all %d detectors\n", numDet);
-  printf("     ringVx() - Raw \033[0;31mring\033[0m vs. RAW \033[0;31mx\033[0m for all %d detectors\n", numDet);
+  printf("       rawe() - Raw \033[0;31me\033[0m for all %d detectors\n", NARRAY);
+  printf("    rawring() - Raw \033[0;31mring\033[0m for all %d detectors\n", NARRAY);
+  printf("      rawxf() - Raw \033[0;31mxf\033[0m for all %d detectors\n", NARRAY);
+  printf("      rawxn() - Raw \033[0;31mxn\033[0m for all %d detectors\n", NARRAY);
+  printf("     eVring() - Raw \033[0;31me\033[0m vs. \033[0;31mring\033[0m for all %d detectors\n", NARRAY);
+  printf("      xfVxn() - Raw \033[0;31mxf\033[0m vs. \033[0;31mxn\033[0m for all %d detectors\n", NARRAY);
+  printf("       eVxs() - Raw \033[0;31me\033[0m vs. Raw \033[0;31mxs = xf + xn\033[0m for all %d detectors\n", NARRAY);
+  printf("        eVx() - Raw \033[0;31me\033[0m vs. RAW \033[0;31mx\033[0m for all %d detectors\n", NARRAY);
+  printf("     ringVx() - Raw \033[0;31mring\033[0m vs. RAW \033[0;31mx\033[0m for all %d detectors\n", NARRAY);
   printf("-----------------------------------------------------\n");
-  printf("    eVxsCal() - Raw \033[0;31me\033[0m vs. Corrected \033[0;31mxs\033[0m for all %d detectors\n", numDet);
-  printf("       ecal() - Calibrated \033[0;31me\033[0m for all %d detectors\n", numDet);
-  printf("      ecal2() - Calibrated \033[0;31me\033[0m for all %d detectors (same row or same col)\n", numDet);
-  printf("xfCalVxnCal() - Calibrated \033[0;31mxf\033[0m vs. \033[0;31mxn\033[0m for all %d detectors\n", numDet);
+  printf("    eVxsCal() - Raw \033[0;31me\033[0m vs. Corrected \033[0;31mxs\033[0m for all %d detectors\n", NARRAY);
+  printf("       ecal() - Calibrated \033[0;31me\033[0m for all %d detectors\n", NARRAY);
+  printf("      ecal2() - Calibrated \033[0;31me\033[0m for all %d detectors (same row or same col)\n", NARRAY);
+  printf("xfCalVxnCal() - Calibrated \033[0;31mxf\033[0m vs. \033[0;31mxn\033[0m for all %d detectors\n", NARRAY);
   printf("-----------------------------------------------------\n");
-  printf("  eCalVxCal() - Cal \033[0;31me\033[0m vs. \033[0;31mx\033[0m for all %d detectors\n", numDet);
+  printf("  eCalVxCal() - Cal \033[0;31me\033[0m vs. \033[0;31mx\033[0m for all %d detectors\n", NARRAY);
   printf("-----------------------------------------------------\n");
   printf("    recoils() - Raw DE vs. E Recoil spectra\n");
   printf("       elum() - Luminosity Energy Spectra\n");
@@ -36,8 +46,8 @@ void listDraws(void) {
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
   printf("     excite() - Excitation Energy\n");
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
-  printf("    ExVxCal() - Ex vs X for all %d detectors\n", numDet);
-  //printf("    eSVeRaw() - e(Ex,z) vs eRaw for all %d detectors\n", numDet);
+  printf("    ExVxCal() - Ex vs X for all %d detectors\n", NARRAY);
+  //printf("    eSVeRaw() - e(Ex,z) vs eRaw for all %d detectors\n", NARRAY);
   printf("-----------------------------------------------------\n");
   printf("   ShowFitMethod() - Shows various fitting methods \n");
   printf("   RDTCutCreator() - Create RDT Cuts [May need to edit]\n");
@@ -87,8 +97,8 @@ void rawID(){
 void rawe(Bool_t isLogy = false) {
   TCanvas *cRawE = (TCanvas *) gROOT->FindObjectAny("cRawE");
   if( cRawE == NULL ) cRawE = new TCanvas("cRawE",Form("E raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawE->Clear();cRawE->Divide(numCol,numRow);
-  for (Int_t i=0; i<numDet; i++) {
+  cRawE->Clear();cRawE->Divide(NCOL,NROW);
+  for (Int_t i=0; i<NARRAY; i++) {
     cRawE->cd(i+1); 
     cRawE->cd(i+1)->SetGrid();
     if( isLogy ) cRawE->cd(i+1)->SetLogy();
@@ -99,8 +109,8 @@ void rawe(Bool_t isLogy = false) {
 void rawring(Bool_t isLogy = false) {
   TCanvas *cRawRing = (TCanvas *) gROOT->FindObjectAny("cRawRing");
   if( cRawRing == NULL ) cRawRing = new TCanvas("cRawRing",Form("Ring raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawRing->Clear();cRawRing->Divide(numCol,numRow);
-  for (Int_t i=0; i<numDet; i++) {
+  cRawRing->Clear();cRawRing->Divide(NCOL,NROW);
+  for (Int_t i=0; i<NARRAY; i++) {
     cRawRing->cd(i+1); 
     cRawRing->cd(i+1)->SetGrid();
     if( isLogy ) cRawRing->cd(i+1)->SetLogy();
@@ -111,8 +121,8 @@ void rawring(Bool_t isLogy = false) {
 void rawxf(Bool_t isLogy = false) {
   TCanvas *cRawXf = (TCanvas *) gROOT->FindObjectAny("cRawXf");
   if( cRawXf == NULL ) cRawXf = new TCanvas("cRawXf",Form("Xf raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawXf->Clear();cRawXf->Divide(numCol,numRow);
-  for (Int_t i=0; i<numDet; i++) {
+  cRawXf->Clear();cRawXf->Divide(NCOL,NROW);
+  for (Int_t i=0; i<NARRAY; i++) {
     cRawXf->cd(i+1); 
     cRawXf->cd(i+1)->SetGrid();
     if( isLogy ) cRawXf->cd(i+1)->SetLogy();
@@ -123,8 +133,8 @@ void rawxf(Bool_t isLogy = false) {
 void rawxn(Bool_t isLogy = false) {
   TCanvas *cRawXn = (TCanvas *) gROOT->FindObjectAny("cRawXn");
   if( cRawXn == NULL ) cRawXn = new TCanvas("cRawXn",Form("Xn raw | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawXn->Clear();cRawXn->Divide(numCol,numRow);
-  for (Int_t i=0; i<numDet; i++) {
+  cRawXn->Clear();cRawXn->Divide(NCOL,NROW);
+  for (Int_t i=0; i<NARRAY; i++) {
     cRawXn->cd(i+1); 
     cRawXn->cd(i+1)->SetGrid();
     if( isLogy ) cRawXn->cd(i+1)->SetLogy();
@@ -135,8 +145,8 @@ void rawxn(Bool_t isLogy = false) {
 void eVring(void) {
   TCanvas *cRawERing = (TCanvas *) gROOT->FindObjectAny("cRawERing");
   if( cRawERing == NULL ) cRawERing = new TCanvas("cRawERing",Form("e vs. ring | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cRawERing->Clear(); cRawERing->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  cRawERing->Clear(); cRawERing->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     cRawERing->cd(i+1); 
     cRawERing->cd(i+1)->SetGrid(); 
     heVring[i]->Draw("col");
@@ -146,8 +156,8 @@ void eVring(void) {
 void xfVxn(void) {
   TCanvas *cxfxn = (TCanvas *) gROOT->FindObjectAny("cxfxn");
   if( cxfxn == NULL ) cxfxn = new TCanvas("cxfxn",Form("XF vs. XN | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cxfxn->Clear(); cxfxn->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  cxfxn->Clear(); cxfxn->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     cxfxn->cd(i+1); 
     cxfxn->cd(i+1)->SetGrid(); 
     hxfVxn[i]->Draw("col");
@@ -157,9 +167,9 @@ void xfVxn(void) {
 void eVxs(void) {
   TCanvas *cxfxne = (TCanvas *) gROOT->FindObjectAny("cxfxne");
   if( cxfxne == NULL ) cxfxne = new TCanvas("cxfxne",Form("E - XF+XN | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cxfxne->Clear(); cxfxne->Divide(numCol,numRow);
+  cxfxne->Clear(); cxfxne->Divide(NCOL,NROW);
   TLine line(0,0, 4000, 4000); line.SetLineColor(2);
-  for (Int_t i=0;i<numDet;i++) {
+  for (Int_t i=0;i<NARRAY;i++) {
     cxfxne->cd(i+1); 
     cxfxne->cd(i+1)->SetGrid(); 
     heVxs[i]->Draw("col");
@@ -170,8 +180,8 @@ void eVxs(void) {
 void ecal(void) {
   TCanvas *cEC = (TCanvas *) gROOT->FindObjectAny("cEC");
   if(cEC == NULL) cEC = new TCanvas("cEC",Form("E corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cEC->Clear();cEC->Divide(numCol,numRow);
-  for (Int_t i=0; i<numDet; i++) {
+  cEC->Clear();cEC->Divide(NCOL,NROW);
+  for (Int_t i=0; i<NARRAY; i++) {
     cEC->cd(i+1); 
     cEC->cd(i+1)->SetGrid();
     heCal[i]->Draw("");
@@ -187,29 +197,29 @@ void ecal2(void) {
   TCanvas *cECall = (TCanvas *) gROOT->FindObjectAny("cECall");
   if(cECall == NULL) cECall = new TCanvas("cECall",Form("E corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
   
-  int maxRC = TMath::Max(numRow, numCol);
+  int maxRC = TMath::Max(NROW, NCOL);
   cECall->Clear();cECall->Divide(maxRC,2);
   //plot same position
-  for(int i = 0; i < numCol ; i++){
+  for(int i = 0; i < NCOL ; i++){
      cECall->cd(i+1);
      cECall->cd(i+1)->SetGrid();
      heCal[i]->SetLineColor(1); heCal[i]->Draw("");
-     for(int j = 1 ; j < numRow; j++){
-        heCal[numCol*j + i]->SetLineColor(j+1); 
-        heCal[numCol*j + i]->Draw("same"); 
+     for(int j = 1 ; j < NROW; j++){
+        heCal[NCOL*j + i]->SetLineColor(j+1); 
+        heCal[NCOL*j + i]->Draw("same"); 
      }
   }
   //plot same side
-  TH1F * heC2[numDet];
-  for (Int_t i = 0; i< numRow; i++) {
+  TH1F * heC2[NARRAY];
+  for (Int_t i = 0; i< NROW; i++) {
      cECall->cd(i+maxRC+1);
      cECall->cd(i+maxRC+1)->SetGrid();
-     heC2[numCol*i] = (TH1F* )heCal[numCol*i]->Clone();
-     heC2[numCol*i]->SetLineColor(1); heC2[numCol*i]->Draw("");
-     for( int j = 1; j < numCol; j++){
-         heC2[numCol*i+j] = (TH1F* )heCal[numCol*i+j]->Clone();
-         heC2[numCol*i+j]->SetLineColor(j+1);
-         heC2[numCol*i+j]->Draw("same");
+     heC2[NCOL*i] = (TH1F* )heCal[NCOL*i]->Clone();
+     heC2[NCOL*i]->SetLineColor(1); heC2[NCOL*i]->Draw("");
+     for( int j = 1; j < NCOL; j++){
+         heC2[NCOL*i+j] = (TH1F* )heCal[NCOL*i+j]->Clone();
+         heC2[NCOL*i+j]->SetLineColor(j+1);
+         heC2[NCOL*i+j]->Draw("same");
      }
   }
 }
@@ -218,8 +228,8 @@ void ecal2(void) {
 void xfCalVxnCal(void) {
   TCanvas *cxfxnC = (TCanvas *) gROOT->FindObjectAny("cxfxnC");
   if(cxfxnC == NULL) cxfxnC = new TCanvas("cxfxnC",Form("XF vs XN corrected | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cxfxnC->Clear(); cxfxnC->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  cxfxnC->Clear(); cxfxnC->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     cxfxnC->cd(i+1); 
     cxfxnC->cd(i+1)->SetGrid(); 
     hxfCalVxnCal[i]->Draw("col");
@@ -229,9 +239,9 @@ void xfCalVxnCal(void) {
 void eVxsCal(void) {
   TCanvas *cxfxneC = (TCanvas *) gROOT->FindObjectAny("cxfxneC");
   if(cxfxneC == NULL)cxfxneC = new TCanvas("cxfxneC",Form("Raw E - Corrected XF+XN | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cxfxneC->Clear(); cxfxneC->Divide(numCol,numRow);
+  cxfxneC->Clear(); cxfxneC->Divide(NCOL,NROW);
   TLine line(0,0, 4000, 4000); line.SetLineColor(2);
-  for (Int_t i=0;i<numDet;i++) {
+  for (Int_t i=0;i<NARRAY;i++) {
     cxfxneC->cd(i+1); 
     cxfxneC->cd(i+1)->SetGrid(); 
     heVxsCal[i]->Draw("col");
@@ -242,8 +252,8 @@ void eVxsCal(void) {
 void eVx(void) {
   TCanvas *ceVx = (TCanvas *) gROOT->FindObjectAny("ceVx");
   if(ceVx == NULL) ceVx = new TCanvas("ceVx",Form("E vs. X = (xf-xn)/e | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  ceVx->Clear(); ceVx->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  ceVx->Clear(); ceVx->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     ceVx->cd(i+1); heVx[i]->Draw("col");
   }
 }
@@ -251,8 +261,8 @@ void eVx(void) {
 void ringVx(void) {
   TCanvas *cringVx = (TCanvas *) gROOT->FindObjectAny("cringVx");
   if(cringVx == NULL) cringVx = new TCanvas("cringVx",Form("ring vs X = (xf-xn)/e | %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cringVx->Clear(); cringVx->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  cringVx->Clear(); cringVx->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     cringVx->cd(i+1); hringVx[i]->Draw("col");
   }
 }
@@ -260,8 +270,8 @@ void ringVx(void) {
 void eCalVxCal(void) {
   TCanvas *cecalVxcal =  (TCanvas *) gROOT->FindObjectAny("cecalVxcal");
   if( cecalVxcal == NULL ) cecalVxcal = new TCanvas("cecalVxcal",Form("ECALVXCAL | %s",canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cecalVxcal->Clear(); cecalVxcal->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  cecalVxcal->Clear(); cecalVxcal->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     cecalVxcal->cd(i+1); 
     heCalVxCal[i]->SetMarkerStyle(7);
     heCalVxCal[i]->Draw("");
@@ -271,8 +281,8 @@ void eCalVxCal(void) {
 void eCalVxCalG(void) {
   TCanvas *cecalVxcalG =  (TCanvas *) gROOT->FindObjectAny("cecalVxcalG");
   if( cecalVxcalG == NULL ) cecalVxcalG = new TCanvas("cecalVxcalG",Form("ECALVXCAL | %s",canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  cecalVxcalG->Clear(); cecalVxcalG->Divide(numCol,numRow);
-  for (Int_t i=0;i<numDet;i++) {
+  cecalVxcalG->Clear(); cecalVxcalG->Divide(NCOL,NROW);
+  for (Int_t i=0;i<NARRAY;i++) {
     cecalVxcalG->cd(i+1); 
     heCalVxCalG[i]->SetMarkerStyle(7);
     heCalVxCalG[i]->Draw("");
@@ -344,7 +354,7 @@ void recoils(bool isLogz = false) {
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
   if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),600, 0, 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
-  for( int i = 0; i < 8; i ++){
+  for( int i = 0; i < NRDT; i ++){
     crdtS->cd(i+1);
     if( isLogz ) crdtS->cd(i+1)->SetLogy(); 
     hrdt[i]->Draw("");
@@ -376,11 +386,11 @@ void eCalVz(void) {
 void eCalVzRow() {
   TCanvas *cecalVzRow =  (TCanvas *) gROOT->FindObjectAny("cecalVzRow");
   if( cecalVzRow == NULL ) cecalVzRow = new TCanvas("cevalVzRow",Form("eCal - Z : %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
-  FindBesCanvasDivision(numRow);
+  FindBesCanvasDivision(NROW);
   cecalVzRow->Clear(); cecalVzRow->Divide(xD,yD);
   gStyle->SetOptStat("neiou");
   
-  for(int row = 0; row < numRow; row ++){
+  for(int row = 0; row < NROW; row ++){
      cecalVzRow->cd(row+1);
      cecalVzRow->cd(row+1)->SetGrid();
      hecalVzRow[row]->Draw("colz");
@@ -398,18 +408,18 @@ void excite(void) {
   
   TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
   if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),500, 0, 1600,1000);
-  cexI->Clear();cexI->Divide(numCol,numRow);
+  cexI->Clear();cexI->Divide(NCOL,NROW);
   gStyle->SetOptStat("neiou");
-  for( int i = 0; i < numDet; i++){
+  for( int i = 0; i < NARRAY; i++){
     cexI->cd(i+1); 
     hExi[i]->Draw("");
   }
   
   TCanvas *cexC =  (TCanvas *) gROOT->FindObjectAny("cexC");
   if( cexC == NULL ) cexC = new TCanvas("cexC",Form("EX : %s", canvasTitle.Data()),500, 500, 1600,300);
-  cexC->Clear();cexC->Divide(numCol,1);
+  cexC->Clear();cexC->Divide(NCOL,1);
   gStyle->SetOptStat("neiou");
-  for( int i = 0; i < numCol; i++){
+  for( int i = 0; i < NCOL; i++){
     cexC->cd(i+1); 
     hExc[i]->Draw("");
   }
@@ -431,8 +441,8 @@ void ExVxCal(TString drawOpt = "") {
   cExVxCal->Clear();
   gStyle->SetOptStat("neiou");
   
-  cExVxCal->Divide(numCol,numRow);
-  for( int i = 0; i < numDet; i++){
+  cExVxCal->Divide(NCOL,NROW);
+  for( int i = 0; i < NARRAY; i++){
     cExVxCal->cd(i+1); 
     if( drawOpt == "" )hExVxCal[i]->SetMarkerStyle(7);
     hExVxCal[i]->Draw(drawOpt);
@@ -447,8 +457,8 @@ void ExVxCal(TString drawOpt = "") {
 //  ceSVeRaw->Clear();
 //  gStyle->SetOptStat("neiou");
 //  
-//  ceSVeRaw->Divide(numCol,numRow);
-//  for( int i = 0; i < numDet; i++){
+//  ceSVeRaw->Divide(NCOL,NROW);
+//  for( int i = 0; i < NARRAY; i++){
 //    ceSVeRaw->cd(i+1); 
 //    heSVeRaw[i]->SetMarkerStyle(7);
 //    heSVeRaw[i]->Draw("");
@@ -459,9 +469,9 @@ void ExVxCal(TString drawOpt = "") {
 void tac(void) {
   TCanvas *ctac =  (TCanvas *) gROOT->FindObjectAny("ctac");
   if( ctac == NULL ) ctac = new TCanvas("ctac",Form("ARRAY-RDT | %s", canvasTitle.Data() ),1000,650);
-  ctac->Clear();ctac->SetGrid(0);ctac->Divide(numCol,numRow);
+  ctac->Clear();ctac->SetGrid(0);ctac->Divide(NCOL,NROW);
   gStyle->SetOptStat("neiou");
-  for (Int_t i=0;i<numDet;i++) {
+  for (Int_t i=0;i<NARRAY;i++) {
     ctac->cd(i+1); htacArray[i]->Draw("");
     //   cutG = (TCutG *)cutList->At(i);
     //   cutG->Draw("same");
