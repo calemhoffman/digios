@@ -77,7 +77,7 @@ struct CompareEvent {
 
 class Data {
 public:
-  // int runiD = 0;
+  unsigned short runID = 0;
 
   unsigned int evID = 0 ;
 
@@ -154,7 +154,7 @@ public:
   }
 
   void Reset() {
-    // runiD = 0;
+    // runID = 0;
 
     for (int i = 0; i < NARRAY; i++) {
       Energy[i] = TMath::QuietNaN();
@@ -420,7 +420,7 @@ public:
 int main(int argc, char* argv[]) {
 
   printf("=======================================================\n");
-  printf("===          Event Builder  raw data --> root       ===\n");
+  printf("===        Event Builder S  raw data --> root       ===\n");
   printf("=======================================================\n");  
 
   if( argc <= 4){
@@ -470,11 +470,17 @@ int main(int argc, char* argv[]) {
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
 
+  unsigned short globalRunID = 0;
+
   std::vector<std::thread> threads;
 
   for( int i = 0 ; i < nFile ; i++){
     reader[i] = new BinaryReader((MAX_READ_HITS)); 
     reader[i]->Open(inFileName[i].Data());
+    globalRunID = reader[i]->GetRunID(); // Get the run ID from the first file
+    if( i > 0 && globalRunID != reader[i]->GetRunID() ) {
+      printf("\033[31mWarning: Run ID mismatch between files. Using the first file's Run ID: %d.\033[0m\n", globalRunID);
+    }
     threads.emplace_back([](BinaryReader* reader) { 
       reader->Scan(true); 
       printf("%s | %6.1f MB | # hit : %10d (%d)\n", reader->GetFileName().c_str(), reader->GetFileSize()/1024./1024., reader->GetNumData(), reader->GetMaxHitSize());
@@ -524,10 +530,10 @@ int main(int argc, char* argv[]) {
 
   //*=============== create output file and setup TTree
   TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
-  TTree * outTree = new TTree("tree", outFileName.Data());
+  TTree * outTree = new TTree("gen_tree", outFileName.Data());
   outTree->SetDirectory(outFile);
 
-  // outTree->Branch("runID",   &data.runiD, "runID/I");
+  outTree->Branch("runID",   &data.runID, "runID/s");
   outTree->Branch("evID",   &data.evID, "evID/i");
   
   outTree->Branch("e",             data.Energy, Form("e[%d]/F", NARRAY));
@@ -740,7 +746,7 @@ int main(int argc, char* argv[]) {
         // Acquire dataMutex to update the global 'data' and fill the tree
         data = temp_data;
   
-        // data.runiD = runID; // Set the run ID
+        data.runID = globalRunID; // Set the run ID
         outTree->Fill(); // Fill the tree with the data
         outFile->cd(); // Ensure the output file is set as the current directory
 
@@ -835,6 +841,7 @@ int main(int argc, char* argv[]) {
 
       } else if( nWorkers == 1){
         data.Reset();
+        data.runID = globalRunID; // Set the run ID
         data.evID = eventID; // Set the event ID
         data.FillData(events, saveTrace); // Fill data with the events
         data.TraceAnalysis(); // Perform trace analysis if enabled
@@ -844,6 +851,7 @@ int main(int argc, char* argv[]) {
       } else {
         // Single-threaded processing, o trace analysis
         data.Reset();
+        data.runID = globalRunID; // Set the run ID
         data.evID = eventID; // Set the event ID
         data.FillData(events, saveTrace);
 
@@ -905,7 +913,7 @@ int main(int argc, char* argv[]) {
 
   //*=============== summary
   printf("=======================================================\n");
-  printf("===          Event Builder finished                 ===\n");
+  printf("===          Event Builder S finished               ===\n");
   printf("=======================================================\n");
   unsigned int runEndTime = getTime_us();
   printf("              Total time taken: %.3f s = %.3f min\n", (runEndTime - runStartTime) / 1000000.0, (runEndTime - runStartTime) / 1000000.0 / 60.0);
