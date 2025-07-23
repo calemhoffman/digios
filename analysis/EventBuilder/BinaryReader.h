@@ -154,14 +154,15 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
       std::sort(timestampList.begin(), timestampList.end()); // Sort the timestamps for error checking
       last_timestamp = timestampList.back(); // Get the last timestamp in the sorted list
       
-      if( timestampList.front() < globalEarliestTime) globalEarliestTime = timestampList.front(); // Update the global earliest time
-      if( timestampList.back() > globalLastTime) globalLastTime = timestampList.back(); // Update the global last time 
-      
-      if( count > 0 && timestampList.front() < old_timestamp) {
+      if( count > 0 && timestampList.front() < globalLastTime) {
         maxHitSize *= 2;
         // printf("\033[33m=== Increasing maxHitSize to %u due to timestamp not in order. %s \033[0m\n", maxHitSize, fileName.c_str());
         CreateHits(maxHitSize); // Adjust the hit size to the maximum difference
       }
+
+      if( timestampList.front() < globalEarliestTime) globalEarliestTime = timestampList.front(); // Update the global earliest time
+      if( timestampList.back() > globalLastTime) globalLastTime = timestampList.back(); // Update the global last time 
+      
       timestampList.clear(); // Clear the list for the next batch
       count++;
     }
