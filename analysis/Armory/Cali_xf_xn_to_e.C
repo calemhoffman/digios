@@ -33,7 +33,7 @@ void Cali_xf_xn_to_e(TTree *tree){
 
    //========================================= detector Geometry
    printf("======================= loading parameters files .... \n");
-   string detGeoFileName = "detectorGeo.txt";
+   std::string detGeoFileName = "detectorGeo.txt";
    printf("loading detector geometery : %s.", detGeoFileName.c_str());
 
    DetGeo detGeo;
@@ -52,7 +52,7 @@ void Cali_xf_xn_to_e(TTree *tree){
    }
    
    double length = detGeo.detLength;
-   vector<double> pos = detGeo.detPos;
+   std::vector<double> pos = detGeo.detPos;
    
    int colDet = detGeo.nDet;
    int rowDet = detGeo.mDet;
@@ -66,7 +66,7 @@ void Cali_xf_xn_to_e(TTree *tree){
    
    //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
-   ifstream file;
+   std::ifstream file;
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
       double a;
@@ -123,7 +123,8 @@ void Cali_xf_xn_to_e(TTree *tree){
       TString expression;
       expression.Form("e[%d]:(xf[%d]+xn[%d] * %f)>> d%d" , i,i,i, xnCorr[i],i);
       TString gate;
-      gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0 && ring[%d] < 50",i, i, i, i);
+      // gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0 && ring[%d] < 50",i, i, i, i);
+      gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0",i, i, i);
       //gate.Form("e[%d]>0 && xf[%d]>0 && xn[%d]>0 && TMath::Abs(xf[%d] - xn[%d]*%f)< 100",i, i, i, i, i, xnCorr[i]);
       
       cCali_xf_xn_e->cd(i+1);

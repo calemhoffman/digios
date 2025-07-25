@@ -408,6 +408,7 @@ void Cali_e_trace::Init(TTree *tree)
    TMacro * haha = new TMacro();
    if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
 
+      printf("... done.\n");
       detGeo = LoadDetectorGeo(haha);
 
       PrintDetGeo(detGeo);
@@ -418,7 +419,6 @@ void Cali_e_trace::Init(TTree *tree)
       length = detGeo.detLength;
       pos = detGeo.detPos;
       
-      printf("... done.\n");
       haha->Write("detectorGeo");
    }else{
       printf("... fail\n");

@@ -32,9 +32,9 @@ using namespace std;
 
 //---histogram setting
 int rawEnergyRange[2] = {   -2100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     2,     20};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,     800}; 
-int      rdtERange[2] = {     0,     4500};  
+int    energyRange[2] = {     1,     10};       /// in the E-Z plot
+int     rdtDERange[2] = {     0,    3000}; 
+int      rdtERange[2] = {     0,    3000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -42,7 +42,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  200,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  30,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -64,7 +64,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
 vector<int> skipDetID = {}; // {0,1,2,3,4,5,6,7,8,9,10,11} ;//{2,  11, 17}
 
-TString rdtCutFile1 = "";//cut_test1.root";//o20.root, o20a.root, f21.root
+TString rdtCutFile1 = "rdtCuts_30Mg.root";//cut_test1.root";//o20.root, o20a.root, f21.root
 TString rdtCutFile2 = "";
 TString ezCutFile   = "";//"ezCut.root";
 
@@ -540,12 +540,7 @@ void Monitors::Begin(TTree *tree)
 /*###########################################################
  * Process
 ###########################################################*/
-Bool_t Monitors::Process(Long64_t entry)
-{
-
-   if( entry == 0 ) {
-      printf("######################### Start processing entries, Total Entries : %lld \n", NumEntries);
-   }
+Bool_t Monitors::Process(Long64_t entry){
 
    ProcessedEntries++;
    
@@ -1117,10 +1112,10 @@ void Monitors::Terminate()
    printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine(".L ../Armory/Check_rdtGate.C");
    printf("=============== loaded Armory/Check_rdtGate.C\n");
-   gROOT->ProcessLine(".L ../Armory/readTrace.C");
-   printf("=============== loaded Armory/readTrace.C\n");
-   gROOT->ProcessLine(".L ../Armory/readRawTrace.C");
-   printf("=============== loaded Armory/readRawTrace.C\n");
+   // gROOT->ProcessLine(".L ../Armory/readTrace.C");
+   // printf("=============== loaded Armory/readTrace.C\n");
+   // gROOT->ProcessLine(".L ../Armory/readRawTrace.C");
+   // printf("=============== loaded Armory/readRawTrace.C\n");
    gROOT->ProcessLine("listDraws()");
    
    /************************* Save histograms to root file*/
