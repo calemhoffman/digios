@@ -8,6 +8,7 @@
 #include "TCutG.h"
 #include "TF1.h"
 #include "TLatex.h"
+#include "TSystem.h"
 #include <fstream>
 
 #include "../Armory/AnalysisLibrary.h"
@@ -25,7 +26,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    TTree *tree = (TTree*)file0->Get(treeName);
    printf("=====> /// %15s //// is loaded. Total #Entry: %10lld \n", rootFile.Data(),  tree->GetEntries());
    
-   Int_t Div[2] = {5,6};  //x,y
+   Int_t Div[2] = {6,4};  //x,y
    Int_t size[2] = {200,230}; //x,y
    
    TCanvas * cCheck = new TCanvas("cCheck", "cCheck", 0, 0, size[0]*Div[0], size[1]*Div[1]);
@@ -55,7 +56,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
    }
 
 //========================================= detector Geometry
-   string detGeoFileName = "detectorGeo.txt";
+   std::string detGeoFileName = "detectorGeo.txt";
    int numDet;
    int rDet = 6; // number of detector at different position, row-Det
    int cDet = 4; // number of detector at same position, column-Det
@@ -108,7 +109,7 @@ void Check_e_x( TString rootFile = "temp.root",double eThreshold = 400){
       line->Draw("same");
       cCheck->Modified();
       cCheck->Update();
-       gSystem->ProcessEvents();
+      gSystem->ProcessEvents();
    }
    
 /**///======================================================== e vs z

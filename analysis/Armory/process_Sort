@@ -11,16 +11,13 @@ fi;
 source ${HELIOSSYS}/analysis/Armory/process_PathSetting
 
 builder=EventBuilder_S
+eventWindow=1000 # in ticks, 1 tick = 10 ns
 
 RUN=$1
 runID=$1
 isBuild=$2
 isSaveTrace=$3
 isTrace=0
-
-if [ ${isBuild} -ge 2 ] || [ ${isBuild} -le -2 ] ; then
-  isTrace=$isBuild
-fi
 
 #just in case people put %03d as RUN
 if [ "${RUN:0:2}" == "00" ]; then
@@ -36,8 +33,8 @@ RUN=$(printf '%03d' ${RUN})
 ROOTNAME=gen_run${RUN}.root
 if [ ${isBuild} -ge 2 ] || [ ${isBuild} -le -2 ] ; then
   ROOTNAME=trace_run${RUN}.root
+  isTrace=${isBuild#-} # if isBuild is negative, then isTrace is positive
 fi
-
 
 if [ $# -eq 1 ]; then
     echo -e "${Cyan}============================================="
@@ -85,7 +82,7 @@ elif [ $isBuild -gt 0 ]; then
     if [ ${rawDataTime} -ge ${rootDataTime} ]; then
         echo -e "${RED}=================== RUN $RUN: EventBuilder started at `date`${NC}"
         
-        ${GEBDIR}/${builder} ${ROOTDIR}/${ROOTNAME} 1000 $isSaveTrace ${isTrace} `\ls -1 ${DATADIR}/${expName}_run_$RUN.gtd*`
+        ${GEBDIR}/${builder} ${ROOTDIR}/${ROOTNAME} ${eventWindow} $isSaveTrace ${isTrace} `\ls -1 ${DATADIR}/${expName}_run_$RUN.gtd*`
 
         echo -e "${RED}====================== RUN $RUN: EventBuilder DONE at `date`${NC}"
         echo -e "saved root file >>>>>>  ${YELLOW} ${ROOTDIR}/${ROOTNAME} ${NC} "
@@ -98,7 +95,7 @@ elif [ $isBuild -lt 0 ]; then # force Sort
     echo -e "${RED}=================== RUN $RUN: EventBuilder started at `date`${NC}"
     echo -e "${YELLOW} >>>>>>>>>>>>> force sort by user ${NC}"
     
-    ${GEBDIR}/${builder} ${ROOTDIR}/${ROOTNAME} 1000 $isSaveTrace  $isTrace `\ls -1 ${DATADIR}/${expName}_run_$RUN.gtd*`
+    ${GEBDIR}/${builder} ${ROOTDIR}/${ROOTNAME} ${eventWindow} $isSaveTrace  $isTrace `\ls -1 ${DATADIR}/${expName}_run_$RUN.gtd*`
     
     echo -e "${RED}====================== RUN $RUN: EventBuilder DONE at `date`${NC}"
     echo -e "saved root file >>>>>>  ${YELLOW} ${ROOTDIR}/${ROOTNAME} ${NC} "

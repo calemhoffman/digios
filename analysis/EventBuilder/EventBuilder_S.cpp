@@ -426,7 +426,7 @@ int main(int argc, char* argv[]) {
   if( argc <= 4){
     printf("%s [outfile] [timeWindow] [save Trace] [trace Analysis] [file-1] [file-2] ... \n", argv[0]);
     printf("        outfile : output root file name\n");
-    printf("     timeWindow : nano-sec; if < 0, no event build\n"); 
+    printf("     timeWindow : tick; if < 0, no event build\n"); 
     printf("     Save Trace : 0 : no, 1 : yes\n");
     printf(" trace Analysis : 0 : no, 1 : yes (single core), >1 : multi-core\n");
     printf("         file-X : the input file(s)\n");
@@ -452,7 +452,7 @@ int main(int argc, char* argv[]) {
   if ( timeWindow < 0 ){
     printf(" Event building time window : no event build\n");
   }else{
-    printf(" Event building time window : %d nsec \n", timeWindow);
+    printf(" Event building time window : %d ticks \n", timeWindow);
   }
   printf("       Save Trace ? %s\n", saveTrace ? "Yes" : "No");
   printf("   Trace Analysis ? %s %s\n", nWorkers ? "Yes" : "No", nWorkers > 0 ? Form("(%d-core)", nWorkers) : "");
