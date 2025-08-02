@@ -241,6 +241,114 @@ void fitCurve(std::vector<float>& x, std::vector<float>& y, float& A, float& T, 
     cudaFree(d_gradB);
 }
 
+// a new function that uses singular value decomposition (SVD) to compute the fitting parameters
+#include <cublas_v2.h>
+#include <cusolverDn.h>
+
+// Linear least squares fit using SVD (matrix method)
+// Fits y = a0 * f0(x) + a1 * f1(x) + ... + an * fn(x)
+void fitCurveSVD(const std::vector<float>& x, const std::vector<float>& y, float& A, float& T, float& R, float& B) {
+    int n = x.size();
+    int p = 4; // Number of parameters: A, T, R, B
+
+    // Build design matrix (Jacobian) for linearized model
+    std::vector<float> h_A(n * p);
+    std::vector<float> h_b(y);
+
+    // Linearize the model around initial guess (A, T, R, B)
+    float A0 = A, T0 = T, R0 = R, B0 = B;
+    for (int i = 0; i < n; ++i) {
+        float exp_term = expf((x[i] - T0) / R0);
+        float denom = 1.0f + exp_term;
+        // Partial derivatives
+        h_A[i * p + 0] = 1.0f / denom; // d/dA
+        h_A[i * p + 1] = (A0 * exp_term) / (R0 * denom * denom); // d/dT
+        h_A[i * p + 2] = (A0 * (x[i] - T0) * exp_term) / (R0 * R0 * denom * denom); // d/dR
+        h_A[i * p + 3] = 1.0f; // d/dB
+        // Residual
+        h_b[i] = y[i] - (A0 / denom + B0);
+    }
+
+    // Allocate device memory
+    float *d_A, *d_b, *d_x, *d_S, *d_U, *d_VT, *d_work;
+    int *devInfo;
+    cudaMalloc(&d_A, n * p * sizeof(float));
+    cudaMalloc(&d_b, n * sizeof(float));
+    cudaMalloc(&d_x, p * sizeof(float));
+    cudaMalloc(&d_S, p * sizeof(float));
+    cudaMalloc(&d_U, n * n * sizeof(float));
+    cudaMalloc(&d_VT, p * p * sizeof(float));
+    cudaMalloc(&devInfo, sizeof(int));
+
+    cudaMemcpy(d_A, h_A.data(), n * p * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, h_b.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+
+    cusolverDnHandle_t cusolverH;
+    cusolverDnCreate(&cusolverH);
+
+    int lwork = 0;
+    cusolverDnSgesvd_bufferSize(cusolverH, n, p, &lwork);
+    cudaMalloc(&d_work, lwork * sizeof(float));
+
+    // SVD: A = U * S * VT
+    char jobu = 'A', jobvt = 'A';
+    cusolverDnSgesvd(cusolverH, jobu, jobvt, n, p, d_A, n, d_S, d_U, n, d_VT, p, d_work, lwork, NULL, devInfo);
+
+    // Solve least squares: x = V * S^-1 * U^T * b
+    // For simplicity, use cublas to multiply matrices
+    std::vector<float> h_S(p);
+    cudaMemcpy(h_S.data(), d_S, p * sizeof(float), cudaMemcpyDeviceToHost);
+
+    std::vector<float> h_VT(p * p);
+    cudaMemcpy(h_VT.data(), d_VT, p * p * sizeof(float), cudaMemcpyDeviceToHost);
+
+    std::vector<float> h_U(n * n);
+    cudaMemcpy(h_U.data(), d_U, n * n * sizeof(float), cudaMemcpyDeviceToHost);
+
+    std::vector<float> h_b2(n);
+    cudaMemcpy(h_b2.data(), d_b, n * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Compute U^T * b
+    std::vector<float> Ut_b(n);
+    for (int i = 0; i < n; ++i) {
+        Ut_b[i] = 0.0f;
+        for (int j = 0; j < n; ++j) {
+            Ut_b[i] += h_U[j * n + i] * h_b2[j];
+        }
+    }
+
+    // Divide by singular values
+    std::vector<float> S_inv_Ut_b(p);
+    for (int i = 0; i < p; ++i) {
+        S_inv_Ut_b[i] = (h_S[i] > 1e-6f) ? Ut_b[i] / h_S[i] : 0.0f;
+    }
+
+    // Multiply by V to get solution
+    std::vector<float> x_fit(p, 0.0f);
+    for (int i = 0; i < p; ++i) {
+        for (int j = 0; j < p; ++j) {
+            x_fit[i] += h_VT[j * p + i] * S_inv_Ut_b[j];
+        }
+    }
+
+    // Update parameters
+    A += x_fit[0];
+    T += x_fit[1];
+    R += x_fit[2];
+    B += x_fit[3];
+
+    // Cleanup
+    cudaFree(d_A);
+    cudaFree(d_b);
+    cudaFree(d_x);
+    cudaFree(d_S);
+    cudaFree(d_U);
+    cudaFree(d_VT);
+    cudaFree(d_work);
+    cudaFree(devInfo);
+    cusolverDnDestroy(cusolverH);
+}
+
 int main() {
 
     // Data points
