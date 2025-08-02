@@ -27,16 +27,16 @@ __global__ void computeLoss(float* y_true, float* y_pred, float* loss, int n) {
 __global__ void computeGradients(float* x, float* y_true, float* y_pred, float* gradA, float* gradT, float* gradR, float* gradB, float A, float T, float R, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < n) {
-        float exp_term = expf(-(x[idx] - T) / R);
+        float exp_term = expf((x[idx] - T) / R);
         float denom = 1.0f + exp_term;
         float diff = y_pred[idx] - y_true[idx];
-        
-        // Partial derivatives
+
+        // Partial derivatives (chain rule applied)
         float dA = 1.0f / denom;
         float dB = 1.0f;
         float dT = (A * exp_term) / (R * denom * denom);
-        float dR = (A * (x[idx] - T) * exp_term) / (R * R * denom * denom);
-        
+        float dR = (A * (-T + x[idx]) * exp_term) / (R * R * denom * denom);
+
         atomicAdd(gradA, 2.0f * diff * dA);
         atomicAdd(gradT, 2.0f * diff * dT);
         atomicAdd(gradR, 2.0f * diff * dR);
@@ -44,9 +44,83 @@ __global__ void computeGradients(float* x, float* y_true, float* y_pred, float* 
     }
 }
 
-void fitCurve(std::vector<float>& x, std::vector<float>& y, float& A, float& T, float& R, float& B, int max_iterations = 1000, float learning_rate = 0.01f) {
+// CUDA kernel to compute the diagonal of the Hessian (second derivatives)
+__global__ void computeHessianDiag(float* x, float* y_true, float* y_pred, float* hessA, float* hessT, float* hessR, float* hessB, float A, float T, float R, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        float exp_term = expf((x[idx] - T) / R);
+        float denom = 1.0f + exp_term;
+        float denom2 = denom * denom;
+        float diff = y_pred[idx] - y_true[idx];
+
+        // Second derivatives (diagonal only)
+        float dA = 1.0f / denom;
+        float dT = (A * exp_term) / (R * denom2);
+        float dR = (A * (x[idx] - T) * exp_term) / (R * R * denom2);
+        float dB = 1.0f;
+
+        atomicAdd(hessA, 2.0f * dA * dA);
+        atomicAdd(hessT, 2.0f * dT * dT);
+        atomicAdd(hessR, 2.0f * dR * dR);
+        atomicAdd(hessB, 2.0f * dB * dB);
+    }
+}
+
+void computeUncertainties(std::vector<float>& x, std::vector<float>& y, float A, float T, float R, float B, float& sigmaA, float& sigmaT, float& sigmaR, float& sigmaB) {
     int n = x.size();
-    
+    float *d_x, *d_y, *d_y_pred, *d_hessA, *d_hessT, *d_hessR, *d_hessB;
+    cudaMalloc(&d_x, n * sizeof(float));
+    cudaMalloc(&d_y, n * sizeof(float));
+    cudaMalloc(&d_y_pred, n * sizeof(float));
+    cudaMalloc(&d_hessA, sizeof(float));
+    cudaMalloc(&d_hessT, sizeof(float));
+    cudaMalloc(&d_hessR, sizeof(float));
+    cudaMalloc(&d_hessB, sizeof(float));
+
+    cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_y, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+
+    int threadsPerBlock = 256;
+    int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
+
+    // Compute model predictions
+    computeModel<<<blocks, threadsPerBlock>>>(d_x, d_y_pred, A, T, R, B, n);
+    cudaDeviceSynchronize();
+
+    // Initialize Hessian diagonals
+    cudaMemset(d_hessA, 0, sizeof(float));
+    cudaMemset(d_hessT, 0, sizeof(float));
+    cudaMemset(d_hessR, 0, sizeof(float));
+    cudaMemset(d_hessB, 0, sizeof(float));
+
+    // Compute Hessian diagonal
+    computeHessianDiag<<<blocks, threadsPerBlock>>>(d_x, d_y, d_y_pred, d_hessA, d_hessT, d_hessR, d_hessB, A, T, R, n);
+    cudaDeviceSynchronize();
+
+    float hessA = 0.0f, hessT = 0.0f, hessR = 0.0f, hessB = 0.0f;
+    cudaMemcpy(&hessA, d_hessA, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&hessT, d_hessT, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&hessR, d_hessR, sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&hessB, d_hessB, sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Uncertainty estimation: sqrt(1 / Hessian)
+    sigmaA = sqrtf(1.0f / hessA);
+    sigmaT = sqrtf(1.0f / hessT);
+    sigmaR = sqrtf(1.0f / hessR);
+    sigmaB = sqrtf(1.0f / hessB);
+
+    cudaFree(d_x);
+    cudaFree(d_y);
+    cudaFree(d_y_pred);
+    cudaFree(d_hessA);
+    cudaFree(d_hessT);
+    cudaFree(d_hessR);
+    cudaFree(d_hessB);
+}
+
+void fitCurve(std::vector<float>& x, std::vector<float>& y, float& A, float& T, float& R, float& B, float initial_lr = 0.2f) {
+    int n = x.size();
+
     // Device memory
     float *d_x, *d_y, *d_y_pred, *d_loss, *d_gradA, *d_gradT, *d_gradR, *d_gradB;
     cudaMalloc(&d_x, n * sizeof(float));
@@ -66,10 +140,20 @@ void fitCurve(std::vector<float>& x, std::vector<float>& y, float& A, float& T, 
     int threadsPerBlock = 256;
     int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
 
-    // Optimization loop
-    for (int iter = 0; iter < max_iterations; ++iter) {
+    // Levenberg-Marquardt parameters
+    float lambda = 1.0f; // damping factor
+    float lambda_up = 5.0f;
+    float lambda_down = 0.5f;
+    float learning_rate = initial_lr;
+
+    int nIterations = 0;
+    double tolerance = 1e-3;
+    float loss = 0.0f, old_loss = 0.0;
+    float tolerance_check = 0.0f;
+    
+    do {
         // Initialize loss and gradients
-        float loss = 0.0f, gradA = 0.0f, gradT = 0.0f, gradR = 0.0f, gradB = 0.0f;
+        float gradA = 0.0f, gradT = 0.0f, gradR = 0.0f, gradB = 0.0f;
         cudaMemset(d_loss, 0, sizeof(float));
         cudaMemset(d_gradA, 0, sizeof(float));
         cudaMemset(d_gradT, 0, sizeof(float));
@@ -94,17 +178,56 @@ void fitCurve(std::vector<float>& x, std::vector<float>& y, float& A, float& T, 
         cudaMemcpy(&gradR, d_gradR, sizeof(float), cudaMemcpyDeviceToHost);
         cudaMemcpy(&gradB, d_gradB, sizeof(float), cudaMemcpyDeviceToHost);
 
-        // Update parameters
-        A -= learning_rate * gradA / n;
-        T -= learning_rate * gradT / n;
-        R -= learning_rate * gradR / n;
-        B -= learning_rate * gradB / n;
+        // Save current parameters
+        float A_old = A, T_old = T, R_old = R, B_old = B;
 
-        // Print progress
-        if (iter % 100 == 0) {
-            std::cout << "Iteration " << iter << ", Loss: " << loss 
-                      << ", A: " << A << ", T: " << T << ", R: " << R << ", B: " << B << std::endl;
+        // LM update: add damping to gradient step
+        A -= learning_rate * gradA / (n + lambda);
+        T -= learning_rate * gradT / (n + lambda);
+        R -= learning_rate * gradR / (n + lambda);
+        B -= learning_rate * gradB / (n + lambda);
+
+        // Recompute loss with new parameters
+        cudaMemset(d_loss, 0, sizeof(float));
+        computeModel<<<blocks, threadsPerBlock>>>(d_x, d_y_pred, A, T, R, B, n);
+        cudaDeviceSynchronize();
+        computeLoss<<<blocks, threadsPerBlock>>>(d_y, d_y_pred, d_loss, n);
+        cudaDeviceSynchronize();
+        float new_loss = 0.0f;
+        cudaMemcpy(&new_loss, d_loss, sizeof(float), cudaMemcpyDeviceToHost);
+        new_loss /= n;
+
+        // Adaptive lambda adjustment
+        if (new_loss < loss) {
+            // Accept update, decrease lambda
+            lambda *= lambda_down;
+            old_loss = new_loss;
+        } else {
+            // Reject update, increase lambda and revert parameters
+            lambda *= lambda_up;
+            A = A_old;
+            T = T_old;
+            R = R_old;
+            B = B_old;
+            continue;
         }
+
+        tolerance_check = fabs(loss - old_loss)/ fabs(old_loss);
+
+        if (nIterations % 10 == 0){
+            printf(" %f, %f, %f|%f| A: %f, T: %f, R: %f, B: %f, lambda: %f\n", old_loss, loss, new_loss, tolerance_check, A, T, R, B, lambda);
+        }
+
+        if (nIterations > 50 && tolerance_check < tolerance) {
+            printf("Convergence reached. num of iteration : %d | loss tolerance %f\n", nIterations, tolerance_check);
+            break;
+        }
+
+    } while ( nIterations++ < 10000);
+
+    //if not converged, print warning
+    if (nIterations >= 10000) {
+        printf("Warning: Maximum iterations reached without convergence. tolerance %f\n", tolerance_check);
     }
 
     // Clean up
@@ -132,11 +255,15 @@ int main() {
     for( int i = 0; i < y.size(); i++ ) x.push_back(i);
 
     // Initial parameter guesses
-    float A = -1000.0, T = 100, R = 10.0, B = 8000;
+    float A = 3000.0, T = 160, R = 100.0, B = 12000;
 
     fitCurve(x, y, A, T, R, B);
 
-    std::cout << "Final parameters: A=" << A << ", T=" << T << ", R=" << R << ", B=" << B << std::endl;
+    printf("Final parameters: (A, T, R, B) = %f, %f, %f, %f\n", A, T, R, B);
+    // Compute uncertainties
+    float sigmaA, sigmaT, sigmaR, sigmaB;
+    computeUncertainties(x, y, A, T, R, B, sigmaA, sigmaT, sigmaR, sigmaB);
+    printf("Uncertainties: (sigmaA, sigmaT, sigmaR, sigmaB) = %f, %f, %f, %f\n", sigmaA, sigmaT, sigmaR, sigmaB);
 
     return 0;
 }
