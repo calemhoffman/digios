@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "Matrix_zero.h"
+#include "Matrix.h"
 
 class FindFit {
 public:
@@ -180,8 +180,8 @@ private:
 
     }
 
-    Matrix Jt = Transpose(J);
-    Matrix H = Jt * J;
+    Matrix Jt = Transpose(J); // p x n
+    Matrix H = Jt * J; // p x p Hessian matrix
 
     if( lambda == -1 ){ // if lambda is not set, calculate initial lambda
       lambda = 0;
@@ -194,10 +194,10 @@ private:
       printf("====== ini lambda : %f \n", lambda);
     }
 
-    Matrix DI(H.GetNRow(), H.GetNCol()); // identity matrix
-    for( int i = 0; i < H.GetNRow() ; i++) DI(i,i) = lambda ;
+    Matrix DI(p, p); // identity matrix, p x p 
+    for( int i = 0; i < p ; i++) DI(i,i) = lambda ;
 
-    Matrix Q = H + DI;
+    Matrix Q = H + DI; // p x p matrix for Hessian + lambda * I
     try{
       CoVar = Inv(Q);
     }catch( Exception err){
@@ -208,7 +208,6 @@ private:
     Matrix JtY = Jt * dY; // p x 1 matrix for gradient of SSR
 
     SSR = (Transpose(dY) * dY)(0, 0); // compute initial SSR
-
     Matrix dpar = CoVar * JtY; // p x 1 matrix for
 
     std::vector<double> par_new = par; // new parameters
