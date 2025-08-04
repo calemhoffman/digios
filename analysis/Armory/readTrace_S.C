@@ -30,12 +30,12 @@ double WSFunc(double *x , double * par ){
    return par[0]* TMath::Exp( ( x[0] - par[1])/par[2] ) + par[3];
 }
 
-void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
+void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool print = false){
 
 /**///==============================================================   
 
    TFile * f1 = new TFile (fileName, "read");
-   TTree * tree = (TTree *) f1->Get("tree");
+   TTree * tree = (TTree *) f1->Get("gen_tree");
 
    TMacro * macro = (TMacro *) f1->Get("trace_info");
    TString traceLenStr;
@@ -46,8 +46,14 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
    const int maxTraceLen = traceLenStr.Atoi();
    
    if( tree == NULL ) {
-      printf("===== Are you using gen_runXXX.root ? please use runXXX.root\n");
-      return;
+      printf("===== Are you using gen_runXXX.root ? please use runXXX.rootcannot find gen_tree, try to find tree instead\n");
+      tree = (TTree *) f1->Get("tree");
+      if( tree == NULL ){
+         printf(" cannot find tree. the file probably not right. Abort.\n");
+         return;
+      }else{
+         printf(" found tree!\n");
+      }
    }
    
    int totnumEntry = tree->GetEntries();
@@ -150,15 +156,18 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
          g->Set(traceLength[j]);  
          double base = 0;
          for( int k = 0; k < traceLength[j] ; k++){
+            int haha;
             if( trace[j][k] < 16000){
                base = trace[j][k];
                g->SetPoint(k, k, trace[j][k]);
+               haha = trace[j][k];
             }else{
                g->SetPoint(k, k, base);
+               haha = base;
             }
             //printf("%4d, %5d \n", k, base);
             //if( k % 10 ==0 ) printf("\n");
-
+            if( print) printf("{%3d, %d},\n", k, haha);
          }
          
          g->SetTitle(Form("ev: %d, nHit : %d, id : %d, idKind : %d, trace Length : %u\n", ev, j, idDet, idKind, traceLength[j]));

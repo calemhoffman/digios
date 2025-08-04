@@ -77,8 +77,11 @@ public:
       
       count++;
       deltaSSR = fabs(SSR - lastSSR);
+      if( SSR < lastSSR && deltaSSR < tolerance * lastSSR ){
+        break;
+      }
 
-    }while(count < max_iter && deltaSSR > tolerance * SSR && 1e+12 > lambda && lambda > 1e-12);
+    }while(count < max_iter && 1e+12 > lambda && lambda > 1e-12);
 
 
     if( count >= max_iter ){
@@ -221,6 +224,7 @@ private:
     }
     Matrix dYn = Y - fn;
     double new_SSR = (Transpose(dYn) * dYn)(0, 0); // new SSR
+    // printf("============ lambda: %e, SSR: %f, new SSR: %f\n", lambda, SSR, new_SSR);
 
     double delta = new_SSR - SSR; // change in SSR
     if (delta > 0) { 
@@ -231,6 +235,13 @@ private:
       SSR = new_SSR; // update SSR
       par = par_new; // update parameters
     }
+
+    // printf("Parameters: ");
+    // for (int i = 0; i < p; ++i) {
+    //   printf("%f ", par[i]);
+    // }
+    // printf("\n");
+
 
     return 1; // Return 0 for success, non-zero for failure
   }
