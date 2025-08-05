@@ -224,7 +224,7 @@ private:
     }
     Matrix dYn = Y - fn;
     double new_SSR = (Transpose(dYn) * dYn)(0, 0); // new SSR
-    // printf("============ lambda: %e, SSR: %f, new SSR: %f\n", lambda, SSR, new_SSR);
+    printf("==== lambda: %e, SSR: %f, new SSR: %f\n", lambda, SSR, new_SSR);
 
     double delta = new_SSR - SSR; // change in SSR
     if (delta > 0) { 
