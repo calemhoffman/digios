@@ -23,24 +23,31 @@ __global__ void transpose(float* A, float* AT, int rows, int cols) {
     }
 }
 
-__global__ void computeYf(float* dx, float *dY, float* dYf, float * para, int n) {
+__global__ void computeYf(float* dx, float *dY, float* dYf, const float *dpara, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    float A = dpara[0];
+    float T = dpara[1];
+    float R = dpara[2];
+    float B = dpara[3];
     if (idx < n) {
-        float haha = para[0] / (1.0f + expf((dx[idx] - para[1]) / para[2])) + para[3];
-        dYf[idx] = dY[idx] - haha; // Y - f(p_0)
+        // Load parameters from device memory
+        float model = A / (1.0f + expf((dx[idx] - T) / R)) + B;
+        dYf[idx] = dY[idx] - model; // Y - f(p_0)
     }
 }
 
-__global__ void computeJacobian(float* dx, float* dJ, float * para, int n, int p) {
+__global__ void computeJacobian(float* dx, float* dJ, float * dpara, int n, int p) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    float A = dpara[0];
+    float T = dpara[1];
+    float R = dpara[2];
     if (idx < n) {
-        float exp_term = expf((dx[idx] - para[1]) / para[2]);
+        float exp_term = expf((dx[idx] - T) / R);
         float denom = 1.0f + exp_term;
-
         // Fill the Jacobian matrix J
         dJ[idx * p + 0] = 1.0f / denom; // dA
-        dJ[idx * p + 1] = -para[0] * exp_term / (para[2] * denom * denom); // dT
-        dJ[idx * p + 2] = (para[0] * (dx[idx] - para[1]) * exp_term) / (para[2] * para[2] * denom * denom); // dR
+        dJ[idx * p + 1] = -A * exp_term / (R * denom * denom); // dT
+        dJ[idx * p + 2] = (A * (dx[idx] - T) * exp_term) / (R * R * denom * denom); // dR
         dJ[idx * p + 3] = 1.0f; // dB
     }
 }
@@ -65,16 +72,16 @@ __global__ void computeInvserseOfDiagonal(float *dS, float *dInvS, int p) {
 
 
 void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double lambdaUp = 10, double lambdaDown = 10){
-
+    
     // Simulated data
     int n = 100;
     std::vector<float> x(n);
     std::vector<float> y(n);
     std::vector<float> para = {12.0f, 10.0f, 5.0f, 7.0f}; // Initial guess for A, T, R, B
     int p = para.size();
-
+    
     const int dF = n - p; // degrees of freedom
-
+    
     float maxNoise = 0.0f; // Maximum noise level
     for( int i = 0; i < n; i++ ) {
         x[i] = i;
@@ -83,20 +90,30 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         printf("{%.0f, %.3f},", x[i], y[i]);
     }
     printf("\n");
-
+    
     // cuda memory pointers
     float *dx, *dy;
+    float *dpara;
     cudaMalloc(&dx, n * sizeof(float));
     cudaMalloc(&dy, n * sizeof(float));
-    cudaMemcpy(dx, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(dy, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
-    
-    int threadsPerBlock = 256;
-    int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
-
+    cudaMalloc(&dpara, p * sizeof(float));
     float *dYf, *dJ;
     cudaMalloc(&dYf, n * sizeof(float)); // Yf = Y - f(p_0)
     cudaMalloc(&dJ, n * p * sizeof(float)); // Jacobian matrix
+    float * dpara_new;
+    cudaMalloc(&dpara_new, p * sizeof(float)); // New parameters
+    float *dH;
+    cudaMalloc(&dH, p * p * sizeof(float)); // Hessian matrix
+    float *dG;
+    cudaMalloc(&dG, p * sizeof(float)); // Gradient vector
+
+    cudaMemcpy(dx, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(dy, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(dpara, para.data(), p * sizeof(float), cudaMemcpyHostToDevice);
+
+    int threadsPerBlock = 256;
+    int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
+
 
     float lambda = 0.53f; // LMA factor
     float SSR = 0.0f;
@@ -107,52 +124,82 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
     Matrix H_inv(p, p); // Inverse of Hessian matrix;
 
     // Compute predicted values
-    computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, para.data(), n);
+    cudaMemset(dYf, 0, n * sizeof(float)); // Initialize dYf to zero
+    computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, dpara, n);
     cudaDeviceSynchronize(); // ensure kernel execution is complete
 
-    // Compute the SSR (mean squared error) in host
+    
+    // // Compute the SSR (mean squared error) in host
     std::vector<float> Yf(n);
     cudaMemcpy(Yf.data(), dYf, n * sizeof(float), cudaMemcpyDeviceToHost);
-    for (int i = 0; i < n; i++) SSR += Yf[i] * Yf[i];
+    SSR = 0.0f;
+    for (int i = 0; i < n; i++){
+        SSR += Yf[i] * Yf[i];
+        // printf(" %d | %f - %f = %f \n", i, y[i], (para[0] / (1.0f + expf((x[i] - para[1]) / para[2])) + para[3]), Yf[i]);
+    }
     printf("Initial SSR = %f\n", SSR);
-
-    float *dJT;
-    cudaMalloc(&dJT, p * n * sizeof(float)); // Transpose of J
-
-    float *dH;
-    cudaMalloc(&dH, p * p * sizeof(float)); // Hessian matrix
-
-    float *dG;
-    cudaMalloc(&dG, p * sizeof(float)); // Gradient vector
+    
 
     float deltaSSR = 0.f;
 
     //^=========================================
 
-    do{
+    // do{
 
         // Compute Jacobian matrix J
-        computeJacobian<<<blocks, threadsPerBlock>>>(dx, dJ, para.data(), n, p);
+        computeJacobian<<<blocks, threadsPerBlock>>>(dx, dJ, dpara, n, p);
         cudaDeviceSynchronize(); 
-
-        // Compute Hessian matrix H = J^T * J
-
-        dim3 threadsPerBlock2(16, 16);
-        dim3 blocksPerGrid((p + 15) / 16, (n + 15) / 16);
-        transpose<<<blocksPerGrid, threadsPerBlock2>>>(dJ, dJT, n, p); // Transpose J
-
 
         // CUDA matrix multiplication for H = J^T * J
         cublasHandle_t handle;
         cublasCreate(&handle);
         const float beta = 0.0f; // Initialize H to zero
         const float alpha = 1.0f; // Scaling factor for the matrix multiplication
-        cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, p, p, n, &alpha, dJT, p, dJ, n, &beta, dH, p); // H = J^T * J
+        
+        printf("Computing Hessian matrix H = J^T * J\n");
+        
+        cublasSgemm(handle,
+            CUBLAS_OP_T, // Transpose dJ: now shape p x n
+            CUBLAS_OP_N, // dJ shape is n x p
+            p,           // rows of output matrix H
+            p,           // columns of output matrix H
+            n,           // inner dimension
+            &alpha,
+            dJ, p,       // A: J, leading dim = p (since CUBLAS_OP_T)
+            dJ, p,       // B: J, leading dim = p
+            &beta,
+            dH, p);      // C: H, output, shape p x p, leading dim = p
+
+        
         cublasDestroy(handle);
+
+        printf("Hessian matrix H computed.\n");
         
         // copy dH back to Host, since H is small matrix, 4x4
         std::vector<float> H_matrix(p * p);
         cudaMemcpy(H_matrix.data(), dH, p * p * sizeof(float), cudaMemcpyDeviceToHost);
+
+        // Print the Hessian matrix
+        printf("Hessian matrix H:\n");
+        for (int i = 0; i < p; i++) {
+            for (int j = 0; j < p; j++) {
+                printf("%f ", H_matrix[i * p + j]);
+            }
+            printf("\n");
+        }
+
+
+    cudaFree(dx);
+    cudaFree(dy);
+    cudaFree(dYf);
+    cudaFree(dJ);
+    cudaFree(dH);
+    cudaFree(dG);
+    cudaFree(dpara);
+    cudaFree(dpara_new);
+
+    return;
+
 
         // Compute gradient: g = J^T * Yf 
         cublasHandle_t handle3;
@@ -179,10 +226,26 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         // Compute inverse of H using Matrix class
         if( Det(H) == 0.0 ) {
             std::cout << "Hessian is singular, cannot compute inverse." << std::endl;
-            break;
+            // break;
+            
         }
 
         H_inv = Inv(H);
+
+        H_inv.Print(); // Print the inverse of Hessian matrix
+
+
+            cudaFree(dx);
+    cudaFree(dy);
+    cudaFree(dYf);
+    cudaFree(dJ);
+    cudaFree(dH);
+    cudaFree(dG);
+    cudaFree(dpara);
+    cudaFree(dpara_new);
+
+    return;
+
 
         // Update parameters: p = p - H_inv * G
         Matrix delta = H_inv * G; // delta = H_inv * G
@@ -192,7 +255,8 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
                 
         // Calculate the new SSR.
         // Compute predicted values
-        computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, para_new.data(), n);
+        cudaMemcpy(dpara_new, para_new.data(), p * sizeof(float), cudaMemcpyHostToDevice);
+        computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, dpara_new, n);
         cudaDeviceSynchronize(); // ensure kernel execution is complete
         
         // Compute the SSR (mean squared error)
@@ -200,7 +264,9 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         cudaMemcpy(Yf.data(), dYf, n * sizeof(float), cudaMemcpyDeviceToHost);
         for (int i = 0; i < n; i++) new_SSR += Yf[i] * Yf[i];
         
-        printf("         new SSR = %f, parameters: [%f, %f, %f, %f]\n", new_SSR, para_new[0], para_new[1], para_new[2], para_new[3]);
+        printf("==== %d === SSR : %f, new_SSR: %f, lambda: %f\n", count, SSR, new_SSR, lambda);
+
+        // printf("         new SSR = %f, parameters: [%f, %f, %f, %f]\n", new_SSR, para_new[0], para_new[1], para_new[2], para_new[3]);
         deltaSSR = fabs(SSR - new_SSR);
 
         if(  new_SSR < SSR ) {
@@ -214,10 +280,10 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         count++;
 
         // if( count % 10 == 0) {
-            printf("Iteration %d: SSR = %f, Parameters = [%f, %f, %f, %f], Lambda = %f\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
+            // printf("Iteration %d: SSR = %f, Parameters = [%f, %f, %f, %f], Lambda = %f\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
         // }
 
-    }while( count < 1000 && deltaSSR > tolerance * SSR );
+    // }while( count < 1000 && deltaSSR > tolerance * SSR );
 
     
     if( count >= max_iter ){
@@ -248,10 +314,12 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
     cudaFree(dy);
     cudaFree(dYf);
     cudaFree(dJ);
-    cudaFree(dJT);
     cudaFree(dH);
     cudaFree(dG);
+    cudaFree(dpara);
+    cudaFree(dpara_new);
 
+    return;
 
 }
 
