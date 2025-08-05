@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "Matrix.h"
+#include "timer.h"
 
 class FindFit {
 public:
@@ -171,6 +172,8 @@ private:
     // p = p0 + inverse(H + lambda * I) * J^T * (Y - f)
     // Newton's method is fast but unstable, while Gradient Descent is stable but slow
 
+    unsigned int start_time = getTime_us(); // start time for performance measurement
+
     Matrix J(n, p);  // n x p matrix for function values
     Matrix f(n ,1);  // n x 1 matrix for fitted values
 
@@ -185,6 +188,9 @@ private:
 
     Matrix Jt = Transpose(J); // p x n
     Matrix H = Jt * J; // p x p Hessian matrix
+
+    unsigned int time1 = getTime_us();
+    printf("Hessian matrix computed in %u us\n", time1 - start_time);
 
     if( lambda == -1 ){ // if lambda is not set, calculate initial lambda
       lambda = 0;
@@ -207,20 +213,22 @@ private:
       return -1; // Error in matrix inversion
     }
 
+    unsigned int time2 = getTime_us();
+    printf("Covariance matrix computed in %u us\n", time2 - time1);
+    CoVar.Print();
+
+
     Matrix dY = Y - f;
     Matrix JtY = Jt * dY; // p x 1 matrix for gradient of SSR
 
     SSR = (Transpose(dY) * dY)(0, 0); // compute initial SSR
     Matrix dpar = CoVar * JtY; // p x 1 matrix for
 
+    unsigned int time3 = getTime_us();
+    printf("Gradient computed in %u us\n", time3 - time2);
+
     std::vector<double> par_new = par; // new parameters
     for (int i = 0; i < p; ++i)  par_new[i] += dpar(i, 0); // update parameters
-
-    //printf("Updated parameters: ");
-    for (int i = 0; i < p; i++) {
-        printf("--------------  %f", par_new[i]);
-    }
-    printf("\n");
 
     //====================== Compute new SSR
     Matrix fn(n, 1);
@@ -231,9 +239,6 @@ private:
     Matrix dYn = Y - fn;
     double new_SSR = (Transpose(dYn) * dYn)(0, 0); // new SSR
     printf("==== lambda: %e, SSR: %f, new SSR: %f\n", lambda, SSR, new_SSR);
-    CoVar.Print();
-    JtY.Print();
-    dpar.Print();
 
 
     double delta = new_SSR - SSR; // change in SSR

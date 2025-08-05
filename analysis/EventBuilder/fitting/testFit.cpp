@@ -6,24 +6,24 @@ int main(){
 
   // generate data 
   std::vector<double> x, y;
-  std::vector<double> par = {12, 10, 5, 7}; // initial parameters for the sigmoid function
+  std::vector<double> par = {12, 100, 5, 7}; // initial parameters for the sigmoid function
 
   double maxNoise = 0; // maximum noise level
 
-  for( int i = 0; i < 100; i++){
+  for( int i = 0; i < 500; i++){
     x.push_back(i);
     double noise = (rand() % 100) / 100.0 * maxNoise; // random noise
-    double yVal = 10. / (1 + exp((i - 20.) / 3.)) + 8. + noise; // sigmoid function with noise
+    double yVal = 10. / (1 + exp((i - 200.) / 3.)) + 8. + noise; // sigmoid function with noise
     // round up to 3 decimal places
     yVal = round(yVal * 1000.0) / 1000.;
 
     y.push_back(yVal); 
 
-    printf("{%.0f, %.3f},", x[i], y[i]);
+    // printf("{%.0f, %.3f},", x[i], y[i]);
 
   }
 
-  printf("\n");
+  // printf("\n");
 
 
 
@@ -36,12 +36,17 @@ int main(){
 
   // // Initial parameter guesses
   // std::vector<double> par = {3000, 150, 100, 8000}; // A, T, R, B
-  
+
+  unsigned int time0 = getTime_us(); // start time
+
   FindFit fit;
 
   fit.SetData(x, y);
   fit.SetParameters(par); // initial guess for parameters
   fit.LMA(1e-6, 10000, 10, 10); // run the Levenberg-Marquardt algorithm
+
+  unsigned int time1 = getTime_us(); // end time
+  printf("========== Time taken for LMA: %u us\n", time1 - time0 );
 
 
   // Matrix A0(4, 4);
