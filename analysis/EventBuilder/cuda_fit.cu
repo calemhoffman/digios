@@ -158,17 +158,21 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         
         printf("Computing Hessian matrix H = J^T * J\n");
         
+        // dJ is stored as a n x p row-major matrix. CUBLAS expects column-major format,
+        // so it sees dJ as a p x n matrix, which is equivalent to J^T.
+        // To compute H = J^T * J, we can do (J^T) * (J^T)^T.
+        // This corresponds to cublasSgemm with opA = CUBLAS_OP_N and opB = CUBLAS_OP_T.
         cublasSgemm(handle,
-            CUBLAS_OP_T, // Transpose dJ: now shape p x n
-            CUBLAS_OP_N, // dJ shape is n x p
-            p,           // rows of output matrix H
-            p,           // columns of output matrix H
-            n,           // inner dimension
+            CUBLAS_OP_N, // op(A) = A = J^T
+            CUBLAS_OP_T, // op(B) = A^T = (J^T)^T = J
+            p,           // m = rows of op(A) and H
+            p,           // n = columns of op(B) and H
+            n,           // k = inner dimension
             &alpha,
-            dJ, p,       // A: J, leading dim = p (since CUBLAS_OP_T)
-            dJ, p,       // B: J, leading dim = p
+            dJ, p,       // A is p x n, lda = p
+            dJ, p,       // B is p x n, ldb = p
             &beta,
-            dH, p);      // C: H, output, shape p x p, leading dim = p
+            dH, p);      // C is p x p, ldc = p
 
         
         cublasDestroy(handle);
@@ -204,7 +208,9 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         // Compute gradient: g = J^T * Yf 
         cublasHandle_t handle3;
         cublasCreate(&handle3);
-        cublasSgemv(handle3, CUBLAS_OP_T, n, p, &alpha, dJ, n, dYf, 1, &beta, dG, 1); // g = J^T * Yf
+        // To compute g = J^T * Yf, we can use the fact that dJ is already J^T in column-major format.
+        // So we can use cublasSgemv with opA = CUBLAS_OP_N.
+        cublasSgemv(handle3, CUBLAS_OP_N, p, n, &alpha, dJ, p, dYf, 1, &beta, dG, 1); // g = J^T * Yf
         cublasDestroy(handle3);
 
         // copy dG back to Host
