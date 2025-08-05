@@ -2,6 +2,34 @@
 
 #include <random>
 
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_multifit_nlinear.h>
+
+struct trace_data {
+  size_t n;
+  double *y;
+};
+
+int fit_model(const gsl_vector * x, void *data, gsl_vector * f){
+  size_t n = ((struct trace_data *)data)->n;
+  double *y = ((struct trace_data *)data)->y;
+
+  double A        = gsl_vector_get(x, 0);
+  double T0       = gsl_vector_get(x, 1);
+  double riseTime = gsl_vector_get(x, 2);
+  double B        = gsl_vector_get(x, 3);
+
+  for (size_t i = 0; i < n; ++i){
+    double t = i;
+    double Yi = A / (1 + exp((t - T0) / riseTime)) + B;
+    gsl_vector_set(f, i, Yi - y[i]);
+  }
+
+  return GSL_SUCCESS;
+}
+
 int main(){
 
   // generate data 
@@ -10,10 +38,12 @@ int main(){
 
   double maxNoise = 0; // maximum noise level
 
-  for( int i = 0; i < 500; i++){
+  const int n = 1000; // number of data points
+
+  for( int i = 0; i < n; i++){
     x.push_back(i);
     double noise = (rand() % 100) / 100.0 * maxNoise; // random noise
-    double yVal = 10. / (1 + exp((i - 200.) / 3.)) + 8. + noise; // sigmoid function with noise
+    double yVal = 10. / (1 + exp((i - 200.) / 30.)) + 8. + noise; // sigmoid function with noise
     // round up to 3 decimal places
     yVal = round(yVal * 1000.0) / 1000.;
 
@@ -65,6 +95,62 @@ int main(){
   // printf("Det(A0) = %f\n", Det(A0));
   // Matrix D0 = Inv(A0);
   // D0.Print();
+
+  unsigned int time2 = getTime_us();
+
+  // set the trace_data 
+  
+  struct trace_data d = { n, new double[n] };
+  for( int j = 0; j < n; j++) d.y[j] = y[j];
+  
+  gsl_multifit_nlinear_fdf f;
+  f.f = &fit_model;
+  f.df = NULL;   // Use finite differences
+  f.n = d.n;
+  f.p = 4;
+  f.params = &d;
+  
+  gsl_vector *para = gsl_vector_alloc(4);
+  gsl_vector_set(para, 0, 100.0); // Initial guess for A
+  gsl_vector_set(para, 1, 100.0); // Initial guess for T0
+  gsl_vector_set(para, 2, 1.0);   // Initial guess for rise time
+  gsl_vector_set(para, 3, 8000.0); // Initial guess for baseline
+  
+  const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
+  gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
+  gsl_multifit_nlinear_workspace *w = gsl_multifit_nlinear_alloc(T, &fdf_params, d.n, 4);
+  gsl_multifit_nlinear_init(para, &f, w);
+
+  // Solve the system using iteration
+  int status;
+  size_t iter = 0, max_iter = 100;
+  do {
+    status = gsl_multifit_nlinear_iterate(w);
+    if (status) break;
+    status = gsl_multifit_test_delta(w->dx, w->x, 1e-5, 1e-5);
+    iter++;
+  } while (status == GSL_CONTINUE && iter < max_iter);
+
+  // Store the results
+  gsl_vector *result = gsl_multifit_nlinear_position(w);
+  std::vector<double> fit_params(4);
+  for (size_t i = 0; i < 4; i++){
+    fit_params[i] = gsl_vector_get(result, i);
+  }
+  
+  gsl_multifit_nlinear_free(w);
+  delete[] d.y;
+
+  unsigned int time3 = getTime_us();
+  printf("========== Time taken for GSL fit: %u us\n", time3 - time2);
+
+  printf("Fit parameters:\n");
+  for (size_t i = 0; i < fit_params.size(); i++){
+    printf("Parameter %zu: %.6f\n", i, fit_params[i]);
+  }
+
+
+  return 0;
 
 
 }

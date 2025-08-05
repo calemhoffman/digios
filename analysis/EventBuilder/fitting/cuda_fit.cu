@@ -49,26 +49,13 @@ __global__ void computeJacobian(float* dx, float* dJ, const float * para, int n,
 }
 
 
-void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double lambdaUp = 10, double lambdaDown = 10){
+float NonLinearRegression(const std::vector<float> &x, const std::vector<float> &y, std::vector<float> &para, std::vector<float> &error, bool debug = false, float lambda = -1.0f, float tolerance = 1e-6, int max_iter = 10000, float lambdaUp = 10, float lambdaDown = 10){
     
     // Simulated data
-    int n = 500;
-    std::vector<float> x(n);
-    std::vector<float> y(n);
-    std::vector<float> para = {12.0f, 100.0f, 5.0f, 7.0f}; // Initial guess for A, T, R, B
+    int n = x.size();
     int p = para.size();
-    
     const int dF = n - p; // degrees of freedom
-    
-    float maxNoise = 0.0f; // Maximum noise level
-    for( int i = 0; i < n; i++ ) {
-        x[i] = i;
-        y[i] = 10.0f / (1 + expf((i - 200.0f) / 3.0f)) + 8.0f + (rand() % 100) / 100.0 * maxNoise; // Adding some noise
-        y[i] = round(y[i] * 1000.0f) / 1000.0f; // Round to 3 decimal places
-        // printf("{%.0f, %.3f},", x[i], y[i]);
-    }
-    // printf("\n");
-    
+        
     // cuda memory pointers
     float *dx, *dy;
     cudaMalloc(&dx, n * sizeof(float));
@@ -76,8 +63,6 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
     float *dYf, *dJ;
     cudaMalloc(&dYf, n * sizeof(float)); // Yf = Y - f(p_0)
     cudaMalloc(&dJ, n * p * sizeof(float)); // Jacobian matrix
-    float * dpara_new;
-    cudaMalloc(&dpara_new, p * sizeof(float)); // New parameters
     float *dH;
     cudaMalloc(&dH, p * p * sizeof(float)); // Hessian matrix
     float *dG;
@@ -86,15 +71,16 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
     cudaMemcpy(dx, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(dy, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 
-    int threadsPerBlock = 1024;
+    int threadsPerBlock = 512;
     int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
 
+    if( debug ) printf("Number of blocks: %d, Threads per block: %d\n", blocks, threadsPerBlock);   
 
-    float lambda = 1.0f; // LMA factor
     float SSR = 0.0f;
     int count = 0; // count of iterations
 
     float new_SSR = 0.0f;
+    std::vector<float> para_new;
 
     Matrix H_inv(p, p); // Inverse of Hessian matrix;
 
@@ -102,31 +88,37 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
     cudaMemset(dYf, 0, n * sizeof(float)); // Initialize dYf to zero
     computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, para.data(), n);
     cudaDeviceSynchronize(); // ensure kernel execution is complete
-
     
-    // // Compute the SSR (mean squared error) in host
+    // Compute the SSR (mean squared error) in host
     std::vector<float> Yf(n);
     cudaMemcpy(Yf.data(), dYf, n * sizeof(float), cudaMemcpyDeviceToHost);
     SSR = 0.0f;
-    for (int i = 0; i < n; i++){
-        SSR += Yf[i] * Yf[i];
-        // printf(" %d | %f - %f = %f \n", i, y[i], (para[0] / (1.0f + expf((x[i] - para[1]) / para[2])) + para[3]), Yf[i]);
-    }
-    printf("Initial SSR = %f\n", SSR);
-    
+    for (int i = 0; i < n; i++) SSR += Yf[i] * Yf[i];
 
     float deltaSSR = 0.f;
 
     //^=========================================
 
     do{
-
-        // print current parameters
-        printf("Iteration %d: SSR = %f,  {%f, %f, %f, %f}, Lambda = %.3e\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
+        // printf("Iteration %d: SSR = %f,  {%f, %f, %f, %f}, Lambda = %.3e\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
 
         // Compute Jacobian matrix J
         computeJacobian<<<blocks, threadsPerBlock>>>(dx, dJ, para.data(), n, p);
         cudaDeviceSynchronize(); 
+
+        
+        if( lambda == -1 ){// Copy Jacobian matrix to host for lambda calculation
+            std::vector<float> J_matrix(n * p);
+            cudaMemcpy(J_matrix.data(), dJ, n * p * sizeof(float), cudaMemcpyDeviceToHost);
+            lambda = 0.0f; // Reset lambda
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < p; j++) {
+                    lambda += J_matrix[i * p + j] * J_matrix[i * p + j];
+                }
+            }
+            lambda = sqrt(lambda / (n * p)); // Calculate initial lambda
+            if( debug )  printf("Initial lambda calculated: %.3e\n", lambda);
+        }
 
         // CUDA matrix multiplication for H = J^T * J
         cublasHandle_t handle;
@@ -152,9 +144,6 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
         
         cublasDestroy(handle);
 
-        // copy dH back to Host, since H is small matrix, 4x4
-        std::vector<float> H_matrix(p * p);
-        cudaMemcpy(H_matrix.data(), dH, p * p * sizeof(float), cudaMemcpyDeviceToHost);
 
         // Compute gradient: g = J^T * Yf 
         cublasHandle_t handle3;
@@ -164,11 +153,13 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
         cublasSgemv(handle3, CUBLAS_OP_N, p, n, &alpha, dJ, p, dYf, 1, &beta, dG, 1); // g = J^T * Yf
         cublasDestroy(handle3);
 
+        // copy dH back to Host, since H is small matrix, 4x4
+        std::vector<float> H_matrix(p * p);
+        cudaMemcpy(H_matrix.data(), dH, p * p * sizeof(float), cudaMemcpyDeviceToHost);
         // copy dG back to Host
         std::vector<float> G_vector(p);
         cudaMemcpy(G_vector.data(), dG, p * sizeof(float), cudaMemcpyDeviceToHost);
 
-        // Convert H and G to Matrix class
         Matrix H(p, p);
         for (int i = 0; i < p; i++) {
             for (int j = 0; j < p; j++) {
@@ -190,15 +181,12 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
 
         // Update parameters: p = p - H_inv * G
         Matrix delta = H_inv * G; // delta = H_inv * G
-
         std::vector<float> para_new = para; // Copy current parameters
         for (int i = 0; i < p; i++) para_new[i] += delta(i, 0); // Update parameters    
         
         // Calculate the new SSR.
         // Compute predicted values
-        cudaMemcpy(dpara_new, para_new.data(), p * sizeof(float), cudaMemcpyHostToDevice);
-
-        computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, dpara_new, n);
+        computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, para_new.data(), n);
         cudaDeviceSynchronize(); // ensure kernel execution is complete
         
         // Compute the SSR (mean squared error)
@@ -206,50 +194,44 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
         cudaMemcpy(Yf.data(), dYf, n * sizeof(float), cudaMemcpyDeviceToHost);
         for (int i = 0; i < n; i++) new_SSR += Yf[i] * Yf[i];
 
-        // printf("         new SSR = %f, parameters: [%f, %f, %f, %f]\n", new_SSR, para_new[0], para_new[1], para_new[2], para_new[3]);
         deltaSSR = fabs(SSR - new_SSR);
+        // printf("SSR = %.6e, New SSR = %.6e, Delta SSR = %.6e\n", SSR, new_SSR, deltaSSR);
 
-        if(  new_SSR < SSR ) {
+        if( deltaSSR < tolerance ) {
+            if( debug )  printf("Convergence criteria met: Delta SSR = %.6e\n", deltaSSR);
+            break; // Convergence criteria met
+        }
+
+        if(  new_SSR <= SSR ) {
             lambda /= lambdaDown; // Increase lambda, leaning towards Newton's method
             para = para_new; // Update parameters
             SSR = new_SSR; // Update SSR
-            if( deltaSSR < tolerance ) break;
-
         } else {
             lambda *= lambdaUp; // Increase lambda
         }
 
         count++;
 
-        // if( count % 10 == 0) {
-            // printf("Iteration %d: SSR = %f, Parameters = [%f, %f, %f, %f], Lambda = %f\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
-        // }
-
-    }while( count < 1000 && 1e+12 > lambda && lambda > 1e-12);
+    }while( count < max_iter && 1e+12 > lambda && lambda > 1e-12);
 
     
     if( count >= max_iter ){
       printf("Warning: LMA did not converge within the maximum number of iterations (%d)\n", max_iter);
     }
 
-    if( deltaSSR <= tolerance * SSR ){
-      printf("LMA converged after %d iterations with SSR = %f\n", count, SSR);
-    }else{
-      printf("LMA did not converge, last SSR = %f after %d iterations\n", SSR, count); 
-    }
-
     //calculate errors;
     double var = SSR / dF; // variance
-    std::vector<float> error(p, 0.0f);
     for (int i = 0; i < p; ++i)  error[i] = sqrt(var * H_inv(i, i)); // standard error
 
     // print the final parameters
-    printf("==================== Fitting result: \n");
-    printf("SSR = %f\n", SSR);
-    for (int i = 0; i < p; ++i) {
-      printf("par[%d] = %f (%f)\n", i, para[i], error[i] );
+    if( debug ) {
+        printf("==================== Fitting result: \n");
+        printf("Number of iteraciton: %d, SSR = %f\n", count, SSR);
+        for (int i = 0; i < p; ++i) {
+        printf("par[%d] = %12.6f (%.6f)\n", i, para[i], error[i] );
+        }
+        printf("######################################## end of LMA\n");
     }
-    printf("######################################## end of LMA\n");
 
 
     cudaFree(dx);
@@ -258,15 +240,44 @@ void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double l
     cudaFree(dJ);
     cudaFree(dH);
     cudaFree(dG);
-    cudaFree(dpara_new);
 
-    return;
+    return SSR;
 
 }
 
 int main() {
 
-    NonLinearRegression();
+    const int n = 1000; // number of data points
+    float maxNoise = 0.0f; // Maximum noise level
+    std::vector<float> para = {12.0f, 100.0f, 5.0f, 7.0f}; // Initial guess for A, T, R, B
+    
+    std::vector<float> x(n);
+    std::vector<float> y(n);
+    for( int i = 0; i < n; i++ ) {
+        x[i] = i;
+        y[i] = 10.0f / (1 + expf((i - 200.0f) / 30.0f)) + 8.0f + (rand() % 100) / 100.0 * maxNoise; // Adding some noise
+        y[i] = round(y[i] * 1000.0f) / 1000.0f; // Round to 3 decimal places
+        // printf("{%.0f, %.3f},", x[i], y[i]);
+    }
+
+    std::vector<float> error(para.size(), 0.0f);
+
+
+    unsigned int startTime = getTime_us();  
+    
+    float SSR = NonLinearRegression(x, y, para, error);
+
+    unsigned int endTime = getTime_us();
+    printf("Total time: %u us\n", endTime - startTime);
+
+    printf("==================== Fitting result: \n");
+    printf("SSR = %f\n", SSR);
+    for (int i = 0; i < 4; ++i) {
+      printf("par[%d] = %12.6f (%.6f)\n", i, para[i], error[i] );
+    }
+    printf("######################################## end of LMA\n");
+
+
 
     // // Data points
     // std::vector<float> y = {

@@ -215,7 +215,7 @@ private:
 
     unsigned int time2 = getTime_us();
     printf("Covariance matrix computed in %u us\n", time2 - time1);
-    CoVar.Print();
+    // CoVar.Print();
 
 
     Matrix dY = Y - f;
