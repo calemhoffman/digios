@@ -66,3 +66,5 @@ slurm-*.out
 /analysis/EventBuilder/EventBuilder_Q
 /analysis/EventBuilder/EventBuilder_S
 /analysis/EventBuilder/merged*
+/analysis/EventBuilder/fitting/cuda_fit
+/analysis/EventBuilder/fitting/testFit
