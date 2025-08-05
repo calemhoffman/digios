@@ -35,7 +35,7 @@ __global__ void computeJacobian(float* dx, float* dJ, float * dpara, int n, int 
         float denom = 1.0f + exp_term;
         // Fill the Jacobian matrix J
         dJ[idx * p + 0] = 1.0f / denom; // dA
-        dJ[idx * p + 1] = -A * exp_term / (R * denom * denom); // dT
+        dJ[idx * p + 1] = A * exp_term / (R * denom * denom); // dT
         dJ[idx * p + 2] = (A * (dx[idx] - T) * exp_term) / (R * R * denom * denom); // dR
         dJ[idx * p + 3] = 1.0f; // dB
     }
@@ -60,7 +60,7 @@ __global__ void computeInvserseOfDiagonal(float *dS, float *dInvS, int p) {
 }
 
 
-void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double lambdaUp = 10, double lambdaDown = 10){
+void NonLinearRegression(double tolerance = 1e-5, int max_iter = 10000, double lambdaUp = 10, double lambdaDown = 10){
     
     // Simulated data
     int n = 100;
@@ -104,7 +104,7 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
     int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
 
 
-    float lambda = 0.53f; // LMA factor
+    float lambda = 0.539193f; // LMA factor
     float SSR = 0.0f;
     int count = 0; // count of iterations
 
@@ -199,16 +199,28 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         }
 
         H_inv = Inv(H);
+        printf("------------inverse  Hessian matrix:\n");
+        H_inv.Print(); // Print the inverse of Hessian matrix
+        G.Print(); // Print the gradient vector
 
         // Update parameters: p = p - H_inv * G
         Matrix delta = H_inv * G; // delta = H_inv * G
 
+        delta.Print(); // Print the delta vector
+
         std::vector<float> para_new = para; // Copy current parameters
         for (int i = 0; i < p; i++) para_new[i] += delta(i, 0); // Update parameters    
-                
+        
+        //printf("Updated parameters: ");
+        for (int i = 0; i < p; i++) {
+            printf("--------------  %f", para_new[i]);
+        }
+        printf("\n");
+
         // Calculate the new SSR.
         // Compute predicted values
         cudaMemcpy(dpara_new, para_new.data(), p * sizeof(float), cudaMemcpyHostToDevice);
+
         computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, dpara_new, n);
         cudaDeviceSynchronize(); // ensure kernel execution is complete
         
@@ -226,6 +238,11 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
             lambda /= lambdaDown; // Decrease lambda
             para = para_new; // Update parameters
             SSR = new_SSR; // Update SSR
+            if( deltaSSR < tolerance * SSR ) break;
+            
+            cudaMemcpy(dpara, para.data(), p * sizeof(float), cudaMemcpyHostToDevice);
+
+
         } else {
             lambda *= lambdaUp; // Increase lambda
         }
@@ -236,7 +253,7 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
             // printf("Iteration %d: SSR = %f, Parameters = [%f, %f, %f, %f], Lambda = %f\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
         // }
 
-    }while( count < 1000 && deltaSSR > tolerance * SSR );
+    }while( count < 1000 && 1e+12 > lambda && lambda > 1e-12);
 
     
     if( count >= max_iter ){

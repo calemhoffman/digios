@@ -216,6 +216,12 @@ private:
     std::vector<double> par_new = par; // new parameters
     for (int i = 0; i < p; ++i)  par_new[i] += dpar(i, 0); // update parameters
 
+    //printf("Updated parameters: ");
+    for (int i = 0; i < p; i++) {
+        printf("--------------  %f", par_new[i]);
+    }
+    printf("\n");
+
     //====================== Compute new SSR
     Matrix fn(n, 1);
     for(int i = 0; i < n ; i++) {
@@ -225,6 +231,10 @@ private:
     Matrix dYn = Y - fn;
     double new_SSR = (Transpose(dYn) * dYn)(0, 0); // new SSR
     printf("==== lambda: %e, SSR: %f, new SSR: %f\n", lambda, SSR, new_SSR);
+    CoVar.Print();
+    JtY.Print();
+    dpar.Print();
+
 
     double delta = new_SSR - SSR; // change in SSR
     if (delta > 0) { 
