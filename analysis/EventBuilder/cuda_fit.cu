@@ -12,17 +12,6 @@
 #include <cublas_v2.h>
 
 
-// CUDA kernel to compute the SSR (mean squared error)
-
-__global__ void transpose(float* A, float* AT, int rows, int cols) {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;  // column in A
-    int y = blockIdx.y * blockDim.y + threadIdx.y;  // row in A
-
-    if (x < cols && y < rows) {
-        AT[x * rows + y] = A[y * cols + x];
-    }
-}
-
 __global__ void computeYf(float* dx, float *dY, float* dYf, const float *dpara, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     float A = dpara[0];
@@ -144,7 +133,7 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
 
     //^=========================================
 
-    // do{
+    do{
 
         // Compute Jacobian matrix J
         computeJacobian<<<blocks, threadsPerBlock>>>(dx, dJ, dpara, n, p);
@@ -155,9 +144,7 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         cublasCreate(&handle);
         const float beta = 0.0f; // Initialize H to zero
         const float alpha = 1.0f; // Scaling factor for the matrix multiplication
-        
-        printf("Computing Hessian matrix H = J^T * J\n");
-        
+                
         // dJ is stored as a n x p row-major matrix. CUBLAS expects column-major format,
         // so it sees dJ as a p x n matrix, which is equivalent to J^T.
         // To compute H = J^T * J, we can do (J^T) * (J^T)^T.
@@ -173,37 +160,12 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
             dJ, p,       // B is p x n, ldb = p
             &beta,
             dH, p);      // C is p x p, ldc = p
-
         
         cublasDestroy(handle);
 
-        printf("Hessian matrix H computed.\n");
-        
         // copy dH back to Host, since H is small matrix, 4x4
         std::vector<float> H_matrix(p * p);
         cudaMemcpy(H_matrix.data(), dH, p * p * sizeof(float), cudaMemcpyDeviceToHost);
-
-        // Print the Hessian matrix
-        printf("Hessian matrix H:\n");
-        for (int i = 0; i < p; i++) {
-            for (int j = 0; j < p; j++) {
-                printf("%f ", H_matrix[i * p + j]);
-            }
-            printf("\n");
-        }
-
-
-    cudaFree(dx);
-    cudaFree(dy);
-    cudaFree(dYf);
-    cudaFree(dJ);
-    cudaFree(dH);
-    cudaFree(dG);
-    cudaFree(dpara);
-    cudaFree(dpara_new);
-
-    return;
-
 
         // Compute gradient: g = J^T * Yf 
         cublasHandle_t handle3;
@@ -238,21 +200,6 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
 
         H_inv = Inv(H);
 
-        H_inv.Print(); // Print the inverse of Hessian matrix
-
-
-            cudaFree(dx);
-    cudaFree(dy);
-    cudaFree(dYf);
-    cudaFree(dJ);
-    cudaFree(dH);
-    cudaFree(dG);
-    cudaFree(dpara);
-    cudaFree(dpara_new);
-
-    return;
-
-
         // Update parameters: p = p - H_inv * G
         Matrix delta = H_inv * G; // delta = H_inv * G
 
@@ -270,7 +217,7 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
         cudaMemcpy(Yf.data(), dYf, n * sizeof(float), cudaMemcpyDeviceToHost);
         for (int i = 0; i < n; i++) new_SSR += Yf[i] * Yf[i];
         
-        printf("==== %d === SSR : %f, new_SSR: %f, lambda: %f\n", count, SSR, new_SSR, lambda);
+        printf("==== %3d === SSR : %f, new_SSR: %f, lambda: %f\n", count, SSR, new_SSR, lambda);
 
         // printf("         new SSR = %f, parameters: [%f, %f, %f, %f]\n", new_SSR, para_new[0], para_new[1], para_new[2], para_new[3]);
         deltaSSR = fabs(SSR - new_SSR);
@@ -289,7 +236,7 @@ void NonLinearRegression(double tolerance = 1e-6, int max_iter = 10000, double l
             // printf("Iteration %d: SSR = %f, Parameters = [%f, %f, %f, %f], Lambda = %f\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
         // }
 
-    // }while( count < 1000 && deltaSSR > tolerance * SSR );
+    }while( count < 1000 && deltaSSR > tolerance * SSR );
 
     
     if( count >= max_iter ){
