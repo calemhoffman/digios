@@ -98,6 +98,12 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
     float deltaSSR = 0.f;
 
     //^=========================================
+    cublasHandle_t handle;
+    cublasCreate(&handle);
+
+    cublasHandle_t handle3;
+    cublasCreate(&handle3);
+
 
     do{
         // printf("Iteration %d: SSR = %f,  {%f, %f, %f, %f}, Lambda = %.3e\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
@@ -121,8 +127,6 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
         }
 
         // CUDA matrix multiplication for H = J^T * J
-        cublasHandle_t handle;
-        cublasCreate(&handle);
         const float alpha = 1.0f; // Scaling factor for the matrix multiplication
         const float beta = 0.0f; 
                 
@@ -142,24 +146,20 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
             &beta,
             dH, p);      // C is p x p, ldc = p
         
-        cublasDestroy(handle);
 
 
         // Compute gradient: g = J^T * Yf 
-        cublasHandle_t handle3;
-        cublasCreate(&handle3);
         // To compute g = J^T * Yf, we can use the fact that dJ is already J^T in column-major format.
         // So we can use cublasSgemv with opA = CUBLAS_OP_N.
         cublasSgemv(handle3, CUBLAS_OP_N, p, n, &alpha, dJ, p, dYf, 1, &beta, dG, 1); // g = J^T * Yf
-        cublasDestroy(handle3);
-
+        
         // copy dH back to Host, since H is small matrix, 4x4
         std::vector<float> H_matrix(p * p);
         cudaMemcpy(H_matrix.data(), dH, p * p * sizeof(float), cudaMemcpyDeviceToHost);
         // copy dG back to Host
         std::vector<float> G_vector(p);
         cudaMemcpy(G_vector.data(), dG, p * sizeof(float), cudaMemcpyDeviceToHost);
-
+        
         Matrix H(p, p);
         for (int i = 0; i < p; i++) {
             for (int j = 0; j < p; j++) {
@@ -170,15 +170,15 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
         for (int i = 0; i < p; i++) {
             G(i, 0) = G_vector[i]; 
         }
-
+        
         // Compute inverse of H using Matrix class
         if (std::isnan(Det(H)) || Det(H) == 0.0) {
             std::cout << "Hessian is singular or NaN, cannot compute inverse." << std::endl;
             break;
         }
-
+        
         H_inv = Inv(H);
-
+        
         // Update parameters: p = p - H_inv * G
         Matrix delta = H_inv * G; // delta = H_inv * G
         std::vector<float> para_new = para; // Copy current parameters
@@ -193,15 +193,15 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
         new_SSR = 0.0f;
         cudaMemcpy(Yf.data(), dYf, n * sizeof(float), cudaMemcpyDeviceToHost);
         for (int i = 0; i < n; i++) new_SSR += Yf[i] * Yf[i];
-
+        
         deltaSSR = fabs(SSR - new_SSR);
         // printf("SSR = %.6e, New SSR = %.6e, Delta SSR = %.6e\n", SSR, new_SSR, deltaSSR);
-
+        
         if( deltaSSR < tolerance ) {
             if( debug )  printf("Convergence criteria met: Delta SSR = %.6e\n", deltaSSR);
             break; // Convergence criteria met
         }
-
+        
         if(  new_SSR <= SSR ) {
             lambda /= lambdaDown; // Increase lambda, leaning towards Newton's method
             para = para_new; // Update parameters
@@ -209,16 +209,19 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
         } else {
             lambda *= lambdaUp; // Increase lambda
         }
-
+        
         count++;
-
+        
     }while( count < max_iter && 1e+12 > lambda && lambda > 1e-12);
-
+    
+    cublasDestroy(handle);
+    cublasDestroy(handle3);
+    
     
     if( count >= max_iter ){
-      printf("Warning: LMA did not converge within the maximum number of iterations (%d)\n", max_iter);
+        printf("Warning: LMA did not converge within the maximum number of iterations (%d)\n", max_iter);
     }
-
+    
     //calculate errors;
     double var = SSR / dF; // variance
     for (int i = 0; i < p; ++i)  error[i] = sqrt(var * H_inv(i, i)); // standard error
