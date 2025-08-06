@@ -55,7 +55,9 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
     int n = x.size();
     int p = para.size();
     const int dF = n - p; // degrees of freedom
-        
+    
+    unsigned int time0 = getTime_us();
+
     // cuda memory pointers
     float *dx, *dy;
     cudaMalloc(&dx, n * sizeof(float));
@@ -68,8 +70,12 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
     float *dG;
     cudaMalloc(&dG, p * sizeof(float)); // Gradient vector
 
+    float * dpara;
+    cudaMalloc(&dpara, p * sizeof(float)); // Parameters vector
+
     cudaMemcpy(dx, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(dy, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(dpara, para.data(), p * sizeof(float), cudaMemcpyHostToDevice);
 
     int threadsPerBlock = 512;
     int blocks = (n + threadsPerBlock - 1) / threadsPerBlock;
@@ -81,12 +87,14 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
 
     float new_SSR = 0.0f;
     std::vector<float> para_new;
+    float * dpara_new = nullptr;
+    cudaMalloc(&dpara_new, p * sizeof(float)); // New parameters vector
 
     Matrix H_inv(p, p); // Inverse of Hessian matrix;
 
     // Compute predicted values
     cudaMemset(dYf, 0, n * sizeof(float)); // Initialize dYf to zero
-    computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, para.data(), n);
+    computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, dpara, n);
     cudaDeviceSynchronize(); // ensure kernel execution is complete
     
     // Compute the SSR (mean squared error) in host
@@ -101,15 +109,14 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
     cublasHandle_t handle;
     cublasCreate(&handle);
 
-    cublasHandle_t handle3;
-    cublasCreate(&handle3);
-
+    unsigned int time1 = getTime_us();
+    printf("Time to copy data to device and compute initial SSR: %u us\n", time1 - time0);
 
     do{
         // printf("Iteration %d: SSR = %f,  {%f, %f, %f, %f}, Lambda = %.3e\n", count, SSR, para[0], para[1], para[2], para[3], lambda);
 
         // Compute Jacobian matrix J
-        computeJacobian<<<blocks, threadsPerBlock>>>(dx, dJ, para.data(), n, p);
+        computeJacobian<<<blocks, threadsPerBlock>>>(dx, dJ, dpara, n, p);
         cudaDeviceSynchronize(); 
 
         
@@ -151,7 +158,7 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
         // Compute gradient: g = J^T * Yf 
         // To compute g = J^T * Yf, we can use the fact that dJ is already J^T in column-major format.
         // So we can use cublasSgemv with opA = CUBLAS_OP_N.
-        cublasSgemv(handle3, CUBLAS_OP_N, p, n, &alpha, dJ, p, dYf, 1, &beta, dG, 1); // g = J^T * Yf
+        cublasSgemv(handle, CUBLAS_OP_N, p, n, &alpha, dJ, p, dYf, 1, &beta, dG, 1); // g = J^T * Yf
         
         // copy dH back to Host, since H is small matrix, 4x4
         std::vector<float> H_matrix(p * p);
@@ -166,11 +173,7 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
                 H(i, j) = H_matrix[i * p + j] + (i == j ? lambda : 0.0f); // Add lambda to diagonal elements
             }
         }
-        Matrix G(p, 1);
-        for (int i = 0; i < p; i++) {
-            G(i, 0) = G_vector[i]; 
-        }
-        
+
         // Compute inverse of H using Matrix class
         if (std::isnan(Det(H)) || Det(H) == 0.0) {
             std::cout << "Hessian is singular or NaN, cannot compute inverse." << std::endl;
@@ -180,13 +183,20 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
         H_inv = Inv(H);
         
         // Update parameters: p = p - H_inv * G
-        Matrix delta = H_inv * G; // delta = H_inv * G
+        std::vector<float> delta(p, 0.0f);
+        for (int i = 0; i < p; i++) {
+            for (int j = 0; j < p; j++) {
+                delta[i] += H_inv(i, j) * G_vector[j]; // delta = -H_inv * G
+            }
+        }
+
         std::vector<float> para_new = para; // Copy current parameters
-        for (int i = 0; i < p; i++) para_new[i] += delta(i, 0); // Update parameters    
+        for (int i = 0; i < p; i++) para_new[i] += delta[i]; // Update parameters    
         
         // Calculate the new SSR.
         // Compute predicted values
-        computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, para_new.data(), n);
+        cudaMemcpy(dpara_new, para_new.data(), p * sizeof(float), cudaMemcpyHostToDevice); // Copy new parameters to device
+        computeYf<<<blocks, threadsPerBlock>>>(dx, dy, dYf, dpara_new, n);
         cudaDeviceSynchronize(); // ensure kernel execution is complete
         
         // Compute the SSR (mean squared error)
@@ -206,6 +216,9 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
             lambda /= lambdaDown; // Increase lambda, leaning towards Newton's method
             para = para_new; // Update parameters
             SSR = new_SSR; // Update SSR
+
+            cudaMemcpy(dpara, para.data(), p * sizeof(float), cudaMemcpyHostToDevice); // Copy updated parameters to device
+
         } else {
             lambda *= lambdaUp; // Increase lambda
         }
@@ -215,8 +228,6 @@ float NonLinearRegression(const std::vector<float> &x, const std::vector<float> 
     }while( count < max_iter && 1e+12 > lambda && lambda > 1e-12);
     
     cublasDestroy(handle);
-    cublasDestroy(handle3);
-    
     
     if( count >= max_iter ){
         printf("Warning: LMA did not converge within the maximum number of iterations (%d)\n", max_iter);
