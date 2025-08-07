@@ -19,20 +19,36 @@ __global__ void compute_residuals_SSR_and_jacobian(float* x, float* y, float* re
   float xi = x[i];
   float yi = y[i];
   float exp_term = expf((xi - T) / R);
-  float denom = (1.0f + exp_term);
-  float denom2 = denom * denom;
 
-  float fi = A / denom + B;
-  float ri = yi - fi;
-  residuals[i] = ri;
-  atomicAdd(SSR, ri * ri);
+  if( exp_term > 1e20f ){
 
-  // Compute partial derivatives (Jacobian)
-  J[i * 4 + 0] = -1.0f / denom;                        // ∂f/∂A
-  J[i * 4 + 1] = (A * exp_term) / (R * denom2);        // ∂f/∂T
-  J[i * 4 + 2] = (A * exp_term * (xi - T)) / (R * R * denom2); // ∂f/∂R
-  J[i * 4 + 3] = -1.0f;                                // ∂f/∂B
-  
+    float ri = yi - B;
+    residuals[i] = ri;
+    atomicAdd(SSR, ri * ri);
+
+    // Compute partial derivatives (Jacobian)
+    J[i * 4 + 0] = 0;                        // ∂f/∂A
+    J[i * 4 + 1] = 0;        // ∂f/∂T
+    J[i * 4 + 2] = 0; // ∂f/∂R
+    J[i * 4 + 3] = 1.0f;                                // ∂f/∂B
+
+
+  }else{
+    float denom = (1.0f + exp_term);
+    float denom2 = denom * denom;
+
+    float fi = A / denom + B;
+    float ri = yi - fi;
+    residuals[i] = ri;
+    atomicAdd(SSR, ri * ri);
+
+    // Compute partial derivatives (Jacobian)
+    J[i * 4 + 0] = 1.0f / denom;                        // ∂f/∂A
+    J[i * 4 + 1] = (A * exp_term) / (R * denom2);        // ∂f/∂T
+    J[i * 4 + 2] = (A * exp_term * (xi - T)) / (R * R * denom2); // ∂f/∂R
+    J[i * 4 + 3] = 1.0f;                                // ∂f/∂B
+
+  }
 }
 
 // Reduction kernel to compute JᵗJ and Jᵗr
@@ -59,41 +75,72 @@ __global__ void compute_JTJ_JTr(float* J, float* residuals, float* JTJ, float* J
   __syncthreads();
 
   if (tid < 4 * 4) atomicAdd(&JTJ[tid], sJTJ[tid]);
-    if (tid < 4)     atomicAdd(&JTr[tid], sJTr[tid]);
+  if (tid < 4)     atomicAdd(&JTr[tid], sJTr[tid]);
 }
 
 
 // Host-side LMA update (solve (JᵗJ + λI) δ = Jᵗr)
-float update_parameters(float* JTJ, float* JTr, float* params, float lambda) {
+float update_parameters(float* JTJ, float* JTr, float* new_params, const float * params, const float * y, float lambda) {
   // Solve 4x4 linear system using basic Gaussian elimination (naive, for demo)
   float A[4][5]; // 4x4 + rhs
   for (int i = 0; i < 4; ++i)
-      for (int j = 0; j < 4; ++j)
-          A[i][j] = JTJ[i * 4 + j] + (i == j ? lambda : 0.0f);
+    for (int j = 0; j < 4; ++j)
+      A[i][j] = JTJ[i * 4 + j] + (i == j ? lambda : 0.0f);
   for (int i = 0; i < 4; ++i)
-      A[i][4] = JTr[i];
+    A[i][4] = JTr[i];
 
-  // Gaussian elimination
+
+  //print the augmented matrix A
+  printf("Augmented matrix A:\n");
   for (int i = 0; i < 4; ++i) {
-      float pivot = A[i][i];
-      for (int j = 0; j <= 4; ++j)
-          A[i][j] /= pivot;
-      for (int k = 0; k < 4; ++k) {
-          if (k == i) continue;
-          float factor = A[k][i];
-          for (int j = 0; j <= 4; ++j)
-              A[k][j] -= factor * A[i][j];
+    for (int j = 0; j < 5; ++j) {
+      printf("%8.4f ", A[i][j]);
+    }
+    printf("\n");
+  }
+
+  // Gaussian elimination with partial pivoting
+  for (int i = 0; i < 4; ++i) {
+    // Partial pivoting: find the row with the largest absolute value in column i
+    int maxRow = i;
+    float maxVal = fabsf(A[i][i]);
+    for (int k = i + 1; k < 4; ++k) {
+      if (fabsf(A[k][i]) > maxVal) {
+        maxVal = fabsf(A[k][i]);
+        maxRow = k;
       }
+    }
+    // Swap rows if needed
+    if (maxRow != i) {
+      for (int j = 0; j <= 4; ++j) {
+        float tmp = A[i][j];
+        A[i][j] = A[maxRow][j];
+        A[maxRow][j] = tmp;
+      }
+    }
+    float pivot = A[i][i];
+    if (fabsf(pivot) < 1e-8f) pivot = 1e-8f; // Avoid division by zero
+    for (int j = 0; j <= 4; ++j)
+      A[i][j] /= pivot;
+    for (int k = 0; k < 4; ++k) {
+      if (k == i) continue;
+      float factor = A[k][i];
+      for (int j = 0; j <= 4; ++j)
+        A[k][j] -= factor * A[i][j];
+    }
   }
 
   // Update parameters
-  for (int i = 0; i < 4; ++i) params[i] += A[i][4];
+  for (int i = 0; i < 4; ++i) {
+    new_params[i] = params[i] + A[i][4];
+    printf("Updated parameter %d: %.4f <- %.4f + %.4f\n", i, new_params[i], params[i], A[i][4]);
+  }
 
   // calculate SSR
   float SSR = 0.0f;
   for (int i = 0; i < N; ++i) {
-      float fi = model(i * 0.01f, params[0], params[1], params[2], params[3]);
-      float ri = (i * 0.01f - fi);
+      float fi = model(i , new_params[0], new_params[1], new_params[2], new_params[3]);
+      float ri = (y[i]  - fi);
       SSR += ri * ri;
   }
   return SSR;
@@ -103,15 +150,18 @@ float update_parameters(float* JTJ, float* JTr, float* params, float lambda) {
 int main() {
     float *x, *y, *d_x, *d_y, *d_res, *d_J, *d_JTJ, *d_JTr, *d_SSR;
     float params[4] = { 5.0f, 5.0f, 1.0f, 0.5f }; // Initial guess: A, T, R, B
+    float new_params[4];
+
+    float noise_level = 0.0f;
 
     x = new float[N];
     y = new float[N];
 
     // Generate synthetic data
     for (int i = 0; i < N; ++i) {
-        x[i] = i * 0.01f;
-        float true_val = 3.0f / (1.0f + expf((x[i] - 7.0f) / 0.8f)) + 1.0f;
-        y[i] = true_val + 0.05f * ((rand() % 1000) / 1000.0f - 0.5f);
+      x[i] = i ;
+      float true_val  = model(x[i], 10.0f, 503.0f, 80.0f, 1.0f);
+      y[i] = true_val + noise_level * ((rand() % 1000) / 1000.0f - 0.5f);
     }
 
     unsigned int time0 = getTime_us();
@@ -128,18 +178,28 @@ int main() {
     cudaMemcpy(d_x, x, N * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, y, N * sizeof(float), cudaMemcpyHostToDevice);
 
-    float lambda = 1e-3f;
+    float lambda = 1.0f;
 
     unsigned int time1 = getTime_us();
     printf("Memory allocation and data transfer took %u us\n", time1 - time0 );
 
-    for (int iter = 0; iter < 20; ++iter) {
-
+    int iter = 0;
+    
+    do{
       unsigned int time2 = getTime_us();
 
+      printf("----------------------- Iteration %d -----------------------\n", iter);
+      printf("Current parameters: A = %.4f, T = %.4f, R = %.4f, B = %.4f\n",
+            params[0], params[1], params[2], params[3]);
+      
+      cudaMemset(d_SSR, 0, sizeof(float));
       compute_residuals_SSR_and_jacobian<<<BLOCKS, THREADS>>>(d_x, d_y, d_res, d_SSR, d_J, params[0], params[1], params[2], params[3]);
-      compute_JTJ_JTr<<<BLOCKS, THREADS>>>(d_J, d_res, d_JTJ, d_JTr);
+      cudaDeviceSynchronize();
 
+      cudaMemset(d_JTJ, 0, sizeof(float) * 16);
+      cudaMemset(d_JTr, 0, sizeof(float) * 4);
+
+      compute_JTJ_JTr<<<BLOCKS, THREADS>>>(d_J, d_res, d_JTJ, d_JTr);
       cudaDeviceSynchronize();
 
       unsigned int time2a = getTime_us();
@@ -153,14 +213,23 @@ int main() {
       unsigned int time2b = getTime_us();
       printf("Iteration %d: Data transfer took %u us\n", iter, time2b - time2a);
 
-      float new_SSR = update_parameters(JTJ, JTr, params, lambda);
+      float new_SSR = update_parameters(JTJ, JTr, new_params, params, y, lambda);
       unsigned int time3 = getTime_us();
       printf("Iteration %d: Time for kernel execution and parameter update: %u us\n", iter, time3 - time2);
 
-      printf("Iteration %d: A = %.4f, T = %.4f, R = %.4f, B = %.4f | SSR: %f, new SSR: %f\n",
-             iter, params[0], params[1], params[2], params[3], SSR, new_SSR);
+      printf("Iteration %d: A = %.4f, T = %.4f, R = %.4f, B = %.4f | SSR: %f, new SSR: %f | lambda : %.3e\n",
+            iter, new_params[0], new_params[1], new_params[2], new_params[3], SSR, new_SSR, lambda);
 
-    }
+      if (new_SSR < SSR) {
+        lambda *= 0.1f;
+        printf("$$$$$$$$$ Accepting new parameters.\n");
+        for (int i = 0; i < 4; ++i) params[i] = new_params[i];
+        SSR = new_SSR;
+      } else {
+        lambda *= 10.0f;
+      }
+      
+    }while(iter++ < 200 && 1e+12 > lambda && lambda > 1e-12);
 
     printf("Fitted parameters:\nA = %.4f\nT = %.4f\nR = %.4f\nB = %.4f\n",
         params[0], params[1], params[2], params[3]);
