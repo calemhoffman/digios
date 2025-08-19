@@ -408,7 +408,6 @@ void Cali_e_trace::Init(TTree *tree)
    TMacro * haha = new TMacro();
    if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
 
-      printf("... done.\n");
       detGeo = LoadDetectorGeo(haha);
 
       PrintDetGeo(detGeo);
@@ -419,6 +418,7 @@ void Cali_e_trace::Init(TTree *tree)
       length = detGeo.detLength;
       pos = detGeo.detPos;
       
+      printf("... done.\n");
       haha->Write("detectorGeo");
    }else{
       printf("... fail\n");
@@ -711,7 +711,7 @@ void Cali_e_trace::Init(TTree *tree)
    newTree->Branch("e" ,      eC, Form("e[%d]/F" , numDet) );
    newTree->Branch("xf",     xfC, Form("xf[%d]/F", numDet) );
    newTree->Branch("xn",     xnC, Form("xn[%d]/F", numDet) );
-   newTree->Branch("ring",  ring, Form("ring[%d]/F", numDet) );
+   newTree->Branch("ring",  ring, Form("xn[%d]/F", numDet) );
    newTree->Branch("x" ,       x, Form("x[%d]/F" , numDet) );
    newTree->Branch("z" ,       z, Form("z[%d]/F" , numDet) );
    newTree->Branch("detID", &det, "detID/I");

@@ -196,7 +196,6 @@ void Cali_littleTree_trace::Init(TTree *tree)
    TMacro * haha = new TMacro();
    if( haha->ReadFile(detGeoFileName.c_str()) > 0 ) {
 
-      printf("... done.\n");
       detGeo = LoadDetectorGeo(haha);
 
       PrintDetGeo(detGeo);
@@ -211,6 +210,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
 
       pos = detGeo.detPos;
       
+      printf("... done.\n");
    }else{
       printf("... fail\n");
       Terminate();
