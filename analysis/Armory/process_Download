@@ -11,9 +11,11 @@ source ${HELIOSSYS}/analysis/Armory/process_PathSetting
 
 RUN=$1
 
+echo $PCName
+
 if [ ${RUN} == "all" ]; then
 
-    if [ ${PCName:0:5} == "phywl" ] || [ ${PCName} == "heliosdb" ] || [ ${PCName} == "helioss-iMac" ]; then
+    if [ ${PCName:0:5} == "phywl" ] || [ ${PCName} == "heliosdb" ] || [ ${PCName:0:12} == "helioss-iMac" ]; then
         #============ Get the raw data
         IP=192.168.1.2
         if [ ${PCName} == "heliosdb" ]; then
@@ -33,7 +35,7 @@ if [ ${RUN} == "all" ]; then
         tail -10 ${AnalysisDir}/data/RunTimeStamp.dat
         echo "============================================="
     else
-      echo "Only in HELIOS MAC or HELIOS-DB can donwload data. skip."
+      echo "Download all. Only in HELIOS MAC or HELIOS-DB can donwload data. skip."
     fi
     
     exit 1

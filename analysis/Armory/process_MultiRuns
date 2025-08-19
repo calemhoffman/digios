@@ -1,12 +1,10 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] || [ $# -eq 1 ] || [ $1 == "-help"  ]; then
-  echo "$./process_MultiRuns [RunNum1] [RunNum2] [Merge] [EventBuild] [GeneralSort]"
+  echo "$./process_MultiRuns [RunNum1] [RunNum2] [Method]"
   echo "    RunNum1 = start run number"
   echo "    RunNum2 = stop run number"
-  echo "      Merge =   1/0*     "  
-  echo "   EventBld = 2/1/0*   || 2 = with Trace"  
-  echo " GenralSort = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
+  echo "     Method = n/1/0*   || 1 = GeneralSort.C, n = GeneralSortTraceProof.C with n-worker"
   echo "        * negative option = force "
   exit 1
 fi;
@@ -16,23 +14,11 @@ source ${HELIOSSYS}/digios/analysis/Armory/process_PathSetting
 RUN1=$1
 RUN2=$2
 
-isMerge=1
-isSort=1
-isGeneralSort=1
+isGeneralSort=$3
+isTrace=0
 
-if [ $# -ge 3 ]; then isMerge=$3; fi
-if [ $# -ge 4 ]; then isSort=$4; fi
-if [ $# -ge 5 ]; then isGeneralSort=$5; fi
-
-GEBSort=GEBSort_nogeb
-GEBSortMsg="using GEBSort_nogeb"
-GeneralSortMsg="no trace"
-
-if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ] || [ $isSort -gt 1 ] || [ $isSort -lt -1 ]; then
+if [ ${isGeneralSort} -ge 2 ] || [ ${isGeneralSort} -le -2 ]; then
   isTrace=1
-  GEBSortMsg="using GEBSort_nogeb_trace"
-  GEBSort=GEBSort_nogeb_trace
-  GeneralSortMsg="trace with ${isGeneralSort} core"
 fi
 
 if [ ${isGeneralSort} -eq 0 ];  then
@@ -70,8 +56,6 @@ runID2=$(printf '%03d' $RUN2)
 echo "============================================="
 echo "============= RUN $runID1 to $runID2 ================"
 echo "============================================="
-echo "Merge       : ${isMerge}"
-echo "Sort        : ${isSort}  ${GEBSortMsg}"  
 echo "GeneralSort : ${isGeneralSort} ${GeneralSortMsg}"
 echo "============================================="
 
@@ -91,12 +75,8 @@ for iRUN in $(seq ${RUN1} ${RUN2}); do
     ../Armory/process_Download $iRUN
 
     #######################################
-    #################### Merge
-    ../Armory/process_Merge $iRUN $isMerge
-
-    #######################################
     #################### Sort and GeneralSort
-    ../Armory/process_Sort $iRUN $isSort $isGeneralSort
+    ../Armory/process_Sort $iRUN $isGeneralSort
 
 done
 

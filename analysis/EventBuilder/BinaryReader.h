@@ -42,8 +42,16 @@ public:
   void Scan(bool quick = false, bool debug = false);  // Scan the file to count data blocks
   unsigned int GetNumData() const { return totalNumHits; }  // Get number of data blocks found
   
-  
-  void ReadNextNHitsFromFile(bool debug = false);
+  void ResetFile() {
+    file.clear();  // Clear any error flags
+    file.seekg(0, std::ios::beg);  // Seek to the beginning of the file
+    hitID = 0;  // Reset hit ID
+    hitSize = 0;  // Reset hit size
+    lastTimestampOfHits = 0;  // Reset last timestamp of hits
+  }
+
+
+  void ReadNextNHitsFromFile(bool debug = false); 
   unsigned int GetMaxHitSize() const { return maxHitSize; }  // Get the maximum size of the hits vector
   unsigned int GetHitSize() const { return hitSize; }  // Get the size of the hits vector
   const Hit * GetHits() const { return hits; }  // Get vector of hits
@@ -87,6 +95,7 @@ private:
   Hit * hits;
   unsigned int maxHitSize; // Size of the hits array
   unsigned int hitSize; // Number of hits read from the file
+  uint64_t lastTimestampOfHits; // Last timestamp of hits read from the file
 
   void Init(){
     fileSize = 0;
@@ -97,6 +106,7 @@ private:
     hits = nullptr;
     maxHitSize = 0;
     hitSize = 0;
+    lastTimestampOfHits = 0; 
   }
 };
 
@@ -110,6 +120,12 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
   uint32_t type = 0;
   uint64_t old_timestamp = 0;
   unsigned int timestamp_error_counter = 0;
+
+  unsigned short count = 0;
+  std::vector<uint64_t> timestampList; // Store timestamps for error checking
+
+  uint64_t last_timestamp = 0; // Last timestamp of hits
+
   do{
     hit.header = Read<GEBHeader>();
     if( totalNumHits == 0) type = hit.header.type;
@@ -120,6 +136,20 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
     if( hit.header.type != type) {
       printf("header error at Data ID : %d \n", totalNumHits);
       break;
+    }
+
+    timestampList.push_back(hit.header.timestamp); 
+    if( timestampList.size() >= maxHitSize ){ // check the timestamp error every maxHitSize hits
+      std::sort(timestampList.begin(), timestampList.end()); // Sort the timestamps for error checking
+      last_timestamp = timestampList.back(); // Get the last timestamp in the sorted list
+      
+      if( count > 0 && timestampList.front() < old_timestamp) {
+        maxHitSize *= 2;
+        // printf("\033[33m=== Increasing maxHitSize to %u due to timestamp not in order. %s \033[0m\n", maxHitSize, fileName.c_str());
+        CreateHits(maxHitSize); // Adjust the hit size to the maximum difference
+      }
+      timestampList.clear(); // Clear the list for the next batch
+      count++;
     }
 
     if( hit.header.timestamp < old_timestamp) {
@@ -140,7 +170,8 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
   }while(Tell() < fileSize);
 
   if( debug ) printf("number of Hit Found : %d \n", totalNumHits);
-  if( timestamp_error_counter > 0 && debug ) printf("timestamp error found for %u times.\n", timestamp_error_counter);
+  if( timestamp_error_counter > 0 && debug) printf("%s : timestamp error found for %u times.\n", fileName.c_str(), timestamp_error_counter);
+
   file.seekg(0, std::ios::beg);
   hitID = 0; // Reset hitID to 0 after scanning
 
@@ -163,6 +194,7 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
     }
     old_timestamp = hits[i].header.timestamp;
 
+
     if (hits[i].header.payload_lenght_byte > 0) {
       hits[i].payload = ReadArray<uint32_t>(hits[i].header.payload_lenght_byte / sizeof(uint32_t));
     }
@@ -171,13 +203,22 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
   }
 
   //sort hits by timestamp
-  if( hitSize > 0 && timestamp_error_counter > 0 && debug ) {
-    printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
+  if( hitSize > 0 && timestamp_error_counter > 0 ) {
+    if( debug ) printf("timestamp error found for %u times. Sort data.\n", timestamp_error_counter);
 
     //sort the hits by timestamp
     std::sort(hits, hits + hitSize, [](const Hit& a, const Hit& b) {
       return a.header.timestamp < b.header.timestamp;
     });
+
+    uint64_t firstTimestamp = hits[0].header.timestamp; // First timestamp of hits
+    if( firstTimestamp < lastTimestampOfHits){
+      printf("\033[33m=== In file: %s \033[0m\n", fileName.c_str());
+      printf("\033[31mWarning: First timestamp (%lu) of this read is less than the last timestamp (%lu) of the last read. \033[0m\n", 
+             firstTimestamp, lastTimestampOfHits);
+    }
+
+    lastTimestampOfHits = hits[hitSize - 1].header.timestamp; // Update the last timestamp of hits
   }
 
 
