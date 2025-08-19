@@ -64,13 +64,15 @@ echo "$COMMENT <br />" >> ${elogContext}
 scp ${elogContext} heliosdigios@${mac2020IP}:~/.
 
 # tell Mac2020 run push2elog script
-if [ $expName = "ARR01" ]; then
-  elogName=$expName
-elif [  ${expName} == "h087_Tritium" ]; then
-  elogName="H087_Tritium"
-else
-  elogName="H"${expName:1}
-fi
+#if [ $expName = "ARR01" ]; then
+#  elogName=$expName
+#elif [  ${expName} == "h087_Tritium" ]; then
+#  elogName="H087_Tritium"
+#elif [ ${expName:1} == "s" ]; then
+  elogName=${expName}
+#else
+#  elogName="H"${expName:1}
+#fi
 ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 

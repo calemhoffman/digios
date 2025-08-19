@@ -74,13 +74,15 @@ caput Online_CS_StartStop Start
 
 echo "pushing to elog for started a run"
 
-if [ ${expName} == "ARR01" ]; then
-    elogName="ARR01"
-elif [  ${expName} == "h087_Tritium" ]; then
-    elogName="H087_Tritium"
-else
-    elogName="H"${expName:1}
-fi
+#if [ ${expName} == "ARR01" ]; then
+#    elogName="ARR01"
+#elif [  ${expName} == "h087_Tritium" ]; then
+#    elogName="H087_Tritium"
+#elif [ ${expName:1} == "s" ]; then
+    elogName=${expName}
+#else
+#    elogName="H"${expName:1}
+#fi
 
 #### need to do this because the selog in DAQ is outdated.
 
