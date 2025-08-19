@@ -170,7 +170,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       rejRDT4 = false;
    }
    
-   if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; ///######### rdt gate
+   ///if( rejRDT1 && rejRDT2 && rejRDT3 && rejRDT4) return kTRUE; ///######### rdt gate
    
    ///============================= timestamp Coincident gate
    bool coinFlag = false;
@@ -192,7 +192,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
          }
       }
    }
-   if( coinFlag == false ) return kTRUE;
+   ///if( coinFlag == false ) return kTRUE;
    
    //#################################################################### processing
    
@@ -351,7 +351,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       
    }
    
-   if( rejZeroHit && multiHit == 0 ) return kTRUE;
+   ///if( rejZeroHit && multiHit == 0 ) return kTRUE;
    
    //#################################################################### Timer  
    saveFile->cd(); //set focus on this file
