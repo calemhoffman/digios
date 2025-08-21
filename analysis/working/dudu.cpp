@@ -211,9 +211,9 @@ void dudu(){
 
     hCoinTime_x[*detID]->Fill(x[*detID], *coinTimeUC) ;
     hCoinTime_Ex[*detID]->Fill(*Ex, *coinTimeUC) ;
-    hCoinTime_z[*detID/6]->Fill(z[i], *coinTimeUC);
+    hCoinTime_z[*detID/6]->Fill(z[id], *coinTimeUC);
 
-    hez->Fill(z[i], e[i]);
+    hez->Fill(z[id], e[id]);
 
     
 
