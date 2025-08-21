@@ -2,7 +2,7 @@
 export TERM=vt100
 explocation=${HELIOSSYS}/daq
 source ${HELIOSSYS}/expName.sh #load expName
-datalocation=${daqDataPath}/${expName}/data
+datalocation=${daqDataPath}/${expName}/
 
 if [ $# -eq 1 ]; then
     min=$1

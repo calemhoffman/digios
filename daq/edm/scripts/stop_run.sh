@@ -26,7 +26,7 @@ fi
 currentDate=$(date)
 
 echo "         stop at ${currentDate}"
-echo "         stop at ${currentDate}| ${COMMENT}" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "         stop at ${currentDate}| ${COMMENT}" >> ${daqDataPath}/${expName}/RunTimeStamp.dat
 
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
@@ -76,15 +76,15 @@ scp ${elogContext} heliosdigios@${mac2020IP}:~/.
 ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 
-echo ">>>>>>>>>>>>>>> push to Discord"
+#echo ">>>>>>>>>>>>>>> push to Discord"
 
 #source ~/Slack_Elog_Notification.sh
-source ~/Discord_webhooks.sh
+#source ~/Discord_webhooks.sh
 slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
 auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
 
 #curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
-curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${auxMsg}\"}" $WEBHOOK_DAQ_URL
+#curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${auxMsg}\"}" $WEBHOOK_DAQ_URL
 
 
 echo wait 2 seconds before closing the IOCs
