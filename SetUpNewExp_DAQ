@@ -1,0 +1,101 @@
+#!/bin/bash -l
+echo "#############################################"
+echo "#     Set-up for new Experiment"
+echo "#############################################"
+
+
+echo "============================================="
+echo " The bach script do following things "
+echo " 1) check disk space"
+echo " 2) making directories for data"
+echo " 3) create symbolic links to data"
+echo "============================================="
+
+if [ $# -ne 0 ]; then
+    if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
+	expName="ARR01"
+    fi
+fi
+    
+if [ $# -eq 0 ]; then
+   read -p 'Enter the new experiment name: ' expName    
+fi
+
+if [ ${expName} == "master" ] || [ ${expName} == "Master" ] ; then
+   expName="ARR01"
+   echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m = master"
+else
+   echo -e "----------- new experiment name : \033[0;31m${expName}\033[0m"
+fi
+
+Arch="$(uname -s)"
+PCName="$(hostname)"
+
+#------ Set up data folder, check disk space
+echo "=================== Checking disk space."
+echo "PC name  : ${PCName}"
+echo "Archetech: ${Arch}"
+
+echo -e "\e[93m================= avalible disk:\033[0m"
+df -hT |grep "/media\|File"
+read -p "================= choose disk [e.g. sdb]:" disk
+
+daqDataPath=`df | grep ${disk} | awk '{print $6}'`
+if [ -z ${daqDataPath} ]; then
+    echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
+    exit
+fi
+
+echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
+
+DATAPATH=${daqDataPath}
+expDIR=~/digios
+
+space=`df -ml | grep ${DATAPATH} | awk '{print $4}'` #in mb
+spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
+spacePrecent="${spacePrecent:0:2}"
+echo "Free Space : ${space} MB |  ${spacePrecent}%-used"
+
+
+
+if [ ${space} -le 512000 ]; then
+   echo "The avalible space is less then 500 GB."
+   read -p  '-------------------------- Continue? (Y/N) ' OKFlag
+   
+   if [ ${OKFlag} == "N" ]; then
+      echo "xxxxxxxxxxxxxx Abort SetUpNewExp"
+      exit
+   fi
+fi
+
+#------ set up expName.sh, so that all experimental Name is refered to this name
+if [ ${isBranchExist} -eq 0 ]; then
+    DigiosDir="$(pwd)"
+    echo "=================== Setting up ${DigiosDir}/expName.sh"
+    touch ${DigiosDir}/expName.sh
+    echo "#!/bin/bash -l" > ${DigiosDir}/expName.sh
+    echo "expName=${expName}" >> ${DigiosDir}/expName.sh
+    echo "daqDataPath=${daqDataPath}" >> ${DigiosDir}/expName.sh
+    echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
+fi
+
+echo "=================== making new folders in ${DATAPATH}/${expName}"
+Data=${DATAPATH}/${expName}
+
+mkdir -v ${DATAPATH}/${expName}
+mkdir -v ${Data}
+
+#===== create symbolic links
+echo "=================== creating symbolic links"
+rm -f ${expDIR}/analysis/data
+
+ln -sfv ${Data} ${expDIR}/analysis/data
+
+#===== tell Database SetupNewExp change exp.
+echo "=================== Tell the database"
+
+source ${expDIR}/daq/edm/scripts/DataBaseAddress.sh
+
+curl -s -XPOST "http://"${dataBaseAddress}":8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+
+echo "=================== done."

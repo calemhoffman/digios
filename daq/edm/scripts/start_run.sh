@@ -53,7 +53,7 @@ export DIGIOSRUNNUM
 currentDate=$(date)
 
 echo "RUN-${RUN} start at ${currentDate}| $COMMENT"
-echo "RUN-${RUN} start at ${currentDate}| $COMMENT" >> ${daqDataPath}/${expName}/data/RunTimeStamp.dat
+echo "RUN-${RUN} start at ${currentDate}| $COMMENT" >> ${daqDataPath}/${expName}/RunTimeStamp.dat
 
 
 elogFile=${HELIOSSYS}/analysis/working/elog.txt
@@ -93,9 +93,9 @@ echo "wait 3 sec for Mac2020 reply elog ID"
 sleep 3
 
 source ~/elogID.txt
-echo ${ID}
+echo "ID = ${ID}"
 elogIDStr="elogID="${ID}
-echo ${elogID}
+echo "elogID = ${elogID}"
 
 #source ~/Slack_Elog_Notification.sh
 source ~/Discord_webhooks.sh
@@ -104,7 +104,7 @@ elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
 #curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
 
 elogMsg=$(echo "$elogMsg" | sed 's/\*/=/g' | sed -e 's/<br \/>//g' | sed 's/"/\\"/g; s/$/\\n/' | tr -d '\n' | sed 's/\\n$//')
-curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${elogMsg}\"}" $WEBHOOK_DAQ_URL
+#curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${elogMsg}\"}" $WEBHOOK_DAQ_URL
 
 
 echo "============== Opening IOC...."
