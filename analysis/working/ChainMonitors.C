@@ -11,9 +11,16 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
-  
+    //chain->Add("../root_data/gen_run00[2-7].root"); //alpha
+    // chain->Add("../root_data/gen_run005.root"); //alpha
+     
+    // chain->Add("../root_data/gen_run02[2-3].root");
+    // chain->Add("../root_data/gen_run024.root"); // higher beam rate, dE 75V, RIB sweeper off
+    chain->Add("../root_data/gen_run02[5-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+    chain->Add("../root_data/gen_run03[0-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+    
+    // chain->Add("../root_data/trace_run02[5-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+    
     ///********** end Marker for AutoCalibration.
     
     

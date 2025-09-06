@@ -30,6 +30,8 @@ run_Summary.dat
 MakeDataLinks
 reaction.dat
 
+*_C_ACLiC*
+
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
 analysis/Cleopatra/ExtractXSec

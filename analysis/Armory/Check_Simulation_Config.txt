@@ -20,7 +20,7 @@
 {pEZ, pExCal, pThetaCM, pRecoilRZ, break, pThetaCM_Z, pRecoilXY, pInfo, pRecoilRThetaCM}   //Canvas config
 hit == 1 && loop <= 1 && thetaCM > 10
 60              //elum range
-{0,50}        //thetaCM range
+{50, 100}        //thetaCM range
 false          //shownKELines
 false          //isOverRideEx
 {-0.5, 4.0}    // over-rdied Ex range

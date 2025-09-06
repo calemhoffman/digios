@@ -36,8 +36,8 @@ void Cali_compareF(TTree *expTree, TFile *refFile,
    double a1Range[2] = {a1Min, a1Max};
    double a0Range[2] = {a0Min, a0Max};
    
-   double eRawRange[2] = {500, 3000};
-   double eRange[2] = {1, 10};
+   double eRawRange[2] = {500, 7000};
+   double eRange[2] = {1, 16};
    
    double SSR = 150; // sum of square of residual of the fitting
 

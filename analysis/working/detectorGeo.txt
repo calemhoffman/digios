@@ -1,10 +1,10 @@
--3.00    //Bfield_[T]
+-2.85    //Bfield_[T]
 0.00     //Bfield_direction_to_z-axis_[deg]_should_not_use
 462.5    //bore_[mm]
 11.5     //distance_from_axis_[mm]
 10.0     //width_of_detector_[mm]
 50       //length_of_detector_[mm]
-1000      //recoil_position_+_for_downstream_[mm]
+350      //recoil_position_+_for_downstream_[mm]
 10.0     //inner_radius_of_recoil_detector_[mm]
 40.2     //outter_radius_of_recoil_detector_[mm]
 false    //is_coincident_with_recoil
@@ -13,7 +13,7 @@ false    //is_coincident_with_recoil
 0.00   //Elum_1_position_[mm]_(just_another_recoil_detector_but_for_light_recoil)
 0.00   //Elum_2_position_[mm]_when_Elum=0_disable_tree_branch
 0       //support_length_[mm]
--121     //first_position_-_for_upstream_[mm]
++520     //first_position_-_for_upstream_[mm]
 0.03     //energy_resolution_of_PSD_array_[MeV]
 1.00     //position_resolution_of_PSD_array_[mm]
 Out           //detector_facing_Out_or_In
@@ -23,5 +23,5 @@ Out           //detector_facing_Out_or_In
 117.9
 176.8
 235.8    //5th_det
-290.0
+296.0
 #============= end of file

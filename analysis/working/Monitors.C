@@ -31,10 +31,10 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {   -2100,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     1,     10};       /// in the E-Z plot
-int     rdtDERange[2] = {     0,    3000}; 
-int      rdtERange[2] = {     0,    3000};  
+int rawEnergyRange[2] = {     -1000,    3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     1,     20};       /// in the E-Z plot
+int     rdtDERange[2] = {     50,    3000}; 
+int      rdtERange[2] = {     50,    8000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -50,7 +50,7 @@ int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this 
 int  icRange [3] = {1000, 1000, 500}; /// max of IC0,1,2 
 
 bool isUseArrayTrace = false;
-bool isUseRDTTrace = false;
+bool isUseRDTTrace = true;
 
 //---Gate
 bool isTimeGateOn     = true;
@@ -62,10 +62,10 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
-vector<int> skipDetID = {}; // {0,1,2,3,4,5,6,7,8,9,10,11} ;//{2,  11, 17}
+vector<int> skipDetID = {2, 11, 20, 21}; 
 
-TString rdtCutFile1 = "rdtCuts_30Mg.root";//cut_test1.root";//o20.root, o20a.root, f21.root
-TString rdtCutFile2 = "";
+TString rdtCutFile1 = "rdtCuts_O.root";
+TString rdtCutFile2 = "";//"rdtCuts_Ne.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -157,6 +157,7 @@ TH2F* hxfCalVxnCal[NARRAY];
 TH2F* heCalVz;
 TH2F* heCalVzGC;
 TH2F* hecalVzRow[NROW];
+TH2F* hecalVzRowG[NROW];
 
 //====== Ex data
 TH1F* hEx;
@@ -418,6 +419,7 @@ void Monitors::Begin(TTree *tree)
    
    for( int i = 0; i < numRow; i++){
       hecalVzRow[i] = new TH2F(Form("heCalVzRow%d", i), Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*(i+1)-1), 500, zRange[0], zRange[1], 500, energyRange[0], energyRange[1]);
+      hecalVzRowG[i] = new TH2F(Form("heCalVzRow%dG", i), Form("E vs. Z (ch=%d-%d); Z (cm); E (MeV)", numCol*i, numCol*(i+1)-1), 500, zRange[0], zRange[1], 500, energyRange[0], energyRange[1]);
    }
 
    //===================== Recoils
@@ -498,10 +500,10 @@ void Monitors::Begin(TTree *tree)
    hEx    = new TH1F("hEx",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    
    hExCut1  = new TH1F("hExCut1",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-   hExCut1->SetLineColor(2);
+   hExCut1->SetLineColor(9);
    
    hExCut2  = new TH1F("hExCut2",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
-   hExCut2->SetLineColor(4);
+   hExCut2->SetLineColor(8);
    
    for(int i = 0 ; i < NARRAY; i++){
       hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
@@ -833,6 +835,13 @@ Bool_t Monitors::Process(Long64_t entry){
         
          heCalVxCalG[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
          heVIDG->Fill(detID, e[detID]);
+
+         for( int i = 0; i < numRow; i++){
+            for(int j = 0; j < numCol; j++){
+               int k = numCol*i+j;
+               hecalVzRowG[i] -> Fill( z[k], eCal[k]);
+            }
+         }
       
          multiEZ ++;
          isGoodEventFlag = true;
@@ -1025,9 +1034,9 @@ void Monitors::Terminate()
    //############################################ User is free to edit this section
    //--- Canvas Size
    int canvasDiv[2] = {3,3};
-   int padSize = 400;
+   int padSize = 550;
    int canvasXY[2] = { canvasDiv[0] * padSize, canvasDiv[1] * padSize };
-   cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1,canvasXY[0],canvasXY[1]);
+   cCanvas  = new TCanvas("cCanvas",canvasTitle + " | " + rdtCutFile1 + "," + rdtCutFile2,canvasXY[0],canvasXY[1]);
    cCanvas->Modified(); cCanvas->Update();
    cCanvas->cd(); cCanvas->Divide(canvasDiv[0],canvasDiv[1]);
 
@@ -1067,6 +1076,7 @@ void Monitors::Terminate()
    }
    DrawLine(hEx, Sn);
    DrawLine(hEx, Sa);
+   DrawLine(hEx, 4.03, 1);
    
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
@@ -1084,6 +1094,7 @@ void Monitors::Terminate()
    hEx->Draw();
    DrawLine(hEx, Sn);
    DrawLine(hEx, Sa);
+   DrawLine(hEx, 4.03, 8);
 
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
