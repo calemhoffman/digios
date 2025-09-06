@@ -276,7 +276,7 @@ public:
       event.traceLength = (packet_length - 13)*2;
       for( int i = 13; i < payload.size(); i++){
         uint32_t word = ntohl(payload[i]);
-        event.trace.push_back(word & 0xFFFF);
+        event.trace.push_back(word & 0x3FFF);
         event.trace.push_back(word >> 16);
       }
     }
