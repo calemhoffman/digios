@@ -164,7 +164,7 @@ DetGeo LoadDetectorGeo(TMacro * macro){
   (detGeo.detPos).clear();
   
   for(int id = 0; id < detGeo.nDet; id++){
-    if( detGeo.firstPos > 0 ) detGeo.detPos.push_back(detGeo.firstPos + detGeo.pos[id]);
+    if( detGeo.firstPos > 0 ) detGeo.detPos.push_back(detGeo.firstPos + detGeo.pos[detGeo.nDet - 1 - id]);
     if( detGeo.firstPos < 0 ) detGeo.detPos.push_back(detGeo.firstPos - detGeo.pos[detGeo.nDet - 1 - id]);
     ///printf("%d | %f, %f \n", id, detGeo.pos[id], detGeo.detPos[id]);
   }

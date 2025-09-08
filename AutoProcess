@@ -28,8 +28,7 @@ else
 fi
 
 ../Armory/process_Download $Run
-../Armory/process_Merge $Run -1
-../Armory/process_Sort $Run -1 -1
+../Armory/process_Sort $Run 1 0
 #root -l "ChainMonitors.C(${firstRun},${Run}, true)"     #multi-runs
 root -l "ChainMonitors.C(${Run}, -1, true)"     #single-run
 
