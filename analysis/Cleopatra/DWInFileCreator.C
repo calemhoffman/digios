@@ -1,0 +1,70 @@
+/***********************************************************************
+ * 
+ *  This is InFileCreator, To creator the in-file for Ptolemy
+ *          only for (d,p), (d,p), (d,d), or (p,p)
+ * 
+ *  It read a simple infile.in from reaction_setting file
+ * 
+ * -----------------------------------------------------
+ *  This program will call the root library and compile in g++
+ *  compilation:
+ *  g++ InFileCreator.C -o InFileCreator `root-config --cflags --glibs`
+ *
+ *------------------------------------------------------
+ *  The reaction_setting file is simple like:
+ *
+ *  206Hg(d,p)207Hg(1s1/2 0.000) 10MeV/u AK
+ *
+ *  the first is similar to usual reaction setting, the word AK is a
+ *     short name for Optical Potential, user can put as many line as
+ *     they like, Cleopatra can create the suitable infile.in for Ptolomy
+ *
+ * ------------------------------------------------------
+ *  created by Ryan (Tsz Leung) Tang, Nov-18, 2018
+ *  email: goluckyryan@gmail.com
+ * ********************************************************************/
+
+#include <fstream>
+#include <stdlib.h>     /* atof */
+#include <cmath>
+#include <vector>
+#include "DWInFileCreator.h"
+
+using namespace std;
+
+int main (int argc, char *argv[]) {
+   
+  printf("=====================================================================\n");
+  printf("===  InfileCreator, DWUCK4 for microscopic two nucleon transfer  ====\n");
+  printf("=====================================================================\n");
+
+  if(argc < 2 || argc > 6) {
+    printf("Usage: ./InfileCreator input_file (angMin = 0 deg, angMax = 180 deg, angStep = 1 deg)\n");
+    printf("Usage: ./InfileCreator input_file angMin angMax (angStep = 1 deg)\n");
+    printf("Usage: ./InfileCreator input_file angMin angMax angStep\n");
+    exit(0); 
+  }else{
+    printf("From file : %s \n", argv[1]);
+  }
+
+  //================= read infile. extract the reactions, write pptolemy infile for each reaction
+  string readFile = argv[1];
+  double angMin = 0.;
+  double angMax = 180.;
+  double angStep = 1.;
+  if( argc >= 4 ){
+    angMin = atof(argv[2]);
+    angMax = atof(argv[3]);    
+  }
+  if( argc == 6 ){
+    angStep = atof(argv[4]);
+  }
+    string TNAinfile = argv[5];
+  
+  string ptolemyInFileName = argv[1];
+  ptolemyInFileName += ".in";
+  
+  int ee = DWInFileCreator( readFile, ptolemyInFileName, angMin, angMax, angStep, TNAinfile);
+    return ee;
+
+} 

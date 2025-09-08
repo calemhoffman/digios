@@ -59,3 +59,10 @@ daq/save/trigger.txt
 DB_*.txt
 
 slurm-*.out
+
+/analysis/EventBuilder/run*
+/analysis/EventBuilder/h088*
+/analysis/EventBuilder/EventBuilder*
+/analysis/EventBuilder/merged*
+/analysis/EventBuilder/fitting/cuda_fit
+/analysis/EventBuilder/fitting/testFit

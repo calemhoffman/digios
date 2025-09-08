@@ -2,6 +2,10 @@
 
 # digios
 
+Since Aug 19, 2025, the DAQ computer can no longer update from github (probably due to SSL too old). The daq folder will not update as often as the analysis folder. 
+
+Also, GEBSort/Merge will no longer be used. Instead EventBuilder_S is being used.
+
 ## Note
 - This repository mainly used in 4 places: HELIOS-DAQ, HELIOS-MAC, HELIOS-DB, and LCRC(/lcrc/project/HELIOS)
 - In HELIOS-DAQ, MAC, and DB, things are the same, can switch to other branches.

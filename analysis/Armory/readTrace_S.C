@@ -10,49 +10,78 @@
 #include <TClonesArray.h>
 #include <TBenchmark.h>
 #include <TMath.h>
+#include <TMacro.h>
 #include <TF1.h>
 #include <TH1.h>
 #include <TLine.h>
 #include <TSpectrum.h>
 #include <iostream>
 
-#include "../working/GeneralSortMapping.h"
+// #include "../working/GeneralSortMapping.h"
 
-#include "AutoFit.C"
+// #include "AutoFit.C"
 
-void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
+double WSFunc(double *x , double * par ){
+   // par[0] = A
+   // par[1] = R
+   // par[2] = a
+   // par[3] = B
+
+   return par[0]* TMath::Exp( ( x[0] - par[1])/par[2] ) + par[3];
+}
+
+void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool print = false){
 
 /**///==============================================================   
 
    TFile * f1 = new TFile (fileName, "read");
-   TTree * tree = (TTree *) f1->Get("tree");
+   TTree * tree = (TTree *) f1->Get("gen_tree");
+
+   TMacro * macro = (TMacro *) f1->Get("trace_info");
+   TString traceLenStr;
+   if( macro != NULL ){
+      traceLenStr = macro->GetListOfLines()->At(0)->GetName();
+      printf("Max Trace Length : %s\n", traceLenStr.Data());
+   }
+   const int maxTraceLen = traceLenStr.Atoi();
    
    if( tree == NULL ) {
-      printf("===== Are you using gen_runXXX.root ? please use runXXX.root\n");
-      return;
+      printf("===== Are you using gen_runXXX.root ? please use runXXX.rootcannot find gen_tree, try to find tree instead\n");
+      tree = (TTree *) f1->Get("tree");
+      if( tree == NULL ){
+         printf(" cannot find tree. the file probably not right. Abort.\n");
+         return;
+      }else{
+         printf(" found tree!\n");
+      }
    }
    
    int totnumEntry = tree->GetEntries();
    printf( "========== total Entry : %d \n", totnumEntry);
    
-   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 0, 1000, 800, 600);
-   cRead->Divide(1,2);
-   for( int i = 1; i <= 2 ; i++){
-      cRead->cd(i)->SetGrid();
-   }
+   TCanvas * cRead = new TCanvas("cRead", "Read Trace", 1000, 1000, 800, 300);
+   // cRead->Divide(1,2);
+   // for( int i = 1; i <= 2 ; i++){
+   //    cRead->cd(i)->SetGrid();
+   // }
    cRead->SetGrid();
    
    gStyle->SetOptFit(0);
    
 /**///==============================================================   
-   Short_t   id[200];
-   Int_t      numHit;
-   Short_t trace[200][1024];
+   UShort_t   id[200];
+   UShort_t   kind[200];
+   UShort_t     traceCount;
+   UShort_t  trace[200][maxTraceLen]; // need to match the tree
+   float tracePara[200][4]; // 0: Amplitude, 1: Timestamp, 2: Rise time, 3: baseline
+
    UShort_t  traceLength[200];
-   tree->SetBranchAddress("id", id);
-   tree->SetBranchAddress("NumHits", &numHit);
+   tree->SetBranchAddress("traceDetID", id);
+   tree->SetBranchAddress("traceKindID", kind);
+   tree->SetBranchAddress("traceCount", &traceCount);
    tree->SetBranchAddress("trace", trace);
-   tree->SetBranchAddress("trace_length", traceLength);
+   tree->SetBranchAddress("traceLen", traceLength);
+   tree->SetBranchAddress("tracePara", tracePara);
    
    TLatex text ;
    text.SetNDC();
@@ -70,6 +99,25 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
    TH1F * jaja = new TH1F();
    jaja->SetName("jaja");
    jaja->SetTitle("jaja");
+
+   //==== fitting
+   TF1 * fit = new TF1("fit", "[0]/(1+TMath::Exp((x-[1])/[2])) + [3]", 0, 300);
+   fit->SetLineWidth(2);
+   fit->SetLineColor(2);
+   fit->SetNpx(1000);
+
+   double * para_default = new double[4];
+   para_default[0] = -1000;
+   para_default[1] = 100;
+   para_default[2] = 2;
+   para_default[3] = 8500;
+
+   fit->SetParameters(para_default);
+
+   TF1 * fit2 = new TF1("fit2", "[0]/(1+TMath::Exp(-(x-[1])/[2])) + [3]", 0, 300);
+   fit2->SetLineWidth(2);
+   fit2->SetLineColor(4);
+   fit2->SetNpx(1000);
    
    for( int ev = 0; ev < totnumEntry; ev++){
       
@@ -79,37 +127,81 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
       }
       tree->GetEntry(ev);
       
-
       int countJ = 0;
+            
+      for( int j = 0; j <  traceCount ; j++){
+         // for( int k = 0; k < traceLength[j] ; k++){
+         //    printf("%4d, %5d \n", k, trace[j][k]);
+         // }  
       
-      for( int j = 0; j <  numHit ; j++){
-         Int_t idTemp   = id[j] - idConst;
-         int idDet  = idDetMap[idTemp];
-         int idKind = idKindMap[idTemp];
+         int idDet  = id[j];
+         int idKind = kind[j];
          
-
          if( !(minDetID <=  idDet &&  idDet <= maxDetID ) ) continue;
 
-         if( countJ == 0 )  printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d\n", ev, evPointer, numHit);
+         if( countJ == 0 )  printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d\n", ev, evPointer, traceCount);
 
          printf("nHit: %d, id : %d, idKind : %d, trace Length : %u ( enter = next , q = stop, w = last)\n", j, idDet, idKind, traceLength[j]);
+
+         printf(" Amp : %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f\n", 
+               tracePara[j][0], tracePara[j][1], tracePara[j][2]*4.29, tracePara[j][3]);
+
+         fit2->SetRange(0, traceLength[j]);
+         fit2->SetParameter(0, tracePara[j][0]);
+         fit2->SetParameter(1, tracePara[j][1]);
+         fit2->SetParameter(2, tracePara[j][2]);
+         fit2->SetParameter(3, tracePara[j][3]);
          
          g->Clear();
          g->Set(traceLength[j]);  
          double base = 0;
          for( int k = 0; k < traceLength[j] ; k++){
+            int haha;
             if( trace[j][k] < 16000){
                base = trace[j][k];
                g->SetPoint(k, k, trace[j][k]);
+               haha = trace[j][k];
             }else{
                g->SetPoint(k, k, base);
+               haha = base;
             }
             //printf("%4d, %5d \n", k, base);
             //if( k % 10 ==0 ) printf("\n");
-         }         
+            if( print) printf("{%3d, %d},\n", k, haha);
+         }
          
          g->SetTitle(Form("ev: %d, nHit : %d, id : %d, idKind : %d, trace Length : %u\n", ev, j, idDet, idKind, traceLength[j]));
+         g->GetXaxis()->SetTitle("tick = 10 ns");
 
+         fit->SetRange(0, traceLength[j]);
+         fit->SetParameters(para_default);
+         g->Fit(fit, "Rq");
+         
+
+         double * para = fit->GetParameters();
+
+         TString fitResultStr = Form("Amp: %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f", 
+                           -para[0], para[1], para[2]*4.29, para[3]);
+
+         TString fitResultStr2 = Form("Amp: %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f", 
+                           tracePara[j][0], tracePara[j][1], tracePara[j][2]*4.29, tracePara[j][3]);
+
+         // printf("%s\n", fitResultStr.Data());
+
+         
+         // cRead->Clear();
+         //g->GetXaxis()->SetRangeUser(0, g->GetN());
+         //g->GetYaxis()->SetRangeUser(7500, 35000);
+         
+         cRead->cd(1);
+         g->Draw("Al");
+         fit2->Draw("same");
+         text.SetTextColor(2);
+         text.DrawText(0.11, 0.85, fitResultStr.Data());
+         text.SetTextColor(4);
+         text.DrawText(0.11, 0.10, fitResultStr2.Data());
+
+         /*
          ///===== using offset-different method 
          int offset = 30;
 
@@ -124,7 +216,7 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
             jaja->SetBinError(k, 0);
          }
 
-         //========= moving average
+         // //========= moving average
          TH1F * specS = (TH1F*) jaja->Clone();
          specS->Rebin(4);
 
@@ -157,20 +249,14 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
 
             delete peak;
          }
-
-         
-         // cRead->Clear();
-         cRead->cd(1);
-         g->Draw("Al");
-         //g->GetXaxis()->SetRangeUser(0, g->GetN());
-         //g->GetYaxis()->SetRangeUser(7500, 35000);
          cRead->cd(2);
-         //jaja->Draw();
          specS->Draw("");
+         */
+         
       
          cRead->Update();              
          gSystem->ProcessEvents();
-         
+
          char s[80];
          fgets(s, sizeof s, stdin); 
 
@@ -201,7 +287,6 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000){
          if( oldEv.size() == evPointer ) oldEv.push_back(ev);
          evPointer ++;
       }
-   
       
    }
    

@@ -139,20 +139,20 @@ void GeneralSortTraceProof::Begin(TTree */*tree*/){
    printf( "  EZero    : %s , %d \n", isEZero  ? "On" : "Off", NEZERO);
    printf( "  C-Recoil : %s , %d \n", isCRDT   ? "On" : "Off", NCRDT);
    printf( "  APOLLO   : %s , %d \n", isAPOLLO ? "On" : "Off", NAPOLLO);
+   
    TString traceMethodName;
    switch(traceMethod){
-   case 0: traceMethodName = "copy"; break;
-   case 1: traceMethodName = "fit"; break;
-   case 2: traceMethodName = "trapezoid"; break;
-   case 3: traceMethodName = "offset-diff."; break;
+      case 0: traceMethodName = "copy"; break;
+      case 1: traceMethodName = "fit"; break;
+      case 2: traceMethodName = "trapezoid"; break;
+      case 3: traceMethodName = "offset-diff."; break;
    }
-   printf( "  Trace  : %s , Method: %s, Save: %s \n",
+   printf( "  Trace    : %s , Method: %s, Save: %s \n",
                isTraceON ?  "On" : "Off",
                traceMethodName.Data(),
                isSaveTrace? "Yes": "No:");
+
    printf( "=====================================================\n");
-   //printf("                    file : %s \n", tree->GetDirectory()->GetName());
-   //printf("          Number of Event: %llu \n", tree->GetEntries());
 
    printf("======= ID-MAP: \n");
 
@@ -287,7 +287,7 @@ void GeneralSortTraceProof::SlaveBegin(TTree * /*tree*/)
       printf(" -----  no crdt.\n");
    }
 
-   if( isTraceON ){
+   if( isTraceON && hasTrace ){
       arr = new TClonesArray("TGraph");
 
       if( isSaveTrace){
@@ -387,7 +387,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
       psd.APOLLOTimestamp[i]= 0;
    }
 
-   if( isTraceON ){
+   if( isTraceON && hasTrace){
       for(int i = 0; i < NARRAY; i++){
          te[i]     = TMath::QuietNaN();
          te_r[i]   = TMath::QuietNaN();
@@ -427,7 +427,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
    b_pre_rise_energy->GetEntry(entry);
    b_post_rise_energy->GetEntry(entry);
    b_event_timestamp->GetEntry(entry);
-   if( isTraceON ) {
+   if( isTraceON && hasTrace ) {
       b_trace->GetEntry(entry);
       b_trace_length->GetEntry(entry);
    }
@@ -522,7 +522,7 @@ Bool_t GeneralSortTraceProof::Process(Long64_t entry)
 
    ///Trace
    /************************************************************************/
-   if( isTraceON ) {
+   if( isTraceON && hasTrace) {
       int countTrace = 0;
 
       arr->Clear("C");
