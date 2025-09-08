@@ -113,7 +113,7 @@ public :
    int numDet;
    int iDet; // number of detector at different position
    int jDet; // number of detector at same position
-   vector<double> pos;
+   std::vector<double> pos;
    double Bfield;
    double a;
    double length;
@@ -190,7 +190,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    
    //===================================================== loading parameter
    //========================================= detector Geometry
-   string detGeoFileName = "detectorGeo.txt";
+   std::string detGeoFileName = "detectorGeo.txt";
    printf("----- loading detector geometery : %s.", detGeoFileName.c_str());
 
    TMacro * haha = new TMacro();
@@ -207,6 +207,8 @@ void Cali_littleTree_trace::Init(TTree *tree)
       a = detGeo.detPerpDist;
       length = detGeo.detLength;
       firstPos = detGeo.firstPos;
+
+      pos = detGeo.detPos;
       
       printf("... done.\n");
    }else{
@@ -218,7 +220,7 @@ void Cali_littleTree_trace::Init(TTree *tree)
    
    //========================================= xf = xn correction
    printf("----- loading xf-xn correction.");
-   ifstream file;
+   std::ifstream file;
    file.open("correction_xf_xn.dat");
    if( file.is_open() ){
       double a;

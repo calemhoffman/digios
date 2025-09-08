@@ -229,7 +229,6 @@ if [ ${Arch} == "Linux" ]; then
 elif [ ${Arch} == "Darwin" ]; then
     if [ ${PCName:0:12} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
         sed -i '' "s/expName/${capExpName}/g" ${expDIR}/analysis/working/Monitors.html
-        echo -e "\033[0;93mStill need to change the Slack channel link. \033[0m"
     else
         echo "Not in the MAC2020, no need to change Monitors.html."
     fi
