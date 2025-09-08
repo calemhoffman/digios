@@ -73,21 +73,21 @@ scp ${elogContext} heliosdigios@${mac2020IP}:~/.
 #else
 #  elogName="H"${expName:1}
 #fi
+
+echo ">>>>>>>>>>>>>>> push to Elog"
 ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
 
 
-#echo ">>>>>>>>>>>>>>> push to Discord"
+echo ">>>>>>>>>>>>>>> push to Discord"
 
-#source ~/Slack_Elog_Notification.sh
-#source ~/Discord_webhooks.sh
-slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
+#slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
 auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
+echo ${auxMsg} > endRunMsg.txt
+scp endRunMsg.txt heliosdigios@${mac2020IP}:~/.
+ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Discord.sh ${elogName} 0"
 
-#curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${auxMsg}"'"}' ${WebHook}
-#curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${auxMsg}\"}" $WEBHOOK_DAQ_URL
 
-
-echo wait 2 seconds before closing the IOCs
+echo "wait 2 seconds before closing the IOCs"
 sleep 2
 
 #number of IOCS/Rec. in use

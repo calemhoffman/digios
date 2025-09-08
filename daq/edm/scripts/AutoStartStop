@@ -151,9 +151,6 @@ while [  $stopFlag -eq 0 ]; do
 		echo -e "######## ${RED}CHANCE TO STOP the auto!!!! Ctrl+C to stop.${NC}"
 		echo "========== number of repeat : ${repeat}"
 		sleep 10
-		#if [ $expname == "h078_14C14N" ]; then
-		#    caput VME01:MDIG1:trigger_mux_select IntAcptAll
-		#fi
 		cd ${datalocation}
 		source ${HELIOSSYS}/daq/edm/scripts/start_run.sh "Auto start! $repeat"
 		cd ${currentLocation}
