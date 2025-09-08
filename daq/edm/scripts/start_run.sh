@@ -86,6 +86,8 @@ echo "pushing to elog for started a run"
 
 #### need to do this because the selog in DAQ is outdated.
 
+echo "============= copy elog.txt to Mac2020"
+
 scp ${elogFile} heliosdigios@${mac2020IP}:~/elog.txt
 ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh start ${elogName} ${RUN}"
 
@@ -97,15 +99,8 @@ echo "ID = ${ID}"
 elogIDStr="elogID="${ID}
 echo "elogID = ${elogID}"
 
-#source ~/Slack_Elog_Notification.sh
-source ~/Discord_webhooks.sh
-slackMsg="**RUN=${LastRunNum}**.  https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
-elogMsg=`cat ${HELIOSSYS}/analysis/working/elog.txt`
-#curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${slackMsg}${elogMsg}"'"}' ${WebHook}
-
-elogMsg=$(echo "$elogMsg" | sed 's/\*/=/g' | sed -e 's/<br \/>//g' | sed 's/"/\\"/g; s/$/\\n/' | tr -d '\n' | sed 's/\\n$//')
-#curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"${slackMsg}${elogMsg}\"}" $WEBHOOK_DAQ_URL
-
+echo "============= push to Discord"
+ssh  heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Discord.sh ${elogName} 1"
 
 echo "============== Opening IOC...."
 
