@@ -16,10 +16,18 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
      
     // chain->Add("../root_data/gen_run02[2-3].root");
     // chain->Add("../root_data/gen_run024.root"); // higher beam rate, dE 75V, RIB sweeper off
-    chain->Add("../root_data/gen_run02[5-9].root"); // higher beam rate, dE 75V, RIB sweeper on
-    chain->Add("../root_data/gen_run03[0-9].root"); // higher beam rate, dE 75V, RIB sweeper on
-    
+   // chain->Add("../root_data/gen_run02[5-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+   // chain->Add("../root_data/gen_run03[7-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+    //chain->Add("../root_data/gen_run04[0-8].root"); // higher beam rate, dE 75V, RIB sweeper on
+
+    //start of d,d'
+    chain->Add("../root_data/gen_run049.root"); // higher beam rate, dE 75V, RIB sweeper on
+    chain->Add("../root_data/gen_run05[0-6].root"); // higher beam rate, dE 75V, RIB sweeper on
+
+
     // chain->Add("../root_data/trace_run02[5-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+    // chain->Add("../root_data/trace_run03[0-9].root"); // higher beam rate, dE 75V, RIB sweeper on
+    // chain->Add("../root_data/trace_run04[0-9].root");
     
     ///********** end Marker for AutoCalibration.
     

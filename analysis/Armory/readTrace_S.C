@@ -156,18 +156,10 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
          g->Set(traceLength[j]);  
          double base = 0;
          for( int k = 0; k < traceLength[j] ; k++){
-            int haha;
-            if( trace[j][k] < 16000){
-               base = trace[j][k];
-               g->SetPoint(k, k, trace[j][k]);
-               haha = trace[j][k];
-            }else{
-               g->SetPoint(k, k, base);
-               haha = base;
-            }
+            g->SetPoint(k, k, trace[j][k]);
             //printf("%4d, %5d \n", k, base);
             //if( k % 10 ==0 ) printf("\n");
-            if( print) printf("{%3d, %d},\n", k, haha);
+            if( print) printf("{%3d, %d},\n", k, trace[j][k]);
          }
          
          g->SetTitle(Form("ev: %d, nHit : %d, id : %d, idKind : %d, trace Length : %u\n", ev, j, idDet, idKind, traceLength[j]));
