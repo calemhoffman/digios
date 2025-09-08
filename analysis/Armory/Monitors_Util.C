@@ -44,6 +44,7 @@ void listDraws(void) {
   printf("-----------------------------------------------------\n");
   printf("     eCalVz() - Energy vs. Z\n");
   printf("  eCalVzRow() - Energy vs. Z for each row\n");
+  printf(" eCalVzRowG() - Energy vs. Z for each row (Gated)\n");
   printf("     excite() - Excitation Energy\n");
   printf("  ExThetaCM() - Ex vs ThetaCM\n");
   printf("    ExVxCal() - Ex vs X for all %d detectors\n", NARRAY);
@@ -397,6 +398,22 @@ void eCalVzRow() {
   }
   
 }
+
+void eCalVzRowG() {
+  TCanvas *cecalVzRowG =  (TCanvas *) gROOT->FindObjectAny("cecalVzRowG");
+  if( cecalVzRowG == NULL ) cecalVzRowG = new TCanvas("cevalVzRowG",Form("eCal - Z : %s", canvasTitle.Data()),canvasSize[0], canvasSize[1]);
+  FindBesCanvasDivision(NROW);
+  cecalVzRowG->Clear(); cecalVzRowG->Divide(xD,yD);
+  gStyle->SetOptStat("neiou");
+  
+  for(int row = 0; row < NROW; row ++){
+     cecalVzRowG->cd(row+1);
+     cecalVzRowG->cd(row+1)->SetGrid();
+     hecalVzRowG[row]->Draw("colz");
+  }
+  
+}
+
 
 void excite(void) {
   TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");

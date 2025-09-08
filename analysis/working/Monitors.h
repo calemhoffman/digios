@@ -145,7 +145,7 @@ public :
    
    
    TString FindStartEndTime(TTree * tree,TString BranchName);
-   void Draw2DHist(TH2F * hist);
+   void Draw2DHist(TH2F * hist, int colzThreshold = 3000);
    
    void PlotEZ(bool isRaw);
    void PlotTDiff(bool isGated, bool isLog);
@@ -243,9 +243,10 @@ void Monitors::Init(TTree *tree){
    }else{
       isArrayTraceExist = true;
       if( isUseArrayTrace ){
-         fChain->SetBranchAddress("te", e, &b_Energy);// replace  e with te
+         fChain->SetBranchAddress("te", e, &b_Trace_Energy); // replace  e with te
+         printf("************ using Trace in array \n");
       }else{
-         fChain->SetBranchAddress("te", te, &b_Trace_Energy);
+         fChain->SetBranchAddress("e", e, &b_Energy);
       }
       fChain->SetBranchAddress("te_r", te_r, &b_Trace_Energy_RiseTime);
       fChain->SetBranchAddress("te_t", te_t, &b_Trace_Energy_Time);
@@ -258,10 +259,10 @@ void Monitors::Init(TTree *tree){
    }else{
       isRDTTraceExist = true;
       if( isUseRDTTrace ) {
-         fChain->SetBranchAddress("trdt", rdt, &b_RDT); // replace  rdt with trdt
+         fChain->SetBranchAddress("trdt", rdt, &b_Trace_RDT); // replace  rdt with trdt
          printf("************ using Trace in recoil \n");
       }else{
-         fChain->SetBranchAddress("trdt", trdt, &b_Trace_RDT);
+         fChain->SetBranchAddress("trdt", rdt, &b_RDT);
       }
       fChain->SetBranchAddress("trdt_t", trdt_t, &b_Trace_RDT_Time);
       fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
@@ -316,11 +317,11 @@ TString Monitors::FindStartEndTime(TTree * tree, TString BranchName){
 }
 
 
-void DrawLine(TH1 * hist, double pos){
+void DrawLine(TH1 * hist, double pos, int colorCode = 2){
    
    double yMax = hist->GetMaximum();
    TLine * line = new TLine(pos, 0, pos, yMax);
-   line->SetLineColor(2);
+   line->SetLineColor(colorCode);
    line->Draw("");
    
 }
@@ -334,12 +335,12 @@ void DrawBox(TH1* hist, double x1, double x2, Color_t color, float alpha){
 
 }
 
-void Monitors::Draw2DHist(TH2F * hist){
+void Monitors::Draw2DHist(TH2F * hist, int colzThreshold){
    
-   if( hist->Integral() < 3000 ){
+   if( hist->Integral() < colzThreshold ){
       hist->SetMarkerStyle(20);
       hist->SetMarkerSize(0.3);
-      hist->Draw("");
+      hist->Draw("box");
    }else{
       hist->Draw("colz"); 
    }
@@ -664,7 +665,7 @@ void Monitors::PlotTDiff(bool isGated, bool isLog){
    
    if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.8, "with Recoil gate");
    if(isTimeGateOn)text.DrawLatex(0.15, 0.7, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   // DrawBox(htdiff, timeGate[0], timeGate[1], kGreen, 0.0);
+   DrawBox(htdiff, timeGate[0], timeGate[1], kGreen, 0.0);
 }
 
 void Monitors::PlotRDT(int id, bool isRaw){

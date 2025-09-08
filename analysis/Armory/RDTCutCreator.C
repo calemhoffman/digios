@@ -123,7 +123,7 @@ void RDTCutCreator(TString dataList,
       cut->SetVarX(varX.Data());
       cut->SetVarY(varY.Data());
       cut->SetTitle(tag);
-      cut->SetLineColor(i+1);
+      cut->SetLineColor(i == 2 ? 8 : i+1 );
       cutList->Add(cut);
 
       printf(" cut-%d \n", i);
