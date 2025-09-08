@@ -1,8 +1,8 @@
 19             //beam_A
 10             //beam_Z
-1               //target_A
+2               //target_A
 1               //target_Z
-1               //recoil_light_A
+2               //recoil_light_A
 1               //recoil-light_Z
 9.0            //beam-energy_in_MeV/u
 0.000           //beam-energy_sigma_in_MeV/u
@@ -18,8 +18,8 @@ false           //isTargetScattering
 ../SRIM/3H_in_CD2.txt   //stopping_power_for_light_recoil
 ../SRIM19F_in_CD2.txt  //stopping_power_for_heavy_recoil
 true           //isDecay
-4               //decayNucleus_A
-2               //decayNucleus_Z
+15               //decayNucleus_A
+8               //decayNucleus_Z
 false           //isReDo
 0.0           //excitation_energy_of_A[MeV]
 #===== end of file

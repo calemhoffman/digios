@@ -64,8 +64,8 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
 vector<int> skipDetID = {2, 11, 20, 21}; 
 
-TString rdtCutFile1 = "rdtCuts_O.root";
-TString rdtCutFile2 = "";//"rdtCuts_Ne.root";
+TString rdtCutFile1 = "rdtCuts_Ne.root";
+TString rdtCutFile2 = "rdtCuts_O.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
