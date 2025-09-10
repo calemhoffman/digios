@@ -1461,7 +1461,7 @@ private:
    double mB, mD, md;
    double theta;
    
-   TF1 * f1;
+   // TF1 * f1;
    
    bool isMotherSet;
    double Q;
@@ -1486,11 +1486,11 @@ Decay::Decay(){
    dTheta = TMath::QuietNaN();
    isMotherSet = false;
    
-   f1 = new TF1("f1", "(1+ROOT::Math::legendre(2,x))/2.", -1, 1);
+   // f1 = new TF1("f1", "(1+ROOT::Math::legendre(2,x))/2.", -1, 1);
 }
 
 Decay::~Decay(){
-   delete f1;
+   // delete f1;
 }
 
 //=======================================================
