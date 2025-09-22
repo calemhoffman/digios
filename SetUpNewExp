@@ -186,73 +186,89 @@ if [ ${isBranchExist} -eq 0 ]; then
     echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
 fi
 
-echo "=================== making new folders in ${DATAPATH}/${expName}"
-Data=${DATAPATH}/${expName}/data
-mergedData=${DATAPATH}/${expName}/merged_data
-rootData=${DATAPATH}/${expName}/root_data
+echo "=================== making new folders in ${DATAPATH}/${expName} and creating symoblic link"
 
-mkdir -v ${DATAPATH}/${expName}
-mkdir -v ${Data}
-mkdir -v ${mergedData}
-mkdir -v ${rootData}
+if [ ${PCName} == "digios1" ]; then  #DAQ
 
+    Data=${DATAPATH}/${expName}
 
-#===== create symbolic links
-echo "=================== creating symbolic links"
-rm -f ${expDIR}/analysis/data
-rm -f ${expDIR}/analysis/merged_data
-rm -f ${expDIR}/analysis/root_data
+    mkdir -v ${DATAPATH}/${expName}
+    mkdir -v ${Data}
 
-ln -sfv ${Data} ${expDIR}/analysis/data
-ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
-ln -sfv ${rootData} ${expDIR}/analysis/root_data
+    rm -f ${expDIR}/analysis/data
 
-#===== tell Database SetupNewExp change exp.
-echo "=================== Tell the database"
+    ln -sfv ${Data} ${expDIR}/analysis/data
 
-source ${expDIR}/daq/edm/scripts/DataBaseAddress.sh
-
-curl -s -XPOST "http://"${dataBaseAddress}":8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
-
-echo "=================== done."
-
-#===== Modify Monitors.html
-
-if [ ${expName} == "ARR01" ]; then
-    capExpName="ARR01"
 else
-    capExpName="H"${expName:1}
-fi
 
-if [ ${Arch} == "Linux" ]; then 
-    echo "in Linux machine, no need to change Monitors.html."
-elif [ ${Arch} == "Darwin" ]; then
-    if [ ${PCName:0:12} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
-        sed -i '' "s/expName/${capExpName}/g" ${expDIR}/analysis/working/Monitors.html
+    Data=${DATAPATH}/${expName}/data
+    mergedData=${DATAPATH}/${expName}/merged_data
+    rootData=${DATAPATH}/${expName}/root_data
+
+    mkdir -v ${DATAPATH}/${expName}
+    mkdir -v ${Data}
+    mkdir -v ${mergedData}
+    mkdir -v ${rootData}
+
+    rm -f ${expDIR}/analysis/data
+    rm -f ${expDIR}/analysis/merged_data
+    rm -f ${expDIR}/analysis/root_data
+
+    ln -sfv ${Data} ${expDIR}/analysis/data
+    ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
+    ln -sfv ${rootData} ${expDIR}/analysis/root_data
+
+    #===== tell Database SetupNewExp change exp.
+    echo "=================== Tell the database"
+
+    source ${expDIR}/daq/edm/scripts/DataBaseAddress.sh
+
+    curl -s -XPOST "http://"${dataBaseAddress}":8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+
+    echo "=================== done."
+
+    #===== Modify Monitors.html
+
+    if [ ${expName} == "ARR01" ]; then
+        capExpName="ARR01"
     else
-        echo "Not in the MAC2020, no need to change Monitors.html."
+        capExpName="H"${expName:1}
     fi
+
+    if [ ${Arch} == "Linux" ]; then 
+        echo "in Linux machine, no need to change Monitors.html."
+    elif [ ${Arch} == "Darwin" ]; then
+        if [ ${PCName:0:12} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
+            sed -i '' "s/expName/${capExpName}/g" ${expDIR}/analysis/working/Monitors.html
+        else
+            echo "Not in the MAC2020, no need to change Monitors.html."
+        fi
+    fi
+
+    #===== clean up working if it is new
+    if [ ${isBranchExist} -eq 0 ]; then
+
+        echo "======== Clean up working directory "
+        #rm -fv ${expDIR}/analysis/working/correction_*.dat
+        rm -fv ${expDIR}/analysis/working/reaction.dat
+        rm -fv ${expDIR}/analysis/working/run_Summary.dat
+        rm -fv ${expDIR}/analysis/working/example.*
+        rm -fv ${expDIR}/analysis/working/RunTimeStamp.dat
+        rm -fv ${expDIR}/analysis/working/*.root
+        rm -fv ${expDIR}/analysis/working/*.d
+        rm -fv ${expDIR}/analysis/working/*.so
+        rm -fv ${expDIR}/analysis/working/*.pcm
+
+        echo "======== git commit "
+        git add -A
+        git commit -m "new experiment ${expName}"
+
+        echo "======== git push "
+        git push origin ${expName}
+
+    fi 
+
 fi
 
-#===== clean up working if it is new
-if [ ${isBranchExist} -eq 0 ]; then
 
-    echo "======== Clean up working directory "
-    #rm -fv ${expDIR}/analysis/working/correction_*.dat
-    rm -fv ${expDIR}/analysis/working/reaction.dat
-    rm -fv ${expDIR}/analysis/working/run_Summary.dat
-    rm -fv ${expDIR}/analysis/working/example.*
-    rm -fv ${expDIR}/analysis/working/RunTimeStamp.dat
-    rm -fv ${expDIR}/analysis/working/*.root
-    rm -fv ${expDIR}/analysis/working/*.d
-    rm -fv ${expDIR}/analysis/working/*.so
-    rm -fv ${expDIR}/analysis/working/*.pcm
 
-    echo "======== git commit "
-    git add -A
-    git commit -m "new experiment ${expName}"
-
-    echo "======== git push "
-    git push origin ${expName}
-
-fi 
