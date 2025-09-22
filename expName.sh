@@ -1,4 +1,4 @@
 #!/bin/bash -l
-expName=ARR01
+expName=h095_11C_dp_2
 daqDataPath=/media/DIGIOSDATA6
-LastRunNum=178
+LastRunNum=0
