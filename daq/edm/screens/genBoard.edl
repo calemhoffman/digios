@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 1104
-y 967
+x 1197
+y 1077
 w 850
 h 550
 font "helvetica-medium-r-18.0"
@@ -2775,7 +2775,7 @@ botShadowColor index 85
 font "helvetica-medium-r-14.0"
 buttonLabel "Channel PVs"
 numPvs 4
-numDsps 11
+numDsps 12
 displayFileName {
   0 "DigParamContrl.edl"
   1 "DigParamContrl.edl"
@@ -2788,6 +2788,7 @@ displayFileName {
   8 "DigParamContrl.edl"
   9 "DigWinContrl.edl"
   10 "DigParamContrl.edl"
+  11 "DigParamContrl.edl"
 }
 menuLabel {
   0 "LED Thresh"
@@ -2801,6 +2802,7 @@ menuLabel {
   8 "P1 Window"
   9 "P2 Window"
   10 "D3 Window"
+  11 "Baseline"
 }
 symbols {
   0 "P=led_threshold"
@@ -2814,6 +2816,7 @@ symbols {
   8 "P=p1_window"
   9 "P=p2_window"
   10 "P=d3_window"
+  11 "P=baseline_start"
 }
 endObjectProperties
 
