@@ -3,8 +3,8 @@ beginScreenProperties
 major 4
 minor 0
 release 1
-x 785
-y 244
+x 737
+y 183
 w 1350
 h 800
 font "helvetica-bold-r-10.0"
@@ -6455,7 +6455,7 @@ x 772
 y 611
 w 59
 h 15
-controlPv "VME02:MDIG4:ahit_count1_RBV"
+controlPv "VME01:MDIG1:ahit_count1_RBV"
 font "helvetica-bold-r-12.0"
 fontAlign "right"
 fgColor index 80
