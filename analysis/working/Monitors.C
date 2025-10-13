@@ -31,10 +31,10 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {     -1000,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     1,     20};       /// in the E-Z plot
-int     rdtDERange[2] = {     50,    3000}; 
-int      rdtERange[2] = {     50,    8000};  
+int rawEnergyRange[2] = {     0,    3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     0,     14};       /// in the E-Z plot
+int     rdtDERange[2] = {     50,    9000}; 
+int      rdtERange[2] = {     50,    5000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -42,7 +42,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  30,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  50,    10,     24};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -54,18 +54,22 @@ bool isUseRDTTrace = true;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-30, 20};             /// min, max, 1 ch = 10 ns
-double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
+int timeGate[2]       = {-50, 50};             /// min, max, 1 ch = 10 ns
+double eCalCut[2]     = {1.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
-vector<int> skipDetID = {2, 11, 20, 21}; 
+vector<int> skipDetID = {11, 22}; 
 
-TString rdtCutFile1 = "rdtCuts_Ne.root";
-TString rdtCutFile2 = "rdtCuts_O.root";
+TString rdtCutFile1 = "rdtCuts12C.root";//"ben.root"; //"rdtCut12C.root";
+TString rdtCutFile2 = "rdtCuts11C.root";
+
+// TString rdtCutFile1 = "rdtCut12C_2.root";//"ben.root"; //"rdtCut12C.root"; //_2
+// TString rdtCutFile2 = "alpha_ben.root";
+
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -169,6 +173,8 @@ TH2F* hExThetaCM;
 
 TH1F* hExCut1;
 TH1F* hExCut2;
+
+TH1F * hExTime;
 
 //====== TAC
 TH1F* htac;   // by TAC
@@ -353,11 +359,17 @@ void Monitors::Begin(TTree *tree)
    }
    
    //=============== Get Time stamp range
+   // checking RDT time
+   TString branchRDT = FindStartEndTime(tree, "rdt_t", NRDT);
+   
+   double rdtRunTime = (endTime - startTime)/1e8/60.;
+   printf(" RDT duration : %.3f mins\n", rdtRunTime);
+  
    //TODO use the info macro
    TString branch = FindStartEndTime(tree, "e_t");
-   if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "rdt_t");
-   if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "ezero_t");
-   if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "elum_t");
+   if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "rdt_t", NRDT);
+   if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "ezero_t", NEZERO);
+   if( (startTime == 0 && endTime == 0 ) || (startTime == endTime)  ) branch = FindStartEndTime(tree, "elum_t", NELUM);
    
    runTime = (endTime-startTime)/1e8/60.;
    
@@ -380,6 +392,8 @@ void Monitors::Begin(TTree *tree)
       timeRange[0] = 0;
       timeRange[1] = 1000;
    }
+
+
    
    //========================= Generate all of the histograms needed for drawing later on
    printf("======================================== Histograms declaration\n");
@@ -504,6 +518,8 @@ void Monitors::Begin(TTree *tree)
    
    hExCut2  = new TH1F("hExCut2",Form("excitation spectrum w/ goodFlag; Ex [MeV] ; Count / %4.0f keV", exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
    hExCut2->SetLineColor(8);
+  
+   hExTime = new TH1F("hExTime", "rate for 15.11 MeV state; Time [min]; count / hour",  (timeRange[1]-timeRange[0])/60, timeRange[0], timeRange[1]);
    
    for(int i = 0 ; i < NARRAY; i++){
       hExi[i] = new TH1F(Form("hExi%02d", i), Form("Ex (det=%i) w/goodFlag; Ex [MeV]; Count / %4.0f keV",i, exRange[0]), (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
@@ -671,6 +687,7 @@ Bool_t Monitors::Process(Long64_t entry){
     bool coinFlag = false;
     bool ezGate = false;
     bool isGoodEventFlag = false;
+    ULong64_t eTime = 0;
 
     for (Int_t detID = 0; detID < NARRAY; detID++) {
       
@@ -846,6 +863,8 @@ Bool_t Monitors::Process(Long64_t entry){
          multiEZ ++;
          isGoodEventFlag = true;
 
+         eTime = e_t[detID];
+
       }
       
    }//end of array loop
@@ -1007,6 +1026,10 @@ Bool_t Monitors::Process(Long64_t entry){
          hExi[detID]->Fill(Ex);
          hExVxCal[detID]->Fill(xcal[detID], Ex);
          hExc[detID%numCol]->Fill(Ex);
+
+         if( 14.8 < Ex && Ex < 15.6){
+            hExTime->Fill(eTime/1e8/60.);
+         }
          
       }
    }
@@ -1076,7 +1099,6 @@ void Monitors::Terminate()
    }
    DrawLine(hEx, Sn);
    DrawLine(hEx, Sa);
-   DrawLine(hEx, 4.03, 1);
    
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
@@ -1091,13 +1113,14 @@ void Monitors::Terminate()
    ///----------------------------------- Canvas - 7
    padID++; cCanvas->cd(padID);
 
-   hEx->Draw();
-   DrawLine(hEx, Sn);
-   DrawLine(hEx, Sa);
-   DrawLine(hEx, 4.03, 8);
+   // hEx->Draw();
+   // DrawLine(hEx, Sn);
+   // DrawLine(hEx, Sa);
 
-   if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
+   // if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
+   // if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
+
+   hExTime->Draw("e");
 
    ///----------------------------------- Canvas - 8
    PlotRDT(3, 1);
