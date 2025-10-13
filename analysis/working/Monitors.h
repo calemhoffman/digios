@@ -144,7 +144,7 @@ public :
    virtual void    Terminate();
    
    
-   TString FindStartEndTime(TTree * tree,TString BranchName);
+   TString FindStartEndTime(TTree * tree,TString BranchName, int arraySize = NARRAY);
    void Draw2DHist(TH2F * hist, int colzThreshold = 3000);
    
    void PlotEZ(bool isRaw);
@@ -278,7 +278,7 @@ Bool_t Monitors::Notify(){
    return kTRUE;
 }
 
-TString Monitors::FindStartEndTime(TTree * tree, TString BranchName){
+TString Monitors::FindStartEndTime(TTree * tree, TString BranchName, int arraySize){
    
    ULong64_t timeStamp[100];
    
@@ -290,7 +290,7 @@ TString Monitors::FindStartEndTime(TTree * tree, TString BranchName){
    for( int ev = 0; ev < totEnetries; ev ++ ){
       tree->GetEntry(ev);
       bool breakFlag = false;
-      for( int id = 0; id < NARRAY; id ++){
+      for( int id = 0; id < arraySize; id ++){
          if( timeStamp[id] > 0 ) {
             startTime = timeStamp[id];
             breakFlag = true;
@@ -303,7 +303,7 @@ TString Monitors::FindStartEndTime(TTree * tree, TString BranchName){
    for( int ev =  totEnetries - 1 ; ev > 0 ;  ev -- ){
       tree->GetEntry(ev);
       bool breakFlag = false;
-      for( int id = 0; id < NARRAY; id ++){
+      for( int id = 0; id < arraySize; id ++){
          if( timeStamp[id] > 0 ) {
             endTime = timeStamp[id];
             breakFlag = true;
