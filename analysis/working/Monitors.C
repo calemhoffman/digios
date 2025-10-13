@@ -1120,7 +1120,7 @@ void Monitors::Terminate()
    // if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    // if( xGate < 1 ) text.DrawLatex(0.15, 0.75, Form("with |x-0.5|<%.4f", xGate/2.));
 
-   hExTime->Draw();
+   hExTime->Draw("e");
 
    ///----------------------------------- Canvas - 8
    PlotRDT(3, 1);
