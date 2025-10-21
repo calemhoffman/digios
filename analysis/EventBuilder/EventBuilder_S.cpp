@@ -21,9 +21,10 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <memory> // added for unique_ptr
 
 #define MAX_TRACE_LEN 1250 
-#define MAX_TRACE_MULTI 40
+#define MAX_TRACE_MULTI 60
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
 #define MAX_QUEUE_SIZE 10000 // Maximum size of the data queue
 
@@ -99,11 +100,22 @@ public:
 
   // trace analysis
   float tracePara[MAX_TRACE_MULTI][4]; // trace parameters, 0 = Amplitude, 1 = Rise time, 2 = Timestamp, 3 = Baseline
+  float traceChi2[MAX_TRACE_MULTI]; // trace fit chi2
 
   float te[NARRAY]; // trace energy
   float te_t[NARRAY]; // trace energy timestamp
   float te_r[NARRAY]; // trace energy rise time
+  float te_chi2[NARRAY]; // trace energy chi2
 
+  float txf[NARRAY]; // trace XF
+  float txf_t[NARRAY]; // trace XF timestamp
+  float txf_r[NARRAY]; // trace XF rise time
+  float txf_chi2[NARRAY]; // trace XF chi2
+
+  float txn[NARRAY]; // trace XN
+  float txn_t[NARRAY]; // trace XN timestamp
+  float txn_r[NARRAY]; // trace XN rise time
+  float txn_chi2[NARRAY]; // trace XN chi2
   
 #if NRDT > 0
   float RDT[NRDT];
@@ -112,6 +124,7 @@ public:
   float trdt[NRDT];
   float trdt_t[NRDT];
   float trdt_r[NRDT];
+  float trdt_chi2[NRDT];
 #endif
 #if NTAC > 0
   float TAC[NTAC];
@@ -225,114 +238,116 @@ public:
   void FillData(std::vector<Event> events, bool saveTrace){
 
     for( int i = 0; i <  events.size(); i++) {
-        int id                    = events[i].board * 10 + events[i].channel - 1010;
-        uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
-        uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
-        uint64_t timestamp        = events[i].timestamp; // Timestamp
+      int id                    = events[i].board * 10 + events[i].channel - 1010;
+      uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
+      uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
+      uint64_t timestamp        = events[i].timestamp; // Timestamp
 
-        int idDet = idDetMap[id]; 
-        int idKind = idKindMap[id]; 
+      int idDet = idDetMap[id]; 
+      int idKind = idKindMap[id]; 
 
-        if( idDet < 0 ) continue;
+      if( idDet < 0 ) continue;
 
-        float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
+      float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
 
-        // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
+      // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
 
-        if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
-          switch (idKind ){
-            case 0: // Energy signal
-              Energy[idDet] = eee; // Calculate energy
-              EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
-              break;
-            case 1: // XF
-              XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
-              XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
-              break;
-            case 2: // XN
-              XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
-              XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
-              break;
-            case 3: // Ring
-              Ring[idDet] = eee; // Calculate Ring
-              RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
-                break;
-              }
-            }
+      if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
+        switch (idKind ){
+        case 0: // Energy signal
+          Energy[idDet] = eee; // Calculate energy
+          EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
+          break;
+        case 1: // XF
+          XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
+          XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
+          break;
+        case 2: // XN
+          XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
+          XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
+          break;
+        case 3: // Ring
+          Ring[idDet] = eee; // Calculate Ring
+          RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
+          break;
+        }
+      }
 
     #if NRDT > 0
-        if( 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
-          int rdtID = idDet - 100; // Recoil ID
-          RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
-          RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
-        }
+      if( 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
+        int rdtID = idDet - 100; // Recoil ID
+        RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
+        RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
+      }
     #endif
 
     #if NELUM > 0 
-        if( 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
-          int elumID = idDet - 200; // ELUM ID
-          ELUM[elumID] = eee;
-          ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
-        }
+      if( 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
+        int elumID = idDet - 200; // ELUM ID
+        ELUM[elumID] = eee;
+        ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
+      }
     #endif
 
     #if NEZERO > 0
-        if( 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
-          int ezeroID = idDet - 300; // EZERO ID
-          EZERO[ezeroID] = eee;
-          EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
-        }
+      if( 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
+        int ezeroID = idDet - 300; // EZERO ID
+        EZERO[ezeroID] = eee;
+        EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
+      }
     #endif
 
     #if NTAC > 0
-        if( 400 <= idDet && idDet < 400 + NTAC ) { // TAC
-          int tacID = idDet - 400; // TAC ID
-          TAC[tacID] = eee;
-          TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
-        }
+      if( 400 <= idDet && idDet < 400 + NTAC ) { // TAC
+        int tacID = idDet - 400; // TAC ID
+        TAC[tacID] = eee;
+        TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
+      }
     #endif
 
     #if NCRDT > 0
-        if( 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
-          int crdtID = idDet - 500; // Circular Recoil ID
-          CRDT[crdtID] = eee;
-          CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
-        }
+      if( 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
+        int crdtID = idDet - 500; // Circular Recoil ID
+        CRDT[crdtID] = eee;
+        CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
+      }
     #endif
 
     #if NAPOLLO > 0
-        if( 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
-          int apolloID = idDet - 600; // APOLLO ID
-          APOLLO[apolloID] = eee;
-          APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
-        }
+      if( 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
+        int apolloID = idDet - 600; // APOLLO ID
+        APOLLO[apolloID] = eee;
+        APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
+      }
     #endif
 
-        if( saveTrace ){
+      if( saveTrace ){
 
-          if( traceCount >= MAX_TRACE_MULTI ) {
-            printf("\033[31mWarning: More than %d traces, truncating to %d traces.\033[0m\n", MAX_TRACE_MULTI, MAX_TRACE_MULTI);
-          }else{
+        if( traceCount >= MAX_TRACE_MULTI ) {
+          printf("\033[31mWarning: More than %d traces, truncating to %d traces. (event size %lu)\033[0m\n", MAX_TRACE_MULTI, MAX_TRACE_MULTI, events.size());
+        }else{
 
-            bool isArray = (0 <= idDet && idDet < NARRAY); 
-            bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
-            if( isArray || isRDT ) { 
+          bool isArray = (0 <= idDet && idDet < NARRAY); 
+          bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
+          if( isArray || isRDT ) { 
 
-              traceLen[traceCount] = events[i].traceLength;
-              traceDetID[traceCount] = idDet;
-              traceKindID[traceCount] = idKind;
-              uint16_t regulatedValue = 0;
-              for( int j = 0; j < traceLen[traceCount]; j++){
-                if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
-                trace[traceCount][j] = regulatedValue; 
-              }
+            // printf("iDet: %d, idKind: %d, traceLength: %d\n", idDet, idKind, events[i].traceLength);
 
-              traceCount++;
+            traceLen[traceCount] = events[i].traceLength;
+            traceDetID[traceCount] = idDet;
+            traceKindID[traceCount] = idKind;
+            uint16_t regulatedValue = 0;
+            for( int j = 0; j < traceLen[traceCount]; j++){
+              if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
+              trace[traceCount][j] = regulatedValue; 
             }
+
+            traceCount++;
           }
         }
-
       }
+
+    }
 
   }
 
@@ -383,10 +398,34 @@ public:
       tracePara[i][2] = gsl_vector_get(result, 2);
       tracePara[i][3] = gsl_vector_get(result, 3);
 
+      // Calculate chi2
+      gsl_vector *f_res = gsl_multifit_nlinear_residual(w);
+      double chi2 = 0.0;
+      for (size_t k = 0; k < f_res->size; k++) {
+        double r = gsl_vector_get(f_res, k);
+        chi2 += r * r;
+      }
+      traceChi2[i] = chi2;
+
       if( 0 <= traceDetID[i] && traceDetID[i] < NARRAY ){
-        te[traceDetID[i]] = tracePara[i][0]; // Amplitude
-        te_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
-        te_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+
+        if ( traceKindID[i] == 0 ){ // Energy
+          te[traceDetID[i]] = tracePara[i][0]; // Amplitude
+          te_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+          te_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+          te_chi2[traceDetID[i]] = traceChi2[i]; // Chi2
+        }else if ( traceKindID[i] == 1 ){ // XF
+          txf[traceDetID[i]] = tracePara[i][0]; // Amplitude
+          txf_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+          txf_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+          txf_chi2[traceDetID[i]] = traceChi2[i]; // Chi2
+        }else if ( traceKindID[i] == 2 ){ // XN
+          txn[traceDetID[i]] = tracePara[i][0]; // Amplitude
+          txn_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+          txn_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+          txn_chi2[traceDetID[i]] = traceChi2[i]; // Chi2
+        }
+
       }
 
       if( 100 <= traceDetID[i] && traceDetID[i] < 100 + NRDT ){
@@ -394,6 +433,7 @@ public:
         trdt[rdtID] = tracePara[i][0]; // Amplitude
         trdt_t[rdtID] = tracePara[i][1]; // Timestamp
         trdt_r[rdtID] = tracePara[i][2]; // Rise time
+        trdt_chi2[rdtID] = traceChi2[i]; // Chi2
       }
 
       gsl_multifit_nlinear_free(w);
@@ -598,15 +638,28 @@ int main(int argc, char* argv[]) {
   }
   if( nWorkers > 0 ){ 
     outTree->Branch("tracePara", data.tracePara, "tracePara[traceCount][4]/F");
+    outTree->Branch("traceChi2", data.traceChi2, "traceChi2[traceCount]/F");
 
     outTree->Branch("te", data.te, Form("te[%d]/F", NARRAY));
     outTree->Branch("te_t", data.te_t, Form("te_t[%d]/F", NARRAY));
     outTree->Branch("te_r", data.te_r, Form("te_r[%d]/F", NARRAY));
+    outTree->Branch("te_chi2", data.te_chi2, Form("te_chi2[%d]/F", NARRAY));
+
+    outTree->Branch("txf", data.txf, Form("txf[%d]/F", NARRAY));
+    outTree->Branch("txf_t", data.txf_t, Form("txf_t[%d]/F", NARRAY));
+    outTree->Branch("txf_r", data.txf_r, Form("txf_r[%d]/F", NARRAY));
+    outTree->Branch("txf_chi2", data.txf_chi2, Form("txf_chi2[%d]/F", NARRAY));
+
+    outTree->Branch("txn", data.txn, Form("txn[%d]/F", NARRAY));
+    outTree->Branch("txn_t", data.txn_t, Form("txn_t[%d]/F", NARRAY));
+    outTree->Branch("txn_r", data.txn_r, Form("txn_r[%d]/F", NARRAY));
+    outTree->Branch("txn_chi2", data.txn_chi2, Form("txn_chi2[%d]/F", NARRAY));
 
 #if NRDT > 0
     outTree->Branch("trdt", data.trdt, Form("trdt[%d]/F", NRDT));
     outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/F", NRDT));
     outTree->Branch("trdt_r", data.trdt_r, Form("trdt_r[%d]/F", NRDT));
+    outTree->Branch("trdt_chi2", data.trdt_chi2, Form("trdt_chi2[%d]/F", NRDT));
 #endif
 
   }
@@ -682,9 +735,10 @@ int main(int argc, char* argv[]) {
   double last_precentage = 0.0; // Last percentage printed
 
   std::mutex queueMutex;
-  std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
+  using DataPtr = std::unique_ptr<Data>;
+  std::queue<DataPtr> dataQueue; // Queue of unique_ptr to avoid expensive Data copies
   std::mutex outQueueMutex; // Mutex for output queue and file writing
-  std::queue<Data> outputQueue;
+  std::queue<DataPtr> outputQueue;
   std::condition_variable trace_cv; // Condition variable for thread synchronization
   std::atomic<bool> done(false); // to flag all data is processed. to tell the threads to finish
 
@@ -692,43 +746,40 @@ int main(int argc, char* argv[]) {
   std::condition_variable fileCv; // Condition variable for file writing
   std::thread outTreeThread;
 
-  Data tempData; // used for multi-threaded processing
+  DataPtr tempData; // used for multi-threaded processing (allocated when needed)
 
   if( nWorkers > 1 ) {
        
-    for( int i =0; i < nWorkers; i++){
+    //* Create worker threads for trace analysis
+    for (int i = 0; i < nWorkers; i++) {
       threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &trace_cv, &fileCv, &done, &outQueueMutex]() {
-        Data localData;
-
+        DataPtr localData;
         int count = 0;
         while (true) {
+
           {
             std::unique_lock<std::mutex> lock(queueMutex);
             trace_cv.wait(lock, [&] { return !dataQueue.empty() || done; });
-            if (dataQueue.empty() && done ) break;
-            localData = dataQueue.front();
+            if (dataQueue.empty() && done) break;
+            localData = std::move(dataQueue.front()); // move pointer out of queue (no Data copy)
             dataQueue.pop();
           }
-
           // Process data
-          localData.TraceAnalysis(); // Perform trace analysis if enabled
-          // if( count < 1 ) data.PrintTraceAnalysisResult(); // Print trace analysis results
+          if (localData) localData->TraceAnalysis(); // Perform trace analysis if enabled
           count++;
-          
-          { // If we have enough results, write them to the file
-            // printf("Worker %d writing %zu data items to outputQueue\n", i, localResults.size());
+
+          {// push processed data to output queue
             std::lock_guard<std::mutex> lock(outQueueMutex);
-            outputQueue.push(localData); // Push the data to the output queue             
+            outputQueue.push(std::move(localData)); // move processed pointer to output queue (no copy)
             fileCv.notify_one(); // Notify the output tree thread to write data
           }
-
         }
 
-        printf("Trace worker %d finished processing. total processed event : %d\n", i, count);
+        printf("Trace worker %2d finished processing. total processed event : %d\n", i, count);
       });
     }
 
-    // Create a thread to write the output tree
+    //* Create a thread to write the output tree
     outTreeThread = std::thread([&]() {
       int count = 0;
       while (true) {
@@ -739,13 +790,14 @@ int main(int argc, char* argv[]) {
           printf("Writing data to output tree: %d items processed, out Queue size %ld\n", count, outputQueue.size());
           break; // Exit if all data is processed and output queue is empty
         }
-        Data temp_data = outputQueue.front();
+        DataPtr temp_data = std::move(outputQueue.front()); // take ownership (no copy)
         outputQueue.pop();
         lock.unlock(); // Release outQueueMutex as soon as possible
 
-        // Acquire dataMutex to update the global 'data' and fill the tree
-        data = temp_data;
-  
+        // Copy into the tree-fill object (one copy here)
+        //TODO use TBranch SetAddress to directly point to the data in temp_data to avoid this copy
+        if (temp_data) data = *temp_data;
+         
         data.runID = globalRunID; // Set the run ID
         outTree->Fill(); // Fill the tree with the data
         outFile->cd(); // Ensure the output file is set as the current directory
@@ -818,23 +870,24 @@ int main(int argc, char* argv[]) {
         // Multi-threaded processing
         while(true){
 
-          {
-            std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
-            if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
-              tempData.Reset(); 
-              tempData.evID = eventID; // Set the event ID
-              tempData.FillData(events, saveTrace); // Fill data with the events
-              dataQueue.push(tempData); // Push the data to the queue for processing by worker threads
-              lock.unlock(); // Unlock the queue mutex
-              trace_cv.notify_one(); // Notify one of the worker threads to start processing
-              break;
-            }
-            lock.unlock(); // Unlock the queue mutex 
-            if( dataQueue.size() >= MAX_QUEUE_SIZE ) {
-              //wait for 10 miniseconds before checking the queue again
-              std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Sleep for
-              continue;
-            }
+          std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
+          if (dataQueue.size() < MAX_QUEUE_SIZE) { // Check if the queue size is within the limit
+            tempData.reset(new Data()); // allocate new Data once per push
+            tempData->Reset();
+            tempData->evID = eventID; // Set the event ID
+            // printf("Main thread pushing event %u to dataQueue (size: %ld)\n", eventID, dataQueue.size());
+            //TODO, the dataQueue can be a queue of events, and the FillData can be done in the worker thread
+            tempData->FillData(events, saveTrace); // Fill data with the events
+            dataQueue.push(std::move(tempData)); // move the pointer into the queue (no copy)
+            lock.unlock(); // Unlock the queue mutex
+            trace_cv.notify_one(); // Notify one of the worker threads to start processing
+            break;
+          }
+          lock.unlock(); // Unlock the queue mutex 
+          if( dataQueue.size() >= MAX_QUEUE_SIZE ) {
+            //wait for 10 miniseconds before checking the queue again
+            std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Sleep for
+            continue;
           }
 
         }
