@@ -795,6 +795,7 @@ int main(int argc, char* argv[]) {
         lock.unlock(); // Release outQueueMutex as soon as possible
 
         // Copy into the tree-fill object (one copy here)
+        //TODO use TBranch SetAddress to directly point to the data in temp_data to avoid this copy
         if (temp_data) data = *temp_data;
          
         data.runID = globalRunID; // Set the run ID
