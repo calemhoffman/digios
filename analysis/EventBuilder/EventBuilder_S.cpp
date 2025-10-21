@@ -99,18 +99,22 @@ public:
 
   // trace analysis
   float tracePara[MAX_TRACE_MULTI][4]; // trace parameters, 0 = Amplitude, 1 = Rise time, 2 = Timestamp, 3 = Baseline
+  float traceChi2[MAX_TRACE_MULTI]; // trace fit chi2
 
   float te[NARRAY]; // trace energy
   float te_t[NARRAY]; // trace energy timestamp
   float te_r[NARRAY]; // trace energy rise time
+  float te_chi2[NARRAY]; // trace energy chi2
 
   float txf[NARRAY]; // trace XF
   float txf_t[NARRAY]; // trace XF timestamp
   float txf_r[NARRAY]; // trace XF rise time
+  float txf_chi2[NARRAY]; // trace XF chi2
 
   float txn[NARRAY]; // trace XN
   float txn_t[NARRAY]; // trace XN timestamp
   float txn_r[NARRAY]; // trace XN rise time
+  float txn_chi2[NARRAY]; // trace XN chi2
   
 #if NRDT > 0
   float RDT[NRDT];
@@ -119,6 +123,7 @@ public:
   float trdt[NRDT];
   float trdt_t[NRDT];
   float trdt_r[NRDT];
+  float trdt_chi2[NRDT];
 #endif
 #if NTAC > 0
   float TAC[NTAC];
@@ -392,20 +397,32 @@ public:
       tracePara[i][2] = gsl_vector_get(result, 2);
       tracePara[i][3] = gsl_vector_get(result, 3);
 
+      // Calculate chi2
+      gsl_vector *f_res = gsl_multifit_nlinear_residual(w);
+      double chi2 = 0.0;
+      for (size_t k = 0; k < f_res->size; k++) {
+        double r = gsl_vector_get(f_res, k);
+        chi2 += r * r;
+      }
+      traceChi2[i] = chi2;
+
       if( 0 <= traceDetID[i] && traceDetID[i] < NARRAY ){
 
         if ( traceKindID[i] == 0 ){ // Energy
           te[traceDetID[i]] = tracePara[i][0]; // Amplitude
           te_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
           te_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+          te_chi2[traceDetID[i]] = traceChi2[i]; // Chi2
         }else if ( traceKindID[i] == 1 ){ // XF
           txf[traceDetID[i]] = tracePara[i][0]; // Amplitude
           txf_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
           txf_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+          txf_chi2[traceDetID[i]] = traceChi2[i]; // Chi2
         }else if ( traceKindID[i] == 2 ){ // XN
           txn[traceDetID[i]] = tracePara[i][0]; // Amplitude
           txn_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
           txn_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+          txn_chi2[traceDetID[i]] = traceChi2[i]; // Chi2
         }
 
       }
@@ -415,6 +432,7 @@ public:
         trdt[rdtID] = tracePara[i][0]; // Amplitude
         trdt_t[rdtID] = tracePara[i][1]; // Timestamp
         trdt_r[rdtID] = tracePara[i][2]; // Rise time
+        trdt_chi2[rdtID] = traceChi2[i]; // Chi2
       }
 
       gsl_multifit_nlinear_free(w);
@@ -619,23 +637,28 @@ int main(int argc, char* argv[]) {
   }
   if( nWorkers > 0 ){ 
     outTree->Branch("tracePara", data.tracePara, "tracePara[traceCount][4]/F");
+    outTree->Branch("traceChi2", data.traceChi2, "traceChi2[traceCount]/F");
 
     outTree->Branch("te", data.te, Form("te[%d]/F", NARRAY));
     outTree->Branch("te_t", data.te_t, Form("te_t[%d]/F", NARRAY));
     outTree->Branch("te_r", data.te_r, Form("te_r[%d]/F", NARRAY));
+    outTree->Branch("te_chi2", data.te_chi2, Form("te_chi2[%d]/F", NARRAY));
 
     outTree->Branch("txf", data.txf, Form("txf[%d]/F", NARRAY));
     outTree->Branch("txf_t", data.txf_t, Form("txf_t[%d]/F", NARRAY));
     outTree->Branch("txf_r", data.txf_r, Form("txf_r[%d]/F", NARRAY));
+    outTree->Branch("txf_chi2", data.txf_chi2, Form("txf_chi2[%d]/F", NARRAY));
 
     outTree->Branch("txn", data.txn, Form("txn[%d]/F", NARRAY));
     outTree->Branch("txn_t", data.txn_t, Form("txn_t[%d]/F", NARRAY));
     outTree->Branch("txn_r", data.txn_r, Form("txn_r[%d]/F", NARRAY));
+    outTree->Branch("txn_chi2", data.txn_chi2, Form("txn_chi2[%d]/F", NARRAY));
 
 #if NRDT > 0
     outTree->Branch("trdt", data.trdt, Form("trdt[%d]/F", NRDT));
     outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/F", NRDT));
     outTree->Branch("trdt_r", data.trdt_r, Form("trdt_r[%d]/F", NRDT));
+    outTree->Branch("trdt_chi2", data.trdt_chi2, Form("trdt_chi2[%d]/F", NRDT));
 #endif
 
   }
