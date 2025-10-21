@@ -73,17 +73,17 @@ if [ ${Arch} == "Linux" ]; then
 
     if [ ${PCName} == "digios1" ]; then  #DAQ
 
-	echo -e "\e[93m================= avalible disk:\033[0m"
-	df -hT |grep "/media\|File"
-	read -p "================= choose disk [e.g. sdb]:" disk
+        echo -e "\e[93m================= avalible disk:\033[0m"
+        df -hT |grep "/media\|File"
+        read -p "================= choose disk [e.g. sdb]:" disk
 
-	daqDataPath=`df | grep ${disk} | awk '{print $6}'`
-	if [ -z ${daqDataPath} ]; then
-	    echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
-	    exit
-	fi
+        daqDataPath=`df | grep ${disk} | awk '{print $6}'`
+        if [ -z ${daqDataPath} ]; then
+            echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
+            exit
+        fi
 	
-	echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
+	    echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
 
         DATAPATH=${daqDataPath}
         expDIR=~/digios
@@ -101,6 +101,11 @@ if [ ${Arch} == "Linux" ]; then
         echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
 
         exit
+    else
+
+        echo -e "\e[93m On general Linux machine: skip setting DATAPATH here."
+        echo -e "\e[93m Please edit DATAPATH in expName.sh after this script is done."
+      
     fi
 
 elif [ ${Arch} == "Darwin" ]; then
@@ -139,11 +144,11 @@ else
 
 fi
 
-if [ ${space} -le 512000 ]; then
-   echo "The avalible space is less then 500 GB."
+if [ -n "${space}" ] && [[ "${space}" =~ ^[0-9]+$ ]] && [ "${space}" -le 512000 ]; then
+   echo "The available space is less than 500 GB."
    read -p  '-------------------------- Continue? (Y/N) ' OKFlag
    
-   if [ ${OKFlag} == "N" ]; then
+   if [ "${OKFlag}" = "N" ]; then
       echo "xxxxxxxxxxxxxx Abort SetUpNewExp"
       exit
    fi
