@@ -750,6 +750,7 @@ int main(int argc, char* argv[]) {
 
   if( nWorkers > 1 ) {
        
+    //* Create worker threads for trace analysis
     for (int i = 0; i < nWorkers; i++) {
       threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &trace_cv, &fileCv, &done, &outQueueMutex]() {
         DataPtr localData;
@@ -778,7 +779,7 @@ int main(int argc, char* argv[]) {
       });
     }
 
-    // Create a thread to write the output tree
+    //* Create a thread to write the output tree
     outTreeThread = std::thread([&]() {
       int count = 0;
       while (true) {
@@ -874,6 +875,7 @@ int main(int argc, char* argv[]) {
             tempData->Reset();
             tempData->evID = eventID; // Set the event ID
             // printf("Main thread pushing event %u to dataQueue (size: %ld)\n", eventID, dataQueue.size());
+            //TODO, the dataQueue can be a queue of events, and the FillData can be done in the worker thread
             tempData->FillData(events, saveTrace); // Fill data with the events
             dataQueue.push(std::move(tempData)); // move the pointer into the queue (no copy)
             lock.unlock(); // Unlock the queue mutex
