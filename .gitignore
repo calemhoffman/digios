@@ -30,6 +30,8 @@ run_Summary.dat
 MakeDataLinks
 reaction.dat
 
+*_C_ACLiC*
+
 analysis/Simulation/reaction.dat
 analysis/Cleopatra/Cleopatra
 analysis/Cleopatra/ExtractXSec
@@ -59,3 +61,10 @@ daq/save/trigger.txt
 DB_*.txt
 
 slurm-*.out
+
+/analysis/EventBuilder/run*
+/analysis/EventBuilder/h088*
+/analysis/EventBuilder/EventBuilder*
+/analysis/EventBuilder/merged*
+/analysis/EventBuilder/fitting/cuda_fit
+/analysis/EventBuilder/fitting/testFit

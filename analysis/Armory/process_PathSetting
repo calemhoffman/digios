@@ -13,16 +13,16 @@ source ${HELIOSSYS}/expName.sh #load expName
 AnalysisDir=${HELIOSSYS}/analysis
 
 #remote data path
-dataloc=${daqDataPath}/${expName}/data
+dataloc=${daqDataPath}/${expName}/
 daqDir="~/digios/"
 
 #===== directory and chat files
-GEBDIR=$AnalysisDir/GEBSort
-MERGDIR=$AnalysisDir/merged_data
+GEBDIR=$AnalysisDir/EventBuilder
+# MERGDIR=$AnalysisDir/merged_data
 ROOTDIR=$AnalysisDir/root_data
 DATADIR=$AnalysisDir/data
-MERGECHAT=$AnalysisDir/working/GEBMerge.chat
-SORTCHAT=$AnalysisDir/working/GEBSort.chat
+# MERGECHAT=$AnalysisDir/working/GEBMerge.chat
+# SORTCHAT=$AnalysisDir/working/GEBSort.chat
 
 RED='\033[1;31m'
 YELLOW='\033[1;33m'

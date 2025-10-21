@@ -69,21 +69,23 @@ echo "=================== Checking disk space."
 echo "PC name  : ${PCName}"
 echo "Archetech: ${Arch}"
 
+isGeneralLinux=0
+
 if [ ${Arch} == "Linux" ]; then 
 
     if [ ${PCName} == "digios1" ]; then  #DAQ
 
-	echo -e "\e[93m================= avalible disk:\033[0m"
-	df -hT |grep "/media\|File"
-	read -p "================= choose disk [e.g. sdb]:" disk
+        echo -e "\e[93m================= avalible disk:\033[0m"
+        df -hT |grep "/media\|File"
+        read -p "================= choose disk [e.g. sdb]:" disk
 
-	daqDataPath=`df | grep ${disk} | awk '{print $6}'`
-	if [ -z ${daqDataPath} ]; then
-	    echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
-	    exit
-	fi
+        daqDataPath=`df | grep ${disk} | awk '{print $6}'`
+        if [ -z ${daqDataPath} ]; then
+            echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
+            exit
+        fi
 	
-	echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
+	    echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
 
         DATAPATH=${daqDataPath}
         expDIR=~/digios
@@ -101,6 +103,12 @@ if [ ${Arch} == "Linux" ]; then
         echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
 
         exit
+    else
+
+        isGeneralLinux=1
+        echo -e "\e[93mOn general Linux machine\033[0m"
+        echo -e "\e[93mPlease make sure to create data folders under analysis/.\033[0m"
+      
     fi
 
 elif [ ${Arch} == "Darwin" ]; then
@@ -125,30 +133,30 @@ elif [ ${Arch} == "Darwin" ]; then
         
     fi
     
-else
-   path=$(pwd)
-   read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
-   echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
-   echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
-   echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
+# else #system is not Linux nor Darwin ??
+#    path=$(pwd)
+#    read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
+#    echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
+#    echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
+#    echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
 
-   space=`df -ml | tail -1 | awk '{print $4}'` #in mb
-   spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
-   spacePrecent="${spacePrecent:0:2}"
-   echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+#    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
+#    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
+#    spacePrecent="${spacePrecent:0:2}"
+#    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
 fi
 
-if [ ${space} -le 512000 ]; then
-   echo "The avalible space is less then 500 GB."
+#----- only ask if it is on DAQ or helioss-iMac or phywl or general Linux, that ${space} is defined
+if [ -n "${space}" ] && [[ "${space}" =~ ^[0-9]+$ ]] && [ "${space}" -le 512000 ]; then
+   echo "The available space is less than 500 GB."
    read -p  '-------------------------- Continue? (Y/N) ' OKFlag
    
-   if [ ${OKFlag} == "N" ]; then
+   if [ "${OKFlag}" = "N" ]; then
       echo "xxxxxxxxxxxxxx Abort SetUpNewExp"
       exit
    fi
 fi
-
 
 #------ check is there any GIt branch in repository, 
 #       if not create Git Branch, if yes, checkout
@@ -161,18 +169,34 @@ if [ ${expName} == "ARR01" ]; then
    isBranchExist=1
 else
 
-   if [ ${isBranchExist} -eq 0 ]; then
-       git checkout -b ${expName}
-   else
-       echo "Experimental Name (${expName}) already in use."
-       echo "Please take another name or git pull origin ${expName}"
-       read -p "Do you want to checkout origin/${expName} (Y/N):"  pullFlag
-       if [ ${pullFlag} == "N" ]; then
-	   exit
-       else
-	        git checkout ${expName}
-       fi
-   fi
+    if [ ${isGeneralLinux} -eq 1 ]; then
+
+        if [ ${isBranchExist} -eq 0 ]; then
+            echo "On general Linux machine, cannot create new branch "
+            exit
+        else
+            git checkout ${expName}
+        fi
+
+    else 
+        if [ ${isBranchExist} -eq 0 ]; then
+            git checkout -b ${expName}
+        else
+            echo "Experimental Name (${expName}) already in use."
+            echo "Please take another name or git pull origin ${expName}"
+            read -p "Do you want to checkout origin/${expName} (Y/N):"  pullFlag
+            if [ ${pullFlag} == "N" ]; then
+                exit
+            else
+                git checkout ${expName}
+            fi
+        fi
+    fi
+fi
+
+if [ ${isGeneralLinux} -eq 1 ]; then
+    echo "On general Linux machine, skip making data folders and symbolic links."
+    exit
 fi
 
 #------ set up expName.sh, so that all experimental Name is refered to this name
@@ -186,74 +210,89 @@ if [ ${isBranchExist} -eq 0 ]; then
     echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
 fi
 
-echo "=================== making new folders in ${DATAPATH}/${expName}"
-Data=${DATAPATH}/${expName}/data
-mergedData=${DATAPATH}/${expName}/merged_data
-rootData=${DATAPATH}/${expName}/root_data
+echo "=================== making new folders in ${DATAPATH}/${expName} and creating symoblic link"
 
-mkdir -v ${DATAPATH}/${expName}
-mkdir -v ${Data}
-mkdir -v ${mergedData}
-mkdir -v ${rootData}
+if [ ${PCName} == "digios1" ]; then  #DAQ
 
+    Data=${DATAPATH}/${expName}
 
-#===== create symbolic links
-echo "=================== creating symbolic links"
-rm -f ${expDIR}/analysis/data
-rm -f ${expDIR}/analysis/merged_data
-rm -f ${expDIR}/analysis/root_data
+    mkdir -v ${DATAPATH}/${expName}
+    mkdir -v ${Data}
 
-ln -sfv ${Data} ${expDIR}/analysis/data
-ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
-ln -sfv ${rootData} ${expDIR}/analysis/root_data
+    rm -f ${expDIR}/analysis/data
 
-#===== tell Database SetupNewExp change exp.
-echo "=================== Tell the database"
+    ln -sfv ${Data} ${expDIR}/analysis/data
 
-source ${expDIR}/daq/edm/scripts/DataBaseAddress.sh
-
-curl -s -XPOST "http://"${dataBaseAddress}":8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
-
-echo "=================== done."
-
-#===== Modify Monitors.html
-
-if [ ${expName} == "ARR01" ]; then
-    capExpName="ARR01"
 else
-    capExpName="H"${expName:1}
-fi
 
-if [ ${Arch} == "Linux" ]; then 
-    echo "in Linux machine, no need to change Monitors.html."
-elif [ ${Arch} == "Darwin" ]; then
-    if [ ${PCName:0:12} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
-        sed -i '' "s/expName/${capExpName}/g" ${expDIR}/analysis/working/Monitors.html
-        echo -e "\033[0;93mStill need to change the Slack channel link. \033[0m"
+    Data=${DATAPATH}/${expName}/data
+    mergedData=${DATAPATH}/${expName}/merged_data
+    rootData=${DATAPATH}/${expName}/root_data
+
+    mkdir -v ${DATAPATH}/${expName}
+    mkdir -v ${Data}
+    mkdir -v ${mergedData}
+    mkdir -v ${rootData}
+
+    rm -f ${expDIR}/analysis/data
+    rm -f ${expDIR}/analysis/merged_data
+    rm -f ${expDIR}/analysis/root_data
+
+    ln -sfv ${Data} ${expDIR}/analysis/data
+    ln -sfv ${mergedData} ${expDIR}/analysis/merged_data
+    ln -sfv ${rootData} ${expDIR}/analysis/root_data
+
+    #===== tell Database SetupNewExp change exp.
+    echo "=================== Tell the database"
+
+    source ${expDIR}/daq/edm/scripts/DataBaseAddress.sh
+
+    curl -s -XPOST "http://"${dataBaseAddress}":8086/write?db=testing" --data-binary "SavingData,expName=${expName} value=0" --max-time 1 --connect-timeout 1
+
+    echo "=================== done."
+
+    #===== Modify Monitors.html
+
+    if [ ${expName} == "ARR01" ]; then
+        capExpName="ARR01"
     else
-        echo "Not in the MAC2020, no need to change Monitors.html."
+        capExpName="H"${expName:1}
     fi
+
+    if [ ${Arch} == "Linux" ]; then 
+        echo "in Linux machine, no need to change Monitors.html."
+    elif [ ${Arch} == "Darwin" ]; then
+        if [ ${PCName:0:12} == "helioss-iMac" ] || [ ${PCName:0:5} == "phywl" ] ;  then #MAC
+            sed -i '' "s/expName/${capExpName}/g" ${expDIR}/analysis/working/Monitors.html
+        else
+            echo "Not in the MAC2020, no need to change Monitors.html."
+        fi
+    fi
+
+    #===== clean up working if it is new
+    if [ ${isBranchExist} -eq 0 ]; then
+
+        echo "======== Clean up working directory "
+        #rm -fv ${expDIR}/analysis/working/correction_*.dat
+        rm -fv ${expDIR}/analysis/working/reaction.dat
+        rm -fv ${expDIR}/analysis/working/run_Summary.dat
+        rm -fv ${expDIR}/analysis/working/example.*
+        rm -fv ${expDIR}/analysis/working/RunTimeStamp.dat
+        rm -fv ${expDIR}/analysis/working/*.root
+        rm -fv ${expDIR}/analysis/working/*.d
+        rm -fv ${expDIR}/analysis/working/*.so
+        rm -fv ${expDIR}/analysis/working/*.pcm
+
+        echo "======== git commit "
+        git add -A
+        git commit -m "new experiment ${expName}"
+
+        echo "======== git push "
+        git push origin ${expName}
+
+    fi 
+
 fi
 
-#===== clean up working if it is new
-if [ ${isBranchExist} -eq 0 ]; then
 
-    echo "======== Clean up working directory "
-    #rm -fv ${expDIR}/analysis/working/correction_*.dat
-    rm -fv ${expDIR}/analysis/working/reaction.dat
-    rm -fv ${expDIR}/analysis/working/run_Summary.dat
-    rm -fv ${expDIR}/analysis/working/example.*
-    rm -fv ${expDIR}/analysis/working/RunTimeStamp.dat
-    rm -fv ${expDIR}/analysis/working/*.root
-    rm -fv ${expDIR}/analysis/working/*.d
-    rm -fv ${expDIR}/analysis/working/*.so
-    rm -fv ${expDIR}/analysis/working/*.pcm
 
-    echo "======== git commit "
-    git add -A
-    git commit -m "new experiment ${expName}"
-
-    echo "======== git push "
-    git push origin ${expName}
-
-fi 

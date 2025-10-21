@@ -676,16 +676,16 @@ int HELIOS::DetAcceptance(){
    
    // -3 ==== when zPos further the range of whole array, more loop would not save
    if( firstPos < 0 && orbitb.z < pos[0] - length ) return -3; 
-   if( firstPos > 0 && orbitb.z > pos[nDet-1] + length ) return -3; 
+   if( firstPos > 0 && orbitb.z > pos[0] + length ) return -3; 
 
    // -4 ======== Hit on blacker
    if( blocker != 0 && firstPos > 0 && pos[0] - blocker  < orbitb.z && orbitb.z < pos[0] ) return -4; 
-   if( blocker != 0 && firstPos < 0 && pos[nDet-1]  < orbitb.z && orbitb.z < pos[nDet-1] + blocker ) return -4; 
+   if( blocker != 0 && firstPos < 0 && pos[0]  < orbitb.z && orbitb.z < pos[nDet-1] + blocker ) return -4; 
 
    // 2 ======  when zPos less then the nearest position, more loop may hit
    int increaseLoopFlag = 0;
    if( firstPos < 0 && pos[nDet-1] < orbitb.z ) increaseLoopFlag = 2; 
-   if( firstPos > 0 && pos[0] > orbitb.z ) increaseLoopFlag = 2; 
+   if( firstPos > 0 && pos[nDet-1] > orbitb.z ) increaseLoopFlag = 2; 
    if (increaseLoopFlag == 2 ) {
       orbitb.z += orbitb.z0;
       orbitb.effLoop += 1.0;
@@ -1461,7 +1461,7 @@ private:
    double mB, mD, md;
    double theta;
    
-   TF1 * f1;
+   // TF1 * f1;
    
    bool isMotherSet;
    double Q;
@@ -1486,11 +1486,11 @@ Decay::Decay(){
    dTheta = TMath::QuietNaN();
    isMotherSet = false;
    
-   f1 = new TF1("f1", "(1+ROOT::Math::legendre(2,x))/2.", -1, 1);
+   // f1 = new TF1("f1", "(1+ROOT::Math::legendre(2,x))/2.", -1, 1);
 }
 
 Decay::~Decay(){
-   delete f1;
+   // delete f1;
 }
 
 //=======================================================
