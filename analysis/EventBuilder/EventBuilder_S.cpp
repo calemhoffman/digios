@@ -23,7 +23,7 @@
 #include <atomic>
 
 #define MAX_TRACE_LEN 1250 
-#define MAX_TRACE_MULTI 40
+#define MAX_TRACE_MULTI 60
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
 #define MAX_QUEUE_SIZE 10000 // Maximum size of the data queue
 
@@ -104,6 +104,13 @@ public:
   float te_t[NARRAY]; // trace energy timestamp
   float te_r[NARRAY]; // trace energy rise time
 
+  float txf[NARRAY]; // trace XF
+  float txf_t[NARRAY]; // trace XF timestamp
+  float txf_r[NARRAY]; // trace XF rise time
+
+  float txn[NARRAY]; // trace XN
+  float txn_t[NARRAY]; // trace XN timestamp
+  float txn_r[NARRAY]; // trace XN rise time
   
 #if NRDT > 0
   float RDT[NRDT];
@@ -225,114 +232,116 @@ public:
   void FillData(std::vector<Event> events, bool saveTrace){
 
     for( int i = 0; i <  events.size(); i++) {
-        int id                    = events[i].board * 10 + events[i].channel - 1010;
-        uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
-        uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
-        uint64_t timestamp        = events[i].timestamp; // Timestamp
+      int id                    = events[i].board * 10 + events[i].channel - 1010;
+      uint32_t pre_rise_energy  = events[i].pre_rise_energy; // Pre-rise energy
+      uint32_t post_rise_energy = events[i].post_rise_energy; // Post-rise energy
+      uint64_t timestamp        = events[i].timestamp; // Timestamp
 
-        int idDet = idDetMap[id]; 
-        int idKind = idKindMap[id]; 
+      int idDet = idDetMap[id]; 
+      int idKind = idKindMap[id]; 
 
-        if( idDet < 0 ) continue;
+      if( idDet < 0 ) continue;
 
-        float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
+      float eee = ((float)post_rise_energy - (float)pre_rise_energy) / MWIN; 
 
-        // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
+      // printf(" post_rise_energy : %u, pre_rise_energy : %u, eee : %.3f \n", post_rise_energy, pre_rise_energy, eee);
 
-        if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
-          switch (idKind ){
-            case 0: // Energy signal
-              Energy[idDet] = eee; // Calculate energy
-              EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
-              break;
-            case 1: // XF
-              XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
-              XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
-              break;
-            case 2: // XN
-              XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
-              XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
-              break;
-            case 3: // Ring
-              Ring[idDet] = eee; // Calculate Ring
-              RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
-                break;
-              }
-            }
+      if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
+        switch (idKind ){
+        case 0: // Energy signal
+          Energy[idDet] = eee; // Calculate energy
+          EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
+          break;
+        case 1: // XF
+          XF[idDet] = eee * POLARITY_XFXN; // Calculate XF
+          XFTimestamp[idDet] = timestamp; // Set the timestamp for XF
+          break;
+        case 2: // XN
+          XN[idDet] = eee * POLARITY_XFXN; // Calculate XN
+          XNTimestamp[idDet] = timestamp; // Set the timestamp for XN
+          break;
+        case 3: // Ring
+          Ring[idDet] = eee; // Calculate Ring
+          RingTimestamp[idDet] = timestamp; // Set the timestamp for Ring
+          break;
+        }
+      }
 
     #if NRDT > 0
-        if( 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
-          int rdtID = idDet - 100; // Recoil ID
-          RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
-          RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
-        }
+      if( 100 <= idDet && idDet < 100 + NRDT ) { // Recoil
+        int rdtID = idDet - 100; // Recoil ID
+        RDT[rdtID] = eee * POLARITY_RDT; // Calculate RDT
+        RDTTimestamp[rdtID] = timestamp; // Set the timestamp for RDT
+      }
     #endif
 
     #if NELUM > 0 
-        if( 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
-          int elumID = idDet - 200; // ELUM ID
-          ELUM[elumID] = eee;
-          ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
-        }
+      if( 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
+        int elumID = idDet - 200; // ELUM ID
+        ELUM[elumID] = eee;
+        ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
+      }
     #endif
 
     #if NEZERO > 0
-        if( 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
-          int ezeroID = idDet - 300; // EZERO ID
-          EZERO[ezeroID] = eee;
-          EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
-        }
+      if( 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
+        int ezeroID = idDet - 300; // EZERO ID
+        EZERO[ezeroID] = eee;
+        EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
+      }
     #endif
 
     #if NTAC > 0
-        if( 400 <= idDet && idDet < 400 + NTAC ) { // TAC
-          int tacID = idDet - 400; // TAC ID
-          TAC[tacID] = eee;
-          TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
-        }
+      if( 400 <= idDet && idDet < 400 + NTAC ) { // TAC
+        int tacID = idDet - 400; // TAC ID
+        TAC[tacID] = eee;
+        TACTimestamp[tacID] = timestamp; // Set the timestamp for TAC
+      }
     #endif
 
     #if NCRDT > 0
-        if( 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
-          int crdtID = idDet - 500; // Circular Recoil ID
-          CRDT[crdtID] = eee;
-          CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
-        }
+      if( 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
+        int crdtID = idDet - 500; // Circular Recoil ID
+        CRDT[crdtID] = eee;
+        CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
+      }
     #endif
 
     #if NAPOLLO > 0
-        if( 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
-          int apolloID = idDet - 600; // APOLLO ID
-          APOLLO[apolloID] = eee;
-          APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
-        }
+      if( 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
+        int apolloID = idDet - 600; // APOLLO ID
+        APOLLO[apolloID] = eee;
+        APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
+      }
     #endif
 
-        if( saveTrace ){
+      if( saveTrace ){
 
-          if( traceCount >= MAX_TRACE_MULTI ) {
-            printf("\033[31mWarning: More than %d traces, truncating to %d traces.\033[0m\n", MAX_TRACE_MULTI, MAX_TRACE_MULTI);
-          }else{
+        if( traceCount >= MAX_TRACE_MULTI ) {
+          printf("\033[31mWarning: More than %d traces, truncating to %d traces. (event size %lu)\033[0m\n", MAX_TRACE_MULTI, MAX_TRACE_MULTI, events.size());
+        }else{
 
-            bool isArray = (0 <= idDet && idDet < NARRAY); 
-            bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
-            if( isArray || isRDT ) { 
+          bool isArray = (0 <= idDet && idDet < NARRAY); 
+          bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
+          if( isArray || isRDT ) { 
 
-              traceLen[traceCount] = events[i].traceLength;
-              traceDetID[traceCount] = idDet;
-              traceKindID[traceCount] = idKind;
-              uint16_t regulatedValue = 0;
-              for( int j = 0; j < traceLen[traceCount]; j++){
-                if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
-                trace[traceCount][j] = regulatedValue; 
-              }
+            // printf("iDet: %d, idKind: %d, traceLength: %d\n", idDet, idKind, events[i].traceLength);
 
-              traceCount++;
+            traceLen[traceCount] = events[i].traceLength;
+            traceDetID[traceCount] = idDet;
+            traceKindID[traceCount] = idKind;
+            uint16_t regulatedValue = 0;
+            for( int j = 0; j < traceLen[traceCount]; j++){
+              if( events[i].trace[j] < 16000 ) regulatedValue = events[i].trace[j]; 
+              trace[traceCount][j] = regulatedValue; 
             }
+
+            traceCount++;
           }
         }
-
       }
+
+    }
 
   }
 
@@ -384,9 +393,21 @@ public:
       tracePara[i][3] = gsl_vector_get(result, 3);
 
       if( 0 <= traceDetID[i] && traceDetID[i] < NARRAY ){
-        te[traceDetID[i]] = tracePara[i][0]; // Amplitude
-        te_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
-        te_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+
+        if ( traceKindID[i] == 0 ){ // Energy
+          te[traceDetID[i]] = tracePara[i][0]; // Amplitude
+          te_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+          te_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+        }else if ( traceKindID[i] == 1 ){ // XF
+          txf[traceDetID[i]] = tracePara[i][0]; // Amplitude
+          txf_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+          txf_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+        }else if ( traceKindID[i] == 2 ){ // XN
+          txn[traceDetID[i]] = tracePara[i][0]; // Amplitude
+          txn_t[traceDetID[i]] = tracePara[i][1]; // Timestamp
+          txn_r[traceDetID[i]] = tracePara[i][2]; // Rise time
+        }
+
       }
 
       if( 100 <= traceDetID[i] && traceDetID[i] < 100 + NRDT ){
@@ -603,6 +624,14 @@ int main(int argc, char* argv[]) {
     outTree->Branch("te_t", data.te_t, Form("te_t[%d]/F", NARRAY));
     outTree->Branch("te_r", data.te_r, Form("te_r[%d]/F", NARRAY));
 
+    outTree->Branch("txf", data.txf, Form("txf[%d]/F", NARRAY));
+    outTree->Branch("txf_t", data.txf_t, Form("txf_t[%d]/F", NARRAY));
+    outTree->Branch("txf_r", data.txf_r, Form("txf_r[%d]/F", NARRAY));
+
+    outTree->Branch("txn", data.txn, Form("txn[%d]/F", NARRAY));
+    outTree->Branch("txn_t", data.txn_t, Form("txn_t[%d]/F", NARRAY));
+    outTree->Branch("txn_r", data.txn_r, Form("txn_r[%d]/F", NARRAY));
+
 #if NRDT > 0
     outTree->Branch("trdt", data.trdt, Form("trdt[%d]/F", NRDT));
     outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/F", NRDT));
@@ -724,7 +753,7 @@ int main(int argc, char* argv[]) {
 
         }
 
-        printf("Trace worker %d finished processing. total processed event : %d\n", i, count);
+        printf("Trace worker %2d finished processing. total processed event : %d\n", i, count);
       });
     }
 
@@ -823,6 +852,7 @@ int main(int argc, char* argv[]) {
             if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
               tempData.Reset(); 
               tempData.evID = eventID; // Set the event ID
+              // printf("Main thread pushing event %u to dataQueue (size: %ld)\n", eventID, dataQueue.size());
               tempData.FillData(events, saveTrace); // Fill data with the events
               dataQueue.push(tempData); // Push the data to the queue for processing by worker threads
               lock.unlock(); // Unlock the queue mutex
