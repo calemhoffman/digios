@@ -74,6 +74,10 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
    UShort_t     traceCount;
    UShort_t  trace[200][maxTraceLen]; // need to match the tree
    float tracePara[200][4]; // 0: Amplitude, 1: Timestamp, 2: Rise time, 3: baseline
+   float traceChi2[200];
+
+   float e[24], xf[24], xn[24];
+   unsigned int evID;
 
    UShort_t  traceLength[200];
    tree->SetBranchAddress("traceDetID", id);
@@ -82,6 +86,11 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
    tree->SetBranchAddress("trace", trace);
    tree->SetBranchAddress("traceLen", traceLength);
    tree->SetBranchAddress("tracePara", tracePara);
+   tree->SetBranchAddress("traceChi2", traceChi2); 
+   tree->SetBranchAddress("e", e);
+   tree->SetBranchAddress("xf", xf);
+   tree->SetBranchAddress("xn", xn);
+   tree->SetBranchAddress("evID", &evID);
    
    TLatex text ;
    text.SetNDC();
@@ -128,24 +137,24 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
       tree->GetEntry(ev);
       
       int countJ = 0;
-            
+      
       for( int j = 0; j <  traceCount ; j++){
          // for( int k = 0; k < traceLength[j] ; k++){
          //    printf("%4d, %5d \n", k, trace[j][k]);
          // }  
-      
+         
          int idDet  = id[j];
          int idKind = kind[j];
          
          if( !(minDetID <=  idDet &&  idDet <= maxDetID ) ) continue;
-
-         if( countJ == 0 )  printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d\n", ev, evPointer, traceCount);
-
+         
+         if( countJ == 0 )  printf("-------------------------------- ev : %d, evPointer : %d| num Trace : %d\n", evID, evPointer, traceCount);
+         
          printf("nHit: %d, id : %d, idKind : %d, trace Length : %u ( enter = next , q = stop, w = last)\n", j, idDet, idKind, traceLength[j]);
-
-         printf(" Amp : %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f\n", 
-               tracePara[j][0], tracePara[j][1], tracePara[j][2]*4.29, tracePara[j][3]);
-
+         
+         printf(" Amp : %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f, chi2 : %.2f\n", 
+            tracePara[j][0], tracePara[j][1], tracePara[j][2]*4.29, tracePara[j][3], traceChi2[j] );
+            
          fit2->SetRange(0, traceLength[j]);
          fit2->SetParameter(0, tracePara[j][0]);
          fit2->SetParameter(1, tracePara[j][1]);
@@ -162,8 +171,10 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
             if( print) printf("{%3d, %d},\n", k, trace[j][k]);
          }
          
-         g->SetTitle(Form("ev: %d, nHit : %d, id : %d, idKind : %d, trace Length : %u\n", ev, j, idDet, idKind, traceLength[j]));
+         g->SetTitle(Form("ev: %d, nHit : %d, id : %d, idKind : %d, trace Length : %u\n", evID, j, idDet, idKind, traceLength[j]));
          g->GetXaxis()->SetTitle("tick = 10 ns");
+         
+         printf(" energy : %.2f, xF : %.4f, xN : %.4f\n", e[idDet], xf[idDet], xn[idDet]);
 
          fit->SetRange(0, traceLength[j]);
          fit->SetParameters(para_default);
