@@ -21,6 +21,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <memory> // added for unique_ptr
 
 #define MAX_TRACE_LEN 1250 
 #define MAX_TRACE_MULTI 60
@@ -734,9 +735,10 @@ int main(int argc, char* argv[]) {
   double last_precentage = 0.0; // Last percentage printed
 
   std::mutex queueMutex;
-  std::queue<Data> dataQueue; // Queue to store data for multi-threaded processing 
+  using DataPtr = std::unique_ptr<Data>;
+  std::queue<DataPtr> dataQueue; // Queue of unique_ptr to avoid expensive Data copies
   std::mutex outQueueMutex; // Mutex for output queue and file writing
-  std::queue<Data> outputQueue;
+  std::queue<DataPtr> outputQueue;
   std::condition_variable trace_cv; // Condition variable for thread synchronization
   std::atomic<bool> done(false); // to flag all data is processed. to tell the threads to finish
 
@@ -744,36 +746,32 @@ int main(int argc, char* argv[]) {
   std::condition_variable fileCv; // Condition variable for file writing
   std::thread outTreeThread;
 
-  Data tempData; // used for multi-threaded processing
+  DataPtr tempData; // used for multi-threaded processing (allocated when needed)
 
   if( nWorkers > 1 ) {
        
-    for( int i =0; i < nWorkers; i++){
+    for (int i = 0; i < nWorkers; i++) {
       threads.emplace_back([i, &dataQueue, &outputQueue, &queueMutex, &trace_cv, &fileCv, &done, &outQueueMutex]() {
-        Data localData;
-
+        DataPtr localData;
         int count = 0;
         while (true) {
+
           {
             std::unique_lock<std::mutex> lock(queueMutex);
             trace_cv.wait(lock, [&] { return !dataQueue.empty() || done; });
-            if (dataQueue.empty() && done ) break;
-            localData = dataQueue.front();
+            if (dataQueue.empty() && done) break;
+            localData = std::move(dataQueue.front()); // move pointer out of queue (no Data copy)
             dataQueue.pop();
           }
-
           // Process data
-          localData.TraceAnalysis(); // Perform trace analysis if enabled
-          // if( count < 1 ) data.PrintTraceAnalysisResult(); // Print trace analysis results
+          if (localData) localData->TraceAnalysis(); // Perform trace analysis if enabled
           count++;
-          
-          { // If we have enough results, write them to the file
-            // printf("Worker %d writing %zu data items to outputQueue\n", i, localResults.size());
+
+          {// push processed data to output queue
             std::lock_guard<std::mutex> lock(outQueueMutex);
-            outputQueue.push(localData); // Push the data to the output queue             
+            outputQueue.push(std::move(localData)); // move processed pointer to output queue (no copy)
             fileCv.notify_one(); // Notify the output tree thread to write data
           }
-
         }
 
         printf("Trace worker %2d finished processing. total processed event : %d\n", i, count);
@@ -791,13 +789,13 @@ int main(int argc, char* argv[]) {
           printf("Writing data to output tree: %d items processed, out Queue size %ld\n", count, outputQueue.size());
           break; // Exit if all data is processed and output queue is empty
         }
-        Data temp_data = outputQueue.front();
+        DataPtr temp_data = std::move(outputQueue.front()); // take ownership (no copy)
         outputQueue.pop();
         lock.unlock(); // Release outQueueMutex as soon as possible
 
-        // Acquire dataMutex to update the global 'data' and fill the tree
-        data = temp_data;
-  
+        // Copy into the tree-fill object (one copy here)
+        if (temp_data) data = *temp_data;
+         
         data.runID = globalRunID; // Set the run ID
         outTree->Fill(); // Fill the tree with the data
         outFile->cd(); // Ensure the output file is set as the current directory
@@ -870,24 +868,23 @@ int main(int argc, char* argv[]) {
         // Multi-threaded processing
         while(true){
 
-          {
-            std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
-            if( dataQueue.size() < MAX_QUEUE_SIZE ) { // Check if the queue size is within the limit
-              tempData.Reset(); 
-              tempData.evID = eventID; // Set the event ID
-              // printf("Main thread pushing event %u to dataQueue (size: %ld)\n", eventID, dataQueue.size());
-              tempData.FillData(events, saveTrace); // Fill data with the events
-              dataQueue.push(tempData); // Push the data to the queue for processing by worker threads
-              lock.unlock(); // Unlock the queue mutex
-              trace_cv.notify_one(); // Notify one of the worker threads to start processing
-              break;
-            }
-            lock.unlock(); // Unlock the queue mutex 
-            if( dataQueue.size() >= MAX_QUEUE_SIZE ) {
-              //wait for 10 miniseconds before checking the queue again
-              std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Sleep for
-              continue;
-            }
+          std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue mutex
+          if (dataQueue.size() < MAX_QUEUE_SIZE) { // Check if the queue size is within the limit
+            tempData.reset(new Data()); // allocate new Data once per push
+            tempData->Reset();
+            tempData->evID = eventID; // Set the event ID
+            // printf("Main thread pushing event %u to dataQueue (size: %ld)\n", eventID, dataQueue.size());
+            tempData->FillData(events, saveTrace); // Fill data with the events
+            dataQueue.push(std::move(tempData)); // move the pointer into the queue (no copy)
+            lock.unlock(); // Unlock the queue mutex
+            trace_cv.notify_one(); // Notify one of the worker threads to start processing
+            break;
+          }
+          lock.unlock(); // Unlock the queue mutex 
+          if( dataQueue.size() >= MAX_QUEUE_SIZE ) {
+            //wait for 10 miniseconds before checking the queue again
+            std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Sleep for
+            continue;
           }
 
         }
