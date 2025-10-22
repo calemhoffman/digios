@@ -47,6 +47,18 @@ int GetLValue(string spdf){
   return -1;
 }
 
+float GetSpinValue(string spin){
+  
+  size_t slashPos = spin.find('/');
+  if (slashPos != string::npos) {
+    int num = atoi(spin.substr(0, slashPos).c_str());
+    int den = atoi(spin.substr(slashPos + 1).c_str());
+    if (den != 0) return static_cast<float>(num) / static_cast<float>(den);
+  } else {
+    return atof(spin.c_str());
+  }
+  return -1.0;
+}
 
 int InFileCreator(string readFile, string infile, double angMin, double angMax, double angStep) {
    
@@ -116,18 +128,30 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     if( abs(numNucleonsTransfer) >= 3 ) isReactionSupported = false;
     
     if( isReactionSupported == false ){
-      printf("  ===> Ignored. Reaction type not supported. \n"); 
+      printf("\033[31m  ===> Ignored. Reaction type not supported. \033[0m\n"); 
       continue;
     }
     
     // Continues to decode the input string
-    string gsSpinA = str0[1];
+    string gsSpinparityA = str0[1];
+
+    string gsSpinA = gsSpinparityA.substr(0, gsSpinparityA.length()-1);
+    string gsParityA = gsSpinparityA.substr(gsSpinparityA.length()-1);
+
+    // determine numeric ground-state spin value: half-integer if contains '/', otherwise integer
+    double gsSpinAValue = GetSpinValue(gsSpinA);
+    int gsParityAValue = (gsParityA == "+" ? 1 : -1);
+
     string orbital = str0[2];
 
     string spinParity = str0[3];
     int lenSpinParity = spinParity.length();
     string spin = spinParity.substr(0, lenSpinParity-1);
     string parity = spinParity.substr(lenSpinParity-1);
+
+    double spinValue = GetSpinValue(spin);
+    int parityValue = (parity == "+" ? 1 : -1);
+
 
     string Ex = str0[4];
     string reactionEnergy = str0[5];
@@ -142,26 +166,26 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
     
     /// check is iso_A or iso_B exist in the mass table
     if( iso_A.Mass == -404 || iso_B.Mass == -404 ){
-      printf("  ===> Error! mass does not found. \n");
+      printf("\033[31m  ===> Error! mass does not found. \033[0m\n");
       continue;
     }
     
     /// check reaction valid by balancing the A and Z number;
     if( iso_A.A + iso_a.A != iso_B.A + iso_b.A || iso_A.Z + iso_a.Z != iso_B.Z + iso_b.Z ) {
-      printf("====> ERROR! A-number or Z-number not balanced. \n");
+      printf("\033[31m====> ERROR! A-number or Z-number not balanced. \033[0m\n");
       Isotope isotopeK(iso_A.A + iso_a.A - iso_b.A, iso_A.Z + iso_a.Z - iso_b.Z);
       printf("      try : %s(%s,%s)%s ??\n", iso_A.Name.c_str(), iso_a.Name.c_str(), iso_b.Name.c_str(), isotopeK.Name.c_str());
       continue;
     }
 
     if( isTransferReaction && potential.length() != 2 ){
-      printf("====> ERROR! Potential input should be 2 charaters! skipped. \n");
+      printf("\033[31m====> ERROR! Potential input should be 2 charaters! skipped. \033[0m\n");
       continue;
     }
     
     string node ;
-    string jValue ;
-    string lValue ;
+    string jStr ;
+    string lStr ;
     int spdf = -1;
     
     if( isTransferReaction ) {
@@ -170,25 +194,54 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       
       // single nucleon transfer
       if( abs(iso_a.A - iso_b.A) == 1 ){
-        lValue = orbital.substr(1,1);
-        jValue = orbital.substr(2);
-        ///printf(" l : %s, j : %s \n", lValue.c_str(), jValue.c_str());
-        spdf = GetLValue(lValue);
+        lStr = orbital.substr(1,1);
+        jStr = orbital.substr(2);
+        ///printf(" l : %s, j : %s \n", lStr.c_str(), jStr.c_str());
+        spdf = GetLValue(lStr);
+
+        //Check parity, gsParityAValue * parityValue should be equal to (-1)^l
+        int expectedParity = gsParityAValue * parityValue;
+        int calculatedParity = ( (spdf %2) ==0 ) ? 1 : -1;
+        if( expectedParity != calculatedParity ){
+          printf("\033[31m ===> skipped. Parity mismatch. (expected %d but got %d) \033[0m\n", expectedParity, calculatedParity);
+          continue;
+        }
+
+        //Check converation of angular momentum, spinValue should be in |gsSpinAValue - jValue|  to |gsSpinAValue + jValue|
+        float jValue = GetSpinValue(jStr);
+        
+        //generate all possible spinValue
+        std::vector<float> possibleSpinValues;
+        for (float s = fabs(gsSpinAValue - jValue); s <= (gsSpinAValue + jValue); s += 1.0f) {
+          possibleSpinValues.push_back(s);
+        }
+        bool spinMatch = false;
+        for (float possibleSpin : possibleSpinValues) {
+          if (fabs(possibleSpin - spinValue) < 1e-6) {
+            spinMatch = true;
+            break;
+          }
+        }
+        if (!spinMatch) {
+          printf("\033[31m ===> skipped. Angular momentum mismatch. \033[0m\n");
+          continue;
+        }
+
       }
       
       // two-nucleons transfer
       if( abs(iso_a.A - iso_b.A) == 2 ){
         size_t posEq = orbital.find('=');
-        lValue = orbital.substr(posEq+1,1);
-        spdf=atoi(lValue.c_str());
+        lStr = orbital.substr(posEq+1,1);
+        spdf=atoi(lStr.c_str());
       }
       
       if( abs(iso_a.A - iso_b.A) == 0 ){
-        printf(" ===? skipped. p-n exchange reaction does not support. \n");
+        printf("\033[31m ===> skipped. p-n exchange reaction does not support. \033[0m\n");
       }
       
       if( spdf == -1 ){
-        printf(" ===> skipped. Not reconginzed orbital-label. (user input : l=%s | %s) \n", lValue.c_str(), orbital.c_str());
+        printf("\033[31m ===> skipped. Not reconginzed orbital-label. (user input : l=%s | %s) \033[0m\n", lStr.c_str(), orbital.c_str());
         continue;
       }
     }
@@ -231,7 +284,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         fprintf(file_out, "CHANNEL %s + %s\n", mass_a.c_str(), isoA.c_str());
         fprintf(file_out, "r0target\n");
         fprintf(file_out, "ELAB = %f\n", totalBeamEnergy);
-        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        fprintf(file_out, "JBIGA=%s\n", gsSpinparityA.c_str());
         string pot1Name = potential.substr(0,1);
         string pot1Ref = potentialRef(pot1Name);
         fprintf(file_out, "$%s\n", pot1Ref.c_str());
@@ -250,7 +303,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
         fprintf(file_out, "REACTION: %s%s%s(%s%s %s) ELAB=%7.3f\n", 
                      isoA.c_str(), reactionType.c_str(), isoB.c_str(), spin.c_str(), parity.c_str(), Ex.c_str(),  totalBeamEnergy);
         fprintf(file_out, "PARAMETERSET ineloca2 r0target\n");
-        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        fprintf(file_out, "JBIGA=%s\n", gsSpinparityA.c_str());
         if( str0.size() >= 8 ){
           fprintf(file_out, "BETA=%s\n", str0[7].c_str());  //deformation length
         }
@@ -339,11 +392,11 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       }
       
       if( abs(iso_a.A-iso_b.A) == 1 ){
-        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        fprintf(file_out, "JBIGA=%s\n", gsSpinparityA.c_str());
         if( isAboveThreshold ) {
-          fprintf(file_out, "nodes=%s l=%d jp=%s E=-.2 $node is n-1, set binding 200 keV \n", node.c_str(), spdf, jValue.c_str());
+          fprintf(file_out, "nodes=%s l=%d jp=%s E=-.2 $node is n-1, set binding 200 keV \n", node.c_str(), spdf, jStr.c_str());
         }else{
-          fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jValue.c_str());
+          fprintf(file_out, "nodes=%s l=%d jp=%s $node is n-1 \n", node.c_str(), spdf, jStr.c_str());
         }
         fprintf(file_out, "r0=1.25 a=.65 \n");
         fprintf(file_out, "vso=6 rso0=1.10 aso=.65 \n");
@@ -351,7 +404,7 @@ int InFileCreator(string readFile, string infile, double angMin, double angMax, 
       }
       
       if( abs(iso_a.A-iso_b.A) == 2 ){
-        fprintf(file_out, "JBIGA=%s\n", gsSpinA.c_str());
+        fprintf(file_out, "JBIGA=%s\n", gsSpinparityA.c_str());
         if( isAboveThreshold ){
           fprintf(file_out, "nodes=%s L=%d E=-.2 $node is n-1, binding by 200 keV \n", node.c_str(), spdf);
         }else{
