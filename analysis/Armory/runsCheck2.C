@@ -1,15 +1,17 @@
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
-#include <TSelector.h>
-#include <TMath.h>
-#include <TBenchmark.h>
-#include <TF1.h>
+#include "TROOT.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TSelector.h"
+#include "TMath.h"
+#include "TBenchmark.h"
+#include "TF1.h"
+#include "TObjArray.h"
+#include "TCutG.h"
+#include "TClonesArray.h"
+#include "TMacro.h"
+
 #include <string>
 #include <fstream>
-#include <TObjArray.h>
-#include <TCutG.h>
-#include <TClonesArray.h>
 
 void runsCheck2(TString prefix = "gen", int runID = -1){
    
@@ -23,11 +25,6 @@ void runsCheck2(TString prefix = "gen", int runID = -1){
    
   //==============================================
   
-  if( prefix != "gen" ){
-    printf(" not supporting trace data yet. sorry, use runsCheck.C \n");
-    return;
-  }
-  
   printf("================================================\n");
   printf("  using the timing macro in the root files  \n");
   printf("================================================\n");
@@ -40,11 +37,11 @@ void runsCheck2(TString prefix = "gen", int runID = -1){
   cmd.Form(".!ls -1 %s | sort > foundRunList.txt", folderPath.Data());
   gROOT->ProcessLine(cmd);
    
-  ifstream file;
+  std::ifstream file;
   file.open("foundRunList.txt");
-  vector<TString> rootFileName;
+  std::vector<TString> rootFileName;
   if( file.is_open() ){
-    string x;
+    std::string x;
     while( file >> x){
       rootFileName.push_back(x);
     }
@@ -74,7 +71,7 @@ void runsCheck2(TString prefix = "gen", int runID = -1){
       
     if( !f->IsOpen()) continue; 
       
-    TMacro * timing = (TMacro *)f->Get("timing");
+    TMacro * timing = (TMacro *)f->Get("info");
     
     if( timing == NULL ) continue;
     
@@ -82,9 +79,18 @@ void runsCheck2(TString prefix = "gen", int runID = -1){
     TString t2 = timing->GetListOfLines()->At(1)->GetName();
     TString nE = timing->GetListOfLines()->At(2)->GetName();
 
-    ULong64_t firstTime = t1.Atoll();
-    ULong64_t lastTime = t2.Atoll();
-    int totalEvent = nE.Atoi();
+    // extract substring after '=' in t1
+    Int_t pos = t1.Index("=");
+    TString t1_after = t1(pos+1, t1.Length()-pos-1);
+    ULong64_t firstTime = t1_after.Atoll();
+
+    pos = t2.Index("=");
+    TString t2_after = t2(pos+1, t2.Length()-pos-1);
+    ULong64_t lastTime = t2_after.Atoll();
+    
+    pos = nE.Index("=");
+    TString nE_after = nE(pos+1, nE.Length()-pos-1);
+    int totalEvent = nE_after.Atoi();
       
     double time1 = firstTime/1e8;
     double time2 = lastTime/1e8;

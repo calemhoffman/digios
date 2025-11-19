@@ -665,7 +665,7 @@ void Monitors::PlotTDiff(bool isGated, bool isLog){
    
    if( isCutFileOpen1 ) text.DrawLatex(0.15, 0.8, "with Recoil gate");
    if(isTimeGateOn)text.DrawLatex(0.15, 0.7, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
-   DrawBox(htdiff, timeGate[0], timeGate[1], kGreen, 0.0);
+   // DrawBox(htdiff, timeGate[0], timeGate[1], kGreen, 0.0);
 }
 
 void Monitors::PlotRDT(int id, bool isRaw){
@@ -678,8 +678,8 @@ void Monitors::PlotRDT(int id, bool isRaw){
    }
    if(isTimeGateOn)text.DrawLatex(0.15, 0.8, Form("%d < coinTime < %d", timeGate[0], timeGate[1])); 
    if( isTACGate ) text.DrawLatex(0.15, 0.7, Form("%d < TAC < %d", tacGate[0], tacGate[1]));
-   if( isCutFileOpen1 && numCut1 > id ) {cutG = (TCutG *)cutList1->At(id) ; cutG->Draw("same");}
-   if( isCutFileOpen2 && numCut2 > id ) {cutG = (TCutG *)cutList2->At(id) ; cutG->Draw("same");}
+   if( isCutFileOpen1 && numCut1 > id ) {cutG = (TCutG *)cutList1->At(id) ; cutG->SetLineWidth(3); cutG->Draw("same");}
+   if( isCutFileOpen2 && numCut2 > id ) {cutG = (TCutG *)cutList2->At(id) ; cutG->SetLineWidth(3); cutG->Draw("same");}
 
 }
 
