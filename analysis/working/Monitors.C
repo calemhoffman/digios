@@ -42,7 +42,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  50,    10,     24};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  50,    -2,     8};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -61,11 +61,13 @@ int tacGate[2]        = {-8000, -2000};
 int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
-double xGate          = 0.8;                  ///cut out the edge
+double xGate          = 1.1;                  ///cut out the edge
 vector<int> skipDetID = {11, 22}; 
 
-TString rdtCutFile1 = "rdtCuts12C.root";//"ben.root"; //"rdtCut12C.root";
-TString rdtCutFile2 = "rdtCuts11C.root";
+TString rdtCutFile1 = "rdtCuts_12C_3.root";
+bool notRDTCut1 = false;
+TString rdtCutFile2 = "";//"rdtCuts11C.root";
+bool notRDTCut2 = false;
 
 // TString rdtCutFile1 = "rdtCut12C_2.root";//"ben.root"; //"rdtCut12C.root"; //_2
 // TString rdtCutFile2 = "alpha_ben.root";
@@ -777,30 +779,29 @@ Bool_t Monitors::Process(Long64_t entry){
 
       //=================== Recoil Gate
       if( isRDTExist && (isCutFileOpen1 || isCutFileOpen2)){
-        for(int i = 0 ; i < numCut1 ; i++ ){
+         for(int i = 0 ; i < numCut1 ; i++ ){
             cutG = (TCutG *)cutList1->At(i) ;
             if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
-            // if(cutG->IsInside(rdt[2*i] + rdt[2*i+1],rdt[2*i+1])) {
-
-            rdtgate1= true;
-            break; /// only one is enough
-          }
-        }
+               rdtgate1= true;
+               break; /// only one is enough
+            }
+         }
         
-        for(int i = 0 ; i < numCut2 ; i++ ){
-          cutG = (TCutG *)cutList2->At(i) ;
-          if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
-          //if(cutG->IsInside(rdt[2*i]+ rdt[2*i+1],rdt[2*i+1])) {
-
-            rdtgate2= true;
-            break; /// only one is enough
-          }
-        }
+         for(int i = 0 ; i < numCut2 ; i++ ){
+            cutG = (TCutG *)cutList2->At(i) ;
+            if(cutG->IsInside(rdt[2*i],rdt[2*i+1])) {
+               rdtgate2= true;
+               break; /// only one is enough
+            } 
+         }
         
       }else{
         rdtgate1 = true;
         rdtgate2 = true;
       }
+
+      if( notRDTCut1 ) rdtgate1 = !rdtgate1;
+      if( notRDTCut2 ) rdtgate2 = !rdtgate2;
       
       //================ coincident with Recoil when z is calculated.
       if( !TMath::IsNaN(z[detID]) ) { 
