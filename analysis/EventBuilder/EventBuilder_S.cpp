@@ -182,6 +182,17 @@ public:
       te[i] = TMath::QuietNaN();
       te_t[i] = TMath::QuietNaN();
       te_r[i] = TMath::QuietNaN();
+      te_chi2[i] = TMath::QuietNaN();
+
+      txf[i] = TMath::QuietNaN();
+      txf_t[i] = TMath::QuietNaN();
+      txf_r[i] = TMath::QuietNaN();
+      txf_chi2[i] = TMath::QuietNaN();
+      
+      txn[i] = TMath::QuietNaN();
+      txn_t[i] = TMath::QuietNaN();
+      txn_r[i] = TMath::QuietNaN();
+      txn_chi2[i] = TMath::QuietNaN();
     }
 
     traceCount = 0; 
@@ -201,6 +212,7 @@ public:
       trdt[i] = TMath::QuietNaN();
       trdt_t[i] = TMath::QuietNaN();
       trdt_r[i] = TMath::QuietNaN();
+      trdt_chi2[i] = TMath::QuietNaN();
     }
 #endif
 #if NTAC > 0
