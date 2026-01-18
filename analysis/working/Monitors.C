@@ -31,7 +31,7 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {     0,    3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {   100,    3000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     0,     14};       /// in the E-Z plot
 int     rdtDERange[2] = {     50,    9000}; 
 int      rdtERange[2] = {     50,    5000};  
@@ -62,7 +62,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 1.1;                  ///cut out the edge
-vector<int> skipDetID = {11, 22}; 
+vector<int> skipDetID = {11, 17, 22}; 
 
 TString rdtCutFile1 = "rdtCuts_12C_3.root";
 bool notRDTCut1 = false;
@@ -73,6 +73,13 @@ bool notRDTCut2 = false;
 // TString rdtCutFile2 = "alpha_ben.root";
 
 TString ezCutFile   = "";//"ezCut.root";
+
+double exShift[NARRAY] = {
+   0.00,  0.20,  0.00, -0.10,  0.00,  0.00, //detID 0-5
+   0.00,  0.00,  0.00, -0.10,  0.00,  0.00, //detID 6-11
+   0.50,  0.30,  0.15, -0.10,  0.00,  0.00, //detID 12-17
+   0.00,  0.00,  0.00, -0.10,  0.00,  0.00  //detID 18-23
+}; // in MeV
 
 //TODO switches for histograms on/off
 //############################################ end of user setting
@@ -1005,6 +1012,8 @@ Bool_t Monitors::Process(Long64_t entry){
        Ex = TMath::QuietNaN();
        thetaCM = TMath::QuietNaN();
      }
+
+     Ex = Ex + exShift[detID];
      
      htacEx->Fill(tac[2], Ex);
      htac2Ex->Fill(tac_t[1]-e_t[detID], Ex);
