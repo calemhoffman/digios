@@ -42,7 +42,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  50,    -2,     8};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  50,    8,     22};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -64,7 +64,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 1.1;                  ///cut out the edge
 vector<int> skipDetID = {11, 17, 22}; 
 
-TString rdtCutFile1 = "rdtCuts_12C_3.root";
+TString rdtCutFile1 = "";//"rdtCuts_12C_3.root";
 bool notRDTCut1 = false;
 TString rdtCutFile2 = "";//"rdtCuts11C.root";
 bool notRDTCut2 = false;
