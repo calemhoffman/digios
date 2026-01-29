@@ -64,7 +64,7 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 1.1;                  ///cut out the edge
 vector<int> skipDetID = {11, 17, 22}; 
 
-TString rdtCutFile1 = "";//"rdtCuts_12C_3.root";
+TString rdtCutFile1 = "rdtCuts_12C_6.root";
 bool notRDTCut1 = false;
 TString rdtCutFile2 = "";//"rdtCuts11C.root";
 bool notRDTCut2 = false;
