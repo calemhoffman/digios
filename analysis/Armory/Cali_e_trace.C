@@ -47,7 +47,7 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
    det   = -4;
    
    multiHit = 0;
-   rdtdEMultiHit = 0;
+   nDEHit = 0;
    
    Ex  = TMath::QuietNaN();
    thetaCM  = TMath::QuietNaN();
@@ -58,14 +58,19 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       rdtC_t[i] = 0;
    }
 
-   rdtID = -4;
    
-   coin_t = -2000;
+   for( int i = 0; i < 4; i++ ){
+      rdtID[i] = -4;
+      coin_t[i] = -2000;
+   }
 
    if( isTraceDataExist ){
-      tcoin_t = TMath::QuietNaN();
-      coinTimeUC = TMath::QuietNaN(); //uncorrected
-      coinTime = TMath::QuietNaN();
+      
+      for(int i = 0; i < 4; i++ ){
+         tcoin_t[i] = TMath::QuietNaN();
+         coinTimeUC[i] = TMath::QuietNaN(); //uncorrected
+         coinTime[i] = TMath::QuietNaN();
+      }
       
       for(int i = 0; i < numDet; i++){
          te[i] = TMath::QuietNaN();
@@ -306,48 +311,52 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
 
       //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
    }
-   
+
    for( int i = 0; i< NRDT/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
-         rdtdEMultiHit ++;
-         rdtID = 2*i+1; //dE
+         rdtID[nDEHit] = 2*i+1; //dE
+         nDEHit++;
       }
    }
    
    //================================= for coincident time bewteen array and rdt
    //if( multiHit == 1 && rdtdEMultiHit == 1) {
-   if( multiHit ==1 && rdtdEMultiHit >= 1 ){ 
+   if( multiHit ==1 && nDEHit >= 1 ){ 
       ///===== no Trace data
       ULong64_t eTime = e_t[det];
 
-      /// for dE detector only
-      ULong64_t rdtTime = rdt_t[rdtID];
+      for( int i = 0; i < nDEHit; i++ ){
+         
+         ULong64_t rdtTime = rdt_t[rdtID[i]];
+         coin_t[i] = (int) eTime - (int) rdtTime; // digitizer timeStamp
+      }
 
-      coin_t = (int) eTime - rdtTime; // digitizer timeStamp
-     
       ///======== with trace data
       if( isTraceDataExist ) {
          
          Float_t teTime = te_t[det];
-         Float_t trdtTime =  trdt_t[rdtID];
-         
-         tcoin_t = teTime - trdtTime; // trace trigger time 
-         
-         //Ad-hoc solution 
-         double rdtCorrAux = 0;
-         //switch(rdtID){
-         //   case 0: rdtCorrAux = 23.0 ; break;
-         //   case 1: rdtCorrAux = 0.0 ; break;
-         //   case 2: rdtCorrAux = 4.3 ; break;
-         //   case 3: rdtCorrAux = 15.3 ; break;
-         //}
-         
-         coinTimeUC = 10.0*(coin_t + tcoin_t) - rdtCorrAux; // in nano-sec
-         
          double f7corr = f7[det]->Eval(x[det]) + cTCorr[det][8];
-         
-         coinTime = (coinTimeUC - f7corr); //+ corrofftime
+
+         for( int i = 0; i < nDEHit; i++ ){
+            Float_t trdtTime =  trdt_t[rdtID[i]];
+            
+            tcoin_t[i] = teTime - trdtTime; // trace trigger time 
+            
+            //Ad-hoc solution 
+            double rdtCorrAux = 0;
+            //switch(rdtID){
+            //   case 0: rdtCorrAux = 23.0 ; break;
+            //   case 1: rdtCorrAux = 0.0 ; break;
+            //   case 2: rdtCorrAux = 4.3 ; break;
+            //   case 3: rdtCorrAux = 15.3 ; break;
+            //}
+            
+            coinTimeUC[i] = 10.0*(coin_t[i] + tcoin_t[i]) - rdtCorrAux; // in nano-sec
+            coinTime[i] = (coinTimeUC[i] - f7corr); //+ corrofftime
+         }
       }
+      
+      
       
    }
    
