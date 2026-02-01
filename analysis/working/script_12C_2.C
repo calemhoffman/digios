@@ -29,6 +29,13 @@ void script_12C_2() {
   TTreeReaderArray<unsigned long long> e_t(reader, "e_t");
   TTreeReaderArray<unsigned long long> rdt_t(reader, "rdt_t");
 
+  TTreeReaderValue<int> nDEHit(reader, "nDEHit");
+  TTreeReaderArray<int> rdtID(reader, "rdtID");
+  TTreeReaderArray<int> coin_t(reader, "coin_t"); // e_t - rdt_t for dE in tick
+  TTreeReaderArray<float> tcoin_t(reader, "tcoin_t"); // tet - trdt_t for dE in tick
+
+  TTreeReaderArray<float> coinTimeUC(reader, "coinTimeUC"); // 10 (coin_t + tcoin_t) in ns
+
   //^######## Histograms ########
   TH2F * rdtdEE[4];
   TH2F * Ex_rdtdE[4]; // odd
@@ -39,7 +46,12 @@ void script_12C_2() {
     Ex_rdtE[i]  = new TH2F( Form("Ex_rdtE_%d", i),  Form("Ex_rdtE_%d", i) , 200, 8, 22, 200, 0, 5000 );
   }
 
-  TH1F * hdT = new TH1F("hdT", "hdT", 200, -100, 100 );
+  TH1F * hdT = new TH1F("hdT", "hdT", 80, -30, 50 );
+  TH1F * hdT2 = new TH1F("hdT2", "hdT2", 80, -30, 50 );
+  hdT2->SetLineColor(2);
+
+  TH2F * hExdT = new TH2F("hExdT", "hExdT", 200, 8, 22, 80, -30, 50 );
+  TH2F * hExdT2 = new TH2F("hExdT2", "hExdT2", 200, 8, 22, 80, -30, 50 );
 
   //^######## Load RDT cuts ########
   TFile * fcut = new TFile("rdtCuts_12C_6.root");
@@ -89,6 +101,9 @@ void script_12C_2() {
       hdT->Fill( dt );
       // printf(" detID = %d, e_t = %llu , rdt_t = %llu , dt = %d \n", *detID, e_t[*detID], rdtTime, dt );
     }
+
+    int dt2 = static_cast<int>( e_t[*detID] - rdt_t[rdtIDs.back()] );
+    hdT2->Fill( dt2 );
     
     if ( dt < -20 || dt > 40 ) continue;
     // if (  -20 < dt && dt < 40 ) continue;
@@ -103,6 +118,10 @@ void script_12C_2() {
       Ex_rdtE[id]->Fill( *Ex, rdtE[id] );
 
       rdtdEE[id]->Fill( rdtE[id], rdtdE[id] );
+
+      hExdT->Fill( *Ex, dt );
+      hExdT2->Fill( *Ex, dt2 );
+
     }
     // printf("Ex = %f , thetaCM = %f \n", *Ex, *thetaCM );
 
@@ -130,5 +149,13 @@ void script_12C_2() {
 
   TCanvas * c3 = new TCanvas("c3", "c3", 600, 600 );
   hdT->Draw();
+  hdT2->Draw("same");
+
+  TCanvas * c4 = new TCanvas("c4", "c4", 1600, 800 );
+  c4->Divide(2,1);
+  c4->cd(1);
+  hExdT->Draw("colz");
+  c4->cd(2);
+  hExdT2->Draw("colz");
   
 }
