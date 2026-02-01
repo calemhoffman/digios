@@ -383,10 +383,32 @@ public:
       f.params = &d;
       
       gsl_vector *x = gsl_vector_alloc(4);
-      gsl_vector_set(x, 0, 100.0); // Initial guess for A
+
+      if ( trace[0] - trace[traceLen[i]-1] > 0 ) { // Negative pulse
+        gsl_vector_set(x, 0, -100.0); // Initial guess for A
+      } else { // Positive pulse
+        gsl_vector_set(x, 0, 100.0); // Initial guess for A
+      }
+
       gsl_vector_set(x, 1, 100.0); // Initial guess for T0
-      gsl_vector_set(x, 2, 1.0);   // Initial guess for rise time
+      gsl_vector_set(x, 2, 8.0);   // Initial guess for rise time
       gsl_vector_set(x, 3, 8000.0); // Initial guess for baseline
+
+      // Set parameter bounds
+      // Enforce Amplitude initial guess to be within [-8000, 8000]
+      gsl_vector_set(x, 0, -9000.0);
+      gsl_vector_set(x, 0,  9000.0);
+      
+      // Enforce T0 initial guess to be within [60, 140]
+      gsl_vector_set(x, 1,  60.0);
+      gsl_vector_set(x, 1, 140.0);
+  
+      gsl_vector_set(x, 2,  1.0);
+      gsl_vector_set(x, 2, 50.0);
+
+      gsl_vector_set(x, 3, 7000.0);
+      gsl_vector_set(x, 3, 9000.0);
+
       
       const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
       gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();

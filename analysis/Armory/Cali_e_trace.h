@@ -154,13 +154,13 @@ public :
    
    Float_t rdtC[NRDT];
    ULong64_t rdtC_t[NRDT];
-   int rdtID; // rdt hit ID
-   int rdtdEMultiHit;
-
-   Int_t   coin_t;
-   Float_t tcoin_t;
-   Float_t coinTimeUC; 
-   Float_t coinTime;
+   
+   int nDEHit;
+   int rdtID[4]; // rdt hit ID, maximum is 4
+   Int_t   coin_t[4];
+   Float_t tcoin_t[4];
+   Float_t coinTimeUC[4]; 
+   Float_t coinTime[4];
    
    TObjArray * fList; //!
    
@@ -726,8 +726,8 @@ void Cali_e_trace::Init(TTree *tree)
    
    newTree->Branch("rdt", rdtC, Form("rdt[%d]/F",NRDT));
    newTree->Branch("rdt_t", rdtC_t, Form("rdt_t[%d]/l", NRDT));
-   newTree->Branch("rdtID", &rdtID, "rdtID/I");
-   newTree->Branch("rdtdEMultiHit", &rdtdEMultiHit, "rdtdEMultiHit/I");
+   newTree->Branch("nDEHit", &nDEHit, "nDEHit/I");
+   newTree->Branch("rdtID", rdtID, Form("rdtID[nDEHit]/I"));
    
    if( isEBISExist ) newTree->Branch("ebis_t", &EBIS_t, "EBIS_t/l");
    
@@ -751,12 +751,12 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("crdt_t", crdt_t, Form("crdt_t[%d]/l", NCRDT));
    }
    
-   newTree->Branch("coin_t", &coin_t, "coin_t/I");
+   newTree->Branch("coin_t", coin_t, "coin_t[nDEHit]/I");
    
    if( isTraceDataExist ){
-      newTree->Branch("tcoin_t", &tcoin_t, "tcoin_t/F");
-      newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUn/F");
-      newTree->Branch("coinTime", &coinTime, "coinTime/F");
+      newTree->Branch("tcoin_t", tcoin_t, "tcoin_t[nDEHit]/F");
+      newTree->Branch("coinTimeUC", coinTimeUC, "coinTimeUC[nDEHit]/F");
+      newTree->Branch("coinTime", coinTime, "coinTime[nDEHit]/F");
       newTree->Branch("te",             te,  Form("te[%d]/F", numDet) );
       newTree->Branch("te_r",         te_r,  Form("te_r[%d]/F", numDet));
       newTree->Branch("te_t",         te_t,  Form("te_t[%d]/F", numDet));
