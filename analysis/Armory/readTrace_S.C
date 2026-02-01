@@ -109,7 +109,7 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
    double * para_default = new double[4];
    para_default[0] = -1000;
    para_default[1] = 100;
-   para_default[2] = 2;
+   para_default[2] = 8;
    para_default[3] = 8500;
 
    fit->SetParameters(para_default);
@@ -143,7 +143,7 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
 
          printf("nHit: %d, id : %d, idKind : %d, trace Length : %u ( enter = next , q = stop, w = last)\n", j, idDet, idKind, traceLength[j]);
 
-         printf(" Amp : %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f\n", 
+         printf("GSL Amp : %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f\n", 
                tracePara[j][0], tracePara[j][1], tracePara[j][2]*4.29, tracePara[j][3]);
 
          fit2->SetRange(0, traceLength[j]);
@@ -175,7 +175,7 @@ void readRawTrace(TString fileName, int minDetID = 0, int maxDetID = 1000, bool 
          TString fitResultStr = Form("Amp: %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f", 
                            -para[0], para[1], para[2]*4.29, para[3]);
 
-         TString fitResultStr2 = Form("Amp: %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f", 
+         TString fitResultStr2 = Form("GS Amp: %.2f, Time: %.2f tick, Rise time(10%%-90%%): %.3f ticks, baseline : %.2f", 
                            tracePara[j][0], tracePara[j][1], tracePara[j][2]*4.29, tracePara[j][3]);
 
          // printf("%s\n", fitResultStr.Data());

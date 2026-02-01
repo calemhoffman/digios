@@ -755,7 +755,7 @@ void Cali_e_trace::Init(TTree *tree)
    
    if( isTraceDataExist ){
       newTree->Branch("tcoin_t", tcoin_t, "tcoin_t[nDEHit]/F");
-      newTree->Branch("coinTimeUC", coinTimeUC, "coinTimeUn[nDEHit]/F");
+      newTree->Branch("coinTimeUC", coinTimeUC, "coinTimeUC[nDEHit]/F");
       newTree->Branch("coinTime", coinTime, "coinTime[nDEHit]/F");
       newTree->Branch("te",             te,  Form("te[%d]/F", numDet) );
       newTree->Branch("te_r",         te_r,  Form("te_r[%d]/F", numDet));

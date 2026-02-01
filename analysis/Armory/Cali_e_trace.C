@@ -312,11 +312,22 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       //printf("%2d, %f| %f %f %f \n", i, rdt[i], rdtCorr[i][0], rdtCorr[i][1], rdtC[i]);
    }
 
+   std::vector<std::pair<int, unsigned long long> > rdtTimePair;
    for( int i = 0; i< NRDT/2 ; i++){
       if( !TMath::IsNaN(rdt[2*i]) && !TMath::IsNaN(rdt[2*i+1]) ) {
-         rdtID[nDEHit] = 2*i+1; //dE
-         nDEHit++;
+         rdtTimePair.push_back( std::make_pair( 2*i+1, rdt_t[ 2*i+1 ] ) );
       }
+   }
+
+   //sort rdtTimePair base on time
+   std::sort( rdtTimePair.begin(), rdtTimePair.end(),
+      []( const std::pair<int, unsigned long long> & a, const std::pair<int, unsigned long long> & b ){
+         return a.second < b.second;
+      } ); 
+
+   nDEHit = rdtTimePair.size();
+   for( int i = 0; i < nDEHit; i++ ){
+      rdtID[i] = rdtTimePair[i].first;
    }
    
    //================================= for coincident time bewteen array and rdt
