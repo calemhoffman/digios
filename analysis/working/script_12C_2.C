@@ -7,9 +7,26 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TCanvas.h"
+#include "TProfile.h" 
+
+#include "../Armory/AutoFit.C"
+
+TH2F * htet_ter[24];
 
 void script_12C_2() {
 
+  //^######## Load RDT cuts ########
+  TFile * fcut = new TFile("rdtCuts_12C_6.root");
+  TList * cutList = (TList *)fcut->Get("cutList");
+  TCutG * cutG_rdt[4];
+  for( int i = 0 ; i < 4 ; i++ ) {
+    cutG_rdt[i] = (TCutG *)cutList->At(i);
+  }
+  
+  float rdtdE[4], rdtE[4];
+  std::vector<int> rdtIDs;
+
+  //^######## Load data ########
   TFile * file = TFile::Open("h095_11C_dp_2_trace_run014.root");
   TTree * tree = (TTree *)file->Get("tree");
 
@@ -28,6 +45,9 @@ void script_12C_2() {
 
   TTreeReaderArray<unsigned long long> e_t(reader, "e_t");
   TTreeReaderArray<unsigned long long> rdt_t(reader, "rdt_t");
+
+  TTreeReaderArray<float> te_t(reader, "te_t"); // trace time for e
+  TTreeReaderArray<float> te_r(reader, "te_r"); // rise time for e
 
   TTreeReaderValue<int> nDEHit(reader, "nDEHit");
   TTreeReaderArray<int> rdtID(reader, "rdtID");
@@ -58,56 +78,60 @@ void script_12C_2() {
 
   TH1F * hExID[24];
   TH2F * hCoinTimeX[24];
+
   for( int i = 0 ; i < 24 ; i++ ) {
     hExID[i] = new TH1F( Form("hExID_%d", i), Form("hExID_%d", i), 200, exRange[0], exRange[1] );
     hCoinTimeX[i] = new TH2F( Form("hCoinTimeX_%d", i), Form("hCoinTimeX_%d", i), 200, -1.2, 1.2, 200, -10, 40);
+    htet_ter[i] = new TH2F( Form("htet_ter_%d", i), Form("htet_ter_%d", i), 200, 0, 10, 200, 95, 120);
   }
 
   TH2F * hEZ = new TH2F("hEZ", "hEZ", 200, -600, 0, 200, 0, 12 );
 
 
-  //^######## Load RDT cuts ########
-  TFile * fcut = new TFile("rdtCuts_12C_6.root");
-  TList * cutList = (TList *)fcut->Get("cutList");
-  TCutG * cutG_rdt[4];
-  for( int i = 0 ; i < 4 ; i++ ) {
-    cutG_rdt[i] = (TCutG *)cutList->At(i);
-  }
-  
-  float rdtdE[4], rdtE[4];
-  std::vector<int> rdtIDs;
+
   
   //^######## main loop ########
   int count = 0;
   while( reader.Next() ) {
     //*======== skip detID 11 and 22 ==========
+    // if( !detID.IsValid() ) continue; 
+    if( *detID < 0 || *detID >= 24 ) continue;
     if( *detID == 11 || *detID == 22 ) continue;
 
+    //*======== skip if no e or e > 20 MeV ==========
+    if( e[*detID] <= 0.0 ) continue;
+    if( e[*detID] > 20.0 ) continue;
+
+    // printf("Event %d: detID = %d, Ex = %f, thetaCM = %f, e = %f \n", 
+          //  count, *detID, *Ex, *thetaCM, e[*detID] );
+    htet_ter[*detID]->Fill(  te_r[*detID], te_t[*detID] );
+    
     bool hasRDT = false;
     rdtIDs.clear();
-
+    
     unsigned long long rdtTime = -1ULL;
-
+    
     for( size_t i = 0 ; i < 4 ; i++ ) {
       rdtE[i]  = rdt[2*i];
       rdtdE[i] = rdt[2*i+1];
       if( rdtE[i] > 0.0 && rdtdE[i] > 0.0 ) {
         rdtIDs.push_back(i);
         hasRDT = true;
-
+        
         if( rdtTime > rdt_t[2*i+1] ) {
           rdtTime = rdt_t[2*i+1];
         }
         // if( rdtTime > rdt_t[2*i] ) {
-        //   rdtTime = rdt_t[2*i];
-        // }
-        // printf("rdt[%zu] = %f , rdt[%zu] = %f \n", 2*i, rdt[2*i], 2*i+1, rdt[2*i+1] );
+          //   rdtTime = rdt_t[2*i];
+          // }
+          // printf("rdt[%zu] = %f , rdt[%zu] = %f \n", 2*i, rdt[2*i], 2*i+1, rdt[2*i+1] );
+        }
       }
-    }
-
+      
     //*======== skip if no RDT ==========
     if( !hasRDT ) continue;
     if( *nDEHit <= 0 ) continue;
+      
 
     int dt = 99999;
     if ( rdtTime != (unsigned long long)(-1) ) {
@@ -170,33 +194,45 @@ void script_12C_2() {
   //   c1->cd(i+5);
   //   Ex_rdtE[i]->Draw("box"); 
   // }
-
-  TCanvas * c2 = new TCanvas("c2", "c2", 800, 800 );
-  c2->Divide(2,2);
-  for( int i = 0 ; i < 4 ; i++ ) {
-    c2->cd(i+1);
-    rdtdEE[i]->Draw("colz");
-  }
-
-  TCanvas * c3 = new TCanvas("c3", "c3", 1200, 800 );
-  c3->Divide(6,4);
-  for( int i = 0 ; i < 24 ; i++ ) {
-    c3->cd(i+1);
-    // hExID[i]->Draw();
-    hCoinTimeX[i]->Draw("box");
-  }
-
   
-  TCanvas * c4 = new TCanvas("c4", "c4", 1200, 600 );
-  c4->Divide(2,1);
-  c4->cd(1);
-  hExdT->Draw("colz");
-  c4->cd(2);
-  hExCoin->Draw("colz");
+  // TCanvas * c2 = new TCanvas("c2", "c2", 800, 800 );
+  // c2->Divide(2,2);
+  // for( int i = 0 ; i < 4 ; i++ ) {
+  //   c2->cd(i+1);
+  //   rdtdEE[i]->Draw("colz");
+  // }
   
-  TCanvas * c5 = new TCanvas("c5", "c5", 600, 600 );
-  // hdT_coin->Draw("colz");
-  // hIDCoin->Draw("colz");
-  hEZ->Draw("colz");
+  // TCanvas * c3 = new TCanvas("c3", "c3", 2400, 1600 );
+  // c3->Divide(6,4);
+  // for( int i = 0 ; i < 24 ; i++ ) {
+  //   c3->cd(i+1);
+  //   // hExID[i]->Draw();
+  //   // hCoinTimeX[i]->Draw("box");
+  //   htet_ter[i]->Draw("colz");
+  // }
   
+  
+  // TCanvas * c4 = new TCanvas("c4", "c4", 1200, 600 );
+  // c4->Divide(2,1);
+  // c4->cd(1);
+  // hExdT->Draw("colz");
+  // c4->cd(2);
+  // hExCoin->Draw("colz");
+  
+  // TCanvas * c5 = new TCanvas("c5", "c5", 600, 600 );
+  // // hdT_coin->Draw("colz");
+  // // hIDCoin->Draw("colz");
+  // hEZ->Draw("colz");
+  
+  TCanvas * c6 = new TCanvas("c6", "c6", 800, 800 );
+  if( !c6->GetShowToolBar() ) c6->ToggleToolBar();
+  if( !c6->GetShowEventStatus() ) c6->ToggleEventStatus();
+  htet_ter[0]->Draw("colz");
+  TProfile * p = htet_ter[0]->ProfileX();
+  p->SetLineColor(kRed);
+  p->Draw("same");
+
+  c6->Update();
+
+
 }
