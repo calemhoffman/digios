@@ -10,20 +10,27 @@
 #ifndef AutoFit_C
 #define AutoFit_C
 
+#include <TROOT.h>
+#include <TStyle.h>
 #include <TF1.h>
 #include <TGraph.h>
 #include <TColor.h>
 #include <TSpectrum.h>
 #include <TMath.h>
+#include <TLatex.h>
+#include <TH1.h>
+#include <TH2.h>
 #include <TRandom.h>
 #include <TMarker.h>
 #include <vector>
+#include <string>
+#include <fstream>
 
 //Global fit paramaters
 
-vector<double> BestFitMean;
-vector<double> BestFitCount;
-vector<double> BestFitSigma;
+std::vector<double> BestFitMean;
+std::vector<double> BestFitCount;
+std::vector<double> BestFitSigma;
 
 TString recentFitMethod;
 
@@ -91,9 +98,9 @@ TColor RGBWheel(double ang){
 
   ang = ang * TMath::DegToRad();
   
-  double r = max(0., (1+2*cos(ang))/3.);
-  double g = max(0., (1 - cos(ang) + sqrt(3)* sin(ang))/3.);
-  double b = max(0., (1 - cos(ang) - sqrt(3)* sin(ang))/3.);
+  double r = std::max(0., (1+2*cos(ang))/3.);
+  double g = std::max(0., (1 - cos(ang) + sqrt(3)* sin(ang))/3.);
+  double b = std::max(0., (1 - cos(ang) - sqrt(3)* sin(ang))/3.);
 
   TColor col(r,g,b);
 
@@ -273,8 +280,8 @@ void GoodnessofFit(TH1F * hist, TF1 * fit){
    printf("################################################\n");  
 }
 
-vector<double> energy, height, sigma, lowE, highE ;
-vector<int> energyFlag, sigmaFlag;
+std::vector<double> energy, height, sigma, lowE, highE ;
+std::vector<int> energyFlag, sigmaFlag;
 
 bool loadFitParameters(TString fitParaFile){
   
@@ -289,7 +296,7 @@ bool loadFitParameters(TString fitParaFile){
 
   printf("====================================================================== \n");
   printf("----- loading fit parameters from : %s", fitParaFile.Data());
-  ifstream file;
+  std::ifstream file;
   file.open(fitParaFile.Data());
 
   if( !file){
@@ -298,7 +305,7 @@ bool loadFitParameters(TString fitParaFile){
   }
 
   while( file.good()) {
-    string tempLine;
+    std::string tempLine;
     getline(file, tempLine);
 
     if( tempLine.substr(0, 1) == "#" ) continue;
@@ -307,7 +314,7 @@ bool loadFitParameters(TString fitParaFile){
     
     ///printf("%s\n", tempLine.c_str());
 
-    vector<string> temp = SplitStrAF(tempLine, " ");
+    std::vector<std::string> temp = SplitStrAF(tempLine, " ");
 
     if( temp.size() < 7 ) continue;
 
@@ -491,7 +498,7 @@ void fitGaussPol(TH1F * hist, double mean, double sigmaMax, int degPol, double x
 //########################################
 //#### fit 2 gauss + pol-1  // not updated
 //########################################
-vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1, 
+std::vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1, 
                                        double mean2, double sigma2, 
                            double xMin, double xMax, TString optStat = "", bool newCanvas = false){
 
@@ -503,7 +510,7 @@ vector<double> fit2GaussP1(TH1F * hist, double mean1, double sigma1,
 
   recentFitMethod = "fit2GaussP1";
   
-  vector<double> output;
+  std::vector<double> output;
   output.clear();
 
   gStyle->SetOptStat(optStat);  
@@ -684,7 +691,7 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
    //GoodnessofFit(hist, fit);
 
   ///                  0       1        2        3       4       5   
-  string label[8] = {"Area", "mean", "sigma", "ratio", "beta", "step"};
+  std::string label[8] = {"Area", "mean", "sigma", "ratio", "beta", "step"};
   printf("---------- The detail\n");
   for(int i = 0 ; i < 6 ; i++){
     printf("%d | %8s | %f (%f) \n", i, label[i].c_str(), paraA[i], paraE[i]);
@@ -749,7 +756,7 @@ void fitGF3Pol(TH1F * hist, double mean, double sigmaMax, double ratio, double b
 //##############################################
 //##### Auto Fit n-Gauss with estimated BG 
 //##############################################
-vector<double> fitAuto(TH1F * hist, int bgEst = 10, 
+std::vector<double> fitAuto(TH1F * hist, int bgEst = 10, 
                        double peakThreshold = 0.05, 
                        double sigmaMax = 0, 
                        int peakDensity = 4, 
@@ -817,7 +824,7 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
 
   int * inX = new int[nPeaks];
   TMath::Sort(nPeaks, xpos, inX, 0 );
-  vector<double> energy, height;
+  std::vector<double> energy, height;
   for( int j = 0; j < nPeaks; j++){
     energy.push_back(xpos[inX[j]]);
     height.push_back(ypos[inX[j]]);
@@ -930,7 +937,7 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
   
   double bw = specS->GetBinWidth(1);
 
-  vector<double> exPos;
+  std::vector<double> exPos;
   for(int i = 0; i < nPeaks ; i++){
     exPos.push_back(paraA[numParPerPeak*i+1]);
     printf("%2d , count: %8.0f(%3.0f), mean: %8.4f(%8.4f), sigma: %8.4f(%8.4f) \n", 
@@ -1004,7 +1011,7 @@ vector<double> fitAuto(TH1F * hist, int bgEst = 10,
 //########################################
 //###### NOT tested
 //########################################
-vector<double> fitNGF3(TH1 * hist, int bgEst = 10, 
+std::vector<double> fitNGF3(TH1 * hist, int bgEst = 10, 
                        double peakThreshold = 0.1, 
                        double sigmaMax = 20, 
                        int peakDensity = 4, 
@@ -1067,7 +1074,7 @@ vector<double> fitNGF3(TH1 * hist, int bgEst = 10,
 
   int * inX = new int[nPeaks];
   TMath::Sort(nPeaks, xpos, inX, 0 );
-  vector<double> energy, height;
+  std::vector<double> energy, height;
   for( int j = 0; j < nPeaks; j++){
     energy.push_back(xpos[inX[j]]);
     height.push_back(ypos[inX[j]]);
@@ -1137,7 +1144,7 @@ vector<double> fitNGF3(TH1 * hist, int bgEst = 10,
   
   double bw = specS->GetBinWidth(1);
 
-  vector<double> exPos;
+  std::vector<double> exPos;
   for(int i = 0; i < nPeaks ; i++){
     exPos.push_back(paraA[numParPerPeak*i+1]);
     double totCount = paraA[numParPerPeak*i] + paraA[numParPerPeak*i+3];
@@ -1987,10 +1994,14 @@ void fitNGaussPolSub(TH1F * hist, int degPol,  TString fitFile = "AutoFit_para.t
 
 int nClick = 0;
 bool peakFlag = 1;
-vector<double> xPeakList;
-vector<double> yPeakList;
-vector<double> xBGList;
-vector<double> yBGList;
+std::vector<double> xPeakList;
+std::vector<double> yPeakList;
+std::vector<double> xBGList;
+std::vector<double> yBGList;
+
+// For 2D click-fit
+std::vector<double> clickX2D;
+std::vector<double> clickY2D;
 
 TH1F * tempHist;
 int markerStyle = 23;
@@ -2029,6 +2040,32 @@ void Clicked() {
 
   nClick ++;
 
+}
+
+// Click handler for 2D histogram (stores x,y coordinates)
+void Clicked2D(){
+  int event = gPad->GetEvent();
+  if (event != 11) return; // only respond to double click/mouse click event
+
+  int px = gPad->GetEventX();
+  int py = gPad->GetEventY();
+  double xd = gPad->AbsPixeltoX(px);
+  double yd = gPad->AbsPixeltoY(py);
+  double x = gPad->PadtoX(xd);
+  double y = gPad->PadtoY(yd);
+
+  clickX2D.push_back(x);
+  clickY2D.push_back(y);
+
+  // draw marker on pad
+  TMarker * mark = new TMarker(x, y, markerStyle);
+  mark->SetMarkerColor(markerColor);
+  gPad->GetListOfPrimitives()->Add(mark);
+  gPad->Modified();
+  gPad->Update();
+
+  printf("%2d | x : %8.4f , y : %8.4f \n", nClick, x, y);
+  nClick++;
 }
 
 
@@ -2669,6 +2706,105 @@ void clickFitNGaussPolSub(TH1F * hist, int degPol, double sigmaMax = 0, double m
     BestFitMean.push_back(paraA[3*i+1]);
     BestFitSigma.push_back(paraA[3*i+2]);
   }
+}
+
+//#########################################
+//#### click fit polynomail-n with mouse click on 2D historgam
+//#########################################
+
+void clickFitPol(TH2F * hist, int degPol){
+
+  printf("=========================================================\n");
+  printf("= fit Pol-%d with mouse click on 2D histogram =\n", degPol );
+  printf("==========================================================\n");
+
+  recentFitMethod = "clickFitPol";
+  
+  gStyle->SetOptStat("");
+  gStyle->SetOptFit(0);
+  
+  TCanvas * cClickFitPol = NULL;
+  if( gROOT->FindObjectAny("cClickFitPol") == NULL ){
+    cClickFitPol = new TCanvas("cClickFitPol", Form("fit Pol-%d by mouse click | clickFitPol", degPol), 800, 600);
+  }else{
+    delete gROOT->FindObjectAny("cClickFitPol") ;
+    cClickFitPol = new TCanvas("cClickFitPol", Form("fit Pol-%d by mouse click | clickFitPol", degPol), 800, 600);
+  }
+  
+  if(! cClickFitPol->GetShowEventStatus() ) cClickFitPol->ToggleEventStatus();
+  cClickFitPol->cd(1);
+
+  hist->Draw("colz");
+  cClickFitPol->Update();
+  cClickFitPol->Draw();
+  
+  //The TGraph to store clicked points
+  TGraph * gPoints = new TGraph();
+  cClickFitPol->cd(1)->SetCrosshair(1);
+  // prepare to collect 2D clicks
+  clickX2D.clear(); clickY2D.clear();
+  nClick = 0;
+  markerColor = 2;
+  markerStyle = 23;
+  cClickFitPol->cd(1)->AddExec("ex", "Clicked2D()");
+
+  // wait for user clicks (Double-click / x / Ctrl to end)
+  TObject * obj;
+  do{
+    obj = gPad->WaitPrimitive();
+    if( obj == NULL ) break;
+  }while( obj != NULL );
+
+  // stop listening
+  cClickFitPol->cd(1)->DeleteExec("ex");
+  cClickFitPol->cd(1)->SetCrosshair(0);
+
+  // build TGraph from clicked points
+  int npts = (int) clickX2D.size();
+  if( npts == 0 ){
+    printf("No points were clicked. Abort.\n");
+    return;
+  }
+  for( int i = 0; i < npts; i++) gPoints->SetPoint(i, clickX2D[i], clickY2D[i]);
+
+  // draw the points on top
+  gPoints->SetMarkerStyle(markerStyle);
+  gPoints->SetMarkerSize(1.2);
+  gPoints->SetMarkerColor(markerColor);
+  gPoints->Draw("P same");
+
+  // check we have enough points for degree degPol
+  if( npts < degPol + 1 ){
+    printf("Not enough points (%d) for polynomial degree %d. Need at least %d points.\n", npts, degPol, degPol+1);
+    cClickFitPol->Update();
+    return;
+  }
+
+  // perform polynomial fit of degree degPol
+  double xmin = hist->GetXaxis()->GetXmin();
+  double xmax = hist->GetXaxis()->GetXmax();
+  TString polExp = "[0]";
+  for( int i = 1; i <= degPol; i++) polExp += Form("+[%d]*TMath::Power(x,%d)", i, i);
+  TF1 * fitPol = new TF1("fitPol", polExp.Data(), xmin, xmax);
+  fitPol->SetLineColor(kRed);
+  fitPol->SetLineWidth(2);
+  // initialize parameters
+  for( int i = 0; i <= degPol; i++) fitPol->SetParameter(i, 0.0);
+
+  // Fit the graph
+  gPoints->Fit(fitPol->GetName(), "RQ");
+  // Draw the fitted polynomial on top
+  fitPol->Draw("same");
+  cClickFitPol->Update();
+
+  // print parameters
+  const Double_t * p = fitPol->GetParameters();
+  const Double_t * pe = fitPol->GetParErrors();
+  printf("Fit results (pol degree %d)\n", degPol);
+  for( int i = 0; i <= degPol; i++){
+    printf(" p%d = % .6e (err %.2e)\n", i, p[i], pe[i]);
+  }
+
 }
 
 
