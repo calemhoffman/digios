@@ -16,12 +16,16 @@
 #include <TGraph.h>
 #include <TColor.h>
 #include <TSpectrum.h>
+#include <TCanvas.h>
 #include <TMath.h>
 #include <TLatex.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TRandom.h>
 #include <TMarker.h>
+#include <TCutG.h>
+#include <TProfile.h>
+#include <TString.h>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -2734,7 +2738,7 @@ void clickFitPol(TH2F * hist, int degPol){
   if(! cClickFitPol->GetShowEventStatus() ) cClickFitPol->ToggleEventStatus();
   cClickFitPol->cd(1);
 
-  hist->Draw("colz");
+  hist->Draw();
   cClickFitPol->Update();
   cClickFitPol->Draw();
   
@@ -2805,6 +2809,131 @@ void clickFitPol(TH2F * hist, int degPol){
     printf(" p%d = % .6e (err %.2e)\n", i, p[i], pe[i]);
   }
 
+  printf("Copy the fit parameters to clipboard:\n");
+  printf("{");
+  for( int i = 0; i <= degPol; i++){
+    printf("% .6e", p[i]);
+    if( i < degPol ) printf(", ");
+  }
+  printf("}\n");
+
+}
+
+//########################################
+//####  click fit Cut with mouse click on 2D historgam
+//########################################
+void clickFitCut(TH2F * hist, int degPol, std::string fileName = ""){
+
+  printf("=========================================================\n");
+  printf("= fit Cut with mouse click on 2D histogram =\n");
+  printf("==========================================================\n");
+
+  recentFitMethod = "clickFitCut";
+  
+  gStyle->SetOptStat("");
+  gStyle->SetOptFit(0);
+  
+  TCanvas * cClickFitCut = NULL;
+  if( gROOT->FindObjectAny("cClickFitCut") == NULL ){
+    cClickFitCut = new TCanvas("cClickFitCut", "fit Cut by mouse click | clickFitCut", 800, 600);
+  }else{
+    delete gROOT->FindObjectAny("cClickFitCut") ;
+    cClickFitCut = new TCanvas("cClickFitCut", "fit Cut by mouse click | clickFitCut", 800, 600);
+  }
+  
+  if(! cClickFitCut->GetShowEventStatus() ) cClickFitCut->ToggleEventStatus();
+  if(! cClickFitCut->GetShowToolBar() ) cClickFitCut->ToggleToolBar();
+  cClickFitCut->cd(1);
+
+  hist->Draw("box");
+  cClickFitCut->Update();
+  cClickFitCut->Draw();
+  
+  //Use TCutG to store clicked points and perform cut
+
+  // wait for user to draw a TCutG on the canvas
+  cClickFitCut->WaitPrimitive("CUTG", "TCutG");
+  TCutG * cut = (TCutG*) gROOT->FindObjectAny("CUTG");
+  if( cut == NULL ){
+    printf("No TCutG was created. Abort.\n");
+    return;
+  }
+  // give it a stable name
+  cut->SetName("cutG");
+  // set variable names from histogram axes if available
+  cut->SetVarX(hist->GetXaxis()->GetTitle());
+  cut->SetVarY(hist->GetYaxis()->GetTitle());
+
+  // create a gated copy of the histogram by zeroing bins outside cut
+  TH2F * hG = (TH2F*) hist->Clone("hG");
+  hG->SetTitle(Form("%s (gated)", hist->GetTitle()));
+  int nx = hG->GetNbinsX();
+  int ny = hG->GetNbinsY();
+  for( int ix = 1; ix <= nx; ix++){
+    double x = hG->GetXaxis()->GetBinCenter(ix);
+    for( int iy = 1; iy <= ny; iy++){
+      double y = hG->GetYaxis()->GetBinCenter(iy);
+      if( ! cut->IsInside(x,y) ){
+        hG->SetBinContent(ix, iy, 0);
+        hG->SetBinError(ix, iy, 0);
+      }
+    }
+  }
+
+  // draw gated 2D hist
+  cClickFitCut->cd(1);
+  hG->Draw("same");
+  cClickFitCut->Update();
+
+  // produce profile along X and fit polynomial of degree degPol
+  TProfile * hp = hG->ProfileX("hp");
+  hp->SetTitle(Form("ProfileX (gated) | fit pol-%d", degPol));
+  cClickFitCut->cd();
+  hp->Draw("same");
+  cClickFitCut->Update();
+
+  // construct polynomial expression (use ROOT's polN) and fit
+  TString polName = Form("pol%d", degPol);
+  TString fitName = "fitCutPol";
+  TF1 * fitPol = new TF1(fitName.Data(), polName.Data(), hp->GetXaxis()->GetXmin(), hp->GetXaxis()->GetXmax());
+  fitPol->SetLineColor(kRed);
+  fitPol->SetLineWidth(2);
+  hp->Fit(fitPol->GetName(), "RQ");
+  fitPol->Draw("same");
+  cClickFitCut->Update();
+
+  // print fit parameters
+  const Double_t * p = fitPol->GetParameters();
+  const Double_t * pe = fitPol->GetParErrors();
+  printf("Fit results (pol degree %d)\n", degPol);
+  for( int i = 0; i <= degPol; i++){
+    printf(" p%d = % .6e (err %.2e)\n", i, p[i], pe[i]);
+  }
+
+  if ( fileName != "" ){
+    std::ofstream outFile(fileName);
+    if( outFile.is_open() ){
+      for( int i = 0; i <= degPol; i++){
+        outFile << Form("% .6e", p[i]);
+        if( i < degPol ) outFile << ", ";
+      }
+      outFile << "\n";
+      outFile.close();
+      printf("Fit parameters saved to file: %s\n", fileName.c_str());
+    }else{
+      printf("Failed to open file for writing: %s\n", fileName.c_str());
+    }
+  }else{
+    // helpful copy format
+    printf("Copy the fit parameters:\n{");
+    for( int i = 0; i <= degPol; i++){
+      printf("% .6e", p[i]);
+      if( i < degPol ) printf(", ");
+    }
+    printf("}\n");
+  }
+
+  return;
 }
 
 

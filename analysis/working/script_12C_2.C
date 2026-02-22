@@ -10,8 +10,7 @@
 #include "TProfile.h" 
 
 #include "../Armory/AutoFit.C"
-
-TH2F * htet_ter[24];
+#include "../Armory/AnalysisLibrary.h"
 
 void script_12C_2() {
 
@@ -78,18 +77,21 @@ void script_12C_2() {
 
   TH1F * hExID[24];
   TH2F * hCoinTimeX[24];
-
+  TH2F * htet_ter[24];
+  TH2F * hCoinTimeX_cor[24];
   for( int i = 0 ; i < 24 ; i++ ) {
     hExID[i] = new TH1F( Form("hExID_%d", i), Form("hExID_%d", i), 200, exRange[0], exRange[1] );
     hCoinTimeX[i] = new TH2F( Form("hCoinTimeX_%d", i), Form("hCoinTimeX_%d", i), 200, -1.2, 1.2, 200, -10, 40);
     htet_ter[i] = new TH2F( Form("htet_ter_%d", i), Form("htet_ter_%d", i), 200, 0, 10, 200, 95, 120);
+    hCoinTimeX_cor[i] = new TH2F( Form("hCoinTimeX_cor_%d", i), Form("hCoinTimeX_cor_%d", i), 200, -1.2, 1.2, 200, -10, 40);
   }
 
   TH2F * hEZ = new TH2F("hEZ", "hEZ", 200, -600, 0, 200, 0, 12 );
 
+  //^######## correction parameters ########
+  std::vector<std::vector<float>> para = LoadFitParameters("coinTimeCorr_para.txt");
+  TF1 * fcor = nullptr;
 
-
-  
   //^######## main loop ########
   int count = 0;
   while( reader.Next() ) {
@@ -104,8 +106,29 @@ void script_12C_2() {
 
     // printf("Event %d: detID = %d, Ex = %f, thetaCM = %f, e = %f \n", 
           //  count, *detID, *Ex, *thetaCM, e[*detID] );
-    htet_ter[*detID]->Fill(  te_r[*detID], te_t[*detID] );
     
+
+    ///============== apply correction ================
+    if( fcor != nullptr ) delete fcor;
+    fcor = nullptr;
+    
+    double coinTime_cor = coinTimeUC[0];
+    if( para[*detID].size() > 3 ){
+      fcor = new TF1( "fcor", Form("pol%d", static_cast<int>(para[*detID].size())-1), 0, 10 );
+      for( size_t i = 0 ; i < para[*detID].size() ; i++ ) {
+        fcor->SetParameter( i, para[*detID][i] );
+      }
+
+      coinTime_cor = coinTimeUC[0] - fcor->Eval( x[*detID] )*10.0;
+    }
+
+    // htet_ter[*detID]->Fill(  te_r[*detID], te_t[*detID] );
+    // htet_ter[*detID]->Fill(  te_r[*detID], tet_cor);
+
+    // htet_x_cor[*detID]->Fill( x[*detID], tet_cor );
+    
+    // hCoinTimeX[*detID]->Fill( x[*detID], coinTimeUC[0]/10. );
+
     bool hasRDT = false;
     rdtIDs.clear();
     
@@ -131,7 +154,12 @@ void script_12C_2() {
     //*======== skip if no RDT ==========
     if( !hasRDT ) continue;
     if( *nDEHit <= 0 ) continue;
-      
+
+    hCoinTimeX[*detID]->Fill( x[*detID], coinTimeUC[0]/10. );
+    hCoinTimeX_cor[*detID]->Fill( x[*detID], coinTime_cor/10. );
+
+    htet_ter[*detID]->Fill(  te_r[*detID], te_t[*detID] );
+
 
     int dt = 99999;
     if ( rdtTime != (unsigned long long)(-1) ) {
@@ -151,7 +179,6 @@ void script_12C_2() {
     //*======== time gate ==========
     if ( dt < 0 || dt > 30 ) continue;
     // if (  -20 < dt && dt < 40 ) continue;
-    
     
     bool isInCut = false;
     for( size_t i = 0 ; i < rdtIDs.size() ; i++ ) {
@@ -177,7 +204,7 @@ void script_12C_2() {
     hIDCoin->Fill(*detID, coinTimeUC[0]/10. );
 
     hExID[*detID]->Fill( *Ex );
-    hCoinTimeX[*detID]->Fill( x[*detID], coinTimeUC[0]/10. );
+    // hCoinTimeX[*detID]->Fill( x[*detID], coinTimeUC[0]/10. );
 
     hEZ->Fill( z[*detID], e[*detID] );
 
@@ -224,15 +251,10 @@ void script_12C_2() {
   // // hIDCoin->Draw("colz");
   // hEZ->Draw("colz");
   
-  TCanvas * c6 = new TCanvas("c6", "c6", 800, 800 );
-  if( !c6->GetShowToolBar() ) c6->ToggleToolBar();
-  if( !c6->GetShowEventStatus() ) c6->ToggleEventStatus();
-  htet_ter[0]->Draw("colz");
-  TProfile * p = htet_ter[0]->ProfileX();
-  p->SetLineColor(kRed);
-  p->Draw("same");
-
-  c6->Update();
+  TCanvas * c6 = new TCanvas("c6", "c6", 1600, 800 );
+  c6->Divide(2,1);
+  c6->cd(1); hCoinTimeX[1]->Draw("box");
+  c6->cd(2); hCoinTimeX_cor[1]->Draw("box");
 
 
 }
