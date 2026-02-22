@@ -9,6 +9,8 @@
 #include <TF1.h>
 #include <TSpectrum.h>
 #include <TMath.h>
+#include <TChain.h>
+#include <TSystem.h>
 
 #include "../Armory/AutoFit.C"
 
@@ -230,7 +232,7 @@ void GetCoinTimeCorrectionCutG(TString A_fileName_TChain, int detID){
    
    int * inX = new int[nPeaks];
    TMath::Sort(nPeaks, xpos, inX, 0 );
-   vector<double> energy, height;
+   std::vector<double> energy, height;
    for( int j = 0; j < nPeaks; j++){
       energy.push_back(xpos[inX[j]]);
       height.push_back(ypos[inX[j]]);
