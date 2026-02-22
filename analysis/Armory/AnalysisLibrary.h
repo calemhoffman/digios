@@ -113,6 +113,47 @@ std::vector<std::string> SplitStr(std::string tempLine, std::string splitter, in
   return output;
 }
 
+std::vector<std::vector<float>> LoadFitParameters(std::string fileName, bool print = false){
+
+  std::vector<std::vector<float>> parameters(24);
+  for( int i = 0 ; i < 24 ; i++ ) {
+    parameters[i].clear();
+  }
+
+  std::ifstream inFile(fileName);
+  if( inFile.is_open() ){
+    int i = 0;
+    while( !inFile.eof() ){
+      std::string line;
+      std::getline(inFile, line);
+      if( line.empty() ) continue;
+
+      std::vector<std::string> str = SplitStr(line, ",");
+      if( str.size() < 2 ) continue;
+
+      for( size_t j = 0 ; j < str.size() ; j++ ) {
+        parameters[i].push_back( atof(str[j].c_str()) );
+      }
+      i++;
+    }
+    inFile.close();
+  }else{
+    printf("Failed to open fit parameters file.\n");
+  }
+
+  if (print) {
+    for( int i = 0 ; i < parameters.size() ; i++ ) {
+      printf("detID %2d: ", i);
+      for( size_t j = 0 ; j < parameters[i].size() ; j++ ) {
+        printf("% .6e ", parameters[i][j]);
+      }
+      printf("\n");
+    }
+  }
+
+  return parameters;
+}
+
 ///Using TMacro to load the detectorGeo frist,
 ///this indrect method is good for loading detectorGeo from TMacro in root file
 DetGeo LoadDetectorGeo(TMacro * macro){
