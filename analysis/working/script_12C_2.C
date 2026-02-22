@@ -89,7 +89,7 @@ void script_12C_2() {
   TH2F * hEZ = new TH2F("hEZ", "hEZ", 200, -600, 0, 200, 0, 12 );
 
   //^######## correction parameters ########
-  std::vector<std::vector<float>> para = LoadFitParameters("coinTimeCorr_para.txt");
+  std::vector<std::vector<float>> para = LoadFitParameters("coinTimeCorr_para.txt", true);
   TF1 * fcor = nullptr;
 
   //^######## main loop ########
@@ -113,7 +113,7 @@ void script_12C_2() {
     fcor = nullptr;
     
     double coinTime_cor = coinTimeUC[0];
-    if( para[*detID].size() > 3 ){
+    if( para.size() > static_cast<size_t>(*detID)  ){
       fcor = new TF1( "fcor", Form("pol%d", static_cast<int>(para[*detID].size())-1), 0, 10 );
       for( size_t i = 0 ; i < para[*detID].size() ; i++ ) {
         fcor->SetParameter( i, para[*detID][i] );
@@ -229,14 +229,14 @@ void script_12C_2() {
   //   rdtdEE[i]->Draw("colz");
   // }
   
-  // TCanvas * c3 = new TCanvas("c3", "c3", 2400, 1600 );
-  // c3->Divide(6,4);
-  // for( int i = 0 ; i < 24 ; i++ ) {
-  //   c3->cd(i+1);
-  //   // hExID[i]->Draw();
-  //   // hCoinTimeX[i]->Draw("box");
-  //   htet_ter[i]->Draw("colz");
-  // }
+  TCanvas * c3 = new TCanvas("c3", "c3", 2400, 1600 );
+  c3->Divide(6,4);
+  for( int i = 0 ; i < 24 ; i++ ) {
+    c3->cd(i+1);
+    // hExID[i]->Draw();
+    hCoinTimeX_cor[i]->Draw("box");
+    // htet_ter[i]->Draw("colz");
+  }
   
   
   // TCanvas * c4 = new TCanvas("c4", "c4", 1200, 600 );
@@ -251,10 +251,10 @@ void script_12C_2() {
   // // hIDCoin->Draw("colz");
   // hEZ->Draw("colz");
   
-  TCanvas * c6 = new TCanvas("c6", "c6", 1600, 800 );
-  c6->Divide(2,1);
-  c6->cd(1); hCoinTimeX[1]->Draw("box");
-  c6->cd(2); hCoinTimeX_cor[1]->Draw("box");
+  // TCanvas * c6 = new TCanvas("c6", "c6", 1600, 800 );
+  // c6->Divide(2,1);
+  // c6->cd(1); hCoinTimeX[1]->Draw("box");
+  // c6->cd(2); hCoinTimeX_cor[1]->Draw("box");
 
 
 }

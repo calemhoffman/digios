@@ -2822,7 +2822,7 @@ void clickFitPol(TH2F * hist, int degPol){
 //########################################
 //####  click fit Cut with mouse click on 2D historgam
 //########################################
-void clickFitCut(TH2F * hist, int degPol, std::string fileName = ""){
+void clickFitCut(TH2F * hist, int detID, int degPol, std::string fileName = ""){
 
   printf("=========================================================\n");
   printf("= fit Cut with mouse click on 2D histogram =\n");
@@ -2911,8 +2911,9 @@ void clickFitCut(TH2F * hist, int degPol, std::string fileName = ""){
   }
 
   if ( fileName != "" ){
-    std::ofstream outFile(fileName);
+    std::ofstream outFile(fileName, std::ios::app);
     if( outFile.is_open() ){
+      outFile << Form("%2d,", detID); 
       for( int i = 0; i <= degPol; i++){
         outFile << Form("% .6e", p[i]);
         if( i < degPol ) outFile << ", ";

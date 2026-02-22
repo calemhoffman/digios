@@ -115,10 +115,7 @@ std::vector<std::string> SplitStr(std::string tempLine, std::string splitter, in
 
 std::vector<std::vector<float>> LoadFitParameters(std::string fileName, bool print = false){
 
-  std::vector<std::vector<float>> parameters(24);
-  for( int i = 0 ; i < 24 ; i++ ) {
-    parameters[i].clear();
-  }
+  std::vector<std::vector<float>> parameters;
 
   std::ifstream inFile(fileName);
   if( inFile.is_open() ){
@@ -131,10 +128,12 @@ std::vector<std::vector<float>> LoadFitParameters(std::string fileName, bool pri
       std::vector<std::string> str = SplitStr(line, ",");
       if( str.size() < 2 ) continue;
 
-      for( size_t j = 0 ; j < str.size() ; j++ ) {
-        parameters[i].push_back( atof(str[j].c_str()) );
+      int detID = atoi(str[0].c_str());
+      if( parameters.size() <= detID ) parameters.resize(detID+1);
+      
+      for( size_t j = 1 ; j < str.size() ; j++ ) {
+        parameters[detID].push_back( atof(str[j].c_str()) );
       }
-      i++;
     }
     inFile.close();
   }else{
@@ -142,6 +141,7 @@ std::vector<std::vector<float>> LoadFitParameters(std::string fileName, bool pri
   }
 
   if (print) {
+    printf("Loaded fit parameters from file: %s | array size = %zu\n", fileName.c_str(), parameters.size());
     for( int i = 0 ; i < parameters.size() ; i++ ) {
       printf("detID %2d: ", i);
       for( size_t j = 0 ; j < parameters[i].size() ; j++ ) {
