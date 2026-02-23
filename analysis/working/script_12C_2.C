@@ -79,11 +79,13 @@ void script_12C_2() {
   TH2F * hCoinTimeX[24];
   TH2F * htet_ter[24];
   TH2F * hCoinTimeX_cor[24];
+  TH2F * hCoinEx_corr[24];
   for( int i = 0 ; i < 24 ; i++ ) {
     hExID[i] = new TH1F( Form("hExID_%d", i), Form("hExID_%d", i), 200, exRange[0], exRange[1] );
     hCoinTimeX[i] = new TH2F( Form("hCoinTimeX_%d", i), Form("hCoinTimeX_%d", i), 200, -1.2, 1.2, 200, -10, 40);
     htet_ter[i] = new TH2F( Form("htet_ter_%d", i), Form("htet_ter_%d", i), 200, 0, 10, 200, 95, 120);
     hCoinTimeX_cor[i] = new TH2F( Form("hCoinTimeX_cor_%d", i), Form("hCoinTimeX_cor_%d", i), 200, -1.2, 1.2, 200, -10, 40);
+    hCoinEx_corr[i] = new TH2F( Form("hCoinEx_corr_%d", i), Form("hCoinEx_corr_%d", i), 200, exRange[0], exRange[1], 200, -20, 50);
   }
 
   TH2F * hEZ = new TH2F("hEZ", "hEZ", 200, -600, 0, 200, 0, 12 );
@@ -206,6 +208,8 @@ void script_12C_2() {
     hExID[*detID]->Fill( *Ex );
     // hCoinTimeX[*detID]->Fill( x[*detID], coinTimeUC[0]/10. );
 
+    hCoinEx_corr[*detID]->Fill( *Ex, coinTime_cor );
+
     hEZ->Fill( z[*detID], e[*detID] );
 
     count++;
@@ -234,7 +238,8 @@ void script_12C_2() {
   for( int i = 0 ; i < 24 ; i++ ) {
     c3->cd(i+1);
     // hExID[i]->Draw();
-    hCoinTimeX_cor[i]->Draw("box");
+    hCoinEx_corr[i]->Draw("box");
+    // hCoinTimeX_cor[i]->Draw("box");
     // htet_ter[i]->Draw("colz");
   }
   
