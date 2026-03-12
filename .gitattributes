@@ -3,3 +3,5 @@
 
 
 expName.sh merge=ours
+SetUpNewExp merge=ours
+SetUpNewExp_DAQ merge=ours
