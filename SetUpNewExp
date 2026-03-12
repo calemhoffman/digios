@@ -210,18 +210,15 @@ if [ ${isBranchExist} -eq 0 ]; then
     echo "LastRunNum=0" >> ${DigiosDir}/expName.sh
 fi
 
-echo "=================== making new folders in ${DATAPATH}/${expName} and creating symoblic link"
+echo "=================== making new folders in ${DATAPATH}/${expName}"
 
 if [ ${PCName} == "digios1" ]; then  #DAQ
 
     Data=${DATAPATH}/${expName}
 
     mkdir -v ${DATAPATH}/${expName}
-    mkdir -v ${Data}
 
-    rm -f ${expDIR}/analysis/data
-
-    ln -sfv ${Data} ${expDIR}/analysis/data
+    # No symlink needed on DAQ -- start_run.sh saves directly to ${daqDataPath}/${expName}/
 
 else
 
