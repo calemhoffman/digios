@@ -42,6 +42,19 @@ analysis/
 └── root_data →       — Symlink to sorted ROOT files (Mac/analysis machines only)
 ```
 
+```mermaid
+graph LR
+    A[analysis/] --> B["working/ ← experiment-specific"]
+    A --> C[Armory/ — shared utilities + Process_RUN]
+    A --> D[Cleopatra/ — Transfer simulation + DWBA]
+    A --> E[EventBuilder/ — coincidence builder]
+    A --> F[Woods-Saxon/ — WS potential tools]
+    A --> G[SRIM/ — stopping power tables]
+    A --> H[data → symlink to raw data]
+    A --> I[merged_data → symlink]
+    A --> J[root_data → symlink to ROOT files]
+```
+
 **Note:** `data`, `merged_data`, and `root_data` are symbolic links created by `SetUpNewExp`.
 On DAQ, only `data` symlink exists (raw data only, no subdirs).
 
@@ -49,36 +62,22 @@ On DAQ, only `data` symlink exists (raw data only, no subdirs).
 
 ## Data Flow
 
-```
-DAQ raw data (.gtd files)
-        |
-        | EventBuilder_S (10µs coincidence window)
-        V
-gen_run{N}.root  (via Process_RUN in Armory/)
-        |
-        | Monitors.C / ChainMonitors.C
-        V
-Online monitoring (E-Z plot, RDT gates, timing, rates)
-        |
-        | AutoCalibrationTrace.C (options 0, 5, 1)
-        V
-correction_e_alpha.dat, correction_xfxn.dat, correction_scaleX.dat
-        |
-        | ln -sf correction_e_alpha.dat correction_e.dat
-        | AutoCalibrationTrace.C option 3
-        V
-<expName>_<prefix>_run<N>.root  (calibrated ROOT file, saved in root_data/)
-        |
-        | (optional) AutoCalibrationTrace.C option 2
-        | → correction_e_KE.dat (kinematic refinement)
-        | ln -sf correction_e_KE.dat correction_e.dat
-        | AutoCalibrationTrace.C option 3 again
-        V
-Final calibrated ROOT for physics analysis
+```mermaid
+flowchart TD
+    A["DAQ raw data\n(.gtd files)"] --> B["EventBuilder_S\n(10µs coincidence window)"]
+    B --> C["gen_run{N}.root\n(via Process_RUN)"]
+    C --> D["Monitors.C / ChainMonitors.C\n→ Online monitoring\n(E-Z plot, RDT, timing, rates)"]
+    C --> E["AutoCalibrationTrace.C\nOption 0: energy + xf/xn (alpha)\nOption 5: x-scale (alpha)\nOption 1: xf+xn → e (beam)"]
+    E --> F["correction_e_alpha.dat\ncorrection_xfxn.dat\ncorrection_scaleX.dat"]
+    F --> G["ln -sf correction_e_alpha.dat correction_e.dat\nOption 3: Generate calibrated ROOT"]
+    G --> H["expName_run{N}.root\n(calibrated, in root_data/)"]
+    H --> I{"States visible?"}
+    I -- Yes --> J["Option 2: Kinematic auto-cal\n→ correction_e_KE.dat\nln -sf correction_e_KE.dat correction_e.dat\nOption 3 again"]
+    J --> K["Final calibrated ROOT\nfor physics analysis"]
+    I -- No --> K
 ```
 
-Output filename from option 3 is constructed as:
-`<expName>_<prefix>_run<first>-<last>.root` (e.g. `h094_19Ne_pp_run025-060.root`)
+Output filename: `<expName>_<prefix>_run<first>-<last>.root` (e.g. `h094_19Ne_pp_run025-060.root`)
 
 ### Running Process_RUN
 ```bash
