@@ -38,9 +38,10 @@ analysis/
 ├── Woods-Saxon/      — Woods-Saxon potential tools
 ├── SRIM/             — SRIM stopping power tables
 ├── data →            — Symlink to raw data directory (experiment-specific)
-├── merged_data →     — Symlink to merged data (Mac/analysis machines only)
 └── root_data →       — Symlink to sorted ROOT files (Mac/analysis machines only)
 ```
+
+**Note:** `merged_data` no longer exists — it was used by GEBSort/GEBMerge which has been replaced by `EventBuilder_S`.
 
 ```mermaid
 graph LR
@@ -51,12 +52,12 @@ graph LR
     A --> F[Woods-Saxon/ — WS potential tools]
     A --> G[SRIM/ — stopping power tables]
     A --> H[data → symlink to raw data]
-    A --> I[merged_data → symlink]
     A --> J[root_data → symlink to ROOT files]
 ```
 
-**Note:** `data`, `merged_data`, and `root_data` are symbolic links created by `SetUpNewExp`.
+**Note:** `data` and `root_data` are symbolic links created by `SetUpNewExp`.
 On DAQ, only `data` symlink exists (raw data only, no subdirs).
+`merged_data` no longer exists — removed when GEBSort was replaced by EventBuilder_S.
 
 ---
 
