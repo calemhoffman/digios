@@ -62,18 +62,23 @@ Online monitoring (E-Z plot, RDT gates, timing, rates)
         |
         | AutoCalibrationTrace.C (options 0, 5, 1)
         V
-correction_e_alpha.dat, correction_xfxn.dat, correction_scale_x.dat
+correction_e_alpha.dat, correction_xfxn.dat, correction_scaleX.dat
         |
         | ln -sf correction_e_alpha.dat correction_e.dat
         | AutoCalibrationTrace.C option 3
         V
-A_gen_run{N}.root  (calibrated ROOT file)
+<expName>_<prefix>_run<N>.root  (calibrated ROOT file, saved in root_data/)
         |
         | (optional) AutoCalibrationTrace.C option 2
         | → correction_e_KE.dat (kinematic refinement)
+        | ln -sf correction_e_KE.dat correction_e.dat
+        | AutoCalibrationTrace.C option 3 again
         V
 Final calibrated ROOT for physics analysis
 ```
+
+Output filename from option 3 is constructed as:
+`<expName>_<prefix>_run<first>-<last>.root` (e.g. `h094_19Ne_pp_run025-060.root`)
 
 ### Running Process_RUN
 ```bash
@@ -118,7 +123,7 @@ ln -sf correction_e_KE.dat correction_e.dat
 | `correction_e_KE.dat` | Energy correction from kinematic calibration |
 | `correction_e.dat` | **Symlink** → either of the above (active calibration) |
 | `correction_xfxn.dat` | Position (xf/xn) correction |
-| `correction_scale_x.dat` | X-scale correction |
+| `correction_scaleX.dat` | X-scale correction |
 
 ⚠️ `correction_e.dat` must always be a symlink — never edit directly.
 ⚠️ Det index 11 is always dead/disabled — hardcoded `scaleX=1.0` in calibration.
