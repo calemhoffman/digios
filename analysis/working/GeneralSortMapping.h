@@ -10,6 +10,13 @@
  *          = 5XX ; Circular Recoil
  *          = 6XX ; APOLLO
  * 
+ * idKindMap = 0 ; Energy (E)
+ *           = 1 ; XF  (front position signal)
+ *           = 2 ; XN  (near/back position signal)
+ *           = -1 ; not in use
+ * 
+ * See EventBuilder_S.cpp: case 0=Energy, case 1=XF, case 2=XN
+ * 
 ***********************************************************************/
 
 #ifndef MAPPING
