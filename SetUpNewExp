@@ -69,21 +69,23 @@ echo "=================== Checking disk space."
 echo "PC name  : ${PCName}"
 echo "Archetech: ${Arch}"
 
+isGeneralLinux=0
+
 if [ ${Arch} == "Linux" ]; then 
 
     if [ ${PCName} == "digios1" ]; then  #DAQ
 
-	echo -e "\e[93m================= avalible disk:\033[0m"
-	df -hT |grep "/media\|File"
-	read -p "================= choose disk [e.g. sdb]:" disk
+        echo -e "\e[93m================= avalible disk:\033[0m"
+        df -hT |grep "/media\|File"
+        read -p "================= choose disk [e.g. sdb]:" disk
 
-	daqDataPath=`df | grep ${disk} | awk '{print $6}'`
-	if [ -z ${daqDataPath} ]; then
-	    echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
-	    exit
-	fi
+        daqDataPath=`df | grep ${disk} | awk '{print $6}'`
+        if [ -z ${daqDataPath} ]; then
+            echo  -e "\033[0;31m no disk name with ${disk} is found. abort.\033[0m"
+            exit
+        fi
 	
-	echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
+	    echo -e "set daqDataPath = \e[93m"${daqDataPath}"\033[0m"
 
         DATAPATH=${daqDataPath}
         expDIR=~/digios
@@ -101,6 +103,12 @@ if [ ${Arch} == "Linux" ]; then
         echo -e "\e[93m 2) Run MakeDataLinks to create symbolic link to data"
 
         exit
+    else
+
+        isGeneralLinux=1
+        echo -e "\e[93mOn general Linux machine\033[0m"
+        echo -e "\e[93mPlease make sure to create data folders under analysis/.\033[0m"
+      
     fi
 
 elif [ ${Arch} == "Darwin" ]; then
@@ -125,30 +133,30 @@ elif [ ${Arch} == "Darwin" ]; then
         
     fi
     
-else
-   path=$(pwd)
-   read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
-   echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
-   echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
-   echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
+# else #system is not Linux nor Darwin ??
+#    path=$(pwd)
+#    read -p "Please enter absolute DATAPATH (e.g. ${path}) " DATAPATH
+#    echo "DATAPATH for    raw data : ${DATAPATH}/${expName}/data"
+#    echo "DATAPATH for merged_data : ${DATAPATH}/${expName}/merged_data"
+#    echo "DATAPATH for   root_data : ${DATAPATH}/${expName}/root_data"   
 
-   space=`df -ml | tail -1 | awk '{print $4}'` #in mb
-   spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
-   spacePrecent="${spacePrecent:0:2}"
-   echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
+#    space=`df -ml | tail -1 | awk '{print $4}'` #in mb
+#    spacePrecent=`df -ml | tail -1 | awk '{print $5}'`
+#    spacePrecent="${spacePrecent:0:2}"
+#    echo "Free Space : ${space} MB |  ${spacePrecent}%-free"
 
 fi
 
-if [ ${space} -le 512000 ]; then
-   echo "The avalible space is less then 500 GB."
+#----- only ask if it is on DAQ or helioss-iMac or phywl or general Linux, that ${space} is defined
+if [ -n "${space}" ] && [[ "${space}" =~ ^[0-9]+$ ]] && [ "${space}" -le 512000 ]; then
+   echo "The available space is less than 500 GB."
    read -p  '-------------------------- Continue? (Y/N) ' OKFlag
    
-   if [ ${OKFlag} == "N" ]; then
+   if [ "${OKFlag}" = "N" ]; then
       echo "xxxxxxxxxxxxxx Abort SetUpNewExp"
       exit
    fi
 fi
-
 
 #------ check is there any GIt branch in repository, 
 #       if not create Git Branch, if yes, checkout
@@ -161,18 +169,34 @@ if [ ${expName} == "ARR01" ]; then
    isBranchExist=1
 else
 
-   if [ ${isBranchExist} -eq 0 ]; then
-       git checkout -b ${expName}
-   else
-       echo "Experimental Name (${expName}) already in use."
-       echo "Please take another name or git pull origin ${expName}"
-       read -p "Do you want to checkout origin/${expName} (Y/N):"  pullFlag
-       if [ ${pullFlag} == "N" ]; then
-	   exit
-       else
-	        git checkout ${expName}
-       fi
-   fi
+    if [ ${isGeneralLinux} -eq 1 ]; then
+
+        if [ ${isBranchExist} -eq 0 ]; then
+            echo "On general Linux machine, cannot create new branch "
+            exit
+        else
+            git checkout ${expName}
+        fi
+
+    else 
+        if [ ${isBranchExist} -eq 0 ]; then
+            git checkout -b ${expName}
+        else
+            echo "Experimental Name (${expName}) already in use."
+            echo "Please take another name or git pull origin ${expName}"
+            read -p "Do you want to checkout origin/${expName} (Y/N):"  pullFlag
+            if [ ${pullFlag} == "N" ]; then
+                exit
+            else
+                git checkout ${expName}
+            fi
+        fi
+    fi
+fi
+
+if [ ${isGeneralLinux} -eq 1 ]; then
+    echo "On general Linux machine, skip making data folders and symbolic links."
+    exit
 fi
 
 #------ set up expName.sh, so that all experimental Name is refered to this name
