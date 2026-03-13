@@ -1,0 +1,17 @@
+# Makefile for tcpReceiver
+# Build: make -f Makefile.tcpReceiver
+# Clean: make -f Makefile.tcpReceiver clean
+
+CXX      = g++
+CXXFLAGS = -O2 -std=c++11 -Wall -pthread
+TARGET   = tcpReceiver
+SRC      = tcpReceiver.cpp
+
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
+	@echo "Built $(TARGET) OK"
+
+clean:
+	rm -f $(TARGET)
+
+.PHONY: clean
