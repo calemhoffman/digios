@@ -74,6 +74,7 @@ struct CompareEvent {
   }
 };
   
+#include <condition_variable>
 #include "../working/GeneralSortMapping.h" // Include the mapping header file
 
 class Data {
