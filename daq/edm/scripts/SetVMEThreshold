@@ -32,6 +32,13 @@
 IP="heliosDB.onenet"
 database="testing"
 
+# Ensure EPICS CA tools are available
+if ! command -v caput &>/dev/null; then
+    EPICS_BIN=$(ls -d /home/*/epics-base/bin/linux-* 2>/dev/null | head -1)
+    [ -z "$EPICS_BIN" ] && EPICS_BIN=$(ls -d /usr/local/epics/bin/linux-* 2>/dev/null | head -1)
+    [ -n "$EPICS_BIN" ] && export PATH="$EPICS_BIN:$PATH"
+fi
+
 if [ $# -eq 0 ] || [ $# -lt 2 ]; then
     echo "Usage:"
     echo "  SetVMEThreshold <side> <value>            -- set all channels on side"
