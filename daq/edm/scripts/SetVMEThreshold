@@ -1,130 +1,164 @@
 #!/bin/bash
-
-if [ $# -eq 0 ] || [ $# -lt 2  ]; then
-    echo "Please input VME, DIG and CH"
-    echo "         or  array(e.g. BB), Energy/XF/XN/Ring"
-    echo "         * if missing CH, threshold set for all DIG"
-    exit 1
-fi
+# SetVMEThreshold -- set LED thresholds for HELIOS 4-side silicon array
+#
+# Usage (bulk by side):
+#   SetVMEThreshold <side> <value>
+#   SetVMEThreshold <side> <signal> <value>
+#
+#   Sides: Left, Bottom, Right, Top, Recoil, All
+#   Signals: Energy, XF, XN, E, dE  (dE/E for Recoil only)
+#
+# Usage (individual channel, interactive):
+#   SetVMEThreshold <VME> <DIG> <CH>
+#
+# Mapping derived from GeneralSortMapping.h (4-side array):
+#
+#  Side    | VME | DIG | Det range | Signal types on channels
+#  --------|-----|-----|-----------|----------------------------
+#  Left    |  2  |  1  | 0–5       | E(ch2-7), XF(ch0-1)
+#  Left    |  2  |  2  | 0–5       | XN(ch0-3), XF(ch4-7)
+#  Bottom  |  2  |  3  | 4–11      | E(ch0-5), XN(ch6-7)
+#  Bottom  |  3  |  1  | 6–11      | XN(ch0-1), XF(ch2-7)
+#  Right   |  3  |  2  | 8–15      | E(ch0-3), XN(ch4-7)
+#  Right   |  3  |  3  | 12–17     | XF(ch0-5), E(ch6-7)
+#  Top     |  4  |  1  | 12–19     | E(ch0-1), XN(ch2-7)
+#  Top     |  4  |  2  | 18–23     | XF(ch0-3), E(ch4-7)
+#  Top     |  4  |  3  | 18–23     | XN(ch0-5), XF(ch6-7)
+#  Recoil  |  1  |  1  | RDT 0–7   | E(ch0,2,4,6), dE(ch1,3,5,7)
+#
+# Updated: 2026-04-08 — rewritten for 4-side array from GeneralSortMapping.h
+# Previous version used 6-side array labels (TT/TL/TR/BR/BB/BL) — abandoned
 
 IP="heliosDB.onenet"
 database="testing"
 
-VME=$1
-DIG=$2
-CH=$3
+if [ $# -eq 0 ] || [ $# -lt 2 ]; then
+    echo "Usage:"
+    echo "  SetVMEThreshold <side> <value>            -- set all channels on side"
+    echo "  SetVMEThreshold <side> <signal> <value>   -- set signal type only"
+    echo "  SetVMEThreshold <VME> <DIG> <CH>          -- interactive single channel"
+    echo ""
+    echo "  Sides:   Left, Bottom, Right, Top, Recoil, All"
+    echo "  Signals: Energy, XF, XN   (or E, dE for Recoil)"
+    exit 1
+fi
 
 re='^[0-9]+$'
 
-if ! [[ $1 =~ $re ]]; then
-
-    if [ ${VME} = "TT" ]; then
-	VME=2
-	iDIG=3	
-    fi
-    if [ ${VME} = "TL" ]; then
-	VME=2
-	iDIG=1	
-    fi
-    if [ ${VME} = "TR" ]; then
-	VME=3
-	iDIG=1	
-    fi
-    if [ ${VME} = "BR" ]; then
-	VME=3
-	iDIG=3	
-    fi
-    if [ ${VME} = "BB" ]; then
-	VME=4
-	iDIG=1	
-    fi
-    if [ ${VME} = "BL" ]; then
-	VME=4
-	iDIG=3	
-    fi
-
-    if [ ${VME} = "Recoil" ]; then
-	VME=1
-	iDIG=2
-    fi
-
-    if [ $# -eq 3 ]; then
-
-	echo " Set threshold values for array-$1 ${DIG} to $3"
-
-	if [ ${DIG} = "Energy" ]; then
-	    CHLIST="0 1 2 3 4"
-	fi
-
-	if [ ${DIG} = "XF" ]; then
-	    iDIG=$((iDIG+1))
-	    CHLIST="0 1 2 3 4"
-	fi
-	if [ ${DIG} = "XN" ]; then
-	    iDIG=$((iDIG+1))
-	    CHLIST="5 6 7 8 9"
-	fi
-	if [ ${DIG} = "Ring" ]; then
-	    CHLIST="5 6 7 8 9"
-	fi
-
-	if [ ${DIG} = "E" ]; then
-	    CHLIST="0 2 4 6"
-	fi
-	if [ ${DIG} = "dE" ]; then
-	    CHLIST="1 3 5 7"
-	fi
-
-	for CH in $CHLIST
-	do
-	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $3		
-	done
-    fi
-
-
-
-    if [ $# -eq 2 ]; then
-	CHLIST="0 1 2 3 4 5 6 7 8 9"
-	echo " Set threshold values for array-$1 to $2"
-	for CH in $CHLIST
-	do
-	    caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2
-	done
-
-	if [ $VME -ge 2 ] ; then
-	    iDIG=$(($iDIG+1))
-	    for CH in $CHLIST
-	    do
-		caput VME0${VME}:MDIG${iDIG}:led_threshold${CH} $2	
-	    done
-	fi
-    fi
-	
-
-else
-
+# ── individual channel mode (all numeric args) ──────────────────────────────
+if [[ $1 =~ $re ]]; then
+    VME=$1; DIG=$2; CH=$3
     echo " Set Threshold values for VME-${VME}:${DIG}:CH${CH}"
-
     threshold=$(caget VME0${VME}:MDIG${DIG}:led_threshold${CH} | awk '{print $2}')
-    #dataStr="INSERT threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${threshold}"
-    #influx -execute "${dataStr}" -database="testing"
-
     dataStr="threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${threshold}"
     curl -s -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
-
     echo " === current threshold is ${threshold}"
-
     read -p " === Set threshold to ? " newThreshold
-
     caput VME0${VME}:MDIG${DIG}:led_threshold${CH} ${newThreshold}
-
-    #dataStr="INSERT threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${newThreshold}"
-    #influx -execute "${dataStr}" -database="testing"
-
     dataStr="threshold,VME=${VME},DIG=${DIG},CH=${CH} value=${newThreshold}"
     curl -s -XPOST "http://${IP}:8086/write?db=${database}" --data-binary "${dataStr}" --max-time 1 --connect-timeout 1
-
+    echo "========= done."
+    exit 0
 fi
 
-echo "========= done."
+# ── bulk side mode ──────────────────────────────────────────────────────────
+SIDE=$1
+SIGNAL=${2}   # may be a value (2-arg) or signal name (3-arg)
+VALUE=${3}    # empty in 2-arg mode
 
+# Validate and resolve signal/value
+if [ $# -eq 2 ]; then
+    # SetVMEThreshold <side> <value>
+    VALUE=$2
+    SIGNAL="All"
+fi
+
+# Function: set all channels on one DIG board
+set_dig() {
+    local vme=$1; local dig=$2; local val=$3
+    for ch in 0 1 2 3 4 5 6 7; do
+        caput VME0${vme}:MDIG${dig}:led_threshold${ch} ${val}
+    done
+}
+
+# Function: set specific channels on one DIG
+set_dig_ch() {
+    local vme=$1; local dig=$2; local val=$3; shift 3
+    for ch in "$@"; do
+        caput VME0${vme}:MDIG${dig}:led_threshold${ch} ${val}
+    done
+}
+
+echo " Setting threshold for side=${SIDE} signal=${SIGNAL} value=${VALUE}"
+
+case ${SIDE} in
+
+    Left)
+        # VME2-DIG1: E(ch2-7), XF(ch0-1)
+        # VME2-DIG2: XN(ch0-3), XF(ch4-7)
+        case ${SIGNAL} in
+            All)    set_dig 2 1 ${VALUE}; set_dig 2 2 ${VALUE} ;;
+            Energy) set_dig_ch 2 1 ${VALUE} 2 3 4 5 6 7 ;;
+            XF)     set_dig_ch 2 1 ${VALUE} 0 1; set_dig_ch 2 2 ${VALUE} 4 5 6 7 ;;
+            XN)     set_dig_ch 2 2 ${VALUE} 0 1 2 3 ;;
+            *)      echo "Unknown signal: ${SIGNAL}"; exit 1 ;;
+        esac ;;
+
+    Bottom)
+        # VME2-DIG3: E(ch0-5), XN(ch6-7)
+        # VME3-DIG1: XN(ch0-1), XF(ch2-7)
+        case ${SIGNAL} in
+            All)    set_dig 2 3 ${VALUE}; set_dig 3 1 ${VALUE} ;;
+            Energy) set_dig_ch 2 3 ${VALUE} 0 1 2 3 4 5 ;;
+            XF)     set_dig_ch 3 1 ${VALUE} 2 3 4 5 6 7 ;;
+            XN)     set_dig_ch 2 3 ${VALUE} 6 7; set_dig_ch 3 1 ${VALUE} 0 1 ;;
+            *)      echo "Unknown signal: ${SIGNAL}"; exit 1 ;;
+        esac ;;
+
+    Right)
+        # VME3-DIG2: E(ch0-3), XN(ch4-7)
+        # VME3-DIG3: XF(ch0-5), E(ch6-7)
+        case ${SIGNAL} in
+            All)    set_dig 3 2 ${VALUE}; set_dig 3 3 ${VALUE} ;;
+            Energy) set_dig_ch 3 2 ${VALUE} 0 1 2 3; set_dig_ch 3 3 ${VALUE} 6 7 ;;
+            XF)     set_dig_ch 3 3 ${VALUE} 0 1 2 3 4 5 ;;
+            XN)     set_dig_ch 3 2 ${VALUE} 4 5 6 7 ;;
+            *)      echo "Unknown signal: ${SIGNAL}"; exit 1 ;;
+        esac ;;
+
+    Top)
+        # VME4-DIG1: E(ch0-1), XN(ch2-7)
+        # VME4-DIG2: XF(ch0-3), E(ch4-7)
+        # VME4-DIG3: XN(ch0-5), XF(ch6-7)
+        case ${SIGNAL} in
+            All)    set_dig 4 1 ${VALUE}; set_dig 4 2 ${VALUE}; set_dig 4 3 ${VALUE} ;;
+            Energy) set_dig_ch 4 1 ${VALUE} 0 1; set_dig_ch 4 2 ${VALUE} 4 5 6 7 ;;
+            XF)     set_dig_ch 4 2 ${VALUE} 0 1 2 3; set_dig_ch 4 3 ${VALUE} 6 7 ;;
+            XN)     set_dig_ch 4 1 ${VALUE} 2 3 4 5 6 7; set_dig_ch 4 3 ${VALUE} 0 1 2 3 4 5 ;;
+            *)      echo "Unknown signal: ${SIGNAL}"; exit 1 ;;
+        esac ;;
+
+    Recoil)
+        # VME1-DIG1: E(ch0,2,4,6), dE(ch1,3,5,7)
+        case ${SIGNAL} in
+            All)    set_dig 1 1 ${VALUE} ;;
+            Energy|E) set_dig_ch 1 1 ${VALUE} 0 2 4 6 ;;
+            dE)     set_dig_ch 1 1 ${VALUE} 1 3 5 7 ;;
+            *)      echo "Unknown signal: ${SIGNAL}"; exit 1 ;;
+        esac ;;
+
+    All)
+        # All array sides + recoil
+        set_dig 1 1 ${VALUE}
+        set_dig 2 1 ${VALUE}; set_dig 2 2 ${VALUE}; set_dig 2 3 ${VALUE}
+        set_dig 3 1 ${VALUE}; set_dig 3 2 ${VALUE}; set_dig 3 3 ${VALUE}
+        set_dig 4 1 ${VALUE}; set_dig 4 2 ${VALUE}; set_dig 4 3 ${VALUE}
+        ;;
+
+    *)
+        echo "Unknown side: ${SIDE}"
+        echo "Valid sides: Left, Bottom, Right, Top, Recoil, All"
+        exit 1 ;;
+esac
+
+echo "========= done."
