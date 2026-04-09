@@ -34,6 +34,11 @@ Examples:
   SetChannel 7 E m_window 100           # det 7 Energy, m_window=100
   SetChannel Recoil dE 500              # RDT dE channels, led_threshold=500
   SetChannel All 400                    # everything, led_threshold=400
+  SetChannel Left E RL 100              # Left boards, raw_data_length=100
+  SetChannel All E RD 50                # all boards, raw_data_window=50
+
+Note: raw_data_length and raw_data_window are board-level PVs (per MDIG, not per channel).
+      They will be set once per board regardless of signal type.
 
 Mapping: GeneralSortMapping.h (4-side array, 24 PSD + 8 RDT)
 Updated: 2026-04-08
@@ -51,19 +56,33 @@ import epics
 
 # ── PV alias map ────────────────────────────────────────────────────────────
 PV_ALIASES = {
-    'threshold': 'led_threshold',
-    'T':         'led_threshold',
-    'M':         'm_window',
-    'D':         'd_window',
-    'K':         'k_window',
-    'P1':        'p1_window',
-    'disc':      'disc_width',
-    'reset':     'preamp_reset_delay',
+    'threshold':  'led_threshold',
+    'T':          'led_threshold',
+    'M':          'm_window',
+    'D':          'd_window',
+    'K':          'k_window',
+    'P1':         'p1_window',
+    'disc':       'disc_width',
+    'reset':      'preamp_reset_delay',
+    'raw_length': 'raw_data_length',
+    'RL':         'raw_data_length',
+    'raw_delay':  'raw_data_window',
+    'RD':         'raw_data_window',
 }
 
+# PVs that are board-level (per MDIG, no channel suffix)
+BOARD_LEVEL_PVS = {'raw_data_length', 'raw_data_window'}
+
 SETTABLE_PVS = [
-    'led_threshold', 'm_window', 'd_window', 'k_window',
-    'p1_window', 'disc_width', 'preamp_reset_delay',
+    'led_threshold    (per channel) -- LED discriminator threshold (default)',
+    'm_window         (per channel) -- M-window (energy filter)',
+    'd_window         (per channel) -- D-window',
+    'k_window         (per channel) -- K-window',
+    'p1_window        (per channel) -- P1-window',
+    'disc_width       (per channel) -- Discriminator width',
+    'preamp_reset_delay (per channel) -- Preamp reset delay',
+    'raw_data_length  (per board)   -- Raw trace length  [alias: raw_length, RL]',
+    'raw_data_window  (per board)   -- Raw trace delay/window [alias: raw_delay, RD]',
 ]
 
 # ── Side → detector ranges ──────────────────────────────────────────────────
@@ -123,13 +142,21 @@ def make_pv_name(vme, dig, ch, pv_field):
     return f"VME0{vme}:MDIG{dig}:{pv_field}{ch}"
 
 def set_channel(vme, dig, ch, pv_field, value):
-    pv_name = make_pv_name(vme, dig, ch, pv_field)
+    if pv_field in BOARD_LEVEL_PVS:
+        # Board-level PV: no channel suffix, set once per board
+        pv_name = f"VME0{vme}:MDIG{dig}:{pv_field}"
+    else:
+        pv_name = make_pv_name(vme, dig, ch, pv_field)
     old = epics.caget(pv_name)
     epics.caput(pv_name, value)
     print(f"  {pv_name:45s}  {old} -> {value}")
 
+# Track which boards have already been set (for board-level PVs)
+_boards_done = set()
+
 def set_det_signal(det, signal, pv_field, value):
     """Set PV for a specific detector and signal (E/XF/XN/dE/All)."""
+    global _boards_done
     det_entry = DET_MAP.get(det)
     if det_entry is None:
         print(f"  [skip] det {det} not in map")
@@ -143,6 +170,11 @@ def set_det_signal(det, signal, pv_field, value):
             print(f"  [skip] det {det} has no signal {sig}")
             continue
         vme, dig, ch = det_entry[sig]
+        if pv_field in BOARD_LEVEL_PVS:
+            board_key = (vme, dig)
+            if board_key in _boards_done:
+                continue  # already set this board
+            _boards_done.add(board_key)
         set_channel(vme, dig, ch, pv_field, value)
 
 def print_help():
@@ -242,6 +274,7 @@ value = int(value) if value == int(value) else value
 
 print(f"\nSetChannel: target={target}  signal={signal}  PV={pv_field}  value={value}\n")
 
+_boards_done = set()  # reset board tracking for board-level PVs
 for det in dets:
     set_det_signal(det, signal, pv_field, value)
 
