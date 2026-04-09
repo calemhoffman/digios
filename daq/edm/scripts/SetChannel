@@ -34,11 +34,15 @@ Examples:
   SetChannel 7 E m_window 100           # det 7 Energy, m_window=100
   SetChannel Recoil dE 500              # RDT dE channels, led_threshold=500
   SetChannel All 400                    # everything, led_threshold=400
-  SetChannel Left E RL 100              # Left boards, raw_data_length=100
-  SetChannel All E RD 50                # all boards, raw_data_window=50
+  SetChannel All trace 9.0              # all boards, raw_data_length=9.0 µs (total trace)
+  SetChannel 7 E preTrigger 3.0        # det 7 Energy board, raw_data_window=3.0 µs (pre-trigger)
+  SetChannel Left E RL 9.0             # Left boards, raw_data_length=9.0 µs
 
-Note: raw_data_length and raw_data_window are board-level PVs (per MDIG, not per channel).
-      They will be set once per board regardless of signal type.
+Note: raw_data_length (trace) and raw_data_window (preTrigger) are board-level PVs (per MDIG,
+      not per channel). They are set once per board regardless of signal type.
+      Confirmed from EDM screen genBoard.edl:
+        "Trace Length"           -> raw_data_length  (total)
+        "Trace Length b4 trigger"-> raw_data_window  (pre-trigger portion)
 
 Mapping: GeneralSortMapping.h (4-side array, 24 PSD + 8 RDT)
 Updated: 2026-04-08
@@ -66,8 +70,13 @@ PV_ALIASES = {
     'reset':      'preamp_reset_delay',
     'raw_length': 'raw_data_length',
     'RL':         'raw_data_length',
+    'trace':      'raw_data_length',   # total trace length
     'raw_delay':  'raw_data_window',
     'RD':         'raw_data_window',
+    'preTrigger': 'raw_data_window',   # trace length before trigger
+    'pretrigger': 'raw_data_window',
+    'preTrig':    'raw_data_window',
+    'pretrig':    'raw_data_window',
 }
 
 # PVs that are board-level (per MDIG, no channel suffix)
@@ -81,8 +90,8 @@ SETTABLE_PVS = [
     'p1_window        (per channel) -- P1-window',
     'disc_width       (per channel) -- Discriminator width',
     'preamp_reset_delay (per channel) -- Preamp reset delay',
-    'raw_data_length  (per board)   -- Raw trace length  [alias: raw_length, RL]',
-    'raw_data_window  (per board)   -- Raw trace delay/window [alias: raw_delay, RD]',
+    'raw_data_length  (per board)   -- Total trace length (µs)          [alias: trace, raw_length, RL]',
+    'raw_data_window  (per board)   -- Trace length before trigger (µs) [alias: preTrigger, preTrig, RD]',
 ]
 
 # ── Side → detector ranges ──────────────────────────────────────────────────
