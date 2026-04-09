@@ -1,0 +1,248 @@
+#!/usr/bin/env python3
+"""
+SetChannel -- Set EPICS PV values for HELIOS 4-side silicon array channels
+
+Usage:
+  SetChannel <side> <value>                  # set led_threshold for all channels on side
+  SetChannel <side> <signal> <value>         # set led_threshold for signal type on side
+  SetChannel <side> <signal> <PV> <value>    # set arbitrary PV for signal type on side
+  SetChannel <det> <signal> <value>          # set led_threshold for det number, signal type
+  SetChannel <det> <signal> <PV> <value>     # set arbitrary PV for det number, signal type
+
+Arguments:
+  side    : Left, Bottom, Right, Top, Recoil, All
+  signal  : E (Energy), XF, XN, All  |  Recoil: E, dE, All
+  det     : detector number 0-23 (silicon array) or 100-107 (RDT)
+  PV      : PV field suffix (default: led_threshold). Aliases: threshold -> led_threshold
+  value   : numeric value to set
+
+Settable PVs (led_threshold is default):
+  led_threshold       -- LED discriminator threshold (default)
+  m_window            -- M-window (energy filter)
+  d_window            -- D-window
+  k_window            -- K-window
+  p1_window           -- P1-window
+  disc_width          -- Discriminator width
+  preamp_reset_delay  -- Preamp reset delay
+
+Examples:
+  SetChannel Left 400                   # all Left channels, led_threshold=400
+  SetChannel Left E 400                 # Left Energy channels, led_threshold=400
+  SetChannel Left E threshold 400       # same (explicit alias)
+  SetChannel Left All M 100             # all Left channels, m_window=100
+  SetChannel 7 E 400                    # det 7 Energy, led_threshold=400
+  SetChannel 7 E m_window 100           # det 7 Energy, m_window=100
+  SetChannel Recoil dE 500              # RDT dE channels, led_threshold=500
+  SetChannel All 400                    # everything, led_threshold=400
+
+Mapping: GeneralSortMapping.h (4-side array, 24 PSD + 8 RDT)
+Updated: 2026-04-08
+"""
+
+import sys
+import os
+
+# Point pyepics at the compiled EPICS CA library
+_libca = os.path.expanduser("~/epics-base/lib/linux-aarch64/libca.so")
+if os.path.exists(_libca):
+    os.environ.setdefault("PYEPICS_LIBCA", _libca)
+
+import epics
+
+# ── PV alias map ────────────────────────────────────────────────────────────
+PV_ALIASES = {
+    'threshold': 'led_threshold',
+    'T':         'led_threshold',
+    'M':         'm_window',
+    'D':         'd_window',
+    'K':         'k_window',
+    'P1':        'p1_window',
+    'disc':      'disc_width',
+    'reset':     'preamp_reset_delay',
+}
+
+SETTABLE_PVS = [
+    'led_threshold', 'm_window', 'd_window', 'k_window',
+    'p1_window', 'disc_width', 'preamp_reset_delay',
+]
+
+# ── Side → detector ranges ──────────────────────────────────────────────────
+SIDES = {
+    'Left':   list(range(0, 6)),
+    'Bottom': list(range(6, 12)),
+    'Right':  list(range(12, 18)),
+    'Top':    list(range(18, 24)),
+    'All':    list(range(0, 24)),
+    'Recoil': list(range(100, 108)),
+}
+
+# ── Det → {signal: (VME, DIG, CH)} from GeneralSortMapping.h ───────────────
+# Generated from idDetMap / idKindMap (kind: 0=E, 1=XF, 2=XN)
+DET_MAP = {
+    # RDT (VME1-DIG1, kind=E for even ch, dE for odd ch)
+    100: {'E':  (1,1,1)},   # dE=101 ch1
+    101: {'dE': (1,1,0)},   # E=100 ch0 -- note: RDT dE uses negative polarity
+    102: {'E':  (1,1,3)},
+    103: {'dE': (1,1,2)},
+    104: {'E':  (1,1,5)},
+    105: {'dE': (1,1,4)},
+    106: {'E':  (1,1,7)},
+    107: {'dE': (1,1,6)},
+    # Silicon PSD array
+      0: {'E': (2,1,7), 'XF': (2,1,1), 'XN': (2,2,3)},
+      1: {'E': (2,1,6), 'XF': (2,1,0), 'XN': (2,2,2)},
+      2: {'E': (2,1,5), 'XF': (2,2,7), 'XN': (2,2,1)},
+      3: {'E': (2,1,4), 'XF': (2,2,6), 'XN': (2,2,0)},
+      4: {'E': (2,1,3), 'XF': (2,2,5), 'XN': (2,3,7)},
+      5: {'E': (2,1,2), 'XF': (2,2,4), 'XN': (2,3,6)},
+      6: {'E': (2,3,5), 'XF': (3,1,7), 'XN': (3,1,1)},
+      7: {'E': (2,3,4), 'XF': (3,1,6), 'XN': (3,1,0)},
+      8: {'E': (2,3,3), 'XF': (3,1,5), 'XN': (3,2,7)},
+      9: {'E': (2,3,2), 'XF': (3,1,4), 'XN': (3,2,6)},
+     10: {'E': (2,3,1), 'XF': (3,1,3), 'XN': (3,2,5)},
+     11: {'E': (2,3,0), 'XF': (3,1,2), 'XN': (3,2,4)},
+     12: {'E': (3,2,3), 'XF': (3,3,5), 'XN': (4,1,7)},
+     13: {'E': (3,2,2), 'XF': (3,3,4), 'XN': (4,1,6)},
+     14: {'E': (3,2,1), 'XF': (3,3,3), 'XN': (4,1,5)},
+     15: {'E': (3,2,0), 'XF': (3,3,2), 'XN': (4,1,4)},
+     16: {'E': (3,3,7), 'XF': (3,3,1), 'XN': (4,1,3)},
+     17: {'E': (3,3,6), 'XF': (3,3,0), 'XN': (4,1,2)},
+     18: {'E': (4,1,1), 'XF': (4,2,3), 'XN': (4,3,5)},
+     19: {'E': (4,1,0), 'XF': (4,2,2), 'XN': (4,3,4)},
+     20: {'E': (4,2,7), 'XF': (4,2,1), 'XN': (4,3,3)},
+     21: {'E': (4,2,6), 'XF': (4,2,0), 'XN': (4,3,2)},
+     22: {'E': (4,2,5), 'XF': (4,3,7), 'XN': (4,3,1)},
+     23: {'E': (4,2,4), 'XF': (4,3,6), 'XN': (4,3,0)},
+}
+
+def resolve_pv(pv_arg):
+    """Resolve PV alias to actual PV field name."""
+    return PV_ALIASES.get(pv_arg, pv_arg)
+
+def make_pv_name(vme, dig, ch, pv_field):
+    return f"VME0{vme}:MDIG{dig}:{pv_field}{ch}"
+
+def set_channel(vme, dig, ch, pv_field, value):
+    pv_name = make_pv_name(vme, dig, ch, pv_field)
+    old = epics.caget(pv_name)
+    epics.caput(pv_name, value)
+    print(f"  {pv_name:45s}  {old} -> {value}")
+
+def set_det_signal(det, signal, pv_field, value):
+    """Set PV for a specific detector and signal (E/XF/XN/dE/All)."""
+    det_entry = DET_MAP.get(det)
+    if det_entry is None:
+        print(f"  [skip] det {det} not in map")
+        return
+    if signal == 'All':
+        signals = list(det_entry.keys())
+    else:
+        signals = [signal]
+    for sig in signals:
+        if sig not in det_entry:
+            print(f"  [skip] det {det} has no signal {sig}")
+            continue
+        vme, dig, ch = det_entry[sig]
+        set_channel(vme, dig, ch, pv_field, value)
+
+def print_help():
+    print(__doc__)
+    print("\nSettable PV fields:")
+    for p in SETTABLE_PVS:
+        print(f"  {p}")
+    print("\nPV aliases:")
+    for alias, real in PV_ALIASES.items():
+        print(f"  {alias:12s} -> {real}")
+
+# ── Argument parsing ─────────────────────────────────────────────────────────
+args = sys.argv[1:]
+
+if not args or args[0] in ('-h', '--help', 'help'):
+    print_help()
+    sys.exit(0)
+
+def is_int(s):
+    try: int(s); return True
+    except: return False
+
+def is_float(s):
+    try: float(s); return True
+    except: return False
+
+# Determine mode: side/det, signal, [pv], value
+target = args[0]   # side name or det number
+
+# Resolve target
+if is_int(target):
+    det_num = int(target)
+    dets = [det_num]
+    is_side = False
+elif target in SIDES:
+    dets = SIDES[target]
+    is_side = True
+else:
+    print(f"Unknown target '{target}'. Use a side (Left/Bottom/Right/Top/Recoil/All) or detector number.")
+    sys.exit(1)
+
+# Default signal and PV
+signal = 'All'
+pv_field = 'led_threshold'
+value = None
+
+remaining = args[1:]
+
+# Parse remaining args: could be:
+# <value>                     → just value, defaults apply
+# <signal> <value>            → signal + value, default PV
+# <signal> <PV> <value>       → signal + PV + value
+# <PV> <value>                (no signal, rare — skip for now)
+
+SIGNAL_ALIASES = {'Energy': 'E', 'energy': 'E', 'e': 'E',
+                  'xf': 'XF', 'xn': 'XN',
+                  'de': 'dE', 'DE': 'dE'}
+VALID_SIGNALS = {'E', 'XF', 'XN', 'dE', 'All'}
+
+if len(remaining) == 1:
+    # SetChannel <side/det> <value>
+    value = float(remaining[0])
+
+elif len(remaining) == 2:
+    # SetChannel <side/det> <signal> <value>  OR  <side/det> <PV> <value>
+    arg0 = remaining[0]
+    sig = SIGNAL_ALIASES.get(arg0, arg0)
+    if sig in VALID_SIGNALS:
+        signal = sig
+        pv_field = 'led_threshold'
+    else:
+        pv_field = resolve_pv(arg0)
+    value = float(remaining[1])
+
+elif len(remaining) == 3:
+    # SetChannel <side/det> <signal> <PV> <value>
+    arg0 = remaining[0]
+    sig = SIGNAL_ALIASES.get(arg0, arg0)
+    if sig in VALID_SIGNALS:
+        signal = sig
+    else:
+        print(f"Unknown signal '{arg0}'")
+        sys.exit(1)
+    pv_field = resolve_pv(remaining[1])
+    value = float(remaining[2])
+
+else:
+    print("Too many arguments.")
+    print_help()
+    sys.exit(1)
+
+if value is None:
+    print("No value specified.")
+    sys.exit(1)
+
+value = int(value) if value == int(value) else value
+
+print(f"\nSetChannel: target={target}  signal={signal}  PV={pv_field}  value={value}\n")
+
+for det in dets:
+    set_det_signal(det, signal, pv_field, value)
+
+print("\n========= done.")
