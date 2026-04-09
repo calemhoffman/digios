@@ -68,3 +68,5 @@ slurm-*.out
 /analysis/EventBuilder/merged*
 /analysis/EventBuilder/fitting/cuda_fit
 /analysis/EventBuilder/fitting/testFit
+analysis/working_Helios/
+
