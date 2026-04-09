@@ -57,6 +57,8 @@ if os.path.exists(_libca):
     os.environ.setdefault("PYEPICS_LIBCA", _libca)
 
 import epics
+import re
+from collections import defaultdict
 
 # ── PV alias map ────────────────────────────────────────────────────────────
 PV_ALIASES = {
@@ -94,54 +96,128 @@ SETTABLE_PVS = [
     'raw_data_window  (per board)   -- Trace length before trigger (µs) [alias: preTrigger, preTrig, RD]',
 ]
 
-# ── Side → detector ranges ──────────────────────────────────────────────────
-SIDES = {
-    'Left':   list(range(0, 6)),
-    'Bottom': list(range(6, 12)),
-    'Right':  list(range(12, 18)),
-    'Top':    list(range(18, 24)),
-    'All':    list(range(0, 24)),
-    'Recoil': list(range(100, 108)),
-}
+# ── Parse GeneralSortMapping.h at runtime ───────────────────────────────────
+def find_mapping_file():
+    """Search for GeneralSortMapping.h relative to this script or in standard locations."""
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    candidates = [
+        # working_Helios symlink (preferred — always current experiment)
+        os.path.join(script_dir, '../../../analysis/working_Helios/GeneralSortMapping.h'),
+        # working/ fallback
+        os.path.join(script_dir, '../../../analysis/working/GeneralSortMapping.h'),
+        # explicit env override
+        os.environ.get('HELIOS_MAPPING', ''),
+    ]
+    for p in candidates:
+        if not p:
+            continue
+        p = os.path.normpath(p)
+        if os.path.isfile(p):
+            return p
+    return None
 
-# ── Det → {signal: (VME, DIG, CH)} from GeneralSortMapping.h ───────────────
-# Generated from idDetMap / idKindMap (kind: 0=E, 1=XF, 2=XN)
-DET_MAP = {
-    # RDT (VME1-DIG1, kind=E for even ch, dE for odd ch)
-    100: {'E':  (1,1,1)},   # dE=101 ch1
-    101: {'dE': (1,1,0)},   # E=100 ch0 -- note: RDT dE uses negative polarity
-    102: {'E':  (1,1,3)},
-    103: {'dE': (1,1,2)},
-    104: {'E':  (1,1,5)},
-    105: {'dE': (1,1,4)},
-    106: {'E':  (1,1,7)},
-    107: {'dE': (1,1,6)},
-    # Silicon PSD array
-      0: {'E': (2,1,7), 'XF': (2,1,1), 'XN': (2,2,3)},
-      1: {'E': (2,1,6), 'XF': (2,1,0), 'XN': (2,2,2)},
-      2: {'E': (2,1,5), 'XF': (2,2,7), 'XN': (2,2,1)},
-      3: {'E': (2,1,4), 'XF': (2,2,6), 'XN': (2,2,0)},
-      4: {'E': (2,1,3), 'XF': (2,2,5), 'XN': (2,3,7)},
-      5: {'E': (2,1,2), 'XF': (2,2,4), 'XN': (2,3,6)},
-      6: {'E': (2,3,5), 'XF': (3,1,7), 'XN': (3,1,1)},
-      7: {'E': (2,3,4), 'XF': (3,1,6), 'XN': (3,1,0)},
-      8: {'E': (2,3,3), 'XF': (3,1,5), 'XN': (3,2,7)},
-      9: {'E': (2,3,2), 'XF': (3,1,4), 'XN': (3,2,6)},
-     10: {'E': (2,3,1), 'XF': (3,1,3), 'XN': (3,2,5)},
-     11: {'E': (2,3,0), 'XF': (3,1,2), 'XN': (3,2,4)},
-     12: {'E': (3,2,3), 'XF': (3,3,5), 'XN': (4,1,7)},
-     13: {'E': (3,2,2), 'XF': (3,3,4), 'XN': (4,1,6)},
-     14: {'E': (3,2,1), 'XF': (3,3,3), 'XN': (4,1,5)},
-     15: {'E': (3,2,0), 'XF': (3,3,2), 'XN': (4,1,4)},
-     16: {'E': (3,3,7), 'XF': (3,3,1), 'XN': (4,1,3)},
-     17: {'E': (3,3,6), 'XF': (3,3,0), 'XN': (4,1,2)},
-     18: {'E': (4,1,1), 'XF': (4,2,3), 'XN': (4,3,5)},
-     19: {'E': (4,1,0), 'XF': (4,2,2), 'XN': (4,3,4)},
-     20: {'E': (4,2,7), 'XF': (4,2,1), 'XN': (4,3,3)},
-     21: {'E': (4,2,6), 'XF': (4,2,0), 'XN': (4,3,2)},
-     22: {'E': (4,2,5), 'XF': (4,3,7), 'XN': (4,3,1)},
-     23: {'E': (4,2,4), 'XF': (4,3,6), 'XN': (4,3,0)},
-}
+def parse_int_array(text, name, expected_len=160):
+    """Extract a C int array initializer by name from header text.
+    Uses brace-matching to find the array body, then truncates to expected_len."""
+    start = text.find(f'Int_t {name}')
+    if start == -1:
+        # Try with spaces
+        m = re.search(rf'Int_t\s+{name}\s*\[', text)
+        if not m:
+            raise ValueError(f"Could not find {name} in mapping file")
+        start = m.start()
+    brace_start = text.index('{', start)
+    depth = 0; i = brace_start; chars = []
+    while i < len(text):
+        c = text[i]
+        if c == '{': depth += 1
+        elif c == '}':
+            depth -= 1
+            if depth == 0: break
+        # Strip comments to avoid digits in them polluting the parse
+        chars.append(c)
+        i += 1
+    body = ''.join(chars[1:])
+    # Remove line comments
+    body = re.sub(r'//[^\n]*', '', body)
+    nums = re.findall(r'-?\d+', body)
+    return [int(x) for x in nums[:expected_len]]
+
+def build_det_map(mapping_file):
+    """Parse GeneralSortMapping.h and return (DET_MAP, NARRAY, NSIDES)."""
+    with open(mapping_file) as f:
+        text = f.read()
+
+    # Read NARRAY from #define
+    narray_m = re.search(r'#define\s+NARRAY\s+(\d+)', text)
+    narray = int(narray_m.group(1)) if narray_m else 24
+
+    # Get declared array size from idDetMap declaration
+    size_m = re.search(r'Int_t\s+idDetMap\s*\[\s*(\d+)\s*\]', text)
+    arr_size = int(size_m.group(1)) if size_m else 160
+
+    det_map_raw  = parse_int_array(text, 'idDetMap',  arr_size)
+    kind_map_raw = parse_int_array(text, 'idKindMap', arr_size)
+
+    kind_name = {0: 'E', 1: 'XF', 2: 'XN'}
+    det_map = defaultdict(dict)
+
+    for idx, (det, kind) in enumerate(zip(det_map_raw, kind_map_raw)):
+        if det == -1:
+            continue
+        board_idx = idx // 10
+        ch = idx % 10
+        vme = board_idx // 4 + 1
+        dig = board_idx % 4 + 1
+        # RDT (det >= 100): kindMap is -1; use det_id parity (even=E, odd=dE)
+        if det >= 100:
+            sig = 'dE' if det % 2 == 1 else 'E'
+        else:
+            if kind == -1:
+                continue
+            sig = kind_name.get(kind)
+            if sig is None:
+                continue
+        # Keep first occurrence only — avoids overwriting with duplicate entries
+        if sig not in det_map[det]:
+            det_map[det][sig] = (vme, dig, ch)
+
+    return dict(det_map), narray
+
+# Load mapping
+_mapping_file = find_mapping_file()
+if _mapping_file is None:
+    print("WARNING: GeneralSortMapping.h not found — falling back to empty map", file=sys.stderr)
+    DET_MAP = {}
+    NARRAY = 0
+    _mapping_source = "NOT FOUND"
+else:
+    DET_MAP, NARRAY = build_det_map(_mapping_file)
+    _mapping_source = _mapping_file
+
+# ── Side → detector ranges ───────────────────────────────────────────────────
+# 4 sides hardcoded; NARRAY detectors split equally across them
+N_SIDES = 4
+
+def _psd_dets():
+    return sorted(d for d in DET_MAP if d < 100)
+
+def _rdt_dets():
+    return sorted(d for d in DET_MAP if d >= 100)
+
+def _build_sides():
+    psd = _psd_dets()
+    q = NARRAY // N_SIDES   # detectors per side
+    return {
+        'Left':   psd[0:q],
+        'Bottom': psd[q:2*q],
+        'Right':  psd[2*q:3*q],
+        'Top':    psd[3*q:4*q],
+        'All':    psd,
+        'Recoil': _rdt_dets(),
+    }
+
+SIDES = _build_sides()
 
 def resolve_pv(pv_arg):
     """Resolve PV alias to actual PV field name."""
@@ -152,28 +228,23 @@ def make_pv_name(vme, dig, ch, pv_field):
 
 def set_channel(vme, dig, ch, pv_field, value):
     if pv_field in BOARD_LEVEL_PVS:
-        # Board-level PV: no channel suffix, set once per board
         pv_name = f"VME0{vme}:MDIG{dig}:{pv_field}"
     else:
         pv_name = make_pv_name(vme, dig, ch, pv_field)
     old = epics.caget(pv_name)
+    if old is None:
+        print(f"  [warn] {pv_name:45s}  unreachable — skipping")
+        return
     epics.caput(pv_name, value)
     print(f"  {pv_name:45s}  {old} -> {value}")
 
-# Track which boards have already been set (for board-level PVs)
-_boards_done = set()
-
-def set_det_signal(det, signal, pv_field, value):
+def set_det_signal(det, signal, pv_field, value, boards_done):
     """Set PV for a specific detector and signal (E/XF/XN/dE/All)."""
-    global _boards_done
     det_entry = DET_MAP.get(det)
     if det_entry is None:
         print(f"  [skip] det {det} not in map")
         return
-    if signal == 'All':
-        signals = list(det_entry.keys())
-    else:
-        signals = [signal]
+    signals = list(det_entry.keys()) if signal == 'All' else [signal]
     for sig in signals:
         if sig not in det_entry:
             print(f"  [skip] det {det} has no signal {sig}")
@@ -181,9 +252,9 @@ def set_det_signal(det, signal, pv_field, value):
         vme, dig, ch = det_entry[sig]
         if pv_field in BOARD_LEVEL_PVS:
             board_key = (vme, dig)
-            if board_key in _boards_done:
-                continue  # already set this board
-            _boards_done.add(board_key)
+            if board_key in boards_done:
+                continue
+            boards_done.add(board_key)
         set_channel(vme, dig, ch, pv_field, value)
 
 def print_help():
@@ -194,6 +265,8 @@ def print_help():
     print("\nPV aliases:")
     for alias, real in PV_ALIASES.items():
         print(f"  {alias:12s} -> {real}")
+    print(f"\nMapping source: {_mapping_source}")
+    print(f"Detectors loaded: {len(_psd_dets())} PSD, {len(_rdt_dets())} RDT")
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
 args = sys.argv[1:]
@@ -204,10 +277,6 @@ if not args or args[0] in ('-h', '--help', 'help'):
 
 def is_int(s):
     try: int(s); return True
-    except: return False
-
-def is_float(s):
-    try: float(s); return True
     except: return False
 
 # Determine mode: side/det, signal, [pv], value
@@ -281,10 +350,11 @@ if value is None:
 
 value = int(value) if value == int(value) else value
 
-print(f"\nSetChannel: target={target}  signal={signal}  PV={pv_field}  value={value}\n")
+print(f"\nSetChannel: target={target}  signal={signal}  PV={pv_field}  value={value}")
+print(f"  [mapping: {_mapping_source}]\n")
 
-_boards_done = set()  # reset board tracking for board-level PVs
+boards_done = set()
 for det in dets:
-    set_det_signal(det, signal, pv_field, value)
+    set_det_signal(det, signal, pv_field, value, boards_done)
 
 print("\n========= done.")
