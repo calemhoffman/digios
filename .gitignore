@@ -57,6 +57,7 @@ analysis/Woods-Saxon/test
 
 AutoProcessLog.txt
 daq/save/trigger.txt
+daq/saves/trigger.txt
 
 DB_*.txt
 
