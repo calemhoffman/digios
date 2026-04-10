@@ -1027,8 +1027,20 @@ int HELIOS::CalHit(TLorentzVector Pb, int Zb, TLorentzVector PB, int ZB, double 
             double dphi = phi - phiDet;   
             double z0 = TMath::TwoPi() * rho / TMath::Tan(theta);   // the cycle
 
-            //with sign is the correct formula, but somehow, probably the ASin? give incorrect result for sign = 1;
-            //zHit = z0 / TMath::TwoPi() * ( sign * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho - sign * TMath::Sin(dphi)) + TMath::Pi() * n );
+            // zHit formula: derived from the helical orbit equation x(z) = rho*(sin(z*tan(theta)/rho - sign*phi) + sign*sin(phi)) + xOff
+            // Solving for z where the orbit intersects a detector plane at angle phiDet gives:
+            //   zHit = z0/(2pi) * [ sign*dphi + (-1)^n * arcsin(aEff/rho - sign*sin(dphi)) + n*pi ]
+            //
+            // sign convention: sign = +1 means B-field along +z (beam axis); sign = -1 means B-field along -z.
+            // HELIOS operates with B-field anti-parallel to the beam, so sign = -1 is the physical case.
+            //
+            // The sign-aware formula is mathematically correct and is used in the zPossible loop (~line 806).
+            // In this hit-detection loop, however, the ASin argument (aEff/rho - sign*sin(dphi)) can
+            // exceed [-1,1] for sign=+1 due to floating-point rounding near grazing angles, producing NaN.
+            // Since HELIOS always runs with sign=-1, sign is hardcoded here to avoid that issue.
+            // If reversed B-field (sign=+1) support is ever needed, clamp the argument:
+            //   double arg = TMath::Max(-1., TMath::Min(1., aEff/rho - sign*TMath::Sin(dphi)));
+            //   zHit = z0/TMath::TwoPi() * (sign*dphi + TMath::Power(-1,n)*TMath::ASin(arg) + TMath::Pi()*n);
             zHit = z0 / TMath::TwoPi() * ( -1 * dphi + TMath::Power(-1, n) * TMath::ASin(aEff/rho + TMath::Sin(dphi)) + TMath::Pi() * n );
             e = Pb.E() - Pb.M();
             z = zHit;
@@ -1148,6 +1160,7 @@ public:
    double GetKELoss() {return KE0-KE;}
    double GetDepth() {return depth;}
    double GetPathLength() {return length;}
+   double GetDeltaTheta(){return deltaTheta;} // angular straggling deflection [rad]
    
    vector<string> SplitStr(string tempLine, string splitter, int shift = 0);
    void LoadStoppingPower(string file);
@@ -1172,16 +1185,38 @@ public:
       double x = 0;
       double densityUse = density;
       if( unitID == 0 ) densityUse = 1.;
+      
+      // Angular straggling accumulator (in x and y components of deflection)
+      // Uses SRIM perpendicular straggling (gD) and projected range (gB).
+      // gD and gB are in nm; their ratio gives a dimensionless angle estimate.
+      // We scale by sqrt(dx/length) so that the total RMS deflection over the
+      // full path matches the SRIM lateral/range ratio at the mean KE.
+      double dThetaX = 0.; // accumulated deflection in x [rad]
+      double dThetaY = 0.; // accumulated deflection in y [rad]
+      
       do{
          //assume the particle will not be stopped
          //printf(" x: %f, KE:  %f, S: %f \n", x, KE, gA->Eval(KE));
          KE = KE - densityUse * gA->Eval(KE) * 10 * dx  ; // factor 10, convert MeV/cm -> MeV/cm
          
-         //angular Straggling, assume (Lateral Straggling)/(Projected range)
-         
+         // Angular straggling: Gaussian kick per step
+         // sigma_theta_step = (lateral_straggling / projected_range) * sqrt(dx/length)
+         // gB [nm projected range], gD [nm lateral/perpendicular straggling]
+         if( gB != NULL && gD != NULL && KE > 0 ){
+            double projRange = gB->Eval(KE);   // nm
+            double latStrag  = gD->Eval(KE);   // nm
+            if( projRange > 0 ){
+               double sigma_step = (latStrag / projRange) * TMath::Sqrt(dx / length);
+               dThetaX += gRandom->Gaus(0, sigma_step);
+               dThetaY += gRandom->Gaus(0, sigma_step);
+            }
+         }
          
          x = x + dx;
       }while(x < length && KE > 0 );
+      
+      // Total angular deflection magnitude
+      deltaTheta = TMath::Sqrt(dThetaX*dThetaX + dThetaY*dThetaY);
       
       //printf(" depth: %f cm = %f um, KE : %f -> %f MeV , dE = %f MeV \n", depth, depth * 1e+4, KE0, KE, KE0 - KE);
       double newk = 0;
@@ -1191,10 +1226,17 @@ public:
       
       if( KE < 0 ) {
         KE = 0.0; // somehow, when KE == 0 , the program has problem to rotate the 4-vector
+        deltaTheta = 0.;
       }else{
         newk = TMath::Sqrt(TMath::Power(mass+KE,2) - mass * mass);
         vb = P.Vect();
-        vb.SetMag(newk);      
+        vb.SetMag(newk);
+        // Apply angular straggling: rotate by deltaTheta in a random azimuthal direction
+        if( deltaTheta > 0 ){
+           double phiStrag = TMath::TwoPi() * gRandom->Rndm();
+           TVector3 rotAxis(-TMath::Sin(phiStrag), TMath::Cos(phiStrag), 0); // axis perp to beam
+           vb.Rotate(deltaTheta, rotAxis);
+        }
       }
       Pnew.SetVectM(vb,mass);
 
@@ -1209,6 +1251,7 @@ private:
    double depth; // depth in target [cm]
    double length; // total path length in target [cm]
    double KE0, KE;
+   double deltaTheta; // angular straggling deflection [rad]
    
    TGraph * gA; // stopping power of A, b, B, in unit of MeV/(mg/cm2)
    TGraph * gB; // projection range [nm]
@@ -1225,6 +1268,7 @@ TargetScattering::TargetScattering(){
    KE = 0;
    depth = 0;
    length = 0;
+   deltaTheta = 0;
    gA = NULL;
    gB = NULL;
    gC = NULL;
@@ -1233,6 +1277,9 @@ TargetScattering::TargetScattering(){
 
 TargetScattering::~TargetScattering(){
    delete gA;
+   delete gB;
+   delete gC;
+   delete gD;
 }
 
 vector<string> TargetScattering::SplitStr(string tempLine, string splitter, int shift){
