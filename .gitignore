@@ -72,3 +72,4 @@ slurm-*.out
 analysis/working_Helios/
 
 daq/null
+daq/trigger
