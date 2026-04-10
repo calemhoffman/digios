@@ -6,6 +6,7 @@ RunNo=$3
 
 
 elogTxt=/Users/heliosdigios/elog.txt
+elogFullTxt=/Users/heliosdigios/elogFull.txt
 elogIDTxt=/Users/heliosdigios/elogID.txt
 
 grafanaElog=/Users/heliosdigios/grafanaElog.jpg
@@ -15,7 +16,15 @@ if [ ${flag} == "start" ]; then
    echo "============ push to elog at start run"
    echo "elogName = ${elogName}, RunNo = ${RunNo}"
 
-   IDStr=$(~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogTxt})
+   # Use elogFull.txt for elog if it exists (has detector table), otherwise elog.txt
+   if [ -f ${elogFullTxt} ]; then
+      elogPost=${elogFullTxt}
+      echo "Using elogFull.txt (with detector table)"
+   else
+      elogPost=${elogTxt}
+   fi
+
+   IDStr=$(~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogPost})
 
    echo "-----"
    echo ${IDStr} 
