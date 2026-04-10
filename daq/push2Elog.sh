@@ -20,7 +20,7 @@ if [ ${flag} == "start" ]; then
    echo "-----"
    echo ${IDStr} 
 
-   IDStr=$(echo ${IDStr} | tail -1 | awk '{print $12}')
+   IDStr=$(echo ${IDStr} | grep "transmitted" | awk -F'ID=' '{print $2}')
 
    echo ${IDStr}
    echo ${IDStr} > ${elogIDTxt}
