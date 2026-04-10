@@ -48,6 +48,7 @@ while 1:
     line=fexp.readline() #this line is expName
     expName=line[8:-1]
     line=fexp.readline() #this line is daqDataPath
+    daqDataPath=line[12:-1]
     line=fexp.readline() #this line is LastRunNum
     runNum=line[11:-1]
     fexp.close()
@@ -56,7 +57,7 @@ while 1:
     f.write(string)
 
 
-    bashCommand="du -c ${HELIOSSYS}/analysis/data/%s_run_%03d* | tail -1 | awk '{print $1}'" % (expName, int(runNum))
+    bashCommand="du -c %s/%s/%s_run_%03d* | tail -1 | awk '{print $1}'" % (daqDataPath, expName, expName, int(runNum))
     result=os.popen(bashCommand).read().rstrip()
     print("ExpName : %s, runNum : %03d, file size : %s" % (expName, int(runNum),  result))
     string="fileSize value=%s\n" % (result)
