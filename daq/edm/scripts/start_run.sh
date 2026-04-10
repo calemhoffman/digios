@@ -23,7 +23,15 @@ echo "Starting run : ${RUN}"
 echo "=========================================="
 
 #==== read comment
-if [ $# -eq 0 ];then
+# Usage:
+#   Human (EDM/manual): start_run.sh "comment"   or   start_run.sh  (interactive)
+#   HELIOS AI:          start_run.sh --ai "one-line comment"
+AI_MODE=false
+if [ "$1" == "--ai" ]; then
+    AI_MODE=true
+    COMMENT=$2
+    echo "[AI MODE] started by HELIOS AI"
+elif [ $# -eq 0 ]; then
     echo 'Ctrl+C to cancel with no harm.'
     echo 'e.g. Target, beam rate, attenuation, slit, trigger, people on-shift, objective, etc... '
     read -p 'Singleline comment for this run: ' COMMENT
@@ -57,16 +65,22 @@ echo "RUN-${RUN} start at ${currentDate}| $COMMENT" >> ${daqDataPath}/${expName}
 
 
 elogFile=${HELIOSSYS}/analysis/working/elog.txt
-echo "************************************************<br />" > ${elogFile}
-echo "RUN-${RUN} start at ${currentDate}.<br />" >> ${elogFile}
-echo "$COMMENT <br />" >> ${elogFile}
-trigger=$(caget GLBL:DIG:trigger_mux_select | awk '{print$2}')
-echo "trigger : $trigger <br />" >> ${elogFile}
-haha=$(caget VME32:MTRG:SUM_X)
-echo "${haha} <br />" >>${elogFile}
-haha=$(caget VME32:MTRG:SUM_Y)
-echo "${haha} <br />">>${elogFile}
-echo "-----------------------------------------------<br />" >> ${elogFile}
+if [ "$AI_MODE" == "true" ]; then
+    # elog.txt was pre-written by HELIOS AI -- substitute run number placeholder
+    echo "[AI MODE] using pre-written elog.txt, substituting RUN number"
+    sed -i "s/RUN_NUM_PLACEHOLDER/${RUN}/g" ${elogFile}
+else
+    echo "************************************************<br />" > ${elogFile}
+    echo "RUN-${RUN} start at ${currentDate}.<br />" >> ${elogFile}
+    echo "$COMMENT <br />" >> ${elogFile}
+    trigger=$(caget GLBL:DIG:trigger_mux_select | awk '{print$2}')
+    echo "trigger : $trigger <br />" >> ${elogFile}
+    haha=$(caget VME32:MTRG:SUM_X)
+    echo "${haha} <br />" >>${elogFile}
+    haha=$(caget VME32:MTRG:SUM_Y)
+    echo "${haha} <br />">>${elogFile}
+    echo "-----------------------------------------------<br />" >> ${elogFile}
+fi
 
 #Start run and save first!?!?
 caput Online_CS_SaveData Save
@@ -104,6 +118,13 @@ ssh  heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Discord.sh $
 
 echo "============== Opening IOC...."
 
+# AI mode: display xterms on Mac2020 screen via X11 forwarding
+if [ "$AI_MODE" == "true" ]; then
+    export DISPLAY=192.168.1.164:0
+    echo "[AI MODE] DISPLAY set to Mac2020 (${DISPLAY})"
+fi
+
+cd ${daqDataPath}/${expName}
 export TERM=vt100
 echo " terminals" 
 #Now spawn receiver windows

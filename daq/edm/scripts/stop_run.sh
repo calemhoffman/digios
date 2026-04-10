@@ -16,7 +16,15 @@ fi;
 
 echo -e "\n------------ Stopping the current Run\033[0;31m${RUN}\033[0m ------------------"
 
-if [ $# -eq 0 ];then
+# Usage:
+#   Human (EDM/manual): stop_run.sh "comment"   or   stop_run.sh  (interactive)
+#   HELIOS AI:          stop_run.sh --ai "one-line comment"
+AI_MODE=false
+if [ "$1" == "--ai" ]; then
+    AI_MODE=true
+    COMMENT=$2
+    echo "[AI MODE] stopped by HELIOS AI"
+elif [ $# -eq 0 ];then
     echo 'Ctrl+C to cancel with no harm.'
     read -p 'Singleline comment for this run: ' COMMENT
 else
@@ -60,6 +68,13 @@ echo "grafana screenshot is attached. <br />" >> ${elogContext}
 echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
 echo "-----------------------------------------------</p>" >> ${elogContext}
 echo "$COMMENT <br />" >> ${elogContext}
+
+# AI mode: append rich end-run comment if pre-written by HELIOS AI
+if [ "$AI_MODE" == "true" ] && [ -f ${HELIOSSYS}/analysis/working/elogEndRun_ai.txt ]; then
+    echo "[AI MODE] appending rich end-run comment"
+    cat ${HELIOSSYS}/analysis/working/elogEndRun_ai.txt >> ${elogContext}
+    rm -f ${HELIOSSYS}/analysis/working/elogEndRun_ai.txt
+fi
 
 scp ${elogContext} heliosdigios@${mac2020IP}:~/.
 
@@ -121,5 +136,5 @@ echo -e "\033[1;31m ### Globus is disabled ###\033[m"
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
 
-echo "this window close in 5 sec."
-sleep 5
+echo "this window close in 50 sec."
+sleep 50
