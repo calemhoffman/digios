@@ -71,3 +71,4 @@ slurm-*.out
 /analysis/EventBuilder/fitting/testFit
 analysis/working_Helios/
 
+daq/null
