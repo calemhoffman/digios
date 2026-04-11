@@ -32,7 +32,7 @@ if [ ${flag} == "start" ]; then
    IDStr=$(echo ${IDStr} | grep "transmitted" | awk -F'ID=' '{print $2}')
 
    echo ${IDStr}
-   echo ${IDStr} > ${elogIDTxt}
+   echo "ID=${IDStr}" > ${elogIDTxt}
 
    scp ${elogIDTxt} helios@192.168.1.2:~/.
    echo "sent ${elogIDTxt} back to DAQ"
