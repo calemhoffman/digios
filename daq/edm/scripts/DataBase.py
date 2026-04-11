@@ -131,7 +131,7 @@ while 1:
     string="router2 value=%s\n" % (result)
     f.write(string)
 
-    RT=[1, 2];
+    RT=[1, 2]
     DIG=["A", "B", "C", "D", "E", "F", "G", "H"];
     for rt in RT:
         for dig in DIG:
@@ -149,7 +149,7 @@ while 1:
     t2 = int(round(time.time() * 1000 ))
     tDiff = t2-t1
 
-    print "=======================", t2-tOld
+    print("=======================", t2-tOld)
     #print t2, ", diff = ", tDiff , " mses"
     
     #usually take 4000 msec for all channels
