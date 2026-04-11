@@ -114,10 +114,10 @@ while [  $stopFlag -eq 0 ]; do
 	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after ${maxSize} kB"
 	    
 	    if [ $repeat -gt 1 ] || [ $reapet -eq -1 ] ; then
-		echo "################ wait for 10 sec before next run"
+		echo "################ waiting for elog to finish (max 30 sec)"
 		echo -e "######## ${YELLOW}CHANCE TO STOP the auto!!!!${NC}"
 		echo "========== number of repeat : ${repeat}"
-		sleep 10
+		rm -f /tmp/elog_done; for _w in $(seq 1 30); do [ -f /tmp/elog_done ] && break; sleep 1; done; rm -f /tmp/elog_done
 		cd ${datalocation}
 		source ${HELIOSSYS}/daq/edm/scripts/start_run.sh "Auto start! $repeat"
 		stopFlag=0
@@ -147,10 +147,10 @@ while [  $stopFlag -eq 0 ]; do
 	    source ${HELIOSSYS}/daq/edm/scripts/stop_run.sh "Auto stop after $count mins"
 
 	    if [ $repeat -gt 1 ] || [ $repeat -eq -1 ]; then
-		echo "################# wait for 10 sec before next run"
+		echo "################# waiting for elog to finish (max 30 sec)"
 		echo -e "######## ${RED}CHANCE TO STOP the auto!!!! Ctrl+C to stop.${NC}"
 		echo "========== number of repeat : ${repeat}"
-		sleep 10
+		rm -f /tmp/elog_done; for _w in $(seq 1 30); do [ -f /tmp/elog_done ] && break; sleep 1; done; rm -f /tmp/elog_done
 		cd ${datalocation}
 		source ${HELIOSSYS}/daq/edm/scripts/start_run.sh "Auto start! $repeat"
 		cd ${currentLocation}

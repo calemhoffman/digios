@@ -39,7 +39,7 @@ echo "         stop at ${currentDate}| ${COMMENT}" >> ${daqDataPath}/${expName}/
 caput Online_CS_StartStop Stop
 caput Online_CS_SaveData "No Save"
 
-if [ -z  "$COMMENT" ]; then  
+if [ -z  "$COMMENT" ]; then
     comment2="nan"
 else
     comment2="${COMMENT// /\ }"
@@ -52,55 +52,24 @@ du -hc ${daqDataPath}/${expName}/${expName}_run_${RUN}*
 
 totalFileSize=$(du -hc ${daqDataPath}/${expName}/${expName}_run_${RUN}* | tail -n1 | awk {'print $1'})
 
+# Update expName.sh with stop comment
+echo "#!/bin/bash -l" > ${HELIOSSYS}/expName.sh
+echo "expName=${expName}" >> ${HELIOSSYS}/expName.sh
+echo "daqDataPath=${daqDataPath}" >> ${HELIOSSYS}/expName.sh
+echo "LastRunNum=${LastRunNum}" >> ${HELIOSSYS}/expName.sh
+echo "lastRunComment=\"${COMMENT}\"" >> ${HELIOSSYS}/expName.sh
+echo "lastStopComment=\"${COMMENT}\"" >> ${HELIOSSYS}/expName.sh
+echo "totalFileSize=\"${totalFileSize}\"" >> ${HELIOSSYS}/expName.sh
+
 echo "==== wait for 2 sec"
 sleep 2
 
-echo "take screenshot and copy from mac2017"
-screenShot=${HELIOSSYS}/analysis/working/grafanaElog.jpg
-ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh' #this is in mac2017
-scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ${screenShot}
-# send the screenshot to Mac2020 for elog
-scp ${screenShot} heliosdigios@${mac2020IP}:~/grafanaElog.jpg
+#==== Mac2020 handles all elog + Discord + Grafana screenshot
+echo "============= Calling Mac2020 for elog + Discord"
+ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/stop_run_Mac.sh" &
 
-elogContext=${HELIOSSYS}/analysis/working/elogEndRun.txt
-echo "         stop at ${currentDate} <br />" > ${elogContext}
-echo "grafana screenshot is attached. <br />" >> ${elogContext}
-echo " total File Size = ${totalFileSize} <br /> " >> ${elogContext}
-echo "-----------------------------------------------</p>" >> ${elogContext}
-echo "$COMMENT <br />" >> ${elogContext}
-
-# AI mode: append rich end-run comment if pre-written by HELIOS AI
-if [ "$AI_MODE" == "true" ] && [ -f ${HELIOSSYS}/analysis/working/elogEndRun_ai.txt ]; then
-    echo "[AI MODE] appending rich end-run comment"
-    cat ${HELIOSSYS}/analysis/working/elogEndRun_ai.txt >> ${elogContext}
-    rm -f ${HELIOSSYS}/analysis/working/elogEndRun_ai.txt
-fi
-
-scp ${elogContext} heliosdigios@${mac2020IP}:~/.
-
-# tell Mac2020 run push2elog script
-#if [ $expName = "ARR01" ]; then
-#  elogName=$expName
-#elif [  ${expName} == "h087_Tritium" ]; then
-#  elogName="H087_Tritium"
-#elif [ ${expName:1} == "s" ]; then
-  elogName=${expName}
-#else
-#  elogName="H"${expName:1}
-#fi
-
-echo ">>>>>>>>>>>>>>> push to Elog"
-ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Elog.sh stop ${expName} ${RUN}"
-
-
-echo ">>>>>>>>>>>>>>> push to Discord"
-
-#slackMsg="https://www.phy.anl.gov/elog/${elogName}/${elogID}\n"
-auxMsg="stop at ${currentDate} \ntotal File Size = ${totalFileSize}\n$COMMENT"
-echo ${auxMsg} > endRunMsg.txt
-scp endRunMsg.txt heliosdigios@${mac2020IP}:~/.
-ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/push2Discord.sh ${elogName} 0"
-
+echo "============= Calling Pi for run status"
+ssh ryan@192.168.1.100 "python3 ~/.openclaw/workspace/skills/helios-status/gen_run_status.py" &
 
 echo "wait 2 seconds before closing the IOCs"
 sleep 2
@@ -108,33 +77,18 @@ sleep 2
 #number of IOCS/Rec. in use
 LIMIT=4
 
-for ((a=1; a <= LIMIT ; a++))  # Double parentheses, and naked "LIMIT"
-do 
+for ((a=1; a <= LIMIT ; a++))
+do
    \rm -rf temp
    ps aux | grep ioc$a | grep 'xterm' >temp
-   while read -r var1 var2 var3   
-   do       
-     kill -9 $var2      
+   while read -r var1 var2 var3
+   do
+     kill -9 $var2
    done <temp
-done        
+done
 rm -rf temp
-
-echo -e "\033[1;31m ### Globus is disabled ###\033[m"
-#echo "=== wait 5 seconds before submit a transfer to LCRC ==="
-#sleep 5
-#${HELIOSSYS}/daq/edm/scripts/globus_out.py
-#${HELIOSSYS}/daq/edm/scripts/globus_in.py
-
-#===== Get root_data/ from LCRC to MAC
-#MACEndPoint=0910df94-fb59-11e9-9945-0a8c187e8c12
-#LCRCEndPoint=57b72e31-9f22-11e8-96e1-0a6d4e044368
-
-#LCRCPath=/lcrc/project/HELIOS/digios/analysis/root_data/
-#MACPath=/Users/heliosdigios/digios/analysis/root_data/
-#globus transfer -r -s checksum  $LCRCEndPoint:$LCRCPath  $MACEndPoint:$MACPath
-
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
 
-echo "this window close in 50 sec."
-sleep 50
+if [ "$AI_MODE" != "true" ]; then echo "this window close in 50 sec."
+sleep 50; fi
