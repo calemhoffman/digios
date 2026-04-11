@@ -48,9 +48,9 @@ fi
 echo $comment2
 curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Stop_RUN-${comment2} value=0" --max-time 1 --connect-timeout 1
 
-du -hc ${HELIOSSYS}/analysis/data/${expName}_run_${RUN}*
+du -hc ${daqDataPath}/${expName}/${expName}_run_${RUN}*
 
-totalFileSize=$(du -hc ${HELIOSSYS}/analysis/data/${expName}_run_${RUN}* | tail -n1 | awk {'print $1'})
+totalFileSize=$(du -hc ${daqDataPath}/${expName}/${expName}_run_${RUN}* | tail -n1 | awk {'print $1'})
 
 echo "==== wait for 2 sec"
 sleep 2
