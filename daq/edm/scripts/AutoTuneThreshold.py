@@ -30,12 +30,30 @@ import sys
 import os
 import time
 import argparse
+import subprocess
 from datetime import datetime
 
 # Add script dir to path for common.py
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from common import load_mapping, build_sides
 import epics
+
+# ── Discord reporting ───────────────────────────────────────────────────────
+
+DISCORD_CHANNEL = '1492292081375248405'
+
+def discord_send(msg):
+    """Post a message to the HELIOS reporting Discord channel via openclaw CLI."""
+    try:
+        subprocess.run(
+            ['openclaw', 'message', 'send',
+             '--channel', 'discord',
+             '--target', DISCORD_CHANNEL,
+             '-m', msg],
+            timeout=15, capture_output=True
+        )
+    except Exception as e:
+        print(f"  [discord] send failed: {e}")
 
 # ── EPICS helpers (with pacing) ─────────────────────────────────────────────
 
@@ -168,9 +186,10 @@ def step_down(det, sig, vme, dig, ch, limit, step, min_thresh, log, dry_run=Fals
 
 
 def tune_detector(det, det_entry, args, log):
-    """Tune one detector: E first (baseline + coarse/fine), then XF/XN to match E.
+    """Tune one detector: E (or dE for RDT) first (baseline + coarse/fine), then XF/XN to match.
     Returns dict of {signal: final_threshold}."""
     results = {}
+    originals = {}  # track original thresholds for reporting
 
     # Skip known broken detectors
     if det in SKIP_DETS:
@@ -180,14 +199,18 @@ def tune_detector(det, det_entry, args, log):
 
     print(f"\n  === det{det:02d} ===")
 
-    # --- Step 1: Baseline on E channel ---
-    if 'E' not in det_entry:
-        msg = f"  det{det:02d}: no E channel -- skip detector"
+    # --- Step 1: Baseline on primary channel (E for array, E or dE for RDT) ---
+    if 'E' in det_entry:
+        primary_sig = 'E'
+    elif 'dE' in det_entry:
+        primary_sig = 'dE'
+    else:
+        msg = f"  det{det:02d}: no E or dE channel -- skip detector"
         print(msg); log.append(msg)
         return results
 
-    e_vme, e_dig, e_ch = det_entry['E']
-    e_label = f"det{det:02d}-E (VME{e_vme}-DIG{e_dig}-CH{e_ch})"
+    e_vme, e_dig, e_ch = det_entry[primary_sig]
+    e_label = f"det{det:02d}-{primary_sig} (VME{e_vme}-DIG{e_dig}-CH{e_ch})"
 
     if not is_enabled(e_vme, e_dig, e_ch):
         msg = f"  {e_label}: DISABLED -- skip detector"
@@ -195,6 +218,7 @@ def tune_detector(det, det_entry, args, log):
         return results
 
     e_current = get_threshold(e_vme, e_dig, e_ch)
+    originals[primary_sig] = e_current
     bl_mean, bl_std, bl_vals = get_baseline(e_vme, e_dig, e_ch, args.samples,
                                              label=f"{e_label} baseline")
     msg = f"  {e_label}: thresh={e_current}, baseline mean={bl_mean:.1f}, std={bl_std:.1f}"
@@ -208,24 +232,24 @@ def tune_detector(det, det_entry, args, log):
     msg = f"    -> limit = {limit:.1f} (mean + {nsigma}*std)"
     print(msg); log.append(msg)
 
-    # --- Step 2: Tune E -- coarse then fine ---
-    msg = f"  Tuning E: coarse (step={COARSE_STEP})"
+    # --- Step 2: Tune primary -- coarse then fine ---
+    msg = f"  Tuning {primary_sig}: coarse (step={COARSE_STEP})"
     print(msg); log.append(msg)
-    coarse_result = step_down(det, 'E', e_vme, e_dig, e_ch, limit, COARSE_STEP,
+    coarse_result = step_down(det, primary_sig, e_vme, e_dig, e_ch, limit, COARSE_STEP,
                                args.min_thresh, log, args.dry_run)
 
-    msg = f"  Tuning E: fine (step={FINE_STEP})"
+    msg = f"  Tuning {primary_sig}: fine (step={FINE_STEP})"
     print(msg); log.append(msg)
-    fine_result = step_down(det, 'E', e_vme, e_dig, e_ch, limit, FINE_STEP,
+    fine_result = step_down(det, primary_sig, e_vme, e_dig, e_ch, limit, FINE_STEP,
                              args.min_thresh, log, args.dry_run)
 
-    results['E'] = fine_result
+    results[primary_sig] = fine_result
     e_changed = (fine_result != e_current)
     msg = f"  RESULT: {e_label} threshold {e_current} -> {fine_result}" + \
           (" [CHANGED]" if e_changed else " [unchanged]")
     print(msg); log.append(msg)
 
-    # --- Step 3: Tune XF and XN to match E's rate ---
+    # --- Step 3: Tune secondary signals (XF/XN for array, none for RDT) ---
     for sig in ['XF', 'XN']:
         if sig not in det_entry:
             continue
@@ -238,6 +262,7 @@ def tune_detector(det, det_entry, args, log):
             continue
 
         current = get_threshold(vme, dig, ch)
+        originals[sig] = current
         msg = f"  Tuning {sig} to match E (limit={limit:.1f})"
         print(msg); log.append(msg)
 
@@ -252,6 +277,18 @@ def tune_detector(det, det_entry, args, log):
         msg = f"  RESULT: {label} threshold {current} -> {fine_result}" + \
               (" [CHANGED]" if changed else " [unchanged]")
         print(msg); log.append(msg)
+
+    # Report per-detector results to Discord
+    if results and not args.dry_run:
+        parts = []
+        for sig in ['E', 'dE', 'XF', 'XN']:
+            if sig in results:
+                orig = originals.get(sig, '?')
+                parts.append(f"{sig} {orig}->{results[sig]}")
+        summary = ', '.join(parts)
+        discord_send(f"[AutoTune] det{det:02d}: {summary}")
+    elif det in SKIP_DETS:
+        discord_send(f"[AutoTune] det{det:02d}: SKIPPED (known broken)")
 
     return results
 
@@ -317,6 +354,16 @@ def main():
         for line in log:
             f.write(line + '\n')
     print(f"Log: {logfile}")
+
+    # Final summary to Discord
+    if not args.dry_run:
+        skipped = len([d for d in dets if d in SKIP_DETS])
+        discord_send(
+            f"[AutoTune] Complete: {len(all_results)} channels tuned across "
+            f"{len(dets) - skipped} detectors" +
+            (f", {skipped} skipped" if skipped else '') +
+            f". Log: {logfile}"
+        )
 
 
 if __name__ == '__main__':

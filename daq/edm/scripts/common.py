@@ -104,6 +104,30 @@ def build_det_map(mapping_file):
     return dict(det_map), narray
 
 
+def parse_string_array(text, name):
+    """Extract a C string array (const char*) by name. Returns list of strings."""
+    m = re.search(rf'const\s+char\s*\*\s*{name}\s*\[', text)
+    if not m:
+        return None
+    start = m.start()
+    brace_start = text.index('{', start)
+    brace_end = text.index('}', brace_start)
+    body = text[brace_start+1:brace_end]
+    body = re.sub(r'//[^\n]*', '', body)
+    return re.findall(r'"([^"]+)"', body)
+
+
+def build_hv_map(mapping_file):
+    """Parse HVdetMap and HVrdtMap from GeneralSortMapping.h.
+    Returns (hv_det_map, hv_rdt_map) as lists of SNMP channel strings.
+    Returns (None, None) if not found."""
+    with open(mapping_file) as f:
+        text = f.read()
+    hv_det = parse_string_array(text, 'HVdetMap')
+    hv_rdt = parse_string_array(text, 'HVrdtMap')
+    return hv_det, hv_rdt
+
+
 def load_mapping(script_dir=None):
     """Convenience: find + parse mapping file. Returns (det_map, narray, mapping_file)."""
     mapping_file = find_mapping_file(script_dir)
