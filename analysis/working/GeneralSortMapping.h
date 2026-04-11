@@ -90,4 +90,24 @@ Int_t idKindMap[160] = {-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};
 
 
+/// HV channel mapping (Iseg MPOD at 192.168.1.155, SNMP v2c)
+/// Format: SNMP channel suffix for outputMeasurementSenseVoltage / outputMeasurementCurrent
+/// Module 0 (u0-u15):   Left(0-5), Bottom(6-11), Top(18-21)
+/// Module 2 (u200-u215): Top(22-23), Right(12-17)
+/// Module 3 (u300-u315): RDT pairs
+
+/// Array detectors, indexed by det number 0-23
+const char* HVdetMap[NARRAY] = {
+    "u0",   "u1",   "u2",   "u3",   "u4",   "u5",    // Left   0-5
+    "u6",   "u7",   "u8",   "u9",   "u10",  "u11",   // Bottom 6-11
+    "u202", "u203", "u204", "u205", "u206", "u207",  // Right  12-17
+    "u12",  "u13",  "u14",  "u15",  "u200", "u201"   // Top    18-23
+};
+
+/// RDT detectors, indexed 0-7 matching rdt[0]-rdt[7]
+/// Even=dE (thin), Odd=E (thick): dE0,E0,dE1,E1,dE2,E2,dE3,E3
+const char* HVrdtMap[NRDT] = {
+    "u300", "u301", "u302", "u303", "u304", "u305", "u306", "u307"
+};
+
 #endif

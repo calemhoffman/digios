@@ -31,8 +31,8 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {     -1000,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     1,     20};       /// in the E-Z plot
+int rawEnergyRange[2] = {     1000,    3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     1,     12};       /// in the E-Z plot
 int     rdtDERange[2] = {     50,    3000}; 
 int      rdtERange[2] = {     50,    8000};  
 int    apolloRange[2] = {     0,    1000};

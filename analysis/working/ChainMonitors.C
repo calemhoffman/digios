@@ -11,8 +11,7 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
-     ///chain->Add("../root_data/trace_run135.root");
+    chain->Add("../root_data/gen_run00[0-4].root"); // alpha runs
   
     ///********** end Marker for AutoCalibration.
     
