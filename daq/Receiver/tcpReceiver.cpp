@@ -21,7 +21,7 @@
  * Build:
  *   g++ -O2 -pthread -o tcpReceiver tcpReceiver.cpp
  *
- * Author: HELIOS AI (General HELIOS) — 2026-03-12
+ * Author: HELIOS AI (Master HELIOS) — 2026-03-12
  * Based on gtReceiver4.c by C. Lionberger (LBL) / ANL DGS group.
  * No existing files were modified.
  */

@@ -54,7 +54,7 @@ if [ ! -f "${ELOG_BIN}" ]; then
 fi
 
 ELOG_OUT=$(${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
-    -u GeneralHelios helios \
+    -u MasterHelios helios \
     -a Category=Runs -a Subject="RUN-${RUN} started" \
     -n 2 -m ~/elogFull.txt 2>&1)
 

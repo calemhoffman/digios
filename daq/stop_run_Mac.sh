@@ -57,7 +57,7 @@ PID_GRAFANA=$!
 (
     if [ -n "${ID}" ]; then
         ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
-            -u GeneralHelios helios \
+            -u MasterHelios helios \
             -w ${ID} > ~/elog_live.txt 2>/dev/null
         echo "[stop_run_Mac] Elog downloaded: $(wc -c < ~/elog_live.txt) bytes"
     else
@@ -94,20 +94,20 @@ echo "[stop_run_Mac] Starting parallel: elog upload + Discord..."
     if [ -n "${ID}" ]; then
         if [ -f ~/grafanaElog.jpg ]; then
             ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
-                -u GeneralHelios helios \
+                -u MasterHelios helios \
                 -e ${ID} \
                 -n 2 -m ~/elog_live.txt \
                 -f ~/grafanaElog.jpg 2>&1
         else
             ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
-                -u GeneralHelios helios \
+                -u MasterHelios helios \
                 -e ${ID} \
                 -n 2 -m ~/elog_live.txt 2>&1
         fi
         echo "[stop_run_Mac] Elog entry ${ID} updated."
     else
         ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
-            -u GeneralHelios helios \
+            -u MasterHelios helios \
             -a Category=Runs -a Subject="RUN-${RUN} stopped" \
             -n 2 -m ~/elog_live.txt 2>&1
         echo "[stop_run_Mac] Elog posted as new entry."

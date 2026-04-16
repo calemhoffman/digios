@@ -42,4 +42,4 @@ else
     elogName="H"${expName:1}
 fi
 
-elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u GeneralHelios helios -a Category=General -a Subject="Comments" -n 2 "${COMMENT}"
+elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u MasterHelios helios -a Category=General -a Subject="Comments" -n 2 "${COMMENT}"

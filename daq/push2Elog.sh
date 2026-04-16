@@ -24,7 +24,7 @@ if [ ${flag} == "start" ]; then
       elogPost=${elogTxt}
    fi
 
-   IDStr=$(~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogPost})
+   IDStr=$(~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogPost})
 
    echo "-----"
    echo ${IDStr} 
@@ -48,7 +48,7 @@ if [ ${flag} == "stop" ]; then
    source ${elogIDTxt}
    echo "elogID = "${ID}
 
-   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -w ${ID} > ${elogTxt}
+   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -w ${ID} > ${elogTxt}
 
    cutLineNum=$(grep -n "==============" ${elogTxt} | cut -b 1,2)
    #echo "cut Line Number : "${cutLineNum}
@@ -63,8 +63,8 @@ if [ ${flag} == "stop" ]; then
    #append elogEnnRun.txt
    cat ${elogEndTxt} >> ${elogTxt}
 
-   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
+   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
 
-#  elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Stop Run ${RunNo}" -n 2 -m ${elogEndTxt} -f ${grafanaElog}
+#  elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Stop Run ${RunNo}" -n 2 -m ${elogEndTxt} -f ${grafanaElog}
 
 fi
