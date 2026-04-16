@@ -1,8 +1,13 @@
 //Ex   relative_xsec   SF   sigma_in_MeV
 //<--- use "//" for line comment
 // h096 31Si(d,p)32Si states of interest (from NNDC / proposal)
-0.000    1.0     1.0     0.0100
-1.9417   1.0     1.0     0.0100
-4.231    1.0     1.0     0.0100
-4.984    1.0     1.0     0.0100
+//0.000    1.0     1.0     0.0100
+//1.9417   1.0     1.0     0.0100
+//4.231    1.0     1.0     0.0100
+//4.984    1.0     1.0     0.0100
+// h096 30Si(d,p)31Si states of interest (from NNDC / proposal)
+0.000    1.0     1.0     0.0400
+3.133    1.0     1.0     0.0400
+3.533    1.0     1.0     0.0400
+5.2813   1.0     1.0     0.0400
 #============_End_of_file

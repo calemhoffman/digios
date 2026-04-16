@@ -107,7 +107,7 @@ const char* HVdetMap[NARRAY] = {
 /// RDT detectors, indexed 0-7 matching rdt[0]-rdt[7]
 /// Even=dE (thin), Odd=E (thick): dE0,E0,dE1,E1,dE2,E2,dE3,E3
 const char* HVrdtMap[NRDT] = {
-    "u300", "u301", "u302", "u303", "u304", "u305", "u306", "u307"
+    "u300", "u301", "u302", "u305", "u306", "u307", "u308", "u309"
 };
 
 #endif
