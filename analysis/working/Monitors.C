@@ -31,10 +31,10 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {     1000,    3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {     0,    4000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     1,     12};       /// in the E-Z plot
-int     rdtDERange[2] = {     50,    3000}; 
-int      rdtERange[2] = {     50,    8000};  
+int     rdtDERange[2] = {     0,    3500}; 
+int      rdtERange[2] = {     0,    3500};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
 int      elumRange[2] = {   200,    4000};
@@ -42,7 +42,7 @@ int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  30,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = { 80,    -2,     12};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -54,7 +54,7 @@ bool isUseRDTTrace = true;
 
 //---Gate
 bool isTimeGateOn     = true;
-int timeGate[2]       = {-30, 20};             /// min, max, 1 ch = 10 ns
+int timeGate[2]       = {-20,5};             /// min, max, 1 ch = 10 ns
 double eCalCut[2]     = {0.5, 50};             /// lower & higher limit for eCal
 bool  isTACGate       = false;
 int tacGate[2]        = {-8000, -2000};
@@ -62,10 +62,11 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
-vector<int> skipDetID = {2, 11, 20, 21}; 
+vector<int> skipDetID = {11}; //{2,10,11}
 
-TString rdtCutFile1 = "rdtCuts_Ne.root";
-TString rdtCutFile2 = "rdtCuts_O.root";
+TString rdtCutFile1 = "newCuts.root"; //"rough32Sia.root";
+// TString rdtCutFile1 = "p_gate.root";
+TString rdtCutFile2 = "";//rdtCuts_O.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -233,6 +234,9 @@ TH2I *hArrayRDTMatrixG;
 //======= ARRAY-RDT time diff
 TH1I *htdiff;
 TH1I *htdiffg;
+
+//======= Ex vs Etot_Recoil
+TH2F* hExEtRecoil[4];
 
 /***************************
  ***************************/
@@ -534,6 +538,12 @@ void Monitors::Begin(TTree *tree)
    hic02 = new TH2F("hic02", "IC0 vs IC0+IC1; IC-2 [ch]; IC-0[ch]", 500, 0, icRange[1]+icRange[0], 500, 0, icRange[0]);
    hic12 = new TH2F("hic12", "IC1 - IC2; IC-2 [ch]; IC-1[ch]", 500, 0, icRange[1], 500, 0, icRange[2]);
    
+   //===================== ExEtRecoil
+   for(int i = 0; i < 4; i++)
+   {
+      hExEtRecoil[i] = new TH2F(Form("hExEtRecoil%d", i), Form("Ex vs Et for recoil %d; Et (MeV); Ex (MeV)", i), 500, rdtDERange[0]+rdtERange[0], rdtDERange[1]+rdtERange[1], (int) (exRange[2]-exRange[1])/exRange[0]*1000, exRange[1], exRange[2]);
+   } 
+
    printf("======================================== End of histograms Declaration\n");
    StpWatch.Start();
 
@@ -875,6 +885,7 @@ Bool_t Monitors::Process(Long64_t entry){
          rdtot[i/2] = rdt[i]+rdt[i+1];
          htacRecoilsum[i/2]->Fill(tac[0],rdtot[i/2]);
          hrdt2D[i/2]->Fill(rdt[i],rdt[i+1]); //E-dE
+        // hrdt2D[i/2]->Fill(rdt[i]+rdt[i+1],rdt[i+1]); //E-totE
          hrdt2Dsum[i/2]->Fill(rdtot[i/2],rdt[i+1]);//dE-(dE+E)
 
          htacRecoil[i]->Fill(tac[0],rdt[i]);
@@ -1007,8 +1018,12 @@ Bool_t Monitors::Process(Long64_t entry){
          hExi[detID]->Fill(Ex);
          hExVxCal[detID]->Fill(xcal[detID], Ex);
          hExc[detID%numCol]->Fill(Ex);
-         
-      }
+                  
+         for(int i = 0; i < 4; i++) {
+            hExEtRecoil[i]->Fill(rdt[2*i]+rdt[2*i+1], Ex);
+         }  
+     }
+
    }
   
    return kTRUE;

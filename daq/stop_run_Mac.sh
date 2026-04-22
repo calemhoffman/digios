@@ -59,6 +59,8 @@ PID_GRAFANA=$!
         ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
             -u MasterHelios helios \
             -w ${ID} > ~/elog_live.txt 2>/dev/null
+        # Strip metadata header from elog -w output (body only for -m upload)
+        sed -i '' '1,/^========/d' ~/elog_live.txt
         echo "[stop_run_Mac] Elog downloaded: $(wc -c < ~/elog_live.txt) bytes"
     else
         echo "[stop_run_Mac] WARNING: no start elog ID found"
