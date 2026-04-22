@@ -354,7 +354,11 @@ inline void BinaryReader::Open(const std::string& filename){
   // Setup mmap
   mmapFd = ::open(filename.c_str(), O_RDONLY);
   if (mmapFd >= 0) {
+#ifdef MAP_POPULATE
     void* mapped = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE | MAP_POPULATE, mmapFd, 0);
+#else
+    void* mapped = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, mmapFd, 0);
+#endif
     if (mapped != MAP_FAILED) {
       mmapBase = static_cast<const char*>(mapped);
       mmapPos = 0;

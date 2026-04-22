@@ -10,7 +10,7 @@ fi;
 
 source ${HELIOSSYS}/analysis/Armory/process_PathSetting
 
-builder=EventBuilder_S
+builder=EventBuilder_A
 eventWindow=1000 # in ticks, 1 tick = 10 ns
 
 RUN=$1
