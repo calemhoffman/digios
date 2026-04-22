@@ -6,6 +6,7 @@ RunNo=$3
 
 
 elogTxt=/Users/heliosdigios/elog.txt
+elogFullTxt=/Users/heliosdigios/elogFull.txt
 elogIDTxt=/Users/heliosdigios/elogID.txt
 
 grafanaElog=/Users/heliosdigios/grafanaElog.jpg
@@ -15,15 +16,23 @@ if [ ${flag} == "start" ]; then
    echo "============ push to elog at start run"
    echo "elogName = ${elogName}, RunNo = ${RunNo}"
 
-   IDStr=$(elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogTxt})
+   # Use elogFull.txt for elog if it exists (has detector table), otherwise elog.txt
+   if [ -f ${elogFullTxt} ]; then
+      elogPost=${elogFullTxt}
+      echo "Using elogFull.txt (with detector table)"
+   else
+      elogPost=${elogTxt}
+   fi
+
+   IDStr=$(~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogPost})
 
    echo "-----"
    echo ${IDStr} 
 
-   IDStr=$(echo ${IDStr} | tail -1 | awk '{print $12}')
+   IDStr=$(echo ${IDStr} | grep "transmitted" | awk -F'ID=' '{print $2}')
 
    echo ${IDStr}
-   echo ${IDStr} > ${elogIDTxt}
+   echo "ID=${IDStr}" > ${elogIDTxt}
 
    scp ${elogIDTxt} helios@192.168.1.2:~/.
    echo "sent ${elogIDTxt} back to DAQ"
@@ -39,7 +48,7 @@ if [ ${flag} == "stop" ]; then
    source ${elogIDTxt}
    echo "elogID = "${ID}
 
-   elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -w ${ID} > ${elogTxt}
+   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -w ${ID} > ${elogTxt}
 
    cutLineNum=$(grep -n "==============" ${elogTxt} | cut -b 1,2)
    #echo "cut Line Number : "${cutLineNum}
@@ -54,8 +63,8 @@ if [ ${flag} == "stop" ]; then
    #append elogEnnRun.txt
    cat ${elogEndTxt} >> ${elogTxt}
 
-   elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
+   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
 
-#  elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u GeneralHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Stop Run ${RunNo}" -n 2 -m ${elogEndTxt} -f ${grafanaElog}
+#  elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Stop Run ${RunNo}" -n 2 -m ${elogEndTxt} -f ${grafanaElog}
 
 fi

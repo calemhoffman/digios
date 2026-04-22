@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""
+GetChannel -- Read EPICS PV values for HELIOS 4-side silicon array channels
+
+Usage:
+  GetChannel <side> [PV]                  # get PV for all channels on side
+  GetChannel <side> <signal> [PV]         # get PV for signal type on side
+  GetChannel <det> <signal> [PV]          # get PV for det number, signal type
+  GetChannel <VME> <DIG> <CH> [PV]        # get PV for single channel
+
+Arguments:
+  side    : Left, Bottom, Right, Top, Recoil, All
+  signal  : E (Energy), XF, XN, All  |  Recoil: E, dE, All
+  det     : detector number 0-23 (silicon array) or 100-107 (RDT)
+  PV      : PV field suffix (default: led_threshold). Aliases: threshold, rate, M, D, K, etc.
+
+Examples:
+  GetChannel Left                         # all Left channels, led_threshold
+  GetChannel Left E                       # Left Energy channels, led_threshold
+  GetChannel Left E rate                  # Left Energy channels, disc_count_RBV
+  GetChannel All rate                     # all channels, disc_count_RBV
+  GetChannel 7 E                          # det 7 Energy, led_threshold
+  GetChannel 2 1 3                        # VME2-DIG1-CH3, led_threshold
+"""
+
+import sys
+import os
+import time
+
+# Add script dir to path for common.py
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from common import (load_mapping, build_sides, resolve_pv, resolve_signal,
+                     make_get_pv_name, VALID_SIGNALS, BOARD_LEVEL_PVS)
+import epics
+
+CA_DELAY = 0.3  # seconds between CA requests
+RATE_SAMPLES = 10  # number of repeated reads for disc_count
+RATE_PV = 'disc_count'  # token that triggers repeated sampling
+
+
+def get_channel(vme, dig, ch, pv_field, det=None, sig=None):
+    pv_name = make_get_pv_name(vme, dig, ch, pv_field)
+    label = f"det{det:02d}-{sig}" if det is not None and sig is not None else ""
+
+    if pv_field == RATE_PV:
+        # Repeated sampling for rate (1s between reads = EPICS update frequency)
+        vals = []
+        progress = f"  {label:12s} {pv_name:45s}  sampling"
+        print(progress, end='', flush=True)
+        for i in range(RATE_SAMPLES):
+            time.sleep(1.0)
+            v = epics.caget(pv_name)
+            vals.append(int(v) if v is not None else 0)
+            print('.', end='', flush=True)
+        avg = sum(vals) / len(vals)
+        result = f"  {label:12s} {pv_name:45s}  avg={avg:.1f}  [{', '.join(str(v) for v in vals)}]"
+        print(f"\r{result}{' ' * max(0, len(progress) + RATE_SAMPLES - len(result))}")
+        return avg
+    else:
+        time.sleep(CA_DELAY)
+        val = epics.caget(pv_name)
+        if val is None:
+            print(f"  {label:12s} {pv_name:45s}  [unreachable]")
+        else:
+            print(f"  {label:12s} {pv_name:45s}  {val}")
+        return val
+
+
+def get_det_signal(det, signal, pv_field, det_map, boards_done):
+    det_entry = det_map.get(det)
+    if det_entry is None:
+        print(f"  [skip] det {det} not in map")
+        return
+    signals = list(det_entry.keys()) if signal == 'All' else [signal]
+    for sig in signals:
+        if sig not in det_entry:
+            continue
+        vme, dig, ch = det_entry[sig]
+        if pv_field in BOARD_LEVEL_PVS:
+            board_key = (vme, dig)
+            if board_key in boards_done:
+                continue
+            boards_done.add(board_key)
+        get_channel(vme, dig, ch, pv_field, det=det, sig=sig)
+
+
+def is_int(s):
+    try: int(s); return True
+    except: return False
+
+
+def main():
+    args = sys.argv[1:]
+
+    if not args or args[0] in ('-h', '--help', 'help'):
+        print(__doc__)
+        sys.exit(0)
+
+    det_map, narray, mapping_file = load_mapping()
+    sides = build_sides(det_map, narray)
+
+    # Direct VME DIG CH mode
+    if len(args) >= 3 and all(is_int(a) for a in args[:3]):
+        vme, dig, ch = int(args[0]), int(args[1]), int(args[2])
+        pv_field = resolve_pv(args[3]) if len(args) > 3 else 'led_threshold'
+        print(f"\nGetChannel: VME{vme}-DIG{dig}-CH{ch}  PV={pv_field}")
+        print(f"  [mapping: {mapping_file}]\n")
+        get_channel(vme, dig, ch, pv_field)
+        sys.exit(0)
+
+    target = args[0]
+    if is_int(target):
+        dets = [int(target)]
+    elif target in sides:
+        dets = sides[target]
+    else:
+        print(f"Unknown target '{target}'. Use a side or detector number.")
+        sys.exit(1)
+
+    signal = 'All'
+    pv_field = 'led_threshold'
+    remaining = args[1:]
+
+    if len(remaining) == 0:
+        pass
+    elif len(remaining) == 1:
+        arg = remaining[0]
+        sig = resolve_signal(arg)
+        if sig in VALID_SIGNALS:
+            signal = sig
+        else:
+            pv_field = resolve_pv(arg)
+    elif len(remaining) == 2:
+        sig = resolve_signal(remaining[0])
+        if sig in VALID_SIGNALS:
+            signal = sig
+        else:
+            print(f"Unknown signal '{remaining[0]}'")
+            sys.exit(1)
+        pv_field = resolve_pv(remaining[1])
+    else:
+        print("Too many arguments.")
+        sys.exit(1)
+
+    target_label = f"detector={target}" if is_int(target) else f"side={target}"
+    print(f"\nGetChannel: {target_label}  signal={signal}  PV={pv_field}")
+    print(f"  [mapping: {mapping_file}]\n")
+
+    boards_done = set()
+    for det in dets:
+        get_det_signal(det, signal, pv_field, det_map, boards_done)
+
+    print("\n========= done.")
+
+
+if __name__ == '__main__':
+    main()

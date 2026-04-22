@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""
+SetChannel -- Set EPICS PV values for HELIOS 4-side silicon array channels
+
+Usage:
+  SetChannel <side> <value>                  # set led_threshold for all channels on side
+  SetChannel <side> <signal> <value>         # set led_threshold for signal type on side
+  SetChannel <side> <signal> <PV> <value>    # set arbitrary PV for signal type on side
+  SetChannel <det> <signal> <value>          # set led_threshold for det number, signal type
+  SetChannel <det> <signal> <PV> <value>     # set arbitrary PV for det number, signal type
+
+Arguments:
+  side    : Left, Bottom, Right, Top, Recoil, All
+  signal  : E (Energy), XF, XN, All  |  Recoil: E, dE, All
+  det     : detector number 0-23 (silicon array) or 100-107 (RDT)
+  PV      : PV field suffix (default: led_threshold). Aliases: threshold -> led_threshold
+  value   : numeric value to set
+
+Settable PVs (led_threshold is default):
+  led_threshold       -- LED discriminator threshold (default)
+  m_window            -- M-window (energy filter)
+  d_window            -- D-window
+  k_window            -- K-window
+  p1_window           -- P1-window
+  disc_width          -- Discriminator width
+  preamp_reset_delay  -- Preamp reset delay
+  raw_data_length     -- Total trace length (board-level) [alias: trace, RL]
+  raw_data_window     -- Pre-trigger trace length (board-level) [alias: preTrigger, RD]
+
+Examples:
+  SetChannel Left 400                   # all Left channels, led_threshold=400
+  SetChannel Left E 400                 # Left Energy channels, led_threshold=400
+  SetChannel Left E threshold 400       # same (explicit alias)
+  SetChannel Left All M 100             # all Left channels, m_window=100
+  SetChannel 7 E 400                    # det 7 Energy, led_threshold=400
+  SetChannel 7 E m_window 100           # det 7 Energy, m_window=100
+  SetChannel Recoil dE 500              # RDT dE channels, led_threshold=500
+  SetChannel All 400                    # everything, led_threshold=400
+  SetChannel All trace 9.0              # all boards, raw_data_length=9.0
+  SetChannel 7 E preTrigger 3.0         # det 7 Energy board, raw_data_window=3.0
+  SetChannel Left E RL 9.0              # Left boards, raw_data_length=9.0
+
+Mapping: reads GeneralSortMapping.h dynamically (common.py)
+"""
+
+import sys
+import os
+
+# Add script dir to path for common.py
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from common import (load_mapping, build_sides, resolve_pv, resolve_signal,
+                     make_set_pv_name, PV_ALIASES, VALID_SIGNALS, BOARD_LEVEL_PVS)
+import epics
+
+
+SETTABLE_PVS = [
+    'led_threshold    (per channel) -- LED discriminator threshold (default)',
+    'm_window         (per channel) -- M-window (energy filter)',
+    'd_window         (per channel) -- D-window',
+    'k_window         (per channel) -- K-window',
+    'p1_window        (per channel) -- P1-window',
+    'disc_width       (per channel) -- Discriminator width',
+    'preamp_reset_delay (per channel) -- Preamp reset delay',
+    'raw_data_length  (per board)   -- Total trace length          [alias: trace, RL]',
+    'raw_data_window  (per board)   -- Pre-trigger trace length    [alias: preTrigger, RD]',
+]
+
+
+def set_channel(vme, dig, ch, pv_field, value):
+    pv_name = make_set_pv_name(vme, dig, ch, pv_field)
+    old = epics.caget(pv_name)
+    if old is None:
+        print(f"  [warn] {pv_name:45s}  unreachable -- skipping")
+        return
+    epics.caput(pv_name, value)
+    print(f"  {pv_name:45s}  {old} -> {value}")
+
+
+def set_det_signal(det, signal, pv_field, value, det_map, boards_done):
+    det_entry = det_map.get(det)
+    if det_entry is None:
+        print(f"  [skip] det {det} not in map")
+        return
+    signals = list(det_entry.keys()) if signal == 'All' else [signal]
+    for sig in signals:
+        if sig not in det_entry:
+            print(f"  [skip] det {det} has no signal {sig}")
+            continue
+        vme, dig, ch = det_entry[sig]
+        if pv_field in BOARD_LEVEL_PVS:
+            board_key = (vme, dig)
+            if board_key in boards_done:
+                continue
+            boards_done.add(board_key)
+        set_channel(vme, dig, ch, pv_field, value)
+
+
+def print_help(mapping_source, det_map):
+    print(__doc__)
+    print("\nSettable PV fields:")
+    for p in SETTABLE_PVS:
+        print(f"  {p}")
+    print("\nPV aliases:")
+    for alias, real in PV_ALIASES.items():
+        print(f"  {alias:12s} -> {real}")
+    psd = len([d for d in det_map if d < 100])
+    rdt = len([d for d in det_map if d >= 100])
+    print(f"\nMapping source: {mapping_source}")
+    print(f"Detectors loaded: {psd} PSD, {rdt} RDT")
+
+
+def is_int(s):
+    try: int(s); return True
+    except: return False
+
+
+def main():
+    args = sys.argv[1:]
+
+    det_map, narray, mapping_file = load_mapping()
+    sides = build_sides(det_map, narray)
+
+    if not args or args[0] in ('-h', '--help', 'help'):
+        print_help(mapping_file, det_map)
+        sys.exit(0)
+
+    target = args[0]
+    if is_int(target):
+        dets = [int(target)]
+    elif target in sides:
+        dets = sides[target]
+    else:
+        print(f"Unknown target '{target}'. Use a side (Left/Bottom/Right/Top/Recoil/All) or detector number.")
+        sys.exit(1)
+
+    signal = 'All'
+    pv_field = 'led_threshold'
+    value = None
+    remaining = args[1:]
+
+    if len(remaining) == 1:
+        value = float(remaining[0])
+    elif len(remaining) == 2:
+        arg0 = remaining[0]
+        sig = resolve_signal(arg0)
+        if sig in VALID_SIGNALS:
+            signal = sig
+            pv_field = 'led_threshold'
+        else:
+            pv_field = resolve_pv(arg0)
+        value = float(remaining[1])
+    elif len(remaining) == 3:
+        sig = resolve_signal(remaining[0])
+        if sig in VALID_SIGNALS:
+            signal = sig
+        else:
+            print(f"Unknown signal '{remaining[0]}'")
+            sys.exit(1)
+        pv_field = resolve_pv(remaining[1])
+        value = float(remaining[2])
+    else:
+        print("Too many arguments.")
+        print_help(mapping_file, det_map)
+        sys.exit(1)
+
+    if value is None:
+        print("No value specified.")
+        sys.exit(1)
+
+    value = int(value) if value == int(value) else value
+
+    print(f"\nSetChannel: target={target}  signal={signal}  PV={pv_field}  value={value}")
+    print(f"  [mapping: {mapping_file}]\n")
+
+    boards_done = set()
+    for det in dets:
+        set_det_signal(det, signal, pv_field, value, det_map, boards_done)
+
+    print("\n========= done.")
+
+
+if __name__ == '__main__':
+    main()

@@ -2,3 +2,6 @@
 expName=ARR01
 daqDataPath=/media/DIGIOSDATA6
 LastRunNum=178
+lastRunComment=""
+lastStopComment=""
+totalFileSize=""

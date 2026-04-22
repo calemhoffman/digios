@@ -6,10 +6,13 @@
  * logic with thread-local buffers. No shared mutable state between threads.
  *
  * Usage:
- *   tcpReceiver <filename_base> <maxfilesize> <GEBID> <server1> [server2] ...
+ *   tcpReceiver <filename_base> <server1> [server2] ...
  *
  * Example (matching start_run.sh usage):
- *   tcpReceiver ARR01_run_001.gtd 2000000000 14 ioc1 ioc2 ioc3 ioc4
+ *   tcpReceiver ARR01_run_001.gtd 192.168.1.20 192.168.1.21 192.168.1.22 192.168.1.23
+ *
+ * GEB_TYPE_DGS and MAX_FILE_SIZE are set via #define below.
+ * Override at compile time: -DGEB_TYPE_DGS=15 -DMAX_FILE_SIZE=1000000000
  *
  * Each thread writes its own board-ID-indexed files (e.g. _0105, _0106).
  * Since each VME digitizer board has a unique board_id, there is no
@@ -18,7 +21,7 @@
  * Build:
  *   g++ -O2 -pthread -o tcpReceiver tcpReceiver.cpp
  *
- * Author: HELIOS AI (General HELIOS) — 2026-03-12
+ * Author: HELIOS AI (Master HELIOS) — 2026-03-12
  * Based on gtReceiver4.c by C. Lionberger (LBL) / ANL DGS group.
  * No existing files were modified.
  */
@@ -62,6 +65,17 @@
 #define WRITEGTFORMAT 1
 
 /* ------------------------------------------------------------------ */
+/* User-configurable constants — override with -D flags at compile time */
+/* ------------------------------------------------------------------ */
+#ifndef GEB_TYPE_DGS
+#define GEB_TYPE_DGS    14            /* 14=DGS, 15=DGSTRIG, 16=DFMA  */
+#endif
+
+#ifndef MAX_FILE_SIZE
+#define MAX_FILE_SIZE   2000000000LL  /* 2 GB default per file chunk   */
+#endif
+
+/* ------------------------------------------------------------------ */
 /* Protocol structs — from psNet.h                                     */
 /* ------------------------------------------------------------------ */
 typedef struct {
@@ -86,8 +100,8 @@ typedef struct gebData GEBDATA;
 /* Global state                                                         */
 /* ------------------------------------------------------------------ */
 static std::atomic<bool> g_running(true);  /* set false on SIGINT */
-static int g_GEB_TYPE_DGS = 0;
-static long long g_maxFileSize = 2000000000LL;
+static int g_GEB_TYPE_DGS = GEB_TYPE_DGS;
+static long long g_maxFileSize = MAX_FILE_SIZE;
 static char g_filenameBase[512] = {0};     /* e.g. ARR01_run_001.gtd */
 
 /* Per-board output files — indexed by board_id.                       */
@@ -99,8 +113,8 @@ static int g_ofile[MAXBOARDID];
 /* Per-thread context                                                   */
 /* ------------------------------------------------------------------ */
 struct ThreadCtx {
-    std::string server;   /* "ioc1", "ioc2", etc.  */
-    int threadIdx;        /* 0-based index          */
+    std::string server;   /* IP or hostname        */
+    int threadIdx;        /* 0-based index         */
 };
 
 /* ------------------------------------------------------------------ */
@@ -290,9 +304,9 @@ static int write_events(const char *inptr, int size2write,
             char fname[600];
             char cstr[16];
             strncpy(fname, filenameBase, sizeof(fname)-1);
-            sprintf(cstr, "_%3.3i", chunck);
+            snprintf(cstr, sizeof(cstr), "_%3.3i", chunck);
             strcat(fname, cstr);
-            sprintf(cstr, "_%4.4i", board_id);
+            snprintf(cstr, sizeof(cstr), "_%4.4i", board_id);
             strcat(fname, cstr);
 
             /* refuse to overwrite */
@@ -426,22 +440,23 @@ int main(int argc, char **argv)
     printf("tcpReceiver — multi-threaded DGS data receiver\n");
     printf("Based on gtReceiver4.c (C. Lionberger, LBL / ANL)\n\n");
 
-    if (argc < 5) {
-        printf("Usage: %s <filename_base> <maxfilesize> <GEBID> <server1> [server2] ...\n", argv[0]);
-        printf("  e.g: %s ARR01_run_001.gtd 2000000000 14 ioc1 ioc2 ioc3 ioc4\n", argv[0]);
-        printf("\nGEBID: 14=DGS, 15=DGSTRIG, 16=DFMA\n");
+    if (argc < 3) {
+        printf("Usage: %s <filename_base> <server1> [server2] ...\n", argv[0]);
+        printf("  e.g: %s ARR01_run_001.gtd 192.168.1.20 192.168.1.21 192.168.1.22 192.168.1.23\n", argv[0]);
+        printf("\nCompile-time defaults: GEB_TYPE_DGS=%d, MAX_FILE_SIZE=%lld bytes\n",
+               GEB_TYPE_DGS, MAX_FILE_SIZE);
+        printf("Override: g++ -DGEB_TYPE_DGS=15 -DMAX_FILE_SIZE=1000000000 ...\n");
         return 1;
     }
 
     strncpy(g_filenameBase, argv[1], sizeof(g_filenameBase) - 1);
-    g_maxFileSize   = atoll(argv[2]);
-    g_GEB_TYPE_DGS  = atoi(argv[3]);
+    /* GEB type and file size come from compile-time #defines */
 
     memset(g_ofile, 0, sizeof(g_ofile));
 
-    /* collect server names */
+    /* collect server IPs/hostnames */
     std::vector<std::string> servers;
-    for (int i = 4; i < argc; i++)
+    for (int i = 2; i < argc; i++)
         servers.push_back(argv[i]);
 
     int nthreads = (int)servers.size();

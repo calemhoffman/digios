@@ -5,6 +5,11 @@
 #include <cstdint>
 #include <stdexcept>
 #include <algorithm>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstring>
 
 #include "Hit.h"  
 
@@ -21,6 +26,8 @@ public:
   } 
   ~BinaryReader() {
     if (file.is_open()) file.close();
+    if (mmapBase) { munmap(const_cast<char*>(mmapBase), fileSize); mmapBase = nullptr; }
+    if (mmapFd >= 0) { ::close(mmapFd); mmapFd = -1; }
     DeleteHits();
   }
 
@@ -49,6 +56,7 @@ public:
     hitID = 0;  // Reset hit ID
     hitSize = 0;  // Reset hit size
     lastTimestampOfHits = 0;  // Reset last timestamp of hits
+    mmapPos = 0;  // Reset mmap position
   }
 
   uint64_t GetGlobalEarliestTime() const { return globalEarliestTime; }  
@@ -97,7 +105,11 @@ private:
   unsigned int totalNumHits;
   unsigned int hitID; // current hit ID
 
-  // std::vector<Hit> hits; // Vector to store hits
+  // mmap support
+  int mmapFd = -1;
+  const char* mmapBase = nullptr;
+  size_t mmapPos = 0; // current read position in mmap'd region
+  bool useMmap = false;
 
   Hit * hits;
   unsigned int maxHitSize; // Size of the hits array
@@ -107,6 +119,10 @@ private:
   void Init(){
     fileSize = 0;
     runID = 0;
+    mmapFd = -1;
+    mmapBase = nullptr;
+    mmapPos = 0;
+    useMmap = false;
     DigID = 0;
     fileIndex = 0;
     totalNumHits = 0;
@@ -202,23 +218,52 @@ inline void BinaryReader::ReadNextNHitsFromFile(bool debug) {
   uint64_t old_timestamp = 0;
   unsigned int timestamp_error_counter = 0;
   hitSize = 0; // Reset hit size before reading new hits
-  for (unsigned int i = 0; i < maxHitSize && Tell() < fileSize; ++i) {
-    hits[i].header = Read<GEBHeader>();
 
-    if( hits[i].header.timestamp < old_timestamp) {
-      if( debug ) printf("timestamp error at Data ID : %d \n", i);
-      if( debug ) printf("old timestamp : %16lu \n", old_timestamp);
-      if( debug ) printf("new timestamp : %16lu \n", hits[i].header.timestamp);
-      timestamp_error_counter++;
+  if( useMmap && mmapBase ) {
+    // ---- mmap fast path: pointer arithmetic, no syscalls ----
+    for (unsigned int i = 0; i < maxHitSize && mmapPos + sizeof(GEBHeader) <= fileSize; ++i) {
+      // Read header directly from mapped memory
+      memcpy(&hits[i].header, mmapBase + mmapPos, sizeof(GEBHeader));
+      mmapPos += sizeof(GEBHeader);
+
+      if( hits[i].header.timestamp < old_timestamp) {
+        if( debug ) printf("timestamp error at Data ID : %d \n", i);
+        timestamp_error_counter++;
+      }
+      old_timestamp = hits[i].header.timestamp;
+
+      // Read payload from mapped memory
+      size_t payloadWords = hits[i].header.payload_lenght_byte / sizeof(uint32_t);
+      if (payloadWords > 0 && mmapPos + hits[i].header.payload_lenght_byte <= fileSize) {
+        hits[i].payload.resize(payloadWords);
+        memcpy(hits[i].payload.data(), mmapBase + mmapPos, hits[i].header.payload_lenght_byte);
+        mmapPos += hits[i].header.payload_lenght_byte;
+      } else {
+        hits[i].payload.clear();
+        mmapPos += hits[i].header.payload_lenght_byte;
+      }
+      hitSize++;
+      hitID++;
     }
-    old_timestamp = hits[i].header.timestamp;
+  } else {
+    // ---- ifstream fallback path ----
+    for (unsigned int i = 0; i < maxHitSize && Tell() < fileSize; ++i) {
+      hits[i].header = Read<GEBHeader>();
 
+      if( hits[i].header.timestamp < old_timestamp) {
+        if( debug ) printf("timestamp error at Data ID : %d \n", i);
+        if( debug ) printf("old timestamp : %16lu \n", old_timestamp);
+        if( debug ) printf("new timestamp : %16lu \n", hits[i].header.timestamp);
+        timestamp_error_counter++;
+      }
+      old_timestamp = hits[i].header.timestamp;
 
-    if (hits[i].header.payload_lenght_byte > 0) {
-      hits[i].payload = ReadArray<uint32_t>(hits[i].header.payload_lenght_byte / sizeof(uint32_t));
+      if (hits[i].header.payload_lenght_byte > 0) {
+        hits[i].payload = ReadArray<uint32_t>(hits[i].header.payload_lenght_byte / sizeof(uint32_t));
+      }
+      hitSize++;
+      hitID++;
     }
-    hitSize++;  // Increment hit size for each hit read
-    hitID ++;  // Update the hitID to the next position
   }
 
   //sort hits by timestamp
@@ -305,6 +350,21 @@ inline void BinaryReader::Open(const std::string& filename){
   // } else {
   //   throw std::runtime_error("File is empty: " + filename); 
   // }
+
+  // Setup mmap
+  mmapFd = ::open(filename.c_str(), O_RDONLY);
+  if (mmapFd >= 0) {
+    void* mapped = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE | MAP_POPULATE, mmapFd, 0);
+    if (mapped != MAP_FAILED) {
+      mmapBase = static_cast<const char*>(mapped);
+      mmapPos = 0;
+      useMmap = true;
+      madvise(const_cast<char*>(mmapBase), fileSize, MADV_SEQUENTIAL);
+    } else {
+      ::close(mmapFd);
+      mmapFd = -1;
+    }
+  }
 }
 
 template <typename T> inline T BinaryReader::Read() {

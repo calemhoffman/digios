@@ -129,7 +129,7 @@ std::vector<std::vector<float>> LoadFitParameters(std::string fileName, bool pri
       if( str.size() < 2 ) continue;
 
       int detID = atoi(str[0].c_str());
-      if( parameters.size() <= detID ) parameters.resize(detID+1);
+      if( (int) parameters.size() <= detID ) parameters.resize(detID+1);
       
       for( size_t j = 1 ; j < str.size() ; j++ ) {
         parameters[detID].push_back( atof(str[j].c_str()) );
@@ -142,8 +142,8 @@ std::vector<std::vector<float>> LoadFitParameters(std::string fileName, bool pri
 
   if (print) {
     printf("Loaded fit parameters from file: %s | array size = %zu\n", fileName.c_str(), parameters.size());
-    for( int i = 0 ; i < parameters.size() ; i++ ) {
-      printf("detID %2d: ", i);
+    for( size_t i = 0 ; i < parameters.size() ; i++ ) {
+      printf("detID %2zu: ", i);
       for( size_t j = 0 ; j < parameters[i].size() ; j++ ) {
         printf("% .6e ", parameters[i][j]);
       }

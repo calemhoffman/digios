@@ -57,6 +57,7 @@ analysis/Woods-Saxon/test
 
 AutoProcessLog.txt
 daq/save/trigger.txt
+daq/saves/trigger.txt
 
 DB_*.txt
 
@@ -65,6 +66,13 @@ slurm-*.out
 /analysis/EventBuilder/run*
 /analysis/EventBuilder/h088*
 /analysis/EventBuilder/EventBuilder*
+!/analysis/EventBuilder/EventBuilder*.cpp
 /analysis/EventBuilder/merged*
 /analysis/EventBuilder/fitting/cuda_fit
 /analysis/EventBuilder/fitting/testFit
+analysis/working_Helios/
+
+daq/null
+daq/trigger
+
+__pycache__
