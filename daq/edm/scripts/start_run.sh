@@ -102,7 +102,7 @@ echo "============= Calling Mac2020 for elog + Discord"
 ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/start_run_Mac.sh" &
 
 echo "============= Calling Pi for run status"
-ssh ryan@192.168.1.100 "python3 ~/.openclaw/workspace/skills/helios-status/gen_run_status.py" &
+ssh heliosspark@192.168.1.101 "python3 ~/.openclaw/workspace/skills/helios-status/gen_run_status.py" &
 
 echo "============== Opening IOC...."
 
