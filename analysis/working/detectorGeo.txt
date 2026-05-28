@@ -23,5 +23,5 @@ Out           //detector_facing_Out_or_In
 117.9
 176.8
 235.8    //5th_det
-290.0
+294.5
 #============= end of file
