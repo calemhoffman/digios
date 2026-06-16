@@ -11,7 +11,24 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
     /// this list only for manual Chain sort
     ///********** start Marker for AutoCalibration.
 
-     ///chain->Add("../root_data/gen_run135.root");
+    // Medium target 114
+    chain->Add("../root_data/gen_run009.root");
+    chain->Add("../root_data/gen_run01[0-3].root");
+
+    // Thin target 88
+    chain->Add("../root_data/gen_run01[4-7].root");
+    chain->Add("../root_data/gen_run02[0-3].root");
+
+    // "Thick" target 119
+    chain->Add("../root_data/gen_run02[4-5].root");
+
+    // change VME02:DIG2 to VME01:DIG3
+      // chain->Add("../root_data/gen_run018.root");
+
+    // switch board so the mapping does not need to change
+      // chain->Add("../root_data/gen_run019.root"); // trigger issue, junk
+
+      // chain->Add("../root_data/gen_run02[0-9].root");
      ///chain->Add("../root_data/trace_run135.root");
   
     ///********** end Marker for AutoCalibration.

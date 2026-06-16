@@ -31,18 +31,18 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {     -1000,    3000};       /// share with e, ring, xf, xn
-int    energyRange[2] = {     1,     20};       /// in the E-Z plot
-int     rdtDERange[2] = {     50,    3000}; 
-int      rdtERange[2] = {     50,    8000};  
+int rawEnergyRange[2] = {     100,    3000};       /// share with e, ring, xf, xn
+int    energyRange[2] = {     0,     14};       /// in the E-Z plot
+int     rdtDERange[2] = {     0,    1500}; 
+int      rdtERange[2] = {     0,    1500};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {   200,    4000};
+int      elumRange[2] = {     0,    16000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
 
-double     exRange[3] = {  30,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
+double     exRange[3] = {  40,    -2,     10};  /// bin [keV], low[MeV], high[MeV]
 
 int  coinTimeRange[2] = { -200, 200};
 int  timeRangeUser[2] = {0, 99999999}; /// min, use when cannot find time, this set the min and max
@@ -64,8 +64,8 @@ double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
 vector<int> skipDetID = {2, 11, 20, 21}; 
 
-TString rdtCutFile1 = "rdtCuts_Ne.root";
-TString rdtCutFile2 = "rdtCuts_O.root";
+TString rdtCutFile1 = "test_gate_17N.root";
+TString rdtCutFile2 = "test2_gate_17N.root";
 TString ezCutFile   = "";//"ezCut.root";
 
 //TODO switches for histograms on/off
@@ -648,7 +648,7 @@ Bool_t Monitors::Process(Long64_t entry){
       
     if( 800 < elum[0]  && elum[0] < 1200 ) helum4D->Fill(elum_t[0]/1e8/60.); 
     
-    if( !TMath::IsNaN(elum[1]) ) hBIC->Fill(elum_t[1]/1e8/60.);
+    if( NELUM > 1 && !TMath::IsNaN(elum[1]) ) hBIC->Fill(elum_t[1]/1e8/60.);
     
     int tac2 = tac_t[1]-elum_t[0];        
     htac2->Fill(tac2);
@@ -704,12 +704,6 @@ Bool_t Monitors::Process(Long64_t entry){
          }
       }
       if (skipFlag ) continue;
-
-      //==================== Basic gate
-      if( TMath::IsNaN(e[detID]) ) continue ; 
-      ///if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
-      ///if( ring[detID] > 300 ) continue; 
-      if( TMath::IsNaN(xn[detID]) &&  TMath::IsNaN(xf[detID]) ) continue ; 
 
       //==================== Calibrations go here
       xfcal[detID] = xf[detID] * xfxneCorr[detID][1] + xfxneCorr[detID][0];
