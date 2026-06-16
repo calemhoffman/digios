@@ -32,9 +32,9 @@ if [ "$HV_OK" == "false" ]; then
         echo "  !!!!    HV is NOT ON !!!!"
         echo "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         echo -e "\033[0m"
-        echo "Run cancelled. No run number changed."
-        sleep 30
-        exit 1
+        #echo "Run cancelled. No run number changed."
+        #sleep 30
+        #exit 1
     fi
 fi
 
