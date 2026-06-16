@@ -293,16 +293,18 @@ void eCalVxCalG(void) {
 void elum(void) {
   TCanvas *celum = (TCanvas *) gROOT->FindObjectAny("celum");
   if( celum == NULL )  celum = new TCanvas("celum",Form("ELUM | %s", canvasTitle.Data()),1000,1000);
-  celum->Clear(); celum->Divide(4,4);
-  for( int i = 0 ; i < 16 ; i++){
+  celum->Clear(); 
+  if( NELUM > 1) celum->Divide(4,4);
+  for( int i = 0 ; i < NELUM ; i++){
     celum->cd(i+1);
+    celum->cd(i+1)->SetLogy();
     helum[i]->Draw("");
   }
   
-  TCanvas *celumID = (TCanvas *) gROOT->FindObjectAny("celumID");
-  if( celumID == NULL )  celumID = new TCanvas("celumID",Form("ELUM-ID | %s", canvasTitle.Data()),1100, 0, 500,500);
-  celumID->Clear();
-  helumID->Draw("colz");
+  // TCanvas *celumID = (TCanvas *) gROOT->FindObjectAny("celumID");
+  // if( celumID == NULL )  celumID = new TCanvas("celumID",Form("ELUM-ID | %s", canvasTitle.Data()),1100, 0, 500,500);
+  // celumID->Clear();
+  // helumID->Draw("colz");
   
 }
 
@@ -417,14 +419,14 @@ void eCalVzRowG() {
 
 void excite(void) {
   TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");
-  if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),0, 0, 1000,650);
+  if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()), 1000,650);
   cex->Clear();
   gStyle->SetOptStat("neiou");
   hEx->Draw("");
   
   
   TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
-  if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),500, 0, 1600,1000);
+  if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()), 1600,1000);
   cexI->Clear();cexI->Divide(NCOL,NROW);
   gStyle->SetOptStat("neiou");
   for( int i = 0; i < NARRAY; i++){
@@ -433,7 +435,7 @@ void excite(void) {
   }
   
   TCanvas *cexC =  (TCanvas *) gROOT->FindObjectAny("cexC");
-  if( cexC == NULL ) cexC = new TCanvas("cexC",Form("EX : %s", canvasTitle.Data()),500, 500, 1600,300);
+  if( cexC == NULL ) cexC = new TCanvas("cexC",Form("EX : %s", canvasTitle.Data()), 1600,300);
   cexC->Clear();cexC->Divide(NCOL,1);
   gStyle->SetOptStat("neiou");
   for( int i = 0; i < NCOL; i++){

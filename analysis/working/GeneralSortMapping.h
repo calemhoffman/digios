@@ -32,7 +32,7 @@
 
 #define POLARITY_XFXN   +1
 #define POLARITY_RDT    -1
-#define POLARITY_ELUM   +1
+#define POLARITY_ELUM   -1
 #define POLARITY_EZERO  +1
 #define POLARITY_CRDT   +1
 #define POLARITY_APOLLO +1
@@ -44,12 +44,12 @@
 Int_t idConst = 1010;
 
 Int_t idDetMap[160] = { 
-                        101, 100, 103, 102, 105, 104, 107, 106,  -1,  -1,  //VME1-DIG1, RECOIL E, dE (VME 1 is top right)
+                       101, 100, 103, 102, 105, 104, 107, 106,  -1,  -1,  //VME1-DIG1, RECOIL E, dE (VME 1 is top right)
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG2, not in use
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG3, not in use
-                       -1, -1, -1, -1, -1, -1, -1, -1,  -1,  -1,           //VME1-DIG4, not in use
-
-
+                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG4, not in use
+                        
+                        
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,   // 1, VME2-DIG1, array
                          3,   2,   1,   0,   5,   4,   3,   2,  -1,  -1,   // 2, VME2-DIG2, array
                         11,  10,   9,   8,   7,   6,   5,   4,  -1,  -1,   // 3, VME2-DIG3, array
@@ -63,9 +63,7 @@ Int_t idDetMap[160] = {
                         19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
                         21,  20,  19,  18,  23,  22,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
                         23,  22,  21,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
-                       -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,    //12, VME4-DIG4, not in use
-                   
-    
+                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1    //12, VME4-DIG4, not in use
 };
 
 
