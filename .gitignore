@@ -76,3 +76,6 @@ daq/null
 daq/trigger
 
 __pycache__
+
+daq/edm/scripts/array_saved
+array_saved*

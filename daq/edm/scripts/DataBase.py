@@ -5,6 +5,7 @@ from epics import caput
 import os
 import time
 import datetime
+import glob
 #import Edwards_D379_driver
 
 print("======== DataBase for HELIOS ========")
@@ -62,6 +63,17 @@ while 1:
     print("ExpName : %s, runNum : %03d, file size : %s" % (expName, int(runNum),  result))
     string="fileSize value=%s\n" % (result)
     f.write(string)
+
+    #check the number of files for the same run and take the last 3 digi of the filenames
+    #Scheme be "fileID,run=<RunID> value=<last3digi>"
+    fileList = sorted(glob.glob("%s/%s/%s_run_%03d*" % (daqDataPath, expName, expName, int(runNum))))
+    for fpath in fileList:
+        fname = os.path.basename(fpath)
+        last3 = int(fname[-4:]) % 1000
+        fsize = os.path.getsize(fpath)
+        print("fileID size=%d, value=%d" % (fsize, last3))
+        string = "fileID,fileID=%d size=%d\n" % (last3, fsize)
+        f.write(string)
 
     for VME in range (1,5):
         pv="DAQC%d_CV_BuffersAvail" % (VME)

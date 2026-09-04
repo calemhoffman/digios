@@ -48,11 +48,9 @@ source ~/elogID.txt 2>/dev/null
 # 2. Grafana screenshot + elog download (PARALLEL)
 echo "[stop_run_Mac] Starting parallel: Grafana screenshot + elog download..."
 
-# 2a. Grafana screenshot (background)
-source ~/digios/daq/edm/scripts/DataBaseAddress.sh
+# 2a. Grafana screenshot (background, local)
 (
-    ssh heliosdigios@${dataBaseAddress} '/Users/heliosdigios/digios/daq/GrafanaWeb.sh' 2>/dev/null
-    scp heliosdigios@${dataBaseAddress}:~/grafanaElog.jpg ~/grafanaElog.jpg 2>/dev/null
+    ${SCRIPTDIR}/GrafanaWeb.sh 2>/dev/null
     echo "[stop_run_Mac] Grafana screenshot done."
 ) &
 PID_GRAFANA=$!

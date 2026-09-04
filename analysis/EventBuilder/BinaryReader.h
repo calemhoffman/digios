@@ -11,6 +11,10 @@
 #include <unistd.h>
 #include <cstring>
 
+#ifndef MAP_POPULATE
+#define MAP_POPULATE 0
+#endif
+
 #include "Hit.h"  
 
 class BinaryReader {
