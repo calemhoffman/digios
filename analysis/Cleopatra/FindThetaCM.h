@@ -17,7 +17,7 @@
 #include "TGraph.h"
 #include "../Cleopatra/HELIOS_LIB.h"
 
-void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95, 
+void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95, short loop = 1,
             string basicConfig="reactionConfig.txt",  
             string detGeoFileName = "detectorGeo.txt"){
 
@@ -143,7 +143,7 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
    for(int i = 0; i < 100; i++){
       double thetacm = (i + 5.) * TMath::DegToRad();
       double temp = TMath::TwoPi() * slope / beta / kCM * a / TMath::Sin(thetacm); 
-      double dudu = beta /slope * (gamma * beta * q - gamma * kCM * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi());
+      double dudu = beta /slope * (gamma * beta * q - gamma * kCM * TMath::Cos(thetacm)) * (1 - TMath::ASin(temp)/TMath::TwoPi()) * loop;
       double haha = thetacm * TMath::RadToDeg();
       if( !TMath::IsNaN(dudu) && !TMath::IsNaN(haha) ){
         px.push_back(dudu);
@@ -209,6 +209,8 @@ void FindThetaCM(double Ex, int nDivision=1, double XRATION = 0.95,
        
        double tMin =  (zMin +     j*zStep > zMin0) ? tx->Eval(zMin +     j*zStep) : TMath::QuietNaN();
        double tMax =  (zMin + (j+1)*zStep > zMin0) ? tx->Eval(zMin + (j+1)*zStep) : TMath::QuietNaN();
+
+       if( TMath::IsNaN(tMin) || tMin < 10 ) tMin = 10;
        
        double tMean = (tMax + tMin)/2.;
        double dt = (tMax - tMin);

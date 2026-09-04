@@ -14,7 +14,10 @@
 #include <stdlib.h>     /* atof */
 #include <cmath>
 #include <vector>
+#include <string>
 #include "FindThetaCM.h"
+
+using namespace std;
 
 int main(int argc, char *argv[]){
    
@@ -22,17 +25,19 @@ int main(int argc, char *argv[]){
   printf("===     Find ThetaCM convrage for each detector at Ex        ====\n");
   printf("=================================================================\n");
 
-  if(argc < 2 || argc > 6) { 
+  if(argc < 2 || argc > 7) { 
     printf("Usage: ./FindThetaCM Ex\n");
     printf("Usage: ./FindThetaCM Ex nDiv\n");
     printf("Usage: ./FindThetaCM Ex nDiv X-Ratio\n");
-    printf("Usage: ./FindThetaCM Ex nDiv X-Ratio reactionTxt detGeoTxt\n");
+    printf("Usage: ./FindThetaCM Ex nDiv X-Ratio loop\n");
+    printf("Usage: ./FindThetaCM Ex nDiv X-Ratio loop reactionTxt detGeoTxt\n");
     exit(0); 
   }  
   
   double Ex = 0;
   double xRatio = 0.95;
   int nDiv = 1;
+  short loop = 1;
   string reactionTxt = "reactionConfig.txt";
   string detGeoTxt = "detectorGeo.txt";
   
@@ -46,13 +51,16 @@ int main(int argc, char *argv[]){
     xRatio = atof(argv[3]);
   }
   if ( argc >= 5 ){
-    reactionTxt = argv[4];
+    loop = atoi(argv[4]);
   }
   if ( argc >= 6 ){
-    detGeoTxt = argv[5];
+    reactionTxt = argv[5];
+  }
+  if ( argc >= 7 ){
+    detGeoTxt = argv[6];
   }
   
-  FindThetaCM(Ex, nDiv, xRatio, reactionTxt, detGeoTxt);
+  FindThetaCM(Ex, nDiv, xRatio, loop, reactionTxt, detGeoTxt);
   
   return 0;
 }
