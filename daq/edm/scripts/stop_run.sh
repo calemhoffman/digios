@@ -90,5 +90,5 @@ rm -rf temp
 
 echo -e "------------ The Run\033[0;31m${RUN}\033[0m has now been STOPPED  ----------------"
 
-if [ "$AI_MODE" != "true" ]; then echo "this window close in 50 sec."
-sleep 50; fi
+if [ "$AI_MODE" != "true" ]; then echo "this window close in 20 sec."
+sleep 20; fi

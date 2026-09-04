@@ -297,7 +297,7 @@ public:
     #if NELUM > 0 
       if( 200 <= idDet && idDet < 200 + NELUM ) { // ELUM
         int elumID = idDet - 200; // ELUM ID
-        ELUM[elumID] = eee;
+        ELUM[elumID] = eee * POLARITY_ELUM; // Calculate ELUM
         ELUMTimestamp[elumID] = timestamp; // Set the timestamp for ELUM
       }
     #endif
@@ -305,7 +305,7 @@ public:
     #if NEZERO > 0
       if( 300 <= idDet && idDet < 300 + NEZERO ) { // EZERO
         int ezeroID = idDet - 300; // EZERO ID
-        EZERO[ezeroID] = eee;
+        EZERO[ezeroID] = eee * POLARITY_EZERO; // Calculate EZERO
         EZEROTimestamp[ezeroID] = timestamp; // Set the timestamp for EZERO
       }
     #endif
@@ -321,7 +321,7 @@ public:
     #if NCRDT > 0
       if( 500 <= idDet && idDet < 500 + NCRDT ) { // Circular Recoil
         int crdtID = idDet - 500; // Circular Recoil ID
-        CRDT[crdtID] = eee;
+        CRDT[crdtID] = eee * POLARITY_CRDT; // Calculate CRDT
         CRDTTimestamp[crdtID] = timestamp; // Set the timestamp for CRDT
       }
     #endif
@@ -329,7 +329,7 @@ public:
     #if NAPOLLO > 0
       if( 600 <= idDet && idDet < 600 + NAPOLLO ) { // APOLLO
         int apolloID = idDet - 600; // APOLLO ID
-        APOLLO[apolloID] = eee;
+        APOLLO[apolloID] = eee * POLARITY_APOLLO; // Calculate APOLLO
         APOLLOTimestamp[apolloID] = timestamp; // Set the timestamp for APOLLO
       }
     #endif
