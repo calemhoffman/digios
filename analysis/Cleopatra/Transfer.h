@@ -358,7 +358,7 @@ void Transfer(
   TString name;
   for( int i = 0; i < gxSize; i++){
     name.Form("g%d", i);     
-    gx[i] = new TF1(name, "([0]*TMath::Sqrt([1]+[2]*x*x)+[5]*x)/([3]) - [4]", -1000, 1000);      
+    gx[i] = new TF1(name, "([0]*TMath::Sqrt([1]+[2]*x*x)+[5]*x)/([3]) - [4]", -1000, 2000);      
     double thetacm = i * TMath::DegToRad();
     double gS2 = TMath::Power(TMath::Sin(thetacm)*gamma,2);
     gx[i]->SetParameter(0, TMath::Cos(thetacm));
