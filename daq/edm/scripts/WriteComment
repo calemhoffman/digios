@@ -42,4 +42,12 @@ else
     elogName="H"${expName:1}
 fi
 
-elog -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u MasterHelios helios -a Category=General -a Subject="Comments" -n 2 "${COMMENT}"
+# Prefer ryan_ANL build (libcurl + HTTP/2 Location parsing); fall through to the
+# older builds and finally the bare `elog` in PATH so this still works on hosts
+# where the ryan build isn't installed (e.g. the DAQ).
+ELOG_BIN=~/elog-ryan-build/elog
+if [ ! -x "${ELOG_BIN}" ]; then ELOG_BIN=~/elog_CloudFlare/BUILD/elog; fi
+if [ ! -x "${ELOG_BIN}" ]; then ELOG_BIN=~/bin/elog; fi
+if [ ! -x "${ELOG_BIN}" ]; then ELOG_BIN=elog; fi
+
+${ELOG_BIN} -h websrv1.phy.anl.gov -p 8080 -l ${elogName} -u MasterHelios helios -a Category=General -a Subject="Comments" -n 2 "${COMMENT}"

@@ -48,20 +48,47 @@ echo "[start_run_Mac] Combined elog: $(wc -c < ~/elogFull.txt) bytes"
 
 # 5. Post to elog
 echo "[start_run_Mac] Posting to elog..."
-ELOG_BIN=~/elog_CloudFlare/BUILD/elog
-if [ ! -f "${ELOG_BIN}" ]; then
+# Prefer the ryan_ANL build (ttang/elog-ryan branch ANL): libcurl transport
+# plus HTTP/2-aware "location:" header parsing so the ID is reliably returned.
+# Fall back to the older dhp/elog:ANL build, then a plain ~/bin/elog.
+ELOG_BIN=~/elog-ryan-build/elog
+if [ ! -x "${ELOG_BIN}" ]; then
+    ELOG_BIN=~/elog_CloudFlare/BUILD/elog
+fi
+if [ ! -x "${ELOG_BIN}" ]; then
     ELOG_BIN=~/bin/elog
 fi
 
+# Clear any stale ID from a prior run so a failure here can't cause
+# stop_run_Mac.sh to edit the previous run's entry.
+rm -f ~/elogID.txt
+
+ELOG_ERR=$(mktemp)
 ELOG_OUT=$(${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
     -u MasterHelios helios \
     -a Category=Runs -a Subject="RUN-${RUN} started" \
-    -n 2 -m ~/elogFull.txt 2>&1)
+    -n 2 -m ~/elogFull.txt 2>"${ELOG_ERR}")
+ELOG_RC=$?
 
-# Parse elog ID
-ELOG_ID=$(echo "${ELOG_OUT}" | awk -F'ID=' '{print $2}' | tr -d '[:space:]')
-echo "ID=${ELOG_ID}" > ~/elogID.txt
-echo "[start_run_Mac] Elog posted, ID=${ELOG_ID}"
+# Parse elog ID: only accept an ID printed on elog's success line, so a
+# CloudFlare/WAF page containing "Ray ID=..." can't be mistaken for success.
+ELOG_ID=$(printf '%s\n' "${ELOG_OUT}" \
+    | grep 'successfully transmitted' \
+    | grep -oE 'ID=[0-9]+' | tail -1 | cut -d= -f2)
+
+if [[ "${ELOG_ID}" =~ ^[0-9]+$ ]]; then
+    echo "ID=${ELOG_ID}" > ~/elogID.txt
+    echo "[start_run_Mac] Elog posted, ID=${ELOG_ID}"
+else
+    echo "[start_run_Mac] ERROR: failed to parse elog ID (rc=${ELOG_RC})" >&2
+    echo "[start_run_Mac] --- elog stdout ---" >&2
+    printf '%s\n' "${ELOG_OUT}" >&2
+    echo "[start_run_Mac] --- elog stderr ---" >&2
+    cat "${ELOG_ERR}" >&2
+    rm -f "${ELOG_ERR}"
+    exit 1
+fi
+rm -f "${ELOG_ERR}"
 
 # 6. Push to Discord
 echo "[start_run_Mac] Pushing to Discord..."

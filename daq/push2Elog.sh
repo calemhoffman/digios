@@ -12,6 +12,16 @@ elogIDTxt=/Users/heliosdigios/elogID.txt
 grafanaElog=/Users/heliosdigios/grafanaElog.jpg
 elogEndTxt=/Users/heliosdigios/elogEndRun.txt
 
+# Prefer the ryan_ANL build (libcurl + HTTP/2 Location parsing), then dhp/elog:ANL,
+# then a plain ~/bin/elog. See start_run_Mac.sh for background.
+ELOG_BIN=~/elog-ryan-build/elog
+if [ ! -x "${ELOG_BIN}" ]; then
+    ELOG_BIN=~/elog_CloudFlare/BUILD/elog
+fi
+if [ ! -x "${ELOG_BIN}" ]; then
+    ELOG_BIN=~/bin/elog
+fi
+
 if [ ${flag} == "start" ]; then
    echo "============ push to elog at start run"
    echo "elogName = ${elogName}, RunNo = ${RunNo}"
@@ -24,7 +34,7 @@ if [ ${flag} == "start" ]; then
       elogPost=${elogTxt}
    fi
 
-   IDStr=$(~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogPost})
+   IDStr=$(${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Start Run ${RunNo}" -n 2 -m ${elogPost})
 
    echo "-----"
    echo ${IDStr} 
@@ -48,7 +58,7 @@ if [ ${flag} == "stop" ]; then
    source ${elogIDTxt}
    echo "elogID = "${ID}
 
-   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -w ${ID} > ${elogTxt}
+   ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -w ${ID} > ${elogTxt}
 
    cutLineNum=$(grep -n "==============" ${elogTxt} | cut -b 1,2)
    #echo "cut Line Number : "${cutLineNum}
@@ -63,7 +73,7 @@ if [ ${flag} == "stop" ]; then
    #append elogEnnRun.txt
    cat ${elogEndTxt} >> ${elogTxt}
 
-   ~/bin/elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
+   ${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -e ${ID} -n ${encodingID} -m ${elogTxt} -f ${grafanaElog}
 
 #  elog -s -p 443 -h elog.phy.anl.gov -l ${elogName} -u MasterHelios helios -a Category=Run -a RunNo=${RunNo} -a Subject="Stop Run ${RunNo}" -n 2 -m ${elogEndTxt} -f ${grafanaElog}
 

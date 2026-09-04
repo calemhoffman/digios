@@ -33,9 +33,13 @@ fi
 
 echo "[stop_run_Mac] Experiment: ${expName} | RUN: ${RUN}"
 
-# Elog binary
-ELOG_BIN=~/elog_CloudFlare/BUILD/elog
-if [ ! -f "${ELOG_BIN}" ]; then
+# Elog binary -- prefer ryan_ANL build (libcurl + HTTP/2 Location parsing),
+# then dhp/elog:ANL build, then a plain ~/bin/elog.
+ELOG_BIN=~/elog-ryan-build/elog
+if [ ! -x "${ELOG_BIN}" ]; then
+    ELOG_BIN=~/elog_CloudFlare/BUILD/elog
+fi
+if [ ! -x "${ELOG_BIN}" ]; then
     ELOG_BIN=~/bin/elog
 fi
 
