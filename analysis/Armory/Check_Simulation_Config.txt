@@ -15,9 +15,10 @@
 /////              pElum1XY,          /// 14
 /////              pEElum1R,          /// 15
 /////              pElum1RThetaCM,    /// 16
-/////              pEmpty };          /// 17
+/////              pBeamXY,           /// 17
+/////              pEmpty };          /// 18
 /////=============================================== User Config
-{pEZ, pExCal, pThetaCM, pRecoilRZ, break, pThetaCM_Z, pRecoilXY, pInfo, pRecoilRThetaCM}   //Canvas config
+{pEZ, pExCal, pThetaCM, pRecoilRZ, break, pBeamXY, pArrayXY, pInfo, pRecoilRThetaCM}   //Canvas config
 hit == 1 && loop <= 1 && thetaCM > 10
 60              //elum range
 {0,50}        //thetaCM range

@@ -289,7 +289,11 @@ void Transfer(
   tree->Branch("beamTheta", &theta, "beamTheta/D");
   tree->Branch("beamPhi",     &phi, "beamPhi/D");
   tree->Branch("beamKEA",     &KEA, "beamKEA/D");
-  
+
+  double beamX, beamY; /// reaction vertex in mm, randomized per event
+  tree->Branch("beamX", &beamX, "beamX/D");
+  tree->Branch("beamY", &beamY, "beamY/D");
+
   double TbLoss; /// energy loss of particle-b from target scattering
   double KEAnew; ///beam energy after target scattering
   double depth;  /// reaction depth;
@@ -508,7 +512,20 @@ void Transfer(
         theta = gRandom->Gaus(reactionConfig.beamAngle, reactionConfig.beamAngleSigma);
       }
       phi = 0.0;
-      
+
+      //==== Set reaction vertex (transverse beam spot)
+      if( reactionConfig.beamXSigma == 0 ){
+        beamX = reactionConfig.beamX;
+      }else{
+        beamX = gRandom->Gaus(reactionConfig.beamX, reactionConfig.beamXSigma);
+      }
+      if( reactionConfig.beamYSigma == 0 ){
+        beamY = reactionConfig.beamY;
+      }else{
+        beamY = gRandom->Gaus(reactionConfig.beamY, reactionConfig.beamYSigma);
+      }
+      helios.SetBeamPosition(beamX, beamY);
+
       //==== for taregt scattering
       reaction.SetIncidentEnergyAngle(KEA, theta, 0.);
       reaction.CalReactionConstant();

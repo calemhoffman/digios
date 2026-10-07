@@ -8,6 +8,7 @@
 #include <TH1F.h>
 #include <TF1.h>
 #include <TArc.h>
+#include <TEllipse.h>
 #include <TMath.h>
 #include <TLine.h>
 #include <TSpectrum.h>
@@ -45,7 +46,8 @@ enum plotID { pEZ,               /// 0
               pElum1XY,          /// 14
               pEElum1R,          /// 15
               pElum1RThetaCM,    /// 16
-              pEmpty };          /// 17
+              pBeamXY,           /// 17
+              pEmpty };          /// 18
 plotID StringToPlotID(TString str);
 void Check_Simulation(TString filename = "transfer.root",
                       TString configFile = "../Armory/Check_Simulation_Config.txt",
@@ -115,8 +117,10 @@ void Check_Simulation(TString filename = "transfer.root",
    printf("number of events generated : %d \n", nEvent);
 
    double xBeam = reactionConfig.beamX;
-   double yBeam = reactionConfig.beamY; 
-   printf("             beam position : (%5.2f, %5.2f) mm \n", xBeam, yBeam); 
+   double yBeam = reactionConfig.beamY;
+   double xBeamSigma = reactionConfig.beamXSigma;
+   double yBeamSigma = reactionConfig.beamYSigma;
+   printf("             beam position : (%5.2f +- %4.2f, %5.2f +- %4.2f) mm \n", xBeam, xBeamSigma, yBeam, yBeamSigma);
 
    gStyle->SetOptStat("");
    gStyle->SetStatY(0.9);
@@ -401,6 +405,46 @@ void Check_Simulation(TString filename = "transfer.root",
         TH2F * hArrayXY = new TH2F("hArrayXY", "Array-XY [gated]; X [mm]; Y [mm]", 400, -prepDist*1.5, prepDist*1.5, 400, -prepDist*1.5, prepDist*1.5);
         tree->Draw("yArray:xArray>>hArrayXY", gate, "colz");
       }
+      if( pID == pBeamXY ){
+        /// the beamX/beamY branches only exist in files made after the vertex was added
+        if( tree->GetBranch("beamX") == NULL || tree->GetBranch("beamY") == NULL ){
+           printf("        beam spot : no beamX/beamY branch in this file, skipped pBeamXY \n");
+           TLatex text;
+           text.SetNDC();
+           text.SetTextFont(82);
+           text.SetTextSize(0.05);
+           text.SetTextColor(2);
+           text.DrawLatex(0.05, 0.5, "no beamX/beamY branch");
+           continue;
+        }
+        /// reaction vertex of the gated events; the window always contains the
+        /// magnetic axis (0,0) so the offset is visible, plus 4-sigma of the spot
+        double sigMax = TMath::Max(xBeamSigma, yBeamSigma);
+        double halfWidth = TMath::Max(TMath::Abs(xBeam), TMath::Abs(yBeam)) + TMath::Max(4.*sigMax, 1.0);
+        TH2F * hBeamXY = new TH2F("hBeamXY", Form("Beam-XY (reaction vertex) [gated], nominal (%.2f, %.2f) mm; X [mm]; Y [mm]", xBeam, yBeam),
+                                  400, -halfWidth, halfWidth, 400, -halfWidth, halfWidth);
+        tree->Draw("beamY:beamX>>hBeamXY", gate, "colz");
+
+        double count = hBeamXY->GetEntries();
+        if( count < 2000. ) {
+           hBeamXY->SetMarkerStyle(7);
+           if( count < 500. ) hBeamXY->SetMarkerStyle(3);
+           hBeamXY->Draw("scat");
+        }
+
+        /// 1-sigma contour of the configured spot, so the plot can be checked against the config
+        if( sigMax > 0. ){
+           TEllipse * spot = new TEllipse(xBeam, yBeam, xBeamSigma, yBeamSigma);
+           spot->SetLineColor(2);
+           spot->SetFillStyle(0);
+           spot->Draw("same");
+        }
+        TLine * axisX = new TLine(-halfWidth, 0, halfWidth, 0); axisX->SetLineColor(kBlue-8); axisX->Draw("same");
+        TLine * axisY = new TLine(0, -halfWidth, 0, halfWidth); axisY->SetLineColor(kBlue-8); axisY->Draw("same");
+
+        printf("        beam spot (gated) : (%.3f +- %.3f, %.3f +- %.3f) mm \n",
+               hBeamXY->GetMean(1), hBeamXY->GetRMS(1), hBeamXY->GetMean(2), hBeamXY->GetRMS(2));
+      }
       if( pID == pInfo           ){
          TLatex text;
          text.SetNDC();
@@ -642,9 +686,10 @@ plotID StringToPlotID(TString str){
    if( str == "pInfo" ) return plotID::pInfo;                 /// 12
    if( str == "pHitID" ) return plotID::pHitID;               /// 13
    if( str == "pElum1XY" ) return plotID::pElum1XY;           /// 14
-   if( str == "pEElum1R" ) return plotID::pEElum1R;           /// 14
-   if( str == "pElum1RThetaCM" ) return plotID::pElum1RThetaCM;    /// 15
-   if( str == "pEmpty" ) return plotID::pEmpty ;              /// 16
+   if( str == "pEElum1R" ) return plotID::pEElum1R;           /// 15
+   if( str == "pElum1RThetaCM" ) return plotID::pElum1RThetaCM;    /// 16
+   if( str == "pBeamXY" ) return plotID::pBeamXY;             /// 17
+   if( str == "pEmpty" ) return plotID::pEmpty ;              /// 18
    
    return plotID::pEmpty;
 }

@@ -63,6 +63,8 @@ struct ReactionConfig{
   float beamAngleSigma;     ///beam-emittance_in_mrad
   float beamX;              ///x_offset_of_Beam_in_mm
   float beamY;              ///y_offset_of_Beam_in_mm
+  float beamXSigma;         ///x_beam_spot_sigma_in_mm, optional 2nd number on the beamX line
+  float beamYSigma;         ///y_beam_spot_sigma_in_mm, optional 2nd number on the beamY line
   int numEvents;            ///number_of_Event_being_generated
   bool isTargetScattering;  ///isTargetScattering
   float targetDensity;      ///target_density_in_g/cm3
@@ -254,6 +256,8 @@ void PrintDetGeo(DetGeo detGeo){
 ReactionConfig LoadReactionConfig(TMacro * macro){
 
   ReactionConfig reaction;
+  reaction.beamXSigma = 0; /// optional, an old config without it must give 0, not garbage
+  reaction.beamYSigma = 0;
 
   if( macro == NULL ) return reaction;
 
@@ -277,8 +281,15 @@ ReactionConfig LoadReactionConfig(TMacro * macro){
     if( i == 7 ) reaction.beamEnergySigma = atof(str[0].c_str());
     if( i == 8 ) reaction.beamAngle       = atof(str[0].c_str());
     if( i == 9 ) reaction.beamAngleSigma  = atof(str[0].c_str());
-    if( i == 10 ) reaction.beamX = atof(str[0].c_str());
-    if( i == 11 ) reaction.beamY = atof(str[0].c_str());
+    /// the 2nd number, if any, is the beam-spot sigma; a comment there means no sigma given
+    if( i == 10 ) {
+      reaction.beamX = atof(str[0].c_str());
+      if( str.size() > 1 && str[1].find("//") != 0 ) reaction.beamXSigma = atof(str[1].c_str());
+    }
+    if( i == 11 ) {
+      reaction.beamY = atof(str[0].c_str());
+      if( str.size() > 1 && str[1].find("//") != 0 ) reaction.beamYSigma = atof(str[1].c_str());
+    }
     if( i == 12 ) reaction.numEvents = atoi(str[0].c_str());
     if( i == 13 ) {
       if( str[0].compare("false") == 0 ) reaction.isTargetScattering = false;
@@ -321,7 +332,7 @@ void PrintReactionConfig(ReactionConfig reaction){
 
   printf(" beam Energy : %.2f +- %.2f MeV/u, dE/E = %5.2f %%\n", reaction.beamEnergy, reaction.beamEnergySigma, reaction.beamEnergySigma/reaction.beamEnergy);
   printf("       Angle : %.2f +- %.2f mrad\n", reaction.beamAngle, reaction.beamAngleSigma);
-  printf("      offset : (x,y) = (%.2f, %.2f) mmm \n", reaction.beamX, reaction.beamY);
+  printf("      offset : (x,y) = (%.2f +- %.2f, %.2f +- %.2f) mm \n", reaction.beamX, reaction.beamXSigma, reaction.beamY, reaction.beamYSigma);
 
   printf("##### number of Simulation Events : %d \n", reaction.numEvents);
   

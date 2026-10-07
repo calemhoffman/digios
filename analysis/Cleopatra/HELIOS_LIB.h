@@ -505,7 +505,7 @@ public:
    
 private:   
       
-   void ClearTrajectory(trajectory t){
+   void ClearTrajectory(trajectory &t){ // must be a reference, otherwise it clears a copy
       t.theta = TMath::QuietNaN();
       t.phi = TMath::QuietNaN();
       t.vt = TMath::QuietNaN();
@@ -516,6 +516,8 @@ private:
       t.x = TMath::QuietNaN();
       t.y = TMath::QuietNaN();
       t.z = TMath::QuietNaN();
+      t.R = TMath::QuietNaN();
+      t.t = TMath::QuietNaN();
       t.effLoop = TMath::QuietNaN();
       t.detID = -1;
       t.detRowID = -1;
@@ -739,6 +741,7 @@ int HELIOS::DetAcceptance(){
 void HELIOS::CalTrajectoryPara(TLorentzVector P, int Z, int id){
    
    if( id == 0 ){
+      ClearTrajectory(orbitb); // so that un-assigned fields cannot leak from the previous event
       orbitb.theta = P.Theta();
       orbitb.phi = P.Phi();
       orbitb.rho = P.Pt() / abs(Bfield) / Z / c * 1000; //mm
@@ -753,6 +756,7 @@ void HELIOS::CalTrajectoryPara(TLorentzVector P, int Z, int id){
    }
    
    if( id == 1 ){
+      ClearTrajectory(orbitB); // so that un-assigned fields cannot leak from the previous event
       orbitB.theta = P.Theta();
       orbitB.phi = P.Phi();
       orbitB.rho = P.Pt() / abs(Bfield) / Z / c * 1000; //mm
@@ -845,7 +849,7 @@ int HELIOS::CalArrayHit(TLorentzVector Pb, int Zb){
          dMin = dd;
          orbitb.effLoop = zPossible[i]/orbitb.z0;
          orbitb.loop = TMath::Ceil(orbitb.effLoop);
-         orbitb.detRowID = (12+dID[i])%4;
+         orbitb.detRowID = ((dID[i] % mDet) + mDet) % mDet; // dID can be negative when sign = -1
          orbitb.t = orbitb.t0 * orbitb.effLoop;
          
          double phiD = TMath::TwoPi()/mDet * dID[i] ;
