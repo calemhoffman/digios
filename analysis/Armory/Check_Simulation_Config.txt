@@ -8,17 +8,18 @@
 /////              pThetaCM,          /// 7
 /////              pThetaCM_Z,        /// 8
 /////              pExCal,            /// 9
-/////              pRecoilRThetaCM,   /// 10
-/////              pArrayXY,          /// 11
-/////              pInfo,             /// 12
-/////              pHitID,            /// 13
-/////              pElum1XY,          /// 14
-/////              pEElum1R,          /// 15
-/////              pElum1RThetaCM,    /// 16
-/////              pBeamXY,           /// 17
-/////              pEmpty };          /// 18
+/////              pExCal2,           /// 10   ExCal (black) + vertex-corrected ExCal2 (red)
+/////              pRecoilRThetaCM,   /// 11
+/////              pArrayXY,          /// 12
+/////              pInfo,             /// 13
+/////              pHitID,            /// 14
+/////              pElum1XY,          /// 15
+/////              pEElum1R,          /// 16
+/////              pElum1RThetaCM,    /// 17
+/////              pBeamXY,           /// 18
+/////              pEmpty };          /// 19
 /////=============================================== User Config
-{pEZ, pExCal, pThetaCM, pRecoilRZ, break, pBeamXY, pArrayXY, pInfo, pRecoilRThetaCM}   //Canvas config
+{pEZ, pExCal2, pThetaCM, pRecoilRZ, break, pBeamXY, pArrayXY, pInfo, pRecoilRThetaCM}   //Canvas config
 hit == 1 && loop <= 1 && thetaCM > 10
 60              //elum range
 {0,50}        //thetaCM range

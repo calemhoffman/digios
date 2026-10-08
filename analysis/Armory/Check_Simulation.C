@@ -39,15 +39,16 @@ enum plotID { pEZ,               /// 0
               pThetaCM,          /// 7
               pThetaCM_Z,        /// 8
               pExCal,            /// 9
-              pRecoilRThetaCM,   /// 10
-              pArrayXY,          /// 11
-              pInfo,             /// 12
-              pHitID,            /// 13
-              pElum1XY,          /// 14
-              pEElum1R,          /// 15
-              pElum1RThetaCM,    /// 16
-              pBeamXY,           /// 17
-              pEmpty };          /// 18
+              pExCal2,           /// 10
+              pRecoilRThetaCM,   /// 11
+              pArrayXY,          /// 12
+              pInfo,             /// 13
+              pHitID,            /// 14
+              pElum1XY,          /// 15
+              pEElum1R,          /// 16
+              pElum1RThetaCM,    /// 17
+              pBeamXY,           /// 18
+              pEmpty };          /// 19
 plotID StringToPlotID(TString str);
 void Check_Simulation(TString filename = "transfer.root",
                       TString configFile = "../Armory/Check_Simulation_Config.txt",
@@ -395,7 +396,51 @@ void Check_Simulation(TString filename = "transfer.root",
          text->SetTextColor(4); text->DrawLatex(Sp,  yMax*0.9, "S_{p}");
          text->SetTextColor(6); text->DrawLatex(Sa,  yMax*0.9, "S_{a}");
          text->SetTextColor(8); text->DrawLatex(S2n, yMax*0.9, "S_{2n}");
-         
+
+      }
+      if( pID == pExCal2         ){
+         /// the ExCal2 branch only exists when the beam is off-axis or has a finite spot size,
+         /// otherwise the vertex correction is a no-op and Transfer does not write it out
+         if( tree->GetBranch("ExCal2") == NULL ){
+            printf("        ExCal2 : no ExCal2 branch in this file (beam is on-axis and point-like), skipped pExCal2 \n");
+            TLatex text;
+            text.SetNDC();
+            text.SetTextFont(82);
+            text.SetTextSize(0.05);
+            text.SetTextColor(2);
+            text.DrawLatex(0.05, 0.5, "no ExCal2 branch");
+            continue;
+         }
+
+         /// both histograms MUST share one axis. with a single Ex state exSpan == 0, so
+         /// ExRange is {0,0}; a TH1F booked with xlow == xup auto-ranges itself, and the two
+         /// would end up with different bin widths - same counts, but the narrower ExCal2
+         /// spread over narrower bins, so the peaks come out looking equally tall.
+         double ExCalRange[2] = {ExRange[0], ExRange[1]};
+         if( ExCalRange[1] <= ExCalRange[0] ) FindRange("ExCal", gate, tree, ExCalRange);
+
+         TH1F * hExCalA = new TH1F("hExCalA",  Form("calculated Ex [gated], black = ExCal, red = ExCal2 (vertex corrected); Ex [MeV]; count / %.2f keV", (ExCalRange[1]-ExCalRange[0])/400.*1000), 400, ExCalRange[0], ExCalRange[1]);
+         TH1F * hExCal2 = new TH1F("hExCal2",  Form("calculated Ex [gated]; Ex [MeV]; count / %.2f keV",                                                 (ExCalRange[1]-ExCalRange[0])/400.*1000), 400, ExCalRange[0], ExCalRange[1]);
+
+         hExCalA->SetLineColor(kBlack);
+         hExCal2->SetLineColor(kRed);
+
+         /// fill first with "goff", so the frame can be sized before anything is painted
+         tree->Draw("ExCal>>hExCalA",   gate, "goff");
+         tree->Draw("ExCal2>>hExCal2",  gate, "goff");
+
+         /// ExCal2 is the narrower of the two, let the frame be tall enough for it
+         hExCalA->GetYaxis()->SetRangeUser(0, TMath::Max(hExCalA->GetMaximum(), hExCal2->GetMaximum()) * 1.2);
+         hExCalA->Draw();
+         hExCal2->Draw("same");
+
+         printf("        ExCal  : mean %8.1f keV, std-dev %8.1f keV \n", hExCalA->GetMean()*1000, hExCalA->GetStdDev()*1000);
+         printf("        ExCal2 : mean %8.1f keV, std-dev %8.1f keV  (vertex corrected) \n", hExCal2->GetMean()*1000, hExCal2->GetStdDev()*1000);
+
+         TLegend * legendExCal2 = new TLegend(0.65, 0.70, 0.99, 0.88);
+         legendExCal2->AddEntry(hExCalA, Form("ExCal  (#sigma = %.1f keV)",  hExCalA->GetStdDev()*1000));
+         legendExCal2->AddEntry(hExCal2, Form("ExCal2 (#sigma = %.1f keV)",  hExCal2->GetStdDev()*1000));
+         legendExCal2->Draw();
       }
       if( pID == pRecoilRThetaCM ){
         TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoilOut);
@@ -681,15 +726,16 @@ plotID StringToPlotID(TString str){
    if( str == "pThetaCM" ) return plotID::pThetaCM;           /// 7
    if( str == "pThetaCM_Z" ) return plotID::pThetaCM_Z;       /// 8
    if( str == "pExCal" ) return plotID::pExCal;               /// 9
-   if( str == "pRecoilRThetaCM" ) return plotID::pRecoilRThetaCM;   /// 10
-   if( str == "pArrayXY" ) return plotID::pArrayXY;           /// 11
-   if( str == "pInfo" ) return plotID::pInfo;                 /// 12
-   if( str == "pHitID" ) return plotID::pHitID;               /// 13
-   if( str == "pElum1XY" ) return plotID::pElum1XY;           /// 14
-   if( str == "pEElum1R" ) return plotID::pEElum1R;           /// 15
-   if( str == "pElum1RThetaCM" ) return plotID::pElum1RThetaCM;    /// 16
-   if( str == "pBeamXY" ) return plotID::pBeamXY;             /// 17
-   if( str == "pEmpty" ) return plotID::pEmpty ;              /// 18
+   if( str == "pExCal2" ) return plotID::pExCal2;             /// 10
+   if( str == "pRecoilRThetaCM" ) return plotID::pRecoilRThetaCM;   /// 11
+   if( str == "pArrayXY" ) return plotID::pArrayXY;           /// 12
+   if( str == "pInfo" ) return plotID::pInfo;                 /// 13
+   if( str == "pHitID" ) return plotID::pHitID;               /// 14
+   if( str == "pElum1XY" ) return plotID::pElum1XY;           /// 15
+   if( str == "pEElum1R" ) return plotID::pEElum1R;           /// 16
+   if( str == "pElum1RThetaCM" ) return plotID::pElum1RThetaCM;    /// 17
+   if( str == "pBeamXY" ) return plotID::pBeamXY;             /// 18
+   if( str == "pEmpty" ) return plotID::pEmpty ;              /// 19
    
    return plotID::pEmpty;
 }

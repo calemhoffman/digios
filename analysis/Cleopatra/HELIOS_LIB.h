@@ -67,7 +67,11 @@ public:
    TLorentzVector GetPB(){return PB;}
    
    void CalReactionConstant();
-   int CalExThetaCM(double e, double z, double Bfield, double a); // return 0 for no-result, 1 for OK.
+   /// detRowID = azimuthal index of the hit detector (0..mDet-1), mDet = number of detector at same position
+   /// vertexX, vertexY = reaction vertex (beam position) in mm. The default gives the on-axis result.
+   int CalExThetaCM(double e, double z, double Bfield, double a,
+                    int detRowID = 0, int mDet = 4,
+                    double vertexX = 0, double vertexY = 0); // return 0 for no-result, 1 for OK.
    
    TLorentzVector * Event(double thetaCM, double phiCM);
    
@@ -333,13 +337,22 @@ TLorentzVector * TransferReaction::Event(double thetaCM, double phiCM)
 }
 
 
-int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a){
+int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a,
+                                   int detRowID, int mDet,
+                                   double vertexX, double vertexY){
    double mass = mb;
    double massB = mB;
    double y = e + mass;
    double slope = 299.792458 * zb * abs(Bfield) / TMath::TwoPi() * beta / 1000.; // MeV/mm;
    double alpha = slope/beta;
-   double G =  alpha * gamma * beta * a ;
+   // effective detector distance seen from an off-axis vertex.
+   // must match HELIOS::CalArrayHit, otherwise generation and reconstruction disagree.
+   double aEff = a;
+   if( mDet > 0 ){
+      double phiD = TMath::TwoPi()/mDet * detRowID;
+      aEff = a - (vertexX * TMath::Cos(phiD) + vertexY * TMath::Sin(phiD));
+   }
+   double G =  alpha * gamma * beta * aEff ;
    double Z = alpha * gamma * beta * z;
    double H = TMath::Sqrt(TMath::Power(gamma * beta,2) * (y*y - mass * mass) ) ;
    double Et = Etot;

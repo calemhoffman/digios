@@ -285,14 +285,27 @@ void Transfer(
   tree->Branch("ExCal",           &ExCal, "ExCal/D");
   tree->Branch("thetaCMCal", &thetaCMCal, "thetaCMCal/D");
 
+  /// when the beam is on-axis and point-like, the vertex is always (0,0),
+  /// the vertex correction is a no-op, and these branches carry no information.
+  bool isBeamOffset = ( reactionConfig.beamX      != 0 || reactionConfig.beamY      != 0 ||
+                        reactionConfig.beamXSigma != 0 || reactionConfig.beamYSigma != 0 );
+
+  double ExCal2 = TMath::QuietNaN(), thetaCMCal2 = TMath::QuietNaN(); /// corrected for the reaction vertex (beam position)
+  if( isBeamOffset ){
+    tree->Branch("ExCal2",           &ExCal2, "ExCal2/D");
+    tree->Branch("thetaCMCal2", &thetaCMCal2, "thetaCMCal2/D");
+  }
+
   double KEA, theta, phi;
   tree->Branch("beamTheta", &theta, "beamTheta/D");
   tree->Branch("beamPhi",     &phi, "beamPhi/D");
   tree->Branch("beamKEA",     &KEA, "beamKEA/D");
 
   double beamX, beamY; /// reaction vertex in mm, randomized per event
-  tree->Branch("beamX", &beamX, "beamX/D");
-  tree->Branch("beamY", &beamY, "beamY/D");
+  if( isBeamOffset ){
+    tree->Branch("beamX", &beamX, "beamX/D");
+    tree->Branch("beamY", &beamY, "beamY/D");
+  }
 
   double TbLoss; /// energy loss of particle-b from target scattering
   double KEAnew; ///beam energy after target scattering
@@ -666,6 +679,16 @@ void Transfer(
       reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius());
       ExCal = reaction.GetEx();
       thetaCMCal = reaction.GetThetaCM();
+
+      /// same, but correcting for the reaction vertex being off the magnetic axis.
+      /// must be after ExCal, CalExThetaCM() overwrites the Ex, thetaCM members.
+      if( isBeamOffset ){
+        reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius(),
+                              detRowID, helios.GetNumberOfDetectorsInSamePos(),
+                              beamX, beamY);
+        ExCal2 = reaction.GetEx();
+        thetaCMCal2 = reaction.GetThetaCM();
+      }
 
       //change thetaCM into deg
       thetaCM = thetaCM * TMath::RadToDeg();
