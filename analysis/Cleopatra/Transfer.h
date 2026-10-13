@@ -31,6 +31,13 @@ void Transfer(
   TransferReaction reaction;
   reaction.SetReactionFromFile(basicConfig);
 
+  /// A 2nd reaction object frozen at the nominal beam energy from the config file
+  /// (ExA = 0, no target energy loss) -- i.e. what a real analysis has to assume.
+  /// Used for the ExCal / ExCal_XY branches. It needs no per-event update, because
+  /// CalExThetaCM() only reads beta, gamma, Etot, mb, mB, none of which depend on ExB.
+  TransferReaction reactionNominal;
+  reactionNominal.SetReactionFromFile(basicConfig);
+
   printf("*****************************************************************\n");
   printf("*\e[1m\e[33m        %27s                            \e[0m*\n", reaction.GetReactionName().Data());
   printf("*****************************************************************\n");
@@ -281,19 +288,32 @@ void Transfer(
   tree->Branch("ExID", &ExID, "ExID/I");
   tree->Branch("Ex",     &Ex, "Ex/D");
 
-  double ExCal, thetaCMCal;
-  tree->Branch("ExCal",           &ExCal, "ExCal/D");
-  tree->Branch("thetaCMCal", &thetaCMCal, "thetaCMCal/D");
+  /// Ex and thetaCM reconstructed by CalExThetaCM(), in four flavours :
+  ///   (none) : nominal beam energy from the config, on-axis vertex <-- what a real analysis can do
+  ///   _E     : true event-by-event beam energy, on-axis vertex
+  ///   _XY    : nominal beam energy, true vertex (beamX, beamY)
+  ///   _EXY   : true event-by-event beam energy, true vertex
+  /// ExCal vs ExCal_E is the Ex resolution lost to the beam-energy spread, the target
+  /// energy loss and the ExA spread; ExCal vs ExCal_XY is the same for the beam spot.
+  double ExCal   = TMath::QuietNaN(), thetaCMCal   = TMath::QuietNaN();
+  double ExCal_E = TMath::QuietNaN(), thetaCMCal_E = TMath::QuietNaN();
+  tree->Branch("ExCal",             &ExCal, "ExCal/D");
+  tree->Branch("thetaCMCal",   &thetaCMCal, "thetaCMCal/D");
+  tree->Branch("ExCal_E",         &ExCal_E, "ExCal_E/D");
+  tree->Branch("thetaCMCal_E", &thetaCMCal_E, "thetaCMCal_E/D");
 
   /// when the beam is on-axis and point-like, the vertex is always (0,0),
   /// the vertex correction is a no-op, and these branches carry no information.
   bool isBeamOffset = ( reactionConfig.beamX      != 0 || reactionConfig.beamY      != 0 ||
                         reactionConfig.beamXSigma != 0 || reactionConfig.beamYSigma != 0 );
 
-  double ExCal2 = TMath::QuietNaN(), thetaCMCal2 = TMath::QuietNaN(); /// corrected for the reaction vertex (beam position)
+  double ExCal_XY  = TMath::QuietNaN(), thetaCMCal_XY  = TMath::QuietNaN();
+  double ExCal_EXY = TMath::QuietNaN(), thetaCMCal_EXY = TMath::QuietNaN();
   if( isBeamOffset ){
-    tree->Branch("ExCal2",           &ExCal2, "ExCal2/D");
-    tree->Branch("thetaCMCal2", &thetaCMCal2, "thetaCMCal2/D");
+    tree->Branch("ExCal_XY",         &ExCal_XY, "ExCal_XY/D");
+    tree->Branch("thetaCMCal_XY",   &thetaCMCal_XY, "thetaCMCal_XY/D");
+    tree->Branch("ExCal_EXY",       &ExCal_EXY, "ExCal_EXY/D");
+    tree->Branch("thetaCMCal_EXY", &thetaCMCal_EXY, "thetaCMCal_EXY/D");
   }
 
   double KEA, theta, phi;
@@ -676,18 +696,30 @@ void Transfer(
         rhoRecoil2 = helios.GetRecoilR(detGeo.recoilPos2);
       }
       
-      reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius());
-      ExCal = reaction.GetEx();
-      thetaCMCal = reaction.GetThetaCM();
+      /// nominal beam energy, on-axis vertex. this is what a real analysis reconstructs.
+      reactionNominal.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius());
+      ExCal = reactionNominal.GetEx();
+      thetaCMCal = reactionNominal.GetThetaCM();
 
-      /// same, but correcting for the reaction vertex being off the magnetic axis.
-      /// must be after ExCal, CalExThetaCM() overwrites the Ex, thetaCM members.
+      /// true event-by-event beam energy, on-axis vertex.
+      reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius());
+      ExCal_E = reaction.GetEx();
+      thetaCMCal_E = reaction.GetThetaCM();
+
+      /// same pair, but correcting for the reaction vertex being off the magnetic axis.
+      /// must be after the above, CalExThetaCM() overwrites the Ex, thetaCM members.
       if( isBeamOffset ){
+        reactionNominal.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius(),
+                                     detRowID, helios.GetNumberOfDetectorsInSamePos(),
+                                     beamX, beamY);
+        ExCal_XY = reactionNominal.GetEx();
+        thetaCMCal_XY = reactionNominal.GetThetaCM();
+
         reaction.CalExThetaCM(e, z, helios.GetBField(), helios.GetDetRadius(),
                               detRowID, helios.GetNumberOfDetectorsInSamePos(),
                               beamX, beamY);
-        ExCal2 = reaction.GetEx();
-        thetaCMCal2 = reaction.GetThetaCM();
+        ExCal_EXY = reaction.GetEx();
+        thetaCMCal_EXY = reaction.GetThetaCM();
       }
 
       //change thetaCM into deg
@@ -716,6 +748,13 @@ void Transfer(
     
     }else{
       hit = -404;
+      /// nothing was reconstructed, do not let the previous event's values be filled.
+      ExCal   = TMath::QuietNaN(); thetaCMCal   = TMath::QuietNaN();
+      ExCal_E = TMath::QuietNaN(); thetaCMCal_E = TMath::QuietNaN();
+      if( isBeamOffset ){
+        ExCal_XY  = TMath::QuietNaN(); thetaCMCal_XY  = TMath::QuietNaN();
+        ExCal_EXY = TMath::QuietNaN(); thetaCMCal_EXY = TMath::QuietNaN();
+      }
     }
 
     if( hit == 1)  count ++;

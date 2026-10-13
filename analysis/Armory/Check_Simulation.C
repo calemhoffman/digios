@@ -399,48 +399,79 @@ void Check_Simulation(TString filename = "transfer.root",
 
       }
       if( pID == pExCal2         ){
-         /// the ExCal2 branch only exists when the beam is off-axis or has a finite spot size,
-         /// otherwise the vertex correction is a no-op and Transfer does not write it out
-         if( tree->GetBranch("ExCal2") == NULL ){
-            printf("        ExCal2 : no ExCal2 branch in this file (beam is on-axis and point-like), skipped pExCal2 \n");
+         /// overlay the four reconstruction flavours written by Cleopatra/Transfer :
+         ///   ExCal     (black)      nominal beam energy from the config, on-axis vertex <- what a real analysis can do
+         ///   ExCal_E   (blue)       true event-by-event beam energy, on-axis vertex
+         ///   ExCal_XY  (dark green) nominal beam energy, true vertex (beamX, beamY)
+         ///   ExCal_EXY (red)        true event-by-event beam energy AND true vertex
+         /// so ExCal vs ExCal_E is the Ex resolution lost to not knowing the beam energy,
+         /// and ExCal vs ExCal_XY the same for not knowing the vertex.
+         /// the _XY pair only exists when the beam is off-axis or has a finite spot size,
+         /// otherwise the vertex correction is a no-op and Transfer does not write it out,
+         /// so take whichever of the four this file actually has.
+         const int nExCalKind = 4;
+         const char * exCalName[nExCalKind]  = {"ExCal", "ExCal_E", "ExCal_XY", "ExCal_EXY"};
+         const char * exCalNote[nExCalKind]  = {"nominal beam energy, on-axis vertex",
+                                                "true beam energy,    on-axis vertex",
+                                                "nominal beam energy, true vertex",
+                                                "true beam energy,    true vertex"};
+         const int    exCalColor[nExCalKind] = {kBlack, kBlue+1, kGreen+3, kRed};
+
+         /// they MUST all share one axis. with a single Ex state exSpan == 0, so ExRange
+         /// is {0,0}; a TH1F booked with xlow == xup auto-ranges itself, and each would end
+         /// up with a different bin width - same counts, but the narrower ones spread over
+         /// narrower bins, so every peak would come out looking equally tall.
+         double ExCalRange[2] = {ExRange[0], ExRange[1]};
+         if( ExCalRange[1] <= ExCalRange[0] ) FindRange("ExCal", gate, tree, ExCalRange);
+
+         TH1F * hExCalX[nExCalKind] = {NULL};
+         double yMaxExCal = 0;
+
+         /// fill first with "goff", so the frame can be sized before anything is painted
+         for( int i = 0; i < nExCalKind; i++ ){
+            if( tree->GetBranch(exCalName[i]) == NULL ){
+               printf("        %-9s : no such branch in this file, skipped \n", exCalName[i]);
+               continue;
+            }
+            hExCalX[i] = new TH1F(Form("hExCalX%d", i),
+                                  Form("calculated Ex [gated]; Ex [MeV]; count / %.2f keV", (ExCalRange[1]-ExCalRange[0])/400.*1000),
+                                  400, ExCalRange[0], ExCalRange[1]);
+            hExCalX[i]->SetLineColor(exCalColor[i]);
+            tree->Draw(Form("%s>>hExCalX%d", exCalName[i], i), gate, "goff");
+            if( hExCalX[i]->GetMaximum() > yMaxExCal ) yMaxExCal = hExCalX[i]->GetMaximum();
+         }
+
+         bool isFirstExCal = true;
+         TLegend * legendExCal2 = new TLegend(0.62, 0.62, 0.99, 0.88);
+         legendExCal2->SetFillStyle(0);
+
+         for( int i = 0; i < nExCalKind; i++ ){
+            if( hExCalX[i] == NULL ) continue;
+
+            if( isFirstExCal ){
+               /// the corrected ones are the narrow, tall ones, let the frame fit them
+               hExCalX[i]->GetYaxis()->SetRangeUser(0, yMaxExCal * 1.2);
+               hExCalX[i]->Draw();
+               isFirstExCal = false;
+            }else{
+               hExCalX[i]->Draw("same");
+            }
+
+            printf("        %-9s : mean %8.1f keV, std-dev %8.1f keV  (%s) \n",
+                      exCalName[i], hExCalX[i]->GetMean()*1000, hExCalX[i]->GetStdDev()*1000, exCalNote[i]);
+            legendExCal2->AddEntry(hExCalX[i], Form("%s (#sigma = %.1f keV)", exCalName[i], hExCalX[i]->GetStdDev()*1000));
+         }
+
+         if( isFirstExCal ){
             TLatex text;
             text.SetNDC();
             text.SetTextFont(82);
             text.SetTextSize(0.05);
             text.SetTextColor(2);
-            text.DrawLatex(0.05, 0.5, "no ExCal2 branch");
-            continue;
+            text.DrawLatex(0.05, 0.5, "no ExCal branch");
+         }else{
+            legendExCal2->Draw();
          }
-
-         /// both histograms MUST share one axis. with a single Ex state exSpan == 0, so
-         /// ExRange is {0,0}; a TH1F booked with xlow == xup auto-ranges itself, and the two
-         /// would end up with different bin widths - same counts, but the narrower ExCal2
-         /// spread over narrower bins, so the peaks come out looking equally tall.
-         double ExCalRange[2] = {ExRange[0], ExRange[1]};
-         if( ExCalRange[1] <= ExCalRange[0] ) FindRange("ExCal", gate, tree, ExCalRange);
-
-         TH1F * hExCalA = new TH1F("hExCalA",  Form("calculated Ex [gated], black = ExCal, red = ExCal2 (vertex corrected); Ex [MeV]; count / %.2f keV", (ExCalRange[1]-ExCalRange[0])/400.*1000), 400, ExCalRange[0], ExCalRange[1]);
-         TH1F * hExCal2 = new TH1F("hExCal2",  Form("calculated Ex [gated]; Ex [MeV]; count / %.2f keV",                                                 (ExCalRange[1]-ExCalRange[0])/400.*1000), 400, ExCalRange[0], ExCalRange[1]);
-
-         hExCalA->SetLineColor(kBlack);
-         hExCal2->SetLineColor(kRed);
-
-         /// fill first with "goff", so the frame can be sized before anything is painted
-         tree->Draw("ExCal>>hExCalA",   gate, "goff");
-         tree->Draw("ExCal2>>hExCal2",  gate, "goff");
-
-         /// ExCal2 is the narrower of the two, let the frame be tall enough for it
-         hExCalA->GetYaxis()->SetRangeUser(0, TMath::Max(hExCalA->GetMaximum(), hExCal2->GetMaximum()) * 1.2);
-         hExCalA->Draw();
-         hExCal2->Draw("same");
-
-         printf("        ExCal  : mean %8.1f keV, std-dev %8.1f keV \n", hExCalA->GetMean()*1000, hExCalA->GetStdDev()*1000);
-         printf("        ExCal2 : mean %8.1f keV, std-dev %8.1f keV  (vertex corrected) \n", hExCal2->GetMean()*1000, hExCal2->GetStdDev()*1000);
-
-         TLegend * legendExCal2 = new TLegend(0.65, 0.70, 0.99, 0.88);
-         legendExCal2->AddEntry(hExCalA, Form("ExCal  (#sigma = %.1f keV)",  hExCalA->GetStdDev()*1000));
-         legendExCal2->AddEntry(hExCal2, Form("ExCal2 (#sigma = %.1f keV)",  hExCal2->GetStdDev()*1000));
-         legendExCal2->Draw();
       }
       if( pID == pRecoilRThetaCM ){
         TH2F * hRecoilRThetaCM = new TH2F("hRecoilRThetaCM", "RecoilR - thetaCM [gated]; thetaCM [deg]; RecoilR [mm]", 400, 0, 60, 400,0, rhoRecoilOut);

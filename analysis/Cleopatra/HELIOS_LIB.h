@@ -354,7 +354,7 @@ int TransferReaction::CalExThetaCM(double e, double z, double Bfield, double a,
    }
    double G =  alpha * gamma * beta * aEff ;
    double Z = alpha * gamma * beta * z;
-   double H = TMath::Sqrt(TMath::Power(gamma * beta,2) * (y*y - mass * mass) ) ;
+   double H = gamma * beta * TMath::Sqrt((y*y - mass * mass) ) ;
    double Et = Etot;
 
    if( TMath::Abs(Z) < H ) {            

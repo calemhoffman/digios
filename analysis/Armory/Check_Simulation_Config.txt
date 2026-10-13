@@ -8,7 +8,7 @@
 /////              pThetaCM,          /// 7
 /////              pThetaCM_Z,        /// 8
 /////              pExCal,            /// 9
-/////              pExCal2,           /// 10   ExCal (black) + vertex-corrected ExCal2 (red)
+/////              pExCal2,           /// 10   all ExCal flavours : ExCal (black) ExCal_E (blue) ExCal_XY (dark green) ExCal_EXY (red)
 /////              pRecoilRThetaCM,   /// 11
 /////              pArrayXY,          /// 12
 /////              pInfo,             /// 13
