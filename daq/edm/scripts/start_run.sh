@@ -73,6 +73,7 @@ if [ -z "$COMMENT" ]; then
 else
     comment2="${COMMENT// /\ }"
     comment2="${comment2//,/\,}"
+    comment2="${comment2//=/\=}"
 fi
 
 curl -s -XPOST "http://${dataBaseAddress}:8086/write?db=testing" --data-binary "SavingData,expName=${expName},comment=Start_RUN-${comment2} value=1" --max-time 1 --connect-timeout 1
@@ -99,7 +100,11 @@ caput Online_CS_StartStop Start
 
 #==== Mac2020 handles all elog + Discord
 echo "============= Calling Mac2020 for elog + Discord"
-ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/start_run_Mac.sh" &
+{
+  echo "=== $(date '+%F %T') run=${RUN} start_run_Mac.sh begin ==="
+  ssh heliosdigios@${mac2020IP} "/Users/heliosdigios/digios/daq/start_run_Mac.sh"
+  echo "=== $(date '+%F %T') run=${RUN} start_run_Mac.sh exit=$? ==="
+} >> ${HOME}/elogPush.log 2>&1 &
 
 echo "============= Calling Pi for run status"
 ssh heliosspark@192.168.1.101 "python3 ~/.openclaw/workspace/skills/helios-status/gen_run_status.py" &

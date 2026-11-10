@@ -1,7 +1,5 @@
 #!/bin/bash -l
 expName=ARR01
 daqDataPath=/media/DIGIOSDATA6
-LastRunNum=178
-lastRunComment=""
-lastStopComment=""
-totalFileSize=""
+LastRunNum=183
+lastRunComment="with elum"
