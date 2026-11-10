@@ -64,6 +64,7 @@ fi
 rm -f ~/elogID.txt
 
 ELOG_ERR=$(mktemp)
+for ELOG_ATTEMPT in 1 2 3; do
 ELOG_OUT=$(${ELOG_BIN} -s -p 443 -h elog.phy.anl.gov -l ${elogName} \
     -u MasterHelios helios \
     -a Category=Runs -a Subject="RUN-${RUN} started" \
@@ -75,6 +76,12 @@ ELOG_RC=$?
 ELOG_ID=$(printf '%s\n' "${ELOG_OUT}" \
     | grep 'successfully transmitted' \
     | grep -oE 'ID=[0-9]+' | tail -1 | cut -d= -f2)
+    if [[ "${ELOG_ID}" =~ ^[0-9]+$ ]]; then
+        break
+    fi
+    echo "[start_run_Mac] elog attempt ${ELOG_ATTEMPT} failed (rc=${ELOG_RC})" >&2
+    if [ ${ELOG_ATTEMPT} -lt 3 ]; then sleep 10; fi
+done
 
 if [[ "${ELOG_ID}" =~ ^[0-9]+$ ]]; then
     echo "ID=${ELOG_ID}" > ~/elogID.txt
