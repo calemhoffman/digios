@@ -1,7 +1,7 @@
 #!/bin/bash -l
-expName=ARR01
+expName=h098_20Ne_ap
 daqDataPath=/media/DIGIOSDATA6
-LastRunNum=183
-lastRunComment="noise"
-lastStopComment="noise"
-totalFileSize="7.2G"
+LastRunNum=0
+lastRunComment=""
+lastStopComment=""
+totalFileSize="0"
