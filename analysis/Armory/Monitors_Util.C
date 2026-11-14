@@ -74,9 +74,10 @@ void FindBesCanvasDivision(int nPad){
 }
 
 int nCanvas=0;
-void newCanvas(int sizeX = 800, int sizeY = 600, int posX = 0, int posY = 0){
+void newCanvas(int sizeX = 800, int sizeY = 600, int posX = -1, int posY = -1){
   TString name; name.Form("cNewCanvas%d | %s", nCanvas, canvasTitle.Data());
-  TCanvas * cNewCanvas = new TCanvas(name, name, posX, posY, sizeX, sizeY);
+  // no position -> OS places it on the main display (ROOT/Cocoa positions are relative to the union of all screens)
+  TCanvas * cNewCanvas = ( posX < 0 || posY < 0 ) ? new TCanvas(name, name, sizeX, sizeY) : new TCanvas(name, name, posX, posY, sizeX, sizeY);
   nCanvas++;
   cNewCanvas->cd();
 }
@@ -300,7 +301,7 @@ void elum(void) {
   }
   
   TCanvas *celumID = (TCanvas *) gROOT->FindObjectAny("celumID");
-  if( celumID == NULL )  celumID = new TCanvas("celumID",Form("ELUM-ID | %s", canvasTitle.Data()),1100, 0, 500,500);
+  if( celumID == NULL )  celumID = new TCanvas("celumID",Form("ELUM-ID | %s", canvasTitle.Data()), 500,500);
   celumID->Clear();
   helumID->Draw("colz");
   
@@ -319,7 +320,7 @@ void apollo(void) {
   
 void recoils(bool isLogz = false) {
   TCanvas *crdt =  (TCanvas *) gROOT->FindObjectAny("crdt");
-  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()),1700, 0, 1000,1000);
+  if( crdt == NULL ) crdt = new TCanvas("crdt",Form("raw RDT | %s", canvasTitle.Data()), 1000,1000);
   crdt->Clear();crdt->Divide(2,2);
 
   if( isLogz ) crdt->cd(1)->SetLogz(); crdt->cd(1); hrdt2D[0]->Draw("col box");  
@@ -347,13 +348,13 @@ void recoils(bool isLogz = false) {
   //if( isLogz ) crdtSum->cd(4)->SetLogz(); crdtSum->cd(4); hrdt2Dsum[2]->Draw("col");    
   
   TCanvas *crdtID =  (TCanvas *) gROOT->FindObjectAny("crdtID");
-  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()),0,0, 500, 500);
+  if( crdtID == NULL ) crdtID = new TCanvas("crdtID",Form("raw RDT ID | %s", canvasTitle.Data()), 500, 500);
   crdtID->Clear();
   if( isLogz ) crdtID->SetLogz(); 
   hrdtID->Draw("colz");
   
   TCanvas *crdtS =  (TCanvas *) gROOT->FindObjectAny("crdtS");
-  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()),600, 0, 1000, 1000);
+  if( crdtS == NULL ) crdtS = new TCanvas("crdtS",Form("raw RDT | %s", canvasTitle.Data()), 1000, 1000);
   crdtS->Clear(); crdtS->Divide(2,4);
   for( int i = 0; i < NRDT; i ++){
     crdtS->cd(i+1);
@@ -417,14 +418,14 @@ void eCalVzRowG() {
 
 void excite(void) {
   TCanvas *cex =  (TCanvas *) gROOT->FindObjectAny("cex");
-  if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()),0, 0, 1000,650);
+  if( cex == NULL ) cex = new TCanvas("cex",Form("EX : %s", canvasTitle.Data()), 1000,650);
   cex->Clear();
   gStyle->SetOptStat("neiou");
   hEx->Draw("");
   
   
   TCanvas *cexI =  (TCanvas *) gROOT->FindObjectAny("cexI");
-  if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()),500, 0, 1600,1000);
+  if( cexI == NULL ) cexI = new TCanvas("cexI",Form("EX : %s", canvasTitle.Data()), 1600,1000);
   cexI->Clear();cexI->Divide(NCOL,NROW);
   gStyle->SetOptStat("neiou");
   for( int i = 0; i < NARRAY; i++){
@@ -433,7 +434,7 @@ void excite(void) {
   }
   
   TCanvas *cexC =  (TCanvas *) gROOT->FindObjectAny("cexC");
-  if( cexC == NULL ) cexC = new TCanvas("cexC",Form("EX : %s", canvasTitle.Data()),500, 500, 1600,300);
+  if( cexC == NULL ) cexC = new TCanvas("cexC",Form("EX : %s", canvasTitle.Data()), 1600,300);
   cexC->Clear();cexC->Divide(NCOL,1);
   gStyle->SetOptStat("neiou");
   for( int i = 0; i < NCOL; i++){

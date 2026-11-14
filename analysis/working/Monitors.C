@@ -31,13 +31,13 @@ using namespace std;
 #define NROW 4 // number of side of array
 
 //---histogram setting
-int rawEnergyRange[2] = {     -1000,    3000};       /// share with e, ring, xf, xn
+int rawEnergyRange[2] = {    500,    6000};       /// share with e, ring, xf, xn
 int    energyRange[2] = {     1,     20};       /// in the E-Z plot
 int     rdtDERange[2] = {     50,    3000}; 
 int      rdtERange[2] = {     50,    8000};  
 int    apolloRange[2] = {     0,    1000};
 int      crdtRange[2] = {     0,    8000};
-int      elumRange[2] = {   200,    4000};
+int      elumRange[2] = {   100,    1000};
 int       TACRange[3] = { 300,   2000,   6000};  /// #bin, min, max
 int      TAC2Range[3] = { 100,    400,    500};
 int   thetaCMRange[2] = {0, 80};
@@ -62,7 +62,7 @@ int dEgate[2]         = {  500,  1500};
 int Eresgate[2]       = { 1000,  4000};
 double thetaCMGate    = 10;                    /// deg
 double xGate          = 0.8;                  ///cut out the edge
-vector<int> skipDetID = {2, 11, 20, 21}; 
+vector<int> skipDetID = {2, 11, 20}; 
 
 TString rdtCutFile1 = "rdtCuts_Ne.root";
 TString rdtCutFile2 = "rdtCuts_O.root";
@@ -687,8 +687,16 @@ Bool_t Monitors::Process(Long64_t entry){
       hringVID->Fill(detID, ring[detID]);
       hxfVID->Fill(detID, xf[detID]);
       hxnVID->Fill(detID, xn[detID]);
+
+      //===================== calculate X
+      if( (xf[detID] > 0 || !TMath::IsNaN(xf[detID])) && ( xn[detID]>0 || !TMath::IsNaN(xn[detID])) && (e[detID]>0 || !TMath::IsNaN(e[detID])) ) {
+        ///x[detID] = 0.5*((xf[detID]-xn[detID]) / (xf[detID]+xn[detID]))+0.5;
+        x[detID] = 0.5*((xf[detID]-xn[detID]) / e[detID])+0.5;
+         //=================== Array fill
+         heVx[detID]->Fill(x[detID],e[detID]);
+         hringVx[detID]->Fill(x[detID],ring[detID]);
+      }
       
-            
       //==================== Basic gate
       if( TMath::IsNaN(e[detID]) ) continue ; 
       ///if( ring[detID] < -100 || ring[detID] > 100 ) continue; 
@@ -725,12 +733,6 @@ Bool_t Monitors::Process(Long64_t entry){
       hxfCalVxnCal[detID]->Fill(xfcal[detID], xncal[detID]);
       heVxsCal[detID]->Fill(xncal[detID] + xfcal[detID], e[detID]);
       
-      //===================== calculate X
-      if( (xf[detID] > 0 || !TMath::IsNaN(xf[detID])) && ( xn[detID]>0 || !TMath::IsNaN(xn[detID])) ) {
-        ///x[detID] = 0.5*((xf[detID]-xn[detID]) / (xf[detID]+xn[detID]))+0.5;
-        x[detID] = 0.5*((xf[detID]-xn[detID]) / e[detID])+0.5;
-      }
-      
       /// range of x is (0, 1)
       if  ( !TMath::IsNaN(xf[detID]) && !TMath::IsNaN(xn[detID]) ) xcal[detID] = 0.5 + 0.5 * (xfcal[detID] - xncal[detID] ) / e[detID];
       if  ( !TMath::IsNaN(xf[detID]) &&  TMath::IsNaN(xn[detID]) ) xcal[detID] = xfcal[detID]/ e[detID];
@@ -750,11 +752,6 @@ Bool_t Monitors::Process(Long64_t entry){
 
       //===================== multiplicity
       arrayMulti++; /// multi-hit when both e, xf, xn are not NaN
-
-      //=================== Array fill
-      heVx[detID]->Fill(x[detID],e[detID]);
-      hringVx[detID]->Fill(x[detID],ring[detID]);
-     
       heCalVxCal[detID]->Fill(xcal[detID]*detGeo.detLength,eCal[detID]);
       heCalVz->Fill(z[detID],eCal[detID]);
 
