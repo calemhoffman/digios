@@ -268,7 +268,7 @@ public:
       if( 0 <= idDet && idDet < NARRAY ) { // Check if the ID is within the range of NARRAY
         switch (idKind ){
         case 0: // Energy signal
-          Energy[idDet] = eee; // Calculate energy
+          Energy[idDet] = eee * POLARITY_E; // Calculate energy
           EnergyTimestamp[idDet] = timestamp; // Set the timestamp for energy
           break;
         case 1: // XF
