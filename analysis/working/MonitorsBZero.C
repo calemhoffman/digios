@@ -6,7 +6,9 @@
  *          ../Armory/Process_RUN RUN ... -BZ
  *
  *  detectors (see MonitorsBZero.h)
- *    stub (det 21) : PSD 50 x 10 mm, long axis along X (-25 ~ +25 mm), at Y = -150 mm, Z = +25 mm
+ *    stub (det 21) : PSD 50 x 10 mm, center at Y = -150 mm, Z = +25 mm, only the long axis is position sensitive
+ *                    stubLongAxis = 0 : long axis along Z -> theta_lab measured, phi unresolved
+ *                    stubLongAxis = 1 : long axis along X -> phi_lab measured, theta unresolved (~80.5 +- 1.9 deg)
  *    ELUM          : S1, 1000 um, 16 rings r = 24-48 mm, z = -50 mm
  *    RDT           : at z = +1000 mm
  *
@@ -51,12 +53,16 @@ vector<double> exLines = {0.0, 0.440, 2.076, 2.391};  /// Ex [MeV] for the kinem
 
 //---- Stub (det 21) geometry
 const int stubID      = 21;
-/// stub long axis is along X ; position along the strip -> X, theta = atan2( sqrt(X^2 + Y^2), Z ) ~ 80.5 - 80.7 deg
-double stubY          = 150.0;  /// distance from beam axis in Y [mm] (stub at -Y)
-double stubZ          =  25.0;  /// Z of the stub plane [mm]
-double stubXCenterPos =   0.0;  /// X of the stub center [mm]
-double stubLength     =  50.0;  /// along X [mm]
-bool   isStubXFPositiveX = true; /// x = 1 (xf side) at +X
+/// only the long axis is position sensitive ; the short axis (width) is not resolved
+///   stubLongAxis = 0 : long axis along Z            -> position gives theta_lab = atan2( sqrt(X^2 + Y^2), Z ), phi fixed (unresolved)
+///   stubLongAxis = 1 : long axis along X (XY plane) -> position gives phi_lab   = atan2( Y, X ),  theta fixed (unresolved, from width along Z)
+int    stubLongAxis   =   1;
+double stubX          =   0.0;  /// center of the stub [mm]
+double stubY          = -150.0; /// center of the stub [mm] (signed, stub at -Y)
+double stubZ          =  25.0;  /// center of the stub [mm]
+double stubLength     =  50.0;  /// long axis, position sensitive [mm]
+double stubWidth      =  10.0;  /// short axis, not position sensitive [mm]
+bool   isStubXFPositive = true; /// x = 1 (xf side) toward +Z (mode 0) or +X (mode 1)
 
 //---- ELUM geometry
 double elumZ          = -50.0;  /// [mm]
@@ -97,9 +103,9 @@ double stubXCenter    = 0.544;   /// x' = (x - center)/scale + 0.5 -> detector e
 double stubXScale     = 0.710;   /// run 2 alpha, half-max edges of gain-matched x at 0.189 and 0.899
 
 //---- histogram ranges
-int    rawERange[2]   = {   0, 6000};   /// stub e, xf, xn [ch]
-int    elumRawRange[2]= {   0, 1000};   /// [ch]
-double eCalRange[2]   = {   0,   15};   /// [MeV]
+int    rawERange[2]   = {  100, 6000};   /// stub e, xf, xn [ch]
+int    elumRawRange[2]= {  100, 1000};   /// [ch]
+double eCalRange[2]   = {   0.5,   15};   /// [MeV]
 int    rdtERange[2]   = {   0, 8000};
 int    rdtDERange[2]  = {   0, 4000};
 double exRange[3]     = {  50,   -2, 12}; /// bin [keV], low [MeV], high [MeV]
@@ -153,8 +159,8 @@ TH2F* hStubXFVXN;
 TH2F* hStubEVXS;      // raw e vs xf+xn
 TH2F* hStubEVx;       // raw e vs raw x
 TH1F* hStubECal;
-TH2F* hStubECalVX;
-TH2F* hStubECalVTheta;
+TH2F* hStubECalVPos;    // stub eCal vs position along the long axis (Z or X)
+TH2F* hStubECalVTheta;  // stub eCal vs resolved angle : theta_lab (mode 0) or phi_lab (mode 1), name kept
 
 //======== ELUM
 TH1F* helum[NELUM];
@@ -181,7 +187,7 @@ TH2F* hrdtMatrix;
 TH1I* htdiffElum;    // rdt_t - elum_t
 TH1I* htdiffStub;    // rdt_t - e_t[stub]
 TH2F* htdiffStubVID; // vs RDT channel
-TH2F* hStubECalVXG;  // stub eCal vs X, RDT coincident
+TH2F* hStubECalVPosG; // stub eCal vs position, RDT coincident
 TH2F* hrdt2DgStub[NRDT/2]; // RDT dE-E, stub coincident
 TH2F* htdiffElumVID; // vs ring
 
@@ -213,6 +219,18 @@ double CalT(double thetaDeg, double ex, int sol = 0){
    double E3 = TMath::Sqrt(p3*p3 + mLight*mLight);
    if( TMath::Abs(Etot*E3 - Ptot*c*p3 - K) > 1e-6*TMath::Abs(K) ) return TMath::QuietNaN(); /// spurious root from squaring
    return E3 - mLight;
+}
+
+/// stub hit position [mm] from s = signed position along the long axis, measured from the stub center
+void StubHitPos(double s, double &X, double &Y, double &Z){
+   X = stubX; Y = stubY; Z = stubZ;
+   if( stubLongAxis == 0 ) Z += s; else X += s;
+}
+
+/// the angle resolved by the stub [deg] : theta_lab (long axis along Z) or phi_lab (long axis along X)
+double StubAngle(double X, double Y, double Z){
+   if( stubLongAxis == 0 ) return TMath::ATan2(TMath::Sqrt(X*X + Y*Y), Z) * TMath::RadToDeg();
+   return TMath::ATan2(Y, X) * TMath::RadToDeg();
 }
 
 TGraph * KinematicLine(double ex, double th1, double th2, int color){
@@ -281,11 +299,27 @@ void MonitorsBZero::Begin(TTree *tree){
       elumTheta[i] = TMath::ATan2(elumR[i], elumZ) * TMath::RadToDeg();
       printf("   ring %2d : r = %5.2f mm, theta = %6.2f deg, T_p(Ex=0) = %6.3f MeV\n", i, elumR[i], elumTheta[i], CalT(elumTheta[i], 0));
    }
-   double stubXMaxAbs = TMath::Max(TMath::Abs(stubXCenterPos - stubLength/2.), TMath::Abs(stubXCenterPos + stubLength/2.));
-   double stubXMinAbs = ( TMath::Abs(stubXCenterPos) < stubLength/2. ) ? 0 : TMath::Abs(stubXCenterPos) - stubLength/2.;
-   double thStub[2] = { TMath::ATan2(TMath::Sqrt(stubXMinAbs*stubXMinAbs + stubY*stubY), stubZ)*TMath::RadToDeg(),
-                        TMath::ATan2(TMath::Sqrt(stubXMaxAbs*stubXMaxAbs + stubY*stubY), stubZ)*TMath::RadToDeg() };
-   printf("================ stub theta range : %.2f - %.2f deg\n", thStub[0], thStub[1]);
+   //---- stub angles : resolved (along long axis) and unresolved (across width)
+   double angStub[2];  /// range of the resolved angle, for histogram axis
+   {
+      double s[3] = {-stubLength/2., 0, stubLength/2.};
+      double w[2] = {-stubWidth/2., stubWidth/2.};
+      double a[3], u[2];
+      for( int i = 0; i < 3; i++){ double X, Y, Z; StubHitPos(s[i], X, Y, Z); a[i] = StubAngle(X, Y, Z); }
+      /// unresolved angle : center of the long axis, edges of the width
+      if( stubLongAxis == 0 ){ /// width along X (perpendicular to Y offset) -> phi
+         for( int i = 0; i < 2; i++) u[i] = TMath::ATan2(stubY, stubX + w[i]) * TMath::RadToDeg();
+      }else{                   /// width along Z -> theta
+         for( int i = 0; i < 2; i++) u[i] = TMath::ATan2(TMath::Sqrt(stubX*stubX + stubY*stubY), stubZ + w[i]) * TMath::RadToDeg();
+      }
+      angStub[0] = TMath::Min(a[0], a[2]); angStub[1] = TMath::Max(a[0], a[2]);
+      const char * res = stubLongAxis == 0 ? "theta" : "phi";
+      const char * unr = stubLongAxis == 0 ? "phi"   : "theta";
+      printf("================ stub long axis along %s : %s_lab measured %.2f - %.2f deg (center %.2f)\n",
+             stubLongAxis == 0 ? "Z" : "X", res, angStub[0], angStub[1], a[1]);
+      printf("                 %s_lab NOT resolved : %.2f - %.2f deg (center %.2f +- %.2f, from %.0f mm width)\n",
+             unr, TMath::Min(u[0], u[1]), TMath::Max(u[0], u[1]), 0.5*(u[0]+u[1]), 0.5*TMath::Abs(u[1]-u[0]), stubWidth);
+   }
 
    //================ Recoil cut
    isCutFileOpen = false; numCut = 0; cutList = NULL;
@@ -333,8 +367,11 @@ void MonitorsBZero::Begin(TTree *tree){
    hStubEVXS   = new TH2F("hStubEVXS",  "stub raw e vs xf+xn; xf+xn [ch]; e [ch]",           500, rawERange[0], rawERange[1], 500, rawERange[0], rawERange[1]);
    hStubEVx    = new TH2F("hStubEVx",   "stub raw e vs x; x = 0.5(xf-xn)/e+0.5; e [ch]",      500, -0.1, 1.1, 500, rawERange[0], rawERange[1]);
    hStubECal   = new TH1F("hStubECal",  "stub eCal; E [MeV]; count",                          1500, eCalRange[0], eCalRange[1]);
-   hStubECalVX = new TH2F("hStubECalVX","stub eCal vs X; X [mm]; E [MeV]",                    400, stubXCenterPos - stubLength/2. - 10, stubXCenterPos + stubLength/2. + 10, 500, eCalRange[0], eCalRange[1]);
-   hStubECalVTheta = new TH2F("hStubECalVTheta", "stub eCal vs #theta_{lab}; #theta_{lab} [deg]; E [MeV]", 200, thStub[0]-0.5, thStub[1]+0.5, 500, eCalRange[0], eCalRange[1]);
+   TString stubAx  = stubLongAxis == 0 ? "Z" : "X";
+   TString stubAng = stubLongAxis == 0 ? "#theta_{lab}" : "#phi_{lab}";
+   double  stubPos0 = (stubLongAxis == 0 ? stubZ : stubX);
+   hStubECalVPos   = new TH2F("hStubECalVPos", Form("stub eCal vs %s; %s [mm]; E [MeV]", stubAx.Data(), stubAx.Data()), 400, stubPos0 - stubLength/2. - 10, stubPos0 + stubLength/2. + 10, 500, eCalRange[0], eCalRange[1]);
+   hStubECalVTheta = new TH2F("hStubECalVTheta", Form("stub eCal vs %s; %s [deg]; E [MeV]", stubAng.Data(), stubAng.Data()), 200, angStub[0]-1, angStub[1]+1, 500, eCalRange[0], eCalRange[1]);
 
    //---- ELUM
    for( int i = 0; i < NELUM; i++){
@@ -373,7 +410,7 @@ void MonitorsBZero::Begin(TTree *tree){
    htdiffElum    = new TH1I("htdiffElum", "rdt_t - elum_t; time [10 ns]; count",   nT, coinTimeRange[0], coinTimeRange[1]);
    htdiffStub    = new TH1I("htdiffStub", "rdt_t - stub e_t; time [10 ns]; count", nT, coinTimeRange[0], coinTimeRange[1]);
    htdiffStubVID = new TH2F("htdiffStubVID", "rdt_t - stub e_t vs RDT ch; RDT ch; time [10 ns]", NRDT, 0, NRDT, nT, coinTimeRange[0], coinTimeRange[1]);
-   hStubECalVXG  = new TH2F("hStubECalVXG", "stub eCal vs X, RDT coin.; X [mm]; E [MeV]", 400, stubXCenterPos - stubLength/2. - 10, stubXCenterPos + stubLength/2. + 10, 500, eCalRange[0], eCalRange[1]);
+   hStubECalVPosG = new TH2F("hStubECalVPosG", Form("stub eCal vs %s, RDT coin.; %s [mm]; E [MeV]", stubAx.Data(), stubAx.Data()), 400, stubPos0 - stubLength/2. - 10, stubPos0 + stubLength/2. + 10, 500, eCalRange[0], eCalRange[1]);
    for( int i = 0; i < NRDT/2; i++){
       hrdt2DgStub[i] = new TH2F(Form("hrdt2DgStub%d", i), Form("RDT dE vs E, stub coin. (E=%d, dE=%d); E [ch]; dE [ch]", 2*i, 2*i+1), 500, rdtERange[0], rdtERange[1], 500, rdtDERange[0], rdtDERange[1]);
    }
@@ -518,11 +555,13 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
          xC = (xC - stubXCenter)/stubXScale + 0.5;
 
          if( TMath::Abs(xC - 0.5) < xGate/2. ){
-            double xx = isStubXFPositiveX ? stubXCenterPos + (xC - 0.5)*stubLength : stubXCenterPos - (xC - 0.5)*stubLength;
-            double th = TMath::ATan2(TMath::Sqrt(xx*xx + stubY*stubY), stubZ) * TMath::RadToDeg();
-            hStubECalVX->Fill(xx, eC);
-            hStubECalVTheta->Fill(th, eC);
-            if( stubCoin ) hStubECalVXG->Fill(xx, eC);
+            double s = (isStubXFPositive ? 1 : -1) * (xC - 0.5) * stubLength;
+            double hX, hY, hZ;
+            StubHitPos(s, hX, hY, hZ);
+            double pos = (stubLongAxis == 0 ? hZ : hX);
+            hStubECalVPos->Fill(pos, eC);
+            hStubECalVTheta->Fill(StubAngle(hX, hY, hZ), eC);
+            if( stubCoin ) hStubECalVPosG->Fill(pos, eC);
          }
       }
    }
@@ -573,7 +612,7 @@ void stub(){
    c->cd(5); Draw2DHistBZ(hStubEVXS);
    c->cd(6); Draw2DHistBZ(hStubEVx);
    c->cd(7); hStubECal->Draw();
-   c->cd(8); Draw2DHistBZ(hStubECalVX);
+   c->cd(8); Draw2DHistBZ(hStubECalVPos);
    c->cd(9); Draw2DHistBZ(hStubECalVTheta);
 }
 
@@ -625,7 +664,7 @@ void coin(){
    c->cd(3); Draw2DHistBZ(helumCalVThetaG);
    c->cd(4); htdiffStub->Draw(); DrawGateLines(htdiffStub, stubTimeGate);
    c->cd(5); htdiffStubVID->Draw("colz");
-   c->cd(6); Draw2DHistBZ(hStubECalVXG);
+   c->cd(6); Draw2DHistBZ(hStubECalVPosG);
 
    /// RDT gated by ELUM / stub, pads follow the physical quadrants (0 1 / 3 2)
    int padOrder[4] = {0, 1, 3, 2};
@@ -637,7 +676,7 @@ void coin(){
 
 void listDrawsBZ(){
    printf("------------------- MonitorsBZero draw functions\n");
-   printf("  stub()           - stub (det %d) raw, x, eCal vs X, eCal vs theta ((a,a) elastics)\n", stubID);
+   printf("  stub()           - stub (det %d) raw, x, eCal vs pos, eCal vs theta or phi ((a,a) elastics)\n", stubID);
    printf("  elum(isLogy)     - ELUM raw / cal per ring, ID, multi, rate\n");
    printf("  Ex()             - Ex per ring, Ex vs theta, ELUM E vs theta + (a,p) lines\n");
    printf("  rdt(isLogz)      - RDT dE-E, singles, ID\n");
@@ -674,12 +713,12 @@ void MonitorsBZero::Terminate(){
    cBZ->Divide(3, 3);
 
    /// layout (RDT pads follow the physical quadrant arrangement, as in Monitors.C)
-   ///   hStubECalVX | helumCalVTheta | htdiffElum
+   ///   hStubECalVPos | helumCalVTheta | htdiffElum
    ///   hExElum     | hrdt2D0        | hrdt2D1
    ///   hExElumG    | hrdt2D3        | hrdt2D2
 
-   ///---- 1 stub eCal vs X, (a,a) elastics
-   cBZ->cd(1); Draw2DHistBZ(hStubECalVX);
+   ///---- 1 stub eCal vs position along long axis, (a,a) elastics
+   cBZ->cd(1); Draw2DHistBZ(hStubECalVPos);
 
    ///---- 2 ELUM E vs theta + (a,p) kinematic lines
    cBZ->cd(2); Draw2DHistBZ(helumCalVTheta);
