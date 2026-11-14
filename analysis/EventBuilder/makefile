@@ -17,7 +17,7 @@ MAPPING ?= ../working/GeneralSortMapping.h
 ifeq ($(strip $(MAPPING)),)
 override MAPPING = ../working/GeneralSortMapping.h
 endif
-# symlink resolved, so GeneralSortMapping.h -> _beam.h counts as the same mapping
+# symlinks resolved, so a symlinked header counts as the same mapping as its target
 MAPPING_ABS = $(or $(realpath $(MAPPING)),$(abspath $(MAPPING)))
 STAMP = .mapping.stamp
 # evaluated when the makefile is read (before make checks any target):

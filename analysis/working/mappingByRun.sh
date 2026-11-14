@@ -12,7 +12,7 @@
 
 alphaRuns="1 2"   # alpha source runs, add more here, e.g. "1 2 57 58"
 
-MAPPING=../working/GeneralSortMapping_beam.h
+MAPPING=../working/GeneralSortMapping.h   # beam (default)
 for _alphaRun in $alphaRuns; do
   if [ "$((10#$RUN))" -eq "$_alphaRun" ]; then MAPPING=../working/GeneralSortMapping_alpha.h; fi
 done
