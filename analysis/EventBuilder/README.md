@@ -15,6 +15,13 @@ The only event builder (formerly EventBuilder_S; the original EventBuilder, Even
 
 event-->data --> dataQueue --> trace analysis(nWorkers) --> outputQueue --> save to TTREE.
 
+### mapping
+
+The mapping header is compiled in. `make EventBuilder MAPPING=../working/GeneralSortMapping_xxx.h` selects it
+(default `../working/GeneralSortMapping.h`); the binary is rebuilt only when the mapping or a source changes.
+`Armory/process_Sort` picks the mapping per run from `working/mappingByRun.sh` if that file exists.
+The mapping used is printed at start and saved in the output root file as TMacro `mapping`.
+
 
 # Experimental Parquet format (not implemented)
 

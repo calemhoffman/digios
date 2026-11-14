@@ -75,7 +75,12 @@ struct CompareEvent {
 };
   
 #include <condition_variable>
-#include "../working/GeneralSortMapping.h" // Include the mapping header file
+// mapping header, selectable at compile time:  make EventBuilder MAPPING=../working/GeneralSortMapping_xxx.h
+// (the makefile passes -DMAPPING_FILE='"<absolute path>"')
+#ifndef MAPPING_FILE
+#define MAPPING_FILE "../working/GeneralSortMapping.h"
+#endif
+#include MAPPING_FILE
 
 class Data {
 public:
@@ -496,7 +501,8 @@ int main(int argc, char* argv[]) {
 
   printf("=======================================================\n");
   printf("===         Event Builder  raw data --> root        ===\n");
-  printf("=======================================================\n");  
+  printf("=======================================================\n");
+  printf(" mapping : %s\n", MAPPING_FILE);
 
   if( argc <= 4){
     printf("%s [outfile] [timeWindow] [save Trace] [trace Analysis] [file-1] [file-2] ... \n", argv[0]);
@@ -998,6 +1004,11 @@ int main(int argc, char* argv[]) {
   TMacro macro2("trace_info", "Maximum Trace Length"); //this macro is for read Raw trace
   macro2.AddLine(Form("%d", MAX_TRACE_LEN));
   macro2.Write("trace_info");
+
+  //the mapping header used for this file (compiled in), for record
+  TMacro mapMacro("mapping", MAPPING_FILE);
+  if( mapMacro.ReadFile(MAPPING_FILE) <= 0 ) mapMacro.AddLine("// mapping file not readable at run time : " MAPPING_FILE);
+  mapMacro.Write("mapping");
 
   //*=============== summary
   printf("=======================================================\n");

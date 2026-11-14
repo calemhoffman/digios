@@ -32,7 +32,4 @@ BLUE='\033[0;34m'
 Cyan='\033[0;36m'
 NC='\033[0m'
 
-dir=$(pwd)
-cd $GEBDIR
-make all
-cd $dir
+# EventBuilder is built by process_Sort (with the mapping for the run), not here

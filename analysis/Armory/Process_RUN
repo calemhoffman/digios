@@ -1,12 +1,21 @@
 #!/bin/bash
 
+#---- strip the -BZ flag (any position) -> use ChainMonitorsBZero.C (B = 0 T setup)
+isBZ=0
+args=()
+for a in "$@"; do
+  if [ "$a" == "-BZ" ]; then isBZ=1; else args+=("$a"); fi
+done
+set -- "${args[@]}"
+
 if [ $# -eq 0 ] || [ $1 == "-help"  ]; then
-  echo "$./process_run [RunNum] [EventBuild] [Monitor] <SaveTrace>"
+  echo "$./process_run [RunNum] [EventBuild] [Monitor] <SaveTrace> <-BZ>"
   echo "     RunNum = run number / \"lastRun\" "
   echo " EventBuild = 0/1/n/100  ||    0 = no EventBld, 1 = EventBld, n > 1 = EventBld with trace"
   echo "   Monitors = 0/1/2      ||    1 = single run,  2 = using the list in ChainMonitors.C"
   echo "                              10 = single run and post to websrv, 20 = list runs and post to websrv"
   echo " SaveTrace = 0/1         ||    0 = no trace, 1 = save trace. with trace analysis trace always saved disregard this option"
+  echo "       -BZ = (any position)  ||    use ChainMonitorsBZero.C / MonitorsBZero.C for B = 0 T, 10/20 same as 1/2 (no websrv)"
   echo ""
   exit 1
 fi;
@@ -90,6 +99,12 @@ echo -e "=======================================================================
 echo "isBuild     : ${isBuild}${buildMsg}"
 echo "isMonitor   : ${isMonitor}${monitorMsg}"
 echo "isSaveTrace : ${isSaveTrace}${saveTraceMsg}"
+if [ ${isBZ} -eq 1 ]; then echo "isBZ        : 1, B = 0 T, Monitor -> ChainMonitorsBZero.C"; fi
+if [ -f mappingByRun.sh ]; then
+  echo "mapping     : $(RUN=${RUN}; source ./mappingByRun.sh; echo ${MAPPING}) (by mappingByRun.sh)"
+else
+  echo "mapping     : ../working/GeneralSortMapping.h (default)"
+fi
 echo "============================================="
 
 
@@ -104,7 +119,13 @@ echo "============================================="
 ########################################
 #################### Monitor
 
-if [ $isMonitor -eq 1 ] ; then
+if [ $isBZ -eq 1 ] ; then
+  if [ $isMonitor -eq 1 ] || [ $isMonitor -eq 10 ] ; then
+    root -l "ChainMonitorsBZero.C($RUN, -1, ${traceFlag})"   # single run
+  elif [ $isMonitor -eq 2 ] || [ $isMonitor -eq 20 ] ; then
+    root -l "ChainMonitorsBZero.C(-1, -1, ${traceFlag})"     # all runs listed in ChainMonitorsBZero.C
+  fi
+elif [ $isMonitor -eq 1 ] ; then
   root -l "ChainMonitors.C($RUN, -1, false, ${traceFlag})" # single run
 elif [ $isMonitor -eq 2 ] ; then
   root -l "ChainMonitors.C(-1,-1, false, ${traceFlag})"  #all runs listed 
