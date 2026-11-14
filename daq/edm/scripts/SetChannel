@@ -40,7 +40,7 @@ Examples:
   SetChannel 7 E preTrigger 3.0         # det 7 Energy board, raw_data_window=3.0
   SetChannel Left E RL 9.0              # Left boards, raw_data_length=9.0
 
-Mapping: reads GeneralSortMapping.h dynamically (common.py)
+Mapping: reads mapping.h dynamically (common.py)
 """
 
 import sys

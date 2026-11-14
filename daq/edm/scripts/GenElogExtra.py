@@ -9,7 +9,7 @@ Reads:
   - Detector thresholds (E/XF/XN) via pyepics caget
   - HV voltage + leakage current via raw SNMP (snmpget -Op .12 for full precision)
 
-Mapping: reads GeneralSortMapping.h dynamically (common.py)
+Mapping: reads mapping.h dynamically (common.py)
 
 [!!] Run on Pi ONLY (192.168.1.100)
 """

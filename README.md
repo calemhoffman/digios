@@ -51,7 +51,7 @@ digios/
 │   │   ├── Analyzer.C/.h        — ROOT TSelector event-by-event analysis
 │   │   ├── Monitors.C/.h        — Online/offline monitor histograms
 │   │   ├── ChainMonitors.C      — Chain multiple ROOT files for analysis
-│   │   ├── GeneralSortMapping.h — Channel mapping (authoritative detector map)
+│   │   ├── mapping.h — Channel mapping (authoritative detector map)
 │   │   ├── reactionConfig.txt   — Reaction kinematics configuration
 │   │   ├── detectorGeo.txt      — Silicon array geometry
 │   │   └── Simulation_Helper.C  — GUI for kinematics/DWBA simulation
@@ -151,7 +151,7 @@ Do not switch branches on LCRC — use `expName.sh` and `MakeDataLinks` instead.
 
 ## Notes
 - `SetUpNewExp` is protected by `.gitattributes` (`merge=ours`) — master version is always preserved on merge
-- `GeneralSortMapping.h` is the authoritative detector map — EDM panels may be stale
+- `mapping.h` is the authoritative detector map — EDM panels may be stale
 - Det index 11 is always dead/disabled
 - `correction_e.dat` should always be a symlink to either `correction_e_alpha.dat` or `correction_e_KE.dat`
 - Do not use `GLBL:DIG:*` PVs — use individual `VMExx:MDIGn:*` PVs directly

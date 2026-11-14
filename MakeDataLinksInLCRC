@@ -36,7 +36,7 @@ fi
 if [ ${expName} == "master" ] || [ ${expName} == "ARR01" ]; then
    echo -e "\e[93m============ Restore everything to master \e[0m"
    git checkout master expName.sh
-   git checkout master ${expDIR}/analysis/working/GeneralSortMapping.h
+   git checkout master ${expDIR}/analysis/working/mapping.h
    expName="ARR01"
    isMaster=1
 else
@@ -94,18 +94,23 @@ env | grep "HELIOSSYS"
 if [ ${isMaster} == 0 ]; then
    echo -e "\e[93m=================== Checkout the mapping from the branch \e[0m"
    cd ${HELIOSSYS}/analysis/working
-   git checkout origin/${expName} GeneralSortMapping.h 
+   # the mapping is mapping.h (new) or GeneralSortMapping.h (older branches); save it as mapping.h
+   if git cat-file -e origin/${expName}:./mapping.h 2>/dev/null; then
+      git show origin/${expName}:./mapping.h > mapping.h
+   else
+      git show origin/${expName}:./GeneralSortMapping.h > mapping.h
+   fi
 
-   isNewMapping=$(grep -rn "NARRAY" GeneralSortMapping.h)
+   isNewMapping=$(grep -rn "NARRAY" mapping.h)
 
-   if [ -z ${isNewMapping} ]; then
+   if [ -z "${isNewMapping}" ]; then
       echo " patching up old Mapping file"
-      echo "#define NARRAY 30" >> GeneralSortMapping.h
-      echo "#define NRDT 8"    >> GeneralSortMapping.h
-      echo "#define NELUM 16"  >> GeneralSortMapping.h
-      echo "#define NEZERO 5"  >> GeneralSortMapping.h
-      echo "#define NTAC 3"    >> GeneralSortMapping.h
-      echo "#define NCRDT 0"   >> GeneralSortMapping.h
+      echo "#define NARRAY 30" >> mapping.h
+      echo "#define NRDT 8"    >> mapping.h
+      echo "#define NELUM 16"  >> mapping.h
+      echo "#define NEZERO 5"  >> mapping.h
+      echo "#define NTAC 3"    >> mapping.h
+      echo "#define NCRDT 0"   >> mapping.h
    fi
   
    cd ${HELIOSSYS}

@@ -3,7 +3,7 @@
  * created by Ryan Tang 2025, July 10
  * 
  * Base on the EventBuilder_Q.cpp (removed, see git history),
- * This event builder apply the mapping (GeneralSortMapping.h)
+ * This event builder apply the mapping (mapping.h)
  * and optional trace analysis. Was EventBuilder_S.cpp.
  * 
 ****************************************/
@@ -75,10 +75,10 @@ struct CompareEvent {
 };
   
 #include <condition_variable>
-// mapping header, selectable at compile time:  make EventBuilder MAPPING=../working/GeneralSortMapping_xxx.h
+// mapping header, selectable at compile time:  make EventBuilder MAPPING=../working/mapping_xxx.h
 // (the makefile passes -DMAPPING_FILE='"<absolute path>"')
 #ifndef MAPPING_FILE
-#define MAPPING_FILE "../working/GeneralSortMapping.h"
+#define MAPPING_FILE "../working/mapping.h"
 #endif
 #include MAPPING_FILE
 

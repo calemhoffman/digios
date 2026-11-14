@@ -23,7 +23,7 @@
 #include <fstream>
 #include <vector>
 #include "../Cleopatra/Isotope.h"
-#include "GeneralSortMapping.h"
+#include "mapping.h"
 
 using namespace std;
 

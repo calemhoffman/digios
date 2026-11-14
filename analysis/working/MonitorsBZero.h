@@ -23,7 +23,7 @@
 #include <TStyle.h>
 #include <TCutG.h>
 
-#include "GeneralSortMapping.h"
+#include "mapping.h"
 
 class MonitorsBZero : public TSelector {
 public :

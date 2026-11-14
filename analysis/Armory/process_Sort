@@ -47,7 +47,7 @@ source $ROOTSYS/bin/thisroot.sh
 #---- mapping compiled into the EventBuilder, chosen per run by working/mappingByRun.sh (if exist)
 SCRIPTDIR=$(dirname "$0")
 mapRule=${SCRIPTDIR}/../working/mappingByRun.sh
-MAPPING=../working/GeneralSortMapping.h
+MAPPING=../working/mapping.h
 if [ -f ${mapRule} ]; then
   source ${mapRule}
   echo -e "${Cyan}=== mapping for run ${RUN} (by working/mappingByRun.sh) : ${MAPPING}${NC}"
@@ -58,11 +58,11 @@ fi
 dir=$(pwd)
 cd ${GEBDIR}
 
-#---- the N* and POLARITY_* must agree with GeneralSortMapping.h, which the Monitors / Cali macros use
+#---- the N* and POLARITY_* must agree with mapping.h, which the Monitors / Cali macros use
 defA=$(grep -E '^#define[[:space:]]+(N[A-Z]+|POLARITY_[A-Z]+|MWIN)[[:space:]]' ${MAPPING} | tr -s ' \t' ' ')
-defB=$(grep -E '^#define[[:space:]]+(N[A-Z]+|POLARITY_[A-Z]+|MWIN)[[:space:]]' ../working/GeneralSortMapping.h | tr -s ' \t' ' ')
+defB=$(grep -E '^#define[[:space:]]+(N[A-Z]+|POLARITY_[A-Z]+|MWIN)[[:space:]]' ../working/mapping.h | tr -s ' \t' ' ')
 if [ "${defA}" != "${defB}" ]; then
-  echo -e "${RED}WARNING : #define N* / POLARITY_* in ${MAPPING} differ from GeneralSortMapping.h (used by Monitors) ${NC}"
+  echo -e "${RED}WARNING : #define N* / POLARITY_* in ${MAPPING} differ from mapping.h (used by Monitors) ${NC}"
 fi
 
 make ${builder} MAPPING=${MAPPING}

@@ -3,7 +3,7 @@
 GenElogExtra.py -- HTML table of detector thresholds + HV status for elog.
 
 Outputs HTML to stdout. Reads thresholds via pyepics, HV via snmpget.
-Uses common.py to parse GeneralSortMapping.h dynamically.
+Uses common.py to parse mapping.h dynamically.
 
 Usage: GenElogExtra.py > ~/elog_extra.txt
 """
@@ -26,7 +26,7 @@ SNMP_COMMUNITY = 'guru'
 SNMP_DELAY = 0.3
 SKIP_DETS = {11}
 
-# HV mapping read from GeneralSortMapping.h (HVdetMap, HVrdtMap)
+# HV mapping read from mapping.h (HVdetMap, HVrdtMap)
 
 def safe_caget(pv):
     try:
@@ -102,7 +102,7 @@ def main():
     det_map, narray, mapping_file = load_mapping()
     sides = build_sides(det_map, narray)
 
-    # Parse HV map from GeneralSortMapping.h
+    # Parse HV map from mapping.h
     hv_det_map, hv_rdt_map = build_hv_map(mapping_file)
 
     # Start HV reads in background thread (SNMP, separate from EPICS CA)

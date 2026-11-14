@@ -1,6 +1,26 @@
 /***********************************************************************
  * 
- * This is the Mapping for Armory/GeneralSort.C
+ * mapping.h : the channel mapping (digitizer channel -> detector) for
+ *             analysis/EventBuilder, and the array sizes (NARRAY, NRDT, ...)
+ *             for Monitors / Cali macros, which include this file.
+ *
+ * ---- If the experiment needs more than one mapping (e.g. cabling for the
+ *      alpha-source runs differs from the beam runs) :
+ *
+ *   1. copy this file to mapping_xxx.h (e.g. mapping_alpha.h) and edit only
+ *      idDetMap / idKindMap there. Keep every #define (NARRAY, NRDT, NELUM,
+ *      ..., POLARITY_*, MWIN) the SAME as in this file : Monitors / Cali
+ *      macros are compiled with mapping.h only (process_Sort warns if the
+ *      #define differ).
+ *   2. create working/mappingByRun.sh to set MAPPING for each run, e.g.
+ *         alphaRuns="1 2"   -> MAPPING=../working/mapping_alpha.h
+ *         other runs        -> MAPPING=../working/mapping.h
+ *      Armory/process_Sort sources it; without that file, all runs use mapping.h.
+ *   3. process_Sort then builds the EventBuilder with that mapping
+ *      ( make EventBuilder MAPPING=../working/mapping_xxx.h ), rebuilding only
+ *      when the mapping changes. The mapping used is printed and saved in
+ *      gen_runXXX.root as TMacro "mapping".
+ *   Do not sort runs of different mappings at the same time (one binary).
  * 
  * idDetMap = 0XX ; PSD
  *          = 1XX ; Recoil,  dE of the Recoil MUST be odd
@@ -15,7 +35,7 @@
  *           = 2 ; XN  (near/back position signal)
  *           = -1 ; not in use
  * 
- * See EventBuilder_S.cpp: case 0=Energy, case 1=XF, case 2=XN
+ * See EventBuilder/EventBuilder.cpp: case 0=Energy, case 1=XF, case 2=XN
  * 
 ***********************************************************************/
 
@@ -42,13 +62,13 @@
 
 #define MWIN 100 ///M value for energy filter from digi setting
 
-Int_t idConst = 1010;
+int idConst = 1010;
 
-Int_t idDetMap[160] = { 
+int idDetMap[160] = { 
                         101, 100, 103, 102, 105, 104, 107, 106,  -1,  -1,  //VME1-DIG1, RECOIL E, dE (VME 1 is top right)
-                        200, 201, 202, 203, 204, 205, 206, 207,  -1,  -1,   //VME1-DIG2, not in use
-                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //VME1-DIG3, not in use
-                        208, 209, 210, 211, 212, 213, 214, 215,  -1,  -1,           //VME1-DIG4, not in use
+                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  //VME1-DIG2, not in use
+                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  //VME1-DIG3, not in use
+                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  //VME1-DIG4, not in use
 
 
                          1,   0,   5,   4,   3,   2,   1,   0,  -1,  -1,   // 1, VME2-DIG1, array
@@ -61,16 +81,16 @@ Int_t idDetMap[160] = {
                         17,  16,  15,  14,  13,  12,  17,  16,  -1,  -1,   // 6, VME3-DIG3, arrays
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   //11, VME3-DIG4, not in use
                         
-                        19,  18,  17,  16,  15,  14,  13,  12,  -1,  -1,   // 7, VME4-DIG1, array
-                        21,  20,  19,  18,  23,  21,  21,  20,  -1,  -1,   // 8, VME4-DIG2, array
-                        23,  22,  -1,  20,  19,  18,  23,  22,  -1,  -1,   // 9, VME4-DIG3, array
+                       200, 201, 202, 203, 204, 205, 206, 207,  -1,  -1,   // 7, VME4-DIG1, array
+                        21,  -1,  -1,  -1,  -1,  21,  21,  -1,  -1,  -1,   // 8, VME4-DIG2, array
+                       208, 209, 210, 211, 212, 213, 214, 215,  -1,  -1,   // 9, VME4-DIG3, array
                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,    //12, VME4-DIG4, not in use
                    
     
 };
 
 
-Int_t idKindMap[160] = {-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+int idKindMap[160] = {  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
@@ -85,9 +105,9 @@ Int_t idKindMap[160] = {-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
                          1,   1,   1,   1,   1,   1,   0,   0,  -1,  -1,//6
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
                         
-                         0,   0,   2,   2,   2,   2,   2,   2,  -1,  -1,//7
-                         0,   1,   1,   1,   0,   1,   2,   0,  -1,  -1,//8
-                         2,   2,   -1,   2,   2,   2,   1,   1,  -1,  -1,//9
+                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,//7
+                         0,  -1,  -1,  -1,  -1,   1,   2,  -1,  -1,  -1,//8
+                        -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,//9
                         -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1};
 
 

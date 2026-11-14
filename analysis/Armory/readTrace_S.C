@@ -17,7 +17,7 @@
 #include <TSpectrum.h>
 #include <iostream>
 
-// #include "../working/GeneralSortMapping.h"
+// #include "../working/mapping.h"
 
 // #include "AutoFit.C"
 

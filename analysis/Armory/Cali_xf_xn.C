@@ -15,7 +15,7 @@
 
 #include "../Armory/AnalysisLibrary.h"
 #include "../Armory/AutoFit.C"
-#include "../working/GeneralSortMapping.h"
+#include "../working/mapping.h"
 
 void Cali_xf_xn(TTree * tree){
 /**///======================================================== initial input

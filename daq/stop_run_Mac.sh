@@ -8,7 +8,7 @@
 # 4. Re-upload elog + push to Discord (PARALLEL)
 # 5. Signal DAQ: touch /tmp/elog_done
 
-export HELIOS_MAPPING=~/digios/analysis/working/GeneralSortMapping.h
+export HELIOS_MAPPING=~/digios/analysis/working/mapping.h
 SCRIPTDIR=$(dirname "$(realpath "$0")")
 DAQ_HOST=helios@192.168.1.2
 

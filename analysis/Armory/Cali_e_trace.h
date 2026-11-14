@@ -23,7 +23,7 @@
 #include "TClonesArray.h"
 
 #include "../Armory/AnalysisLibrary.h"
-#include "../working/GeneralSortMapping.h"
+#include "../working/mapping.h"
 
 // Headers needed by this particular selector
 

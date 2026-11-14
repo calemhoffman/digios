@@ -11,7 +11,7 @@ Last updated: March 2026, Ryan (goluckyryan@gmail.com)
 
 | File | Description |
 |---|---|
-| `GeneralSortMapping.h` | **Authoritative** detector channel mapping — digitizer → detector |
+| `mapping.h` | **Authoritative** detector channel mapping — digitizer → detector |
 | `Analyzer.C/.h` | ROOT TSelector for event-by-event offline analysis |
 | `Monitors.C/.h` | Online/offline monitor histograms (E-Z plot, RDT, timing, etc.) |
 | `ChainMonitors.C` | TChain wrapper to run Monitors over multiple ROOT files |
@@ -164,13 +164,13 @@ root -l Simulation_Helper.C
 1. Run `SetUpNewExp <expName>` — handles git branch + data dirs + symlinks
 2. Edit `reactionConfig.txt` — set beam, target, recoil, energy
 3. Edit `detectorGeo.txt` — set B-field, detector positions
-4. Edit `GeneralSortMapping.h` — set channel mapping for this experiment
+4. Edit `mapping.h` — set channel mapping for this experiment
 5. Check `Monitors.C` — adjust `skipDetID`, energy ranges, RDT cuts for this experiment
 
 ---
 
 ## Notes
-- `GeneralSortMapping.h` is the **authoritative** detector map — EDM panels may be stale
+- `mapping.h` is the **authoritative** detector map — EDM panels may be stale
 - `working/` contents are experiment-specific — always verify after branch switch
 - `Armory/`, `Cleopatra/`, `EventBuilder/` are shared — do not modify per-experiment
 - In LCRC: use master branch only, set experiment via `expName.sh` + `MakeDataLinks`
