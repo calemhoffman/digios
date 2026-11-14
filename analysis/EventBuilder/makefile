@@ -9,10 +9,10 @@ ROOTFLAG=`root-config --cflags --glibs`
 pLIBS = $(shell pkg-config --libs arrow parquet)
 pINCLUDE = $(shell pkg-config --cflags arrow parquet)
 
-all: EventBuilder_S
+all: EventBuilder
 
-EventBuilder_S: EventBuilder_S.cpp BinaryReader.h Hit.h ../working/GeneralSortMapping.h
-	$(CC) EventBuilder_S.cpp -o EventBuilder_S $(CFLAG) ${ROOTFLAG}
+EventBuilder: EventBuilder.cpp BinaryReader.h Hit.h ../working/GeneralSortMapping.h
+	$(CC) EventBuilder.cpp -o EventBuilder $(CFLAG) ${ROOTFLAG}
 
 clean:
-	-rm EventBuilder_S
+	-rm EventBuilder
