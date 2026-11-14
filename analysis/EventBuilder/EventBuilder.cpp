@@ -2,9 +2,9 @@
  * 
  * created by Ryan Tang 2025, July 10
  * 
- * Base on the EventBuilder_Q.cpp,
- * This event builder apply the mapping 
- * S for super
+ * Base on the EventBuilder_Q.cpp (removed, see git history),
+ * This event builder apply the mapping (GeneralSortMapping.h)
+ * and optional trace analysis. Was EventBuilder_S.cpp.
  * 
 ****************************************/
 
@@ -495,7 +495,7 @@ public:
 int main(int argc, char* argv[]) {
 
   printf("=======================================================\n");
-  printf("===        Event Builder S  raw data --> root       ===\n");
+  printf("===         Event Builder  raw data --> root        ===\n");
   printf("=======================================================\n");  
 
   if( argc <= 4){
@@ -1001,7 +1001,7 @@ int main(int argc, char* argv[]) {
 
   //*=============== summary
   printf("=======================================================\n");
-  printf("===          Event Builder S finished               ===\n");
+  printf("===           Event Builder finished                ===\n");
   printf("=======================================================\n");
   unsigned int runEndTime = getTime_us();
   printf("              Total time taken: %.3f s = %.3f min\n", (runEndTime - runStartTime) / 1000000.0, (runEndTime - runStartTime) / 1000000.0 / 60.0);
