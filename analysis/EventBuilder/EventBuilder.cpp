@@ -25,6 +25,8 @@
 
 #define MAX_TRACE_LEN 1250 
 #define MAX_TRACE_MULTI 60
+
+//---- ELUM traces (NELUM > 0) : saved + fitted with the trace analysis -> telum, telum_t, telum_r, telum_chi2
 #define MAX_READ_HITS 100000 // Maximum hits to read at a time
 #define MAX_QUEUE_SIZE 10000 // Maximum size of the data queue
 
@@ -140,6 +142,12 @@ public:
   float ELUM[NELUM];
   uint64_t ELUMTimestamp[NELUM];
 #endif
+#if NELUM > 0
+  float telum[NELUM];
+  float telum_t[NELUM];
+  float telum_r[NELUM];
+  float telum_chi2[NELUM];
+#endif
 #if NEZERO > 0
   float EZERO[NEZERO];
   uint64_t EZEROTimestamp[NEZERO];
@@ -231,6 +239,14 @@ public:
     for (int i = 0; i < NELUM; i++) {
       ELUM[i] = TMath::QuietNaN();
       ELUMTimestamp[i] = 0;
+    }
+#endif
+#if NELUM > 0
+    for (int i = 0; i < NELUM; i++) {
+      telum[i] = TMath::QuietNaN();
+      telum_t[i] = TMath::QuietNaN();
+      telum_r[i] = TMath::QuietNaN();
+      telum_chi2[i] = TMath::QuietNaN();
     }
 #endif
 #if NEZERO > 0    
@@ -347,7 +363,8 @@ public:
 
           bool isArray = (0 <= idDet && idDet < NARRAY); 
           bool isRDT = (NRDT > 0 && 100 <= idDet && idDet < 100 + NRDT); 
-          if( isArray || isRDT ) { 
+          bool isELUM = (NELUM > 0 && 200 <= idDet && idDet < 200 + NELUM);
+          if( isArray || isRDT || isELUM ) { 
 
             // printf("iDet: %d, idKind: %d, traceLength: %d\n", idDet, idKind, events[i].traceLength);
 
@@ -475,6 +492,16 @@ public:
         trdt_r[rdtID] = tracePara[i][2]; // Rise time
         trdt_chi2[rdtID] = traceChi2[i]; // Chi2
       }
+
+    #if NELUM > 0
+      if( 200 <= traceDetID[i] && traceDetID[i] < 200 + NELUM ){
+        int elumID = traceDetID[i] - 200; // ELUM ID
+        telum[elumID] = tracePara[i][0]; // Amplitude
+        telum_t[elumID] = tracePara[i][1]; // Timestamp
+        telum_r[elumID] = tracePara[i][2]; // Rise time
+        telum_chi2[elumID] = traceChi2[i]; // Chi2
+      }
+    #endif
 
       gsl_multifit_nlinear_free(w);
       delete[] d.y;
@@ -701,6 +728,13 @@ int main(int argc, char* argv[]) {
     outTree->Branch("trdt_t", data.trdt_t, Form("trdt_t[%d]/F", NRDT));
     outTree->Branch("trdt_r", data.trdt_r, Form("trdt_r[%d]/F", NRDT));
     outTree->Branch("trdt_chi2", data.trdt_chi2, Form("trdt_chi2[%d]/F", NRDT));
+#endif
+
+#if NELUM > 0
+    outTree->Branch("telum", data.telum, Form("telum[%d]/F", NELUM));
+    outTree->Branch("telum_t", data.telum_t, Form("telum_t[%d]/F", NELUM));
+    outTree->Branch("telum_r", data.telum_r, Form("telum_r[%d]/F", NELUM));
+    outTree->Branch("telum_chi2", data.telum_chi2, Form("telum_chi2[%d]/F", NELUM));
 #endif
 
   }
