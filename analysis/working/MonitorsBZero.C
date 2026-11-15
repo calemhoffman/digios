@@ -15,6 +15,14 @@
  *  Ex of 23Na from ELUM : missing mass with (T_p, theta_lab of ring)
  *     P_B = P_beam + P_target - P_p ,  Ex = sqrt(P_B^2) - m(23Na)
  *
+ *  trace mode : trace_runXXX.root (Process_RUN RUN 2 10 -BZ), auto-detected from the branches
+ *     energy : te/txf/txn (stub), trdt, telum (EventBuilder, NELUM > 0) replace e/xf/xn, rdt, elum,
+ *              stub / ELUM via stubTraceScale / elumTraceScale ({0,1} now : same calibrations as non-trace),
+ *              RDT = trdt * POLARITY_RDT (no scale), so all calibrations / cuts apply unchanged
+ *     time   : timestamp + trace T0 when both sides of a coincidence have a trace
+ *     fit dropped (NaN) when rise time outside traceRiseGate
+ *     Terminate prints the trace -> firmware scale table ; trace() draws the checks
+ *
  *  after running, at the ROOT prompt : listDrawsBZ()
  *
 ***********************************************************************/
@@ -35,7 +43,11 @@
 #include <TStopwatch.h>
 #include <TCanvas.h>
 #include <TObjArray.h>
+#include <TChain.h>
+#include <TChainElement.h>
+#include <TFile.h>
 #include <vector>
+#include <fstream>
 #include "../Cleopatra/Isotope.h"
 #include "mapping.h"
 
@@ -45,27 +57,28 @@ using namespace std;
 
 //---- Reaction : beam(target, light)heavy, inverse kinematics
 int    beamA = 20, beamZ = 10;     /// 20Ne
-int    targA =  4, targZ =  2;     /// 4He
-int   lightA =  1, lightZ = 1;     /// p
-int   heavyA = 23, heavyZ = 11;    /// 23Na
+int    targA =  4, targZ =  2;     /// 
+int   lightA =  1, lightZ = 1;     /// 
+int   heavyA = beamA + targA - lightA, heavyZ = beamZ + targZ - lightZ;    /// 23Na
+int   targ2A = 28, targ2Z = 14;     /// for the beam(targ2, targ2)beam elastic line on hStubECalVPos, e.g. 12C in CD2
 double beamEnergyPerU = 6.0;       /// MeV/u
-vector<double> exLines = {0.0, 0.440, 2.076, 2.391};  /// Ex [MeV] for the kinematic lines
+vector<double> exLines = {0.0, 4.0};  /// Ex [MeV] for the kinematic lines
 
 //---- Stub (det 21) geometry
 const int stubID      = 21;
 /// only the long axis is position sensitive ; the short axis (width) is not resolved
 ///   stubLongAxis = 0 : long axis along Z            -> position gives theta_lab = atan2( sqrt(X^2 + Y^2), Z ), phi fixed (unresolved)
 ///   stubLongAxis = 1 : long axis along X (XY plane) -> position gives phi_lab   = atan2( Y, X ),  theta fixed (unresolved, from width along Z)
-int    stubLongAxis   =   1;
+int    stubLongAxis   =   0;
 double stubX          =   0.0;  /// center of the stub [mm]
 double stubY          = -150.0; /// center of the stub [mm] (signed, stub at -Y)
-double stubZ          =  25.0;  /// center of the stub [mm]
+double stubZ          =  50.0;  /// center of the stub [mm]
 double stubLength     =  50.0;  /// long axis, position sensitive [mm]
 double stubWidth      =  10.0;  /// short axis, not position sensitive [mm]
 bool   isStubXFPositive = true; /// x = 1 (xf side) toward +Z (mode 0) or +X (mode 1)
 
 //---- ELUM geometry
-double elumZ          = -50.0;  /// [mm]
+double elumZ          = -80.0;  /// [mm]
 double elumRin        =  24.0;  /// [mm]
 double elumRout       =  48.0;  /// [mm]
 bool   isElumRing0Inner = true; /// elum[0] is the innermost ring
@@ -105,11 +118,11 @@ double stubXScale     = 0.710;   /// run 2 alpha, half-max edges of gain-matched
 //---- histogram ranges
 int    rawERange[2]   = {  100, 6000};   /// stub e, xf, xn [ch]
 int    elumRawRange[2]= {  100, 1000};   /// [ch]
-double eCalRange[2]   = {   0.5,   15};   /// [MeV]
-int    rdtERange[2]   = {   0, 8000};
-int    rdtDERange[2]  = {   0, 4000};
-double exRange[3]     = {  50,   -2, 12}; /// bin [keV], low [MeV], high [MeV]
-int    coinTimeRange[2] = { -300, 300};   /// [ch = 10 ns]
+double eCalRange[2]   = {   0.5,  15};   /// [MeV]
+int    rdtERange[2]   = {   0, 5000};
+int    rdtDERange[2]  = {   0, 5000};
+double exRange[3]     = {  50,   -10, 12}; /// bin [keV], low [MeV], high [MeV]
+int    coinTimeRange[2] = { -100, 100};   /// [ch = 10 ns]
 
 //---- Gates
 double elumThreshold  = 1.0;     /// [MeV], below -> ignored (cal offset ~0.8 MeV at ch 0)
@@ -118,7 +131,27 @@ double xGate          = 1.0;     /// |x - 0.5| < xGate/2 for stub
 bool   isTimeGateOn   = true;
 int    timeGate[2]    = { -50, 50}; /// rdt_t - elum_t, [ch = 10 ns]
 int    stubTimeGate[2]= { -50, 50}; /// rdt_t - e_t[stub], [ch = 10 ns], (a,a): alpha -> stub (-Y), 20Ne -> RDT (+Y)
-TString rdtCutFile    = "rdtCuts.root"; /// from ../Armory/RDTCutCreator.C : TObjArray "cutList", cut-i on x=rdt[2i] (E), y=rdt[2i+1] (dE). ignored if not exist
+TString rdtCutFile    = "rdtCuts.root"; /// from ../Armory/RDTCutCreator.py (or .C) : TObjArray "cutList", cut-i on x=rdt[2i] (E), y=rdt[2i+1] (dE). ignored if not exist
+
+//---- Trace (trace_runXXX.root). used only when the trace branches exist
+bool   isUseArrayTrace = true;  /// stub e, xf, xn  <- te, txf, txn
+bool   isUseRDTTrace   = true;  /// rdt  <- trdt
+bool   isUseELUMTrace  = true;  /// elum <- telum (EventBuilder trace analysis, NELUM > 0)
+bool   isUseTraceTime  = true;  /// coincidence time = timestamp + trace T0, when both sides have a trace
+double traceRiseGate[2] = {0.5, 50}; /// [sample], rise time outside -> fit dropped (no hit)
+/// trace amplitude -> firmware scale : x = s0 + s1 * (trace * POLARITY), {s0, s1}
+/// for the moment {0, 1} : trace uses the same calibrations as non-trace (stubECal, stubXfxnE, elumCal)
+/// a fit of firmware vs trace per channel is printed at Terminate, if a rescale is needed later
+/// RDT : no scale, rdt = trdt * POLARITY_RDT (same RDT cuts)
+double stubTraceScale[3][2] = { {0, 1}, {0, 1}, {0, 1} }; /// e, xf, xn of the stub
+double elumTraceScale[NELUM][2] = {
+   {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1},
+   {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}
+};
+int    traceTimeBinPerCh = 10;          /// tdiff bins per 10 ns with trace time
+double traceTimeGate[2]     = {-50, 50}; /// rdt - elum, trace time [10 ns]
+double traceStubTimeGate[2] = {-50, 50}; /// rdt - stub, trace time [10 ns]
+double traceScaleFitMin = 200;          /// firmware value > this [ch] used in the scale fit
 
 //############################################ end of user setting
 
@@ -136,14 +169,57 @@ double runTime = 0;
 TObjArray * cutList = NULL;
 bool isCutFileOpen = false;
 int numCut = 0;
+TFile * fCutFile = NULL;      /// file of cutList
+TString processedFiles = "";  /// files of the chain, default input of RDTCutCreator()
+
+/// (re)load the RDT cuts from rdtCutFile : TObjArray "cutList", cut-i on x = rdt[2i] (E), y = rdt[2i+1] (dE)
+void LoadRDTCuts(){
+   isCutFileOpen = false; numCut = 0; cutList = NULL;
+   if( fCutFile ){ fCutFile->Close(); delete fCutFile; fCutFile = NULL; } /// cutList read from it is not owned by the file
+   if( rdtCutFile != "" && !gSystem->AccessPathName(rdtCutFile) ){
+      fCutFile = new TFile(rdtCutFile);
+      isCutFileOpen = fCutFile->IsOpen();
+      if( isCutFileOpen ){
+         cutList = (TObjArray *) fCutFile->FindObjectAny("cutList");
+         if( cutList ) numCut = cutList->GetEntries(); else isCutFileOpen = false;
+         printf("=========== found %d cutG in %s \n", numCut, rdtCutFile.Data());
+         for( int i = 0; i < numCut; i++){
+            TCutG * cc = (TCutG*) cutList->At(i);
+            printf("   %s : VarX %s, VarY %s, nPoints %d\n", cc->GetName(), cc->GetVarX(), cc->GetVarY(), cc->GetN());
+         }
+      }else{
+         printf("Failed to open rdt-cutfile : %s\n", rdtCutFile.Data());
+      }
+   }else if( rdtCutFile != "" ){
+      printf("=========== no rdt-cutfile %s, no RDT cut. make one at the ROOT prompt (after the monitor) with RDTCutCreator()\n", rdtCutFile.Data());
+   }
+}
 
 TLatex text;
 
 //====== reaction constants
 double mBeam, mTarg, mLight, mHeavy;
+double mTarg2; /// for the (targ2, targ2) elastic line
 double Etot, Ptot, sInv; /// lab total energy, momentum (along +z), invariant mass^2
 double Qvalue;
 bool isKinematicsOK = false;
+
+//====== trace mode, set in Begin from the bound branches
+bool isStubFineTime = false;  /// stub-RDT tdiff uses trace T0 on both sides
+bool isElumFineTime = false;  /// ELUM-RDT tdiff uses trace T0 on both sides
+double gateElum[2], gateStub[2]; /// active time gates
+
+/// linear LSQ sums for the trace -> firmware scale, y = s0 + s1 * x
+struct ScaleSum {
+   double n = 0, sx = 0, sy = 0, sxx = 0, sxy = 0;
+   void Add(double x, double y){ n++; sx += x; sy += y; sxx += x*x; sxy += x*y; }
+   bool Get(double &s0, double &s1){
+      double d = n*sxx - sx*sx;
+      if( n < 10 || d == 0 ) return false;
+      s1 = (n*sxy - sx*sy)/d; s0 = (sy - s1*sx)/n; return true;
+   }
+};
+ScaleSum sumStub[3], sumElum[NELUM];
 
 double elumTheta[16];    /// lab angle of each ring [deg]
 double elumR[16];        /// ring center radius [mm]
@@ -181,15 +257,27 @@ TH1F* hrdt[NRDT];
 TH2F* hrdtID;
 TH2F* hrdt2D[NRDT/2];
 TH2F* hrdt2Dg[NRDT/2];
+TH2F* hrdt2D_timeG[NRDT/2]; // RDT dE-E, this telescope (E or dE) in rdt_t - elum_t gate with any ELUM hit
 TH2F* hrdtMatrix;
 
 //======== coincidence
-TH1I* htdiffElum;    // rdt_t - elum_t
-TH1I* htdiffStub;    // rdt_t - e_t[stub]
+TH1F* htdiffElum;    // rdt_t - elum_t  (+ trace T0 with trace time)
+TH1F* htdiffStub;    // rdt_t - e_t[stub] (+ trace T0 with trace time)
 TH2F* htdiffStubVID; // vs RDT channel
 TH2F* hStubECalVPosG; // stub eCal vs position, RDT coincident
 TH2F* hrdt2DgStub[NRDT/2]; // RDT dE-E, stub coincident
 TH2F* htdiffElumVID; // vs ring
+
+//======== trace checks (firmware vs trace*POLARITY, before rescale)
+TH2F* hTrStub[3];     // e, xf, xn
+TH2F* hTrRdtRatio;    // fw / trace vs ID
+TH2F* hTrElumRatio;   // fw / trace vs ring
+TH1F* hTrStubRise;
+TH1F* hTrStubT0;
+TH2F* hTrRdtRise;
+TH2F* hTrRdtT0;
+TH2F* hTrElumRise;
+TH2F* hTrElumT0;
 
 /******************************************************************
 *  kinematics
@@ -221,6 +309,20 @@ double CalT(double thetaDeg, double ex, int sol = 0){
    return E3 - mLight;
 }
 
+/// (X, X) elastics : beam(X, X)beam with X = targ or targ2, e.g. 20Ne(d,d)20Ne, 20Ne(12C,12C)20Ne
+/// T [MeV] of the recoiling X (mass mX [MeV]) at theta_lab [deg]; p3 = 2 m E P cos / (E^2 - P^2 cos^2). NaN if theta >= 90 deg
+TString elasticName, elasticName2; /// (targ, targ), (targ2, targ2), set in Begin
+double CalTElastic(double thetaDeg, double mX){
+   if( !(mBeam > 1 && mX > 1) ) return TMath::QuietNaN();
+   double c = TMath::Cos(thetaDeg*TMath::DegToRad());
+   if( c <= 0 ) return TMath::QuietNaN();
+   double Tb = beamEnergyPerU * beamA;
+   double E  = Tb + mBeam + mX;
+   double P  = TMath::Sqrt(Tb*Tb + 2*Tb*mBeam);
+   double p3 = 2*mX*E*P*c/(E*E - P*P*c*c);
+   return TMath::Sqrt(p3*p3 + mX*mX) - mX;
+}
+
 /// stub hit position [mm] from s = signed position along the long axis, measured from the stub center
 void StubHitPos(double s, double &X, double &Y, double &Z){
    X = stubX; Y = stubY; Z = stubZ;
@@ -243,6 +345,21 @@ TGraph * KinematicLine(double ex, double th1, double th2, int color){
       }
    }
    g->SetLineColor(color); g->SetMarkerColor(color); g->SetMarkerStyle(7);
+   return g;
+}
+
+/// (X, X) elastic line on hStubECalVPos : T vs position along the long axis (Z or X), theta_lab from the hit position
+TGraph * ElasticLineStub(double mX, int color = kRed){
+   TGraph * g = new TGraph();
+   for( int k = 0; k <= 200; k++){
+      double s = -stubLength/2. - 10 + (stubLength + 20)*k/200.;
+      double X, Y, Z;
+      StubHitPos(s, X, Y, Z);
+      double th = TMath::ATan2(TMath::Sqrt(X*X + Y*Y), Z) * TMath::RadToDeg();
+      double T  = CalTElastic(th, mX);
+      if( !TMath::IsNaN(T) ) g->SetPoint(g->GetN(), stubLongAxis == 0 ? Z : X, T);
+   }
+   g->SetLineColor(color); g->SetLineWidth(2);
    return g;
 }
 
@@ -289,6 +406,11 @@ void MonitorsBZero::Begin(TTree *tree){
    printf("================ Reaction %s(%s,%s)%s @ %.2f MeV/u = %.1f MeV\n",
            iBeam.Name.c_str(), iTarg.Name.c_str(), iLight.Name.c_str(), iHeavy.Name.c_str(), beamEnergyPerU, Tbeam);
    printf("   Q-value : %.3f MeV,  Ecm : %.3f MeV,  isOK : %d\n", Qvalue, TMath::Sqrt(sInv) - mBeam - mTarg, isKinematicsOK);
+   Isotope iTarg2 = GetIsotope(targ2A, targ2Z);
+   mTarg2 = iTarg2.Mass;
+   elasticName.Form("%s(%s,%s)",  iBeam.Name.c_str(), iTarg.Name.c_str(),  iTarg.Name.c_str());
+   elasticName2.Form("%s(%s,%s)", iBeam.Name.c_str(), iTarg2.Name.c_str(), iTarg2.Name.c_str());
+   printf("   elastic lines on hStubECalVPos : %s (red), %s (blue, targ2 mass %.4f MeV)\n", elasticName.Data(), elasticName2.Data(), mTarg2);
 
    //================ ELUM ring angles
    double dr = (elumRout - elumRin)/NELUM;
@@ -319,27 +441,46 @@ void MonitorsBZero::Begin(TTree *tree){
              stubLongAxis == 0 ? "Z" : "X", res, angStub[0], angStub[1], a[1]);
       printf("                 %s_lab NOT resolved : %.2f - %.2f deg (center %.2f +- %.2f, from %.0f mm width)\n",
              unr, TMath::Min(u[0], u[1]), TMath::Max(u[0], u[1]), 0.5*(u[0]+u[1]), 0.5*TMath::Abs(u[1]-u[0]), stubWidth);
+      for( int el = 0; el < 2; el++){
+         printf("                 %s elastics :", (el == 0 ? elasticName : elasticName2).Data());
+         for( int i = 0; i < 3; i++){
+            double X, Y, Z; StubHitPos(s[i], X, Y, Z);
+            double th = TMath::ATan2(TMath::Sqrt(X*X + Y*Y), Z) * TMath::RadToDeg();
+            printf(" %s = %.1f mm (theta %.1f) T = %.3f MeV%s", stubLongAxis == 0 ? "Z" : "X", stubLongAxis == 0 ? Z : X, th,
+                   CalTElastic(th, el == 0 ? mTarg : mTarg2), i < 2 ? " |" : "\n");
+         }
+      }
    }
 
    //================ Recoil cut
-   isCutFileOpen = false; numCut = 0; cutList = NULL;
-   if( rdtCutFile != "" && !gSystem->AccessPathName(rdtCutFile) ){
-      TFile * fCut = new TFile(rdtCutFile);
-      isCutFileOpen = fCut->IsOpen();
-      if( isCutFileOpen ){
-         cutList = (TObjArray *) fCut->FindObjectAny("cutList");
-         if( cutList ) numCut = cutList->GetEntries(); else isCutFileOpen = false;
-         printf("=========== found %d cutG in %s \n", numCut, rdtCutFile.Data());
-         for( int i = 0; i < numCut; i++){
-            TCutG * cc = (TCutG*) cutList->At(i);
-            printf("   %s : VarX %s, VarY %s, nPoints %d\n", cc->GetName(), cc->GetVarX(), cc->GetVarY(), cc->GetN());
-         }
-      }else{
-         printf("Failed to open rdt-cutfile : %s\n", rdtCutFile.Data());
-      }
-   }else if( rdtCutFile != "" ){
-      printf("=========== no rdt-cutfile %s, no RDT cut. make one with\n", rdtCutFile.Data());
-      printf("            RDTCutCreator(\"../root_data/gen_runXXX.root\", \"%s\", %d, %d)\n", rdtCutFile.Data(), rdtERange[1], rdtDERange[1]);
+   LoadRDTCuts();
+
+   //================ files of the chain (default input of RDTCutCreator())
+   processedFiles = "";
+   TChain * chainIn = dynamic_cast<TChain *>(tree);
+   if( chainIn ){
+      TIter next(chainIn->GetListOfFiles());
+      while( TChainElement * el = (TChainElement *) next() ) processedFiles += TString(el->GetTitle()) + " ";
+   }else if( tree && tree->GetCurrentFile() ){
+      processedFiles = tree->GetCurrentFile()->GetName();
+   }
+   processedFiles = processedFiles.Strip(TString::kBoth);
+
+   //================ trace mode (Init is called after Begin, so detect from the branches here)
+   DetectTrace(tree);
+   isStubFineTime = isUseTraceTime && isArrayTrace && isRDTTrace;
+   isElumFineTime = isUseTraceTime && isELUMTrace  && isRDTTrace;
+   for( int k = 0; k < 2; k++){
+      gateStub[k] = isStubFineTime ? traceStubTimeGate[k] : stubTimeGate[k];
+      gateElum[k] = isElumFineTime ? traceTimeGate[k]     : timeGate[k];
+   }
+   for( int k = 0; k < 3; k++) sumStub[k] = ScaleSum();
+   for( int i = 0; i < NELUM; i++) sumElum[i] = ScaleSum();
+   printf("================ Trace : stub %s, RDT %s, ELUM %s | tdiff stub-RDT %s, ELUM-RDT %s\n",
+          isArrayTrace ? "ON" : "off", isRDTTrace ? "ON" : "off", isELUMTrace ? "ON" : "off",
+          isStubFineTime ? "trace time" : "timestamp", isElumFineTime ? "trace time" : "timestamp");
+   if( isArrayTrace || isRDTTrace || isELUMTrace ){
+      printf("                 rise-time gate %.1f - %.1f sample, stub / ELUM x = s0 + s1 * trace * POL (xxxTraceScale), RDT = trdt * POL\n", traceRiseGate[0], traceRiseGate[1]);
    }
 
    //================ time range
@@ -401,23 +542,58 @@ void MonitorsBZero::Begin(TTree *tree){
    for( int i = 0; i < NRDT/2; i++){
       hrdt2D[i]  = new TH2F(Form("hrdt2D%d", i),  Form("RDT dE vs E (E=%d, dE=%d); E [ch]; dE [ch]", 2*i, 2*i+1),         500, rdtERange[0], rdtERange[1], 500, rdtDERange[0], rdtDERange[1]);
       hrdt2Dg[i] = new TH2F(Form("hrdt2Dg%d", i), Form("RDT dE vs E, ELUM coin. (E=%d, dE=%d); E [ch]; dE [ch]", 2*i, 2*i+1), 500, rdtERange[0], rdtERange[1], 500, rdtDERange[0], rdtDERange[1]);
+      hrdt2D_timeG[i] = new TH2F(Form("hrdt2D%d_timeG", i),
+                                 Form("RDT dE vs E, %g < rdt_t - elum_t < %g%s (E=%d, dE=%d); E [ch]; dE [ch]", gateElum[0], gateElum[1], isElumFineTime ? " (trace time)" : "", 2*i, 2*i+1),
+                                 500, rdtERange[0], rdtERange[1], 500, rdtDERange[0], rdtDERange[1]);
    }
    hrdtID     = new TH2F("hrdtID", "RDT vs ID; ID; [ch]", NRDT, 0, NRDT, 500, 0, TMath::Max(rdtERange[1], rdtDERange[1]));
    hrdtMatrix = new TH2F("hrdtMatrix", "RDT ID vs RDT ID", NRDT, 0, NRDT, NRDT, 0, NRDT);
 
    //---- coincidence
    int nT = coinTimeRange[1] - coinTimeRange[0];
-   htdiffElum    = new TH1I("htdiffElum", "rdt_t - elum_t; time [10 ns]; count",   nT, coinTimeRange[0], coinTimeRange[1]);
-   htdiffStub    = new TH1I("htdiffStub", "rdt_t - stub e_t; time [10 ns]; count", nT, coinTimeRange[0], coinTimeRange[1]);
-   htdiffStubVID = new TH2F("htdiffStubVID", "rdt_t - stub e_t vs RDT ch; RDT ch; time [10 ns]", NRDT, 0, NRDT, nT, coinTimeRange[0], coinTimeRange[1]);
+   int nTS = nT * (isStubFineTime ? traceTimeBinPerCh : 1);
+   int nTE = nT * (isElumFineTime ? traceTimeBinPerCh : 1);
+   const char * tagS = isStubFineTime ? " (trace time)" : "";
+   const char * tagE = isElumFineTime ? " (trace time)" : "";
+   htdiffElum    = new TH1F("htdiffElum", Form("rdt_t - elum_t%s; time [10 ns]; count", tagE),   nTE, coinTimeRange[0], coinTimeRange[1]);
+   htdiffStub    = new TH1F("htdiffStub", Form("rdt_t - stub e_t%s; time [10 ns]; count", tagS), nTS, coinTimeRange[0], coinTimeRange[1]);
+   htdiffStubVID = new TH2F("htdiffStubVID", Form("rdt_t - stub e_t vs RDT ch%s; RDT ch; time [10 ns]", tagS), NRDT, 0, NRDT, nTS, coinTimeRange[0], coinTimeRange[1]);
    hStubECalVPosG = new TH2F("hStubECalVPosG", Form("stub eCal vs %s, RDT coin.; %s [mm]; E [MeV]", stubAx.Data(), stubAx.Data()), 400, stubPos0 - stubLength/2. - 10, stubPos0 + stubLength/2. + 10, 500, eCalRange[0], eCalRange[1]);
    for( int i = 0; i < NRDT/2; i++){
       hrdt2DgStub[i] = new TH2F(Form("hrdt2DgStub%d", i), Form("RDT dE vs E, stub coin. (E=%d, dE=%d); E [ch]; dE [ch]", 2*i, 2*i+1), 500, rdtERange[0], rdtERange[1], 500, rdtDERange[0], rdtDERange[1]);
    }
-   htdiffElumVID = new TH2F("htdiffElumVID", "rdt_t - elum_t vs ring; ring; time [10 ns]", NELUM, 0, NELUM, nT, coinTimeRange[0], coinTimeRange[1]);
+   htdiffElumVID = new TH2F("htdiffElumVID", Form("rdt_t - elum_t vs ring%s; ring; time [10 ns]", tagE), NELUM, 0, NELUM, nTE, coinTimeRange[0], coinTimeRange[1]);
+
+   //---- trace checks : firmware vs trace * POLARITY (before rescale), rise time, T0
+   const char * stubName[3] = {"e", "xf", "xn"};
+   for( int k = 0; k < 3; k++){
+      hTrStub[k] = new TH2F(Form("hTrStub%s", stubName[k]), Form("stub %s : firmware vs trace; t%s * POLARITY [ch]; %s [ch]", stubName[k], stubName[k], stubName[k]),
+                            400, rawERange[0], rawERange[1], 400, rawERange[0], rawERange[1]);
+   }
+   hTrRdtRatio  = new TH2F("hTrRdtRatio",  "RDT firmware / (trdt * POLARITY); ID; ratio",   NRDT,  0, NRDT,  400, 0, 2);
+   hTrElumRatio = new TH2F("hTrElumRatio", "ELUM firmware / (telum * POLARITY); ring; ratio", NELUM, 0, NELUM, 400, 0, 2);
+   hTrStubRise  = new TH1F("hTrStubRise", "stub te rise time; rise time [sample]; count", 500, 0, 100);
+   hTrStubT0    = new TH1F("hTrStubT0",   "stub te T0; T0 [sample]; count",               500, 0, 250);
+   hTrRdtRise   = new TH2F("hTrRdtRise",  "RDT trdt rise time; ID; rise time [sample]",   NRDT,  0, NRDT,  250, 0, 100);
+   hTrRdtT0     = new TH2F("hTrRdtT0",    "RDT trdt T0; ID; T0 [sample]",                 NRDT,  0, NRDT,  250, 0, 250);
+   hTrElumRise  = new TH2F("hTrElumRise", "ELUM telum rise time; ring; rise time [sample]", NELUM, 0, NELUM, 250, 0, 100);
+   hTrElumT0    = new TH2F("hTrElumT0",   "ELUM telum T0; ring; T0 [sample]",               NELUM, 0, NELUM, 250, 0, 250);
 
    printf("======================================== End of histograms Declaration\n");
    StpWatch.Start();
+}
+
+/***************************************************************
+ * trace : drop bad fit, fill checks, rescale to firmware scale (in place)
+ ***************************************************************/
+/// val : trace amplitude (in), trace * polarity rescaled or NaN (out). fw : firmware value. returns true if kept
+/// scale = NULL / sum = NULL : no rescale / no scale fit (RDT)
+bool ApplyTrace(Float_t &val, double rise, int polarity, double * scale, double fw, ScaleSum * sum){
+   double raw = val * polarity;
+   if( TMath::IsNaN(raw) || !(traceRiseGate[0] < rise && rise < traceRiseGate[1]) ){ val = TMath::QuietNaN(); return false; }
+   if( sum && !TMath::IsNaN(fw) && fw > traceScaleFitMin ) sum->Add(raw, fw);
+   val = scale ? scale[0] + scale[1] * raw : raw;
+   return true;
 }
 
 /***************************************************************
@@ -441,6 +617,39 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
    }
    if( isRDTExist  ){ b_RDT->GetEntry(entry);  b_RDTTimestamp->GetEntry(entry);  }
    if( isELUMExist ){ b_ELUM->GetEntry(entry); b_ELUMTimestamp->GetEntry(entry); }
+
+   /*********** trace : e/xf/xn, rdt, elum hold the trace amplitudes (b_Energy etc. bound to te ...) */
+   if( isArrayTrace ){
+      b_TE_T->GetEntry(entry);  b_TE_R->GetEntry(entry);
+      b_TXF_R->GetEntry(entry); b_TXN_R->GetEntry(entry);
+      b_FW_E->GetEntry(entry);  b_FW_XF->GetEntry(entry); b_FW_XN->GetEntry(entry);
+      /// only the stub is used
+      int id = stubID;
+      if( !TMath::IsNaN(e[id])  ){ hTrStubRise->Fill(te_r[id]); hTrStubT0->Fill(te_t[id]); hTrStub[0]->Fill(e[id]*POLARITY_E, fw_e[id]); }
+      if( !TMath::IsNaN(xf[id]) ) hTrStub[1]->Fill(xf[id]*POLARITY_XFXN, fw_xf[id]);
+      if( !TMath::IsNaN(xn[id]) ) hTrStub[2]->Fill(xn[id]*POLARITY_XFXN, fw_xn[id]);
+      ApplyTrace(e[id],  te_r[id],  POLARITY_E,    stubTraceScale[0], fw_e[id],  &sumStub[0]);
+      ApplyTrace(xf[id], txf_r[id], POLARITY_XFXN, stubTraceScale[1], fw_xf[id], &sumStub[1]);
+      ApplyTrace(xn[id], txn_r[id], POLARITY_XFXN, stubTraceScale[2], fw_xn[id], &sumStub[2]);
+   }
+   if( isRDTTrace ){
+      b_TRDT_T->GetEntry(entry); b_TRDT_R->GetEntry(entry); b_FW_RDT->GetEntry(entry);
+      for( int i = 0; i < NRDT; i++){
+         if( TMath::IsNaN(rdt[i]) ) continue;
+         hTrRdtRise->Fill(i, trdt_r[i]); hTrRdtT0->Fill(i, trdt_t[i]);
+         if( rdt[i] != 0 ) hTrRdtRatio->Fill(i, fw_rdt[i]/(rdt[i]*POLARITY_RDT));
+         ApplyTrace(rdt[i], trdt_r[i], POLARITY_RDT, NULL, fw_rdt[i], NULL); /// no rescale
+      }
+   }
+   if( isELUMTrace ){
+      b_TELUM_T->GetEntry(entry); b_TELUM_R->GetEntry(entry); b_FW_ELUM->GetEntry(entry);
+      for( int i = 0; i < NELUM; i++){
+         if( TMath::IsNaN(elum[i]) ) continue;
+         hTrElumRise->Fill(i, telum_r[i]); hTrElumT0->Fill(i, telum_t[i]);
+         if( elum[i] != 0 ) hTrElumRatio->Fill(i, fw_elum[i]/(elum[i]*POLARITY_ELUM));
+         ApplyTrace(elum[i], telum_r[i], POLARITY_ELUM, elumTraceScale[i], fw_elum[i], &sumElum[i]);
+      }
+   }
 
    //=========== canvas title
    if( entry == 0 ) {
@@ -473,6 +682,7 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
    /*********** ELUM ***************************************************/
    int elumMulti = 0;
    bool anyElumCoin = false;
+   bool elumTelCoin[NRDT/2] = {false}; /// telescope (E or dE) in rdt_t - elum_t gate with any ELUM hit
    for( int i = 0; i < NELUM; i++){
       if( TMath::IsNaN(elum[i]) ) continue;
       helum[i]->Fill(elum[i]);
@@ -496,10 +706,14 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
       bool coin = false;
       for( int j = 0; j < NRDT; j++){
          if( TMath::IsNaN(rdt[j]) || rdt_t[j] == 0 ) continue;
-         int tdiff = (int) ((Long64_t) rdt_t[j] - (Long64_t) elum_t[i]);
+         double tdiff = (double) ((Long64_t) rdt_t[j] - (Long64_t) elum_t[i]);
+         if( isElumFineTime ) tdiff += trdt_t[j] - telum_t[i];
          htdiffElum->Fill(tdiff);
          htdiffElumVID->Fill(i, tdiff);
-         if( !isTimeGateOn || (timeGate[0] < tdiff && tdiff < timeGate[1]) ) coin = true;
+         if( !isTimeGateOn || (gateElum[0] < tdiff && tdiff < gateElum[1]) ){
+            coin = true;
+            elumTelCoin[j/2] = true;
+         }
       }
       if( coin ) anyElumCoin = true;
       if( coin && rdtCutGate ){
@@ -512,6 +726,7 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
    if( anyElumCoin ){
       for( int i = 0; i < NRDT/2; i++) hrdt2Dg[i]->Fill(rdt[2*i], rdt[2*i+1]);
    }
+   for( int i = 0; i < NRDT/2; i++) if( elumTelCoin[i] ) hrdt2D_timeG[i]->Fill(rdt[2*i], rdt[2*i+1]);
 
    /*********** stub (det 21) ******************************************/
    double sE = e[stubID], sXF = xf[stubID], sXN = xn[stubID];
@@ -536,10 +751,11 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
          bool telCoin[NRDT/2] = {false};
          for( int j = 0; j < NRDT; j++){
             if( TMath::IsNaN(rdt[j]) || rdt_t[j] == 0 ) continue;
-            int tdiff = (int) ((Long64_t) rdt_t[j] - (Long64_t) e_t[stubID]);
+            double tdiff = (double) ((Long64_t) rdt_t[j] - (Long64_t) e_t[stubID]);
+            if( isStubFineTime ) tdiff += trdt_t[j] - te_t[stubID];
             htdiffStub->Fill(tdiff);
             htdiffStubVID->Fill(j, tdiff);
-            if( !isTimeGateOn || (stubTimeGate[0] < tdiff && tdiff < stubTimeGate[1]) ){
+            if( !isTimeGateOn || (gateStub[0] < tdiff && tdiff < gateStub[1]) ){
                stubCoin = true;
                telCoin[j/2] = true;
             }
@@ -590,6 +806,22 @@ void DrawRDTWithCut(TH2F * hist, int id){
    }
 }
 
+/// stub eCal vs position + (targ, targ) elastic line (red) + (targ2, targ2) elastic line (blue)
+void DrawStubECalVPosBZ(TH2F * hist){
+   Draw2DHistBZ(hist);
+   double  mX[2]   = {mTarg, mTarg2};
+   int     col[2]  = {kRed, kBlue};
+   TString name[2] = {elasticName, elasticName2};
+   TLatex t; t.SetNDC(); t.SetTextFont(82); t.SetTextSize(0.04);
+   for( int k = 0; k < 2; k++){
+      TGraph * g = ElasticLineStub(mX[k], col[k]);
+      if( g->GetN() == 0 ) continue;
+      g->Draw("L same");
+      t.SetTextColor(col[k]);
+      t.DrawLatex(0.15, 0.85 - 0.05*k, name[k] + " elastic");
+   }
+}
+
 void DrawExLinesTheta(double th1, double th2){
    int colors[6] = {2, 6, 4, 8, 7, 9};
    for( int k = 0; k < (int) exLines.size(); k++) KinematicLine(exLines[k], th1, th2, colors[k%6])->Draw("L same");
@@ -612,7 +844,7 @@ void stub(){
    c->cd(5); Draw2DHistBZ(hStubEVXS);
    c->cd(6); Draw2DHistBZ(hStubEVx);
    c->cd(7); hStubECal->Draw();
-   c->cd(8); Draw2DHistBZ(hStubECalVPos);
+   c->cd(8); DrawStubECalVPosBZ(hStubECalVPos);
    c->cd(9); Draw2DHistBZ(hStubECalVTheta);
 }
 
@@ -647,9 +879,11 @@ void rdt(bool isLogz = false){
    TCanvas * c3 = GetCanvasBZ("cRdtIDBZ", "RDT ID", 2, 1, 1000, 500);
    c3->cd(1); hrdtID->Draw("colz");
    c3->cd(2); hrdtMatrix->Draw("colz");
+   TCanvas * c4 = GetCanvasBZ("cRdtTimeGBZ", Form("RDT dE-E, %g < rdt_t - elum_t < %g", gateElum[0], gateElum[1]), 2, 2, 1000, 1000);
+   for( int k = 0; k < NRDT/2; k++){ c4->cd(k+1); if(isLogz) gPad->SetLogz(); DrawRDTWithCut(hrdt2D_timeG[padOrder[k]], padOrder[k]); }
 }
 
-void DrawGateLines(TH1 * h, int * gate){
+void DrawGateLines(TH1 * h, double * gate){
    if( !isTimeGateOn ) return;
    double yMax = h->GetMaximum();
    TLine * l1 = new TLine(gate[0], 0, gate[0], yMax); l1->SetLineColor(2); l1->Draw();
@@ -659,10 +893,10 @@ void DrawGateLines(TH1 * h, int * gate){
 void coin(){
    /// row 1 : ELUM - RDT, row 2 : stub - RDT ((a,a): alpha in stub, 20Ne in RDT)
    TCanvas * c = GetCanvasBZ("cCoinBZ", "coincidence", 3, 2, 1500, 1000);
-   c->cd(1); htdiffElum->Draw(); DrawGateLines(htdiffElum, timeGate);
+   c->cd(1); htdiffElum->Draw(); DrawGateLines(htdiffElum, gateElum);
    c->cd(2); htdiffElumVID->Draw("colz");
    c->cd(3); Draw2DHistBZ(helumCalVThetaG);
-   c->cd(4); htdiffStub->Draw(); DrawGateLines(htdiffStub, stubTimeGate);
+   c->cd(4); htdiffStub->Draw(); DrawGateLines(htdiffStub, gateStub);
    c->cd(5); htdiffStubVID->Draw("colz");
    c->cd(6); Draw2DHistBZ(hStubECalVPosG);
 
@@ -674,15 +908,100 @@ void coin(){
    for( int k = 0; k < NRDT/2; k++){ c3->cd(k+1); DrawRDTWithCut(hrdt2Dg[padOrder[k]], padOrder[k]); }
 }
 
+/// trace checks : firmware vs trace (for xxxTraceScale), rise time (for traceRiseGate), T0
+void trace(){
+   TCanvas * c = GetCanvasBZ("cTraceBZ", "trace checks", 4, 3, 1600, 1200);
+   c->cd(1);  Draw2DHistBZ(hTrStub[0]);
+   c->cd(2);  Draw2DHistBZ(hTrStub[1]);
+   c->cd(3);  Draw2DHistBZ(hTrStub[2]);
+   c->cd(4);  gPad->SetLogy(); hTrStubRise->Draw(); DrawGateLines(hTrStubRise, traceRiseGate);
+   c->cd(5);  hTrRdtRatio->Draw("colz");
+   c->cd(6);  hTrRdtRise->Draw("colz");
+   c->cd(7);  hTrRdtT0->Draw("colz");
+   c->cd(8);  hTrStubT0->Draw();
+   c->cd(9);  hTrElumRatio->Draw("colz");
+   c->cd(10); hTrElumRise->Draw("colz");
+   c->cd(11); hTrElumT0->Draw("colz");
+   c->cd(12); htdiffStub->Draw(); DrawGateLines(htdiffStub, gateStub);
+}
+
+/// trace -> firmware scale from the LSQ sums, printed ready to paste into MonitorsBZero.C
+void PrintTraceScale(){
+   double nTot = 0;
+   for( int k = 0; k < 3; k++)     nTot += sumStub[k].n;
+   for( int i = 0; i < NELUM; i++) nTot += sumElum[i].n;
+   if( nTot == 0 ){ printf("=============== trace -> firmware scale : no entries\n"); return; }
+   double s0, s1;
+   printf("=============== trace -> firmware scale, fw = s0 + s1 * trace * POLARITY (fw > %.0f), paste into MonitorsBZero.C\n", traceScaleFitMin);
+   printf("   (current values are applied AFTER this fit, the fit is always trace raw vs firmware)\n");
+   printf("double stubTraceScale[3][2] = {");
+   for( int k = 0; k < 3; k++){
+      if( sumStub[k].Get(s0, s1) ) printf(" {%.4f, %.6f}%s", s0, s1, k < 2 ? "," : "");
+      else                         printf(" {%g, %g}%s", stubTraceScale[k][0], stubTraceScale[k][1], k < 2 ? "," : "");
+   }
+   printf(" }; /// e, xf, xn  (n = %.0f, %.0f, %.0f)\n", sumStub[0].n, sumStub[1].n, sumStub[2].n);
+   printf("double elumTraceScale[NELUM][2] = {\n");
+   for( int i = 0; i < NELUM; i++){
+      if( sumElum[i].Get(s0, s1) ) printf("   {%.4f, %.6f}%s // %d, n = %.0f\n", s0, s1, i < NELUM-1 ? "," : " ", i, sumElum[i].n);
+      else printf("   {%g, %g}%s // %d, n = %.0f, no fit\n", elumTraceScale[i][0], elumTraceScale[i][1], i < NELUM-1 ? "," : " ", i, sumElum[i].n);
+   }
+   printf("};\n");
+}
+
+/// draw the RDT cuts with Armory/RDTCutCreator.py (matplotlib window), then reload them
+///   files    : root files (space separated, glob ok), "" = the processed runs
+///   outFile  : "" = rdtCutFile, can be changed in the window
+///   extraArg : more options for the script, e.g. "--gate \"rdt[0]>100\""
+/// the ROOT prompt waits until the window is closed. range / logz / output are editable in the window
+void RDTCutCreator(TString files = "", TString outFile = "", bool isLogz = false, TString extraArg = ""){
+   if( files == "" ) files = processedFiles;
+   if( files == "" ){ printf("RDTCutCreator : no file, give the root file(s)\n"); return; }
+   if( outFile == "" ) outFile = rdtCutFile;
+
+   TString report = gSystem->TempDirectory() + TString("/RDTCutCreator_report.txt");
+   gSystem->Unlink(report);
+
+   TString cmd;
+   cmd.Form("python3 ../Armory/RDTCutCreator.py %s -o %s --emin %d --emax %d --demin %d --demax %d%s --report %s %s",
+            files.Data(), outFile.Data(), rdtERange[0], rdtERange[1], rdtDERange[0], rdtDERange[1],
+            isLogz ? " --logz" : "", report.Data(), extraArg.Data());
+   printf("%s\n", cmd.Data());
+   gSystem->Exec(cmd);
+
+   //---- saved ? the script writes the saved path into the report file
+   std::ifstream fr(report.Data());
+   std::string saved;
+   if( !fr.is_open() || !std::getline(fr, saved) || saved.empty() ){
+      printf("=============== RDTCutCreator : no cut saved, %s unchanged\n", rdtCutFile.Data());
+      return;
+   }
+   fr.close();
+   gSystem->Unlink(report);
+
+   TString savedPath = saved.c_str();
+   TString cwd = gSystem->WorkingDirectory();
+   if( savedPath.BeginsWith(cwd + "/") ) savedPath.Remove(0, cwd.Length() + 1);
+   if( savedPath != rdtCutFile ){
+      printf("=============== RDT cut file of this session : %s -> %s (rdtCutFile in MonitorsBZero.C unchanged)\n", rdtCutFile.Data(), savedPath.Data());
+      rdtCutFile = savedPath;
+   }
+   LoadRDTCuts();
+   printf("=============== new cuts drawn by rdt() / coin(). gated histograms (hExElumG, helumCalVThetaG, ...) use them after the next run of the monitor\n");
+}
+
 void listDrawsBZ(){
    printf("------------------- MonitorsBZero draw functions\n");
    printf("  stub()           - stub (det %d) raw, x, eCal vs pos, eCal vs theta or phi ((a,a) elastics)\n", stubID);
    printf("  elum(isLogy)     - ELUM raw / cal per ring, ID, multi, rate\n");
    printf("  Ex()             - Ex per ring, Ex vs theta, ELUM E vs theta + (a,p) lines\n");
-   printf("  rdt(isLogz)      - RDT dE-E, singles, ID\n");
+   printf("  rdt(isLogz)      - RDT dE-E, singles, ID, dE-E gated by rdt_t - elum_t (hrdt2DX_timeG)\n");
    printf("  coin()           - ELUM-RDT & stub-RDT time diff, gated spectra, RDT dE-E gated by stub / ELUM\n");
+   printf("  trace()          - trace checks : firmware vs trace, rise time, T0 (trace_runXXX.root)\n");
+   printf("  PrintTraceScale()- trace -> firmware scale table\n");
    printf("-------------------------------\n");
-   printf("  RDTCutCreator(\"../root_data/gen_runXXX.root\", \"%s\", %d, %d)  - draw 4 RDT cuts (x=E, y=dE), save, quit\n", rdtCutFile.Data(), rdtERange[1], rdtDERange[1]);
+   printf("  RDTCutCreator(files, outFile, isLogz, extraArg) - draw 4 RDT cuts (x=E, y=dE), Armory/RDTCutCreator.py\n");
+   printf("                   files = \"\" : the processed runs (%s)\n", processedFiles.Data());
+   printf("                   double-click closes, drag vertices to edit, x accepts, saved after 4, cuts reloaded\n");
    printf("  Check_rdtGate(\"../root_data/gen_runXXX.root\", \"%s\")  - check the cuts\n", rdtCutFile.Data());
    printf("  RDT cut file : %s (%s)\n", rdtCutFile.Data(), isCutFileOpen ? Form("%d cuts loaded", numCut) : "not found, no RDT cut");
    printf("-------------------------------\n");
@@ -701,6 +1020,13 @@ void MonitorsBZero::Terminate(){
    int strLen = canvasTitle.Sizeof();
    canvasTitle.Remove(strLen-3);
    if( runTime > 0. ) canvasTitle += Form(" | %.0f min", runTime);
+   if( isArrayTrace || isRDTTrace || isELUMTrace ){
+      TString tr = " | trace:";
+      if( isArrayTrace ) tr += " stub";
+      if( isRDTTrace   ) tr += " RDT";
+      if( isELUMTrace  ) tr += " ELUM";
+      canvasTitle += tr;
+   }
 
    gStyle->SetOptStat("neiou");
    text.SetNDC();
@@ -718,21 +1044,16 @@ void MonitorsBZero::Terminate(){
    ///   hExElumG    | hrdt2D3        | hrdt2D2
 
    ///---- 1 stub eCal vs position along long axis, (a,a) elastics
-   cBZ->cd(1); Draw2DHistBZ(hStubECalVPos);
+   cBZ->cd(1); DrawStubECalVPosBZ(hStubECalVPos);
 
    ///---- 2 ELUM E vs theta + (a,p) kinematic lines
-   cBZ->cd(2); Draw2DHistBZ(helumCalVTheta);
-   DrawExLinesTheta(helumCalVTheta->GetXaxis()->GetXmin(), helumCalVTheta->GetXaxis()->GetXmax());
+   cBZ->cd(2); Draw2DHistBZ(helumCalVThetaG);
+   DrawExLinesTheta(helumCalVThetaG->GetXaxis()->GetXmin(), helumCalVThetaG->GetXaxis()->GetXmax());
    text.DrawLatex(0.15, 0.85, Form("lines : Ex ="));
    for( int k = 0; k < (int) exLines.size(); k++) text.DrawLatex(0.15, 0.80 - 0.05*k, Form("%.3f", exLines[k]));
 
    ///---- 3 tdiff ELUM - RDT
-   cBZ->cd(3); htdiffElum->Draw();
-   if( isTimeGateOn ){
-      double yMax = htdiffElum->GetMaximum();
-      TLine * l1 = new TLine(timeGate[0], 0, timeGate[0], yMax); l1->SetLineColor(2); l1->Draw();
-      TLine * l2 = new TLine(timeGate[1], 0, timeGate[1], yMax); l2->SetLineColor(2); l2->Draw();
-   }
+   cBZ->cd(3); htdiffElum->Draw(); DrawGateLines(htdiffElum, gateElum);
 
    ///---- 4 Ex from ELUM
    cBZ->cd(4); hExElum->Draw();
@@ -743,7 +1064,7 @@ void MonitorsBZero::Terminate(){
 
    ///---- 7 Ex from ELUM, RDT gated
    cBZ->cd(7); hExElumG->Draw();
-   if( isTimeGateOn ) text.DrawLatex(0.15, 0.85, Form("%d < tdiff < %d", timeGate[0], timeGate[1]));
+   if( isTimeGateOn ) text.DrawLatex(0.15, 0.85, Form("%g < tdiff < %g", gateElum[0], gateElum[1]));
    if( isCutFileOpen ) text.DrawLatex(0.15, 0.80, "with RDT cut");
 
    ///---- 8, 9 RDT dE-E
@@ -759,10 +1080,10 @@ void MonitorsBZero::Terminate(){
 
    StpWatch.Start(kFALSE);
 
-   gROOT->ProcessLine(".L ../Armory/RDTCutCreator.C");
-   printf("=============== loaded Armory/RDTCutCreator.C\n");
    gROOT->ProcessLine(".L ../Armory/Check_rdtGate.C");
    printf("=============== loaded Armory/Check_rdtGate.C\n");
+
+   if( isArrayTrace || isRDTTrace || isELUMTrace ) PrintTraceScale();
 
    listDrawsBZ();
 }

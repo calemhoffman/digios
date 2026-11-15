@@ -7,6 +7,10 @@
  *    elum[16]   : S1 annular, 16 rings, r = 24 - 48 mm, z = -50 mm
  *    rdt[8]     : recoil telescopes at z = +1000 mm (even = E, odd = dE)
  *
+ *  trace mode (trace_runXXX.root, Process_RUN -BZ 2 ...) : as Monitors.h, the trace branch is bound
+ *  to the SAME array and TBranch pointer (te -> e via b_Energy, txf -> xf, txn -> xn, trdt -> rdt,
+ *  telum -> elum), so Process() is unchanged. the firmware values go to fw_* for the trace scale table.
+ *
  *  all user settings / calibrations are in MonitorsBZero.C
  *
 ***********************************************************************/
@@ -59,6 +63,40 @@ public :
    bool isRDTExist;
    bool isELUMExist;
 
+   //---- trace analysis (EventBuilder fit : amplitude, T0 [sample = 10 ns] from trace start, rise time [sample])
+   Float_t         te_t[NARRAY];
+   Float_t         te_r[NARRAY];
+   Float_t         txf_r[NARRAY];
+   Float_t         txn_r[NARRAY];
+   Float_t         trdt_t[NRDT];
+   Float_t         trdt_r[NRDT];
+   Float_t         telum_t[NELUM];
+   Float_t         telum_r[NELUM];
+   //---- firmware values in trace mode (e/xf/xn/rdt/elum hold the trace values)
+   Float_t         fw_e[NARRAY];
+   Float_t         fw_xf[NARRAY];
+   Float_t         fw_xn[NARRAY];
+   Float_t         fw_rdt[NRDT];
+   Float_t         fw_elum[NELUM];
+
+   TBranch        *b_TE_T;   //!
+   TBranch        *b_TE_R;   //!
+   TBranch        *b_TXF_R;   //!
+   TBranch        *b_TXN_R;   //!
+   TBranch        *b_TRDT_T;   //!
+   TBranch        *b_TRDT_R;   //!
+   TBranch        *b_TELUM_T;   //!
+   TBranch        *b_TELUM_R;   //!
+   TBranch        *b_FW_E;   //!
+   TBranch        *b_FW_XF;   //!
+   TBranch        *b_FW_XN;   //!
+   TBranch        *b_FW_RDT;   //!
+   TBranch        *b_FW_ELUM;   //!
+
+   bool isArrayTrace;  /// e, xf, xn  <- te, txf, txn
+   bool isRDTTrace;    /// rdt        <- trdt
+   bool isELUMTrace;   /// elum       <- telum (EventBuilder trace analysis, NELUM > 0)
+
    ULong64_t startTime;
    ULong64_t endTime;
 
@@ -79,6 +117,7 @@ public :
    virtual void    Terminate();
 
    bool FindStartEndTime(TTree * tree, TString branchName, int nCh);
+   void DetectTrace(TTree * tree);
 
    ClassDef(MonitorsBZero,0);
 };
@@ -96,17 +135,33 @@ void MonitorsBZero::Init(TTree *tree){
 
    fChain->SetBranchAddress("runID", &runID, &b_runID);
 
+   DetectTrace(fChain);
+
    TBranch * br = (TBranch *) fChain->GetListOfBranches()->FindObject("e");
    if( br == NULL ){
       printf(" ++++++++ no Array (e/xf/xn).\n");
       isArrayExist = false;
    }else{
       isArrayExist = true;
-      fChain->SetBranchAddress("e",    e,    &b_Energy);
+      if( isArrayTrace ){
+         fChain->SetBranchAddress("te",   e,     &b_Energy); // replace e  with te
+         fChain->SetBranchAddress("txf",  xf,    &b_XF);     // replace xf with txf
+         fChain->SetBranchAddress("txn",  xn,    &b_XN);     // replace xn with txn
+         fChain->SetBranchAddress("te_t", te_t,  &b_TE_T);
+         fChain->SetBranchAddress("te_r", te_r,  &b_TE_R);
+         fChain->SetBranchAddress("txf_r", txf_r, &b_TXF_R);
+         fChain->SetBranchAddress("txn_r", txn_r, &b_TXN_R);
+         fChain->SetBranchAddress("e",    fw_e,  &b_FW_E);
+         fChain->SetBranchAddress("xf",   fw_xf, &b_FW_XF);
+         fChain->SetBranchAddress("xn",   fw_xn, &b_FW_XN);
+         printf("************ using Trace in array (te, txf, txn) \n");
+      }else{
+         fChain->SetBranchAddress("e",    e,    &b_Energy);
+         fChain->SetBranchAddress("xf",   xf,   &b_XF);
+         fChain->SetBranchAddress("xn",   xn,   &b_XN);
+      }
       fChain->SetBranchAddress("e_t",  e_t,  &b_EnergyTimestamp);
-      fChain->SetBranchAddress("xf",   xf,   &b_XF);
       fChain->SetBranchAddress("xf_t", xf_t, &b_XFTimestamp);
-      fChain->SetBranchAddress("xn",   xn,   &b_XN);
       fChain->SetBranchAddress("xn_t", xn_t, &b_XNTimestamp);
    }
 
@@ -116,7 +171,15 @@ void MonitorsBZero::Init(TTree *tree){
       isRDTExist = false;
    }else{
       isRDTExist = true;
-      fChain->SetBranchAddress("rdt"  , rdt,   &b_RDT);
+      if( isRDTTrace ){
+         fChain->SetBranchAddress("trdt",   rdt,    &b_RDT);   // replace rdt with trdt
+         fChain->SetBranchAddress("trdt_t", trdt_t, &b_TRDT_T);
+         fChain->SetBranchAddress("trdt_r", trdt_r, &b_TRDT_R);
+         fChain->SetBranchAddress("rdt",    fw_rdt, &b_FW_RDT);
+         printf("************ using Trace in recoil (trdt) \n");
+      }else{
+         fChain->SetBranchAddress("rdt"  , rdt,   &b_RDT);
+      }
       fChain->SetBranchAddress("rdt_t", rdt_t, &b_RDTTimestamp);
    }
 
@@ -126,7 +189,17 @@ void MonitorsBZero::Init(TTree *tree){
       isELUMExist = false;
    }else{
       isELUMExist = true;
-      fChain->SetBranchAddress("elum",   elum,   &b_ELUM);
+      if( isELUMTrace ){
+         fChain->SetBranchAddress("telum",   elum,    &b_ELUM);   // replace elum with telum
+         fChain->SetBranchAddress("telum_t", telum_t, &b_TELUM_T);
+         fChain->SetBranchAddress("telum_r", telum_r, &b_TELUM_R);
+         fChain->SetBranchAddress("elum",    fw_elum, &b_FW_ELUM);
+         printf("************ using Trace in ELUM (telum) \n");
+      }else{
+         fChain->SetBranchAddress("elum",   elum,   &b_ELUM);
+         if( isUseELUMTrace && fChain->GetListOfBranches()->FindObject("trdt") != NULL )
+            printf(" ++++++++ trace file without ELUM trace (telum), sorted by an older EventBuilder, re-sort the run \n");
+      }
       fChain->SetBranchAddress("elum_t", elum_t, &b_ELUMTimestamp);
    }
 
@@ -139,6 +212,15 @@ void MonitorsBZero::Init(TTree *tree){
    endTime = 0;
 
    printf("=================================== End of Branch Pointer Inititization. \n");
+}
+
+/// which trace branches are used ; called in Begin (before Init) and Init
+void MonitorsBZero::DetectTrace(TTree * tree){
+   TObjArray * list = tree->GetListOfBranches();
+   isArrayTrace = isUseArrayTrace && list->FindObject("e")    && list->FindObject("te")
+                                  && list->FindObject("txf")  && list->FindObject("txn");
+   isRDTTrace   = isUseRDTTrace   && list->FindObject("rdt")  && list->FindObject("trdt");
+   isELUMTrace  = isUseELUMTrace  && list->FindObject("elum") && list->FindObject("telum");
 }
 
 Bool_t MonitorsBZero::Notify(){
