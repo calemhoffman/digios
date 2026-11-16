@@ -60,7 +60,7 @@ int    beamA = 20, beamZ = 10;     /// 20Ne
 int    targA =  4, targZ =  2;     /// 
 int   lightA =  1, lightZ = 1;     /// 
 int   heavyA = beamA + targA - lightA, heavyZ = beamZ + targZ - lightZ;    /// 23Na
-int   targ2A = 28, targ2Z = 14;     /// for the beam(targ2, targ2)beam elastic line on hStubECalVPos, e.g. 12C in CD2
+int   targ2A = 28, targ2Z = 14;     /// for the beam(targ2, targ2)beam elastic line on hStubECalVPos / VTheta, e.g. 12C in CD2
 double beamEnergyPerU = 6.0;       /// MeV/u
 vector<double> exLines = {0.0, 4.0};  /// Ex [MeV] for the kinematic lines
 
@@ -348,8 +348,9 @@ TGraph * KinematicLine(double ex, double th1, double th2, int color){
    return g;
 }
 
-/// (X, X) elastic line on hStubECalVPos : T vs position along the long axis (Z or X), theta_lab from the hit position
-TGraph * ElasticLineStub(double mX, int color = kRed){
+/// (X, X) elastic line : T vs position along the long axis (Z or X) for hStubECalVPos,
+/// or T vs StubAngle (theta_lab or phi_lab) for hStubECalVTheta (isAngle); theta_lab from the hit position
+TGraph * ElasticLineStub(double mX, int color = kRed, bool isAngle = false){
    TGraph * g = new TGraph();
    for( int k = 0; k <= 200; k++){
       double s = -stubLength/2. - 10 + (stubLength + 20)*k/200.;
@@ -357,7 +358,9 @@ TGraph * ElasticLineStub(double mX, int color = kRed){
       StubHitPos(s, X, Y, Z);
       double th = TMath::ATan2(TMath::Sqrt(X*X + Y*Y), Z) * TMath::RadToDeg();
       double T  = CalTElastic(th, mX);
-      if( !TMath::IsNaN(T) ) g->SetPoint(g->GetN(), stubLongAxis == 0 ? Z : X, T);
+      if( TMath::IsNaN(T) ) continue;
+      double xx = isAngle ? StubAngle(X, Y, Z) : (stubLongAxis == 0 ? Z : X);
+      g->SetPoint(g->GetN(), xx, T);
    }
    g->SetLineColor(color); g->SetLineWidth(2);
    return g;
@@ -410,7 +413,7 @@ void MonitorsBZero::Begin(TTree *tree){
    mTarg2 = iTarg2.Mass;
    elasticName.Form("%s(%s,%s)",  iBeam.Name.c_str(), iTarg.Name.c_str(),  iTarg.Name.c_str());
    elasticName2.Form("%s(%s,%s)", iBeam.Name.c_str(), iTarg2.Name.c_str(), iTarg2.Name.c_str());
-   printf("   elastic lines on hStubECalVPos : %s (red), %s (blue, targ2 mass %.4f MeV)\n", elasticName.Data(), elasticName2.Data(), mTarg2);
+   printf("   elastic lines on hStubECalVPos / VTheta : %s (red), %s (blue, targ2 mass %.4f MeV)\n", elasticName.Data(), elasticName2.Data(), mTarg2);
 
    //================ ELUM ring angles
    double dr = (elumRout - elumRin)/NELUM;
@@ -672,7 +675,7 @@ Bool_t MonitorsBZero::Process(Long64_t entry){
       rdtHit++;
       hrdt[i]->Fill(rdt[i]);
       hrdtID->Fill(i, rdt[i]);
-      for( int j = 0; j < NRDT; j++) if( !TMath::IsNaN(rdt[j]) ) hrdtMatrix->Fill(i, j);
+      for( int j = 0; j < NRDT; j++) if( j != i && !TMath::IsNaN(rdt[j]) ) hrdtMatrix->Fill(i, j); /// no self-fill : rdt[] keeps 1 hit per channel
    }
    for( int i = 0; i < NRDT/2; i++){
       hrdt2D[i]->Fill(rdt[2*i], rdt[2*i+1]);
@@ -806,15 +809,15 @@ void DrawRDTWithCut(TH2F * hist, int id){
    }
 }
 
-/// stub eCal vs position + (targ, targ) elastic line (red) + (targ2, targ2) elastic line (blue)
-void DrawStubECalVPosBZ(TH2F * hist){
+/// stub eCal vs position (or vs angle, isAngle) + (targ, targ) elastic line (red) + (targ2, targ2) elastic line (blue)
+void DrawStubECalVPosBZ(TH2F * hist, bool isAngle = false){
    Draw2DHistBZ(hist);
    double  mX[2]   = {mTarg, mTarg2};
    int     col[2]  = {kRed, kBlue};
    TString name[2] = {elasticName, elasticName2};
    TLatex t; t.SetNDC(); t.SetTextFont(82); t.SetTextSize(0.04);
    for( int k = 0; k < 2; k++){
-      TGraph * g = ElasticLineStub(mX[k], col[k]);
+      TGraph * g = ElasticLineStub(mX[k], col[k], isAngle);
       if( g->GetN() == 0 ) continue;
       g->Draw("L same");
       t.SetTextColor(col[k]);
@@ -845,7 +848,7 @@ void stub(){
    c->cd(6); Draw2DHistBZ(hStubEVx);
    c->cd(7); hStubECal->Draw();
    c->cd(8); DrawStubECalVPosBZ(hStubECalVPos);
-   c->cd(9); Draw2DHistBZ(hStubECalVTheta);
+   c->cd(9); DrawStubECalVPosBZ(hStubECalVTheta, true);
 }
 
 void elum(bool isLogy = false){
