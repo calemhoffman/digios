@@ -7,9 +7,11 @@ void ChainMonitorsBZero(int RUNNUM = -1, int RUNNUM2 = -1, bool isTraceON = fals
 
   if( RUNNUM == -1){
     /// this list only for manual Chain sort
-    ///chain->Add("../root_data/gen_run002.root");
+    chain->Add("../root_data/gen_run00[7-8].root");
+    chain->Add("../root_data/gen_run009.root");
+    chain->Add("../root_data/gen_run01[0-9].root");
 
-    
+
 
   }else{
     TString fileName;
