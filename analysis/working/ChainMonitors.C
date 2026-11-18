@@ -13,21 +13,21 @@ void ChainMonitors(int RUNNUM = -1, int RUNNUM2 = -1, bool saveCanvas = false, b
 
     // chain->Add("../root_data/gen_run010.root"); alpha cal array 
 
-    // chain->Add("../root_data/gen_run01[8-9].root"); // 29Si(d,p), 218 ug/cm2
+    // chain->Add("../root_data/gen_run01[5-9].root"); // 29Si(d,p), 218 ug/cm2
     // chain->Add("../root_data/gen_run02[0-9].root"); // 29Si(d,p), 218 ug/cm2
     // chain->Add("../root_data/gen_run03[3-7].root"); // 29Si(d,p), 2018 ug/cm2 (missing runs of 30, 31, 32 are recoil rate checks with Y map)
 
-    // chain->Add("../root_data/trace_run01[8-9].root"); // 29Si(d,p), 218 ug/cm2
-    // chain->Add("../root_data/trace_run02[0-9].root"); // 29Si(d,p), 218 ug/cm2
-    // chain->Add("../root_data/trace_run03[3-7].root"); // 29Si(d,p), 218 ug/cm2 (missing runs of 30, 31, 32 are recoil rate checks with Y map)
+    chain->Add("../root_data/trace_run01[5-9].root"); // 29Si(d,p), 218 ug/cm2
+    chain->Add("../root_data/trace_run02[0-9].root"); // 29Si(d,p), 218 ug/cm2
+    chain->Add("../root_data/trace_run03[0-7].root"); // 29Si(d,p), 218 ug/cm2 (missing runs of 30, 31, 32 are recoil rate checks with Y map)
 
     // chain->Add("../root_data/gen_run03[8-9].root"); // 29Mg(d,p) 381 mkg/cm^2
     // chain->Add("../root_data/gen_run04[0-9].root"); // 29Mg(d,p) 381 mkg/cm^2, run 46 is large
     // chain->Add("../root_data/gen_run05[0-5].root"); // 29Mg(d,p) 381 mkg/cm^2
 
-    chain->Add("../root_data/trace_run03[8-9].root"); // 29Mg(d,p) 381 mkg/cm^2
-    chain->Add("../root_data/trace_run04[0-9].root"); // 29Mg(d,p) 381 mkg/cm^2, run 46 is large
-    chain->Add("../root_data/trace_run05[0-5].root"); // 29Mg(d,p) 381 mkg/cm^2
+    // chain->Add("../root_data/trace_run03[8-9].root"); // 29Mg(d,p) 381 mkg/cm^2
+    // chain->Add("../root_data/trace_run04[0-9].root"); // 29Mg(d,p) 381 mkg/cm^2, run 46 is large
+    // chain->Add("../root_data/trace_run05[0-5].root"); // 29Mg(d,p) 381 mkg/cm^2
 
     // chain->Add("../root_data/gen_run03[0-2].root"); //recoil check (for rate calculations ... three min runs)
 

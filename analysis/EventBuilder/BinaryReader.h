@@ -26,6 +26,7 @@ public:
 
   void Open(const std::string& filename);
   std::string GetFileName() const { return fileName; }  // Get the file name
+  unsigned short GetRunID() const { return runID; }  // Get the run ID
   unsigned short GetDigID() const { return DigID; }  // Get the last three digits of the file name
   unsigned short GetFileIndex() const { return fileIndex; }  // Get the second last three digits of the file name
   size_t GetFileSize() const { return fileSize; }  // Get size of the file in bytes
@@ -50,6 +51,8 @@ public:
     lastTimestampOfHits = 0;  // Reset last timestamp of hits
   }
 
+  uint64_t GetGlobalEarliestTime() const { return globalEarliestTime; }  
+  uint64_t GetGlobalLastTime() const { return globalLastTime; } 
 
   void ReadNextNHitsFromFile(bool debug = false); 
   unsigned int GetMaxHitSize() const { return maxHitSize; }  // Get the maximum size of the hits vector
@@ -84,8 +87,12 @@ private:
   std::ifstream file;
   std::string fileName;
   size_t fileSize; // Size of the file in bytes
+  unsigned short runID;
   unsigned short DigID; // the last three digits of the file name, e.g. 001, 002, etc.
   unsigned short fileIndex; // the 2nd last three digits of the file name, e.g. 000, 001, etc. to indicate the next file from the same DigID.
+
+  uint64_t globalEarliestTime; // Earliest timestamp in the file
+  uint64_t globalLastTime; // Last timestamp in the file
 
   unsigned int totalNumHits;
   unsigned int hitID; // current hit ID
@@ -99,6 +106,7 @@ private:
 
   void Init(){
     fileSize = 0;
+    runID = 0;
     DigID = 0;
     fileIndex = 0;
     totalNumHits = 0;
@@ -107,6 +115,8 @@ private:
     maxHitSize = 0;
     hitSize = 0;
     lastTimestampOfHits = 0; 
+    globalEarliestTime = UINT64_MAX; 
+    globalLastTime = 0; 
   }
 };
 
@@ -139,15 +149,20 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
     }
 
     timestampList.push_back(hit.header.timestamp); 
+ 
     if( timestampList.size() >= maxHitSize ){ // check the timestamp error every maxHitSize hits
       std::sort(timestampList.begin(), timestampList.end()); // Sort the timestamps for error checking
       last_timestamp = timestampList.back(); // Get the last timestamp in the sorted list
       
-      if( count > 0 && timestampList.front() < old_timestamp) {
+      if( count > 0 && timestampList.front() < globalLastTime) {
         maxHitSize *= 2;
         // printf("\033[33m=== Increasing maxHitSize to %u due to timestamp not in order. %s \033[0m\n", maxHitSize, fileName.c_str());
         CreateHits(maxHitSize); // Adjust the hit size to the maximum difference
       }
+
+      if( timestampList.front() < globalEarliestTime) globalEarliestTime = timestampList.front(); // Update the global earliest time
+      if( timestampList.back() > globalLastTime) globalLastTime = timestampList.back(); // Update the global last time 
+      
       timestampList.clear(); // Clear the list for the next batch
       count++;
     }
@@ -168,6 +183,10 @@ inline void BinaryReader::Scan(bool quick, bool debug) {
 
     totalNumHits ++;
   }while(Tell() < fileSize);
+
+  std::sort(timestampList.begin(), timestampList.end()); // Sort the timestamps for error checking
+  if( timestampList.front() < globalEarliestTime) globalEarliestTime = timestampList.front(); // Update the global earliest time
+  if( timestampList.back() > globalLastTime) globalLastTime = timestampList.back(); // Update the global last time  
 
   if( debug ) printf("number of Hit Found : %d \n", totalNumHits);
   if( timestamp_error_counter > 0 && debug) printf("%s : timestamp error found for %u times.\n", fileName.c_str(), timestamp_error_counter);
@@ -262,6 +281,15 @@ inline void BinaryReader::Open(const std::string& filename){
   std::string baseName = filename.substr(filename.find_last_of("/\\") + 1);
   if (baseName.length() >= 6) {
     try {
+
+      // find position of "run_" in the filename
+      size_t runPos = baseName.find("run_");
+      if (runPos != std::string::npos) {
+        runID = std::stoi(baseName.substr(runPos + 4, 3));
+      } else {
+        runID = 0; // Default value if "run_" is not found
+      }
+
       DigID = std::stoi(baseName.substr(baseName.length() - 3, 3));
       fileIndex = std::stoi(baseName.substr(baseName.length() - 7, 3));
     } catch (const std::invalid_argument & e) {

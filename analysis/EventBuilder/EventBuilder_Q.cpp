@@ -14,18 +14,17 @@
 #include "TMath.h"
 #include "TString.h"
 #include "TMacro.h"
-#include <queue>
+#include "TClonesArray.h"
+#include "TGraph.h"
 
+#include <queue>
 #include <thread>
 #include <vector>
 
-// Create a vector of threads for parallel scanning
-std::vector<std::thread> threads;
-
+#define MAX_TRACE_LEN 1250 
 #define FULL_OUTPUT false
 #define MAX_MULTI 200
-#define MAX_TRACE_LEN 1250 
-unsigned int maxHitsRead = 100000; // Maximum hits to read at a time
+#define MAX_READ_HITS 100000 // Maximum hits to read at a time
 
 #include <sys/time.h> /** struct timeval, select() */
 inline unsigned int getTime_us(){
@@ -52,6 +51,8 @@ unsigned int       post_rise_energy[MAX_MULTI] = {0};
 unsigned long long        timestamp[MAX_MULTI] = {0};
 unsigned short             traceLen[MAX_MULTI] = {0};
 unsigned short trace[MAX_MULTI][MAX_TRACE_LEN] = {0};
+
+
 #if FULL_OUTPUT
   uint32_t                      baseline[MAX_MULTI] = {0};
   unsigned short                geo_addr[MAX_MULTI] = {0};
@@ -104,24 +105,37 @@ int main(int argc, char* argv[]) {
   printf(" Number of input file : %d \n", nFile);
   
   //*=============== setup reader
+  printf(" Scaning input files...\n");
   uint64_t totalNumHits = 0;
   uint64_t totFileSize = 0; // Total file size in bytes
   BinaryReader ** reader = new BinaryReader *[nFile];
+
+  std::vector<std::thread> threads; // Create a vector of threads for parallel scanning
+
   for( int i = 0 ; i < nFile ; i++){
-    reader[i] = new BinaryReader((maxHitsRead)); 
+    reader[i] = new BinaryReader((MAX_READ_HITS)); 
     reader[i]->Open(inFileName[i].Data());
     threads.emplace_back([](BinaryReader* reader) { 
       reader->Scan(true); 
+      printf("%s | %6.1f MB | # hit : %10d (%d)\n", reader->GetFileName().c_str(), reader->GetFileSize()/1024./1024., reader->GetNumData(), reader->GetMaxHitSize());
     }, reader[i]);
   }
+
+  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
+  uint64_t globalLastTime = 0; // Global last timestamp
 
   // Wait for all threads to finish
   for (int i = 0; i < threads.size(); ++i) {
     threads[i].join();
-    printf("%3d: %s | %6.1f MB | # hit : %10d | max Hits in RAM : %d\n", i, reader[i]->GetFileName().c_str(), reader[i]->GetFileSize()/1024./1024., reader[i]->GetNumData(), reader[i]->GetMaxHitSize());
     totalNumHits += reader[i]->GetNumData();
     totFileSize += reader[i]->GetFileSize();
+
+    if (reader[i]->GetGlobalEarliestTime() < globalEarliestTime) globalEarliestTime = reader[i]->GetGlobalEarliestTime();    
+    if (reader[i]->GetGlobalLastTime() > globalLastTime) globalLastTime = reader[i]->GetGlobalLastTime();
+
   }
+
+  //TODO there is potential time not sort for different files from the same DigID....
   
   //*=============== group files by DigID and sort the fileIndex
   std::map<unsigned short, std::vector<BinaryReader*>> fileGroups;
@@ -146,6 +160,9 @@ int main(int argc, char* argv[]) {
   
   printf("================= Total number of hits: %lu\n", totalNumHits);
   printf("                       Total file size: %.1f MB\n", totFileSize / (1024.0 * 1024.0));
+  printf("                        Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
+
+
 
   //*=============== create output file and setup TTree
   TFile * outFile = TFile::Open(outFileName.Data(), "RECREATE");
@@ -180,9 +197,6 @@ int main(int argc, char* argv[]) {
 
   //*=============== read n data from each file
 
-  uint64_t globalEarliestTime = UINT64_MAX; // Global earliest timestamp
-  uint64_t globalLastTime = 0; // Global last timestamp
-
   std::map<unsigned short, unsigned int> hitID; // store the hit ID for the current reader for each DigID
   std::map<unsigned short, short> fileID; // store the file ID for each DigID
   
@@ -201,8 +215,6 @@ int main(int argc, char* argv[]) {
     for( int i = 0; i < reader->GetHitSize(); i++) eventQueue.push(reader->GetHit(i).DecodePayload(saveTrace)); // Decode the hit payload and push it to the event queue
 
   }
-
-  globalEarliestTime = eventQueue.top().timestamp; // Set the global earliest time from the first event in the queue
 
   //*=============== event building
   std::vector<Event> events; // Vector to store events
@@ -300,7 +312,6 @@ int main(int argc, char* argv[]) {
         }
       }
       outTree->Fill(); // Fill the TTree with the current event
-      globalLastTime = events.back().timestamp; // Update the global last time
     }
     
     double percentage = hitProcessed * 100/ totalNumHits;
@@ -317,7 +328,7 @@ int main(int argc, char* argv[]) {
 
   }while(!eventQueue.empty()); 
 
-  //Save the global earliest and last timestamps as a TMacro
+  //*=============== save some marco
   TMacro macro("info", "Earliest and Last Timestamps");
   macro.AddLine(Form("globalEarliestTime = %lu", globalEarliestTime));
   macro.AddLine(Form("globalLastTime = %lu", globalLastTime));
@@ -325,7 +336,11 @@ int main(int argc, char* argv[]) {
   macro.AddLine(Form("totFileSizeMB = %.1f", totFileSize / (1024.0 * 1024.0))); // Convert to MB
   macro.Write("info");
 
-  //summary
+  TMacro macro2("trace_info", "Maximum Trace Length"); //this macro is for read Raw trace
+  macro2.AddLine(Form("%d", MAX_TRACE_LEN));
+  macro2.Write("trace_info");
+
+  //*=============== summary
   printf("=======================================================\n");
   printf("===          Event Builder finished                 ===\n");
   printf("=======================================================\n");
@@ -334,7 +349,6 @@ int main(int argc, char* argv[]) {
   printf("Total number of hits processed: %10u (%lu)\n", hitProcessed, totalNumHits);
   printf("  Total number of events built: %10u\n", eventID);
   printf("     Number of entries in tree: %10lld\n", outTree->GetEntries());
-  printf("                Total Run Time: %.3f s = %.3f min\n", (globalLastTime - globalEarliestTime) / 1e8, (globalLastTime - globalEarliestTime) / 1e8 / 60.0);
   //clean up
   outFile->Write();
   outFile->Close();
