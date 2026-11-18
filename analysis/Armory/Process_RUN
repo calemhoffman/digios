@@ -90,6 +90,11 @@ echo -e "=======================================================================
 echo "isBuild     : ${isBuild}${buildMsg}"
 echo "isMonitor   : ${isMonitor}${monitorMsg}"
 echo "isSaveTrace : ${isSaveTrace}${saveTraceMsg}"
+if [ -f mappingByRun.sh ]; then
+  echo "mapping     : $(RUN=${RUN}; source ./mappingByRun.sh; echo ${MAPPING}) (by mappingByRun.sh)"
+else
+  echo "mapping     : ../working/GeneralSortMapping.h (default)"
+fi
 echo "============================================="
 
 

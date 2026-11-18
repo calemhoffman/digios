@@ -44,9 +44,28 @@ fi
 
 source $ROOTSYS/bin/thisroot.sh
 
+#---- mapping compiled into the EventBuilder, chosen per run by working/mappingByRun.sh (if exist)
+SCRIPTDIR=$(dirname "$0")
+mapRule=${SCRIPTDIR}/../working/mappingByRun.sh
+MAPPING=../working/GeneralSortMapping.h
+if [ -f ${mapRule} ]; then
+  source ${mapRule}
+  echo -e "${Cyan}=== mapping for run ${RUN} (by working/mappingByRun.sh) : ${MAPPING}${NC}"
+else
+  echo -e "${Cyan}=== mapping : ${MAPPING} (default)${NC}"
+fi
+
 dir=$(pwd)
 cd ${GEBDIR}
-make ${builder}
+
+#---- the N* and POLARITY_* must agree with GeneralSortMapping.h, which the Monitors / Cali macros use
+defA=$(grep -E '^#define[[:space:]]+(N[A-Z]+|POLARITY_[A-Z]+|MWIN)[[:space:]]' ${MAPPING} | tr -s ' \t' ' ')
+defB=$(grep -E '^#define[[:space:]]+(N[A-Z]+|POLARITY_[A-Z]+|MWIN)[[:space:]]' ../working/GeneralSortMapping.h | tr -s ' \t' ' ')
+if [ "${defA}" != "${defB}" ]; then
+  echo -e "${RED}WARNING : #define N* / POLARITY_* in ${MAPPING} differ from GeneralSortMapping.h (used by Monitors) ${NC}"
+fi
+
+make ${builder} MAPPING=${MAPPING}
 cd $dir
 
 #######################################
