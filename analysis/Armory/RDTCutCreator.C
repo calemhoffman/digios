@@ -65,7 +65,7 @@ void RDTCutCreator(TString dataList,
 
    gStyle->SetOptStat("neiou");
 
-   TCanvas * cCutCreator = new TCanvas("cCutCreator", "RDT Cut Creator", 100, 100, 800, 800);
+   TCanvas * cCutCreator = new TCanvas("cCutCreator", "RDT Cut Creator", 800, 800);
    if( !cCutCreator->GetShowToolBar() ) cCutCreator->ToggleToolBar();
 
    cCutCreator->Update();
