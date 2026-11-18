@@ -61,9 +61,19 @@ public :
    Float_t         te[100];
    Float_t         te_r[100];
    Float_t         te_t[100];
+   Float_t         te_chi2[100];
+   Float_t         txf[100];
+   Float_t         txf_r[100];
+   Float_t         txf_t[100];
+   Float_t         txf_chi2[100];
+   Float_t         txn[100];
+   Float_t         txn_r[100];
+   Float_t         txn_t[100];
+   Float_t         txn_chi2[100];
    Float_t         trdt[50];
    Float_t         trdt_t[50];
    Float_t         trdt_r[50];
+   Float_t         trdt_chi2[50];
    Float_t         tcrdt[50];
    Float_t         tcrdt_t[50];
    Float_t         tcrdt_r[50];
@@ -93,10 +103,22 @@ public :
    TBranch        *b_Trace_Energy;  //!
    TBranch        *b_Trace_Energy_Time;  //!
    TBranch        *b_Trace_Energy_RiseTime;  //!
+   TBranch        *b_Trace_Energy_Chi2;  //!
+
+   TBranch        *b_Trace_xf;  //!
+   TBranch        *b_Trace_xf_Time;  //!
+   TBranch        *b_Trace_xf_RiseTime;  //!
+   TBranch        *b_Trace_xf_Chi2;  //!
+   
+   TBranch        *b_Trace_xn;  //!
+   TBranch        *b_Trace_xn_Time;  //!
+   TBranch        *b_Trace_xn_RiseTime;  //!
+   TBranch        *b_Trace_xn_Chi2;  //!
    
    TBranch        *b_Trace_RDT;  //!
    TBranch        *b_Trace_RDT_Time;  //!
    TBranch        *b_Trace_RDT_RiseTime;  //!
+   TBranch        *b_Trace_RDT_Chi2;  //!
 
    TBranch        *b_Trace_CRDT;  //!
    TBranch        *b_Trace_CRDT_Time;  //!
@@ -308,13 +330,26 @@ void Cali_e_trace::Init(TTree *tree)
    }else{
       printf(" =========== find trace data -> proceed trace. \n");
       isTraceDataExist = true;
-      fChain->SetBranchAddress("te",   te,   &b_Trace_Energy);
-      fChain->SetBranchAddress("te_t", te_t, &b_Trace_Energy_Time);
-      fChain->SetBranchAddress("te_r", te_r, &b_Trace_Energy_RiseTime);
 
-      fChain->SetBranchAddress("trdt",   trdt,   &b_Trace_RDT);
-      fChain->SetBranchAddress("trdt_t", trdt_t, &b_Trace_RDT_Time);
-      fChain->SetBranchAddress("trdt_r", trdt_r, &b_Trace_RDT_RiseTime);
+      fChain->SetBranchAddress("te",      te,      &b_Trace_Energy);
+      fChain->SetBranchAddress("te_t",    te_t,    &b_Trace_Energy_Time);
+      fChain->SetBranchAddress("te_r",    te_r,    &b_Trace_Energy_RiseTime);
+      fChain->SetBranchAddress("te_chi2", te_chi2, &b_Trace_Energy_Chi2);
+
+      fChain->SetBranchAddress("txf",      txf,      &b_Trace_xf);
+      fChain->SetBranchAddress("txf_t",    txf_t,    &b_Trace_xf_Time);
+      fChain->SetBranchAddress("txf_r",    txf_r,    &b_Trace_xf_RiseTime);
+      fChain->SetBranchAddress("txf_chi2", txf_chi2, &b_Trace_xf_Chi2);
+
+      fChain->SetBranchAddress("txn",      txn,      &b_Trace_xn);
+      fChain->SetBranchAddress("txn_t",    txn_t,    &b_Trace_xn_Time);
+      fChain->SetBranchAddress("txn_r",    txn_r,    &b_Trace_xn_RiseTime);
+      fChain->SetBranchAddress("txn_chi2", txn_chi2, &b_Trace_xn_Chi2);
+
+      fChain->SetBranchAddress("trdt",      trdt,      &b_Trace_RDT);
+      fChain->SetBranchAddress("trdt_t",    trdt_t,    &b_Trace_RDT_Time);
+      fChain->SetBranchAddress("trdt_r",    trdt_r,    &b_Trace_RDT_RiseTime);
+      fChain->SetBranchAddress("trdt_chi2", trdt_chi2, &b_Trace_RDT_Chi2);
 
       if( isCRDTExist ){
          fChain->SetBranchAddress("tcrdt",   tcrdt,   &b_Trace_CRDT);
@@ -757,12 +792,26 @@ void Cali_e_trace::Init(TTree *tree)
       newTree->Branch("tcoin_t", &tcoin_t, "tcoin_t/F");
       newTree->Branch("coinTimeUC", &coinTimeUC, "coinTimeUn/F");
       newTree->Branch("coinTime", &coinTime, "coinTime/F");
-      newTree->Branch("te",             te,  Form("te[%d]/F", numDet) );
-      newTree->Branch("te_r",         te_r,  Form("te_r[%d]/F", numDet));
-      newTree->Branch("te_t",         te_t,  Form("te_t[%d]/F", numDet));
-      newTree->Branch("trdt",         trdt,  Form("trdt[%d]/F", NRDT));
-      newTree->Branch("trdt_t",     trdt_t,  Form("trdt_t[%d]/F", NRDT));
-      newTree->Branch("trdt_r",     trdt_r,  Form("trdt_r[%d]/F", NRDT));
+
+      newTree->Branch("te",        te,        Form("te[%d]/F", numDet) );
+      newTree->Branch("te_r",      te_r,      Form("te_r[%d]/F", numDet));
+      newTree->Branch("te_t",      te_t,      Form("te_t[%d]/F", numDet));
+      newTree->Branch("te_chi2",   te_chi2,   Form("te_chi2[%d]/F", numDet));
+
+      newTree->Branch("txf",       txf,       Form("txf[%d]/F", numDet) );
+      newTree->Branch("txf_r",     txf_r,     Form("txf_r[%d]/F", numDet));
+      newTree->Branch("txf_t",     txf_t,     Form("txf_t[%d]/F", numDet));
+      newTree->Branch("txf_chi2",  txf_chi2,  Form("txf_chi2[%d]/F", numDet));
+      
+      newTree->Branch("txn",       txn,       Form("txn[%d]/F", numDet) );
+      newTree->Branch("txn_r",     txn_r,     Form("txn_r[%d]/F", numDet));
+      newTree->Branch("txn_t",     txn_t,     Form("txn_t[%d]/F", numDet));
+      newTree->Branch("txn_chi2",  txn_chi2,  Form("txn_chi2[%d]/F", numDet));
+      
+      newTree->Branch("trdt",      trdt,      Form("trdt[%d]/F", NRDT));
+      newTree->Branch("trdt_t",    trdt_t,    Form("trdt_t[%d]/F", NRDT));
+      newTree->Branch("trdt_r",    trdt_r,    Form("trdt_r[%d]/F", NRDT));
+      newTree->Branch("trdt_chi2", trdt_chi2, Form("trdt_chi2[%d]/F", NRDT));
 
       if( isCRDTExist ){
          newTree->Branch("tcrdt",         tcrdt,  Form("tcrdt[%d]/F", NCRDT));
