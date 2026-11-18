@@ -134,6 +134,22 @@ Bool_t Cali_e_trace::Process(Long64_t entry){
       b_Trace_RDT_Time->GetEntry(entry,0);
       b_Trace_RDT_RiseTime->GetEntry(entry,0);
 
+      if( isTraceFitExist ){
+         b_Trace_Energy_Chi2->GetEntry(entry,0);
+
+         b_Trace_xf->GetEntry(entry,0);
+         b_Trace_xf_Time->GetEntry(entry,0);
+         b_Trace_xf_RiseTime->GetEntry(entry,0);
+         b_Trace_xf_Chi2->GetEntry(entry,0);
+
+         b_Trace_xn->GetEntry(entry,0);
+         b_Trace_xn_Time->GetEntry(entry,0);
+         b_Trace_xn_RiseTime->GetEntry(entry,0);
+         b_Trace_xn_Chi2->GetEntry(entry,0);
+
+         b_Trace_RDT_Chi2->GetEntry(entry,0);
+      }
+
       if( isCRDTExist ){
          b_Trace_CRDT->GetEntry(entry,0);
          b_Trace_CRDT_Time->GetEntry(entry,0);
