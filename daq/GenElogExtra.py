@@ -3,7 +3,7 @@
 GenElogExtra.py -- HTML table of detector thresholds + HV status for elog.
 
 Outputs HTML to stdout. Reads thresholds via pyepics, HV via snmpget.
-Uses common.py to parse mapping.h dynamically.
+Uses daq/edm/scripts/common.py to parse mapping.h dynamically.
 
 Usage: GenElogExtra.py > ~/elog_extra.txt
 """
@@ -17,7 +17,8 @@ import threading
 os.environ['EPICS_CA_ADDR_LIST'] = ''
 os.environ['EPICS_CA_AUTO_ADDR_LIST'] = 'YES'
 
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+# common.py lives in edm/scripts (single copy, shared with SetChannel / GetChannel / AutoTuneThreshold.py)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), 'edm', 'scripts'))
 from common import load_mapping, build_sides, build_hv_map
 import epics
 

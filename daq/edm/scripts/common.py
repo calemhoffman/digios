@@ -6,7 +6,9 @@ Provides:
   - EPICS CA helpers with pacing
   - PV alias maps
 
-Used by: SetChannel, GetChannel, AutoTuneThreshold.py
+Used by: SetChannel, GetChannel, AutoTuneThreshold.py (this dir),
+         daq/GenElogExtra.py (Mac2020 start run), heliosSpark openclaw skills.
+The only copy of common.py -- do not duplicate it.
 """
 
 import os
@@ -20,18 +22,33 @@ if os.path.exists(_libca):
 
 # ── mapping.h parser ─────────────────────────────────────────────
 
+def _find_repo_root(start_dir):
+    """Walk up from start_dir to the digios root (the directory containing analysis/)."""
+    d = os.path.realpath(start_dir)
+    while True:
+        if os.path.isdir(os.path.join(d, 'analysis')):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
 def find_mapping_file(script_dir=None):
-    """Search for mapping.h (or the old GeneralSortMapping.h) relative to script or standard locations."""
+    """Search for mapping.h (or the old GeneralSortMapping.h) in the digios repo, then $HELIOS_MAPPING."""
     if script_dir is None:
         script_dir = os.path.dirname(os.path.realpath(__file__))
+    root = _find_repo_root(script_dir)
     # mapping.h (new name); GeneralSortMapping.h kept as fallback for older experiment branches
-    candidates = [
-        os.path.join(script_dir, '../../../analysis/working_Helios/mapping.h'),
-        os.path.join(script_dir, '../../../analysis/working/mapping.h'),
-        os.path.join(script_dir, '../../../analysis/working_Helios/GeneralSortMapping.h'),
-        os.path.join(script_dir, '../../../analysis/working/GeneralSortMapping.h'),
-        os.environ.get('HELIOS_MAPPING', ''),
-    ]
+    candidates = []
+    if root:
+        candidates += [
+            os.path.join(root, 'analysis/working_Helios/mapping.h'),
+            os.path.join(root, 'analysis/working/mapping.h'),
+            os.path.join(root, 'analysis/working_Helios/GeneralSortMapping.h'),
+            os.path.join(root, 'analysis/working/GeneralSortMapping.h'),
+        ]
+    candidates.append(os.environ.get('HELIOS_MAPPING', ''))
     for p in candidates:
         if not p:
             continue
