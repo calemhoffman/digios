@@ -17,7 +17,7 @@
 #include <TStyle.h>
 #include <TCutG.h>
 
-#include "GeneralSortMapping.h"
+#include "mapping.h"
 #include "../Armory/AnalysisLibrary.h"
 
 // Header file for the classes stored in the TTree if any.

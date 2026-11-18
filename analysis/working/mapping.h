@@ -1,6 +1,26 @@
 /***********************************************************************
  * 
- * This is the Mapping for Armory/GeneralSort.C
+ * mapping.h : the channel mapping (digitizer channel -> detector) for
+ *             analysis/EventBuilder, and the array sizes (NARRAY, NRDT, ...)
+ *             for Monitors / Cali macros, which include this file.
+ *
+ * ---- If the experiment needs more than one mapping (e.g. cabling for the
+ *      alpha-source runs differs from the beam runs) :
+ *
+ *   1. copy this file to mapping_xxx.h (e.g. mapping_alpha.h) and edit only
+ *      idDetMap / idKindMap there. Keep every #define (NARRAY, NRDT, NELUM,
+ *      ..., POLARITY_*, MWIN) the SAME as in this file : Monitors / Cali
+ *      macros are compiled with mapping.h only (process_Sort warns if the
+ *      #define differ).
+ *   2. create working/mappingByRun.sh to set MAPPING for each run, e.g.
+ *         alphaRuns="1 2"   -> MAPPING=../working/mapping_alpha.h
+ *         other runs        -> MAPPING=../working/mapping.h
+ *      Armory/process_Sort sources it; without that file, all runs use mapping.h.
+ *   3. process_Sort then builds the EventBuilder with that mapping
+ *      ( make EventBuilder MAPPING=../working/mapping_xxx.h ), rebuilding only
+ *      when the mapping changes. The mapping used is printed and saved in
+ *      gen_runXXX.root as TMacro "mapping".
+ *   Do not sort runs of different mappings at the same time (one binary).
  * 
  * idDetMap = 0XX ; PSD
  *          = 1XX ; Recoil,  dE of the Recoil MUST be odd
@@ -15,7 +35,7 @@
  *           = 2 ; XN  (near/back position signal)
  *           = -1 ; not in use
  * 
- * See EventBuilder_S.cpp: case 0=Energy, case 1=XF, case 2=XN
+ * See EventBuilder/EventBuilder.cpp: case 0=Energy, case 1=XF, case 2=XN
  * 
 ***********************************************************************/
 
@@ -30,6 +50,7 @@
 #define NCRDT   0
 #define NAPOLLO 0
 
+#define POLARITY_E      +1
 #define POLARITY_XFXN   +1
 #define POLARITY_RDT    -1
 #define POLARITY_ELUM   +1

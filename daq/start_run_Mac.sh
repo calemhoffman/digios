@@ -9,7 +9,7 @@
 # 5. Post to elog
 # 6. Post to Discord
 
-export HELIOS_MAPPING=~/digios/analysis/working/GeneralSortMapping.h
+export HELIOS_MAPPING=~/digios/analysis/working/mapping.h
 SCRIPTDIR=$(dirname "$(realpath "$0")")
 DAQ_HOST=helios@192.168.1.2
 

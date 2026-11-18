@@ -93,7 +93,7 @@ echo "isSaveTrace : ${isSaveTrace}${saveTraceMsg}"
 if [ -f mappingByRun.sh ]; then
   echo "mapping     : $(RUN=${RUN}; source ./mappingByRun.sh; echo ${MAPPING}) (by mappingByRun.sh)"
 else
-  echo "mapping     : ../working/GeneralSortMapping.h (default)"
+  echo "mapping     : ../working/mapping.h (default)"
 fi
 echo "============================================="
 

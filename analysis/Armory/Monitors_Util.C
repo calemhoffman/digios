@@ -9,7 +9,7 @@
 #include "TString.h"
 #include "TMath.h"
 
-#include "../working/GeneralSortMapping.h"
+#include "../working/mapping.h"
 
 #include "../working/Monitors.C"
 

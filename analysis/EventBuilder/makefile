@@ -10,12 +10,12 @@ pLIBS = $(shell pkg-config --libs arrow parquet)
 pINCLUDE = $(shell pkg-config --cflags arrow parquet)
 
 #---- mapping header compiled into EventBuilder, e.g.
-#       make EventBuilder MAPPING=../working/GeneralSortMapping_alpha.h
+#       make EventBuilder MAPPING=../working/mapping_alpha.h
 #     the stamp file is rewritten only when MAPPING changes, and the old binary removed,
 #     so the rebuild does not depend on 1-sec timestamp resolution
-MAPPING ?= ../working/GeneralSortMapping.h
+MAPPING ?= ../working/mapping.h
 ifeq ($(strip $(MAPPING)),)
-override MAPPING = ../working/GeneralSortMapping.h
+override MAPPING = ../working/mapping.h
 endif
 # symlinks resolved, so a symlinked header counts as the same mapping as its target
 MAPPING_ABS = $(or $(realpath $(MAPPING)),$(abspath $(MAPPING)))

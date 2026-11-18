@@ -2,7 +2,7 @@
 common.py -- Shared utilities for HELIOS DAQ scripts
 
 Provides:
-  - GeneralSortMapping.h parser (detID map, side groupings)
+  - mapping.h parser (detID map, side groupings)
   - EPICS CA helpers with pacing
   - PV alias maps
 
@@ -18,13 +18,16 @@ _libca = os.path.expanduser("~/epics-base/lib/linux-aarch64/libca.so")
 if os.path.exists(_libca):
     os.environ.setdefault("PYEPICS_LIBCA", _libca)
 
-# ── GeneralSortMapping.h parser ─────────────────────────────────────────────
+# ── mapping.h parser ─────────────────────────────────────────────
 
 def find_mapping_file(script_dir=None):
-    """Search for GeneralSortMapping.h relative to script or standard locations."""
+    """Search for mapping.h (or the old GeneralSortMapping.h) relative to script or standard locations."""
     if script_dir is None:
         script_dir = os.path.dirname(os.path.realpath(__file__))
+    # mapping.h (new name); GeneralSortMapping.h kept as fallback for older experiment branches
     candidates = [
+        os.path.join(script_dir, '../../../analysis/working_Helios/mapping.h'),
+        os.path.join(script_dir, '../../../analysis/working/mapping.h'),
         os.path.join(script_dir, '../../../analysis/working_Helios/GeneralSortMapping.h'),
         os.path.join(script_dir, '../../../analysis/working/GeneralSortMapping.h'),
         os.environ.get('HELIOS_MAPPING', ''),
@@ -40,7 +43,7 @@ def find_mapping_file(script_dir=None):
 
 def parse_int_array(text, name, expected_len=160):
     """Extract a C int array initializer by name from header text."""
-    m = re.search(rf'Int_t\s+{name}\s*\[', text)
+    m = re.search(rf'(?:Int_t|int)\s+{name}\s*\[', text)
     if not m:
         raise ValueError(f"Could not find {name} in mapping file")
     start = m.start()
@@ -61,7 +64,7 @@ def parse_int_array(text, name, expected_len=160):
 
 
 def build_det_map(mapping_file):
-    """Parse GeneralSortMapping.h and return (det_map, narray).
+    """Parse mapping.h and return (det_map, narray).
     
     det_map: {det_id: {signal: (vme, dig, ch), ...}, ...}
       - det 0-23: array PSD detectors, signals E/XF/XN
@@ -118,7 +121,7 @@ def parse_string_array(text, name):
 
 
 def build_hv_map(mapping_file):
-    """Parse HVdetMap and HVrdtMap from GeneralSortMapping.h.
+    """Parse HVdetMap and HVrdtMap from mapping.h.
     Returns (hv_det_map, hv_rdt_map) as lists of SNMP channel strings.
     Returns (None, None) if not found."""
     with open(mapping_file) as f:
@@ -132,7 +135,7 @@ def load_mapping(script_dir=None):
     """Convenience: find + parse mapping file. Returns (det_map, narray, mapping_file)."""
     mapping_file = find_mapping_file(script_dir)
     if mapping_file is None:
-        raise FileNotFoundError("GeneralSortMapping.h not found")
+        raise FileNotFoundError("mapping.h (or GeneralSortMapping.h) not found")
     det_map, narray = build_det_map(mapping_file)
     return det_map, narray, mapping_file
 

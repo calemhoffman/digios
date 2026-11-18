@@ -23,7 +23,7 @@ Options:
   --dry-run          Show what would be done without changing anything
   --help             Show this help
 
-Mapping: reads GeneralSortMapping.h dynamically (common.py)
+Mapping: reads mapping.h dynamically (common.py)
 """
 
 import sys
